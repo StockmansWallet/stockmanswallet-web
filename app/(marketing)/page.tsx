@@ -123,14 +123,14 @@ export default function HomePage() {
                 ))}
               </ul>
             </div>
-            <div className="relative flex justify-end lg:-mr-24">
+            <div className="relative flex justify-end lg:-mr-16 lg:-mb-48">
               <div className="w-full max-w-sm rotate-[-4deg] lg:max-w-md">
                 <Image
                   src="/images/mockup-herds.png"
                   alt="Herd composition breakdown showing breed valuations"
                   width={390}
                   height={844}
-                  className="w-full drop-shadow-[0_20px_60px_rgba(217,118,47,0.15)]"
+                  className="w-full"
                 />
               </div>
             </div>
