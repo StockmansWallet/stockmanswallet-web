@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
 export async function signIn(formData: FormData) {
@@ -31,6 +32,24 @@ export async function signUp(formData: FormData) {
   }
 
   return { success: "Check your email for a confirmation link." };
+}
+
+export async function signInWithApple() {
+  const supabase = await createClient();
+  const origin = (await headers()).get("origin");
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "apple",
+    options: {
+      redirectTo: `${origin}/auth/callback`,
+    },
+  });
+
+  if (error || !data.url) {
+    redirect("/sign-in");
+  }
+
+  redirect(data.url);
 }
 
 export async function signOut() {
