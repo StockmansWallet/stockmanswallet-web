@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { HerdComposition, categoryColours, fallbackColour } from "./herd-composition";
+import { HerdComposition } from "./herd-composition";
 import { PortfolioChart } from "./portfolio-chart";
 import { defaultFallbackPrice } from "@/lib/engines/valuation-engine";
 
@@ -22,7 +22,7 @@ export default async function DashboardPage() {
   const [{ data: herds }, { data: properties }] = await Promise.all([
     supabase
       .from("herds")
-      .select("id, name, species, breed, category, head_count, current_weight, is_sold")
+      .select("id, name, species, breed, category, head_count, current_weight, daily_weight_gain, is_sold")
       .eq("user_id", user!.id)
       .eq("is_sold", false)
       .order("name"),
@@ -44,20 +44,20 @@ export default async function DashboardPage() {
     return sum + (h.head_count ?? 0) * (h.current_weight ?? 0) * price;
   }, 0);
 
-  // Aggregate value per category for the chart
-  const valueByCategory: Record<string, number> = {};
-  for (const h of activeHerds) {
-    const cat = h.category ?? "Other";
-    const val = (h.head_count ?? 0) * (h.current_weight ?? 0) * defaultFallbackPrice(cat);
-    valueByCategory[cat] = (valueByCategory[cat] || 0) + val;
-  }
-  const chartData = Object.entries(valueByCategory)
-    .sort((a, b) => b[1] - a[1])
-    .map(([category, value]) => ({
-      category,
-      value: Math.round(value),
-      color: categoryColours[category] ?? fallbackColour,
-    }));
+  // 12-month portfolio projection based on daily weight gain
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const now = new Date();
+  const chartData = Array.from({ length: 13 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    const label = `${monthNames[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`;
+    const value = activeHerds.reduce((sum, h) => {
+      const head = h.head_count ?? 0;
+      const weight = (h.current_weight ?? 0) + (h.daily_weight_gain ?? 0) * 30 * i;
+      const price = defaultFallbackPrice(h.category ?? "");
+      return sum + head * weight * price;
+    }, 0);
+    return { month: label, value: Math.round(value) };
+  });
 
   const topHerds = [...activeHerds]
     .sort((a, b) => (b.head_count ?? 0) - (a.head_count ?? 0))
@@ -124,8 +124,8 @@ export default async function DashboardPage() {
           <Card className="mb-6">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Portfolio Breakdown</CardTitle>
-                <span className="text-xs text-text-muted">by estimated value</span>
+                <CardTitle>12-Month Outlook</CardTitle>
+                <span className="text-xs text-text-muted">projected portfolio value</span>
               </div>
             </CardHeader>
             <CardContent>

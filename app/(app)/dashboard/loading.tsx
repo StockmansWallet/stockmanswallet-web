@@ -16,19 +16,10 @@ export default function DashboardLoading() {
         </div>
       </div>
 
-      {/* Portfolio Breakdown card */}
+      {/* 12-Month Outlook card */}
       <div className="mb-6 rounded-2xl bg-white/5 p-6">
         <Skeleton className="mb-5 h-5 w-40" />
-        <div className="space-y-3">
-          <div className="flex items-center gap-4"><Skeleton className="h-4 w-28 flex-shrink-0" /><Skeleton className="h-5 w-full rounded" /></div>
-          <div className="flex items-center gap-4"><Skeleton className="h-4 w-28 flex-shrink-0" /><Skeleton className="h-5 w-5/6 rounded" /></div>
-          <div className="flex items-center gap-4"><Skeleton className="h-4 w-28 flex-shrink-0" /><Skeleton className="h-5 w-3/4 rounded" /></div>
-          <div className="flex items-center gap-4"><Skeleton className="h-4 w-28 flex-shrink-0" /><Skeleton className="h-5 w-2/3 rounded" /></div>
-          <div className="flex items-center gap-4"><Skeleton className="h-4 w-28 flex-shrink-0" /><Skeleton className="h-5 w-1/2 rounded" /></div>
-          <div className="flex items-center gap-4"><Skeleton className="h-4 w-28 flex-shrink-0" /><Skeleton className="h-5 w-2/5 rounded" /></div>
-          <div className="flex items-center gap-4"><Skeleton className="h-4 w-28 flex-shrink-0" /><Skeleton className="h-5 w-1/3 rounded" /></div>
-          <div className="flex items-center gap-4"><Skeleton className="h-4 w-28 flex-shrink-0" /><Skeleton className="h-5 w-1/4 rounded" /></div>
-        </div>
+        <Skeleton className="h-[240px] w-full rounded-lg" />
       </div>
 
       {/* Content grid */}
