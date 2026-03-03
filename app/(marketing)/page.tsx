@@ -48,19 +48,15 @@ export default function HomePage() {
           </div>
 
           {/* Device mockup */}
-          <div className="relative mx-auto mt-20 max-w-sm">
-            {/* Phone frame */}
-            <div className="relative mx-auto overflow-hidden rounded-[3rem] border-[8px] border-[#2A2320] bg-[#1F1B18] shadow-2xl shadow-black/40">
-              {/* Screen */}
-              <Image
-                src="/images/app-dashboard.png"
-                alt="Stockman's Wallet Dashboard showing portfolio value of $1,557,309"
-                width={390}
-                height={844}
-                className="w-full"
-                priority
-              />
-            </div>
+          <div className="relative mx-auto mt-20 max-w-xs">
+            <Image
+              src="/images/iphone-dashboard.png"
+              alt="Stockman's Wallet Dashboard showing portfolio value of $1,557,309"
+              width={390}
+              height={844}
+              className="w-full drop-shadow-2xl"
+              priority
+            />
             {/* Reflection/glow under device */}
             <div className="absolute -bottom-8 left-1/2 h-16 w-3/4 -translate-x-1/2 rounded-full bg-brand/20 blur-2xl" />
           </div>
@@ -123,15 +119,14 @@ export default function HomePage() {
                 ))}
               </ul>
             </div>
-            {/* Placeholder for screenshot */}
             <div className="flex items-center justify-center">
-              <div className="aspect-[9/16] w-full max-w-xs overflow-hidden rounded-[2.5rem] border-[6px] border-[#2A2320] bg-[#1F1B18] shadow-2xl">
+              <div className="w-full max-w-xs">
                 <Image
-                  src="/images/app-dashboard.png"
+                  src="/images/iphone-dashboard.png"
                   alt="Portfolio valuation screen"
                   width={390}
                   height={844}
-                  className="h-full w-full object-cover"
+                  className="w-full drop-shadow-2xl"
                 />
               </div>
             </div>
