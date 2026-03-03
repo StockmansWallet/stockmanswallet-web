@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -8,13 +9,17 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-black/5 bg-white/80 backdrop-blur-md dark:border-white/10 dark:bg-[#1F1B18]/80">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand font-bold text-white">
-            SW
-          </div>
-          <span className="text-lg font-semibold text-text-primary">
+        <Link href="/" className="flex items-center gap-2.5">
+          <Image
+            src="/images/app-icon.png"
+            alt="Stockman's Wallet"
+            width={36}
+            height={36}
+            className="rounded-[8px]"
+          />
+          <span className="text-base font-semibold text-text-primary">
             Stockman&apos;s Wallet
           </span>
         </Link>
@@ -46,12 +51,10 @@ export function Header() {
             Contact
           </Link>
           <a
-            href="https://apps.apple.com/au/app/stockmans-wallet/id6740545737"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="#waitlist"
             className="rounded-full bg-brand px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-dark"
           >
-            Download App
+            Join Waitlist
           </a>
         </div>
 
@@ -118,12 +121,11 @@ export function Header() {
               Contact
             </Link>
             <a
-              href="https://apps.apple.com/au/app/stockmans-wallet/id6740545737"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="#waitlist"
               className="inline-block rounded-full bg-brand px-5 py-2 text-center text-sm font-medium text-white"
+              onClick={() => setMobileMenuOpen(false)}
             >
-              Download App
+              Join Waitlist
             </a>
           </div>
         </div>

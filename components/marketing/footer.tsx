@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export function Footer() {
@@ -7,11 +8,15 @@ export function Footer() {
         <div className="grid gap-8 md:grid-cols-4">
           {/* Brand */}
           <div className="md:col-span-2">
-            <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand font-bold text-white">
-                SW
-              </div>
-              <span className="text-lg font-semibold text-text-primary">
+            <div className="flex items-center gap-2.5">
+              <Image
+                src="/images/app-icon.png"
+                alt="Stockman's Wallet"
+                width={36}
+                height={36}
+                className="rounded-[8px]"
+              />
+              <span className="text-base font-semibold text-text-primary">
                 Stockman&apos;s Wallet
               </span>
             </div>
@@ -43,12 +48,10 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="https://apps.apple.com/au/app/stockmans-wallet/id6740545737"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="#waitlist"
                   className="text-sm text-text-secondary transition-colors hover:text-brand"
                 >
-                  App Store
+                  Join Waitlist
                 </a>
               </li>
             </ul>

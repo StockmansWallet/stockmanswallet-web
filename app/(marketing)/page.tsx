@@ -1,151 +1,341 @@
-import {
-  ChartBarIcon,
-  CheckIcon,
-  CurrencyDollarIcon,
-  TruckIcon,
-  ChatBubbleLeftRightIcon,
-  ClipboardDocumentListIcon,
-  ShieldCheckIcon,
-} from "./icons";
+import Image from "next/image";
+import { CheckIcon } from "./icons";
+import { WaitlistForm } from "@/components/marketing/waitlist-form";
 
 export default function HomePage() {
   return (
     <>
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#F4A871]/10 to-transparent px-6 py-24 dark:from-[#472105]/30 lg:py-32">
-        <div className="mx-auto max-w-6xl">
+      {/* Hero */}
+      <section className="relative overflow-hidden px-6 pb-24 pt-20 lg:pb-32 lg:pt-28">
+        {/* Background glow */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute left-1/2 top-0 h-[600px] w-[800px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-gradient-to-b from-brand/15 to-transparent blur-3xl" />
+        </div>
+
+        <div className="relative mx-auto max-w-6xl">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-brand">
-              Intelligent Livestock Valuation
-            </p>
-            <h1 className="mt-4 text-4xl font-bold tracking-tight text-text-primary sm:text-5xl lg:text-6xl">
-              Your herds are assets.
+            {/* App icon */}
+            <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center">
+              <Image
+                src="/images/app-icon.png"
+                alt="Stockman's Wallet"
+                width={80}
+                height={80}
+                className="rounded-[18px] shadow-xl"
+                priority
+              />
+            </div>
+
+            <h1 className="text-5xl font-bold tracking-tight text-text-primary sm:text-6xl lg:text-7xl">
+              Your herds are
               <br />
-              <span className="text-brand">Manage them like it.</span>
+              <span className="bg-gradient-to-r from-brand to-brand-light bg-clip-text text-transparent">
+                financial assets
+              </span>
             </h1>
-            <p className="mt-6 text-lg leading-relaxed text-text-secondary">
-              Track cattle, sheep and pig herds as financial assets with
-              real-time MLA market valuations. Built for Australian farmers,
-              graziers and rural advisors.
+            <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-text-secondary sm:text-xl">
+              Real-time livestock valuations powered by MLA market data.
+              Built for Australian producers and advisors.
             </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <a
-                href="https://apps.apple.com/au/app/stockmans-wallet/id6740545737"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full bg-brand px-8 py-3.5 text-base font-medium text-white shadow-lg shadow-brand/25 transition-all hover:bg-brand-dark hover:shadow-xl hover:shadow-brand/30"
-              >
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-                </svg>
-                Download on the App Store
-              </a>
-              <a
-                href="#features"
-                className="inline-flex items-center gap-2 rounded-full border border-black/10 px-8 py-3.5 text-base font-medium text-text-primary transition-colors hover:bg-black/5 dark:border-white/10 dark:hover:bg-white/5"
-              >
-                See Features
-              </a>
+
+            {/* Waitlist */}
+            <div className="mt-10">
+              <WaitlistForm variant="hero" />
+              <p className="mt-3 text-xs text-text-muted">
+                Be the first to know when we launch. No spam, ever.
+              </p>
+            </div>
+          </div>
+
+          {/* Device mockup */}
+          <div className="relative mx-auto mt-20 max-w-sm">
+            {/* Phone frame */}
+            <div className="relative mx-auto overflow-hidden rounded-[3rem] border-[8px] border-[#2A2320] bg-[#1F1B18] shadow-2xl shadow-black/40">
+              {/* Screen */}
+              <Image
+                src="/images/app-dashboard.png"
+                alt="Stockman's Wallet Dashboard showing portfolio value of $1,557,309"
+                width={390}
+                height={844}
+                className="w-full"
+                priority
+              />
+            </div>
+            {/* Reflection/glow under device */}
+            <div className="absolute -bottom-8 left-1/2 h-16 w-3/4 -translate-x-1/2 rounded-full bg-brand/20 blur-2xl" />
+          </div>
+        </div>
+      </section>
+
+      {/* Stats bar */}
+      <section className="border-y border-black/5 px-6 py-10 dark:border-white/10">
+        <div className="mx-auto grid max-w-4xl grid-cols-2 gap-8 text-center md:grid-cols-4">
+          <div>
+            <p className="text-3xl font-bold text-text-primary">Real-time</p>
+            <p className="mt-1 text-sm text-text-muted">MLA Market Data</p>
+          </div>
+          <div>
+            <p className="text-3xl font-bold text-text-primary">50+</p>
+            <p className="mt-1 text-sm text-text-muted">Cattle Breeds</p>
+          </div>
+          <div>
+            <p className="text-3xl font-bold text-text-primary">AI</p>
+            <p className="mt-1 text-sm text-text-muted">Stockman IQ Advisor</p>
+          </div>
+          <div>
+            <p className="text-3xl font-bold text-text-primary">AUD</p>
+            <p className="mt-1 text-sm text-text-muted">Australian Focused</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Feature: Valuations */}
+      <section className="px-6 py-28 lg:py-36">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid items-center gap-16 lg:grid-cols-2">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-widest text-brand">
+                Portfolio Valuation
+              </p>
+              <h2 className="mt-3 text-4xl font-bold tracking-tight text-text-primary lg:text-5xl">
+                Know what your
+                <br />
+                herds are worth.
+                <br />
+                <span className="text-text-muted">Right now.</span>
+              </h2>
+              <p className="mt-6 max-w-lg text-lg leading-relaxed text-text-secondary">
+                Live pricing from MLA NLRS data flows directly into your portfolio.
+                Track total value, unrealised gains, and performance over time
+                with interactive charts.
+              </p>
+              <ul className="mt-8 space-y-3">
+                {[
+                  "Daily MLA market-linked pricing",
+                  "Portfolio breakdown by species, breed and category",
+                  "Performance chart with time-range scrubbing",
+                  "Unrealised gains/losses and ROI tracking",
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-sm text-text-secondary">
+                    <CheckIcon />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* Placeholder for screenshot */}
+            <div className="flex items-center justify-center">
+              <div className="aspect-[9/16] w-full max-w-xs overflow-hidden rounded-[2.5rem] border-[6px] border-[#2A2320] bg-[#1F1B18] shadow-2xl">
+                <Image
+                  src="/images/app-dashboard.png"
+                  alt="Portfolio valuation screen"
+                  width={390}
+                  height={844}
+                  className="h-full w-full object-cover"
+                />
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Social proof */}
-      <section className="border-y border-black/5 bg-bg-alt px-6 py-8 dark:border-white/10">
-        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-8 text-center text-sm text-text-muted">
-          <div>
-            <span className="block text-2xl font-bold text-text-primary">Real-time</span>
-            MLA Market Data
-          </div>
-          <div className="hidden h-8 w-px bg-black/10 dark:bg-white/10 sm:block" />
-          <div>
-            <span className="block text-2xl font-bold text-text-primary">50+</span>
-            Cattle Breeds
-          </div>
-          <div className="hidden h-8 w-px bg-black/10 dark:bg-white/10 sm:block" />
-          <div>
-            <span className="block text-2xl font-bold text-text-primary">AI-Powered</span>
-            Stockman IQ Assistant
-          </div>
-          <div className="hidden h-8 w-px bg-black/10 dark:bg-white/10 sm:block" />
-          <div>
-            <span className="block text-2xl font-bold text-text-primary">AUD</span>
-            Australian Focused
+      {/* Feature: Stockman IQ */}
+      <section className="bg-bg-alt px-6 py-28 lg:py-36">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid items-center gap-16 lg:grid-cols-2">
+            {/* Placeholder for screenshot */}
+            <div className="flex items-center justify-center lg:order-first">
+              <div className="relative flex aspect-[9/16] w-full max-w-xs items-center justify-center overflow-hidden rounded-[2.5rem] border-[6px] border-[#2A2320] bg-gradient-to-b from-[#1F1B18] to-[#271F16] shadow-2xl">
+                {/* Placeholder content */}
+                <div className="p-8 text-center">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-brand/20">
+                    <svg className="h-8 w-8 text-brand" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
+                    </svg>
+                  </div>
+                  <p className="mt-4 text-sm text-white/40">
+                    Stockman IQ screenshot
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-widest text-brand">
+                Stockman IQ
+              </p>
+              <h2 className="mt-3 text-4xl font-bold tracking-tight text-text-primary lg:text-5xl">
+                Meet Brangus.
+                <br />
+                <span className="text-text-muted">Your AI advisor.</span>
+              </h2>
+              <p className="mt-6 max-w-lg text-lg leading-relaxed text-text-secondary">
+                Ask Brangus about market conditions, get insights on your herds,
+                or create yard book events with natural voice commands. It knows
+                your portfolio inside out.
+              </p>
+              <ul className="mt-8 space-y-3">
+                {[
+                  "Portfolio-aware AI responses",
+                  "Natural voice input and ElevenLabs voice output",
+                  "Yard Book event creation via conversation",
+                  "Chat history with searchable conversations",
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-sm text-text-secondary">
+                    <CheckIcon />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="px-6 py-24 lg:py-32">
+      {/* Feature: Freight IQ */}
+      <section className="px-6 py-28 lg:py-36">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid items-center gap-16 lg:grid-cols-2">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-widest text-brand">
+                Freight IQ
+              </p>
+              <h2 className="mt-3 text-4xl font-bold tracking-tight text-text-primary lg:text-5xl">
+                Factor in freight.
+                <br />
+                <span className="text-text-muted">Before you sell.</span>
+              </h2>
+              <p className="mt-6 max-w-lg text-lg leading-relaxed text-text-secondary">
+                Estimate transport costs between any two locations with
+                industry-standard loading densities. Know the true net return
+                before making a selling decision.
+              </p>
+              <ul className="mt-8 space-y-3">
+                {[
+                  "Real driving distances via Apple Maps",
+                  "11 transport category loading densities",
+                  "Cost breakdown: per head, per deck, per km",
+                  "Compare saleyards by net return after freight",
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-sm text-text-secondary">
+                    <CheckIcon />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* Placeholder for screenshot */}
+            <div className="flex items-center justify-center">
+              <div className="relative flex aspect-[9/16] w-full max-w-xs items-center justify-center overflow-hidden rounded-[2.5rem] border-[6px] border-[#2A2320] bg-gradient-to-b from-[#1F1B18] to-[#271F16] shadow-2xl">
+                <div className="p-8 text-center">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-brand/20">
+                    <svg className="h-8 w-8 text-brand" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.079-.481 1.09-1.102.01-.609.01-1.41 0-2.02a1.09 1.09 0 00-.216-.636l-2.303-2.992a1.125 1.125 0 00-.893-.45H16.5V6.375c0-.621-.504-1.125-1.125-1.125H5.25c-.621 0-1.125.504-1.125 1.125v8.25" />
+                    </svg>
+                  </div>
+                  <p className="mt-4 text-sm text-white/40">
+                    Freight IQ screenshot
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* More features grid */}
+      <section className="border-t border-black/5 bg-bg-alt px-6 py-28 dark:border-white/10 lg:py-36">
         <div className="mx-auto max-w-6xl">
           <div className="mx-auto max-w-2xl text-center">
             <p className="text-sm font-semibold uppercase tracking-widest text-brand">
-              Features
+              And more
             </p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
-              Everything you need to manage livestock as financial assets
+            <h2 className="mt-3 text-4xl font-bold tracking-tight text-text-primary lg:text-5xl">
+              Built for the way
+              <br />
+              you actually work.
             </h2>
-            <p className="mt-4 text-text-secondary">
-              From paddock to portfolio, Stockman&apos;s Wallet gives you the
-              tools to understand the true value of your herds.
-            </p>
           </div>
 
-          <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <FeatureCard
-              icon={<CurrencyDollarIcon />}
-              title="Live Market Valuations"
-              description="Real-time pricing from MLA NLRS data. Know exactly what your herds are worth today, not last month."
-            />
-            <FeatureCard
-              icon={<ChartBarIcon />}
-              title="Portfolio Dashboard"
-              description="See your total livestock portfolio value at a glance. Track performance over time with interactive charts."
-            />
-            <FeatureCard
-              icon={<TruckIcon />}
-              title="Freight IQ"
-              description="Estimate transport costs between any two locations. Factor freight into your selling decisions."
-            />
-            <FeatureCard
-              icon={<ChatBubbleLeftRightIcon />}
-              title="Stockman IQ"
-              description="Your AI livestock advisor. Ask Brangus about market conditions, herd management and portfolio strategy."
-            />
-            <FeatureCard
-              icon={<ClipboardDocumentListIcon />}
               title="Yard Book"
-              description="Digital task management for your property. Track jobs, reminders and schedules in one place."
+              description="Digital task management for your property. Track jobs, set reminders, link to herds, and create events with your voice."
+              icon={
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15a2.25 2.25 0 012.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+                </svg>
+              }
             />
             <FeatureCard
-              icon={<ShieldCheckIcon />}
+              title="PDF Reports"
+              description="Export branded Asset Register, Sales Summary and Accounting reports. Share with your bank, accountant or agent."
+              icon={
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+              }
+            />
+            <FeatureCard
               title="Multi-Role Support"
-              description="Built for farmers, graziers, agents, bankers, insurers and accountants. Each role gets a tailored experience."
+              description="Tailored experiences for farmers, graziers, agents, bankers, insurers and accountants. See what matters to you."
+              icon={
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                </svg>
+              }
+            />
+            <FeatureCard
+              title="Breeding Tracking"
+              description="Monitor breeding programs, calving percentages, daily weight gain projections and biological accrual across your herds."
+              icon={
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                </svg>
+              }
+            />
+            <FeatureCard
+              title="Weather Integration"
+              description="Property-level weather forecasts powered by Apple WeatherKit. See conditions at a glance from your dashboard."
+              icon={
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z" />
+                </svg>
+              }
+            />
+            <FeatureCard
+              title="Advisor Lens"
+              description="Private valuation overlays, shading sliders, scenario modelling and client permission workflows for professional advisors."
+              icon={
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              }
             />
           </div>
         </div>
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="border-t border-black/5 bg-bg-alt px-6 py-24 dark:border-white/10 lg:py-32">
+      <section id="pricing" className="px-6 py-28 lg:py-36">
         <div className="mx-auto max-w-6xl">
           <div className="mx-auto max-w-2xl text-center">
             <p className="text-sm font-semibold uppercase tracking-widest text-brand">
               Pricing
             </p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
-              A plan for every operation
+            <h2 className="mt-3 text-4xl font-bold tracking-tight text-text-primary lg:text-5xl">
+              A plan for every
+              <br />
+              operation.
             </h2>
-            <p className="mt-4 text-text-secondary">
-              Whether you run a single property or advise dozens of clients,
-              there&apos;s a tier built for you. Every plan includes a 30-day
-              free trial with full access.
+            <p className="mt-6 text-lg text-text-secondary">
+              Every plan includes a 30-day free trial with full access.
+              No credit card required.
             </p>
           </div>
 
-          {/* Tier toggle labels */}
-          <div className="mx-auto mt-6 flex max-w-xs items-center justify-center gap-3">
+          {/* Tier labels */}
+          <div className="mx-auto mt-8 flex max-w-xs items-center justify-center gap-3">
             <span className="rounded-full bg-brand/10 px-4 py-1.5 text-xs font-semibold text-brand">
               Producers
             </span>
@@ -155,7 +345,6 @@ export default function HomePage() {
           </div>
 
           <div className="mt-12 grid gap-6 lg:grid-cols-2">
-            {/* Stockman */}
             <PricingCard
               name="Stockman"
               subtitle="Single Property"
@@ -172,8 +361,6 @@ export default function HomePage() {
                 "Weather card (Apple WeatherKit)",
               ]}
             />
-
-            {/* Head Stockman */}
             <PricingCard
               name="Head Stockman"
               subtitle="Multi Property"
@@ -192,8 +379,6 @@ export default function HomePage() {
                 "Saleyard Comparison and Property reports",
               ]}
             />
-
-            {/* Advisor */}
             <PricingCard
               name="Advisor"
               subtitle="Professional"
@@ -210,8 +395,6 @@ export default function HomePage() {
                 "Client permission workflow",
               ]}
             />
-
-            {/* Head Advisor */}
             <PricingCard
               name="Head Advisor"
               subtitle="Enterprise"
@@ -230,7 +413,6 @@ export default function HomePage() {
             />
           </div>
 
-          {/* Top-up packs note */}
           <div className="mx-auto mt-10 max-w-2xl text-center">
             <p className="text-sm text-text-muted">
               Need more? IQ Query Packs and Freight IQ Calculation Packs are
@@ -240,46 +422,54 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="bg-gradient-to-br from-brand-brown-deep to-brand-brown px-6 py-24 text-white lg:py-32">
-        <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Ready to see what your herds are really worth?
+      {/* Waitlist CTA */}
+      <section id="waitlist" className="relative overflow-hidden px-6 py-28 lg:py-36">
+        {/* Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1F1B18] to-[#472105]" />
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute right-0 top-0 h-[500px] w-[500px] -translate-y-1/4 translate-x-1/4 rounded-full bg-brand/10 blur-3xl" />
+        </div>
+
+        <div className="relative mx-auto max-w-3xl text-center">
+          <Image
+            src="/images/app-icon.png"
+            alt="Stockman's Wallet"
+            width={64}
+            height={64}
+            className="mx-auto rounded-2xl shadow-lg"
+          />
+          <h2 className="mt-8 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+            Be first in the yards.
           </h2>
-          <p className="mt-4 text-lg text-white/80">
-            Download Stockman&apos;s Wallet and start tracking your livestock
-            portfolio today. Free to get started.
+          <p className="mt-4 text-lg text-white/70">
+            Stockman&apos;s Wallet is launching soon. Join the waitlist to get
+            early access and be the first to experience intelligent livestock
+            valuation.
           </p>
-          <a
-            href="https://apps.apple.com/au/app/stockmans-wallet/id6740545737"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-semibold text-brand-brown-deep transition-all hover:bg-white/90"
-          >
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-            </svg>
-            Download on the App Store
-          </a>
+          <div className="mt-10">
+            <WaitlistForm variant="hero" />
+          </div>
         </div>
       </section>
 
-      {/* About Section */}
-      <section id="about" className="px-6 py-24 lg:py-32">
+      {/* About */}
+      <section id="about" className="px-6 py-28 lg:py-36">
         <div className="mx-auto max-w-6xl">
           <div className="mx-auto max-w-2xl text-center">
             <p className="text-sm font-semibold uppercase tracking-widest text-brand">
               About
             </p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
-              Built by people who understand livestock
+            <h2 className="mt-3 text-4xl font-bold tracking-tight text-text-primary lg:text-5xl">
+              Built by people who
+              <br />
+              understand livestock.
             </h2>
-            <p className="mt-4 text-text-secondary">
-              Stockman&apos;s Wallet was born from a simple observation: livestock
-              are one of Australia&apos;s most valuable asset classes, yet most
-              producers don&apos;t have the tools to manage them that way.
+            <p className="mt-6 text-lg leading-relaxed text-text-secondary">
+              Livestock are one of Australia&apos;s most valuable asset classes,
+              yet most producers don&apos;t have the tools to manage them that way.
+              We&apos;re changing that.
             </p>
-            <p className="mt-4 text-text-secondary">
+            <p className="mt-4 text-lg leading-relaxed text-text-secondary">
               Our team combines deep agricultural industry experience with
               modern technology to give every farmer, grazier and advisor the
               portfolio management tools they deserve.
@@ -288,19 +478,19 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Contact Section */}
+      {/* Contact */}
       <section
         id="contact"
-        className="border-t border-black/5 bg-bg-alt px-6 py-24 dark:border-white/10 lg:py-32"
+        className="border-t border-black/5 bg-bg-alt px-6 py-28 dark:border-white/10 lg:py-36"
       >
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-semibold uppercase tracking-widest text-brand">
             Get in Touch
           </p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
+          <h2 className="mt-3 text-4xl font-bold tracking-tight text-text-primary lg:text-5xl">
             Want to know more?
           </h2>
-          <p className="mt-4 text-text-secondary">
+          <p className="mt-6 text-lg text-text-secondary">
             Whether you&apos;re a producer, advisor or just curious about what
             Stockman&apos;s Wallet can do for you, we&apos;d love to hear from
             you.
@@ -309,7 +499,7 @@ export default function HomePage() {
             href="mailto:info@stockmanswallet.com.au"
             className="mt-8 inline-flex items-center gap-2 rounded-full bg-brand px-8 py-3.5 text-base font-medium text-white transition-all hover:bg-brand-dark"
           >
-            Email Us
+            info@stockmanswallet.com.au
           </a>
         </div>
       </section>
@@ -339,9 +529,9 @@ function PricingCard({
 
   return (
     <div
-      className={`relative rounded-2xl border p-6 ${
+      className={`relative rounded-2xl border p-8 ${
         highlighted
-          ? "border-brand/30 bg-white shadow-lg dark:bg-[#271F16]"
+          ? "border-brand/30 bg-white shadow-xl shadow-brand/5 dark:bg-[#271F16]"
           : "border-black/5 bg-white dark:border-white/10 dark:bg-[#271F16]"
       }`}
     >
@@ -357,25 +547,16 @@ function PricingCard({
         </span>
       </div>
       <p className="mt-2 text-sm text-text-secondary">{description}</p>
-      <div className="mt-4 flex items-baseline gap-1">
+      <div className="mt-5 flex items-baseline gap-1">
         <span className="text-3xl font-bold text-text-primary">Free</span>
         <span className="text-sm text-text-muted">for 30 days</span>
       </div>
-      <a
-        href="https://apps.apple.com/au/app/stockmans-wallet/id6740545737"
-        target="_blank"
-        rel="noopener noreferrer"
-        className={`mt-5 block w-full rounded-full py-2.5 text-center text-sm font-semibold transition-colors ${
-          highlighted
-            ? "bg-brand text-white hover:bg-brand-dark"
-            : "bg-brand/10 text-brand hover:bg-brand/20"
-        }`}
-      >
-        Start Free Trial
-      </a>
+      <div className="mt-6 rounded-full bg-brand/10 py-2.5 text-center text-sm font-semibold text-brand">
+        Join Waitlist for Early Access
+      </div>
       <ul className="mt-6 space-y-3">
         {features.map((feature) => (
-          <li key={feature} className="flex items-start gap-2 text-sm text-text-secondary">
+          <li key={feature} className="flex items-start gap-2.5 text-sm text-text-secondary">
             <CheckIcon />
             {feature}
           </li>
@@ -386,20 +567,20 @@ function PricingCard({
 }
 
 function FeatureCard({
-  icon,
   title,
   description,
+  icon,
 }: {
-  icon: React.ReactNode;
   title: string;
   description: string;
+  icon: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-black/5 bg-white p-6 transition-shadow hover:shadow-lg dark:border-white/10 dark:bg-[#271F16]">
+    <div className="rounded-2xl border border-black/5 bg-white p-8 transition-shadow hover:shadow-lg dark:border-white/10 dark:bg-[#271F16]">
       <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand/10 text-brand">
         {icon}
       </div>
-      <h3 className="mt-4 text-lg font-semibold text-text-primary">{title}</h3>
+      <h3 className="mt-5 text-lg font-semibold text-text-primary">{title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-text-secondary">
         {description}
       </p>
