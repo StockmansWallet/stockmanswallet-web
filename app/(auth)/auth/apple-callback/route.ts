@@ -8,10 +8,11 @@ export async function POST(request: NextRequest) {
   const origin = new URL(request.url).origin;
 
   if (!idToken || !rawNonce) {
-    return NextResponse.redirect(`${origin}/sign-in`);
+    return NextResponse.redirect(`${origin}/sign-in`, 303);
   }
 
-  const response = NextResponse.redirect(`${origin}/dashboard`);
+  // 303 See Other — switches from POST to GET for the redirect
+  const response = NextResponse.redirect(`${origin}/dashboard`, 303);
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -40,5 +41,5 @@ export async function POST(request: NextRequest) {
     return response;
   }
 
-  return NextResponse.redirect(`${origin}/sign-in`);
+  return NextResponse.redirect(`${origin}/sign-in`, 303);
 }
