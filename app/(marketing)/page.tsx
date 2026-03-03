@@ -13,52 +13,56 @@ export default function HomePage() {
         </div>
 
         <div className="relative mx-auto max-w-6xl">
-          <div className="mx-auto max-w-3xl text-center">
-            {/* App icon */}
-            <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center">
-              <Image
-                src="/images/app-icon.png"
-                alt="Stockman's Wallet"
-                width={80}
-                height={80}
-                className="rounded-[18px] shadow-xl"
-                priority
-              />
-            </div>
+          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+            {/* Text */}
+            <div>
+              <div className="mb-8 flex h-20 w-20 items-center justify-center">
+                <Image
+                  src="/images/app-icon.png"
+                  alt="Stockman's Wallet"
+                  width={80}
+                  height={80}
+                  className="rounded-[18px] shadow-xl"
+                  priority
+                />
+              </div>
 
-            <h1 className="text-5xl font-semibold tracking-tight text-text-primary sm:text-6xl lg:text-7xl">
-              Your herds are
-              <br />
-              <span className="bg-gradient-to-r from-brand to-brand-light bg-clip-text text-transparent">
-                financial assets
-              </span>
-            </h1>
-            <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-text-secondary sm:text-xl">
-              Real-time livestock valuations powered by MLA market data.
-              Built for Australian producers and advisors.
-            </p>
-
-            {/* Waitlist */}
-            <div className="mt-10">
-              <WaitlistForm variant="hero" />
-              <p className="mt-3 text-xs text-text-muted">
-                Be the first to know when we launch. No spam, ever.
+              <h1 className="text-5xl font-semibold tracking-tight text-text-primary sm:text-6xl lg:text-7xl">
+                Your herds are
+                <br />
+                <span className="bg-gradient-to-r from-brand to-brand-light bg-clip-text text-transparent">
+                  financial assets
+                </span>
+              </h1>
+              <p className="mt-6 max-w-xl text-lg leading-relaxed text-text-secondary sm:text-xl">
+                Real-time livestock valuations powered by MLA market data.
+                Built for Australian producers and advisors.
               </p>
-            </div>
-          </div>
 
-          {/* Device mockup */}
-          <div className="relative mx-auto mt-20 max-w-xs">
-            <Image
-              src="/images/iphone-dashboard.png"
-              alt="Stockman's Wallet Dashboard showing portfolio value of $1,557,309"
-              width={390}
-              height={844}
-              className="w-full drop-shadow-2xl"
-              priority
-            />
-            {/* Reflection/glow under device */}
-            <div className="absolute -bottom-8 left-1/2 h-16 w-3/4 -translate-x-1/2 rounded-full bg-brand/20 blur-2xl" />
+              {/* Waitlist */}
+              <div className="mt-10">
+                <WaitlistForm />
+                <p className="mt-3 text-xs text-text-muted">
+                  Be the first to know when we launch. No spam, ever.
+                </p>
+              </div>
+            </div>
+
+            {/* Device mockup */}
+            <div className="relative flex justify-center">
+              <div className="w-full max-w-xs">
+                <Image
+                  src="/images/mockup-dashboard.png"
+                  alt="Stockman's Wallet Dashboard showing portfolio value"
+                  width={390}
+                  height={844}
+                  className="w-full drop-shadow-2xl"
+                  priority
+                />
+              </div>
+              {/* Reflection/glow under device */}
+              <div className="absolute -bottom-8 left-1/2 h-16 w-3/4 -translate-x-1/2 rounded-full bg-brand/20 blur-2xl" />
+            </div>
           </div>
         </div>
       </section>
