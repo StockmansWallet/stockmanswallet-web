@@ -90,21 +90,21 @@ export default function HomePage() {
       </section>
 
       {/* Feature: Valuations */}
-      <section className="px-6 py-28 lg:py-36">
-        <div className="mx-auto max-w-6xl">
+      <section className="relative overflow-hidden bg-[#1F1B18] px-6 py-28 lg:py-36">
+        <div className="relative mx-auto max-w-6xl">
           <div className="grid items-center gap-16 lg:grid-cols-2">
             <div>
               <p className="text-sm font-semibold uppercase tracking-widest text-brand">
                 Portfolio Valuation
               </p>
-              <h2 className="mt-3 text-4xl font-semibold tracking-tight text-text-primary lg:text-5xl">
+              <h2 className="mt-3 text-4xl font-semibold tracking-tight text-white lg:text-5xl">
                 Know what your
                 <br />
                 herds are worth.
                 <br />
-                <span className="text-text-muted">Right now.</span>
+                <span className="text-white/40">Right now.</span>
               </h2>
-              <p className="mt-6 max-w-lg text-lg leading-relaxed text-text-secondary">
+              <p className="mt-6 max-w-lg text-lg leading-relaxed text-white/70">
                 Live pricing from MLA NLRS data flows directly into your portfolio.
                 Track total value, unrealised gains, and performance over time
                 with interactive charts.
@@ -116,21 +116,21 @@ export default function HomePage() {
                   "Performance chart with time-range scrubbing",
                   "Unrealised gains/losses and ROI tracking",
                 ].map((item) => (
-                  <li key={item} className="flex items-center gap-3 text-sm text-text-secondary">
+                  <li key={item} className="flex items-center gap-3 text-sm text-white/70">
                     <CheckIcon />
                     {item}
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="flex items-center justify-center">
-              <div className="w-full max-w-xs">
+            <div className="relative flex justify-end lg:-mr-24">
+              <div className="w-full max-w-sm rotate-[-4deg] lg:max-w-md">
                 <Image
-                  src="/images/mockup-dashboard.png"
-                  alt="Portfolio valuation screen showing $1,256,318 total value"
+                  src="/images/mockup-herds.png"
+                  alt="Herd composition breakdown showing breed valuations"
                   width={390}
                   height={844}
-                  className="w-full drop-shadow-2xl"
+                  className="w-full drop-shadow-[0_20px_60px_rgba(217,118,47,0.15)]"
                 />
               </div>
             </div>
