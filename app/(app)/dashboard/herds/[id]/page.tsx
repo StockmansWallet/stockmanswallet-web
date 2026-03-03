@@ -33,12 +33,23 @@ export default async function HerdDetailPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: herd } = await supabase
+  let { data: herd, error } = await supabase
     .from("herds")
     .select("*, properties(property_name)")
     .eq("id", id)
     .eq("user_id", user!.id)
     .single();
+
+  // Fallback: if the join fails, query without it
+  if (error && !herd) {
+    const fallback = await supabase
+      .from("herds")
+      .select("*")
+      .eq("id", id)
+      .eq("user_id", user!.id)
+      .single();
+    herd = fallback.data ? { ...fallback.data, properties: null } : null;
+  }
 
   if (!herd) notFound();
 
