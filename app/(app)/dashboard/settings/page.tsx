@@ -1,29 +1,34 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ProfileForm } from "./profile-form";
 import { PasswordForm } from "./password-form";
 
-export const metadata = {
-  title: "Settings",
-};
+export const metadata = { title: "Settings" };
+
+const settingsSections = [
+  {
+    heading: "Features",
+    items: [
+      { label: "Sale Locations", description: "Manage saleyards and custom locations", href: "/dashboard/settings/sale-locations" },
+      { label: "Notifications", description: "Yard book reminders and alerts", href: "/dashboard/settings/notifications" },
+    ],
+  },
+];
 
 export default async function SettingsPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader title="Settings" subtitle="Manage your account." />
+      <PageHeader title="Settings" subtitle="Manage your account and preferences." />
 
       <div className="space-y-6">
         {/* Profile */}
         <Card>
-          <CardHeader>
-            <CardTitle>Profile</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle>Profile</CardTitle></CardHeader>
           <CardContent>
             <ProfileForm
               email={user?.email ?? ""}
@@ -35,13 +40,37 @@ export default async function SettingsPage() {
 
         {/* Password */}
         <Card>
-          <CardHeader>
-            <CardTitle>Change Password</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <PasswordForm />
-          </CardContent>
+          <CardHeader><CardTitle>Change Password</CardTitle></CardHeader>
+          <CardContent><PasswordForm /></CardContent>
         </Card>
+
+        {/* Feature sections */}
+        {settingsSections.map((section) => (
+          <div key={section.heading}>
+            <h2 className="mb-3 px-1 text-xs font-semibold uppercase tracking-wider text-text-muted">
+              {section.heading}
+            </h2>
+            <Card>
+              <CardContent className="divide-y divide-black/5 p-0 dark:divide-white/5">
+                {section.items.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
+                  >
+                    <div>
+                      <p className="text-sm font-medium text-text-primary">{item.label}</p>
+                      <p className="text-xs text-text-muted">{item.description}</p>
+                    </div>
+                    <svg className="h-4 w-4 text-text-muted" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                  </Link>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        ))}
       </div>
     </div>
   );

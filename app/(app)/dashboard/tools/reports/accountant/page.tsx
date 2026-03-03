@@ -1,0 +1,22 @@
+import { PageHeader } from "@/components/ui/page-header";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+export const metadata = { title: "Accountant Report" };
+
+export default function AccountantReportPage() {
+  return (
+    <div className="mx-auto max-w-5xl">
+      <PageHeader
+        title="Accountant Report"
+        subtitle="Professional summary report for your accountant or bank manager."
+        actions={<Button variant="secondary">Export PDF</Button>}
+      />
+      <Card>
+        <CardContent className="p-6">
+          <p className="text-sm text-text-muted">Accountant report coming soon. Will include portfolio valuation, asset breakdown, sales history, and financial summary suitable for professional use.</p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
