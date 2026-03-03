@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ProfileForm } from "./profile-form";
 import { PasswordForm } from "./password-form";
+import { LoadDemoButton, ClearDataButton } from "./demo-buttons";
 
 export const metadata = { title: "Settings" };
 
@@ -43,6 +44,27 @@ export default async function SettingsPage() {
           <CardHeader><CardTitle>Change Password</CardTitle></CardHeader>
           <CardContent><PasswordForm /></CardContent>
         </Card>
+
+        {/* Demo Data */}
+        <div>
+          <h2 className="mb-3 px-1 text-xs font-semibold uppercase tracking-wider text-text-muted">
+            Demo Data
+          </h2>
+          <Card>
+            <CardContent className="p-5 space-y-4">
+              <div>
+                <p className="text-sm font-medium text-text-primary">Doongara Station demo</p>
+                <p className="mt-0.5 text-xs text-text-muted">
+                  Loads 20 herds and a property from the iOS app demo data. Replaces any existing data.
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <LoadDemoButton />
+                <ClearDataButton />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Feature sections */}
         {settingsSections.map((section) => (
