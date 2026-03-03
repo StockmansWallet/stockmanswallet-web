@@ -26,7 +26,7 @@ export default function HomePage() {
               />
             </div>
 
-            <h1 className="text-5xl font-bold tracking-tight text-text-primary sm:text-6xl lg:text-7xl">
+            <h1 className="text-5xl font-semibold tracking-tight text-text-primary sm:text-6xl lg:text-7xl">
               Your herds are
               <br />
               <span className="bg-gradient-to-r from-brand to-brand-light bg-clip-text text-transparent">
@@ -67,19 +67,19 @@ export default function HomePage() {
       <section className="border-y border-black/5 px-6 py-10 dark:border-white/10">
         <div className="mx-auto grid max-w-4xl grid-cols-2 gap-8 text-center md:grid-cols-4">
           <div>
-            <p className="text-3xl font-bold text-text-primary">Real-time</p>
+            <p className="text-3xl font-semibold text-text-primary">Real-time</p>
             <p className="mt-1 text-sm text-text-muted">MLA Market Data</p>
           </div>
           <div>
-            <p className="text-3xl font-bold text-text-primary">50+</p>
+            <p className="text-3xl font-semibold text-text-primary">50+</p>
             <p className="mt-1 text-sm text-text-muted">Cattle Breeds</p>
           </div>
           <div>
-            <p className="text-3xl font-bold text-text-primary">AI</p>
+            <p className="text-3xl font-semibold text-text-primary">AI</p>
             <p className="mt-1 text-sm text-text-muted">Stockman IQ Advisor</p>
           </div>
           <div>
-            <p className="text-3xl font-bold text-text-primary">AUD</p>
+            <p className="text-3xl font-semibold text-text-primary">AUD</p>
             <p className="mt-1 text-sm text-text-muted">Australian Focused</p>
           </div>
         </div>
@@ -93,7 +93,7 @@ export default function HomePage() {
               <p className="text-sm font-semibold uppercase tracking-widest text-brand">
                 Portfolio Valuation
               </p>
-              <h2 className="mt-3 text-4xl font-bold tracking-tight text-text-primary lg:text-5xl">
+              <h2 className="mt-3 text-4xl font-semibold tracking-tight text-text-primary lg:text-5xl">
                 Know what your
                 <br />
                 herds are worth.
@@ -158,7 +158,7 @@ export default function HomePage() {
               <p className="text-sm font-semibold uppercase tracking-widest text-brand">
                 Stockman IQ
               </p>
-              <h2 className="mt-3 text-4xl font-bold tracking-tight text-text-primary lg:text-5xl">
+              <h2 className="mt-3 text-4xl font-semibold tracking-tight text-text-primary lg:text-5xl">
                 Meet Brangus.
                 <br />
                 <span className="text-text-muted">Your AI advisor.</span>
@@ -194,7 +194,7 @@ export default function HomePage() {
               <p className="text-sm font-semibold uppercase tracking-widest text-brand">
                 Freight IQ
               </p>
-              <h2 className="mt-3 text-4xl font-bold tracking-tight text-text-primary lg:text-5xl">
+              <h2 className="mt-3 text-4xl font-semibold tracking-tight text-text-primary lg:text-5xl">
                 Factor in freight.
                 <br />
                 <span className="text-text-muted">Before you sell.</span>
@@ -244,7 +244,7 @@ export default function HomePage() {
             <p className="text-sm font-semibold uppercase tracking-widest text-brand">
               And more
             </p>
-            <h2 className="mt-3 text-4xl font-bold tracking-tight text-text-primary lg:text-5xl">
+            <h2 className="mt-3 text-4xl font-semibold tracking-tight text-text-primary lg:text-5xl">
               Built for the way
               <br />
               you actually work.
@@ -318,7 +318,7 @@ export default function HomePage() {
             <p className="text-sm font-semibold uppercase tracking-widest text-brand">
               Pricing
             </p>
-            <h2 className="mt-3 text-4xl font-bold tracking-tight text-text-primary lg:text-5xl">
+            <h2 className="mt-3 text-4xl font-semibold tracking-tight text-text-primary lg:text-5xl">
               A plan for every
               <br />
               operation.
@@ -433,7 +433,7 @@ export default function HomePage() {
             height={64}
             className="mx-auto rounded-2xl shadow-lg"
           />
-          <h2 className="mt-8 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+          <h2 className="mt-8 text-4xl font-semibold tracking-tight text-white sm:text-5xl">
             Be first in the yards.
           </h2>
           <p className="mt-4 text-lg text-white/70">
@@ -454,7 +454,7 @@ export default function HomePage() {
             <p className="text-sm font-semibold uppercase tracking-widest text-brand">
               About
             </p>
-            <h2 className="mt-3 text-4xl font-bold tracking-tight text-text-primary lg:text-5xl">
+            <h2 className="mt-3 text-4xl font-semibold tracking-tight text-text-primary lg:text-5xl">
               Built by people who
               <br />
               understand livestock.
@@ -482,7 +482,7 @@ export default function HomePage() {
           <p className="text-sm font-semibold uppercase tracking-widest text-brand">
             Get in Touch
           </p>
-          <h2 className="mt-3 text-4xl font-bold tracking-tight text-text-primary lg:text-5xl">
+          <h2 className="mt-3 text-4xl font-semibold tracking-tight text-text-primary lg:text-5xl">
             Want to know more?
           </h2>
           <p className="mt-6 text-lg text-text-secondary">
@@ -536,14 +536,14 @@ function PricingCard({
         </div>
       )}
       <div className="flex items-center gap-2">
-        <h3 className="text-xl font-bold text-text-primary">{name}</h3>
+        <h3 className="text-xl font-semibold text-text-primary">{name}</h3>
         <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${badgeColor}`}>
           {subtitle}
         </span>
       </div>
       <p className="mt-2 text-sm text-text-secondary">{description}</p>
       <div className="mt-5 flex items-baseline gap-1">
-        <span className="text-3xl font-bold text-text-primary">Free</span>
+        <span className="text-3xl font-semibold text-text-primary">Free</span>
         <span className="text-sm text-text-muted">for 30 days</span>
       </div>
       <div className="mt-6 rounded-full bg-brand/10 py-2.5 text-center text-sm font-semibold text-brand">
