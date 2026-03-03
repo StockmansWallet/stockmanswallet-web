@@ -1,5 +1,6 @@
 import {
   ChartBarIcon,
+  CheckIcon,
   CurrencyDollarIcon,
   TruckIcon,
   ChatBubbleLeftRightIcon,
@@ -126,6 +127,119 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Pricing Section */}
+      <section id="pricing" className="border-t border-black/5 bg-bg-alt px-6 py-24 dark:border-white/10 lg:py-32">
+        <div className="mx-auto max-w-6xl">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-sm font-semibold uppercase tracking-widest text-brand">
+              Pricing
+            </p>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
+              A plan for every operation
+            </h2>
+            <p className="mt-4 text-text-secondary">
+              Whether you run a single property or advise dozens of clients,
+              there&apos;s a tier built for you. Every plan includes a 30-day
+              free trial with full access.
+            </p>
+          </div>
+
+          {/* Tier toggle labels */}
+          <div className="mx-auto mt-6 flex max-w-xs items-center justify-center gap-3">
+            <span className="rounded-full bg-brand/10 px-4 py-1.5 text-xs font-semibold text-brand">
+              Producers
+            </span>
+            <span className="rounded-full bg-[#5C8FAD]/10 px-4 py-1.5 text-xs font-semibold text-[#5C8FAD]">
+              Advisors
+            </span>
+          </div>
+
+          <div className="mt-12 grid gap-6 lg:grid-cols-2">
+            {/* Stockman */}
+            <PricingCard
+              name="Stockman"
+              subtitle="Single Property"
+              description="For operators managing a single farm."
+              badge="producer"
+              features={[
+                "Single property, unlimited herds",
+                "Live MLA market valuations",
+                "Portfolio dashboard with performance charts",
+                "50 Brangus AI queries/month",
+                "5 Freight IQ calculations/month",
+                "Yard Book with push reminders",
+                "Asset Register, Sales and Accounting reports",
+                "Weather card (Apple WeatherKit)",
+              ]}
+            />
+
+            {/* Head Stockman */}
+            <PricingCard
+              name="Head Stockman"
+              subtitle="Multi Property"
+              description="For operators managing livestock across multiple farms."
+              highlighted
+              badge="producer"
+              features={[
+                "Everything in Stockman, plus:",
+                "Unlimited properties",
+                "150 Brangus AI queries/month",
+                "15 Freight IQ calculations/month",
+                "ElevenLabs premium voice output",
+                "CSV import for bulk herd entry",
+                "Grid IQ (processor grid analysis)",
+                "Herd Scenario Simulator",
+                "Saleyard Comparison and Property reports",
+              ]}
+            />
+
+            {/* Advisor */}
+            <PricingCard
+              name="Advisor"
+              subtitle="Professional"
+              description="For agribusiness bankers, livestock agents, accountants and insurers."
+              badge="advisor"
+              features={[
+                "Up to 10 active client connections",
+                "Advisor Lens (private valuation overlays)",
+                "100 Brangus AI queries/month",
+                "10 Freight IQ calculations/month",
+                "Sandbox simulator for what-if modelling",
+                "One-click scenario generation",
+                "Sensitivity analysis",
+                "Client permission workflow",
+              ]}
+            />
+
+            {/* Head Advisor */}
+            <PricingCard
+              name="Head Advisor"
+              subtitle="Enterprise"
+              description="For firms and practices managing a larger client book."
+              highlighted
+              badge="advisor"
+              features={[
+                "Everything in Advisor, plus:",
+                "Unlimited client connections",
+                "250 Brangus AI queries/month",
+                "25 Freight IQ calculations/month",
+                "ElevenLabs premium voice output",
+                "Cross-client Property vs Property reports",
+                "Dedicated onboarding support",
+              ]}
+            />
+          </div>
+
+          {/* Top-up packs note */}
+          <div className="mx-auto mt-10 max-w-2xl text-center">
+            <p className="text-sm text-text-muted">
+              Need more? IQ Query Packs and Freight IQ Calculation Packs are
+              available as one-time purchases. Purchased packs never expire.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="bg-gradient-to-br from-brand-brown-deep to-brand-brown px-6 py-24 text-white lg:py-32">
         <div className="mx-auto max-w-3xl text-center">
@@ -200,6 +314,74 @@ export default function HomePage() {
         </div>
       </section>
     </>
+  );
+}
+
+function PricingCard({
+  name,
+  subtitle,
+  description,
+  features,
+  highlighted = false,
+  badge,
+}: {
+  name: string;
+  subtitle: string;
+  description: string;
+  features: string[];
+  highlighted?: boolean;
+  badge: "producer" | "advisor";
+}) {
+  const badgeColor =
+    badge === "producer"
+      ? "bg-brand/10 text-brand"
+      : "bg-[#5C8FAD]/10 text-[#5C8FAD]";
+
+  return (
+    <div
+      className={`relative rounded-2xl border p-6 ${
+        highlighted
+          ? "border-brand/30 bg-white shadow-lg dark:bg-[#271F16]"
+          : "border-black/5 bg-white dark:border-white/10 dark:bg-[#271F16]"
+      }`}
+    >
+      {highlighted && (
+        <div className="absolute -top-3 right-6 rounded-full bg-brand px-3 py-1 text-xs font-semibold text-white">
+          Most Popular
+        </div>
+      )}
+      <div className="flex items-center gap-2">
+        <h3 className="text-xl font-bold text-text-primary">{name}</h3>
+        <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${badgeColor}`}>
+          {subtitle}
+        </span>
+      </div>
+      <p className="mt-2 text-sm text-text-secondary">{description}</p>
+      <div className="mt-4 flex items-baseline gap-1">
+        <span className="text-3xl font-bold text-text-primary">Free</span>
+        <span className="text-sm text-text-muted">for 30 days</span>
+      </div>
+      <a
+        href="https://apps.apple.com/au/app/stockmans-wallet/id6740545737"
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`mt-5 block w-full rounded-full py-2.5 text-center text-sm font-semibold transition-colors ${
+          highlighted
+            ? "bg-brand text-white hover:bg-brand-dark"
+            : "bg-brand/10 text-brand hover:bg-brand/20"
+        }`}
+      >
+        Start Free Trial
+      </a>
+      <ul className="mt-6 space-y-3">
+        {features.map((feature) => (
+          <li key={feature} className="flex items-start gap-2 text-sm text-text-secondary">
+            <CheckIcon />
+            {feature}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
