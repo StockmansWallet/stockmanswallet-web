@@ -122,8 +122,8 @@ export default function HomePage() {
             <div className="flex items-center justify-center">
               <div className="w-full max-w-xs">
                 <Image
-                  src="/images/iphone-dashboard.png"
-                  alt="Portfolio valuation screen"
+                  src="/images/mockup-dashboard.png"
+                  alt="Portfolio valuation screen showing $1,256,318 total value"
                   width={390}
                   height={844}
                   className="w-full drop-shadow-2xl"
@@ -138,20 +138,15 @@ export default function HomePage() {
       <section className="bg-bg-alt px-6 py-28 lg:py-36">
         <div className="mx-auto max-w-6xl">
           <div className="grid items-center gap-16 lg:grid-cols-2">
-            {/* Placeholder for screenshot */}
             <div className="flex items-center justify-center lg:order-first">
-              <div className="relative flex aspect-[9/16] w-full max-w-xs items-center justify-center overflow-hidden rounded-[2.5rem] border-[6px] border-[#2A2320] bg-gradient-to-b from-[#1F1B18] to-[#271F16] shadow-2xl">
-                {/* Placeholder content */}
-                <div className="p-8 text-center">
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-brand/20">
-                    <svg className="h-8 w-8 text-brand" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
-                    </svg>
-                  </div>
-                  <p className="mt-4 text-sm text-white/40">
-                    Stockman IQ screenshot
-                  </p>
-                </div>
+              <div className="w-full max-w-xs">
+                <Image
+                  src="/images/mockup-stockmaniq.png"
+                  alt="Stockman IQ AI chat with Brangus advisor"
+                  width={390}
+                  height={844}
+                  className="w-full drop-shadow-2xl"
+                />
               </div>
             </div>
             <div>
@@ -218,19 +213,15 @@ export default function HomePage() {
                 ))}
               </ul>
             </div>
-            {/* Placeholder for screenshot */}
             <div className="flex items-center justify-center">
-              <div className="relative flex aspect-[9/16] w-full max-w-xs items-center justify-center overflow-hidden rounded-[2.5rem] border-[6px] border-[#2A2320] bg-gradient-to-b from-[#1F1B18] to-[#271F16] shadow-2xl">
-                <div className="p-8 text-center">
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-brand/20">
-                    <svg className="h-8 w-8 text-brand" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.079-.481 1.09-1.102.01-.609.01-1.41 0-2.02a1.09 1.09 0 00-.216-.636l-2.303-2.992a1.125 1.125 0 00-.893-.45H16.5V6.375c0-.621-.504-1.125-1.125-1.125H5.25c-.621 0-1.125.504-1.125 1.125v8.25" />
-                    </svg>
-                  </div>
-                  <p className="mt-4 text-sm text-white/40">
-                    Freight IQ screenshot
-                  </p>
-                </div>
+              <div className="w-full max-w-xs">
+                <Image
+                  src="/images/mockup-freightiq.png"
+                  alt="Freight IQ showing $24,408 transport cost estimate"
+                  width={390}
+                  height={844}
+                  className="w-full drop-shadow-2xl"
+                />
               </div>
             </div>
           </div>
