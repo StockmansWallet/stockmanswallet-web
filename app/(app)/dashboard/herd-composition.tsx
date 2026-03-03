@@ -1,5 +1,5 @@
 // Category → colour mapping (warm earth tones matching iOS donut chart)
-const categoryColours: Record<string, string> = {
+export const categoryColours: Record<string, string> = {
   "Breeder Cow": "#D9762F",
   "Breeder Heifer": "#F4A871",
   "Wet Cow": "#BD580F",
@@ -18,7 +18,7 @@ const categoryColours: Record<string, string> = {
   "Grown Steer": "#E879F9",
 };
 
-const fallbackColour = "#6B7280";
+export const fallbackColour = "#6B7280";
 
 interface HerdCompositionProps {
   herds: { category: string; head_count: number | null }[];

@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { HerdComposition } from "./herd-composition";
+import { HerdComposition, categoryColours, fallbackColour } from "./herd-composition";
 import { PortfolioChart } from "./portfolio-chart";
 import { defaultFallbackPrice } from "@/lib/engines/valuation-engine";
 
@@ -44,6 +44,21 @@ export default async function DashboardPage() {
     return sum + (h.head_count ?? 0) * (h.current_weight ?? 0) * price;
   }, 0);
 
+  // Aggregate value per category for the chart
+  const valueByCategory: Record<string, number> = {};
+  for (const h of activeHerds) {
+    const cat = h.category ?? "Other";
+    const val = (h.head_count ?? 0) * (h.current_weight ?? 0) * defaultFallbackPrice(cat);
+    valueByCategory[cat] = (valueByCategory[cat] || 0) + val;
+  }
+  const chartData = Object.entries(valueByCategory)
+    .sort((a, b) => b[1] - a[1])
+    .map(([category, value]) => ({
+      category,
+      value: Math.round(value),
+      color: categoryColours[category] ?? fallbackColour,
+    }));
+
   const topHerds = [...activeHerds]
     .sort((a, b) => (b.head_count ?? 0) - (a.head_count ?? 0))
     .slice(0, 6);
@@ -65,11 +80,7 @@ export default async function DashboardPage() {
             </h1>
             <p className="mt-1 text-sm text-text-muted">Portfolio Value</p>
 
-            <div className="mt-4">
-              <PortfolioChart value={portfolioValue} />
-            </div>
-
-            <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-sm">
+            <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm">
               <span className="text-text-secondary">
                 <span className="font-semibold text-text-primary">{totalHead.toLocaleString()}</span> head
               </span>
@@ -109,6 +120,19 @@ export default async function DashboardPage() {
         </Card>
       ) : (
         <>
+          {/* ── Portfolio Breakdown (full width) ── */}
+          <Card className="mb-6">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Portfolio Breakdown</CardTitle>
+                <span className="text-xs text-text-muted">by estimated value</span>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <PortfolioChart data={chartData} />
+            </CardContent>
+          </Card>
+
           {/* ── Main grid ── */}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Herd Composition */}

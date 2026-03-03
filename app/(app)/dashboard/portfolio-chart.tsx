@@ -1,74 +1,88 @@
-// Projected portfolio growth curve — deterministic SVG area chart
-const GROWTH_FACTORS = [0.72, 0.74, 0.78, 0.76, 0.82, 0.85, 0.83, 0.88, 0.91, 0.94, 0.97, 1.0];
+"use client";
 
-interface PortfolioChartProps {
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from "recharts";
+
+interface CategoryValue {
+  category: string;
   value: number;
+  color: string;
 }
 
-export function PortfolioChart({ value }: PortfolioChartProps) {
-  if (value <= 0) return null;
+interface PortfolioChartProps {
+  data: CategoryValue[];
+}
 
-  const data = GROWTH_FACTORS.map((f) => value * f);
-  const W = 500;
-  const H = 100;
-  const PAD = 4;
+function formatCurrency(value: number): string {
+  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
+  if (value >= 1_000) return `$${Math.round(value / 1_000)}K`;
+  return `$${Math.round(value)}`;
+}
 
-  const max = Math.max(...data);
-  const min = Math.min(...data) * 0.97;
-  const range = max - min || 1;
+function CustomTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: { payload: CategoryValue }[];
+}) {
+  if (!active || !payload?.length) return null;
+  const d = payload[0].payload;
+  return (
+    <div className="rounded-lg bg-[#1A1A1A] px-3 py-2 text-xs shadow-lg ring-1 ring-white/10">
+      <p className="font-medium text-white">{d.category}</p>
+      <p className="mt-0.5 tabular-nums text-text-secondary">
+        ${d.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+      </p>
+    </div>
+  );
+}
 
-  const pts = data.map((v, i) => ({
-    x: PAD + (i / (data.length - 1)) * (W - PAD * 2),
-    y: PAD + (1 - (v - min) / range) * (H - PAD * 2),
-  }));
+export function PortfolioChart({ data }: PortfolioChartProps) {
+  if (!data.length) return null;
 
-  // Catmull-Rom to cubic bezier for smooth curve
-  function catmullRom(points: { x: number; y: number }[]): string {
-    if (points.length < 2) return "";
-    let d = `M${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}`;
-    for (let i = 0; i < points.length - 1; i++) {
-      const p0 = points[Math.max(0, i - 1)];
-      const p1 = points[i];
-      const p2 = points[i + 1];
-      const p3 = points[Math.min(points.length - 1, i + 2)];
-      const cp1x = p1.x + (p2.x - p0.x) / 6;
-      const cp1y = p1.y + (p2.y - p0.y) / 6;
-      const cp2x = p2.x - (p3.x - p1.x) / 6;
-      const cp2y = p2.y - (p3.y - p1.y) / 6;
-      d += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
-    }
-    return d;
-  }
-
-  const line = catmullRom(pts);
-  const last = pts[pts.length - 1];
-  const first = pts[0];
-  const area = `${line} L${last.x.toFixed(1)},${H} L${first.x.toFixed(1)},${H} Z`;
+  const chartHeight = Math.max(200, data.length * 36 + 20);
 
   return (
-    <div className="h-24 w-full">
-      <svg
-        viewBox={`0 0 ${W} ${H}`}
-        className="h-full w-full"
-        preserveAspectRatio="none"
+    <ResponsiveContainer width="100%" height={chartHeight}>
+      <BarChart
+        data={data}
+        layout="vertical"
+        margin={{ top: 0, right: 12, bottom: 0, left: 0 }}
+        barCategoryGap="20%"
       >
-        <defs>
-          <linearGradient id="portfolioGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#D9762F" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#D9762F" stopOpacity="0.02" />
-          </linearGradient>
-        </defs>
-        <path d={area} fill="url(#portfolioGrad)" />
-        <path
-          d={line}
-          fill="none"
-          stroke="#D9762F"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+        <XAxis
+          type="number"
+          tickFormatter={formatCurrency}
+          axisLine={false}
+          tickLine={false}
+          tick={{ fill: "rgba(255,255,255,0.38)", fontSize: 11 }}
         />
-        <circle cx={last.x} cy={last.y} r="4" fill="#D9762F" />
-      </svg>
-    </div>
+        <YAxis
+          type="category"
+          dataKey="category"
+          width={160}
+          axisLine={false}
+          tickLine={false}
+          tick={{ fill: "rgba(255,255,255,0.65)", fontSize: 12 }}
+        />
+        <Tooltip
+          content={<CustomTooltip />}
+          cursor={{ fill: "rgba(255,255,255,0.03)" }}
+        />
+        <Bar dataKey="value" radius={[0, 6, 6, 0]} maxBarSize={28}>
+          {data.map((entry) => (
+            <Cell key={entry.category} fill={entry.color} fillOpacity={0.85} />
+          ))}
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
   );
 }

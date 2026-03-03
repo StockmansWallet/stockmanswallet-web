@@ -7,9 +7,7 @@ export default function DashboardLoading() {
       <div className="mb-8">
         <Skeleton className="mb-3 h-4 w-32" />
         <Skeleton className="mb-2 h-12 w-64" />
-        <Skeleton className="mb-4 h-4 w-28" />
-        {/* Chart placeholder */}
-        <Skeleton className="mb-4 h-24 w-full rounded-xl" />
+        <Skeleton className="mb-3 h-4 w-28" />
         <div className="flex gap-6">
           <Skeleton className="h-4 w-20" />
           <Skeleton className="h-4 w-28" />
@@ -18,10 +16,25 @@ export default function DashboardLoading() {
         </div>
       </div>
 
+      {/* Portfolio Breakdown card */}
+      <div className="mb-6 rounded-2xl bg-white/5 p-6">
+        <Skeleton className="mb-5 h-5 w-40" />
+        <div className="space-y-3">
+          <div className="flex items-center gap-4"><Skeleton className="h-4 w-28 flex-shrink-0" /><Skeleton className="h-5 w-full rounded" /></div>
+          <div className="flex items-center gap-4"><Skeleton className="h-4 w-28 flex-shrink-0" /><Skeleton className="h-5 w-5/6 rounded" /></div>
+          <div className="flex items-center gap-4"><Skeleton className="h-4 w-28 flex-shrink-0" /><Skeleton className="h-5 w-3/4 rounded" /></div>
+          <div className="flex items-center gap-4"><Skeleton className="h-4 w-28 flex-shrink-0" /><Skeleton className="h-5 w-2/3 rounded" /></div>
+          <div className="flex items-center gap-4"><Skeleton className="h-4 w-28 flex-shrink-0" /><Skeleton className="h-5 w-1/2 rounded" /></div>
+          <div className="flex items-center gap-4"><Skeleton className="h-4 w-28 flex-shrink-0" /><Skeleton className="h-5 w-2/5 rounded" /></div>
+          <div className="flex items-center gap-4"><Skeleton className="h-4 w-28 flex-shrink-0" /><Skeleton className="h-5 w-1/3 rounded" /></div>
+          <div className="flex items-center gap-4"><Skeleton className="h-4 w-28 flex-shrink-0" /><Skeleton className="h-5 w-1/4 rounded" /></div>
+        </div>
+      </div>
+
       {/* Content grid */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Herd Composition */}
-        <div className="rounded-2xl bg-white/5 p-6 ring-1 ring-inset ring-white/8">
+        <div className="rounded-2xl bg-white/5 p-6">
           <Skeleton className="mb-5 h-5 w-36" />
           <Skeleton className="mb-5 h-3 w-full rounded-full" />
           {Array.from({ length: 6 }).map((_, i) => (
@@ -36,7 +49,7 @@ export default function DashboardLoading() {
         </div>
 
         {/* Top Herds */}
-        <div className="rounded-2xl bg-white/5 p-6 ring-1 ring-inset ring-white/8">
+        <div className="rounded-2xl bg-white/5 p-6">
           <Skeleton className="mb-4 h-5 w-28" />
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="flex items-center justify-between py-3">
@@ -50,7 +63,7 @@ export default function DashboardLoading() {
         </div>
 
         {/* Properties */}
-        <div className="rounded-2xl bg-white/5 p-6 ring-1 ring-inset ring-white/8">
+        <div className="rounded-2xl bg-white/5 p-6">
           <Skeleton className="mb-4 h-5 w-24" />
           {Array.from({ length: 2 }).map((_, i) => (
             <div key={i} className="flex items-center justify-between py-3">
@@ -64,7 +77,7 @@ export default function DashboardLoading() {
         </div>
 
         {/* Quick Actions */}
-        <div className="rounded-2xl bg-white/5 p-6 ring-1 ring-inset ring-white/8">
+        <div className="rounded-2xl bg-white/5 p-6">
           <Skeleton className="mb-4 h-5 w-28" />
           <div className="grid grid-cols-3 gap-2">
             {Array.from({ length: 3 }).map((_, i) => (
