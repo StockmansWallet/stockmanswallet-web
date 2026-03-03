@@ -12,7 +12,7 @@ function Skeleton({ className = "" }: SkeletonProps) {
 
 function SkeletonCard() {
   return (
-    <div className="rounded-2xl border border-black/5 bg-white p-6 dark:border-white/10 dark:bg-[#271F16]">
+    <div className="rounded-2xl bg-white/5 p-6 ring-1 ring-inset ring-white/8">
       <Skeleton className="mb-3 h-4 w-24" />
       <Skeleton className="mb-2 h-8 w-32" />
       <Skeleton className="h-3 w-48" />

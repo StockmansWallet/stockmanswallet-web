@@ -10,13 +10,10 @@
   --brand-orange: #D9762F;
   --brand-orange-light: #F4A871;
   --brand-orange-dark: #BD580F;
-  --brand-brown-deep: #472105;
-  --brand-brown: #5F2C07;
-  --brand-brown-medium: #8E420B;
 
-  /* Backgrounds — iOS dark hierarchy */
-  --background: #1C1B1B;
-  --background-alt: #271F16;
+  /* Backgrounds — neutral near-black matching iOS app */
+  --background: #111111;
+  --background-alt: #1A1A1A;
 
   /* Surfaces (cards, inputs) */
   --surface: rgba(255, 255, 255, 0.05);
@@ -31,7 +28,7 @@
   --text-secondary: rgba(255, 255, 255, 0.65);
   --text-muted: rgba(255, 255, 255, 0.38);
 
-  /* Foreground (aliases) */
+  /* Foreground (alias) */
   --foreground: #FFFFFF;
 
   /* Semantic */
@@ -47,8 +44,6 @@
   --color-brand: var(--brand-orange);
   --color-brand-light: var(--brand-orange-light);
   --color-brand-dark: var(--brand-orange-dark);
-  --color-brand-brown: var(--brand-brown);
-  --color-brand-brown-deep: var(--brand-brown-deep);
   --color-bg-alt: var(--background-alt);
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
@@ -76,6 +71,6 @@ html {
 
 /* Native select/input dark styling */
 select option {
-  background: #271F16;
+  background: #1A1A1A;
   color: #ffffff;
 }

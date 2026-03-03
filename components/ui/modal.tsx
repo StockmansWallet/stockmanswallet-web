@@ -50,7 +50,7 @@ function Modal({ open, onClose, title, children, size = "md" }: ModalProps) {
 
       {/* Panel */}
       <div
-        className={`relative w-full ${sizeClasses[size]} rounded-2xl border border-black/5 bg-white p-6 shadow-xl dark:border-white/10 dark:bg-[#271F16]`}
+        className={`relative w-full ${sizeClasses[size]} rounded-2xl bg-[#1A1A1A] p-6 shadow-2xl ring-1 ring-inset ring-white/10`}
       >
         {/* Header */}
         {title && (
@@ -58,7 +58,7 @@ function Modal({ open, onClose, title, children, size = "md" }: ModalProps) {
             <h2 className="text-lg font-semibold text-text-primary">{title}</h2>
             <button
               onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-black/5 hover:text-text-primary dark:hover:bg-white/5"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-white/8 hover:text-text-primary"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
