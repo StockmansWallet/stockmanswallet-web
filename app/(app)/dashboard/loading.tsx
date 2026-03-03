@@ -6,8 +6,12 @@ export default function DashboardLoading() {
       {/* Hero */}
       <div className="mb-8">
         <Skeleton className="mb-3 h-4 w-32" />
-        <Skeleton className="mb-3 h-12 w-56" />
+        <Skeleton className="mb-2 h-12 w-64" />
+        <Skeleton className="mb-4 h-4 w-28" />
+        {/* Chart placeholder */}
+        <Skeleton className="mb-4 h-24 w-full rounded-xl" />
         <div className="flex gap-6">
+          <Skeleton className="h-4 w-20" />
           <Skeleton className="h-4 w-28" />
           <Skeleton className="h-4 w-24" />
           <Skeleton className="h-4 w-28" />

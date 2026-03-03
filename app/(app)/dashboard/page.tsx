@@ -4,6 +4,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HerdComposition } from "./herd-composition";
+import { PortfolioChart } from "./portfolio-chart";
+import { defaultFallbackPrice } from "@/lib/engines/valuation-engine";
 
 export const metadata = {
   title: "Dashboard",
@@ -36,6 +38,12 @@ export default async function DashboardPage() {
   const herdCount = activeHerds.length;
   const propertyCount = properties?.length ?? 0;
 
+  // Portfolio value: head_count × current_weight × fallback $/kg
+  const portfolioValue = activeHerds.reduce((sum, h) => {
+    const price = defaultFallbackPrice(h.category ?? "");
+    return sum + (h.head_count ?? 0) * (h.current_weight ?? 0) * price;
+  }, 0);
+
   const topHerds = [...activeHerds]
     .sort((a, b) => (b.head_count ?? 0) - (a.head_count ?? 0))
     .slice(0, 6);
@@ -53,11 +61,18 @@ export default async function DashboardPage() {
         {hasData ? (
           <div className="mt-2">
             <h1 className="text-4xl font-bold tracking-tight text-text-primary sm:text-5xl">
-              {totalHead.toLocaleString()}{" "}
-              <span className="text-text-muted font-normal text-2xl sm:text-3xl">head</span>
+              ${Math.round(portfolioValue).toLocaleString()}
             </h1>
+            <p className="mt-1 text-sm text-text-muted">Portfolio Value</p>
 
-            <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm">
+            <div className="mt-4">
+              <PortfolioChart value={portfolioValue} />
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-sm">
+              <span className="text-text-secondary">
+                <span className="font-semibold text-text-primary">{totalHead.toLocaleString()}</span> head
+              </span>
               <span className="text-text-secondary">
                 <span className="font-semibold text-text-primary">{herdCount}</span> active herds
               </span>
@@ -109,7 +124,7 @@ export default async function DashboardPage() {
                   </Link>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="px-5 pb-5">
                 <HerdComposition herds={activeHerds} />
               </CardContent>
             </Card>
@@ -122,7 +137,7 @@ export default async function DashboardPage() {
                   <span className="text-xs text-text-muted">by head count</span>
                 </div>
               </CardHeader>
-              <CardContent className="divide-y divide-white/5">
+              <CardContent className="px-5 pb-5 divide-y divide-white/5">
                 {topHerds.map((herd) => (
                   <Link
                     key={herd.id}
@@ -173,7 +188,7 @@ export default async function DashboardPage() {
                   actionHref="/dashboard/properties/new"
                 />
               ) : (
-                <CardContent className="divide-y divide-white/5">
+                <CardContent className="px-5 pb-5 divide-y divide-white/5">
                   {properties.map((prop) => (
                     <Link
                       key={prop.id}
@@ -202,7 +217,7 @@ export default async function DashboardPage() {
               <CardHeader>
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
-              <CardContent className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <CardContent className="px-5 pb-5 grid grid-cols-1 gap-2 sm:grid-cols-3">
                 <Link
                   href="/dashboard/herds/new"
                   className="group flex flex-col items-center gap-2 rounded-xl bg-white/[0.03] px-4 py-5 text-center transition-colors hover:bg-white/[0.06]"
