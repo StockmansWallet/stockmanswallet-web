@@ -76,15 +76,15 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-screen w-64 flex-col border-r border-black/5 bg-bg-alt dark:border-white/5">
+    <aside className="flex h-screen w-64 flex-col bg-bg-alt">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 py-5">
+      <div className="flex items-center gap-3 px-5 py-6">
         <Image
           src="/images/app-icon.png"
           alt="Stockman's Wallet"
           width={36}
           height={36}
-          className="rounded-lg"
+          className="rounded-xl"
         />
         <span className="text-sm font-bold text-text-primary">
           Stockman&apos;s Wallet
@@ -92,7 +92,7 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 px-3 py-2">
+      <nav className="flex-1 space-y-0.5 px-3">
         {navItems.map((item) => {
           const isActive =
             pathname === item.href ||
@@ -103,10 +103,10 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+              className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
                 isActive
-                  ? "bg-brand/10 text-brand"
-                  : "text-text-secondary hover:bg-black/5 hover:text-text-primary dark:hover:bg-white/5"
+                  ? "bg-brand/15 text-brand"
+                  : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
               }`}
             >
               {item.icon}
@@ -117,23 +117,25 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
       </nav>
 
       {/* User section */}
-      <div className="border-t border-black/5 px-3 py-4 dark:border-white/5">
-        {userEmail && (
-          <p className="mb-2 truncate px-3 text-xs text-text-muted">
-            {userEmail}
-          </p>
-        )}
-        <form action={signOut}>
-          <button
-            type="submit"
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:bg-black/5 hover:text-text-primary dark:hover:bg-white/5"
-          >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-            </svg>
-            Sign out
-          </button>
-        </form>
+      <div className="px-3 py-4">
+        <div className="rounded-2xl bg-white/5 p-3">
+          {userEmail && (
+            <p className="mb-2 truncate px-1 text-xs text-text-muted">
+              {userEmail}
+            </p>
+          )}
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-sm font-medium text-text-secondary transition-all hover:bg-white/8 hover:text-text-primary"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+              </svg>
+              Sign out
+            </button>
+          </form>
+        </div>
       </div>
     </aside>
   );

@@ -1,7 +1,12 @@
 @import "tailwindcss";
 
+/* Use class-based dark mode so html.dark enables all dark: variants */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  /* Brand Colors */
+  color-scheme: dark;
+
+  /* Brand */
   --brand-orange: #D9762F;
   --brand-orange-light: #F4A871;
   --brand-orange-dark: #BD580F;
@@ -9,32 +14,31 @@
   --brand-brown: #5F2C07;
   --brand-brown-medium: #8E420B;
 
-  /* Backgrounds */
-  --background: #FAFAF8;
-  --background-alt: #F5F0EB;
-  --foreground: #1F1B18;
+  /* Backgrounds — iOS dark hierarchy */
+  --background: #1C1B1B;
+  --background-alt: #271F16;
+
+  /* Surfaces (cards, inputs) */
+  --surface: rgba(255, 255, 255, 0.05);
+  --surface-raised: rgba(255, 255, 255, 0.08);
+  --surface-high: rgba(255, 255, 255, 0.12);
+
+  /* Borders */
+  --border: rgba(255, 255, 255, 0.08);
 
   /* Text */
-  --text-primary: #1F1B18;
-  --text-secondary: #5C5248;
-  --text-muted: #8A8078;
+  --text-primary: #FFFFFF;
+  --text-secondary: rgba(255, 255, 255, 0.65);
+  --text-muted: rgba(255, 255, 255, 0.38);
+
+  /* Foreground (aliases) */
+  --foreground: #FFFFFF;
 
   /* Semantic */
   --success: #7CA749;
   --warning: #DB9B4D;
   --info: #5C8FAD;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #1F1B18;
-    --background-alt: #271F16;
-    --foreground: #FAFAF8;
-
-    --text-primary: #FFFFFF;
-    --text-secondary: rgba(255, 255, 255, 0.7);
-    --text-muted: rgba(255, 255, 255, 0.4);
-  }
+  --error: #E05252;
 }
 
 @theme inline {
@@ -46,9 +50,17 @@
   --color-brand-brown: var(--brand-brown);
   --color-brand-brown-deep: var(--brand-brown-deep);
   --color-bg-alt: var(--background-alt);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-high: var(--surface-high);
+  --color-border: var(--border);
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-error: var(--error);
   --font-sans: ui-rounded, "SF Pro Rounded", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Nunito", system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
@@ -58,7 +70,12 @@ body {
   color: var(--foreground);
 }
 
-/* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+}
+
+/* Native select/input dark styling */
+select option {
+  background: #271F16;
+  color: #ffffff;
 }

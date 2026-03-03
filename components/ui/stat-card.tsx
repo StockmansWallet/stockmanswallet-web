@@ -12,20 +12,20 @@ interface StatCardProps {
 
 function StatCard({ label, value, change, icon }: StatCardProps) {
   return (
-    <div className="rounded-2xl border border-black/5 bg-white p-5 dark:border-white/10 dark:bg-[#271F16]">
+    <div className="rounded-2xl bg-white/5 p-5 ring-1 ring-inset ring-white/8">
       <div className="flex items-start justify-between">
-        <p className="text-xs font-medium text-text-muted">{label}</p>
+        <p className="text-xs font-medium text-text-muted uppercase tracking-wide">{label}</p>
         {icon && (
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand/10 text-brand">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-brand/15 text-brand">
             {icon}
           </div>
         )}
       </div>
-      <p className="mt-1 text-2xl font-bold text-text-primary">{value}</p>
+      <p className="mt-2 text-2xl font-bold text-text-primary">{value}</p>
       {change && (
         <p
           className={`mt-1 text-xs font-medium ${
-            change.positive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+            change.positive ? "text-success" : "text-error"
           }`}
         >
           {change.positive ? "+" : ""}
