@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 export async function seedDemoData() {
@@ -243,7 +242,7 @@ export async function seedDemoData() {
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/herds");
   revalidatePath("/dashboard/properties");
-  redirect("/dashboard");
+  return { success: true };
 }
 
 // Removes demo data only — real user data is never touched
@@ -260,5 +259,5 @@ export async function clearDemoData() {
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/herds");
   revalidatePath("/dashboard/properties");
-  redirect("/dashboard");
+  return { success: true };
 }
