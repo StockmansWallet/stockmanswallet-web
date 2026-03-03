@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { saleyards } from "@/lib/data/reference-data";
+
 import type { Database } from "@/lib/types/database";
 
 type PropertyRow = Database["public"]["Tables"]["properties"]["Row"];
@@ -20,8 +20,6 @@ const AU_STATES = [
   { value: "NT", label: "Northern Territory" },
   { value: "ACT", label: "Australian Capital Territory" },
 ];
-
-const saleyardOptions = saleyards.map((s) => ({ value: s, label: s }));
 
 interface PropertyFormProps {
   property?: PropertyRow;
@@ -157,60 +155,6 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
             step="any"
             defaultValue={property?.longitude ?? ""}
             placeholder="e.g. 150.5000"
-          />
-        </div>
-      </section>
-
-      {/* Defaults */}
-      <section>
-        <h3 className="mb-4 text-sm font-semibold text-text-primary">
-          Default Settings
-        </h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="sm:col-span-2">
-            <Select
-              id="default_saleyard"
-              name="default_saleyard"
-              label="Default Saleyard"
-              options={saleyardOptions}
-              placeholder="Select saleyard"
-              defaultValue={property?.default_saleyard ?? ""}
-            />
-          </div>
-          <Input
-            id="default_saleyard_distance"
-            name="default_saleyard_distance"
-            label="Distance to Saleyard (km)"
-            type="number"
-            step="any"
-            defaultValue={property?.default_saleyard_distance ?? ""}
-            placeholder="e.g. 120"
-          />
-          <Input
-            id="mortality_rate"
-            name="mortality_rate"
-            label="Mortality Rate (%)"
-            type="number"
-            step="0.1"
-            defaultValue={property?.mortality_rate ?? 2}
-            helperText="Annual mortality rate for valuations"
-          />
-          <Input
-            id="calving_rate"
-            name="calving_rate"
-            label="Calving Rate (%)"
-            type="number"
-            step="0.1"
-            defaultValue={property?.calving_rate ?? 85}
-            helperText="Expected calving/lambing percentage"
-          />
-          <Input
-            id="freight_cost_per_km"
-            name="freight_cost_per_km"
-            label="Freight Cost ($/km)"
-            type="number"
-            step="0.01"
-            defaultValue={property?.freight_cost_per_km ?? 3}
           />
         </div>
       </section>

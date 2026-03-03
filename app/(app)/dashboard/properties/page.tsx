@@ -26,7 +26,7 @@ export default async function PropertiesPage() {
     <div className="mx-auto max-w-6xl">
       <PageHeader
         title="Properties"
-        subtitle="Manage your properties and their default settings."
+        subtitle="Manage your properties and locations."
         actions={
           <Link href="/dashboard/properties/new">
             <Button>Add Property</Button>
@@ -38,7 +38,7 @@ export default async function PropertiesPage() {
         <Card>
           <EmptyState
             title="No properties yet"
-            description="Add your first property to set default saleyards, mortality rates, and other preferences for your herds."
+            description="Add your first property to organise your herds by location."
             actionLabel="Add Property"
             actionHref="/dashboard/properties/new"
           />
@@ -71,16 +71,11 @@ export default async function PropertiesPage() {
                     </p>
                   )}
 
-                  {property.default_saleyard && (
-                    <p className="mt-3 truncate text-xs text-text-secondary">
-                      Saleyard: {property.default_saleyard}
+                  {property.suburb && (
+                    <p className="mt-2 text-xs text-text-secondary">
+                      {property.suburb}{property.postcode ? `, ${property.postcode}` : ""}
                     </p>
                   )}
-
-                  <div className="mt-3 flex gap-3 text-xs text-text-muted">
-                    <span>Mortality {property.mortality_rate}%</span>
-                    <span>Calving {property.calving_rate}%</span>
-                  </div>
                 </CardContent>
               </Card>
             </Link>

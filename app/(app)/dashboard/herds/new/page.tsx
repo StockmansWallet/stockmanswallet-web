@@ -1,0 +1,40 @@
+import { createClient } from "@/lib/supabase/server";
+import { PageHeader } from "@/components/ui/page-header";
+import { Card, CardContent } from "@/components/ui/card";
+import { HerdForm } from "@/components/app/herd-form";
+import { createHerd } from "../actions";
+
+export const metadata = {
+  title: "Add Herd",
+};
+
+export default async function NewHerdPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: properties } = await supabase
+    .from("properties")
+    .select("id, property_name")
+    .eq("user_id", user!.id)
+    .order("property_name");
+
+  return (
+    <div className="mx-auto max-w-3xl">
+      <PageHeader
+        title="Add Herd"
+        subtitle="Create a new herd to track your livestock."
+      />
+      <Card>
+        <CardContent className="p-6">
+          <HerdForm
+            properties={properties ?? []}
+            action={createHerd}
+            submitLabel="Add Herd"
+          />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

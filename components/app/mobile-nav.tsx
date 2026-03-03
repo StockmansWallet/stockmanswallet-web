@@ -8,7 +8,7 @@ import { signOut } from "@/app/(auth)/actions";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard" },
-  { label: "Portfolio", href: "/dashboard/portfolio" },
+  { label: "Herds", href: "/dashboard/herds" },
   { label: "Properties", href: "/dashboard/properties" },
   { label: "Stockman IQ", href: "/dashboard/stockman-iq" },
   { label: "Tools", href: "/dashboard/tools" },

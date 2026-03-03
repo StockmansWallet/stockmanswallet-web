@@ -25,7 +25,7 @@ export default async function DashboardPage() {
 
       {/* Stat cards */}
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Portfolio Value" value="—" />
+        <StatCard label="Herd Value" value="—" />
         <StatCard label="Total Head" value="—" />
         <StatCard label="Properties" value="—" />
         <StatCard label="Avg $/Head" value="—" />
@@ -35,13 +35,13 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Portfolio Overview</CardTitle>
+            <CardTitle>Herds Overview</CardTitle>
           </CardHeader>
           <EmptyState
             title="No herds yet"
-            description="Your portfolio will appear here once your herds are synced. Add herds from your iOS app or create them here."
+            description="Your herds will appear here. Add herds from your iOS app or create them here."
             actionLabel="Add Herd"
-            actionHref="/dashboard/portfolio"
+            actionHref="/dashboard/herds"
           />
         </Card>
 
