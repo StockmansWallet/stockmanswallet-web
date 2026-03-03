@@ -29,7 +29,7 @@ export type HealthTreatmentType =
 
 export type PricingType = "per_kg" | "per_head";
 
-export type BindingConstraint = "head_limit";
+export type BindingConstraint = "head_limit" | "weight";
 
 export type CapacitySource = "library" | "user_override";
 
