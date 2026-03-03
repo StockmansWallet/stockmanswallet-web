@@ -84,7 +84,7 @@ export default async function HerdDetailPage({
           <CardHeader>
             <CardTitle>Overview</CardTitle>
           </CardHeader>
-          <CardContent className="divide-y divide-black/5 dark:divide-white/5">
+          <CardContent className="px-5 pb-5 divide-y divide-black/5 dark:divide-white/5">
             <InfoRow label="Species" value={herd.species} />
             <InfoRow label="Breed" value={herd.breed} />
             <InfoRow label="Sex" value={herd.sex} />
@@ -106,7 +106,7 @@ export default async function HerdDetailPage({
           <CardHeader>
             <CardTitle>Weight & Growth</CardTitle>
           </CardHeader>
-          <CardContent className="divide-y divide-black/5 dark:divide-white/5">
+          <CardContent className="px-5 pb-5 divide-y divide-black/5 dark:divide-white/5">
             <InfoRow
               label="Initial Weight"
               value={herd.initial_weight ? `${herd.initial_weight} kg` : null}
@@ -138,7 +138,7 @@ export default async function HerdDetailPage({
             <CardHeader>
               <CardTitle>Breeding</CardTitle>
             </CardHeader>
-            <CardContent className="divide-y divide-black/5 dark:divide-white/5">
+            <CardContent className="px-5 pb-5 divide-y divide-black/5 dark:divide-white/5">
               <div className="flex justify-between py-2 text-sm">
                 <span className="text-text-muted">Pregnant</span>
                 <Badge variant={herd.is_pregnant ? "success" : "default"}>
@@ -164,7 +164,7 @@ export default async function HerdDetailPage({
           <CardHeader>
             <CardTitle>Location & Market</CardTitle>
           </CardHeader>
-          <CardContent className="divide-y divide-black/5 dark:divide-white/5">
+          <CardContent className="px-5 pb-5 divide-y divide-black/5 dark:divide-white/5">
             {property && (
               <div className="flex justify-between py-2 text-sm">
                 <span className="text-text-muted">Property</span>

@@ -124,7 +124,7 @@ export default async function DashboardPage() {
                   </Link>
                 </div>
               </CardHeader>
-              <CardContent className="px-5 pb-5">
+              <CardContent>
                 <HerdComposition herds={activeHerds} />
               </CardContent>
             </Card>

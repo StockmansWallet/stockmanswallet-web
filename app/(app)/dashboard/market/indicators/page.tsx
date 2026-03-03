@@ -21,7 +21,7 @@ export default function IndicatorsPage() {
         <CardHeader>
           <CardTitle>National Indicators</CardTitle>
         </CardHeader>
-        <CardContent className="divide-y divide-black/5 dark:divide-white/5">
+        <CardContent className="px-5 pb-5 divide-y divide-black/5 dark:divide-white/5">
           {PLACEHOLDER_INDICATORS.map((ind) => (
             <div key={ind.name} className="flex items-center justify-between py-3">
               <p className="text-sm text-text-secondary">{ind.name}</p>
