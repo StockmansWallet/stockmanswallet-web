@@ -39,13 +39,13 @@ export default async function DashboardPage() {
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
       .order("property_name"),
-    // Live MLA national prices (matches iOS ValuationEngine price source)
+    // Live MLA national prices — all weight brackets (matches iOS ValuationEngine price source)
+    // iOS uses matchWeightRange() to find the right bracket; we do the same in calculateHerdValue
     supabase
       .from("category_prices")
-      .select("category, price_per_kg")
+      .select("category, price_per_kg, weight_range")
       .is("saleyard", null)
-      .is("state", null)
-      .is("weight_range", null),
+      .is("state", null),
     // Breed premiums (matches iOS BreedPremiumService)
     supabase
       .from("breed_premiums")
@@ -58,7 +58,14 @@ export default async function DashboardPage() {
   const propertyCount = properties?.length ?? 0;
 
   // Build lookup maps for live pricing data
-  const priceMap = new Map((marketPrices ?? []).map((p) => [p.category, p.price_per_kg]));
+  // priceMap: category -> [{price_per_kg, weight_range}] — all brackets grouped by category
+  // calculateHerdValue uses matchWeightRange() to select the correct bracket
+  const priceMap = new Map<string, { price_per_kg: number; weight_range: string | null }[]>();
+  for (const p of (marketPrices ?? [])) {
+    const entries = priceMap.get(p.category) ?? [];
+    entries.push({ price_per_kg: p.price_per_kg, weight_range: p.weight_range });
+    priceMap.set(p.category, entries);
+  }
   const premiumMap = new Map((breedPremiumData ?? []).map((b) => [b.breed, b.premium_percent]));
 
   // Portfolio value using full iOS valuation formula:

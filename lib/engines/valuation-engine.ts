@@ -241,18 +241,26 @@ export interface HerdForValuation {
   joining_period_end: string | null;
 }
 
+// Price entry with optional weight range (matches category_prices table structure)
+export interface CategoryPriceEntry {
+  price_per_kg: number;
+  weight_range: string | null;
+}
+
 /**
  * Full herd valuation matching iOS ValuationEngine formula exactly:
  * netValue = physicalValue - mortalityDeduction + breedingAccrual
  *
  * @param herd        Herd data from herd_groups
- * @param priceMap    category -> price_per_kg (from category_prices, national level)
+ * @param priceMap    category -> CategoryPriceEntry[] (from category_prices, national level)
+ *                    Multiple entries per category with different weight ranges.
+ *                    matchWeightRange() selects the correct bracket for projected weight.
  * @param premiumMap  breed -> premium_percent (from breed_premiums)
  * @param asOf        Valuation date (defaults to now)
  */
 export function calculateHerdValue(
   herd: HerdForValuation,
-  priceMap: Map<string, number>,
+  priceMap: Map<string, CategoryPriceEntry[]>,
   premiumMap: Map<string, number>,
   asOf: Date = new Date()
 ): number {
@@ -272,8 +280,19 @@ export function calculateHerdValue(
     herd.daily_weight_gain ?? 0
   );
 
-  // 2. Live price with breed premium
-  const basePrice = priceMap.get(herd.category) ?? defaultFallbackPrice(herd.category);
+  // 2. Live price — match projected weight to the correct MLA weight bracket
+  const categoryEntries = priceMap.get(herd.category) ?? [];
+  let basePrice: number;
+  if (categoryEntries.length > 0) {
+    const weightRanges = categoryEntries.map((e) => e.weight_range).filter((r): r is string => r !== null);
+    const matchedRange = weightRanges.length > 0 ? matchWeightRange(projectedWeight, weightRanges) : null;
+    const matchedEntry = matchedRange
+      ? categoryEntries.find((e) => e.weight_range === matchedRange)
+      : categoryEntries.find((e) => e.weight_range === null) ?? categoryEntries[0];
+    basePrice = matchedEntry?.price_per_kg ?? defaultFallbackPrice(herd.category);
+  } else {
+    basePrice = defaultFallbackPrice(herd.category);
+  }
   const rawPremiumPct = herd.breed_premium_override ?? premiumMap.get(herd.breed) ?? 0;
   const adjustedPrice = basePrice * (1 + rawPremiumPct / 100);
 
