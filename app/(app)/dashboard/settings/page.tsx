@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
 import { ProfileForm } from "./profile-form";
 import { PasswordForm } from "./password-form";
-import { LoadDemoButton, ClearDataButton } from "./demo-buttons";
+import { LoadDemoButton, ClearDataButton, ClearAllDataButton } from "./demo-buttons";
 
 export const metadata = { title: "Settings" };
 
@@ -63,6 +63,24 @@ export default async function SettingsPage() {
                 <LoadDemoButton />
                 <ClearDataButton />
               </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Data Management */}
+        <div>
+          <h2 className="mb-3 px-1 text-xs font-semibold uppercase tracking-wider text-text-muted">
+            Data Management
+          </h2>
+          <Card>
+            <CardContent className="p-5 space-y-4">
+              <div>
+                <p className="text-sm font-medium text-text-primary">Clear all data</p>
+                <p className="mt-0.5 text-xs text-text-muted">
+                  Permanently deletes all your herds, records, and data from the cloud. Affects both this web app and the iOS app. Your account will remain active.
+                </p>
+              </div>
+              <ClearAllDataButton />
             </CardContent>
           </Card>
         </div>
