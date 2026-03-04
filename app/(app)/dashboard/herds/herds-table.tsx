@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import { Search, ChevronUp, ChevronRight } from "lucide-react";
+import { Search, ChevronUp, ChevronRight, Home } from "lucide-react";
 
 type HerdWithProperty = {
   id: string;
@@ -14,8 +14,15 @@ type HerdWithProperty = {
   sex: string;
   head_count: number;
   current_weight: number;
+  property_id: string | null;
   properties: { property_name: string } | null;
   [key: string]: unknown;
+};
+
+type PropertyGroup = {
+  id: string;
+  name: string;
+  isDefault: boolean;
 };
 
 const SPECIES_TABS = ["All", "Cattle", "Sheep", "Pig", "Goat"] as const;
@@ -32,9 +39,11 @@ type SortKey = "name" | "breed" | "category" | "head_count" | "current_weight" |
 export function HerdsTable({
   herds,
   herdValues,
+  propertyGroups,
 }: {
   herds: HerdWithProperty[];
   herdValues: Record<string, number>;
+  propertyGroups: PropertyGroup[];
 }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<string>("All");
@@ -62,7 +71,8 @@ export function HerdsTable({
       (h) =>
         h.name.toLowerCase().includes(q) ||
         h.breed.toLowerCase().includes(q) ||
-        h.category.toLowerCase().includes(q)
+        h.category.toLowerCase().includes(q) ||
+        (h.properties?.property_name ?? "").toLowerCase().includes(q)
     );
   }, [speciesFiltered, search]);
 
@@ -86,6 +96,46 @@ export function HerdsTable({
     });
   }, [searched, sortKey, sortDir, herdValues]);
 
+  // Group herds by property, preserving the property order from server
+  const groupedHerds = useMemo(() => {
+    const byProperty = new Map<string | null, HerdWithProperty[]>();
+    for (const h of sorted) {
+      const pid = h.property_id ?? null;
+      const arr = byProperty.get(pid) ?? [];
+      arr.push(h);
+      byProperty.set(pid, arr);
+    }
+
+    const groups: { id: string | null; name: string; isDefault: boolean; herds: HerdWithProperty[] }[] = [];
+
+    // Add groups in property order (default first, then alphabetical)
+    for (const pg of propertyGroups) {
+      const groupHerds = byProperty.get(pg.id);
+      if (groupHerds && groupHerds.length > 0) {
+        groups.push({ id: pg.id, name: pg.name, isDefault: pg.isDefault, herds: groupHerds });
+        byProperty.delete(pg.id);
+      }
+    }
+
+    // Any remaining (unassigned or unknown property_id)
+    const unassigned = byProperty.get(null);
+    if (unassigned && unassigned.length > 0) {
+      groups.push({ id: null, name: "Unassigned", isDefault: false, herds: unassigned });
+    }
+
+    // Any property_ids not in propertyGroups (shouldn't happen, but safe)
+    for (const [pid, groupHerds] of byProperty) {
+      if (pid !== null && groupHerds.length > 0) {
+        const name = groupHerds[0]?.properties?.property_name ?? "Unknown Property";
+        groups.push({ id: pid, name, isDefault: false, herds: groupHerds });
+      }
+    }
+
+    return groups;
+  }, [sorted, propertyGroups]);
+
+  const hasMultipleGroups = groupedHerds.length > 1 || (groupedHerds.length === 1 && propertyGroups.length > 1);
+
   function handleSort(key: SortKey) {
     if (sortKey === key) {
       setSortDir(sortDir === "asc" ? "desc" : "asc");
@@ -101,6 +151,39 @@ export function HerdsTable({
       <ChevronUp
         className={`ml-0.5 inline h-3 w-3 transition-transform ${sortDir === "desc" ? "rotate-180" : ""}`}
       />
+    );
+  }
+
+  function HerdRow({ herd }: { herd: HerdWithProperty }) {
+    const value = herdValues[herd.id] ?? 0;
+    return (
+      <tr
+        onClick={() => router.push(`/dashboard/herds/${herd.id}`)}
+        className="group cursor-pointer transition-colors hover:bg-white/[0.03]"
+      >
+        <td className="px-5 py-3.5">
+          <span className="font-medium text-text-primary">{herd.name}</span>
+        </td>
+        <td className="px-5 py-3.5">
+          <Badge variant={speciesBadgeVariant[herd.species] ?? "default"}>
+            {herd.species}
+          </Badge>
+        </td>
+        <td className="hidden px-5 py-3.5 text-text-secondary md:table-cell">{herd.breed}</td>
+        <td className="hidden px-5 py-3.5 text-text-secondary lg:table-cell">{herd.category}</td>
+        <td className="px-5 py-3.5 text-right tabular-nums font-medium text-text-primary">
+          {herd.head_count?.toLocaleString() ?? "\u2014"}
+        </td>
+        <td className="px-5 py-3.5 text-right tabular-nums text-text-secondary">
+          {value > 0 ? `$${Math.round(value).toLocaleString()}` : "\u2014"}
+        </td>
+        <td className="hidden px-5 py-3.5 text-right tabular-nums text-text-secondary xl:table-cell">
+          {herd.current_weight ? `${herd.current_weight.toLocaleString()} kg` : "\u2014"}
+        </td>
+        <td className="px-3 py-3.5">
+          <ChevronRight className="h-4 w-4 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
+        </td>
+      </tr>
     );
   }
 
@@ -199,40 +282,46 @@ export function HerdsTable({
                     {search ? "No herds match your search." : "No herds found."}
                   </td>
                 </tr>
-              ) : (
-                sorted.map((herd) => {
-                  const value = herdValues[herd.id] ?? 0;
+              ) : hasMultipleGroups ? (
+                groupedHerds.map((group, gi) => {
+                  const groupHead = group.herds.reduce((s, h) => s + (h.head_count ?? 0), 0);
+                  const groupValue = group.herds.reduce((s, h) => s + (herdValues[h.id] ?? 0), 0);
                   return (
-                    <tr
-                      key={herd.id}
-                      onClick={() => router.push(`/dashboard/herds/${herd.id}`)}
-                      className="group cursor-pointer transition-colors hover:bg-white/[0.03]"
-                    >
-                      <td className="px-5 py-3.5">
-                        <span className="font-medium text-text-primary">{herd.name}</span>
-                      </td>
-                      <td className="px-5 py-3.5">
-                        <Badge variant={speciesBadgeVariant[herd.species] ?? "default"}>
-                          {herd.species}
-                        </Badge>
-                      </td>
-                      <td className="hidden px-5 py-3.5 text-text-secondary md:table-cell">{herd.breed}</td>
-                      <td className="hidden px-5 py-3.5 text-text-secondary lg:table-cell">{herd.category}</td>
-                      <td className="px-5 py-3.5 text-right tabular-nums font-medium text-text-primary">
-                        {herd.head_count?.toLocaleString() ?? "\u2014"}
-                      </td>
-                      <td className="px-5 py-3.5 text-right tabular-nums text-text-secondary">
-                        {value > 0 ? `$${Math.round(value).toLocaleString()}` : "\u2014"}
-                      </td>
-                      <td className="hidden px-5 py-3.5 text-right tabular-nums text-text-secondary xl:table-cell">
-                        {herd.current_weight ? `${herd.current_weight.toLocaleString()} kg` : "\u2014"}
-                      </td>
-                      <td className="px-3 py-3.5">
-                        <ChevronRight className="h-4 w-4 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
-                      </td>
-                    </tr>
+                    <GroupFragment key={group.id ?? "_unassigned"}>
+                      {/* Property group header */}
+                      <tr className={`bg-white/[0.02] ${gi > 0 ? "border-t border-white/8" : ""}`}>
+                        <td colSpan={8} className="px-5 py-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-brand/10">
+                                <Home className="h-3 w-3 text-brand" />
+                              </div>
+                              <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
+                                {group.name}
+                              </span>
+                              {group.isDefault && (
+                                <Badge variant="brand" className="text-[10px] px-1.5 py-0">Primary</Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-4 text-xs tabular-nums text-text-muted">
+                              <span>{groupHead.toLocaleString()} head</span>
+                              {groupValue > 0 && (
+                                <span>${Math.round(groupValue).toLocaleString()}</span>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                      {group.herds.map((herd) => (
+                        <HerdRow key={herd.id} herd={herd} />
+                      ))}
+                    </GroupFragment>
                   );
                 })
+              ) : (
+                sorted.map((herd) => (
+                  <HerdRow key={herd.id} herd={herd} />
+                ))
               )}
             </tbody>
           </table>
@@ -250,4 +339,9 @@ export function HerdsTable({
       </div>
     </div>
   );
+}
+
+// Fragment wrapper for table row groups (React doesn't allow <Fragment> with key in JSX shorthand inside tbody easily)
+function GroupFragment({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
 }

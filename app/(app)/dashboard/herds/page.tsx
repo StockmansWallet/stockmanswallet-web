@@ -18,7 +18,7 @@ export default async function HerdsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [herdsResult, { data: marketPrices }, { data: breedPremiumData }] = await Promise.all([
+  const [herdsResult, { data: marketPrices }, { data: breedPremiumData }, { data: propertiesData }] = await Promise.all([
     supabase
       .from("herd_groups")
       .select("*, properties(property_name)")
@@ -34,6 +34,12 @@ export default async function HerdsPage() {
     supabase
       .from("breed_premiums")
       .select("breed, premium_percent"),
+    supabase
+      .from("properties")
+      .select("id, property_name, is_default")
+      .eq("user_id", user!.id)
+      .eq("is_deleted", false)
+      .order("property_name"),
   ]);
 
   let herds = herdsResult.data;
@@ -72,6 +78,15 @@ export default async function HerdsPage() {
     herdValuesObj[h.id] = value;
     totalValue += value;
   }
+
+  // Build property groups: default first, then alphabetical, then "Unassigned"
+  const propertyGroups = (propertiesData ?? [])
+    .sort((a, b) => {
+      if (a.is_default && !b.is_default) return -1;
+      if (!a.is_default && b.is_default) return 1;
+      return a.property_name.localeCompare(b.property_name);
+    })
+    .map((p) => ({ id: p.id, name: p.property_name, isDefault: p.is_default }));
 
   const totalHead =
     herds?.reduce((sum, h) => sum + (h.head_count ?? 0), 0) ?? 0;
@@ -166,7 +181,7 @@ export default async function HerdsPage() {
           </div>
 
           {/* Table */}
-          <HerdsTable herds={herds} herdValues={herdValuesObj} />
+          <HerdsTable herds={herds} herdValues={herdValuesObj} propertyGroups={propertyGroups} />
         </>
       )}
     </div>
