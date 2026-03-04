@@ -52,7 +52,7 @@ export default async function EditYardBookItemPage({
     <div className="mx-auto max-w-3xl">
       <PageHeader
         title={`Edit: ${item.title}`}
-        subtitle={item.category}
+        subtitle={item.category_raw}
       />
       <Card>
         <CardContent className="p-6">

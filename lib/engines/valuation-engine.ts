@@ -239,6 +239,7 @@ export interface HerdForValuation {
   breeding_program_type: "ai" | "controlled" | "uncontrolled" | null;
   joining_period_start: string | null;
   joining_period_end: string | null;
+  selected_saleyard: string | null;
 }
 
 // Price entry with optional weight range (matches category_prices table structure)
@@ -248,21 +249,46 @@ export interface CategoryPriceEntry {
 }
 
 /**
+ * Resolves the best price from a list of CategoryPriceEntry for a given projected weight.
+ * Tries weight-range match first, then falls back to any-weight entry.
+ */
+function resolvePriceFromEntries(
+  entries: CategoryPriceEntry[],
+  projectedWeight: number
+): number | null {
+  if (entries.length === 0) return null;
+  const weightRanges = entries
+    .map((e) => e.weight_range)
+    .filter((r): r is string => r !== null);
+  const matchedRange =
+    weightRanges.length > 0 ? matchWeightRange(projectedWeight, weightRanges) : null;
+  const matchedEntry = matchedRange
+    ? entries.find((e) => e.weight_range === matchedRange)
+    : entries.find((e) => e.weight_range === null) ?? entries[0];
+  return matchedEntry?.price_per_kg ?? null;
+}
+
+/**
  * Full herd valuation matching iOS ValuationEngine formula exactly:
  * netValue = physicalValue - mortalityDeduction + breedingAccrual
  *
- * @param herd        Herd data from herd_groups
- * @param priceMap    category -> CategoryPriceEntry[] (from category_prices, national level)
- *                    Multiple entries per category with different weight ranges.
- *                    matchWeightRange() selects the correct bracket for projected weight.
- * @param premiumMap  breed -> premium_percent (from breed_premiums)
- * @param asOf        Valuation date (defaults to now)
+ * Price resolution hierarchy (mirrors iOS):
+ *   1. Saleyard-specific + weight bracket
+ *   2. National + weight bracket
+ *   3. Hardcoded category fallback
+ *
+ * @param herd             Herd data from herd_groups (includes selected_saleyard)
+ * @param nationalPriceMap category -> CategoryPriceEntry[] (national level, saleyard IS NULL)
+ * @param premiumMap       breed -> premium_percent (from breed_premiums)
+ * @param asOf             Valuation date (defaults to now)
+ * @param saleyardPriceMap category|saleyard -> CategoryPriceEntry[] (saleyard-specific prices)
  */
 export function calculateHerdValue(
   herd: HerdForValuation,
-  priceMap: Map<string, CategoryPriceEntry[]>,
+  nationalPriceMap: Map<string, CategoryPriceEntry[]>,
   premiumMap: Map<string, number>,
-  asOf: Date = new Date()
+  asOf: Date = new Date(),
+  saleyardPriceMap?: Map<string, CategoryPriceEntry[]>
 ): number {
   const head = herd.head_count ?? 0;
   if (head === 0) return 0;
@@ -280,17 +306,26 @@ export function calculateHerdValue(
     herd.daily_weight_gain ?? 0
   );
 
-  // 2. Live price — match projected weight to the correct MLA weight bracket
-  const categoryEntries = priceMap.get(herd.category) ?? [];
-  let basePrice: number;
-  if (categoryEntries.length > 0) {
-    const weightRanges = categoryEntries.map((e) => e.weight_range).filter((r): r is string => r !== null);
-    const matchedRange = weightRanges.length > 0 ? matchWeightRange(projectedWeight, weightRanges) : null;
-    const matchedEntry = matchedRange
-      ? categoryEntries.find((e) => e.weight_range === matchedRange)
-      : categoryEntries.find((e) => e.weight_range === null) ?? categoryEntries[0];
-    basePrice = matchedEntry?.price_per_kg ?? defaultFallbackPrice(herd.category);
-  } else {
+  // 2. Live price — map app category to MLA category, then resolve via hierarchy:
+  //    saleyard-specific > national > hardcoded fallback (mirrors iOS ValuationEngine)
+  const mlaCategory = mapCategoryToMLACategory(herd.category);
+  let basePrice: number | null = null;
+
+  // Try saleyard-specific price first
+  if (saleyardPriceMap && herd.selected_saleyard) {
+    const saleyardKey = `${mlaCategory}|${herd.selected_saleyard}`;
+    const saleyardEntries = saleyardPriceMap.get(saleyardKey) ?? [];
+    basePrice = resolvePriceFromEntries(saleyardEntries, projectedWeight);
+  }
+
+  // Fall back to national price
+  if (basePrice === null) {
+    const nationalEntries = nationalPriceMap.get(mlaCategory) ?? [];
+    basePrice = resolvePriceFromEntries(nationalEntries, projectedWeight);
+  }
+
+  // Final fallback to hardcoded defaults
+  if (basePrice === null) {
     basePrice = defaultFallbackPrice(herd.category);
   }
   const rawPremiumPct = herd.breed_premium_override ?? premiumMap.get(herd.breed) ?? 0;

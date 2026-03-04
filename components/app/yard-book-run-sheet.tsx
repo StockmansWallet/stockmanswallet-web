@@ -149,7 +149,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
       if (!showCompleted && item.is_completed) return false;
-      if (filterCategory && item.category !== filterCategory) return false;
+      if (filterCategory && item.category_raw !== filterCategory) return false;
       return true;
     });
   }, [items, filterCategory, showCompleted]);
@@ -198,8 +198,8 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
     };
     for (const item of items) {
       if (!showCompleted && item.is_completed) continue;
-      if (counts[item.category as YardBookCategory] !== undefined) {
-        counts[item.category as YardBookCategory]++;
+      if (counts[item.category_raw as YardBookCategory] !== undefined) {
+        counts[item.category_raw as YardBookCategory]++;
       }
     }
     return counts;
@@ -292,7 +292,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
               <div className="space-y-1.5">
                 {group.items.map((item) => {
                   const days = daysUntilEvent(item.event_date);
-                  const catConfig = CATEGORY_CONFIG[item.category as YardBookCategory] ?? CATEGORY_CONFIG.Livestock;
+                  const catConfig = CATEGORY_CONFIG[item.category_raw as YardBookCategory] ?? CATEGORY_CONFIG.Livestock;
                   const CatIcon = catConfig.icon;
                   const linkedHerds = (item.linked_herd_ids ?? [])
                     .map((id) => herdMap.get(id))

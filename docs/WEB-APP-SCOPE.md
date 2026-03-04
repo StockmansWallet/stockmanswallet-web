@@ -167,7 +167,7 @@ The Supabase data migration is the critical path for BOTH platforms. Do it now. 
 - **Properties CRUD** — full create/read/update/delete with soft-delete and UUID generation
 - **Herds page** — premium UI with stat cards (total value, head, herds, avg weight), species pill filters, sortable table, search, property grouping with separate cards per property
 - **Valuation engine** — TypeScript port of iOS `calculateHerdValue` with MLA category prices, breed premiums, and weight-range bracket matching
-- **Yard Book CRUD** — full create/read/update/delete with category pill filters, colour-coded icons, overdue/upcoming badges, toggle complete, run sheet view
+- **Yard Book** — full implementation matching iOS: run sheet with horizon grouping (Overdue/Today/Next 7/30/90/Later), 5 colour-coded categories with filter pills, countdown badges, herd linking (multi-select), reminder offsets, recurrence rules, mark complete/incomplete, show/hide completed, stat cards, soft-delete. Data syncs bidirectionally with iOS via shared Supabase table
 - **Demo data seeder** — Doongara Station with 20 herds, flagged as demo data, safe clear that uses soft-delete
 - **Clear All Data** — settings option to permanently delete all user data via Edge Function (double confirmation, affects both web and iOS)
 - Tool pages scaffolded: Freight IQ, Grid IQ, Reports, Market View, Stockman IQ, Settings

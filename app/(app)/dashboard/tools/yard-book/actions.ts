@@ -23,7 +23,7 @@ export async function createYardBookItem(formData: FormData) {
     event_date: formData.get("event_date") as string,
     is_all_day: formData.get("is_all_day") === "on",
     event_time: eventTime || null,
-    category:
+    category_raw:
       (formData.get("category") as
         | "Livestock"
         | "Operations"
@@ -32,7 +32,7 @@ export async function createYardBookItem(formData: FormData) {
         | "Me") || "Livestock",
     notes: (formData.get("notes") as string) || null,
     is_recurring: formData.get("is_recurring") === "on",
-    recurrence_rule:
+    recurrence_rule_raw:
       (formData.get("recurrence_rule") as
         | "Weekly"
         | "Fortnightly"
@@ -78,7 +78,7 @@ export async function updateYardBookItem(id: string, formData: FormData) {
       event_date: formData.get("event_date") as string,
       is_all_day: formData.get("is_all_day") === "on",
       event_time: eventTime || null,
-      category:
+      category_raw:
         (formData.get("category") as
           | "Livestock"
           | "Operations"
@@ -87,7 +87,7 @@ export async function updateYardBookItem(id: string, formData: FormData) {
           | "Me") || "Livestock",
       notes: (formData.get("notes") as string) || null,
       is_recurring: formData.get("is_recurring") === "on",
-      recurrence_rule:
+      recurrence_rule_raw:
         (formData.get("recurrence_rule") as
           | "Weekly"
           | "Fortnightly"

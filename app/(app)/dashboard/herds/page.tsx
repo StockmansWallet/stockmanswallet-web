@@ -18,7 +18,7 @@ export default async function HerdsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [herdsResult, { data: marketPrices }, { data: breedPremiumData }, { data: propertiesData }] = await Promise.all([
+  const [herdsResult, { data: nationalPrices }, { data: breedPremiumData }, { data: propertiesData }] = await Promise.all([
     supabase
       .from("herd_groups")
       .select("*, properties(property_name)")
@@ -57,12 +57,30 @@ export default async function HerdsPage() {
     herds = fallback.data?.map((h) => ({ ...h, properties: null })) ?? null;
   }
 
+  // Fetch saleyard-specific prices for herds that have a selected_saleyard
+  const saleyards = [...new Set((herds ?? []).map((h) => h.selected_saleyard).filter(Boolean))] as string[];
+  let saleyardPricesRaw: { category: string; price_per_kg: number; weight_range: string | null; saleyard: string }[] = [];
+  if (saleyards.length > 0) {
+    const { data } = await supabase
+      .from("category_prices")
+      .select("category, price_per_kg, weight_range, saleyard")
+      .in("saleyard", saleyards);
+    saleyardPricesRaw = data ?? [];
+  }
+
   // Build pricing lookup maps
-  const priceMap = new Map<string, CategoryPriceEntry[]>();
-  for (const p of (marketPrices ?? [])) {
-    const entries = priceMap.get(p.category) ?? [];
+  const nationalPriceMap = new Map<string, CategoryPriceEntry[]>();
+  for (const p of (nationalPrices ?? [])) {
+    const entries = nationalPriceMap.get(p.category) ?? [];
     entries.push({ price_per_kg: p.price_per_kg, weight_range: p.weight_range });
-    priceMap.set(p.category, entries);
+    nationalPriceMap.set(p.category, entries);
+  }
+  const saleyardPriceMap = new Map<string, CategoryPriceEntry[]>();
+  for (const p of saleyardPricesRaw) {
+    const key = `${p.category}|${p.saleyard}`;
+    const entries = saleyardPriceMap.get(key) ?? [];
+    entries.push({ price_per_kg: p.price_per_kg, weight_range: p.weight_range });
+    saleyardPriceMap.set(key, entries);
   }
   const premiumMap = new Map((breedPremiumData ?? []).map((b) => [b.breed, b.premium_percent]));
 
@@ -72,8 +90,7 @@ export default async function HerdsPage() {
   for (const h of (herds ?? [])) {
     const value = calculateHerdValue(
       h as Parameters<typeof calculateHerdValue>[0],
-      priceMap,
-      premiumMap
+      nationalPriceMap, premiumMap, undefined, saleyardPriceMap
     );
     herdValuesObj[h.id] = value;
     totalValue += value;

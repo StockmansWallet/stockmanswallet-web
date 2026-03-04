@@ -91,22 +91,30 @@ Fixed soft-deleted demo properties (e.g. Doongara Station) still appearing in pr
 - `app/(app)/dashboard/herds/[id]/edit/page.tsx` - Same filter
 - `app/(app)/dashboard/properties/[id]/page.tsx` - Same filter
 
-## Yard Book CRUD
+## Yard Book - Full Implementation
 
-Full create, read, update, delete implementation for yard book items. List page with category pill filters matching the herds page pattern, colour-coded category icons (Livestock/PawPrint, Operations/Wrench, Finance/DollarSign, Family/Home, Me/User), overdue and upcoming badges. Detail page with InfoRow components for date, time, recurrence, reminder, location, and notes. Edit form pre-populated with existing data. Soft-delete and toggle-complete server actions. Run sheet component for daily task view. Loading skeleton. Added `yard_book_items` type to database types.
+Complete Yard Book feature matching the iOS app. The run sheet groups items by time horizon (Overdue, Today, Next 7 Days, Next 30 Days, Next 90 Days, Later) with countdown badges colour-coded by urgency (red for overdue, green for today, amber for within 7 days, grey for later). Five category types with distinct colours: Livestock (orange/PawPrint), Operations (amber/Wrench), Finance (blue/DollarSign), Family (purple/Home), Me (green/User).
 
-**Files changed:**
-- `app/(app)/dashboard/tools/yard-book/page.tsx` - List with category pill filters, overdue/upcoming badges, empty state
-- `app/(app)/dashboard/tools/yard-book/new/page.tsx` - Create page with form
-- `app/(app)/dashboard/tools/yard-book/[id]/page.tsx` - Detail page with category icons, info rows, delete/complete actions
-- `app/(app)/dashboard/tools/yard-book/[id]/edit/page.tsx` - Edit page with pre-populated form
-- `app/(app)/dashboard/tools/yard-book/[id]/delete-button.tsx` - Client delete button with confirmation
-- `app/(app)/dashboard/tools/yard-book/[id]/toggle-complete-button.tsx` - Client toggle complete button
-- `app/(app)/dashboard/tools/yard-book/actions.ts` - Server actions (create, update, soft-delete, toggle complete)
-- `app/(app)/dashboard/tools/yard-book/loading.tsx` - Loading skeleton
-- `components/app/yard-book-form.tsx` - Shared form component for create/edit
-- `components/app/yard-book-run-sheet.tsx` - Run sheet daily task view
-- `lib/types/database.ts` - Added `yard_book_items` table types
+Main page shows 4 stat cards (Upcoming, Overdue, Today, Completed), category filter pills with counts, and a show/hide completed toggle. Each item row shows category icon, title, date, time, linked herd pills (max 2 with overflow count), and countdown badge. Completed items display with strikethrough text and a green checkmark.
+
+Detail page has Overview card (category badge, status with countdown), Event card (date, time, recurrence, property), Reminders card (sorted offset descriptions), Linked Herds card (names with head counts linking to herd detail pages), and Notes card.
+
+Form component supports title, date/time with all-day toggle, category chip selection, reminder offset chips (On the day, 1/3/7/14/21 days before), recurrence toggle with Weekly/Fortnightly/Monthly/Annual, multi-select herd linking chips, property select, and notes. Shared between create and edit pages.
+
+All mutations set `updated_at` for iOS sync compatibility. Soft-delete pattern matches iOS (is_deleted + deleted_at). Array fields (linked_herd_ids, reminder_offsets) serialized as JSON in hidden form inputs, parsed server-side. Data syncs bidirectionally between iOS and web via the shared `yard_book_items` Supabase table.
+
+**Files created/changed:**
+- `app/(app)/dashboard/tools/yard-book/actions.ts` - Server actions: createYardBookItem, updateYardBookItem, deleteYardBookItem (soft-delete), toggleYardBookItemComplete
+- `app/(app)/dashboard/tools/yard-book/page.tsx` - Main page with stat cards, run sheet, empty state
+- `app/(app)/dashboard/tools/yard-book/new/page.tsx` - Create page fetching herds and properties
+- `app/(app)/dashboard/tools/yard-book/[id]/page.tsx` - Detail page with linked herd resolution and property lookup
+- `app/(app)/dashboard/tools/yard-book/[id]/edit/page.tsx` - Edit page with bound update action
+- `app/(app)/dashboard/tools/yard-book/[id]/delete-button.tsx` - Client delete button with confirmation modal
+- `app/(app)/dashboard/tools/yard-book/[id]/toggle-complete-button.tsx` - Client mark complete/incomplete button
+- `app/(app)/dashboard/tools/yard-book/loading.tsx` - Skeleton loading state
+- `components/app/yard-book-form.tsx` - Shared form component (category chips, reminder offsets, herd multi-select)
+- `components/app/yard-book-run-sheet.tsx` - Interactive run sheet with horizon grouping, category filtering, show/hide completed
+- `lib/types/database.ts` - Added is_deleted and deleted_at fields to yard_book_items Row/Insert/Update types
 
 ## Clear All Data
 

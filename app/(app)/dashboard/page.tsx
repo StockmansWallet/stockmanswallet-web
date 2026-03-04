@@ -20,7 +20,7 @@ export default async function DashboardPage() {
 
   const firstName = user?.user_metadata?.first_name || "Stockman";
 
-  const [{ data: herds }, { data: properties }, { data: marketPrices }, { data: breedPremiumData }] = await Promise.all([
+  const [{ data: herds }, { data: properties }, { data: nationalPrices }, { data: breedPremiumData }] = await Promise.all([
     supabase
       .from("herd_groups")
       .select(`id, name, species, breed, category, head_count,
@@ -28,7 +28,7 @@ export default async function DashboardPage() {
                dwg_change_date, previous_dwg, created_at,
                is_breeder, is_pregnant, joined_date, calving_rate,
                breeding_program_type, joining_period_start, joining_period_end,
-               breed_premium_override, mortality_rate, is_sold`)
+               breed_premium_override, mortality_rate, is_sold, selected_saleyard`)
       .eq("user_id", user!.id)
       .eq("is_sold", false)
       .eq("is_deleted", false)
@@ -40,7 +40,6 @@ export default async function DashboardPage() {
       .eq("is_deleted", false)
       .order("property_name"),
     // Live MLA national prices — all weight brackets (matches iOS ValuationEngine price source)
-    // iOS uses matchWeightRange() to find the right bracket; we do the same in calculateHerdValue
     supabase
       .from("category_prices")
       .select("category, price_per_kg, weight_range")
@@ -52,27 +51,48 @@ export default async function DashboardPage() {
       .select("breed, premium_percent"),
   ]);
 
+  // Fetch saleyard-specific prices for herds that have a selected_saleyard
+  const saleyards = [...new Set((herds ?? []).map((h) => h.selected_saleyard).filter(Boolean))] as string[];
+  let saleyardPricesRaw: { category: string; price_per_kg: number; weight_range: string | null; saleyard: string }[] = [];
+  if (saleyards.length > 0) {
+    const { data } = await supabase
+      .from("category_prices")
+      .select("category, price_per_kg, weight_range, saleyard")
+      .in("saleyard", saleyards);
+    saleyardPricesRaw = data ?? [];
+  }
+
   const activeHerds = herds ?? [];
   const totalHead = activeHerds.reduce((sum, h) => sum + (h.head_count ?? 0), 0);
   const herdCount = activeHerds.length;
   const propertyCount = properties?.length ?? 0;
 
   // Build lookup maps for live pricing data
-  // priceMap: category -> [{price_per_kg, weight_range}] — all brackets grouped by category
-  // calculateHerdValue uses matchWeightRange() to select the correct bracket
-  const priceMap = new Map<string, { price_per_kg: number; weight_range: string | null }[]>();
-  for (const p of (marketPrices ?? [])) {
-    const entries = priceMap.get(p.category) ?? [];
+  // nationalPriceMap: category -> [{price_per_kg, weight_range}] — all brackets grouped by category
+  // saleyardPriceMap: "category|saleyard" -> [{price_per_kg, weight_range}] — saleyard-specific
+  const nationalPriceMap = new Map<string, { price_per_kg: number; weight_range: string | null }[]>();
+  for (const p of (nationalPrices ?? [])) {
+    const entries = nationalPriceMap.get(p.category) ?? [];
     entries.push({ price_per_kg: p.price_per_kg, weight_range: p.weight_range });
-    priceMap.set(p.category, entries);
+    nationalPriceMap.set(p.category, entries);
+  }
+  const saleyardPriceMap = new Map<string, { price_per_kg: number; weight_range: string | null }[]>();
+  for (const p of saleyardPricesRaw) {
+    const key = `${p.category}|${p.saleyard}`;
+    const entries = saleyardPriceMap.get(key) ?? [];
+    entries.push({ price_per_kg: p.price_per_kg, weight_range: p.weight_range });
+    saleyardPriceMap.set(key, entries);
   }
   const premiumMap = new Map((breedPremiumData ?? []).map((b) => [b.breed, b.premium_percent]));
 
   // Portfolio value using full iOS valuation formula:
   // netValue = physicalValue - mortalityDeduction + breedingAccrual
-  // Falls back to static defaultFallbackPrice when no live MLA data exists
+  // Price hierarchy: saleyard-specific > national > hardcoded fallback
   const portfolioValue = activeHerds.reduce(
-    (sum, h) => sum + calculateHerdValue(h as Parameters<typeof calculateHerdValue>[0], priceMap, premiumMap),
+    (sum, h) => sum + calculateHerdValue(
+      h as Parameters<typeof calculateHerdValue>[0],
+      nationalPriceMap, premiumMap, undefined, saleyardPriceMap
+    ),
     0
   );
 
@@ -86,9 +106,7 @@ export default async function DashboardPage() {
     const value = activeHerds.reduce(
       (sum, h) => sum + calculateHerdValue(
         h as Parameters<typeof calculateHerdValue>[0],
-        priceMap,
-        premiumMap,
-        futureDate
+        nationalPriceMap, premiumMap, futureDate, saleyardPriceMap
       ),
       0
     );

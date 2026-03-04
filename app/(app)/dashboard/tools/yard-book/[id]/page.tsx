@@ -160,7 +160,7 @@ export default async function YardBookItemPage({
   }
 
   const catConfig =
-    CATEGORY_CONFIG[item.category as YardBookCategory] ??
+    CATEGORY_CONFIG[item.category_raw as YardBookCategory] ??
     CATEGORY_CONFIG.Livestock;
   const CatIcon = catConfig.icon;
   const days = daysUntil(item.event_date);

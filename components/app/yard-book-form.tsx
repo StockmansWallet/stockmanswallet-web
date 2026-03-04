@@ -69,7 +69,7 @@ export function YardBookForm({
   const [submitting, setSubmitting] = useState(false);
 
   const [category, setCategory] = useState<YardBookCategory>(
-    item?.category ?? "Livestock"
+    item?.category_raw ?? "Livestock"
   );
   const [isAllDay, setIsAllDay] = useState(item?.is_all_day ?? true);
   const [isRecurring, setIsRecurring] = useState(item?.is_recurring ?? false);
@@ -289,7 +289,7 @@ export function YardBookForm({
             label="Repeat"
             options={RECURRENCE_OPTIONS}
             placeholder="Select frequency"
-            defaultValue={item?.recurrence_rule ?? ""}
+            defaultValue={item?.recurrence_rule_raw ?? ""}
           />
         )}
       </section>
