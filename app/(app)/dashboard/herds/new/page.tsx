@@ -18,6 +18,7 @@ export default async function NewHerdPage() {
     .from("properties")
     .select("id, property_name")
     .eq("user_id", user!.id)
+    .eq("is_deleted", false)
     .order("property_name");
 
   return (
