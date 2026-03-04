@@ -5,9 +5,9 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { calculateProjectedWeight } from "@/lib/engines/valuation-engine";
+import { calculateProjectedWeight, calculateHerdValue, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { DeleteHerdButton } from "./delete-button";
-import { Pencil, Info, Scale, Heart, MapPin, FileText } from "lucide-react";
+import { Pencil, Info, Scale, Heart, MapPin, FileText, DollarSign } from "lucide-react";
 
 export const metadata = {
   title: "Herd Details",
@@ -42,13 +42,27 @@ export default async function HerdDetailPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  let { data: herd, error } = await supabase
-    .from("herd_groups")
-    .select("*, properties(property_name)")
-    .eq("id", id)
-    .eq("user_id", user!.id)
-    .eq("is_deleted", false)
-    .single();
+  // Fetch herd + pricing data in parallel
+  const [herdResult, { data: nationalPrices }, { data: breedPremiumData }] = await Promise.all([
+    supabase
+      .from("herd_groups")
+      .select("*, properties(property_name)")
+      .eq("id", id)
+      .eq("user_id", user!.id)
+      .eq("is_deleted", false)
+      .single(),
+    supabase
+      .from("category_prices")
+      .select("category, price_per_kg, weight_range")
+      .is("saleyard", null)
+      .is("state", null),
+    supabase
+      .from("breed_premiums")
+      .select("breed, premium_percent"),
+  ]);
+
+  let herd = herdResult.data;
+  const error = herdResult.error;
 
   if (error && !herd) {
     const fallback = await supabase
@@ -62,6 +76,42 @@ export default async function HerdDetailPage({
   }
 
   if (!herd) notFound();
+
+  // Fetch saleyard-specific prices if herd has a selected saleyard
+  let saleyardPriceMap: Map<string, CategoryPriceEntry[]> | undefined;
+  if (herd.selected_saleyard) {
+    const { data: saleyardPrices } = await supabase
+      .from("category_prices")
+      .select("category, price_per_kg, weight_range, saleyard")
+      .eq("saleyard", herd.selected_saleyard);
+    if (saleyardPrices && saleyardPrices.length > 0) {
+      saleyardPriceMap = new Map();
+      for (const p of saleyardPrices) {
+        const key = `${p.category}|${p.saleyard}`;
+        const entries = saleyardPriceMap.get(key) ?? [];
+        entries.push({ price_per_kg: p.price_per_kg, weight_range: p.weight_range });
+        saleyardPriceMap.set(key, entries);
+      }
+    }
+  }
+
+  // Build pricing lookup maps
+  const nationalPriceMap = new Map<string, CategoryPriceEntry[]>();
+  for (const p of (nationalPrices ?? [])) {
+    const entries = nationalPriceMap.get(p.category) ?? [];
+    entries.push({ price_per_kg: p.price_per_kg, weight_range: p.weight_range });
+    nationalPriceMap.set(p.category, entries);
+  }
+  const premiumMap = new Map((breedPremiumData ?? []).map((b) => [b.breed, b.premium_percent]));
+
+  // Calculate herd value
+  const herdValue = calculateHerdValue(
+    herd as Parameters<typeof calculateHerdValue>[0],
+    nationalPriceMap,
+    premiumMap,
+    undefined,
+    saleyardPriceMap,
+  );
 
   let projectedWeight: number | null = null;
   if (herd.initial_weight > 0 && herd.daily_weight_gain > 0) {
@@ -96,6 +146,28 @@ export default async function HerdDetailPage({
           </div>
         }
       />
+
+      {/* Herd Value */}
+      {herdValue > 0 && (
+        <div className="mb-4 rounded-2xl bg-white/5 p-5 ring-1 ring-inset ring-white/8">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/15">
+              <DollarSign className="h-5 w-5 text-brand" />
+            </div>
+            <div>
+              <p className="text-xs font-medium text-text-muted">Estimated Herd Value</p>
+              <p className="mt-0.5 text-2xl font-bold tabular-nums text-text-primary">
+                ${Math.round(herdValue).toLocaleString()}
+              </p>
+              {(herd.head_count ?? 0) > 0 && (
+                <p className="text-xs text-text-muted">
+                  ${Math.round(herdValue / herd.head_count).toLocaleString()} per head
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* Overview */}
