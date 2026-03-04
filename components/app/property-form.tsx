@@ -56,7 +56,7 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
 
       {/* Property Details */}
       <section>
-        <h3 className="mb-4 text-sm font-semibold text-text-primary">
+        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
           Property Details
         </h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -113,7 +113,7 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
 
       {/* Address */}
       <section>
-        <h3 className="mb-4 text-sm font-semibold text-text-primary">
+        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
           Address
         </h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -161,14 +161,14 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
 
       {/* Notes */}
       <section>
-        <h3 className="mb-4 text-sm font-semibold text-text-primary">Notes</h3>
+        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">Notes</h3>
         <textarea
           id="notes"
           name="notes"
           rows={3}
           defaultValue={property?.notes ?? ""}
           placeholder="Any additional notes about this property..."
-          className="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-white/10 dark:bg-white/5"
+          className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all ring-1 ring-inset ring-white/10 focus:ring-brand/60 focus:bg-white/8"
         />
       </section>
 

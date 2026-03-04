@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Plus } from "lucide-react";
 
 export const metadata = { title: "Yard Book" };
 
@@ -17,20 +17,23 @@ export default function YardBookPage() {
         subtitle="Your digital run sheet. Top pocket stuff."
         actions={
           <Link href="/dashboard/tools/yard-book/new">
-            <Button>Add Item</Button>
+            <Button>
+              <Plus className="mr-1.5 h-4 w-4" />
+              Add Item
+            </Button>
           </Link>
         }
       />
 
-      {/* Category filter chips */}
-      <div className="mb-6 flex flex-wrap gap-2">
+      {/* Category filter pills */}
+      <div className="mb-6 flex flex-wrap gap-1.5">
         {CATEGORIES.map((cat) => (
           <button
             key={cat}
-            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+            className={`inline-flex items-center rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
               cat === "All"
-                ? "bg-brand text-white"
-                : "border border-black/10 bg-white text-text-secondary hover:bg-black/5 dark:border-white/10 dark:bg-white/5"
+                ? "bg-brand/15 text-brand ring-1 ring-inset ring-brand/25"
+                : "bg-white/5 text-text-muted ring-1 ring-inset ring-white/8 hover:bg-white/8 hover:text-text-secondary"
             }`}
           >
             {cat}

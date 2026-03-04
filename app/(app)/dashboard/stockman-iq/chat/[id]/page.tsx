@@ -2,7 +2,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { Send } from "lucide-react";
 
-export const metadata = { title: "Chat — Stockman IQ" };
+export const metadata = { title: "Chat \u2014 Stockman IQ" };
 
 export default async function StockmanIQConversationPage({
   params,
@@ -18,14 +18,14 @@ export default async function StockmanIQConversationPage({
         <div className="flex-1 overflow-y-auto p-4">
           <p className="text-sm text-text-muted">Conversation history will appear here.</p>
         </div>
-        <div className="border-t border-black/5 p-4 dark:border-white/5">
+        <div className="border-t border-white/6 p-4">
           <div className="flex items-end gap-2">
             <textarea
               rows={1}
               placeholder="Continue the conversation..."
-              className="flex-1 resize-none rounded-xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-white/10 dark:bg-white/5"
+              className="flex-1 resize-none rounded-xl bg-white/5 px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none ring-1 ring-inset ring-white/10 transition-all focus:ring-brand/60 focus:bg-white/8"
             />
-            <button className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-white hover:bg-brand-dark">
+            <button className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-white transition-colors hover:bg-brand-dark">
               <Send className="h-4 w-4" />
             </button>
           </div>

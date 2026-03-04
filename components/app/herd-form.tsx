@@ -88,7 +88,7 @@ export function HerdForm({ herd, properties, action, submitLabel }: HerdFormProp
 
       {/* Basic Info */}
       <section>
-        <h3 className="mb-4 text-sm font-semibold text-text-primary">
+        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
           Basic Info
         </h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -164,7 +164,7 @@ export function HerdForm({ herd, properties, action, submitLabel }: HerdFormProp
 
       {/* Weight */}
       <section>
-        <h3 className="mb-4 text-sm font-semibold text-text-primary">
+        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
           Weight & Growth
         </h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -200,7 +200,7 @@ export function HerdForm({ herd, properties, action, submitLabel }: HerdFormProp
 
       {/* Breeding */}
       <section>
-        <h3 className="mb-4 text-sm font-semibold text-text-primary">
+        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
           Breeding
         </h3>
         <div className="mb-4 flex items-center gap-6">
@@ -263,7 +263,7 @@ export function HerdForm({ herd, properties, action, submitLabel }: HerdFormProp
 
       {/* Location & Market */}
       <section>
-        <h3 className="mb-4 text-sm font-semibold text-text-primary">
+        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
           Location & Market
         </h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -304,14 +304,14 @@ export function HerdForm({ herd, properties, action, submitLabel }: HerdFormProp
 
       {/* Notes */}
       <section>
-        <h3 className="mb-4 text-sm font-semibold text-text-primary">Notes</h3>
+        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">Notes</h3>
         <textarea
           id="notes"
           name="notes"
           rows={3}
           defaultValue={herd?.notes ?? ""}
           placeholder="Any additional notes about this herd..."
-          className="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-white/10 dark:bg-white/5"
+          className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all ring-1 ring-inset ring-white/10 focus:ring-brand/60 focus:bg-white/8"
         />
       </section>
 

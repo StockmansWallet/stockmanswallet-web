@@ -127,7 +127,7 @@ export function FreightCalculator() {
 
       {result && (
         <div className="mt-6">
-          <Card className="border-brand/20 bg-brand/5">
+          <Card className="bg-brand/5 ring-brand/20">
             <CardContent className="p-5">
               <p className="mb-1 text-xs font-medium uppercase tracking-wider text-text-muted">
                 Estimated Total
@@ -138,7 +138,7 @@ export function FreightCalculator() {
             </CardContent>
           </Card>
 
-          <div className="mt-4 divide-y divide-black/5 dark:divide-white/5">
+          <div className="mt-4 divide-y divide-white/[0.04]">
             <ResultRow label="Decks Required" value={`${result.decksRequired} deck${result.decksRequired !== 1 ? "s" : ""}`} />
             <ResultRow label="Heads per Deck" value={result.headsPerDeck.toString()} />
             <ResultRow label="Cost per Head" value={`$${result.costPerHead.toFixed(2)}`} />

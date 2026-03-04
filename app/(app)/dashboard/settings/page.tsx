@@ -74,18 +74,18 @@ export default async function SettingsPage() {
               {section.heading}
             </h2>
             <Card>
-              <CardContent className="divide-y divide-black/5 p-0 dark:divide-white/5">
+              <CardContent className="divide-y divide-white/[0.04] p-0">
                 {section.items.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
+                    className="group flex items-center justify-between px-5 py-4 transition-colors hover:bg-white/[0.03]"
                   >
                     <div>
                       <p className="text-sm font-medium text-text-primary">{item.label}</p>
                       <p className="text-xs text-text-muted">{item.description}</p>
                     </div>
-                    <ChevronRight className="h-4 w-4 text-text-muted" />
+                    <ChevronRight className="h-4 w-4 shrink-0 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
                   </Link>
                 ))}
               </CardContent>

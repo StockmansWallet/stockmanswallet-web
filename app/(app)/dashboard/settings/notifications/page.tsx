@@ -29,14 +29,14 @@ export default function NotificationsPage() {
         {notificationGroups.map((group) => (
           <Card key={group.title}>
             <CardHeader><CardTitle>{group.title}</CardTitle></CardHeader>
-            <CardContent className="divide-y divide-black/5 p-0 dark:divide-white/5">
+            <CardContent className="divide-y divide-white/[0.04] p-0">
               {group.items.map((item) => (
                 <div key={item.label} className="flex items-center justify-between px-5 py-4">
                   <div>
                     <p className="text-sm font-medium text-text-primary">{item.label}</p>
                     <p className="text-xs text-text-muted">{item.description}</p>
                   </div>
-                  <div className="h-5 w-9 rounded-full bg-black/10 dark:bg-white/10" aria-label="Toggle coming soon" />
+                  <div className="h-6 w-10 rounded-full bg-white/8 ring-1 ring-inset ring-white/10" aria-label="Toggle coming soon" />
                 </div>
               ))}
             </CardContent>
