@@ -5,7 +5,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HerdsTable } from "./herds-table";
-import { Plus, Tags, Layers, Beef, Scale } from "lucide-react";
+import { Plus, Tags, Layers, DollarSign, Scale } from "lucide-react";
+import { calculateHerdValue, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 
 export const metadata = {
   title: "Herds",
@@ -17,13 +18,26 @@ export default async function HerdsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let { data: herds, error } = await supabase
-    .from("herd_groups")
-    .select("*, properties(property_name)")
-    .eq("user_id", user!.id)
-    .eq("is_sold", false)
-    .eq("is_deleted", false)
-    .order("name");
+  const [herdsResult, { data: marketPrices }, { data: breedPremiumData }] = await Promise.all([
+    supabase
+      .from("herd_groups")
+      .select("*, properties(property_name)")
+      .eq("user_id", user!.id)
+      .eq("is_sold", false)
+      .eq("is_deleted", false)
+      .order("name"),
+    supabase
+      .from("category_prices")
+      .select("category, price_per_kg, weight_range")
+      .is("saleyard", null)
+      .is("state", null),
+    supabase
+      .from("breed_premiums")
+      .select("breed, premium_percent"),
+  ]);
+
+  let herds = herdsResult.data;
+  const error = herdsResult.error;
 
   // Fallback: if the join fails, query without it so herds still display
   if (error && !herds) {
@@ -37,16 +51,30 @@ export default async function HerdsPage() {
     herds = fallback.data?.map((h) => ({ ...h, properties: null })) ?? null;
   }
 
+  // Build pricing lookup maps
+  const priceMap = new Map<string, CategoryPriceEntry[]>();
+  for (const p of (marketPrices ?? [])) {
+    const entries = priceMap.get(p.category) ?? [];
+    entries.push({ price_per_kg: p.price_per_kg, weight_range: p.weight_range });
+    priceMap.set(p.category, entries);
+  }
+  const premiumMap = new Map((breedPremiumData ?? []).map((b) => [b.breed, b.premium_percent]));
+
+  // Compute per-herd valuations
+  const herdValuesObj: Record<string, number> = {};
+  let totalValue = 0;
+  for (const h of (herds ?? [])) {
+    const value = calculateHerdValue(
+      h as Parameters<typeof calculateHerdValue>[0],
+      priceMap,
+      premiumMap
+    );
+    herdValuesObj[h.id] = value;
+    totalValue += value;
+  }
+
   const totalHead =
     herds?.reduce((sum, h) => sum + (h.head_count ?? 0), 0) ?? 0;
-
-  const speciesCounts = herds?.reduce(
-    (acc, h) => {
-      acc[h.species] = (acc[h.species] || 0) + (h.head_count ?? 0);
-      return acc;
-    },
-    {} as Record<string, number>
-  );
 
   const avgWeight =
     herds && herds.length > 0
@@ -87,6 +115,20 @@ export default async function HerdsPage() {
             <div className="rounded-2xl bg-white/5 p-4 ring-1 ring-inset ring-white/8 sm:p-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/15">
+                  <DollarSign className="h-4 w-4 text-brand" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-text-muted">Total Value</p>
+                  <p className="mt-0.5 text-xl font-bold tabular-nums text-text-primary">
+                    ${Math.round(totalValue).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl bg-white/5 p-4 ring-1 ring-inset ring-white/8 sm:p-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/15">
                   <Tags className="h-4 w-4 text-brand" />
                 </div>
                 <div className="min-w-0">
@@ -108,23 +150,6 @@ export default async function HerdsPage() {
               </div>
             </div>
 
-            {speciesCounts &&
-              Object.entries(speciesCounts)
-                .slice(0, 1)
-                .map(([sp, count]) => (
-                  <div key={sp} className="rounded-2xl bg-white/5 p-4 ring-1 ring-inset ring-white/8 sm:p-5">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/15">
-                        <Beef className="h-4 w-4 text-brand" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-medium text-text-muted">{sp}</p>
-                        <p className="mt-0.5 text-xl font-bold tabular-nums text-text-primary">{(count as number).toLocaleString()}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
             <div className="rounded-2xl bg-white/5 p-4 ring-1 ring-inset ring-white/8 sm:p-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/15">
@@ -133,7 +158,7 @@ export default async function HerdsPage() {
                 <div className="min-w-0">
                   <p className="text-xs font-medium text-text-muted">Avg Weight</p>
                   <p className="mt-0.5 text-xl font-bold tabular-nums text-text-primary">
-                    {avgWeight > 0 ? `${avgWeight} kg` : "—"}
+                    {avgWeight > 0 ? `${avgWeight} kg` : "\u2014"}
                   </p>
                 </div>
               </div>
@@ -141,7 +166,7 @@ export default async function HerdsPage() {
           </div>
 
           {/* Table */}
-          <HerdsTable herds={herds} />
+          <HerdsTable herds={herds} herdValues={herdValuesObj} />
         </>
       )}
     </div>

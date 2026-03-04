@@ -27,16 +27,21 @@ const speciesBadgeVariant: Record<string, "brand" | "success" | "info" | "warnin
   Goat: "warning",
 };
 
-type SortKey = "name" | "breed" | "category" | "head_count" | "current_weight" | null;
+type SortKey = "name" | "breed" | "category" | "head_count" | "current_weight" | "value" | null;
 
-export function HerdsTable({ herds }: { herds: HerdWithProperty[] }) {
+export function HerdsTable({
+  herds,
+  herdValues,
+}: {
+  herds: HerdWithProperty[];
+  herdValues: Record<string, number>;
+}) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<string>("All");
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
-  // Count per species for tab badges
   const speciesCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const h of herds) {
@@ -45,13 +50,11 @@ export function HerdsTable({ herds }: { herds: HerdWithProperty[] }) {
     return counts;
   }, [herds]);
 
-  // Filter by species
   const speciesFiltered = useMemo(
     () => (activeTab === "All" ? herds : herds.filter((h) => h.species === activeTab)),
     [herds, activeTab]
   );
 
-  // Search
   const searched = useMemo(() => {
     if (!search.trim()) return speciesFiltered;
     const q = search.toLowerCase();
@@ -63,19 +66,25 @@ export function HerdsTable({ herds }: { herds: HerdWithProperty[] }) {
     );
   }, [speciesFiltered, search]);
 
-  // Sort
   const sorted = useMemo(() => {
     if (!sortKey) return searched;
     return [...searched].sort((a, b) => {
-      const aVal = a[sortKey];
-      const bVal = b[sortKey];
+      let aVal: unknown;
+      let bVal: unknown;
+      if (sortKey === "value") {
+        aVal = herdValues[a.id] ?? 0;
+        bVal = herdValues[b.id] ?? 0;
+      } else {
+        aVal = a[sortKey];
+        bVal = b[sortKey];
+      }
       if (aVal == null && bVal == null) return 0;
       if (aVal == null) return 1;
       if (bVal == null) return -1;
       const cmp = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
       return sortDir === "asc" ? cmp : -cmp;
     });
-  }, [searched, sortKey, sortDir]);
+  }, [searched, sortKey, sortDir, herdValues]);
 
   function handleSort(key: SortKey) {
     if (sortKey === key) {
@@ -99,7 +108,6 @@ export function HerdsTable({ herds }: { herds: HerdWithProperty[] }) {
     <div>
       {/* Toolbar: species pills + search */}
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        {/* Species filter pills */}
         <div className="flex gap-1.5">
           {SPECIES_TABS.map((tab) => {
             const count = tab === "All" ? herds.length : speciesCounts[tab] || 0;
@@ -116,9 +124,7 @@ export function HerdsTable({ herds }: { herds: HerdWithProperty[] }) {
                 }`}
               >
                 {tab}
-                <span
-                  className={`tabular-nums ${isActive ? "text-brand/70" : "text-text-muted/60"}`}
-                >
+                <span className={`tabular-nums ${isActive ? "text-brand/70" : "text-text-muted/60"}`}>
                   {count}
                 </span>
               </button>
@@ -126,7 +132,6 @@ export function HerdsTable({ herds }: { herds: HerdWithProperty[] }) {
           })}
         </div>
 
-        {/* Search */}
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
           <input
@@ -156,13 +161,13 @@ export function HerdsTable({ herds }: { herds: HerdWithProperty[] }) {
                 </th>
                 <th
                   onClick={() => handleSort("breed")}
-                  className="cursor-pointer select-none px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary"
+                  className="hidden cursor-pointer select-none px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary md:table-cell"
                 >
                   Breed <SortIcon column="breed" />
                 </th>
                 <th
                   onClick={() => handleSort("category")}
-                  className="hidden cursor-pointer select-none px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary md:table-cell"
+                  className="hidden cursor-pointer select-none px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary lg:table-cell"
                 >
                   Category <SortIcon column="category" />
                 </th>
@@ -173,13 +178,16 @@ export function HerdsTable({ herds }: { herds: HerdWithProperty[] }) {
                   Head <SortIcon column="head_count" />
                 </th>
                 <th
+                  onClick={() => handleSort("value")}
+                  className="cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary"
+                >
+                  Value <SortIcon column="value" />
+                </th>
+                <th
                   onClick={() => handleSort("current_weight")}
-                  className="hidden cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary lg:table-cell"
+                  className="hidden cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary xl:table-cell"
                 >
                   Weight <SortIcon column="current_weight" />
-                </th>
-                <th className="hidden px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted xl:table-cell">
-                  Property
                 </th>
                 <th className="w-10 px-3 py-3.5" />
               </tr>
@@ -192,44 +200,44 @@ export function HerdsTable({ herds }: { herds: HerdWithProperty[] }) {
                   </td>
                 </tr>
               ) : (
-                sorted.map((herd) => (
-                  <tr
-                    key={herd.id}
-                    onClick={() => router.push(`/dashboard/herds/${herd.id}`)}
-                    className="group cursor-pointer transition-colors hover:bg-white/[0.03]"
-                  >
-                    <td className="px-5 py-3.5">
-                      <span className="font-medium text-text-primary">{herd.name}</span>
-                    </td>
-                    <td className="px-5 py-3.5">
-                      <Badge variant={speciesBadgeVariant[herd.species] ?? "default"}>
-                        {herd.species}
-                      </Badge>
-                    </td>
-                    <td className="px-5 py-3.5 text-text-secondary">{herd.breed}</td>
-                    <td className="hidden px-5 py-3.5 text-text-secondary md:table-cell">
-                      {herd.category}
-                    </td>
-                    <td className="px-5 py-3.5 text-right tabular-nums font-medium text-text-primary">
-                      {herd.head_count?.toLocaleString() ?? "—"}
-                    </td>
-                    <td className="hidden px-5 py-3.5 text-right tabular-nums text-text-secondary lg:table-cell">
-                      {herd.current_weight ? `${herd.current_weight.toLocaleString()} kg` : "—"}
-                    </td>
-                    <td className="hidden px-5 py-3.5 text-text-muted xl:table-cell">
-                      {herd.properties?.property_name ?? "—"}
-                    </td>
-                    <td className="px-3 py-3.5">
-                      <ChevronRight className="h-4 w-4 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
-                    </td>
-                  </tr>
-                ))
+                sorted.map((herd) => {
+                  const value = herdValues[herd.id] ?? 0;
+                  return (
+                    <tr
+                      key={herd.id}
+                      onClick={() => router.push(`/dashboard/herds/${herd.id}`)}
+                      className="group cursor-pointer transition-colors hover:bg-white/[0.03]"
+                    >
+                      <td className="px-5 py-3.5">
+                        <span className="font-medium text-text-primary">{herd.name}</span>
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <Badge variant={speciesBadgeVariant[herd.species] ?? "default"}>
+                          {herd.species}
+                        </Badge>
+                      </td>
+                      <td className="hidden px-5 py-3.5 text-text-secondary md:table-cell">{herd.breed}</td>
+                      <td className="hidden px-5 py-3.5 text-text-secondary lg:table-cell">{herd.category}</td>
+                      <td className="px-5 py-3.5 text-right tabular-nums font-medium text-text-primary">
+                        {herd.head_count?.toLocaleString() ?? "\u2014"}
+                      </td>
+                      <td className="px-5 py-3.5 text-right tabular-nums text-text-secondary">
+                        {value > 0 ? `$${Math.round(value).toLocaleString()}` : "\u2014"}
+                      </td>
+                      <td className="hidden px-5 py-3.5 text-right tabular-nums text-text-secondary xl:table-cell">
+                        {herd.current_weight ? `${herd.current_weight.toLocaleString()} kg` : "\u2014"}
+                      </td>
+                      <td className="px-3 py-3.5">
+                        <ChevronRight className="h-4 w-4 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
 
-        {/* Footer */}
         {sorted.length > 0 && (
           <div className="border-t border-white/6 px-5 py-3">
             <p className="text-xs text-text-muted">
