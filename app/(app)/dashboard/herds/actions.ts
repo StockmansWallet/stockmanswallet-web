@@ -12,7 +12,7 @@ export async function createHerd(formData: FormData) {
 
   if (!user) return { error: "Not authenticated" };
 
-  const { error } = await supabase.from("herds").insert({
+  const { error } = await supabase.from("herd_groups").insert({
     user_id: user.id,
     name: formData.get("name") as string,
     species: formData.get("species") as "Cattle" | "Sheep" | "Pig" | "Goat",
@@ -59,7 +59,7 @@ export async function updateHerd(id: string, formData: FormData) {
   if (!user) return { error: "Not authenticated" };
 
   const { error } = await supabase
-    .from("herds")
+    .from("herd_groups")
     .update({
       name: formData.get("name") as string,
       species: formData.get("species") as
@@ -114,7 +114,7 @@ export async function deleteHerd(id: string) {
   if (!user) return { error: "Not authenticated" };
 
   const { error } = await supabase
-    .from("herds")
+    .from("herd_groups")
     .delete()
     .eq("id", id)
     .eq("user_id", user.id);

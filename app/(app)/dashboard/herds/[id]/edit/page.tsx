@@ -22,10 +22,11 @@ export default async function EditHerdPage({
 
   const [{ data: herd }, { data: properties }] = await Promise.all([
     supabase
-      .from("herds")
+      .from("herd_groups")
       .select("*")
       .eq("id", id)
       .eq("user_id", user!.id)
+      .eq("is_deleted", false)
       .single(),
     supabase
       .from("properties")

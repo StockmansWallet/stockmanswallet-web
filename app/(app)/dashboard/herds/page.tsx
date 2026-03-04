@@ -18,19 +18,21 @@ export default async function HerdsPage() {
   } = await supabase.auth.getUser();
 
   let { data: herds, error } = await supabase
-    .from("herds")
+    .from("herd_groups")
     .select("*, properties(property_name)")
     .eq("user_id", user!.id)
     .eq("is_sold", false)
+    .eq("is_deleted", false)
     .order("name");
 
   // Fallback: if the join fails, query without it so herds still display
   if (error && !herds) {
     const fallback = await supabase
-      .from("herds")
+      .from("herd_groups")
       .select("*")
       .eq("user_id", user!.id)
       .eq("is_sold", false)
+      .eq("is_deleted", false)
       .order("name");
     herds = fallback.data?.map((h) => ({ ...h, properties: null })) ?? null;
   }

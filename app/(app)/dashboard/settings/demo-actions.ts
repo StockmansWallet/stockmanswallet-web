@@ -12,7 +12,7 @@ export async function seedDemoData() {
   if (!user) return { error: "Not authenticated" };
 
   // Remove any existing demo data only — real user data is untouched
-  await supabase.from("herds").delete().eq("user_id", user.id).eq("is_demo_data", true);
+  await supabase.from("herd_groups").delete().eq("user_id", user.id).eq("is_demo_data", true);
   await supabase.from("properties").delete().eq("user_id", user.id).eq("is_simulated", true);
 
   const uid = user.id;
@@ -53,7 +53,7 @@ export async function seedDemoData() {
   });
 
   // All 20 herds flagged with is_demo_data: true
-  const { error: herdsError } = await supabase.from("herds").insert([
+  const { error: herdsError } = await supabase.from("herd_groups").insert([
     // ── COWS ──
     {
       ...base(), name: "Main Breeders", species: "Cattle", breed: "Droughtmaster",
@@ -242,7 +242,7 @@ export async function clearDemoData() {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
-  await supabase.from("herds").delete().eq("user_id", user.id).eq("is_demo_data", true);
+  await supabase.from("herd_groups").delete().eq("user_id", user.id).eq("is_demo_data", true);
   await supabase.from("properties").delete().eq("user_id", user.id).eq("is_simulated", true);
 
   revalidatePath("/dashboard");

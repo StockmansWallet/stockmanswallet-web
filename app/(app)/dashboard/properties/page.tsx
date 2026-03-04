@@ -20,6 +20,7 @@ export default async function PropertiesPage() {
     .from("properties")
     .select("*")
     .eq("user_id", user!.id)
+    .eq("is_deleted", false)
     .order("property_name");
 
   return (

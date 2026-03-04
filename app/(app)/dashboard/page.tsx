@@ -21,15 +21,17 @@ export default async function DashboardPage() {
 
   const [{ data: herds }, { data: properties }] = await Promise.all([
     supabase
-      .from("herds")
+      .from("herd_groups")
       .select("id, name, species, breed, category, head_count, current_weight, daily_weight_gain, is_sold")
       .eq("user_id", user!.id)
       .eq("is_sold", false)
+      .eq("is_deleted", false)
       .order("name"),
     supabase
       .from("properties")
       .select("id, property_name, state, acreage")
       .eq("user_id", user!.id)
+      .eq("is_deleted", false)
       .order("property_name"),
   ]);
 

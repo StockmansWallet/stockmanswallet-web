@@ -1,5 +1,5 @@
 // Supabase database types — Row, Insert, Update for each table
-// Generated to match supabase/migrations/001_create_user_tables.sql
+// Matches supabase/migrations/20260304100001_user_data_sync_tables.sql
 
 export type Database = {
   public: {
@@ -29,6 +29,9 @@ export type Database = {
           mortality_rate: number;
           calving_rate: number;
           freight_cost_per_km: number;
+          is_deleted: boolean;
+          deleted_at: string | null;
+          last_synced_at: string | null;
         };
         Insert: {
           id?: string;
@@ -54,6 +57,9 @@ export type Database = {
           mortality_rate?: number;
           calving_rate?: number;
           freight_cost_per_km?: number;
+          is_deleted?: boolean;
+          deleted_at?: string | null;
+          last_synced_at?: string | null;
         };
         Update: {
           id?: string;
@@ -79,9 +85,12 @@ export type Database = {
           mortality_rate?: number;
           calving_rate?: number;
           freight_cost_per_km?: number;
+          is_deleted?: boolean;
+          deleted_at?: string | null;
+          last_synced_at?: string | null;
         };
       };
-      herds: {
+      herd_groups: {
         Row: {
           id: string;
           user_id: string;
@@ -125,6 +134,9 @@ export type Database = {
           mortality_rate: number | null;
           calf_weight_recorded_date: string | null;
           is_demo_data: boolean;
+          is_deleted: boolean;
+          deleted_at: string | null;
+          last_synced_at: string | null;
         };
         Insert: {
           id?: string;
@@ -169,6 +181,9 @@ export type Database = {
           mortality_rate?: number | null;
           calf_weight_recorded_date?: string | null;
           is_demo_data?: boolean;
+          is_deleted?: boolean;
+          deleted_at?: string | null;
+          last_synced_at?: string | null;
         };
         Update: {
           id?: string;
@@ -213,6 +228,9 @@ export type Database = {
           mortality_rate?: number | null;
           calf_weight_recorded_date?: string | null;
           is_demo_data?: boolean;
+          is_deleted?: boolean;
+          deleted_at?: string | null;
+          last_synced_at?: string | null;
         };
       };
       muster_records: {
