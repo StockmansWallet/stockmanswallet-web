@@ -217,5 +217,109 @@ export function daysBetween(from: Date, to: Date): number {
   return Math.max(0, Math.floor((to.getTime() - from.getTime()) / 86400000));
 }
 
+// MARK: - Full Herd Valuation (mirrors iOS ValuationEngine+HerdValuation.swift)
+
+export interface HerdForValuation {
+  head_count: number;
+  initial_weight: number;
+  current_weight: number;
+  daily_weight_gain: number;
+  dwg_change_date: string | null;
+  previous_dwg: number | null;
+  created_at: string;
+  species: "Cattle" | "Sheep" | "Pig" | "Goat";
+  category: string;
+  breed: string;
+  breed_premium_override: number | null;
+  mortality_rate: number | null;
+  is_breeder: boolean;
+  is_pregnant: boolean;
+  joined_date: string | null;
+  calving_rate: number;
+  breeding_program_type: "ai" | "controlled" | "uncontrolled" | null;
+  joining_period_start: string | null;
+  joining_period_end: string | null;
+}
+
+/**
+ * Full herd valuation matching iOS ValuationEngine formula exactly:
+ * netValue = physicalValue - mortalityDeduction + breedingAccrual
+ *
+ * @param herd        Herd data from herd_groups
+ * @param priceMap    category -> price_per_kg (from category_prices, national level)
+ * @param premiumMap  breed -> premium_percent (from breed_premiums)
+ * @param asOf        Valuation date (defaults to now)
+ */
+export function calculateHerdValue(
+  herd: HerdForValuation,
+  priceMap: Map<string, number>,
+  premiumMap: Map<string, number>,
+  asOf: Date = new Date()
+): number {
+  const head = herd.head_count ?? 0;
+  if (head === 0) return 0;
+
+  const now = asOf;
+  const createdAt = herd.created_at ? new Date(herd.created_at) : now;
+
+  // 1. Projected weight (split DWG)
+  const projectedWeight = calculateProjectedWeight(
+    herd.initial_weight ?? herd.current_weight ?? 0,
+    createdAt,
+    herd.dwg_change_date ? new Date(herd.dwg_change_date) : null,
+    now,
+    herd.previous_dwg ?? null,
+    herd.daily_weight_gain ?? 0
+  );
+
+  // 2. Live price with breed premium
+  const basePrice = priceMap.get(herd.category) ?? defaultFallbackPrice(herd.category);
+  const rawPremiumPct = herd.breed_premium_override ?? premiumMap.get(herd.breed) ?? 0;
+  const adjustedPrice = basePrice * (1 + rawPremiumPct / 100);
+
+  // 3. Physical value and base market value (for mortality calculation)
+  const physicalValue = head * projectedWeight * adjustedPrice;
+  const baseMarketValue = head * (herd.initial_weight ?? herd.current_weight ?? 0) * adjustedPrice;
+
+  // 4. Mortality deduction (linear, on initial weight only)
+  const daysHeld = daysBetween(createdAt, now);
+  const mortalityRate = herd.mortality_rate ?? 0.05;
+  const mortalityDeduction = calculateMortalityDeduction(baseMarketValue, mortalityRate, daysHeld);
+
+  // 5. Pre-birth breeding accrual (pregnant breeders with a joining date)
+  let breedingAccrual = 0;
+  if (herd.is_breeder && herd.is_pregnant && herd.joined_date) {
+    let accrualStart: Date;
+    if (
+      (herd.breeding_program_type === "ai" || herd.breeding_program_type === "controlled") &&
+      herd.joining_period_start &&
+      herd.joining_period_end
+    ) {
+      const pStart = new Date(herd.joining_period_start).getTime();
+      const pEnd = new Date(herd.joining_period_end).getTime();
+      accrualStart = new Date((pStart + pEnd) / 2);
+    } else {
+      accrualStart = new Date(herd.joined_date);
+    }
+    const calvingDays = daysBetween(accrualStart, now);
+    // calving_rate may be stored as decimal (0.85) or integer percent (85)
+    const calvingRate =
+      (herd.calving_rate ?? 0.85) > 1
+        ? (herd.calving_rate ?? 85) / 100
+        : (herd.calving_rate ?? 0.85);
+    const calfBirthWeightFactor = herd.species === "Sheep" ? 0.08 : 0.07;
+    const calfBirthWeight = (herd.initial_weight ?? herd.current_weight ?? 0) * calfBirthWeightFactor;
+    breedingAccrual = calculatePreBirthAccrual(
+      head,
+      calvingRate,
+      calvingDays,
+      calfBirthWeight,
+      adjustedPrice
+    );
+  }
+
+  return physicalValue - mortalityDeduction + breedingAccrual;
+}
+
 // Re-export for convenience
 export { mapCategoryToMLACategory };

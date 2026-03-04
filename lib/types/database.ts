@@ -549,6 +549,67 @@ export type Database = {
           notes?: string | null;
         };
       };
+      category_prices: {
+        Row: {
+          id: string;
+          category: string;
+          breed: string | null;
+          saleyard: string | null;
+          state: string | null;
+          weight_range: string | null;
+          price_per_kg: number;
+          updated_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          category: string;
+          breed?: string | null;
+          saleyard?: string | null;
+          state?: string | null;
+          weight_range?: string | null;
+          price_per_kg: number;
+          updated_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          category?: string;
+          breed?: string | null;
+          saleyard?: string | null;
+          state?: string | null;
+          weight_range?: string | null;
+          price_per_kg?: number;
+          updated_at?: string;
+          created_at?: string;
+        };
+      };
+      breed_premiums: {
+        Row: {
+          id: string;
+          breed: string;
+          species: string;
+          premium_percent: number;
+          updated_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          breed: string;
+          species: string;
+          premium_percent: number;
+          updated_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          breed?: string;
+          species?: string;
+          premium_percent?: number;
+          updated_at?: string;
+          created_at?: string;
+        };
+      };
       saved_freight_estimates: {
         Row: {
           id: string;
