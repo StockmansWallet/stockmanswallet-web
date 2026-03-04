@@ -11,9 +11,10 @@ export async function seedDemoData() {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
-  // Remove any existing demo data only — real user data is untouched
-  await supabase.from("herd_groups").delete().eq("user_id", user.id).eq("is_demo_data", true);
-  await supabase.from("properties").delete().eq("user_id", user.id).eq("is_simulated", true);
+  // Soft-delete any existing demo data only — real user data is untouched
+  const now = new Date().toISOString();
+  await supabase.from("herd_groups").update({ is_deleted: true, deleted_at: now, updated_at: now }).eq("user_id", user.id).eq("is_demo_data", true);
+  await supabase.from("properties").update({ is_deleted: true, deleted_at: now, updated_at: now }).eq("user_id", user.id).eq("is_simulated", true);
 
   const uid = user.id;
   const pid = randomUUID();
@@ -242,8 +243,9 @@ export async function clearDemoData() {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
-  await supabase.from("herd_groups").delete().eq("user_id", user.id).eq("is_demo_data", true);
-  await supabase.from("properties").delete().eq("user_id", user.id).eq("is_simulated", true);
+  const now = new Date().toISOString();
+  await supabase.from("herd_groups").update({ is_deleted: true, deleted_at: now, updated_at: now }).eq("user_id", user.id).eq("is_demo_data", true);
+  await supabase.from("properties").update({ is_deleted: true, deleted_at: now, updated_at: now }).eq("user_id", user.id).eq("is_simulated", true);
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/herds");
