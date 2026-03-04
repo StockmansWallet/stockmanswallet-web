@@ -13,6 +13,7 @@ export async function createHerd(formData: FormData) {
   if (!user) return { error: "Not authenticated" };
 
   const { error } = await supabase.from("herd_groups").insert({
+    id: crypto.randomUUID(),
     user_id: user.id,
     name: formData.get("name") as string,
     species: formData.get("species") as "Cattle" | "Sheep" | "Pig" | "Goat",
