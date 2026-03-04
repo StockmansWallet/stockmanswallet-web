@@ -154,6 +154,53 @@ export function HerdsTable({
     );
   }
 
+  function TableHeaders() {
+    return (
+      <>
+        <th
+          onClick={() => handleSort("name")}
+          className="cursor-pointer select-none px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary"
+        >
+          Name <SortIcon column="name" />
+        </th>
+        <th className="px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted">
+          Species
+        </th>
+        <th
+          onClick={() => handleSort("breed")}
+          className="hidden cursor-pointer select-none px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary md:table-cell"
+        >
+          Breed <SortIcon column="breed" />
+        </th>
+        <th
+          onClick={() => handleSort("category")}
+          className="hidden cursor-pointer select-none px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary lg:table-cell"
+        >
+          Category <SortIcon column="category" />
+        </th>
+        <th
+          onClick={() => handleSort("head_count")}
+          className="cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary"
+        >
+          Head <SortIcon column="head_count" />
+        </th>
+        <th
+          onClick={() => handleSort("value")}
+          className="cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary"
+        >
+          Value <SortIcon column="value" />
+        </th>
+        <th
+          onClick={() => handleSort("current_weight")}
+          className="hidden cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary xl:table-cell"
+        >
+          Weight <SortIcon column="current_weight" />
+        </th>
+        <th className="w-10 px-3 py-3.5" />
+      </>
+    );
+  }
+
   function HerdRow({ herd }: { herd: HerdWithProperty }) {
     const value = herdValues[herd.id] ?? 0;
     return (
@@ -227,107 +274,79 @@ export function HerdsTable({
         </div>
       </div>
 
-      {/* Table card */}
-      <div className="overflow-hidden rounded-2xl bg-white/5 ring-1 ring-inset ring-white/8">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-white/6">
-                <th
-                  onClick={() => handleSort("name")}
-                  className="cursor-pointer select-none px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary"
-                >
-                  Name <SortIcon column="name" />
-                </th>
-                <th className="px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted">
-                  Species
-                </th>
-                <th
-                  onClick={() => handleSort("breed")}
-                  className="hidden cursor-pointer select-none px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary md:table-cell"
-                >
-                  Breed <SortIcon column="breed" />
-                </th>
-                <th
-                  onClick={() => handleSort("category")}
-                  className="hidden cursor-pointer select-none px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary lg:table-cell"
-                >
-                  Category <SortIcon column="category" />
-                </th>
-                <th
-                  onClick={() => handleSort("head_count")}
-                  className="cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary"
-                >
-                  Head <SortIcon column="head_count" />
-                </th>
-                <th
-                  onClick={() => handleSort("value")}
-                  className="cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary"
-                >
-                  Value <SortIcon column="value" />
-                </th>
-                <th
-                  onClick={() => handleSort("current_weight")}
-                  className="hidden cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary xl:table-cell"
-                >
-                  Weight <SortIcon column="current_weight" />
-                </th>
-                <th className="w-10 px-3 py-3.5" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.04]">
-              {sorted.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="px-5 py-16 text-center text-sm text-text-muted">
-                    {search ? "No herds match your search." : "No herds found."}
-                  </td>
-                </tr>
-              ) : hasMultipleGroups ? (
-                groupedHerds.map((group, gi) => {
-                  const groupHead = group.herds.reduce((s, h) => s + (h.head_count ?? 0), 0);
-                  const groupValue = group.herds.reduce((s, h) => s + (herdValues[h.id] ?? 0), 0);
-                  return (
-                    <GroupFragment key={group.id ?? "_unassigned"}>
-                      {/* Property group header */}
-                      <tr className={`bg-white/[0.02] ${gi > 0 ? "border-t border-white/8" : ""}`}>
-                        <td colSpan={8} className="px-5 py-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2.5">
-                              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-brand/10">
-                                <Home className="h-3 w-3 text-brand" />
-                              </div>
-                              <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
-                                {group.name}
-                              </span>
-                              {group.isDefault && (
-                                <Badge variant="brand" className="text-[10px] px-1.5 py-0">Primary</Badge>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-4 text-xs tabular-nums text-text-muted">
-                              <span>{groupHead.toLocaleString()} head</span>
-                              {groupValue > 0 && (
-                                <span>${Math.round(groupValue).toLocaleString()}</span>
-                              )}
-                            </div>
-                          </div>
-                        </td>
+      {sorted.length === 0 ? (
+        <div className="overflow-hidden rounded-2xl bg-white/5 ring-1 ring-inset ring-white/8">
+          <p className="px-5 py-16 text-center text-sm text-text-muted">
+            {search ? "No herds match your search." : "No herds found."}
+          </p>
+        </div>
+      ) : hasMultipleGroups ? (
+        <div className="flex flex-col gap-5">
+          {groupedHerds.map((group) => {
+            const groupHead = group.herds.reduce((s, h) => s + (h.head_count ?? 0), 0);
+            const groupValue = group.herds.reduce((s, h) => s + (herdValues[h.id] ?? 0), 0);
+            return (
+              <div key={group.id ?? "_unassigned"} className="overflow-hidden rounded-2xl bg-white/5 ring-1 ring-inset ring-white/8">
+                {/* Property header */}
+                <div className="flex items-center justify-between border-b border-white/6 px-5 py-3.5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/10">
+                      <Home className="h-3.5 w-3.5 text-brand" />
+                    </div>
+                    <span className="text-sm font-semibold text-text-primary">
+                      {group.name}
+                    </span>
+                    {group.isDefault && (
+                      <Badge variant="brand" className="text-[10px] px-1.5 py-0">Primary</Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-4 text-xs tabular-nums text-text-muted">
+                    <span>{groupHead.toLocaleString()} head</span>
+                    {groupValue > 0 && (
+                      <span>${Math.round(groupValue).toLocaleString()}</span>
+                    )}
+                  </div>
+                </div>
+                {/* Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-white/6">
+                        <TableHeaders />
                       </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/[0.04]">
                       {group.herds.map((herd) => (
                         <HerdRow key={herd.id} herd={herd} />
                       ))}
-                    </GroupFragment>
-                  );
-                })
-              ) : (
-                sorted.map((herd) => (
-                  <HerdRow key={herd.id} herd={herd} />
-                ))
-              )}
-            </tbody>
-          </table>
+                    </tbody>
+                  </table>
+                </div>
+                <div className="border-t border-white/6 px-5 py-2.5">
+                  <p className="text-xs text-text-muted">
+                    {group.herds.length} {group.herds.length === 1 ? "herd" : "herds"}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
         </div>
-
-        {sorted.length > 0 && (
+      ) : (
+        <div className="overflow-hidden rounded-2xl bg-white/5 ring-1 ring-inset ring-white/8">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-white/6">
+                  <TableHeaders />
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/[0.04]">
+                {sorted.map((herd) => (
+                  <HerdRow key={herd.id} herd={herd} />
+                ))}
+              </tbody>
+            </table>
+          </div>
           <div className="border-t border-white/6 px-5 py-3">
             <p className="text-xs text-text-muted">
               {sorted.length === herds.length
@@ -335,13 +354,8 @@ export function HerdsTable({
                 : `${sorted.length} of ${herds.length} herds`}
             </p>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
-}
-
-// Fragment wrapper for table row groups (React doesn't allow <Fragment> with key in JSX shorthand inside tbody easily)
-function GroupFragment({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
 }
