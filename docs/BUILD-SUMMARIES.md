@@ -16,6 +16,10 @@ Major UI/UX overhaul, herd valuation engine, property grouping, and critical bug
 
 **Lucide-react icons** - Replaced all inline SVG icons with lucide-react components to match the iOS app's SF Symbols approach. Covers dashboard, herds, properties, tools, reports, and settings.
 
+**Yard Book CRUD** - Full create, read, update, delete for yard book items. List page with category pill filters (Livestock, Operations, Finance, Family, Me), colour-coded category icons, and overdue/upcoming badges. Detail page with rich info rows for date, time, recurrence, reminder, location, and notes. Edit page with pre-populated form. Soft-delete and toggle-complete actions. Run sheet component for daily task view. Loading skeleton.
+
+**Clear All Data** - New "Data Management" section in settings with a "Clear All Data" button that calls the `clear-user-data` Edge Function. Double confirmation required. Permanently deletes all user herds, records, and data from the cloud — affects both web and iOS. Account remains active.
+
 **Bug fixes** - Fixed herd/property creation failing with "null value in column id" by adding client-generated UUIDs (offline-first sync requirement). Fixed delete operations blocked by RLS by switching from hard `.delete()` to soft-delete with `is_deleted`, `deleted_at`, `updated_at`. Fixed iOS not syncing deletions by including `updated_at` timestamp. Fixed demo data clear not working (same RLS/soft-delete issue). Fixed soft-deleted demo properties appearing in dropdowns by adding `is_deleted: false` filters to all property queries.
 
 ---

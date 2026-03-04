@@ -91,6 +91,32 @@ Fixed soft-deleted demo properties (e.g. Doongara Station) still appearing in pr
 - `app/(app)/dashboard/herds/[id]/edit/page.tsx` - Same filter
 - `app/(app)/dashboard/properties/[id]/page.tsx` - Same filter
 
+## Yard Book CRUD
+
+Full create, read, update, delete implementation for yard book items. List page with category pill filters matching the herds page pattern, colour-coded category icons (Livestock/PawPrint, Operations/Wrench, Finance/DollarSign, Family/Home, Me/User), overdue and upcoming badges. Detail page with InfoRow components for date, time, recurrence, reminder, location, and notes. Edit form pre-populated with existing data. Soft-delete and toggle-complete server actions. Run sheet component for daily task view. Loading skeleton. Added `yard_book_items` type to database types.
+
+**Files changed:**
+- `app/(app)/dashboard/tools/yard-book/page.tsx` - List with category pill filters, overdue/upcoming badges, empty state
+- `app/(app)/dashboard/tools/yard-book/new/page.tsx` - Create page with form
+- `app/(app)/dashboard/tools/yard-book/[id]/page.tsx` - Detail page with category icons, info rows, delete/complete actions
+- `app/(app)/dashboard/tools/yard-book/[id]/edit/page.tsx` - Edit page with pre-populated form
+- `app/(app)/dashboard/tools/yard-book/[id]/delete-button.tsx` - Client delete button with confirmation
+- `app/(app)/dashboard/tools/yard-book/[id]/toggle-complete-button.tsx` - Client toggle complete button
+- `app/(app)/dashboard/tools/yard-book/actions.ts` - Server actions (create, update, soft-delete, toggle complete)
+- `app/(app)/dashboard/tools/yard-book/loading.tsx` - Loading skeleton
+- `components/app/yard-book-form.tsx` - Shared form component for create/edit
+- `components/app/yard-book-run-sheet.tsx` - Run sheet daily task view
+- `lib/types/database.ts` - Added `yard_book_items` table types
+
+## Clear All Data
+
+Added a "Data Management" section to settings with a "Clear All Data" button. Calls the `clear-user-data` Supabase Edge Function to permanently delete all user herds, records, and data from the cloud. Double confirmation dialog. Affects both web app and iOS app (shared Supabase backend). Account remains active.
+
+**Files changed:**
+- `app/(app)/dashboard/settings/demo-actions.ts` - Added `clearAllUserData` server action calling Edge Function with JWT auth
+- `app/(app)/dashboard/settings/demo-buttons.tsx` - Added `ClearAllDataButton` with double confirmation
+- `app/(app)/dashboard/settings/page.tsx` - Added "Data Management" section with description and button
+
 ---
 
 # Session 4 - 5 Mar 2026
