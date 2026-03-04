@@ -116,7 +116,7 @@ export async function deleteHerd(id: string) {
 
   const { error } = await supabase
     .from("herd_groups")
-    .update({ is_deleted: true, deleted_at: new Date().toISOString() })
+    .update({ is_deleted: true, deleted_at: new Date().toISOString(), updated_at: new Date().toISOString() })
     .eq("id", id)
     .eq("user_id", user.id);
 
