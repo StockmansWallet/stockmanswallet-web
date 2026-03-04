@@ -50,6 +50,12 @@ export function Header() {
           >
             Contact
           </Link>
+          <Link
+            href="/sign-in"
+            className="text-sm font-medium text-brand transition-colors hover:text-brand-dark"
+          >
+            Log In
+          </Link>
           <a
             href="#waitlist"
             className="rounded-full bg-brand px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-dark"
@@ -119,6 +125,13 @@ export function Header() {
               onClick={() => setMobileMenuOpen(false)}
             >
               Contact
+            </Link>
+            <Link
+              href="/sign-in"
+              className="text-sm font-medium text-brand"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Log In
             </Link>
             <a
               href="#waitlist"
