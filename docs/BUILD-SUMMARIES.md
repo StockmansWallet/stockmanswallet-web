@@ -1,5 +1,21 @@
 # Build Summaries
 
+## Session 4 - 5 Mar 2026
+
+### Summary
+
+Fixed iOS-to-web sync by correcting the Supabase table name from "herds" to "herd_groups" and adding soft-delete filters. Added a Log In link to the marketing header.
+
+### What's New
+
+**iOS sync fix** - The web app was querying a `herds` table that doesn't exist in Supabase. The iOS sync system writes to `herd_groups` (the correct table), so herds added in the iOS app were never appearing in the web dashboard. Renamed all queries across 7 files to use `herd_groups` and added `is_deleted = false` filters to both `herd_groups` and `properties` queries so soft-deleted records don't appear.
+
+**Database types update** - Updated `lib/types/database.ts` to match the current Supabase schema. Added `is_deleted`, `deleted_at`, and `last_synced_at` fields to both `herd_groups` and `properties` types. Renamed the `herds` table key to `herd_groups`.
+
+**Marketing header** - Added a "Log In" link to the marketing site header navigation so visitors can easily reach the sign-in page.
+
+---
+
 ## Session 3 - 4 Mar 2026
 
 ### Summary

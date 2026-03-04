@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { Menu, X } from "lucide-react";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -70,27 +71,11 @@ export function Header() {
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Toggle menu"
         >
-          <svg
-            className="h-6 w-6 text-text-primary"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-          >
-            {mobileMenuOpen ? (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            ) : (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-              />
-            )}
-          </svg>
+          {mobileMenuOpen ? (
+            <X className="h-6 w-6 text-text-primary" />
+          ) : (
+            <Menu className="h-6 w-6 text-text-primary" />
+          )}
         </button>
       </nav>
 

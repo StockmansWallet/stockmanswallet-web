@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HerdComposition } from "./herd-composition";
 import { PortfolioChart } from "./portfolio-chart";
-import { defaultFallbackPrice } from "@/lib/engines/valuation-engine";
+import { calculateHerdValue } from "@/lib/engines/valuation-engine";
+import { Plus, Home, Package } from "lucide-react";
 
 export const metadata = {
   title: "Dashboard",
@@ -19,10 +20,15 @@ export default async function DashboardPage() {
 
   const firstName = user?.user_metadata?.first_name || "Stockman";
 
-  const [{ data: herds }, { data: properties }] = await Promise.all([
+  const [{ data: herds }, { data: properties }, { data: marketPrices }, { data: breedPremiumData }] = await Promise.all([
     supabase
       .from("herd_groups")
-      .select("id, name, species, breed, category, head_count, current_weight, daily_weight_gain, is_sold")
+      .select(`id, name, species, breed, category, head_count,
+               initial_weight, current_weight, daily_weight_gain,
+               dwg_change_date, previous_dwg, created_at,
+               is_breeder, is_pregnant, joined_date, calving_rate,
+               breeding_program_type, joining_period_start, joining_period_end,
+               breed_premium_override, mortality_rate, is_sold`)
       .eq("user_id", user!.id)
       .eq("is_sold", false)
       .eq("is_deleted", false)
@@ -33,6 +39,17 @@ export default async function DashboardPage() {
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
       .order("property_name"),
+    // Live MLA national prices (matches iOS ValuationEngine price source)
+    supabase
+      .from("category_prices")
+      .select("category, price_per_kg")
+      .is("saleyard", null)
+      .is("state", null)
+      .is("weight_range", null),
+    // Breed premiums (matches iOS BreedPremiumService)
+    supabase
+      .from("breed_premiums")
+      .select("breed, premium_percent"),
   ]);
 
   const activeHerds = herds ?? [];
@@ -40,24 +57,34 @@ export default async function DashboardPage() {
   const herdCount = activeHerds.length;
   const propertyCount = properties?.length ?? 0;
 
-  // Portfolio value: head_count × current_weight × fallback $/kg
-  const portfolioValue = activeHerds.reduce((sum, h) => {
-    const price = defaultFallbackPrice(h.category ?? "");
-    return sum + (h.head_count ?? 0) * (h.current_weight ?? 0) * price;
-  }, 0);
+  // Build lookup maps for live pricing data
+  const priceMap = new Map((marketPrices ?? []).map((p) => [p.category, p.price_per_kg]));
+  const premiumMap = new Map((breedPremiumData ?? []).map((b) => [b.breed, b.premium_percent]));
 
-  // 12-month portfolio projection based on daily weight gain
+  // Portfolio value using full iOS valuation formula:
+  // netValue = physicalValue - mortalityDeduction + breedingAccrual
+  // Falls back to static defaultFallbackPrice when no live MLA data exists
+  const portfolioValue = activeHerds.reduce(
+    (sum, h) => sum + calculateHerdValue(h as Parameters<typeof calculateHerdValue>[0], priceMap, premiumMap),
+    0
+  );
+
+  // 12-month portfolio projection: advance the valuation date by i×30 days
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const now = new Date();
   const chartData = Array.from({ length: 13 }, (_, i) => {
     const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
     const label = `${monthNames[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`;
-    const value = activeHerds.reduce((sum, h) => {
-      const head = h.head_count ?? 0;
-      const weight = (h.current_weight ?? 0) + (h.daily_weight_gain ?? 0) * 30 * i;
-      const price = defaultFallbackPrice(h.category ?? "");
-      return sum + head * weight * price;
-    }, 0);
+    const futureDate = new Date(now.getTime() + i * 30 * 86_400_000);
+    const value = activeHerds.reduce(
+      (sum, h) => sum + calculateHerdValue(
+        h as Parameters<typeof calculateHerdValue>[0],
+        priceMap,
+        premiumMap,
+        futureDate
+      ),
+      0
+    );
     return { month: label, value: Math.round(value) };
   });
 
@@ -249,9 +276,7 @@ export default async function DashboardPage() {
                   className="group flex flex-col items-center gap-2 rounded-xl bg-white/[0.03] px-4 py-5 text-center transition-colors hover:bg-white/[0.06]"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/15 text-brand transition-transform group-hover:scale-105">
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
+                    <Plus className="h-5 w-5" />
                   </div>
                   <span className="text-xs font-medium text-text-secondary">Add Herd</span>
                 </Link>
@@ -260,9 +285,7 @@ export default async function DashboardPage() {
                   className="group flex flex-col items-center gap-2 rounded-xl bg-white/[0.03] px-4 py-5 text-center transition-colors hover:bg-white/[0.06]"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/15 text-brand transition-transform group-hover:scale-105">
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21" />
-                    </svg>
+                    <Home className="h-5 w-5" />
                   </div>
                   <span className="text-xs font-medium text-text-secondary">Add Property</span>
                 </Link>
@@ -271,9 +294,7 @@ export default async function DashboardPage() {
                   className="group flex flex-col items-center gap-2 rounded-xl bg-white/[0.03] px-4 py-5 text-center transition-colors hover:bg-white/[0.06]"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/15 text-brand transition-transform group-hover:scale-105">
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125v-3.375c0-.621-.504-1.125-1.125-1.125H18M8.25 18.75l-1.5-6h13.5l-1.5 6M2.25 14.25l3-9h13.5l3 9" />
-                    </svg>
+                    <Package className="h-5 w-5" />
                   </div>
                   <span className="text-xs font-medium text-text-secondary">Freight Calc</span>
                 </Link>

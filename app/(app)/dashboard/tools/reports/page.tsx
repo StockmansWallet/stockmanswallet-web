@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
+import { ChevronRight } from "lucide-react";
 
 export const metadata = { title: "Reports" };
 
@@ -40,9 +41,7 @@ export default function ReportsPage() {
                   <h3 className="text-sm font-semibold text-text-primary">{report.name}</h3>
                   <p className="mt-0.5 text-xs text-text-muted">{report.description}</p>
                 </div>
-                <svg className="h-4 w-4 shrink-0 text-text-muted" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                </svg>
+                <ChevronRight className="h-4 w-4 shrink-0 text-text-muted" />
               </CardContent>
             </Card>
           </Link>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/app/(auth)/actions";
+import { Menu, X } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard" },
@@ -41,13 +42,9 @@ export function MobileNav({ userEmail }: { userEmail?: string }) {
           className="rounded-xl p-2 text-text-secondary hover:bg-white/8"
         >
           {open ? (
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X className="h-5 w-5" />
           ) : (
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-            </svg>
+            <Menu className="h-5 w-5" />
           )}
         </button>
       </header>
@@ -65,9 +62,7 @@ export function MobileNav({ userEmail }: { userEmail?: string }) {
                 onClick={() => setOpen(false)}
                 className="rounded-xl p-2 text-text-secondary hover:bg-white/8"
               >
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X className="h-5 w-5" />
               </button>
             </div>
 

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { ChevronRight } from "lucide-react";
 import { ProfileForm } from "./profile-form";
 import { PasswordForm } from "./password-form";
 import { LoadDemoButton, ClearDataButton } from "./demo-buttons";
@@ -84,9 +85,7 @@ export default async function SettingsPage() {
                       <p className="text-sm font-medium text-text-primary">{item.label}</p>
                       <p className="text-xs text-text-muted">{item.description}</p>
                     </div>
-                    <svg className="h-4 w-4 text-text-muted" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                    </svg>
+                    <ChevronRight className="h-4 w-4 text-text-muted" />
                   </Link>
                 ))}
               </CardContent>

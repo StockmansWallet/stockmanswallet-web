@@ -2,6 +2,32 @@
 
 ---
 
+# Session 4 - 5 Mar 2026
+
+## iOS Sync Fix — herds → herd_groups
+
+The web app was querying a `herds` table that doesn't exist in Supabase. The iOS sync system writes to `herd_groups` (the correct table), so herds created in the iOS app never appeared in the web dashboard. Renamed all Supabase queries from `"herds"` to `"herd_groups"` and added `is_deleted = false` filters so soft-deleted records are excluded. Also updated the `HerdRow` type alias in the herd form component.
+
+**Files changed:**
+- `app/(app)/dashboard/herds/page.tsx` - `"herds"` → `"herd_groups"` + `is_deleted` filter
+- `app/(app)/dashboard/herds/[id]/page.tsx` - Same
+- `app/(app)/dashboard/herds/[id]/edit/page.tsx` - Same
+- `app/(app)/dashboard/herds/actions.ts` - `"herds"` → `"herd_groups"` (insert/update/delete)
+- `app/(app)/dashboard/page.tsx` - `"herds"` → `"herd_groups"` + `is_deleted` filters on both herds and properties
+- `app/(app)/dashboard/properties/page.tsx` - Added `is_deleted` filter
+- `app/(app)/dashboard/settings/demo-actions.ts` - `"herds"` → `"herd_groups"`
+- `lib/types/database.ts` - Renamed `herds` type to `herd_groups`, added `is_deleted`/`deleted_at`/`last_synced_at` fields to both `herd_groups` and `properties`
+- `components/app/herd-form.tsx` - Fixed `HerdRow` type to reference `herd_groups`
+
+## Marketing Header — Log In Link
+
+Added a "Log In" link to the marketing site header so visitors can navigate to the sign-in page.
+
+**Files changed:**
+- `components/marketing/header.tsx` - Added Log In navigation link
+
+---
+
 # Session 3 - 4 Mar 2026
 
 ## Sign in with Apple

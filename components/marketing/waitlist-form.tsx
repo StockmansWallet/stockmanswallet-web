@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Check } from "lucide-react";
 
 export function WaitlistForm({ variant = "default" }: { variant?: "default" | "hero" }) {
   const [email, setEmail] = useState("");
@@ -22,9 +23,7 @@ export function WaitlistForm({ variant = "default" }: { variant?: "default" | "h
   if (status === "success") {
     return (
       <div className={`flex items-center gap-2 ${variant === "hero" ? "justify-center" : ""}`}>
-        <svg className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-        </svg>
+        <Check className="h-5 w-5 text-green-500" strokeWidth={2} />
         <p className="text-sm font-medium text-text-primary">
           You&apos;re on the list. We&apos;ll be in touch.
         </p>

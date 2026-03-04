@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, type ReactNode } from "react";
+import { ChevronUp } from "lucide-react";
 
 interface Column<T> {
   key: string;
@@ -98,15 +99,7 @@ function DataTable<T extends Record<string, unknown>>({
                   <span className="inline-flex items-center gap-1">
                     {col.header}
                     {col.sortable && sortKey === col.key && (
-                      <svg
-                        className={`h-3.5 w-3.5 transition-transform ${sortDir === "desc" ? "rotate-180" : ""}`}
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={2}
-                        stroke="currentColor"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
-                      </svg>
+                      <ChevronUp className={`h-3.5 w-3.5 transition-transform ${sortDir === "desc" ? "rotate-180" : ""}`} />
                     )}
                   </span>
                 </th>
