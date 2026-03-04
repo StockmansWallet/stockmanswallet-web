@@ -2,6 +2,97 @@
 
 ---
 
+# Session 5 - 5 Mar 2026
+
+## Lucide-React Icons
+
+Replaced all inline SVG icons across the app with lucide-react components to match the iOS app's SF Symbols usage. Consistent icon sizing and styling throughout.
+
+**Files changed:**
+- `app/(app)/dashboard/page.tsx` - Dashboard stat icons (Wallet, Tags, Layers, TrendingUp)
+- `app/(app)/dashboard/herds/page.tsx` - Herds stat icons (DollarSign, Tags, Layers, Scale)
+- `app/(app)/dashboard/herds/[id]/page.tsx` - Section icons (Info, Scale, Heart, MapPin, FileText)
+- `app/(app)/dashboard/properties/page.tsx` - Property card icons (Home, Plus)
+- `app/(app)/dashboard/tools/page.tsx` - Tool card chevrons
+- Multiple other pages across tools, reports, market, settings
+
+## Herd Valuation Engine
+
+Added weight-range bracket matching to the valuation engine, matching the iOS `matchWeightRange()` logic. The herds page and dashboard now compute live portfolio values from MLA category prices and breed premiums.
+
+**Files changed:**
+- `lib/engines/valuation-engine.ts` - Added `CategoryPriceEntry` type, `matchWeightRange()` function, updated `calculateHerdValue` to use weight-range bracket matching
+- `lib/types/database.ts` - Added `category_prices` and `breed_premiums` table types
+- `app/(app)/dashboard/page.tsx` - Fetches prices/premiums, computes portfolio value with `calculateHerdValue`
+- `app/(app)/dashboard/herds/page.tsx` - Fetches prices/premiums in parallel, computes per-herd values, passes to table, shows Total Value stat card
+
+## Herd Creation Fix — Client-Generated UUIDs
+
+Both `herd_groups` and `properties` tables require client-generated UUIDs for offline-first sync compatibility with the iOS app. Added `id: crypto.randomUUID()` / `id: randomUUID()` to insert operations.
+
+**Files changed:**
+- `app/(app)/dashboard/herds/actions.ts` - Added `id: crypto.randomUUID()` to herd insert
+- `app/(app)/dashboard/properties/actions.ts` - Added `id: randomUUID()` to property insert
+
+## Soft-Delete for Herd and Property Deletion
+
+Hard `.delete()` calls were blocked by Supabase RLS policies. Changed all delete operations to soft-delete using `.update({ is_deleted: true, deleted_at, updated_at })`. The `updated_at` field is required for iOS sync to detect changes.
+
+**Files changed:**
+- `app/(app)/dashboard/herds/actions.ts` - `deleteHerd` uses soft-delete with `updated_at`
+- `app/(app)/dashboard/properties/actions.ts` - `deleteProperty` uses soft-delete with `updated_at`
+- `app/(app)/dashboard/settings/demo-actions.ts` - Both `seedDemoData` cleanup and `clearDemoData` use soft-delete with `updated_at`
+
+## Premium UI Redesign — Herds Page
+
+Complete redesign of the herds page with high-end UI treatment: 4 stat cards (Total Value, Total Head, Herds, Avg Weight) with brand-coloured icons, species pill filter buttons with counts, bespoke sortable table with responsive column hiding, search input, chevron hover animations, and a footer count.
+
+**Files changed:**
+- `app/(app)/dashboard/herds/page.tsx` - Stat cards layout, parallel data fetching
+- `app/(app)/dashboard/herds/herds-table.tsx` - Full rewrite with pill filters, sortable columns, search, responsive design
+
+## Premium UI Redesign — Entire Web App
+
+Applied the same premium design treatment across all 18+ files in the app to create a consistent, polished experience.
+
+**Files changed:**
+- `components/ui/card.tsx` - Added `ring-1 ring-inset ring-white/8` default border
+- `app/(app)/dashboard/herds/[id]/page.tsx` - Section icons, InfoRow styling, consistent dividers
+- `app/(app)/dashboard/properties/page.tsx` - Icon cards, hover chevrons
+- `components/app/herd-form.tsx` - Uppercase tracking section headings, textarea styling
+- `components/app/property-form.tsx` - Same form styling updates
+- `app/(app)/dashboard/tools/page.tsx` - Chevron animations, hover states
+- `app/(app)/dashboard/tools/reports/page.tsx` - Per-report icons
+- `app/(app)/dashboard/market/page.tsx` - Icon cards
+- `app/(app)/dashboard/market/indicators/page.tsx` - Section icon, tabular-nums
+- `app/(app)/dashboard/settings/page.tsx` - Chevron animations, consistent dividers
+- `app/(app)/dashboard/stockman-iq/page.tsx` - Category icons, prompt pills
+- `app/(app)/dashboard/stockman-iq/chat/page.tsx` - Input styling, ring borders
+- `app/(app)/dashboard/stockman-iq/chat/[id]/page.tsx` - Same chat styling
+- `app/(app)/dashboard/tools/yard-book/page.tsx` - Pill filters
+- `app/(app)/dashboard/tools/grid-iq/page.tsx` - Icon cards with chevrons
+- `app/(app)/dashboard/tools/grid-iq/upload/page.tsx` - Drop zone hover
+- `app/(app)/dashboard/tools/freight/freight-calculator.tsx` - Result card styling
+
+## Property Grouping on Herds Page
+
+Herds are now grouped by property. Each property renders as its own separate card with a header bar showing the property name, Home icon, "Primary" badge for the default property, and subtotals for head count and value. Default property appears first, then alphabetical, then unassigned. Search also matches property names.
+
+**Files changed:**
+- `app/(app)/dashboard/herds/page.tsx` - Fetches properties with `is_default` flag, builds sorted `propertyGroups` array
+- `app/(app)/dashboard/herds/herds-table.tsx` - Groups herds by `property_id`, renders separate card per property with header and table
+
+## Soft-Deleted Properties Filtered from All Queries
+
+Fixed soft-deleted demo properties (e.g. Doongara Station) still appearing in property dropdowns on the new herd and edit herd forms, and being accessible via direct URL.
+
+**Files changed:**
+- `app/(app)/dashboard/herds/new/page.tsx` - Added `.eq("is_deleted", false)` to properties query
+- `app/(app)/dashboard/herds/[id]/edit/page.tsx` - Same filter
+- `app/(app)/dashboard/properties/[id]/page.tsx` - Same filter
+
+---
+
 # Session 4 - 5 Mar 2026
 
 ## iOS Sync Fix — herds → herd_groups

@@ -1,5 +1,25 @@
 # Build Summaries
 
+## Session 5 - 5 Mar 2026
+
+### Summary
+
+Major UI/UX overhaul, herd valuation engine, property grouping, and critical bug fixes for CRUD operations and iOS sync compatibility.
+
+### What's New
+
+**Premium UI redesign** - Complete visual refresh across the entire web app. The herds page was redesigned first with stat cards, species pill filters, sortable bespoke table, and responsive column hiding. Then the same premium treatment was applied to all other pages: properties, tools, reports, market, settings, Stockman IQ, chat, yard book, Grid IQ, and freight calculator. Consistent design tokens throughout: `ring-1 ring-inset ring-white/8` card borders, `bg-brand/15` icon backgrounds, `divide-white/[0.04]` row dividers, chevron hover animations, and uppercase tracking section headings.
+
+**Herd valuation engine** - Ported the iOS `matchWeightRange()` logic to TypeScript. The dashboard and herds page now show live portfolio values calculated from MLA category prices, breed premiums, and weight-range bracket matching. A "Total Value" stat card shows the full portfolio value, and each herd row displays its individual value.
+
+**Property grouping** - Herds are now grouped by property on the herds page. Each property renders as its own separate card with a header bar (Home icon, property name, "Primary" badge for the default property, head count and value subtotals). Default property appears first, then alphabetical, then unassigned.
+
+**Lucide-react icons** - Replaced all inline SVG icons with lucide-react components to match the iOS app's SF Symbols approach. Covers dashboard, herds, properties, tools, reports, and settings.
+
+**Bug fixes** - Fixed herd/property creation failing with "null value in column id" by adding client-generated UUIDs (offline-first sync requirement). Fixed delete operations blocked by RLS by switching from hard `.delete()` to soft-delete with `is_deleted`, `deleted_at`, `updated_at`. Fixed iOS not syncing deletions by including `updated_at` timestamp. Fixed demo data clear not working (same RLS/soft-delete issue). Fixed soft-deleted demo properties appearing in dropdowns by adding `is_deleted: false` filters to all property queries.
+
+---
+
 ## Session 4 - 5 Mar 2026
 
 ### Summary

@@ -154,14 +154,23 @@ The Supabase data migration is the critical path for BOTH platforms. Do it now. 
 
 ---
 
-## What Already Exists (Head Start)
+## What Already Exists (Updated 5 Mar 2026)
 
-- Next.js 16 project scaffolded and deployed on Vercel (GitHub auto-deploy working)
+- Next.js 16 project deployed on Vercel (Sydney region, GitHub auto-deploy)
 - Marketing site fully built (hero, features, pricing, about, contact, waitlist)
 - Design tokens matching iOS app (brand colors, typography, spacing in `globals.css`)
 - Supabase backend with market data tables, reference tables, and 4 Edge Functions
-- Auth system (Supabase Auth with Apple Sign In)
-- Empty scaffolding ready: `(app)/` route group, `components/app/`, `components/ui/`, `lib/supabase/`, `lib/types/`
+- Auth system (Supabase Auth with Apple Sign In + email/password)
+- Full app shell with sidebar navigation, dark theme, loading skeletons
+- Dashboard with hero stats, herd composition, 12-month projected portfolio value chart
+- **Herds CRUD** — full create/read/update/delete with property assignment, species/breed/category selection, soft-delete, client-generated UUIDs for iOS sync
+- **Properties CRUD** — full create/read/update/delete with soft-delete and UUID generation
+- **Herds page** — premium UI with stat cards (total value, head, herds, avg weight), species pill filters, sortable table, search, property grouping with separate cards per property
+- **Valuation engine** — TypeScript port of iOS `calculateHerdValue` with MLA category prices, breed premiums, and weight-range bracket matching
+- **Demo data seeder** — Doongara Station with 20 herds, flagged as demo data, safe clear that uses soft-delete
+- All tool pages scaffolded: Yard Book, Freight IQ, Grid IQ, Reports, Market View, Stockman IQ, Settings
+- UI component library: Card, Button, Input, Badge, PageHeader, EmptyState, etc.
+- Lucide-react icons throughout (matching iOS SF Symbols)
 
 ---
 

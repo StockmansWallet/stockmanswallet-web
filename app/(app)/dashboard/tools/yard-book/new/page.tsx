@@ -1,15 +1,47 @@
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
+import { YardBookForm } from "@/components/app/yard-book-form";
+import { createYardBookItem } from "../actions";
 
 export const metadata = { title: "Add Yard Book Item" };
 
-export default function NewYardBookItemPage() {
+export default async function NewYardBookItemPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) redirect("/sign-in");
+
+  const [{ data: herds }, { data: properties }] = await Promise.all([
+    supabase
+      .from("herd_groups")
+      .select("id, name, head_count")
+      .eq("user_id", user.id)
+      .eq("is_deleted", false)
+      .eq("is_sold", false)
+      .order("name"),
+    supabase
+      .from("properties")
+      .select("id, property_name")
+      .eq("user_id", user.id)
+      .eq("is_deleted", false)
+      .order("property_name"),
+  ]);
+
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto max-w-3xl">
       <PageHeader title="Add Item" subtitle="Add a new item to your yard book." />
       <Card>
         <CardContent className="p-6">
-          <p className="text-sm text-text-muted">Yard book item form coming soon.</p>
+          <YardBookForm
+            herds={herds ?? []}
+            properties={properties ?? []}
+            action={createYardBookItem}
+            submitLabel="Add Item"
+          />
         </CardContent>
       </Card>
     </div>

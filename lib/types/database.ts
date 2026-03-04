@@ -401,6 +401,8 @@ export type Database = {
           pack_id: string | null;
           pack_item_index: number | null;
           is_demo_data: boolean;
+          is_deleted: boolean;
+          deleted_at: string | null;
           linked_muster_record_id: string | null;
           linked_health_record_id: string | null;
         };
@@ -427,6 +429,8 @@ export type Database = {
           pack_id?: string | null;
           pack_item_index?: number | null;
           is_demo_data?: boolean;
+          is_deleted?: boolean;
+          deleted_at?: string | null;
           linked_muster_record_id?: string | null;
           linked_health_record_id?: string | null;
         };
@@ -453,6 +457,8 @@ export type Database = {
           pack_id?: string | null;
           pack_item_index?: number | null;
           is_demo_data?: boolean;
+          is_deleted?: boolean;
+          deleted_at?: string | null;
           linked_muster_record_id?: string | null;
           linked_health_record_id?: string | null;
         };
