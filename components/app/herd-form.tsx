@@ -12,7 +12,7 @@ import {
 } from "@/lib/data/reference-data";
 import type { Database } from "@/lib/types/database";
 
-type HerdRow = Database["public"]["Tables"]["herds"]["Row"];
+type HerdRow = Database["public"]["Tables"]["herd_groups"]["Row"];
 
 const SPECIES_OPTIONS = [
   { value: "Cattle", label: "Cattle" },
