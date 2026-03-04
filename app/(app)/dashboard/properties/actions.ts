@@ -1,5 +1,6 @@
 "use server";
 
+import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -13,6 +14,7 @@ export async function createProperty(formData: FormData) {
   if (!user) return { error: "Not authenticated" };
 
   const { error } = await supabase.from("properties").insert({
+    id: randomUUID(),
     user_id: user.id,
     property_name: formData.get("property_name") as string,
     state: formData.get("state") as string,
@@ -112,9 +114,10 @@ export async function deleteProperty(id: string) {
 
   if (!user) return { error: "Not authenticated" };
 
+  const now = new Date().toISOString();
   const { error } = await supabase
     .from("properties")
-    .delete()
+    .update({ is_deleted: true, deleted_at: now, updated_at: now })
     .eq("id", id)
     .eq("user_id", user.id);
 
