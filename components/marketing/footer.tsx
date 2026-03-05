@@ -1,108 +1,76 @@
-import Image from "next/image";
-import Link from "next/link";
+import Image from 'next/image'
+import Link from 'next/link'
+import { NAV_LINKS } from '@/lib/marketing/constants'
 
 export function Footer() {
   return (
-    <footer className="border-t border-black/5 bg-bg-alt dark:border-white/10">
-      <div className="mx-auto max-w-6xl px-6 py-12">
-        <div className="grid gap-8 md:grid-cols-4">
+    <footer className="border-t border-white/5 bg-bg-deep">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid gap-8 md:grid-cols-3">
           {/* Brand */}
-          <div className="md:col-span-2">
-            <div className="flex items-center gap-2.5">
+          <div>
+            <div className="flex items-center gap-2">
               <Image
                 src="/images/app-icon.png"
                 alt="Stockman's Wallet"
-                width={36}
-                height={36}
-                className="rounded-[8px]"
+                width={32}
+                height={32}
+                className="h-8 w-8 rounded-[8px]"
               />
-              <span className="text-base font-semibold text-text-primary">
-                Stockman&apos;s Wallet
-              </span>
+              <span className="text-lg font-bold text-white">Stockman&apos;s Wallet</span>
             </div>
-            <p className="mt-3 max-w-sm text-sm text-text-secondary">
-              Intelligent livestock valuation for Australian farmers, graziers
-              and rural advisors. Track your herds as financial assets.
+            <p className="mt-3 text-sm leading-relaxed text-text-secondary">
+              Intelligent Livestock Valuation. Real MLA market data, real-time herd valuations, and AI-powered capital timing intelligence for Australian producers.
             </p>
           </div>
 
-          {/* Links */}
+          {/* Quick Links */}
           <div>
-            <h3 className="text-sm font-semibold text-text-primary">Product</h3>
-            <ul className="mt-3 space-y-2">
-              <li>
-                <Link
-                  href="#features"
-                  className="text-sm text-text-secondary transition-colors hover:text-brand"
-                >
-                  Features
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="#pricing"
-                  className="text-sm text-text-secondary transition-colors hover:text-brand"
-                >
-                  Pricing
-                </Link>
-              </li>
-              <li>
+            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-text-tertiary">Quick Links</h4>
+            <nav className="flex flex-col gap-2">
+              {NAV_LINKS.map((link) => (
                 <a
-                  href="#waitlist"
-                  className="text-sm text-text-secondary transition-colors hover:text-brand"
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm text-text-secondary transition-colors hover:text-white"
                 >
-                  Join Waitlist
+                  {link.label}
                 </a>
-              </li>
-            </ul>
+              ))}
+            </nav>
           </div>
 
-          {/* Contact */}
+          {/* Legal */}
           <div>
-            <h3 className="text-sm font-semibold text-text-primary">Contact</h3>
-            <ul className="mt-3 space-y-2">
-              <li>
-                <a
-                  href="mailto:info@stockmanswallet.com.au"
-                  className="text-sm text-text-secondary transition-colors hover:text-brand"
-                >
-                  info@stockmanswallet.com.au
-                </a>
-              </li>
-              <li>
-                <Link
-                  href="#about"
-                  className="text-sm text-text-secondary transition-colors hover:text-brand"
-                >
-                  About Us
-                </Link>
-              </li>
-            </ul>
+            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-text-tertiary">Legal</h4>
+            <nav className="flex flex-col gap-2">
+              <Link href="/privacy" className="text-sm text-text-secondary transition-colors hover:text-white">
+                Privacy Policy
+              </Link>
+              <Link href="/terms" className="text-sm text-text-secondary transition-colors hover:text-white">
+                Terms of Service
+              </Link>
+            </nav>
+            <div className="mt-6">
+              <a
+                href="mailto:support@stockmanswallet.com.au"
+                className="text-sm text-text-secondary transition-colors hover:text-brand"
+              >
+                support@stockmanswallet.com.au
+              </a>
+            </div>
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-black/5 pt-6 dark:border-white/10 md:flex-row">
-          <p className="text-xs text-text-muted">
-            &copy; {new Date().getFullYear()} Stockman&apos;s Wallet Pty Ltd.
-            All rights reserved.
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-white/5 pt-8 sm:flex-row">
+          <p className="text-xs text-text-tertiary">
+            &copy; 2026 Stockman&apos;s Wallet Pty Ltd. All rights reserved.
           </p>
-          <div className="flex gap-6">
-            <Link
-              href="/privacy"
-              className="text-xs text-text-muted transition-colors hover:text-text-secondary"
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              href="/terms"
-              className="text-xs text-text-muted transition-colors hover:text-text-secondary"
-            >
-              Terms of Service
-            </Link>
-          </div>
+          <p className="text-xs text-text-tertiary">
+            Made in Queensland, Australia.
+          </p>
         </div>
       </div>
     </footer>
-  );
+  )
 }

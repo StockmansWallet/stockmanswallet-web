@@ -52,12 +52,59 @@
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);
+  --color-text-tertiary: rgba(255, 255, 255, 0.4);
+  --color-text-quaternary: rgba(255, 255, 255, 0.2);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-info: var(--info);
   --color-error: var(--error);
   --font-sans: ui-rounded, "SF Pro Rounded", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Nunito", system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
+
+  /* Landing page backgrounds */
+  --color-bg-deep: #1C1B1B;
+  --color-bg-primary: #1F1B18;
+  --color-bg-card-1: #271F16;
+  --color-bg-card-2: #3B2D21;
+  --color-bg-card-3: #453427;
+  --color-bg-card-4: #4E3C2C;
+
+  /* Accent ramp (landing page) */
+  --color-accent: #D9762F;
+  --color-accent-light: #F4A871;
+  --color-accent-secondary: #BD580F;
+  --color-accent-tertiary: #8E420B;
+  --color-accent-quaternary: #5F2C07;
+  --color-accent-quinary: #472105;
+
+  /* Feature accent colours */
+  --color-stockman-iq: #D9762F;
+  --color-stockman-iq-light: #F4A871;
+  --color-freight-iq: #1399EC;
+  --color-freight-iq-light: #64BBF5;
+  --color-yard-book: #87B11B;
+  --color-yard-book-light: #A3CC3D;
+  --color-grid-iq: #00B4A0;
+  --color-grid-iq-light: #33D4C0;
+  --color-reports: #D4A053;
+  --color-reports-light: #E8C07A;
+  --color-advisor: #B0657A;
+  --color-advisor-light: #CC8E9F;
+}
+
+/* Glass effects (landing page) */
+@utility glass {
+  background: rgba(39, 31, 22, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@utility glass-strong {
+  background: rgba(39, 31, 22, 0.9);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 body {
