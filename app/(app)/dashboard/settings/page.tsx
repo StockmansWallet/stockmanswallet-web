@@ -57,7 +57,7 @@ export default async function SettingsPage() {
   const { data: profile } = await supabase
     .from("user_profiles")
     .select("role")
-    .eq("id", user!.id)
+    .eq("user_id", user!.id)
     .single();
 
   const isAdmin = ADMIN_EMAILS.includes(user?.email ?? "");

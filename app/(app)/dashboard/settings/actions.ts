@@ -32,11 +32,11 @@ export async function updateProfile(formData: FormData) {
       .from("user_profiles")
       .upsert(
         {
-          id: user.id,
+          user_id: user.id,
           role,
           updated_at: new Date().toISOString(),
         },
-        { onConflict: "id" }
+        { onConflict: "user_id" }
       );
 
     if (profileError) return { error: profileError.message };
