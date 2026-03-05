@@ -2,17 +2,29 @@
 
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { updateProfile } from "./actions";
+
+const ROLE_OPTIONS = [
+  { value: "farmerGrazier", label: "Farmer / Grazier" },
+  { value: "agribusinessBanker", label: "Agribusiness Banker" },
+  { value: "insurer", label: "Insurer" },
+  { value: "livestockAgent", label: "Livestock Agent" },
+  { value: "accountant", label: "Accountant" },
+  { value: "successionPlanner", label: "Succession Planner" },
+];
 
 export function ProfileForm({
   email,
   firstName,
   lastName,
+  role,
 }: {
   email: string;
   firstName: string;
   lastName: string;
+  role: string;
 }) {
   const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -71,6 +83,15 @@ export function ProfileForm({
           placeholder="Last name"
         />
       </div>
+
+      <Select
+        id="role"
+        name="role"
+        label="Role"
+        options={ROLE_OPTIONS}
+        defaultValue={role || "farmerGrazier"}
+        helperText="Determines which features and views are available"
+      />
 
       <Button type="submit" disabled={submitting}>
         {submitting ? "Saving..." : "Save Profile"}
