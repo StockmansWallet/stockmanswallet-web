@@ -91,6 +91,53 @@ Fixed soft-deleted demo properties (e.g. Doongara Station) still appearing in pr
 - `app/(app)/dashboard/herds/[id]/edit/page.tsx` - Same filter
 - `app/(app)/dashboard/properties/[id]/page.tsx` - Same filter
 
+## iOS Sync Fix — updated_at on All Mutations
+
+Herd and property create/update actions were not setting `updated_at`, so the iOS app couldn't detect changes made on the web. Added `updated_at: new Date().toISOString()` to `createHerd`, `updateHerd`, `createProperty`, and `updateProperty`. Delete actions already had it.
+
+**Files changed:**
+- `app/(app)/dashboard/herds/actions.ts` - Added `updated_at` to `createHerd` and `updateHerd`
+- `app/(app)/dashboard/properties/actions.ts` - Added `updated_at` to `createProperty` and `updateProperty`
+
+## Brangus Chat Component (Stockman IQ)
+
+Refactored the Stockman IQ chat page from a static placeholder into a fully interactive AI chat. The new `BrangusChat` client component handles message display, user input, API calls, and tool execution. Chat service, tool definitions, and types extracted into `lib/brangus/`.
+
+**Files created/changed:**
+- `components/app/brangus-chat.tsx` - Interactive chat component with message list, input, suggested prompts
+- `lib/brangus/chat-service.ts` - Chat API service layer
+- `lib/brangus/tools.ts` - Tool definitions for AI function calling
+- `lib/brangus/types.ts` - Chat message and conversation types
+- `app/(app)/dashboard/stockman-iq/chat/page.tsx` - Replaced inline placeholder with `BrangusChat` component
+
+## Herd Detail Page — Valuation Display
+
+The herd detail page now shows the estimated herd value with per-head breakdown. Fetches national prices, breed premiums, and saleyard-specific prices in parallel, then runs `calculateHerdValue` to display a value card with DollarSign icon.
+
+**Files changed:**
+- `app/(app)/dashboard/herds/[id]/page.tsx` - Parallel price fetching, saleyard price lookup, valuation card with per-head calculation
+
+## Saleyard-Specific Pricing
+
+Valuation engine now follows the iOS price hierarchy: saleyard-specific prices > national prices > hardcoded fallback. Dashboard and herds pages fetch saleyard-specific prices for herds that have a `selected_saleyard` set. New `resolvePriceFromEntries` helper handles weight-range matching for any price source.
+
+**Files changed:**
+- `lib/engines/valuation-engine.ts` - Added `resolvePriceFromEntries`, `saleyardPriceMap` parameter, 3-tier price hierarchy, `selected_saleyard` to `HerdForValuation`
+- `app/(app)/dashboard/page.tsx` - Fetches `selected_saleyard` field, builds saleyardPriceMap, passes to `calculateHerdValue`
+- `app/(app)/dashboard/herds/page.tsx` - Same saleyard price fetching and map building
+
+## Yard Book Field Renames
+
+Renamed `category` → `category_raw` and `recurrence_rule` → `recurrence_rule_raw` in the yard book to match the actual Supabase column names.
+
+**Files changed:**
+- `lib/types/database.ts` - Updated Row/Insert/Update types
+- `app/(app)/dashboard/tools/yard-book/actions.ts` - Updated create and update actions
+- `app/(app)/dashboard/tools/yard-book/[id]/page.tsx` - Updated detail page
+- `app/(app)/dashboard/tools/yard-book/[id]/edit/page.tsx` - Updated edit page subtitle
+- `components/app/yard-book-form.tsx` - Updated form defaults
+- `components/app/yard-book-run-sheet.tsx` - Updated filtering and category config lookups
+
 ## Yard Book - Full Implementation
 
 Complete Yard Book feature matching the iOS app. The run sheet groups items by time horizon (Overdue, Today, Next 7 Days, Next 30 Days, Next 90 Days, Later) with countdown badges colour-coded by urgency (red for overdue, green for today, amber for within 7 days, grey for later). Five category types with distinct colours: Livestock (orange/PawPrint), Operations (amber/Wrench), Finance (blue/DollarSign), Family (purple/Home), Me (green/User).
