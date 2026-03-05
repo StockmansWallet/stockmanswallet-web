@@ -19,7 +19,7 @@ export default async function HerdsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [herdsResult, { data: nationalPrices }, { data: breedPremiumData }, { data: propertiesData }] = await Promise.all([
+  const [herdsResult, { data: breedPremiumData }, { data: propertiesData }] = await Promise.all([
     supabase
       .from("herd_groups")
       .select("*, properties(property_name)")
@@ -27,12 +27,6 @@ export default async function HerdsPage() {
       .eq("is_sold", false)
       .eq("is_deleted", false)
       .order("name"),
-    supabase
-      .from("category_prices")
-      .select("category, price_per_kg:final_price_per_kg, weight_range")
-      .eq("saleyard", "National")
-      .is("breed", null)
-      .order("data_date", { ascending: false }),
     supabase
       .from("breed_premiums")
       .select("breed, premium_percent:premium_pct"),
@@ -59,46 +53,47 @@ export default async function HerdsPage() {
     herds = fallback.data?.map((h) => ({ ...h, properties: null })) ?? null;
   }
 
-  // Fetch saleyard-specific prices for herds that have a selected_saleyard
-  // No breed filter - MLA saleyard data is mostly breed-specific (breed IS NOT NULL).
-  // General (breed=null) and breed-specific entries are separated into two maps.
-  // Filter by mapped MLA categories to stay under PostgREST's 1000-row default limit
-  // (a single saleyard can have 7000+ rows across all categories).
+  // Fetch pricing data in a single combined query matching iOS prefetchPricesForHerds():
+  // - Saleyard + "National" combined, filtered by MLA categories, all breeds
+  // - Ordered by data_date DESC with limit 500 (matches iOS SupabaseMarketService)
+  // - Expiry filter: only include non-expired entries (matches iOS expiryFilter)
   const saleyards = [...new Set((herds ?? []).map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
   const mlaCategories = [...new Set((herds ?? []).map((h) => mapCategoryToMLACategory(h.category)))];
-  let saleyardPricesRaw: { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null }[] = [];
-  if (saleyards.length > 0 && mlaCategories.length > 0) {
-    const { data } = await supabase
-      .from("category_prices")
-      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed")
-      .in("saleyard", saleyards)
-      .in("category", mlaCategories)
-      .order("data_date", { ascending: false });
-    saleyardPricesRaw = data ?? [];
-  }
+  const saleyardsToFetch = [...saleyards, "National"];
 
-  // Build pricing lookup maps
+  const { data: allPrices } = mlaCategories.length > 0
+    ? await supabase
+        .from("category_prices")
+        .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed")
+        .in("saleyard", saleyardsToFetch)
+        .in("category", mlaCategories)
+        .or(`expires_at.gt.${new Date().toISOString()},expires_at.is.null`)
+        .order("data_date", { ascending: false })
+        .limit(500)
+    : { data: [] as { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null }[] };
+
+  // Build pricing lookup maps from combined result (same keys as iOS cache)
   const nationalPriceMap = new Map<string, CategoryPriceEntry[]>();
-  for (const p of (nationalPrices ?? [])) {
-    const entries = nationalPriceMap.get(p.category) ?? [];
-    entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
-    nationalPriceMap.set(p.category, entries);
-  }
-  // General saleyard prices (breed=null) - safe to apply breed premium
   const saleyardPriceMap = new Map<string, CategoryPriceEntry[]>();
-  // Breed-specific saleyard prices - breed premium already baked in (double-application guard)
   const saleyardBreedPriceMap = new Map<string, CategoryPriceEntry[]>();
-  for (const p of saleyardPricesRaw) {
-    if (p.breed === null) {
-      const key = `${p.category}|${p.saleyard}`;
-      const entries = saleyardPriceMap.get(key) ?? [];
-      entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
-      saleyardPriceMap.set(key, entries);
-    } else {
-      const key = `${p.category}|${p.breed}|${p.saleyard}`;
-      const entries = saleyardBreedPriceMap.get(key) ?? [];
-      entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
-      saleyardBreedPriceMap.set(key, entries);
+  for (const p of (allPrices ?? [])) {
+    const priceEntry = { price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range };
+    if (p.saleyard === "National" && p.breed === null) {
+      const entries = nationalPriceMap.get(p.category) ?? [];
+      entries.push(priceEntry);
+      nationalPriceMap.set(p.category, entries);
+    } else if (p.saleyard !== "National") {
+      if (p.breed === null) {
+        const key = `${p.category}|${p.saleyard}`;
+        const entries = saleyardPriceMap.get(key) ?? [];
+        entries.push(priceEntry);
+        saleyardPriceMap.set(key, entries);
+      } else {
+        const key = `${p.category}|${p.breed}|${p.saleyard}`;
+        const entries = saleyardBreedPriceMap.get(key) ?? [];
+        entries.push(priceEntry);
+        saleyardBreedPriceMap.set(key, entries);
+      }
     }
   }
   // Seed with local breed premiums, then let Supabase override (matches iOS BreedPremiumService)

@@ -43,8 +43,8 @@ export default async function HerdDetailPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Fetch herd + pricing data in parallel
-  const [herdResult, { data: nationalPrices }, { data: breedPremiumData }] = await Promise.all([
+  // Fetch herd + breed premiums in parallel
+  const [herdResult, { data: breedPremiumData }] = await Promise.all([
     supabase
       .from("herd_groups")
       .select("*, properties(property_name)")
@@ -52,12 +52,6 @@ export default async function HerdDetailPage({
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
       .single(),
-    supabase
-      .from("category_prices")
-      .select("category, price_per_kg:final_price_per_kg, weight_range")
-      .eq("saleyard", "National")
-      .is("breed", null)
-      .order("data_date", { ascending: false }),
     supabase
       .from("breed_premiums")
       .select("breed, premium_percent:premium_pct"),
@@ -79,45 +73,58 @@ export default async function HerdDetailPage({
 
   if (!herd) notFound();
 
-  // Fetch saleyard-specific prices if herd has a selected saleyard
-  // No breed filter - MLA saleyard data is mostly breed-specific (breed IS NOT NULL).
-  // Filter by mapped MLA category to stay under PostgREST's 1000-row default limit.
+  // Fetch pricing data in a single combined query matching iOS prefetchPricesForHerds():
+  // - Saleyard + "National" combined, filtered by MLA category, all breeds
+  // - Ordered by data_date DESC with limit 500 (matches iOS SupabaseMarketService)
+  // - Expiry filter: only include non-expired entries (matches iOS expiryFilter)
+  // iOS batches everything in one query — the 500 limit determines which date range
+  // of entries are included, and the cache overwrite pattern (last entry wins per
+  // weight-range key) means the oldest entry within the 500-entry window is used.
+  const mlaCategory = mapCategoryToMLACategory(herd.category);
+  const resolvedSaleyard = herd.selected_saleyard
+    ? resolveMLASaleyardName(herd.selected_saleyard)
+    : null;
+  const saleyardsToFetch = resolvedSaleyard
+    ? [resolvedSaleyard, "National"]
+    : ["National"];
+
+  const { data: allPrices } = await supabase
+    .from("category_prices")
+    .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed")
+    .in("saleyard", saleyardsToFetch)
+    .eq("category", mlaCategory)
+    .or(`expires_at.gt.${new Date().toISOString()},expires_at.is.null`)
+    .order("data_date", { ascending: false })
+    .limit(500);
+
+  // Build pricing lookup maps from combined result (same keys as iOS cache)
+  const nationalPriceMap = new Map<string, CategoryPriceEntry[]>();
   let saleyardPriceMap: Map<string, CategoryPriceEntry[]> | undefined;
   let saleyardBreedPriceMap: Map<string, CategoryPriceEntry[]> | undefined;
-  if (herd.selected_saleyard) {
-    const mlaCategory = mapCategoryToMLACategory(herd.category);
-    const resolvedSaleyard = resolveMLASaleyardName(herd.selected_saleyard);
-    const { data: saleyardPrices } = await supabase
-      .from("category_prices")
-      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed")
-      .eq("saleyard", resolvedSaleyard)
-      .eq("category", mlaCategory)
-      .order("data_date", { ascending: false });
-    if (saleyardPrices && saleyardPrices.length > 0) {
-      saleyardPriceMap = new Map();
-      saleyardBreedPriceMap = new Map();
-      for (const p of saleyardPrices) {
-        if (p.breed === null) {
-          const key = `${p.category}|${p.saleyard}`;
-          const entries = saleyardPriceMap.get(key) ?? [];
-          entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
-          saleyardPriceMap.set(key, entries);
-        } else {
-          const key = `${p.category}|${p.breed}|${p.saleyard}`;
-          const entries = saleyardBreedPriceMap.get(key) ?? [];
-          entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
-          saleyardBreedPriceMap.set(key, entries);
-        }
-      }
-    }
+  if (resolvedSaleyard) {
+    saleyardPriceMap = new Map();
+    saleyardBreedPriceMap = new Map();
   }
 
-  // Build pricing lookup maps
-  const nationalPriceMap = new Map<string, CategoryPriceEntry[]>();
-  for (const p of (nationalPrices ?? [])) {
-    const entries = nationalPriceMap.get(p.category) ?? [];
-    entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
-    nationalPriceMap.set(p.category, entries);
+  for (const p of (allPrices ?? [])) {
+    const priceEntry = { price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range };
+    if (p.saleyard === "National" && p.breed === null) {
+      const entries = nationalPriceMap.get(p.category) ?? [];
+      entries.push(priceEntry);
+      nationalPriceMap.set(p.category, entries);
+    } else if (resolvedSaleyard && p.saleyard === resolvedSaleyard) {
+      if (p.breed === null) {
+        const key = `${p.category}|${p.saleyard}`;
+        const entries = saleyardPriceMap!.get(key) ?? [];
+        entries.push(priceEntry);
+        saleyardPriceMap!.set(key, entries);
+      } else {
+        const key = `${p.category}|${p.breed}|${p.saleyard}`;
+        const entries = saleyardBreedPriceMap!.get(key) ?? [];
+        entries.push(priceEntry);
+        saleyardBreedPriceMap!.set(key, entries);
+      }
+    }
   }
   // Seed with local breed premiums, then let Supabase override (matches iOS BreedPremiumService)
   const premiumMap = new Map<string, number>(Object.entries(cattleBreedPremiums));
@@ -136,22 +143,6 @@ export default async function HerdDetailPage({
   );
   const herdValue = valuation.netValue;
   const isFallback = valuation.priceSource !== "saleyard";
-
-  // DEBUG: temporary
-  const mlaCategory_debug = mapCategoryToMLACategory(herd.category);
-  const resolvedSaleyard_debug = herd.selected_saleyard ? resolveMLASaleyardName(herd.selected_saleyard) : null;
-  const saleyardKey_debug = `${mlaCategory_debug}|${resolvedSaleyard_debug}`;
-  const saleyardEntries_debug = saleyardPriceMap?.get(saleyardKey_debug) ?? [];
-  const debugInfo = {
-    priceSource: valuation.priceSource,
-    pricePerKg: valuation.pricePerKg.toFixed(4),
-    breedPremium: valuation.breedPremiumApplied,
-    netValue: valuation.netValue.toFixed(2),
-    saleyardEntryCount: saleyardEntries_debug.length,
-    firstEntry: saleyardEntries_debug[0]?.price_per_kg.toFixed(4),
-    lastEntry: saleyardEntries_debug[saleyardEntries_debug.length - 1]?.price_per_kg.toFixed(4),
-    nationalEntryCount: (nationalPriceMap.get(mlaCategory_debug) ?? []).length,
-  };
 
   let projectedWeight: number | null = null;
   if (herd.initial_weight > 0 && herd.daily_weight_gain > 0) {
@@ -186,11 +177,6 @@ export default async function HerdDetailPage({
           </div>
         }
       />
-
-      {/* DEBUG: temporary */}
-      <pre className="mb-4 rounded-lg bg-yellow-900/30 p-3 text-xs text-yellow-200 overflow-auto">
-        {JSON.stringify(debugInfo, null, 2)}
-      </pre>
 
       {/* Herd Value */}
       {herdValue > 0 && (
