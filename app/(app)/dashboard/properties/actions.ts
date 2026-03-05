@@ -45,6 +45,7 @@ export async function createProperty(formData: FormData) {
     freight_cost_per_km: formData.get("freight_cost_per_km")
       ? Number(formData.get("freight_cost_per_km"))
       : 3,
+    updated_at: new Date().toISOString(),
   });
 
   if (error) return { error: error.message };
@@ -95,6 +96,7 @@ export async function updateProperty(id: string, formData: FormData) {
       freight_cost_per_km: formData.get("freight_cost_per_km")
         ? Number(formData.get("freight_cost_per_km"))
         : 3,
+      updated_at: new Date().toISOString(),
     })
     .eq("id", id)
     .eq("user_id", user.id);

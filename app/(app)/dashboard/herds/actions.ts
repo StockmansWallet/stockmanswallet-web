@@ -43,6 +43,7 @@ export async function createHerd(formData: FormData) {
     notes: (formData.get("notes") as string) || null,
     animal_id_number:
       (formData.get("animal_id_number") as string) || null,
+    updated_at: new Date().toISOString(),
   });
 
   if (error) return { error: error.message };
@@ -95,6 +96,7 @@ export async function updateHerd(id: string, formData: FormData) {
       notes: (formData.get("notes") as string) || null,
       animal_id_number:
         (formData.get("animal_id_number") as string) || null,
+      updated_at: new Date().toISOString(),
     })
     .eq("id", id)
     .eq("user_id", user.id);
