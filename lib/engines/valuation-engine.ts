@@ -2,7 +2,7 @@
 // Ported from iOS ValuationEngine.swift + extensions
 // Pure functions — pricing/caching will be added when Supabase data layer is wired up
 
-import { mapCategoryToMLACategory } from "../data/reference-data";
+import { mapCategoryToMLACategory, resolveMLASaleyardName } from "../data/reference-data";
 
 // MARK: - Constants
 
@@ -338,16 +338,18 @@ export function calculateHerdValuation(
   let skipBreedPremium = false;
 
   // 2a. Try saleyard general (breed=null) price first - breed premium safe
-  if (saleyardPriceMap && herd.selected_saleyard) {
-    const saleyardKey = `${mlaCategory}|${herd.selected_saleyard}`;
+  // Resolve short saleyard name to full MLA name (e.g. "Charters Towers" -> "Charters Towers Dalrymple Saleyards")
+  const resolvedSaleyard = herd.selected_saleyard ? resolveMLASaleyardName(herd.selected_saleyard) : null;
+  if (saleyardPriceMap && resolvedSaleyard) {
+    const saleyardKey = `${mlaCategory}|${resolvedSaleyard}`;
     const saleyardEntries = saleyardPriceMap.get(saleyardKey) ?? [];
     basePrice = resolvePriceFromEntries(saleyardEntries, projectedWeight);
     if (basePrice !== null) priceSource = "saleyard";
   }
 
   // 2b. Try saleyard breed-specific price - skip breed premium (double-application guard)
-  if (basePrice === null && saleyardBreedPriceMap && herd.selected_saleyard) {
-    const breedKey = `${mlaCategory}|${herd.breed}|${herd.selected_saleyard}`;
+  if (basePrice === null && saleyardBreedPriceMap && resolvedSaleyard) {
+    const breedKey = `${mlaCategory}|${herd.breed}|${resolvedSaleyard}`;
     const breedEntries = saleyardBreedPriceMap.get(breedKey) ?? [];
     basePrice = resolvePriceFromEntries(breedEntries, projectedWeight);
     if (basePrice !== null) {

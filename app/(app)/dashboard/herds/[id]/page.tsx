@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { calculateProjectedWeight, calculateHerdValuation, mapCategoryToMLACategory, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
-import { cattleBreedPremiums } from "@/lib/data/reference-data";
+import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 import { DeleteHerdButton } from "./delete-button";
 import { Pencil, Info, Scale, Heart, MapPin, FileText, DollarSign, AlertTriangle } from "lucide-react";
 
@@ -85,10 +85,11 @@ export default async function HerdDetailPage({
   let saleyardBreedPriceMap: Map<string, CategoryPriceEntry[]> | undefined;
   if (herd.selected_saleyard) {
     const mlaCategory = mapCategoryToMLACategory(herd.category);
+    const resolvedSaleyard = resolveMLASaleyardName(herd.selected_saleyard);
     const { data: saleyardPrices } = await supabase
       .from("category_prices")
       .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed")
-      .eq("saleyard", herd.selected_saleyard)
+      .eq("saleyard", resolvedSaleyard)
       .eq("category", mlaCategory);
     if (saleyardPrices && saleyardPrices.length > 0) {
       saleyardPriceMap = new Map();

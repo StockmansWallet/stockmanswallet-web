@@ -7,7 +7,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { HerdsTable } from "./herds-table";
 import { Plus, Tags, Layers, DollarSign, Scale } from "lucide-react";
 import { calculateHerdValuation, mapCategoryToMLACategory, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
-import { cattleBreedPremiums } from "@/lib/data/reference-data";
+import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 
 export const metadata = {
   title: "Herds",
@@ -63,7 +63,7 @@ export default async function HerdsPage() {
   // General (breed=null) and breed-specific entries are separated into two maps.
   // Filter by mapped MLA categories to stay under PostgREST's 1000-row default limit
   // (a single saleyard can have 7000+ rows across all categories).
-  const saleyards = [...new Set((herds ?? []).map((h) => h.selected_saleyard).filter(Boolean))] as string[];
+  const saleyards = [...new Set((herds ?? []).map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
   const mlaCategories = [...new Set((herds ?? []).map((h) => mapCategoryToMLACategory(h.category)))];
   let saleyardPricesRaw: { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null }[] = [];
   if (saleyards.length > 0 && mlaCategories.length > 0) {
