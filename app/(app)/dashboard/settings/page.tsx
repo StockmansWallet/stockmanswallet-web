@@ -9,6 +9,12 @@ import { LoadDemoButton, ClearDataButton, ClearAllDataButton } from "./demo-butt
 
 export const metadata = { title: "Settings" };
 
+const ADMIN_EMAILS = [
+  "leon@stockmanswallet.com.au",
+  "mil@stockmanswallet.com.au",
+  "luke@stockmanswallet.com.au",
+];
+
 const settingsSections = [
   {
     heading: "Features",
@@ -84,6 +90,29 @@ export default async function SettingsPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Admin tools - only visible to whitelisted emails */}
+        {ADMIN_EMAILS.includes(user?.email ?? "") && (
+          <div>
+            <h2 className="mb-3 px-1 text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Admin
+            </h2>
+            <Card>
+              <CardContent className="divide-y divide-white/[0.04] p-0">
+                <Link
+                  href="/dashboard/admin/mla-upload"
+                  className="group flex items-center justify-between px-5 py-4 transition-colors hover:bg-white/[0.03]"
+                >
+                  <div>
+                    <p className="text-sm font-medium text-text-primary">MLA CSV Upload</p>
+                    <p className="text-xs text-text-muted">Upload MLA data to populate saleyard-specific pricing</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Feature sections */}
         {settingsSections.map((section) => (
