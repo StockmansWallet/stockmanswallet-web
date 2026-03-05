@@ -383,8 +383,7 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
       .limit(50),
     supabase
       .from("category_prices")
-      .select("category, price_per_kg, weight_range, saleyard")
-      .is("state", null),
+      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard"),
     supabase
       .from("breed_premiums")
       .select("breed, premium_percent"),
@@ -396,15 +395,15 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
   const categoryPricesRaw = (nationalPrices ?? []) as { category: string; price_per_kg: number; weight_range: string | null; saleyard: string | null }[];
 
   for (const p of categoryPricesRaw) {
-    if (p.saleyard) {
+    if (!p.saleyard || p.saleyard === "National") {
+      const entries = nationalPriceMap.get(p.category) ?? [];
+      entries.push({ price_per_kg: p.price_per_kg, weight_range: p.weight_range });
+      nationalPriceMap.set(p.category, entries);
+    } else {
       const key = `${p.category}|${p.saleyard}`;
       const entries = saleyardPriceMap.get(key) ?? [];
       entries.push({ price_per_kg: p.price_per_kg, weight_range: p.weight_range });
       saleyardPriceMap.set(key, entries);
-    } else {
-      const entries = nationalPriceMap.get(p.category) ?? [];
-      entries.push({ price_per_kg: p.price_per_kg, weight_range: p.weight_range });
-      nationalPriceMap.set(p.category, entries);
     }
   }
 

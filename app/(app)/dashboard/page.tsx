@@ -42,9 +42,8 @@ export default async function DashboardPage() {
     // Live MLA national prices — all weight brackets (matches iOS ValuationEngine price source)
     supabase
       .from("category_prices")
-      .select("category, price_per_kg, weight_range")
-      .is("saleyard", null)
-      .is("state", null),
+      .select("category, price_per_kg:final_price_per_kg, weight_range")
+      .eq("saleyard", "National"),
     // Breed premiums (matches iOS BreedPremiumService)
     supabase
       .from("breed_premiums")
@@ -57,7 +56,7 @@ export default async function DashboardPage() {
   if (saleyards.length > 0) {
     const { data } = await supabase
       .from("category_prices")
-      .select("category, price_per_kg, weight_range, saleyard")
+      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard")
       .in("saleyard", saleyards);
     saleyardPricesRaw = data ?? [];
   }

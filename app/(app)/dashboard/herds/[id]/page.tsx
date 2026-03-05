@@ -53,9 +53,8 @@ export default async function HerdDetailPage({
       .single(),
     supabase
       .from("category_prices")
-      .select("category, price_per_kg, weight_range")
-      .is("saleyard", null)
-      .is("state", null),
+      .select("category, price_per_kg:final_price_per_kg, weight_range")
+      .eq("saleyard", "National"),
     supabase
       .from("breed_premiums")
       .select("breed, premium_percent"),
@@ -82,7 +81,7 @@ export default async function HerdDetailPage({
   if (herd.selected_saleyard) {
     const { data: saleyardPrices } = await supabase
       .from("category_prices")
-      .select("category, price_per_kg, weight_range, saleyard")
+      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard")
       .eq("saleyard", herd.selected_saleyard);
     if (saleyardPrices && saleyardPrices.length > 0) {
       saleyardPriceMap = new Map();

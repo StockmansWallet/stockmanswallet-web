@@ -28,9 +28,8 @@ export default async function HerdsPage() {
       .order("name"),
     supabase
       .from("category_prices")
-      .select("category, price_per_kg, weight_range")
-      .is("saleyard", null)
-      .is("state", null),
+      .select("category, price_per_kg:final_price_per_kg, weight_range")
+      .eq("saleyard", "National"),
     supabase
       .from("breed_premiums")
       .select("breed, premium_percent"),
@@ -63,7 +62,7 @@ export default async function HerdsPage() {
   if (saleyards.length > 0) {
     const { data } = await supabase
       .from("category_prices")
-      .select("category, price_per_kg, weight_range, saleyard")
+      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard")
       .in("saleyard", saleyards);
     saleyardPricesRaw = data ?? [];
   }
