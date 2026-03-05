@@ -137,6 +137,22 @@ export default async function HerdDetailPage({
   const herdValue = valuation.netValue;
   const isFallback = valuation.priceSource !== "saleyard";
 
+  // DEBUG: temporary
+  const mlaCategory_debug = mapCategoryToMLACategory(herd.category);
+  const resolvedSaleyard_debug = herd.selected_saleyard ? resolveMLASaleyardName(herd.selected_saleyard) : null;
+  const saleyardKey_debug = `${mlaCategory_debug}|${resolvedSaleyard_debug}`;
+  const saleyardEntries_debug = saleyardPriceMap?.get(saleyardKey_debug) ?? [];
+  const debugInfo = {
+    priceSource: valuation.priceSource,
+    pricePerKg: valuation.pricePerKg.toFixed(4),
+    breedPremium: valuation.breedPremiumApplied,
+    netValue: valuation.netValue.toFixed(2),
+    saleyardEntryCount: saleyardEntries_debug.length,
+    firstEntry: saleyardEntries_debug[0]?.price_per_kg.toFixed(4),
+    lastEntry: saleyardEntries_debug[saleyardEntries_debug.length - 1]?.price_per_kg.toFixed(4),
+    nationalEntryCount: (nationalPriceMap.get(mlaCategory_debug) ?? []).length,
+  };
+
   let projectedWeight: number | null = null;
   if (herd.initial_weight > 0 && herd.daily_weight_gain > 0) {
     const created = new Date(herd.created_at);
@@ -170,6 +186,11 @@ export default async function HerdDetailPage({
           </div>
         }
       />
+
+      {/* DEBUG: temporary */}
+      <pre className="mb-4 rounded-lg bg-yellow-900/30 p-3 text-xs text-yellow-200 overflow-auto">
+        {JSON.stringify(debugInfo, null, 2)}
+      </pre>
 
       {/* Herd Value */}
       {herdValue > 0 && (
