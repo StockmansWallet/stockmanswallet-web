@@ -56,7 +56,8 @@ export default async function HerdDetailPage({
       .from("category_prices")
       .select("category, price_per_kg:final_price_per_kg, weight_range")
       .eq("saleyard", "National")
-      .is("breed", null),
+      .is("breed", null)
+      .order("data_date", { ascending: false }),
     supabase
       .from("breed_premiums")
       .select("breed, premium_percent:premium_pct"),
@@ -90,7 +91,8 @@ export default async function HerdDetailPage({
       .from("category_prices")
       .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed")
       .eq("saleyard", resolvedSaleyard)
-      .eq("category", mlaCategory);
+      .eq("category", mlaCategory)
+      .order("data_date", { ascending: false });
     if (saleyardPrices && saleyardPrices.length > 0) {
       saleyardPriceMap = new Map();
       saleyardBreedPriceMap = new Map();
@@ -135,26 +137,6 @@ export default async function HerdDetailPage({
   const herdValue = valuation.netValue;
   const isFallback = valuation.priceSource !== "saleyard";
 
-  // DEBUG: temporary - remove after diagnosis
-  const mlaCategory_debug = mapCategoryToMLACategory(herd.category);
-  const resolvedSaleyard_debug = herd.selected_saleyard ? resolveMLASaleyardName(herd.selected_saleyard) : null;
-  const saleyardGeneralKey = `${mlaCategory_debug}|${resolvedSaleyard_debug}`;
-  const saleyardBreedKey = `${mlaCategory_debug}|${herd.breed}|${resolvedSaleyard_debug}`;
-  const debugInfo = {
-    mlaCategory: mlaCategory_debug,
-    resolvedSaleyard: resolvedSaleyard_debug,
-    saleyardPriceMapSize: saleyardPriceMap?.size ?? 0,
-    saleyardBreedPriceMapSize: saleyardBreedPriceMap?.size ?? 0,
-    nationalPriceMapSize: nationalPriceMap.size,
-    saleyardGeneralEntries: saleyardPriceMap?.get(saleyardGeneralKey)?.length ?? 0,
-    saleyardBreedEntries: saleyardBreedPriceMap?.get(saleyardBreedKey)?.length ?? 0,
-    nationalEntries: nationalPriceMap.get(mlaCategory_debug)?.length ?? 0,
-    priceSource: valuation.priceSource,
-    pricePerKg: valuation.pricePerKg.toFixed(4),
-    breedPremium: valuation.breedPremiumApplied,
-    netValue: valuation.netValue.toFixed(2),
-  };
-
   let projectedWeight: number | null = null;
   if (herd.initial_weight > 0 && herd.daily_weight_gain > 0) {
     const created = new Date(herd.created_at);
@@ -188,11 +170,6 @@ export default async function HerdDetailPage({
           </div>
         }
       />
-
-      {/* DEBUG: temporary - remove after diagnosis */}
-      <pre className="mb-4 rounded-lg bg-yellow-900/30 p-3 text-xs text-yellow-200 overflow-auto">
-        {JSON.stringify(debugInfo, null, 2)}
-      </pre>
 
       {/* Herd Value */}
       {herdValue > 0 && (

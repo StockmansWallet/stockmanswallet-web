@@ -6,7 +6,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { HerdComposition } from "./herd-composition";
 import { PortfolioChart } from "./portfolio-chart";
 import { calculateHerdValuation, mapCategoryToMLACategory } from "@/lib/engines/valuation-engine";
-import { cattleBreedPremiums } from "@/lib/data/reference-data";
+import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 import { Plus, Home, Package } from "lucide-react";
 
 export const metadata = {
@@ -45,7 +45,8 @@ export default async function DashboardPage() {
       .from("category_prices")
       .select("category, price_per_kg:final_price_per_kg, weight_range")
       .eq("saleyard", "National")
-      .is("breed", null),
+      .is("breed", null)
+      .order("data_date", { ascending: false }),
     // Breed premiums (matches iOS BreedPremiumService)
     supabase
       .from("breed_premiums")
@@ -55,7 +56,7 @@ export default async function DashboardPage() {
   // Fetch saleyard-specific prices for herds that have a selected_saleyard
   // No breed filter - MLA saleyard data is mostly breed-specific (breed IS NOT NULL).
   // Filter by mapped MLA categories to stay under PostgREST's 1000-row default limit.
-  const saleyards = [...new Set((herds ?? []).map((h) => h.selected_saleyard).filter(Boolean))] as string[];
+  const saleyards = [...new Set((herds ?? []).map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
   const mlaCategories = [...new Set((herds ?? []).map((h) => mapCategoryToMLACategory(h.category)))];
   let saleyardPricesRaw: { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null }[] = [];
   if (saleyards.length > 0 && mlaCategories.length > 0) {
@@ -63,7 +64,8 @@ export default async function DashboardPage() {
       .from("category_prices")
       .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed")
       .in("saleyard", saleyards)
-      .in("category", mlaCategories);
+      .in("category", mlaCategories)
+      .order("data_date", { ascending: false });
     saleyardPricesRaw = data ?? [];
   }
 

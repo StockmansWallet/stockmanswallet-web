@@ -31,7 +31,8 @@ export default async function HerdsPage() {
       .from("category_prices")
       .select("category, price_per_kg:final_price_per_kg, weight_range")
       .eq("saleyard", "National")
-      .is("breed", null),
+      .is("breed", null)
+      .order("data_date", { ascending: false }),
     supabase
       .from("breed_premiums")
       .select("breed, premium_percent:premium_pct"),
@@ -71,7 +72,8 @@ export default async function HerdsPage() {
       .from("category_prices")
       .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed")
       .in("saleyard", saleyards)
-      .in("category", mlaCategories);
+      .in("category", mlaCategories)
+      .order("data_date", { ascending: false });
     saleyardPricesRaw = data ?? [];
   }
 
