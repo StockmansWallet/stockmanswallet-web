@@ -248,7 +248,6 @@ export default async function HerdDetailPage({
           </CardHeader>
           <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
             <InfoRow label="Initial Weight" value={herd.initial_weight ? `${herd.initial_weight} kg` : null} />
-            <InfoRow label="Current Weight" value={herd.current_weight ? `${herd.current_weight} kg` : null} />
             {projectedWeight && <InfoRow label="Projected Weight" value={`${Math.round(projectedWeight)} kg`} />}
             <InfoRow label="Daily Weight Gain" value={herd.daily_weight_gain ? `${herd.daily_weight_gain} kg/day` : null} />
           </CardContent>
