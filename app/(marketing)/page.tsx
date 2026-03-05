@@ -29,15 +29,20 @@ export default function HomePage() {
               </div>
 
               <h1 className="text-5xl font-semibold tracking-tight text-text-primary sm:text-6xl lg:text-7xl">
-                Your herds are
+                Know what your
+                <br />
+                cattle are worth.
                 <br />
                 <span className="bg-gradient-to-r from-brand to-brand-light bg-clip-text text-transparent">
-                  financial assets
+                  Every day.
                 </span>
               </h1>
-              <p className="mt-6 max-w-xl text-lg leading-relaxed text-text-secondary sm:text-xl">
-                Real-time livestock valuations powered by MLA market data.
-                Built for Australian producers and advisors.
+              <p className="mt-6 text-lg font-semibold text-brand">
+                Intelligent Livestock Valuation
+              </p>
+              <p className="mt-3 max-w-xl text-lg leading-relaxed text-text-secondary sm:text-xl">
+                Real MLA market data. Real-time herd valuations. Zero guesswork.
+                Capital timing intelligence for Australian livestock producers and rural advisors.
               </p>
 
               {/* Waitlist */}
