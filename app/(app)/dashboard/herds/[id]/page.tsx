@@ -88,7 +88,7 @@ export default async function HerdDetailPage({
       for (const p of saleyardPrices) {
         const key = `${p.category}|${p.saleyard}`;
         const entries = saleyardPriceMap.get(key) ?? [];
-        entries.push({ price_per_kg: p.price_per_kg, weight_range: p.weight_range });
+        entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
         saleyardPriceMap.set(key, entries);
       }
     }
@@ -98,7 +98,7 @@ export default async function HerdDetailPage({
   const nationalPriceMap = new Map<string, CategoryPriceEntry[]>();
   for (const p of (nationalPrices ?? [])) {
     const entries = nationalPriceMap.get(p.category) ?? [];
-    entries.push({ price_per_kg: p.price_per_kg, weight_range: p.weight_range });
+    entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
     nationalPriceMap.set(p.category, entries);
   }
   const premiumMap = new Map((breedPremiumData ?? []).map((b) => [b.breed, b.premium_percent]));

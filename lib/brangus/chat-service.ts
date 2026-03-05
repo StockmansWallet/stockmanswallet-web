@@ -397,12 +397,12 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
   for (const p of categoryPricesRaw) {
     if (!p.saleyard || p.saleyard === "National") {
       const entries = nationalPriceMap.get(p.category) ?? [];
-      entries.push({ price_per_kg: p.price_per_kg, weight_range: p.weight_range });
+      entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
       nationalPriceMap.set(p.category, entries);
     } else {
       const key = `${p.category}|${p.saleyard}`;
       const entries = saleyardPriceMap.get(key) ?? [];
-      entries.push({ price_per_kg: p.price_per_kg, weight_range: p.weight_range });
+      entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
       saleyardPriceMap.set(key, entries);
     }
   }
