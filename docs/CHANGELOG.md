@@ -91,6 +91,25 @@ Fixed soft-deleted demo properties (e.g. Doongara Station) still appearing in pr
 - `app/(app)/dashboard/herds/[id]/edit/page.tsx` - Same filter
 - `app/(app)/dashboard/properties/[id]/page.tsx` - Same filter
 
+## Saleyard Breed-Specific Pricing (iOS Parity)
+
+Valuation engine now supports breed-specific saleyard prices with a double-application guard matching iOS `resolveGeneralBasePrice()`. MLA saleyard transaction data is mostly breed-specific (breed IS NOT NULL), so prices are split into two maps: general (breed=null) where breed premium is applied, and breed-specific where premium is skipped since it's already baked into the price.
+
+The price resolution hierarchy is now 4 tiers:
+1. Saleyard general (breed=null) + breed premium
+2. Saleyard breed-specific (no breed premium — already reflected in price)
+3. National (breed=null) + breed premium
+4. Hardcoded category fallback + breed premium
+
+National price queries now also filter with `.is("breed", null)` to avoid mixing breed-specific rows into the national map.
+
+**Files changed:**
+- `lib/engines/valuation-engine.ts` - New `saleyardBreedPriceMap` parameter, `skipBreedPremium` flag, 4-tier hierarchy, updated `calculateHerdValue` wrapper
+- `app/(app)/dashboard/page.tsx` - Splits saleyard prices by breed, passes `saleyardBreedPriceMap`, adds `.is("breed", null)` to national query
+- `app/(app)/dashboard/herds/page.tsx` - Same breed split and national filter
+- `app/(app)/dashboard/herds/[id]/page.tsx` - Same breed split and national filter
+- `lib/brangus/chat-service.ts` - Same 3-map split for Brangus chat data store
+
 ## Price Source Indicators and Valuation Detail
 
 Added price source tracking to the valuation engine. New `calculateHerdValuation` function returns a `HerdValuationResult` with `netValue`, `priceSource` (saleyard/national/fallback), `pricePerKg`, and `breedPremiumApplied`. The original `calculateHerdValue` is kept as a convenience wrapper.
