@@ -178,15 +178,6 @@ export function HerdForm({ herd, properties, action, submitLabel }: HerdFormProp
             defaultValue={herd?.initial_weight ?? 0}
           />
           <Input
-            id="current_weight"
-            name="current_weight"
-            label="Current Weight (kg)"
-            type="number"
-            step="0.1"
-            min={0}
-            defaultValue={herd?.current_weight ?? 0}
-          />
-          <Input
             id="daily_weight_gain"
             name="daily_weight_gain"
             label="Daily Weight Gain (kg)"
@@ -194,6 +185,16 @@ export function HerdForm({ herd, properties, action, submitLabel }: HerdFormProp
             step="0.01"
             defaultValue={herd?.daily_weight_gain ?? 0}
             helperText="DWG in kg/day"
+          />
+          <Input
+            id="mortality_rate"
+            name="mortality_rate"
+            label="Mortality Rate (%)"
+            type="number"
+            step="0.1"
+            min={0}
+            max={100}
+            defaultValue={herd?.mortality_rate != null ? herd.mortality_rate * 100 : 0}
           />
         </div>
       </section>
@@ -291,13 +292,6 @@ export function HerdForm({ herd, properties, action, submitLabel }: HerdFormProp
             options={saleyardOptions}
             placeholder="Select saleyard"
             defaultValue={herd?.selected_saleyard ?? ""}
-          />
-          <Input
-            id="market_category"
-            name="market_category"
-            label="Market Category"
-            defaultValue={herd?.market_category ?? ""}
-            placeholder="e.g. Vealer, Trade Steer"
           />
         </div>
       </section>
