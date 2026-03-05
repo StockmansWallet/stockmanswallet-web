@@ -58,7 +58,7 @@
   --color-warning: var(--warning);
   --color-info: var(--info);
   --color-error: var(--error);
-  --font-sans: ui-rounded, "SF Pro Rounded", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Nunito", system-ui, sans-serif;
+  --font-sans: ui-rounded, "SF Pro Rounded", "SF Pro Display", -apple-system, BlinkMacSystemFont, var(--font-nunito), "Nunito", system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
 
   /* Landing page backgrounds */
