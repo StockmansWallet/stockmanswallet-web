@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HerdsTable } from "./herds-table";
 import { Plus, Tags, Layers, DollarSign, Scale } from "lucide-react";
-import { calculateHerdValuation, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import { calculateHerdValuation, mapCategoryToMLACategory, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { cattleBreedPremiums } from "@/lib/data/reference-data";
 
 export const metadata = {
@@ -61,13 +61,17 @@ export default async function HerdsPage() {
   // Fetch saleyard-specific prices for herds that have a selected_saleyard
   // No breed filter - MLA saleyard data is mostly breed-specific (breed IS NOT NULL).
   // General (breed=null) and breed-specific entries are separated into two maps.
+  // Filter by mapped MLA categories to stay under PostgREST's 1000-row default limit
+  // (a single saleyard can have 7000+ rows across all categories).
   const saleyards = [...new Set((herds ?? []).map((h) => h.selected_saleyard).filter(Boolean))] as string[];
+  const mlaCategories = [...new Set((herds ?? []).map((h) => mapCategoryToMLACategory(h.category)))];
   let saleyardPricesRaw: { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null }[] = [];
-  if (saleyards.length > 0) {
+  if (saleyards.length > 0 && mlaCategories.length > 0) {
     const { data } = await supabase
       .from("category_prices")
       .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed")
-      .in("saleyard", saleyards);
+      .in("saleyard", saleyards)
+      .in("category", mlaCategories);
     saleyardPricesRaw = data ?? [];
   }
 

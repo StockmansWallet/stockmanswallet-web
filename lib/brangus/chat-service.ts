@@ -2,7 +2,7 @@
 // Mirrors iOS StockmanIQChatService - handles API calls, tool loop, system prompt
 
 import { createClient } from "../supabase/client";
-import { calculateHerdValue, type CategoryPriceEntry } from "../engines/valuation-engine";
+import { calculateHerdValue, mapCategoryToMLACategory, type CategoryPriceEntry } from "../engines/valuation-engine";
 import { cattleBreedPremiums } from "../data/reference-data";
 import { toolDefinitions, executeTool } from "./tools";
 import type {
@@ -20,8 +20,8 @@ const MAX_TOOL_ROUNDS = 5;
 // MARK: - Build System Prompt
 
 export function buildSystemPrompt(store: ChatDataStore): string {
-  const activeHerds = store.herds.filter((h) => !h.is_sold);
-  const totalHead = activeHerds.reduce((sum, h) => sum + (h.head_count ?? 0), 0);
+  const activeHerdsList = store.herds.filter((h) => !h.is_sold);
+  const totalHead = activeHerdsList.reduce((sum, h) => sum + (h.head_count ?? 0), 0);
 
   const today = new Date().toLocaleDateString("en-AU", {
     weekday: "long",
@@ -84,7 +84,7 @@ IMPORTANT FOR FREIGHT QUESTIONS:
   // Portfolio index
   const indexLines = ["PORTFOLIO INDEX (use lookup_portfolio_data tool for details):"];
   indexLines.push(`Total portfolio value: $${Math.round(store.portfolioValue).toLocaleString()}`);
-  indexLines.push(`Active herds: ${activeHerds.length}`);
+  indexLines.push(`Active herds: ${activeHerdsList.length}`);
   indexLines.push(`Total head: ${totalHead}`);
   indexLines.push(`Properties: ${store.properties.length}`);
 
@@ -92,9 +92,9 @@ IMPORTANT FOR FREIGHT QUESTIONS:
     indexLines.push(`Property names: ${store.properties.map((p) => p.property_name).join(", ")}`);
   }
 
-  if (activeHerds.length > 0) {
+  if (activeHerdsList.length > 0) {
     indexLines.push("Herd index:");
-    for (const herd of activeHerds) {
+    for (const herd of activeHerdsList) {
       indexLines.push(`  - ${herd.name}: ${herd.head_count} head, ${herd.species} ${herd.breed}, ${herd.category}`);
     }
   }
@@ -382,40 +382,53 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
       .eq("is_deleted", false)
       .order("date", { ascending: false })
       .limit(50),
+    // National prices only in parallel batch - saleyard-specific fetched after herds load
+    // (PostgREST default 1000-row limit would truncate unfiltered query on 345k+ rows)
     supabase
       .from("category_prices")
-      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed"),
+      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed")
+      .eq("saleyard", "National")
+      .is("breed", null),
     supabase
       .from("breed_premiums")
       .select("breed, premium_percent:premium_pct"),
   ]);
 
-  // Build pricing maps - separate general (breed=null) from breed-specific entries
+  // Build national pricing map from parallel-fetched data
   const nationalPriceMap = new Map<string, CategoryPriceEntry[]>();
   const saleyardPriceMap = new Map<string, CategoryPriceEntry[]>();
   const saleyardBreedPriceMap = new Map<string, CategoryPriceEntry[]>();
   const categoryPricesRaw = (nationalPrices ?? []) as { category: string; price_per_kg: number; weight_range: string | null; saleyard: string | null; breed: string | null }[];
 
   for (const p of categoryPricesRaw) {
-    if (!p.saleyard || p.saleyard === "National") {
-      // National prices (always breed=null from DB)
+    const entries = nationalPriceMap.get(p.category) ?? [];
+    entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
+    nationalPriceMap.set(p.category, entries);
+  }
+
+  // Fetch saleyard-specific prices now that herds are loaded
+  // Filter by user's saleyards + MLA categories to stay under PostgREST 1000-row limit
+  const activeHerdsList = (herds ?? []).filter((h: { is_sold: boolean }) => !h.is_sold);
+  const saleyards = [...new Set(activeHerdsList.map((h: { selected_saleyard: string | null }) => h.selected_saleyard).filter(Boolean))] as string[];
+  const mlaCategories = [...new Set(activeHerdsList.map((h: { category: string }) => mapCategoryToMLACategory(h.category)))];
+  if (saleyards.length > 0 && mlaCategories.length > 0) {
+    const { data: saleyardPricesData } = await supabase
+      .from("category_prices")
+      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed")
+      .in("saleyard", saleyards)
+      .in("category", mlaCategories);
+    for (const p of (saleyardPricesData ?? []) as { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null }[]) {
       if (p.breed === null) {
-        const entries = nationalPriceMap.get(p.category) ?? [];
+        const key = `${p.category}|${p.saleyard}`;
+        const entries = saleyardPriceMap.get(key) ?? [];
         entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
-        nationalPriceMap.set(p.category, entries);
+        saleyardPriceMap.set(key, entries);
+      } else {
+        const key = `${p.category}|${p.breed}|${p.saleyard}`;
+        const entries = saleyardBreedPriceMap.get(key) ?? [];
+        entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
+        saleyardBreedPriceMap.set(key, entries);
       }
-    } else if (p.breed === null) {
-      // Saleyard general price - safe to apply breed premium
-      const key = `${p.category}|${p.saleyard}`;
-      const entries = saleyardPriceMap.get(key) ?? [];
-      entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
-      saleyardPriceMap.set(key, entries);
-    } else {
-      // Saleyard breed-specific price - breed premium already baked in
-      const key = `${p.category}|${p.breed}|${p.saleyard}`;
-      const entries = saleyardBreedPriceMap.get(key) ?? [];
-      entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
-      saleyardBreedPriceMap.set(key, entries);
     }
   }
 
@@ -425,10 +438,9 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
     premiumMap.set(b.breed, b.premium_percent);
   }
 
-  // Calculate portfolio value
-  const activeHerds = (herds ?? []).filter((h: { is_sold: boolean }) => !h.is_sold);
+  // Calculate portfolio value (reuse activeHerdsList from saleyard fetch above)
   let portfolioValue = 0;
-  for (const h of activeHerds) {
+  for (const h of activeHerdsList) {
     portfolioValue += calculateHerdValue(
       h as Parameters<typeof calculateHerdValue>[0],
       nationalPriceMap,
