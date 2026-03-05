@@ -44,7 +44,8 @@ export default async function DashboardPage() {
     supabase
       .from("category_prices")
       .select("category, price_per_kg:final_price_per_kg, weight_range")
-      .eq("saleyard", "National"),
+      .eq("saleyard", "National")
+      .is("breed", null),
     // Breed premiums (matches iOS BreedPremiumService)
     supabase
       .from("breed_premiums")
@@ -52,12 +53,13 @@ export default async function DashboardPage() {
   ]);
 
   // Fetch saleyard-specific prices for herds that have a selected_saleyard
+  // No breed filter - MLA saleyard data is mostly breed-specific (breed IS NOT NULL).
   const saleyards = [...new Set((herds ?? []).map((h) => h.selected_saleyard).filter(Boolean))] as string[];
-  let saleyardPricesRaw: { category: string; price_per_kg: number; weight_range: string | null; saleyard: string }[] = [];
+  let saleyardPricesRaw: { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null }[] = [];
   if (saleyards.length > 0) {
     const { data } = await supabase
       .from("category_prices")
-      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard")
+      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed")
       .in("saleyard", saleyards);
     saleyardPricesRaw = data ?? [];
   }
@@ -68,20 +70,28 @@ export default async function DashboardPage() {
   const propertyCount = properties?.length ?? 0;
 
   // Build lookup maps for live pricing data
-  // nationalPriceMap: category -> [{price_per_kg, weight_range}] — all brackets grouped by category
-  // saleyardPriceMap: "category|saleyard" -> [{price_per_kg, weight_range}] — saleyard-specific
   const nationalPriceMap = new Map<string, { price_per_kg: number; weight_range: string | null }[]>();
   for (const p of (nationalPrices ?? [])) {
     const entries = nationalPriceMap.get(p.category) ?? [];
     entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
     nationalPriceMap.set(p.category, entries);
   }
+  // General saleyard prices (breed=null) - safe to apply breed premium
   const saleyardPriceMap = new Map<string, { price_per_kg: number; weight_range: string | null }[]>();
+  // Breed-specific saleyard prices - breed premium already baked in (double-application guard)
+  const saleyardBreedPriceMap = new Map<string, { price_per_kg: number; weight_range: string | null }[]>();
   for (const p of saleyardPricesRaw) {
-    const key = `${p.category}|${p.saleyard}`;
-    const entries = saleyardPriceMap.get(key) ?? [];
-    entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
-    saleyardPriceMap.set(key, entries);
+    if (p.breed === null) {
+      const key = `${p.category}|${p.saleyard}`;
+      const entries = saleyardPriceMap.get(key) ?? [];
+      entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
+      saleyardPriceMap.set(key, entries);
+    } else {
+      const key = `${p.category}|${p.breed}|${p.saleyard}`;
+      const entries = saleyardBreedPriceMap.get(key) ?? [];
+      entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
+      saleyardBreedPriceMap.set(key, entries);
+    }
   }
   // Seed with local breed premiums, then let Supabase override (matches iOS BreedPremiumService)
   const premiumMap = new Map<string, number>(Object.entries(cattleBreedPremiums));
@@ -95,7 +105,7 @@ export default async function DashboardPage() {
   for (const h of activeHerds) {
     const result = calculateHerdValuation(
       h as Parameters<typeof calculateHerdValuation>[0],
-      nationalPriceMap, premiumMap, undefined, saleyardPriceMap
+      nationalPriceMap, premiumMap, undefined, saleyardPriceMap, saleyardBreedPriceMap
     );
     portfolioValue += result.netValue;
     if (result.priceSource !== "saleyard") fallbackCount++;
@@ -111,7 +121,7 @@ export default async function DashboardPage() {
     const value = activeHerds.reduce(
       (sum, h) => sum + calculateHerdValuation(
         h as Parameters<typeof calculateHerdValuation>[0],
-        nationalPriceMap, premiumMap, futureDate, saleyardPriceMap
+        nationalPriceMap, premiumMap, futureDate, saleyardPriceMap, saleyardBreedPriceMap
       ).netValue,
       0
     );

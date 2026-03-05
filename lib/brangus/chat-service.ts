@@ -384,27 +384,38 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
       .limit(50),
     supabase
       .from("category_prices")
-      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard"),
+      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed"),
     supabase
       .from("breed_premiums")
       .select("breed, premium_percent:premium_pct"),
   ]);
 
-  // Build pricing maps
+  // Build pricing maps - separate general (breed=null) from breed-specific entries
   const nationalPriceMap = new Map<string, CategoryPriceEntry[]>();
   const saleyardPriceMap = new Map<string, CategoryPriceEntry[]>();
-  const categoryPricesRaw = (nationalPrices ?? []) as { category: string; price_per_kg: number; weight_range: string | null; saleyard: string | null }[];
+  const saleyardBreedPriceMap = new Map<string, CategoryPriceEntry[]>();
+  const categoryPricesRaw = (nationalPrices ?? []) as { category: string; price_per_kg: number; weight_range: string | null; saleyard: string | null; breed: string | null }[];
 
   for (const p of categoryPricesRaw) {
     if (!p.saleyard || p.saleyard === "National") {
-      const entries = nationalPriceMap.get(p.category) ?? [];
-      entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
-      nationalPriceMap.set(p.category, entries);
-    } else {
+      // National prices (always breed=null from DB)
+      if (p.breed === null) {
+        const entries = nationalPriceMap.get(p.category) ?? [];
+        entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
+        nationalPriceMap.set(p.category, entries);
+      }
+    } else if (p.breed === null) {
+      // Saleyard general price - safe to apply breed premium
       const key = `${p.category}|${p.saleyard}`;
       const entries = saleyardPriceMap.get(key) ?? [];
       entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
       saleyardPriceMap.set(key, entries);
+    } else {
+      // Saleyard breed-specific price - breed premium already baked in
+      const key = `${p.category}|${p.breed}|${p.saleyard}`;
+      const entries = saleyardBreedPriceMap.get(key) ?? [];
+      entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
+      saleyardBreedPriceMap.set(key, entries);
     }
   }
 
@@ -423,7 +434,8 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
       nationalPriceMap,
       premiumMap,
       undefined,
-      saleyardPriceMap
+      saleyardPriceMap,
+      saleyardBreedPriceMap
     );
   }
 

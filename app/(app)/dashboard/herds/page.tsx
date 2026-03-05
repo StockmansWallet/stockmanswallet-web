@@ -30,7 +30,8 @@ export default async function HerdsPage() {
     supabase
       .from("category_prices")
       .select("category, price_per_kg:final_price_per_kg, weight_range")
-      .eq("saleyard", "National"),
+      .eq("saleyard", "National")
+      .is("breed", null),
     supabase
       .from("breed_premiums")
       .select("breed, premium_percent:premium_pct"),
@@ -58,12 +59,14 @@ export default async function HerdsPage() {
   }
 
   // Fetch saleyard-specific prices for herds that have a selected_saleyard
+  // No breed filter - MLA saleyard data is mostly breed-specific (breed IS NOT NULL).
+  // General (breed=null) and breed-specific entries are separated into two maps.
   const saleyards = [...new Set((herds ?? []).map((h) => h.selected_saleyard).filter(Boolean))] as string[];
-  let saleyardPricesRaw: { category: string; price_per_kg: number; weight_range: string | null; saleyard: string }[] = [];
+  let saleyardPricesRaw: { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null }[] = [];
   if (saleyards.length > 0) {
     const { data } = await supabase
       .from("category_prices")
-      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard")
+      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed")
       .in("saleyard", saleyards);
     saleyardPricesRaw = data ?? [];
   }
@@ -75,12 +78,22 @@ export default async function HerdsPage() {
     entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
     nationalPriceMap.set(p.category, entries);
   }
+  // General saleyard prices (breed=null) - safe to apply breed premium
   const saleyardPriceMap = new Map<string, CategoryPriceEntry[]>();
+  // Breed-specific saleyard prices - breed premium already baked in (double-application guard)
+  const saleyardBreedPriceMap = new Map<string, CategoryPriceEntry[]>();
   for (const p of saleyardPricesRaw) {
-    const key = `${p.category}|${p.saleyard}`;
-    const entries = saleyardPriceMap.get(key) ?? [];
-    entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
-    saleyardPriceMap.set(key, entries);
+    if (p.breed === null) {
+      const key = `${p.category}|${p.saleyard}`;
+      const entries = saleyardPriceMap.get(key) ?? [];
+      entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
+      saleyardPriceMap.set(key, entries);
+    } else {
+      const key = `${p.category}|${p.breed}|${p.saleyard}`;
+      const entries = saleyardBreedPriceMap.get(key) ?? [];
+      entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
+      saleyardBreedPriceMap.set(key, entries);
+    }
   }
   // Seed with local breed premiums, then let Supabase override (matches iOS BreedPremiumService)
   const premiumMap = new Map<string, number>(Object.entries(cattleBreedPremiums));
@@ -95,7 +108,7 @@ export default async function HerdsPage() {
   for (const h of (herds ?? [])) {
     const result = calculateHerdValuation(
       h as Parameters<typeof calculateHerdValuation>[0],
-      nationalPriceMap, premiumMap, undefined, saleyardPriceMap
+      nationalPriceMap, premiumMap, undefined, saleyardPriceMap, saleyardBreedPriceMap
     );
     herdValuesObj[h.id] = result.netValue;
     herdSourcesObj[h.id] = result.priceSource;

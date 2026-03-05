@@ -55,7 +55,8 @@ export default async function HerdDetailPage({
     supabase
       .from("category_prices")
       .select("category, price_per_kg:final_price_per_kg, weight_range")
-      .eq("saleyard", "National"),
+      .eq("saleyard", "National")
+      .is("breed", null),
     supabase
       .from("breed_premiums")
       .select("breed, premium_percent:premium_pct"),
@@ -78,19 +79,29 @@ export default async function HerdDetailPage({
   if (!herd) notFound();
 
   // Fetch saleyard-specific prices if herd has a selected saleyard
+  // No breed filter - MLA saleyard data is mostly breed-specific (breed IS NOT NULL).
   let saleyardPriceMap: Map<string, CategoryPriceEntry[]> | undefined;
+  let saleyardBreedPriceMap: Map<string, CategoryPriceEntry[]> | undefined;
   if (herd.selected_saleyard) {
     const { data: saleyardPrices } = await supabase
       .from("category_prices")
-      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard")
+      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed")
       .eq("saleyard", herd.selected_saleyard);
     if (saleyardPrices && saleyardPrices.length > 0) {
       saleyardPriceMap = new Map();
+      saleyardBreedPriceMap = new Map();
       for (const p of saleyardPrices) {
-        const key = `${p.category}|${p.saleyard}`;
-        const entries = saleyardPriceMap.get(key) ?? [];
-        entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
-        saleyardPriceMap.set(key, entries);
+        if (p.breed === null) {
+          const key = `${p.category}|${p.saleyard}`;
+          const entries = saleyardPriceMap.get(key) ?? [];
+          entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
+          saleyardPriceMap.set(key, entries);
+        } else {
+          const key = `${p.category}|${p.breed}|${p.saleyard}`;
+          const entries = saleyardBreedPriceMap.get(key) ?? [];
+          entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
+          saleyardBreedPriceMap.set(key, entries);
+        }
       }
     }
   }
@@ -115,6 +126,7 @@ export default async function HerdDetailPage({
     premiumMap,
     undefined,
     saleyardPriceMap,
+    saleyardBreedPriceMap,
   );
   const herdValue = valuation.netValue;
   const isFallback = valuation.priceSource !== "saleyard";

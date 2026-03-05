@@ -284,16 +284,23 @@ export interface HerdValuationResult {
  * Returns detailed result including price source for UI indicators.
  *
  * Price resolution hierarchy (mirrors iOS):
- *   1. Saleyard-specific + weight bracket
- *   2. National + weight bracket
- *   3. Hardcoded category fallback
+ *   1. Saleyard general (breed=null) price + breed premium
+ *   2. Saleyard breed-specific price (no breed premium - already baked in)
+ *   3. National (breed=null) + breed premium
+ *   4. Hardcoded category fallback + breed premium
+ *
+ * The breed premium "double-application guard" mirrors iOS resolveGeneralBasePrice():
+ * breed premium is only applied to general (breed=null) base prices. When the only
+ * available saleyard price is breed-specific (from MLA transaction data), it already
+ * reflects that breed's market value, so applying premium again would double-count.
  */
 export function calculateHerdValuation(
   herd: HerdForValuation,
   nationalPriceMap: Map<string, CategoryPriceEntry[]>,
   premiumMap: Map<string, number>,
   asOf: Date = new Date(),
-  saleyardPriceMap?: Map<string, CategoryPriceEntry[]>
+  saleyardPriceMap?: Map<string, CategoryPriceEntry[]>,
+  saleyardBreedPriceMap?: Map<string, CategoryPriceEntry[]>
 ): HerdValuationResult {
   const head = herd.head_count ?? 0;
   if (head === 0) return { netValue: 0, priceSource: "fallback", pricePerKg: 0, breedPremiumApplied: 0 };
@@ -311,13 +318,13 @@ export function calculateHerdValuation(
     herd.daily_weight_gain ?? 0
   );
 
-  // 2. Live price - map app category to MLA category, then resolve via hierarchy:
-  //    saleyard-specific > national > hardcoded fallback (mirrors iOS ValuationEngine)
+  // 2. Live price - map app category to MLA category, then resolve via hierarchy
   const mlaCategory = mapCategoryToMLACategory(herd.category);
   let basePrice: number | null = null;
   let priceSource: PriceSource = "fallback";
+  let skipBreedPremium = false;
 
-  // Try saleyard-specific price first
+  // 2a. Try saleyard general (breed=null) price first - breed premium safe
   if (saleyardPriceMap && herd.selected_saleyard) {
     const saleyardKey = `${mlaCategory}|${herd.selected_saleyard}`;
     const saleyardEntries = saleyardPriceMap.get(saleyardKey) ?? [];
@@ -325,20 +332,32 @@ export function calculateHerdValuation(
     if (basePrice !== null) priceSource = "saleyard";
   }
 
-  // Fall back to national price
+  // 2b. Try saleyard breed-specific price - skip breed premium (double-application guard)
+  if (basePrice === null && saleyardBreedPriceMap && herd.selected_saleyard) {
+    const breedKey = `${mlaCategory}|${herd.breed}|${herd.selected_saleyard}`;
+    const breedEntries = saleyardBreedPriceMap.get(breedKey) ?? [];
+    basePrice = resolvePriceFromEntries(breedEntries, projectedWeight);
+    if (basePrice !== null) {
+      priceSource = "saleyard";
+      skipBreedPremium = true;
+    }
+  }
+
+  // 2c. Fall back to national price (breed=null, premium safe)
   if (basePrice === null) {
     const nationalEntries = nationalPriceMap.get(mlaCategory) ?? [];
     basePrice = resolvePriceFromEntries(nationalEntries, projectedWeight);
     if (basePrice !== null) priceSource = "national";
   }
 
-  // Final fallback to hardcoded defaults
+  // 2d. Final fallback to hardcoded defaults
   if (basePrice === null) {
     basePrice = defaultFallbackPrice(herd.category);
     priceSource = "fallback";
   }
 
-  const rawPremiumPct = herd.breed_premium_override ?? premiumMap.get(herd.breed) ?? 0;
+  // 3. Breed premium - only apply to general (breed=null) prices (mirrors iOS resolveGeneralBasePrice guard)
+  const rawPremiumPct = skipBreedPremium ? 0 : (herd.breed_premium_override ?? premiumMap.get(herd.breed) ?? 0);
   const adjustedPrice = basePrice * (1 + rawPremiumPct / 100);
 
   // 3. Physical value and base market value (for mortality calculation)
@@ -394,9 +413,10 @@ export function calculateHerdValue(
   nationalPriceMap: Map<string, CategoryPriceEntry[]>,
   premiumMap: Map<string, number>,
   asOf: Date = new Date(),
-  saleyardPriceMap?: Map<string, CategoryPriceEntry[]>
+  saleyardPriceMap?: Map<string, CategoryPriceEntry[]>,
+  saleyardBreedPriceMap?: Map<string, CategoryPriceEntry[]>
 ): number {
-  return calculateHerdValuation(herd, nationalPriceMap, premiumMap, asOf, saleyardPriceMap).netValue;
+  return calculateHerdValuation(herd, nationalPriceMap, premiumMap, asOf, saleyardPriceMap, saleyardBreedPriceMap).netValue;
 }
 
 // Re-export for convenience
