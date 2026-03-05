@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HerdsTable } from "./herds-table";
 import { Plus, Tags, Layers, DollarSign, Scale } from "lucide-react";
-import { calculateHerdValue, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import { calculateHerdValuation, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import { cattleBreedPremiums } from "@/lib/data/reference-data";
 
 export const metadata = {
   title: "Herds",
@@ -32,7 +33,7 @@ export default async function HerdsPage() {
       .eq("saleyard", "National"),
     supabase
       .from("breed_premiums")
-      .select("breed, premium_percent"),
+      .select("breed, premium_percent:premium_pct"),
     supabase
       .from("properties")
       .select("id, property_name, is_default")
@@ -81,18 +82,24 @@ export default async function HerdsPage() {
     entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
     saleyardPriceMap.set(key, entries);
   }
-  const premiumMap = new Map((breedPremiumData ?? []).map((b) => [b.breed, b.premium_percent]));
+  // Seed with local breed premiums, then let Supabase override (matches iOS BreedPremiumService)
+  const premiumMap = new Map<string, number>(Object.entries(cattleBreedPremiums));
+  for (const b of (breedPremiumData ?? [])) {
+    premiumMap.set(b.breed, b.premium_percent);
+  }
 
-  // Compute per-herd valuations
+  // Compute per-herd valuations with price source tracking
   const herdValuesObj: Record<string, number> = {};
+  const herdSourcesObj: Record<string, string> = {};
   let totalValue = 0;
   for (const h of (herds ?? [])) {
-    const value = calculateHerdValue(
-      h as Parameters<typeof calculateHerdValue>[0],
+    const result = calculateHerdValuation(
+      h as Parameters<typeof calculateHerdValuation>[0],
       nationalPriceMap, premiumMap, undefined, saleyardPriceMap
     );
-    herdValuesObj[h.id] = value;
-    totalValue += value;
+    herdValuesObj[h.id] = result.netValue;
+    herdSourcesObj[h.id] = result.priceSource;
+    totalValue += result.netValue;
   }
 
   // Build property groups: default first, then alphabetical, then "Unassigned"
@@ -197,7 +204,7 @@ export default async function HerdsPage() {
           </div>
 
           {/* Table */}
-          <HerdsTable herds={herds} herdValues={herdValuesObj} propertyGroups={propertyGroups} />
+          <HerdsTable herds={herds} herdValues={herdValuesObj} herdSources={herdSourcesObj} propertyGroups={propertyGroups} />
         </>
       )}
     </div>

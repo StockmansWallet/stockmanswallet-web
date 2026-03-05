@@ -5,9 +5,10 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { calculateProjectedWeight, calculateHerdValue, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import { calculateProjectedWeight, calculateHerdValuation, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import { cattleBreedPremiums } from "@/lib/data/reference-data";
 import { DeleteHerdButton } from "./delete-button";
-import { Pencil, Info, Scale, Heart, MapPin, FileText, DollarSign } from "lucide-react";
+import { Pencil, Info, Scale, Heart, MapPin, FileText, DollarSign, AlertTriangle } from "lucide-react";
 
 export const metadata = {
   title: "Herd Details",
@@ -57,7 +58,7 @@ export default async function HerdDetailPage({
       .eq("saleyard", "National"),
     supabase
       .from("breed_premiums")
-      .select("breed, premium_percent"),
+      .select("breed, premium_percent:premium_pct"),
   ]);
 
   let herd = herdResult.data;
@@ -101,16 +102,22 @@ export default async function HerdDetailPage({
     entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
     nationalPriceMap.set(p.category, entries);
   }
-  const premiumMap = new Map((breedPremiumData ?? []).map((b) => [b.breed, b.premium_percent]));
+  // Seed with local breed premiums, then let Supabase override (matches iOS BreedPremiumService)
+  const premiumMap = new Map<string, number>(Object.entries(cattleBreedPremiums));
+  for (const b of (breedPremiumData ?? [])) {
+    premiumMap.set(b.breed, b.premium_percent);
+  }
 
-  // Calculate herd value
-  const herdValue = calculateHerdValue(
-    herd as Parameters<typeof calculateHerdValue>[0],
+  // Calculate herd value with price source tracking
+  const valuation = calculateHerdValuation(
+    herd as Parameters<typeof calculateHerdValuation>[0],
     nationalPriceMap,
     premiumMap,
     undefined,
     saleyardPriceMap,
   );
+  const herdValue = valuation.netValue;
+  const isFallback = valuation.priceSource !== "saleyard";
 
   let projectedWeight: number | null = null;
   if (herd.initial_weight > 0 && herd.daily_weight_gain > 0) {
@@ -150,19 +157,29 @@ export default async function HerdDetailPage({
       {herdValue > 0 && (
         <div className="mb-4 rounded-2xl bg-white/5 p-5 ring-1 ring-inset ring-white/8">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/15">
-              <DollarSign className="h-5 w-5 text-brand" />
+            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isFallback ? "bg-red-500/15" : "bg-brand/15"}`}>
+              {isFallback
+                ? <AlertTriangle className="h-5 w-5 text-red-400" />
+                : <DollarSign className="h-5 w-5 text-brand" />
+              }
             </div>
             <div>
               <p className="text-xs font-medium text-text-muted">Estimated Herd Value</p>
-              <p className="mt-0.5 text-2xl font-bold tabular-nums text-text-primary">
+              <p className={`mt-0.5 text-2xl font-bold tabular-nums ${isFallback ? "text-red-400" : "text-text-primary"}`}>
                 ${Math.round(herdValue).toLocaleString()}
               </p>
-              {(herd.head_count ?? 0) > 0 && (
-                <p className="text-xs text-text-muted">
-                  ${Math.round(herdValue / herd.head_count).toLocaleString()} per head
-                </p>
-              )}
+              <div className="flex items-center gap-2">
+                {(herd.head_count ?? 0) > 0 && (
+                  <p className={`text-xs ${isFallback ? "text-red-400/70" : "text-text-muted"}`}>
+                    ${Math.round(herdValue / herd.head_count).toLocaleString()} per head
+                  </p>
+                )}
+                {isFallback && (
+                  <span className="inline-flex items-center rounded-md bg-red-500/15 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
+                    {valuation.priceSource === "national" ? "National Avg" : "Est. Fallback"}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>

@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HerdComposition } from "./herd-composition";
 import { PortfolioChart } from "./portfolio-chart";
-import { calculateHerdValue } from "@/lib/engines/valuation-engine";
+import { calculateHerdValuation } from "@/lib/engines/valuation-engine";
+import { cattleBreedPremiums } from "@/lib/data/reference-data";
 import { Plus, Home, Package } from "lucide-react";
 
 export const metadata = {
@@ -47,7 +48,7 @@ export default async function DashboardPage() {
     // Breed premiums (matches iOS BreedPremiumService)
     supabase
       .from("breed_premiums")
-      .select("breed, premium_percent"),
+      .select("breed, premium_percent:premium_pct"),
   ]);
 
   // Fetch saleyard-specific prices for herds that have a selected_saleyard
@@ -82,18 +83,23 @@ export default async function DashboardPage() {
     entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
     saleyardPriceMap.set(key, entries);
   }
-  const premiumMap = new Map((breedPremiumData ?? []).map((b) => [b.breed, b.premium_percent]));
+  // Seed with local breed premiums, then let Supabase override (matches iOS BreedPremiumService)
+  const premiumMap = new Map<string, number>(Object.entries(cattleBreedPremiums));
+  for (const b of (breedPremiumData ?? [])) {
+    premiumMap.set(b.breed, b.premium_percent);
+  }
 
-  // Portfolio value using full iOS valuation formula:
-  // netValue = physicalValue - mortalityDeduction + breedingAccrual
-  // Price hierarchy: saleyard-specific > national > hardcoded fallback
-  const portfolioValue = activeHerds.reduce(
-    (sum, h) => sum + calculateHerdValue(
-      h as Parameters<typeof calculateHerdValue>[0],
+  // Portfolio value using full iOS valuation formula with price source tracking
+  let portfolioValue = 0;
+  let fallbackCount = 0;
+  for (const h of activeHerds) {
+    const result = calculateHerdValuation(
+      h as Parameters<typeof calculateHerdValuation>[0],
       nationalPriceMap, premiumMap, undefined, saleyardPriceMap
-    ),
-    0
-  );
+    );
+    portfolioValue += result.netValue;
+    if (result.priceSource !== "saleyard") fallbackCount++;
+  }
 
   // 12-month portfolio projection: advance the valuation date by i×30 days
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -103,10 +109,10 @@ export default async function DashboardPage() {
     const label = `${monthNames[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`;
     const futureDate = new Date(now.getTime() + i * 30 * 86_400_000);
     const value = activeHerds.reduce(
-      (sum, h) => sum + calculateHerdValue(
-        h as Parameters<typeof calculateHerdValue>[0],
+      (sum, h) => sum + calculateHerdValuation(
+        h as Parameters<typeof calculateHerdValuation>[0],
         nationalPriceMap, premiumMap, futureDate, saleyardPriceMap
-      ),
+      ).netValue,
       0
     );
     return { month: label, value: Math.round(value) };
@@ -131,7 +137,14 @@ export default async function DashboardPage() {
             <h1 className="text-4xl font-bold tracking-tight text-text-primary sm:text-5xl">
               ${Math.round(portfolioValue).toLocaleString()}
             </h1>
-            <p className="mt-1 text-sm text-text-muted">Portfolio Value</p>
+            <p className="mt-1 text-sm text-text-muted">
+              Portfolio Value
+              {fallbackCount > 0 && (
+                <span className="ml-2 inline-flex items-center rounded-md bg-red-500/15 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
+                  {fallbackCount} {fallbackCount === 1 ? "herd" : "herds"} using national avg
+                </span>
+              )}
+            </p>
 
             <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm">
               <span className="text-text-secondary">

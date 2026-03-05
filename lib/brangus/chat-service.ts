@@ -3,6 +3,7 @@
 
 import { createClient } from "../supabase/client";
 import { calculateHerdValue, type CategoryPriceEntry } from "../engines/valuation-engine";
+import { cattleBreedPremiums } from "../data/reference-data";
 import { toolDefinitions, executeTool } from "./tools";
 import type {
   ChatMessage,
@@ -386,7 +387,7 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
       .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard"),
     supabase
       .from("breed_premiums")
-      .select("breed, premium_percent"),
+      .select("breed, premium_percent:premium_pct"),
   ]);
 
   // Build pricing maps
@@ -407,9 +408,11 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
     }
   }
 
-  const premiumMap = new Map(
-    (breedPremiums ?? []).map((b: { breed: string; premium_percent: number }) => [b.breed, b.premium_percent])
-  );
+  // Seed with local breed premiums, then let Supabase override (matches iOS BreedPremiumService)
+  const premiumMap = new Map<string, number>(Object.entries(cattleBreedPremiums));
+  for (const b of (breedPremiums ?? []) as { breed: string; premium_percent: number }[]) {
+    premiumMap.set(b.breed, b.premium_percent);
+  }
 
   // Calculate portfolio value
   const activeHerds = (herds ?? []).filter((h: { is_sold: boolean }) => !h.is_sold);

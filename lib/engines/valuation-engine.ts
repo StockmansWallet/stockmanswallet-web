@@ -268,30 +268,35 @@ function resolvePriceFromEntries(
   return matchedEntry?.price_per_kg ?? null;
 }
 
+// MARK: - Detailed Valuation Result
+
+export type PriceSource = "saleyard" | "national" | "fallback";
+
+export interface HerdValuationResult {
+  netValue: number;
+  priceSource: PriceSource;
+  pricePerKg: number;
+  breedPremiumApplied: number;
+}
+
 /**
- * Full herd valuation matching iOS ValuationEngine formula exactly:
- * netValue = physicalValue - mortalityDeduction + breedingAccrual
+ * Full herd valuation matching iOS ValuationEngine formula exactly.
+ * Returns detailed result including price source for UI indicators.
  *
  * Price resolution hierarchy (mirrors iOS):
  *   1. Saleyard-specific + weight bracket
  *   2. National + weight bracket
  *   3. Hardcoded category fallback
- *
- * @param herd             Herd data from herd_groups (includes selected_saleyard)
- * @param nationalPriceMap category -> CategoryPriceEntry[] (national level, saleyard IS NULL)
- * @param premiumMap       breed -> premium_percent (from breed_premiums)
- * @param asOf             Valuation date (defaults to now)
- * @param saleyardPriceMap category|saleyard -> CategoryPriceEntry[] (saleyard-specific prices)
  */
-export function calculateHerdValue(
+export function calculateHerdValuation(
   herd: HerdForValuation,
   nationalPriceMap: Map<string, CategoryPriceEntry[]>,
   premiumMap: Map<string, number>,
   asOf: Date = new Date(),
   saleyardPriceMap?: Map<string, CategoryPriceEntry[]>
-): number {
+): HerdValuationResult {
   const head = herd.head_count ?? 0;
-  if (head === 0) return 0;
+  if (head === 0) return { netValue: 0, priceSource: "fallback", pricePerKg: 0, breedPremiumApplied: 0 };
 
   const now = asOf;
   const createdAt = herd.created_at ? new Date(herd.created_at) : now;
@@ -306,28 +311,33 @@ export function calculateHerdValue(
     herd.daily_weight_gain ?? 0
   );
 
-  // 2. Live price — map app category to MLA category, then resolve via hierarchy:
+  // 2. Live price - map app category to MLA category, then resolve via hierarchy:
   //    saleyard-specific > national > hardcoded fallback (mirrors iOS ValuationEngine)
   const mlaCategory = mapCategoryToMLACategory(herd.category);
   let basePrice: number | null = null;
+  let priceSource: PriceSource = "fallback";
 
   // Try saleyard-specific price first
   if (saleyardPriceMap && herd.selected_saleyard) {
     const saleyardKey = `${mlaCategory}|${herd.selected_saleyard}`;
     const saleyardEntries = saleyardPriceMap.get(saleyardKey) ?? [];
     basePrice = resolvePriceFromEntries(saleyardEntries, projectedWeight);
+    if (basePrice !== null) priceSource = "saleyard";
   }
 
   // Fall back to national price
   if (basePrice === null) {
     const nationalEntries = nationalPriceMap.get(mlaCategory) ?? [];
     basePrice = resolvePriceFromEntries(nationalEntries, projectedWeight);
+    if (basePrice !== null) priceSource = "national";
   }
 
   // Final fallback to hardcoded defaults
   if (basePrice === null) {
     basePrice = defaultFallbackPrice(herd.category);
+    priceSource = "fallback";
   }
+
   const rawPremiumPct = herd.breed_premium_override ?? premiumMap.get(herd.breed) ?? 0;
   const adjustedPrice = basePrice * (1 + rawPremiumPct / 100);
 
@@ -372,7 +382,21 @@ export function calculateHerdValue(
     );
   }
 
-  return physicalValue - mortalityDeduction + breedingAccrual;
+  const netValue = physicalValue - mortalityDeduction + breedingAccrual;
+  return { netValue, priceSource, pricePerKg: adjustedPrice, breedPremiumApplied: rawPremiumPct };
+}
+
+/**
+ * Convenience wrapper - returns just the net value (backward compatible).
+ */
+export function calculateHerdValue(
+  herd: HerdForValuation,
+  nationalPriceMap: Map<string, CategoryPriceEntry[]>,
+  premiumMap: Map<string, number>,
+  asOf: Date = new Date(),
+  saleyardPriceMap?: Map<string, CategoryPriceEntry[]>
+): number {
+  return calculateHerdValuation(herd, nationalPriceMap, premiumMap, asOf, saleyardPriceMap).netValue;
 }
 
 // Re-export for convenience

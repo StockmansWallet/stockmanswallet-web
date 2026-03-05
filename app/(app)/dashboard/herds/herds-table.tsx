@@ -39,10 +39,12 @@ type SortKey = "name" | "breed" | "category" | "head_count" | "current_weight" |
 export function HerdsTable({
   herds,
   herdValues,
+  herdSources,
   propertyGroups,
 }: {
   herds: HerdWithProperty[];
   herdValues: Record<string, number>;
+  herdSources?: Record<string, string>;
   propertyGroups: PropertyGroup[];
 }) {
   const router = useRouter();
@@ -203,6 +205,8 @@ export function HerdsTable({
 
   function HerdRow({ herd }: { herd: HerdWithProperty }) {
     const value = herdValues[herd.id] ?? 0;
+    const source = herdSources?.[herd.id];
+    const isFallback = source !== undefined && source !== "saleyard";
     return (
       <tr
         onClick={() => router.push(`/dashboard/herds/${herd.id}`)}
@@ -221,7 +225,7 @@ export function HerdsTable({
         <td className="px-5 py-3.5 text-right tabular-nums font-medium text-text-primary">
           {herd.head_count?.toLocaleString() ?? "\u2014"}
         </td>
-        <td className="px-5 py-3.5 text-right tabular-nums text-text-secondary">
+        <td className={`px-5 py-3.5 text-right tabular-nums ${isFallback ? "text-red-400" : "text-text-secondary"}`}>
           {value > 0 ? `$${Math.round(value).toLocaleString()}` : "\u2014"}
         </td>
         <td className="hidden px-5 py-3.5 text-right tabular-nums text-text-secondary xl:table-cell">
