@@ -236,7 +236,7 @@ function EmptyState({ onPromptClick }: { onPromptClick: (prompt: string) => void
           <button
             key={prompt}
             onClick={() => onPromptClick(prompt)}
-            className="rounded-full bg-white/5 px-3.5 py-1.5 text-xs text-text-secondary ring-1 ring-inset ring-white/8 transition-all hover:bg-white/8 hover:text-text-primary"
+            className="rounded-full bg-white/5 px-3.5 py-1.5 text-xs text-text-secondary transition-all hover:bg-white/8 hover:text-text-primary"
           >
             {prompt}
           </button>
@@ -257,7 +257,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
           isUser
             ? "bg-brand text-white"
-            : "bg-white/5 text-text-primary ring-1 ring-inset ring-white/8"
+            : "bg-white/5 text-text-primary"
         }`}
       >
         {isUser ? (
@@ -331,7 +331,7 @@ function formatInlineText(text: string): string {
 function TypingIndicator() {
   return (
     <div className="flex justify-start">
-      <div className="flex items-center gap-1.5 rounded-2xl bg-white/5 px-4 py-3 ring-1 ring-inset ring-white/8">
+      <div className="flex items-center gap-1.5 rounded-2xl bg-white/5 px-4 py-3">
         <span className="h-2 w-2 rounded-full bg-brand/60 animate-bounce [animation-delay:0ms]" />
         <span className="h-2 w-2 rounded-full bg-brand/60 animate-bounce [animation-delay:150ms]" />
         <span className="h-2 w-2 rounded-full bg-brand/60 animate-bounce [animation-delay:300ms]" />

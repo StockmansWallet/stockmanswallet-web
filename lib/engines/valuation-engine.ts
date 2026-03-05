@@ -296,16 +296,16 @@ export interface HerdValuationResult {
  * Full herd valuation matching iOS ValuationEngine formula exactly.
  * Returns detailed result including price source for UI indicators.
  *
- * Price resolution hierarchy (mirrors iOS):
+ * Price resolution hierarchy (mirrors iOS resolveGeneralBasePrice + getMarketPrice):
  *   1. Saleyard general (breed=null) price + breed premium
- *   2. Saleyard breed-specific price (no breed premium - already baked in)
- *   3. National (breed=null) + breed premium
+ *   2. National general (breed=null) price + breed premium
+ *   3. Saleyard breed-specific price (no breed premium - already baked in)
  *   4. Hardcoded category fallback + breed premium
  *
- * The breed premium "double-application guard" mirrors iOS resolveGeneralBasePrice():
- * breed premium is only applied to general (breed=null) base prices. When the only
- * available saleyard price is breed-specific (from MLA transaction data), it already
- * reflects that breed's market value, so applying premium again would double-count.
+ * iOS first resolves a "general base price" (saleyard general -> national general)
+ * via resolveGeneralBasePrice(). If found, breed premium is applied to it. Only when
+ * NO general base exists at any level does iOS fall through to the raw price from
+ * getMarketPrice() (which may be breed-specific) without breed premium.
  */
 export function calculateHerdValuation(
   herd: HerdForValuation,
@@ -337,9 +337,10 @@ export function calculateHerdValuation(
   let priceSource: PriceSource = "fallback";
   let skipBreedPremium = false;
 
-  // 2a. Try saleyard general (breed=null) price first - breed premium safe
   // Resolve short saleyard name to full MLA name (e.g. "Charters Towers" -> "Charters Towers Dalrymple Saleyards")
   const resolvedSaleyard = herd.selected_saleyard ? resolveMLASaleyardName(herd.selected_saleyard) : null;
+
+  // 2a. Try saleyard general (breed=null) price first - breed premium safe
   if (saleyardPriceMap && resolvedSaleyard) {
     const saleyardKey = `${mlaCategory}|${resolvedSaleyard}`;
     const saleyardEntries = saleyardPriceMap.get(saleyardKey) ?? [];
@@ -347,7 +348,23 @@ export function calculateHerdValuation(
     if (basePrice !== null) priceSource = "saleyard";
   }
 
-  // 2b. Try saleyard breed-specific price - skip breed premium (double-application guard)
+  // 2b. Try national general (breed=null) price - breed premium safe
+  // iOS resolveGeneralBasePrice() checks saleyard general then national general
+  // BEFORE falling through to breed-specific. We match this order.
+  if (basePrice === null) {
+    const nationalEntries = nationalPriceMap.get(mlaCategory) ?? [];
+    basePrice = resolvePriceFromEntries(nationalEntries, projectedWeight);
+    if (basePrice !== null) {
+      // Use "saleyard" source if saleyard breed-specific data exists (matches iOS:
+      // getMarketPrice returns saleyard source, resolveGeneralBasePrice uses national base)
+      priceSource = (saleyardBreedPriceMap && resolvedSaleyard &&
+        (saleyardBreedPriceMap.get(`${mlaCategory}|${herd.breed}|${resolvedSaleyard}`) ?? []).length > 0)
+        ? "saleyard" : "national";
+    }
+  }
+
+  // 2c. No general base price at any level - try saleyard breed-specific (skip premium)
+  // Only when no general (breed=null) price exists anywhere (matches iOS resolveGeneralBasePrice returning nil)
   if (basePrice === null && saleyardBreedPriceMap && resolvedSaleyard) {
     const breedKey = `${mlaCategory}|${herd.breed}|${resolvedSaleyard}`;
     const breedEntries = saleyardBreedPriceMap.get(breedKey) ?? [];
@@ -356,13 +373,6 @@ export function calculateHerdValuation(
       priceSource = "saleyard";
       skipBreedPremium = true;
     }
-  }
-
-  // 2c. Fall back to national price (breed=null, premium safe)
-  if (basePrice === null) {
-    const nationalEntries = nationalPriceMap.get(mlaCategory) ?? [];
-    basePrice = resolvePriceFromEntries(nationalEntries, projectedWeight);
-    if (basePrice !== null) priceSource = "national";
   }
 
   // 2d. Final fallback to hardcoded defaults

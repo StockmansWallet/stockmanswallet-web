@@ -13,7 +13,7 @@ export default function PropertyDetailLoading() {
       </div>
 
       {/* Form card */}
-      <div className="rounded-2xl bg-white/5 p-6 ring-1 ring-inset ring-white/8">
+      <div className="rounded-2xl bg-white/5 p-6">
         <div className="space-y-5">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i}>

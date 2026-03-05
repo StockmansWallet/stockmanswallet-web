@@ -265,7 +265,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
 
       {/* Horizon sections */}
       {horizonGroups.length === 0 ? (
-        <div className="rounded-2xl bg-white/[0.03] p-12 text-center ring-1 ring-inset ring-white/8">
+        <div className="rounded-2xl bg-white/[0.03] p-12 text-center">
           <p className="text-sm text-text-muted">
             {filterCategory
               ? `No ${filterCategory.toLowerCase()} items to show.`

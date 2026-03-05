@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function SkeletonInfoCard({ rows = 4 }: { rows?: number }) {
   return (
-    <div className="rounded-2xl bg-white/5 ring-1 ring-inset ring-white/8">
+    <div className="rounded-2xl bg-white/5">
       <div className="px-5 pt-5 pb-4">
         <Skeleton className="h-5 w-28" />
       </div>

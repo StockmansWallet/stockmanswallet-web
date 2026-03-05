@@ -11,7 +11,7 @@ export default function SettingsLoading() {
 
       <div className="space-y-6">
         {/* Profile card */}
-        <div className="rounded-2xl bg-white/5 ring-1 ring-inset ring-white/8">
+        <div className="rounded-2xl bg-white/5">
           <div className="px-5 pt-5 pb-4">
             <Skeleton className="h-5 w-20" />
           </div>
@@ -34,7 +34,7 @@ export default function SettingsLoading() {
         </div>
 
         {/* Password card */}
-        <div className="rounded-2xl bg-white/5 ring-1 ring-inset ring-white/8">
+        <div className="rounded-2xl bg-white/5">
           <div className="px-5 pt-5 pb-4">
             <Skeleton className="h-5 w-36" />
           </div>
@@ -51,7 +51,7 @@ export default function SettingsLoading() {
         </div>
 
         {/* Demo data card */}
-        <div className="rounded-2xl bg-white/5 p-5 ring-1 ring-inset ring-white/8">
+        <div className="rounded-2xl bg-white/5 p-5">
           <Skeleton className="mb-1 h-4 w-44" />
           <Skeleton className="mb-4 h-3 w-72" />
           <div className="flex gap-3">

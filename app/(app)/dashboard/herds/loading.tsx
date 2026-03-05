@@ -21,7 +21,7 @@ export default function HerdsLoading() {
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-2xl bg-white/5 ring-1 ring-inset ring-white/8">
+      <div className="overflow-hidden rounded-2xl bg-white/5">
         {/* Table header */}
         <div className="flex gap-4 border-b border-white/5 px-5 py-3">
           <Skeleton className="h-4 w-32" />

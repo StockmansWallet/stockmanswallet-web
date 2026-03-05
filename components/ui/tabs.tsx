@@ -21,7 +21,7 @@ function Tabs({ tabs, defaultTab }: TabsProps) {
   return (
     <div>
       {/* Tab bar */}
-      <div className="mb-6 flex gap-1 rounded-2xl bg-white/5 p-1 ring-1 ring-inset ring-white/8">
+      <div className="mb-6 flex gap-1 rounded-2xl bg-white/5 p-1">
         {tabs.map((tab) => (
           <button
             key={tab.id}

@@ -254,7 +254,7 @@ export function HerdsTable({
                 className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
                   isActive
                     ? "bg-brand/15 text-brand ring-1 ring-inset ring-brand/25"
-                    : "bg-white/5 text-text-muted ring-1 ring-inset ring-white/8 hover:bg-white/8 hover:text-text-secondary"
+                    : "bg-white/5 text-text-muted hover:bg-white/8 hover:text-text-secondary"
                 }`}
               >
                 {tab}
@@ -279,7 +279,7 @@ export function HerdsTable({
       </div>
 
       {sorted.length === 0 ? (
-        <div className="overflow-hidden rounded-2xl bg-white/5 ring-1 ring-inset ring-white/8">
+        <div className="overflow-hidden rounded-2xl bg-white/5">
           <p className="px-5 py-16 text-center text-sm text-text-muted">
             {search ? "No herds match your search." : "No herds found."}
           </p>
@@ -290,7 +290,7 @@ export function HerdsTable({
             const groupHead = group.herds.reduce((s, h) => s + (h.head_count ?? 0), 0);
             const groupValue = group.herds.reduce((s, h) => s + (herdValues[h.id] ?? 0), 0);
             return (
-              <div key={group.id ?? "_unassigned"} className="overflow-hidden rounded-2xl bg-white/5 ring-1 ring-inset ring-white/8">
+              <div key={group.id ?? "_unassigned"} className="overflow-hidden rounded-2xl bg-white/5">
                 {/* Property header */}
                 <div className="flex items-center justify-between border-b border-white/6 px-5 py-3.5">
                   <div className="flex items-center gap-2.5">
@@ -336,7 +336,7 @@ export function HerdsTable({
           })}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl bg-white/5 ring-1 ring-inset ring-white/8">
+        <div className="overflow-hidden rounded-2xl bg-white/5">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>

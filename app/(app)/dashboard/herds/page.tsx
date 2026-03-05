@@ -167,7 +167,7 @@ export default async function HerdsPage() {
         <>
           {/* Stats */}
           <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-            <div className="rounded-2xl bg-white/5 p-4 ring-1 ring-inset ring-white/8 sm:p-5">
+            <div className="rounded-2xl bg-white/5 p-4 sm:p-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/15">
                   <DollarSign className="h-4 w-4 text-brand" />
@@ -181,7 +181,7 @@ export default async function HerdsPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl bg-white/5 p-4 ring-1 ring-inset ring-white/8 sm:p-5">
+            <div className="rounded-2xl bg-white/5 p-4 sm:p-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/15">
                   <Tags className="h-4 w-4 text-brand" />
@@ -193,7 +193,7 @@ export default async function HerdsPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl bg-white/5 p-4 ring-1 ring-inset ring-white/8 sm:p-5">
+            <div className="rounded-2xl bg-white/5 p-4 sm:p-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/15">
                   <Layers className="h-4 w-4 text-brand" />
@@ -205,7 +205,7 @@ export default async function HerdsPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl bg-white/5 p-4 ring-1 ring-inset ring-white/8 sm:p-5">
+            <div className="rounded-2xl bg-white/5 p-4 sm:p-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/15">
                   <Scale className="h-4 w-4 text-brand" />

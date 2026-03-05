@@ -171,7 +171,7 @@ export default async function HerdDetailPage({
 
       {/* Herd Value */}
       {herdValue > 0 && (
-        <div className="mb-4 rounded-2xl bg-white/5 p-5 ring-1 ring-inset ring-white/8">
+        <div className="mb-4 rounded-2xl bg-white/5 p-5">
           <div className="flex items-center gap-3">
             <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isFallback ? "bg-red-500/15" : "bg-brand/15"}`}>
               {isFallback
