@@ -78,7 +78,7 @@ export default function Hero() {
             </div>
 
             {/* Floating Portfolio Value Card */}
-            <div className="absolute -left-36 top-8 hidden w-56 rounded-[20px] glass p-5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] lg:block">
+            <div className="absolute -left-36 top-8 hidden w-56 rounded-[20px] border border-white/[0.08] bg-[rgba(39,31,22,0.7)] p-5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl lg:block">
               <p className="text-xs text-text-tertiary">Portfolio Value</p>
               <p className="mt-1 text-3xl font-bold text-white">$1.52M</p>
               <div className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-success/15 px-2.5 py-0.5">
@@ -91,7 +91,7 @@ export default function Hero() {
             </div>
 
             {/* Floating Chart Card */}
-            <div className="absolute -right-32 bottom-24 hidden w-60 rounded-[20px] glass p-5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] lg:block">
+            <div className="absolute -right-32 bottom-24 hidden w-60 rounded-[20px] border border-white/[0.08] bg-[rgba(39,31,22,0.7)] p-5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl lg:block">
               <div className="mb-3 flex items-center justify-between">
                 <p className="text-xs font-medium text-text-secondary">Performance</p>
                 <p className="text-xs text-brand">All Time</p>
