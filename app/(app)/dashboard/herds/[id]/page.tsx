@@ -10,6 +10,8 @@ import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/referenc
 import { DeleteHerdButton } from "./delete-button";
 import { Pencil, Info, Scale, Heart, MapPin, FileText, DollarSign, AlertTriangle } from "lucide-react";
 
+export const revalidate = 0;
+
 export const metadata = {
   title: "Herd Details",
 };

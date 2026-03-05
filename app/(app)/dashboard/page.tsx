@@ -9,6 +9,8 @@ import { calculateHerdValuation, mapCategoryToMLACategory } from "@/lib/engines/
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 import { Plus, Home, Package } from "lucide-react";
 
+export const revalidate = 0;
+
 export const metadata = {
   title: "Dashboard",
 };

@@ -9,6 +9,8 @@ import { Plus, Tags, Layers, DollarSign, Scale } from "lucide-react";
 import { calculateHerdValuation, mapCategoryToMLACategory, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 
+export const revalidate = 0;
+
 export const metadata = {
   title: "Herds",
 };
