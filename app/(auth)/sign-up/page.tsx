@@ -6,13 +6,11 @@ import { signUp, signInWithApple } from "../actions";
 
 export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-    setSuccess(null);
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
@@ -20,8 +18,6 @@ export default function SignUpPage() {
 
     if (result?.error) {
       setError(result.error);
-    } else if (result?.success) {
-      setSuccess(result.success);
     }
     setLoading(false);
   }
@@ -74,12 +70,6 @@ export default function SignUpPage() {
         {error && (
           <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
             {error}
-          </p>
-        )}
-
-        {success && (
-          <p className="rounded-lg bg-green-50 px-3 py-2 text-sm text-green-700 dark:bg-green-900/20 dark:text-green-400">
-            {success}
           </p>
         )}
 

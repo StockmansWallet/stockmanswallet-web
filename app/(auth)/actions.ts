@@ -31,7 +31,8 @@ export async function signUp(formData: FormData) {
     return { error: error.message };
   }
 
-  return { success: "Check your email for a confirmation link." };
+  // mailer_autoconfirm is enabled - account is confirmed immediately
+  redirect("/dashboard");
 }
 
 export async function signInWithApple() {
