@@ -62,7 +62,6 @@ export default async function DashboardPage() {
         .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed")
         .in("saleyard", saleyardsToFetch)
         .in("category", mlaCategories)
-        .or(`expires_at.gt.${new Date().toISOString()},expires_at.is.null`)
         .order("data_date", { ascending: false })
         .limit(500)
     : { data: [] as { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null }[] };

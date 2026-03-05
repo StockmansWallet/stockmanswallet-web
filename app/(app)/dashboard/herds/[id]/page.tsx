@@ -95,7 +95,6 @@ export default async function HerdDetailPage({
     .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed")
     .in("saleyard", saleyardsToFetch)
     .eq("category", mlaCategory)
-    .or(`expires_at.gt.${new Date().toISOString()},expires_at.is.null`)
     .order("data_date", { ascending: false })
     .limit(500);
 
