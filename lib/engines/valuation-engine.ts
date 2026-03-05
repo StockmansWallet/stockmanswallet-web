@@ -251,6 +251,11 @@ export interface CategoryPriceEntry {
 /**
  * Resolves the best price from a list of CategoryPriceEntry for a given projected weight.
  * Tries weight-range match first, then falls back to any-weight entry.
+ *
+ * Multiple entries per weight range are common (one per MLA sale date).
+ * iOS ValuationEngine overwrites the cache on each iteration (last entry wins),
+ * and for fallback keys (no weight range) keeps the highest price.
+ * We match this: last entry for weight-range match, highest for any-weight fallback.
  */
 function resolvePriceFromEntries(
   entries: CategoryPriceEntry[],
@@ -262,10 +267,18 @@ function resolvePriceFromEntries(
     .filter((r): r is string => r !== null);
   const matchedRange =
     weightRanges.length > 0 ? matchWeightRange(projectedWeight, weightRanges) : null;
-  const matchedEntry = matchedRange
-    ? entries.find((e) => e.weight_range === matchedRange)
-    : entries.find((e) => e.weight_range === null) ?? entries[0];
-  return matchedEntry?.price_per_kg ?? null;
+
+  if (matchedRange) {
+    // Take the LAST entry for the matched weight range (matches iOS cache overwrite behavior).
+    // Supabase returns in insertion order (oldest first), so last = most recently uploaded price.
+    const matched = entries.filter((e) => e.weight_range === matchedRange);
+    if (matched.length > 0) return matched[matched.length - 1].price_per_kg;
+  }
+
+  // Fallback: no weight range match - take the HIGHEST price (matches iOS max-wins logic)
+  const nullRange = entries.filter((e) => e.weight_range === null);
+  if (nullRange.length > 0) return Math.max(...nullRange.map((e) => e.price_per_kg));
+  return Math.max(...entries.map((e) => e.price_per_kg));
 }
 
 // MARK: - Detailed Valuation Result
