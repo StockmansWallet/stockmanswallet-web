@@ -91,6 +91,32 @@ Fixed soft-deleted demo properties (e.g. Doongara Station) still appearing in pr
 - `app/(app)/dashboard/herds/[id]/edit/page.tsx` - Same filter
 - `app/(app)/dashboard/properties/[id]/page.tsx` - Same filter
 
+## Saleyard Name Resolution
+
+App-side saleyard names (e.g. "Charters Towers") don't always match MLA's full names (e.g. "Charters Towers Dalrymple Saleyards"). Added `resolveMLASaleyardName()` to map short names to full MLA names before querying `category_prices`. Used in the valuation engine and all page-level saleyard price queries.
+
+**Files changed:**
+- `lib/engines/valuation-engine.ts` - Calls `resolveMLASaleyardName` before building saleyard price lookup keys
+- `app/(app)/dashboard/herds/[id]/page.tsx` - Resolves saleyard name before query
+- `app/(app)/dashboard/herds/page.tsx` - Resolves saleyard names in set before query
+
+## Last-Price and Max-Price Resolution (iOS Cache Parity)
+
+`resolvePriceFromEntries` now matches iOS `ValuationEngine` cache overwrite behaviour. Multiple entries per weight range are common (one per MLA sale date). For weight-range matches, takes the last entry (most recently uploaded price, matching iOS cache overwrite). For fallback (no weight range), takes the highest price (matching iOS max-wins logic).
+
+**Files changed:**
+- `lib/engines/valuation-engine.ts` - Updated `resolvePriceFromEntries` to use last-wins for range matches and max for fallback
+
+## Category Filter on Saleyard Price Queries
+
+A single saleyard can have 7000+ rows across all categories in `category_prices`, exceeding PostgREST's default 1000-row limit. Added `.in("category", mlaCategories)` filter to all saleyard price queries so only the relevant categories are fetched. Brangus chat service refactored to fetch national prices in the parallel batch and saleyard prices in a separate filtered query after herds load.
+
+**Files changed:**
+- `app/(app)/dashboard/page.tsx` - Adds `.in("category", mlaCategories)` to saleyard query
+- `app/(app)/dashboard/herds/page.tsx` - Same category filter
+- `app/(app)/dashboard/herds/[id]/page.tsx` - Uses `.eq("category", mlaCategory)` for single-herd query
+- `lib/brangus/chat-service.ts` - Split into parallel national fetch + sequential saleyard fetch with category filter
+
 ## Saleyard Breed-Specific Pricing (iOS Parity)
 
 Valuation engine now supports breed-specific saleyard prices with a double-application guard matching iOS `resolveGeneralBasePrice()`. MLA saleyard transaction data is mostly breed-specific (breed IS NOT NULL), so prices are split into two maps: general (breed=null) where breed premium is applied, and breed-specific where premium is skipped since it's already baked into the price.
