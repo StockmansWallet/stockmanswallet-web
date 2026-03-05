@@ -26,7 +26,13 @@ Major UI/UX overhaul, herd valuation engine, property grouping, and critical bug
 
 **Clear All Data** - New "Data Management" section in settings with a "Clear All Data" button that calls the `clear-user-data` Edge Function. Double confirmation required. Permanently deletes all user herds, records, and data from the cloud — affects both web and iOS. Account remains active.
 
-**Bug fixes** - Fixed herd/property creation failing with "null value in column id" by adding client-generated UUIDs (offline-first sync requirement). Fixed delete operations blocked by RLS by switching from hard `.delete()` to soft-delete with `is_deleted`, `deleted_at`, `updated_at`. Fixed iOS not syncing deletions by including `updated_at` timestamp. Fixed demo data clear not working (same RLS/soft-delete issue). Fixed soft-deleted demo properties appearing in dropdowns by adding `is_deleted: false` filters to all property queries. Fixed all create/update mutations missing `updated_at`, preventing iOS from detecting web changes. Fixed yard book field names (`category` → `category_raw`, `recurrence_rule` → `recurrence_rule_raw`) to match Supabase schema.
+**Price source indicators** - Valuation engine now returns detailed results via `calculateHerdValuation` including `priceSource` (saleyard/national/fallback), `pricePerKg`, and `breedPremiumApplied`. Herd detail page shows a red warning icon and "National Avg" or "Est. Fallback" badge when not using saleyard pricing. Herds table highlights values in red for non-saleyard prices. Dashboard shows a fallback count badge next to Portfolio Value.
+
+**Local breed premium fallback** - Premium map now seeds with local `cattleBreedPremiums` before applying Supabase overrides, matching iOS `BreedPremiumService`. Ensures valuations work even when breed_premiums table is empty.
+
+**Admin MLA CSV upload** - Admin-only page for uploading MLA market data CSV files. Server-side email whitelist, CSV format auto-detection, chunked upload with progress. Linked from Settings.
+
+**Bug fixes** - Fixed Supabase column names: `price_per_kg` → `final_price_per_kg`, `premium_percent` → `premium_pct` (using query aliases for backward compatibility). Fixed national price filter from `.is("saleyard", null)` to `.eq("saleyard", "National")`. Fixed prices stored in cents not being converted to dollars (÷ 100). Fixed herd/property creation failing with "null value in column id" by adding client-generated UUIDs. Fixed delete operations blocked by RLS by switching to soft-delete. Fixed all create/update mutations missing `updated_at`, preventing iOS sync. Fixed yard book field names (`category` → `category_raw`, `recurrence_rule` → `recurrence_rule_raw`).
 
 ---
 

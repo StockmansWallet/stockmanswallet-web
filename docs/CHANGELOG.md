@@ -91,6 +91,48 @@ Fixed soft-deleted demo properties (e.g. Doongara Station) still appearing in pr
 - `app/(app)/dashboard/herds/[id]/edit/page.tsx` - Same filter
 - `app/(app)/dashboard/properties/[id]/page.tsx` - Same filter
 
+## Price Source Indicators and Valuation Detail
+
+Added price source tracking to the valuation engine. New `calculateHerdValuation` function returns a `HerdValuationResult` with `netValue`, `priceSource` (saleyard/national/fallback), `pricePerKg`, and `breedPremiumApplied`. The original `calculateHerdValue` is kept as a convenience wrapper.
+
+Herd detail page shows red warning icon and "National Avg" or "Est. Fallback" badge when not using saleyard-specific pricing. Herds table highlights values in red when using non-saleyard prices. Dashboard shows a badge like "3 herds using national avg" next to Portfolio Value when applicable.
+
+**Files changed:**
+- `lib/engines/valuation-engine.ts` - New `calculateHerdValuation`, `HerdValuationResult` type, `PriceSource` type; `calculateHerdValue` kept as wrapper
+- `app/(app)/dashboard/herds/[id]/page.tsx` - Red AlertTriangle icon, price source badge, conditional colour styling
+- `app/(app)/dashboard/herds/herds-table.tsx` - New `herdSources` prop, red text for fallback values
+- `app/(app)/dashboard/herds/page.tsx` - Passes `herdSourcesObj` to table
+- `app/(app)/dashboard/page.tsx` - Counts fallback herds, shows badge on portfolio value
+
+## Supabase Column Name Fixes
+
+Fixed column names to match the actual Supabase schema. `price_per_kg` → `final_price_per_kg` (aliased as `price_per_kg` in queries), `premium_percent` → `premium_pct` (aliased as `premium_percent`). National prices filtered with `.eq("saleyard", "National")` instead of `.is("saleyard", null).is("state", null)`. Prices converted from cents to dollars (÷ 100) in all price maps.
+
+**Files changed:**
+- `app/(app)/dashboard/page.tsx` - Column aliases, cents→dollars, national filter
+- `app/(app)/dashboard/herds/page.tsx` - Same
+- `app/(app)/dashboard/herds/[id]/page.tsx` - Same
+- `lib/brangus/chat-service.ts` - Same, plus national/saleyard split logic updated
+
+## Local Breed Premium Fallback
+
+Premium map now seeds with local `cattleBreedPremiums` from reference data before applying Supabase overrides, matching the iOS `BreedPremiumService` pattern. Ensures valuations work even when the breed_premiums table is empty or missing entries.
+
+**Files changed:**
+- `app/(app)/dashboard/page.tsx` - Seeds premiumMap from `cattleBreedPremiums`
+- `app/(app)/dashboard/herds/page.tsx` - Same
+- `app/(app)/dashboard/herds/[id]/page.tsx` - Same
+- `lib/brangus/chat-service.ts` - Same
+
+## Admin MLA CSV Upload
+
+New admin-only page for uploading MLA market data CSV files. Server-side email whitelist gate restricts access to admin users. Supports CSV format auto-detection, chunked transaction upload with progress indicator. Linked from the Settings page.
+
+**Files created/changed:**
+- `app/(app)/dashboard/admin/mla-upload/page.tsx` - Admin gate with email whitelist
+- `app/(app)/dashboard/admin/mla-upload/mla-uploader.tsx` - CSV parser, format detection, chunked upload with progress
+- `app/(app)/dashboard/settings/page.tsx` - Admin section with link to MLA upload
+
 ## iOS Sync Fix — updated_at on All Mutations
 
 Herd and property create/update actions were not setting `updated_at`, so the iOS app couldn't detect changes made on the web. Added `updated_at: new Date().toISOString()` to `createHerd`, `updateHerd`, `createProperty`, and `updateProperty`. Delete actions already had it.

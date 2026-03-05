@@ -166,13 +166,14 @@ The Supabase data migration is the critical path for BOTH platforms. Do it now. 
 - **Herds CRUD** — full create/read/update/delete with property assignment, species/breed/category selection, soft-delete, client-generated UUIDs for iOS sync
 - **Properties CRUD** — full create/read/update/delete with soft-delete and UUID generation
 - **Herds page** — premium UI with stat cards (total value, head, herds, avg weight), species pill filters, sortable table, search, property grouping with separate cards per property
-- **Valuation engine** — TypeScript port of iOS `calculateHerdValue` with MLA category prices, breed premiums, weight-range bracket matching, and saleyard-specific pricing hierarchy (saleyard > national > fallback)
-- **Herd detail page** — shows estimated herd value with per-head breakdown using live pricing data
+- **Valuation engine** — TypeScript port of iOS `calculateHerdValue` with MLA category prices, breed premiums, weight-range bracket matching, saleyard-specific pricing hierarchy (saleyard > national > fallback), price source tracking with `calculateHerdValuation`, and local breed premium fallback
+- **Herd detail page** — shows estimated herd value with per-head breakdown, red price source indicators when using national avg or fallback pricing
 - **Yard Book** — full implementation matching iOS: run sheet with horizon grouping (Overdue/Today/Next 7/30/90/Later), 5 colour-coded categories with filter pills, countdown badges, herd linking (multi-select), reminder offsets, recurrence rules, mark complete/incomplete, show/hide completed, stat cards, soft-delete. Data syncs bidirectionally with iOS via shared Supabase table
 - **Stockman IQ (Brangus chat)** — interactive AI chat component with message display, input handling, suggested prompts, chat service layer, and tool definitions in `lib/brangus/`
 - **Demo data seeder** — Doongara Station with 20 herds, flagged as demo data, safe clear that uses soft-delete
 - **Clear All Data** — settings option to permanently delete all user data via Edge Function (double confirmation, affects both web and iOS)
 - **iOS sync** — all create/update/delete mutations set `updated_at` for iOS sync detection
+- **Admin MLA upload** — admin-only CSV upload page for MLA market data with email whitelist, format auto-detection, chunked upload with progress
 - Tool pages scaffolded: Freight IQ, Grid IQ, Reports, Market View, Settings
 - UI component library: Card, Button, Input, Badge, PageHeader, EmptyState, etc.
 - Lucide-react icons throughout (matching iOS SF Symbols)
