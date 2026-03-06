@@ -8,11 +8,8 @@ import {
   MapPinned,
   Database,
   Shield,
-  AlertTriangle,
   ChevronRight,
 } from "lucide-react";
-import { SignOutButton } from "./sign-out-button";
-import { DeleteAccountButton } from "./delete-account-button";
 
 export const revalidate = 0;
 
@@ -119,18 +116,6 @@ export default async function SettingsPage() {
           </Card>
         )}
 
-        {/* Danger Zone */}
-        <div>
-          <h2 className="mb-3 px-1 text-xs font-semibold uppercase tracking-wider text-red-400/70">
-            Danger Zone
-          </h2>
-          <Card className="ring-1 ring-inset ring-red-500/20">
-            <CardContent className="space-y-1 p-2">
-              <SignOutButton />
-              <DeleteAccountButton />
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </div>
   );

@@ -2,9 +2,10 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { User, Lock } from "lucide-react";
+import { User, Lock, Trash2 } from "lucide-react";
 import { ProfileForm } from "../profile-form";
 import { PasswordForm } from "../password-form";
+import { DeleteAccountButton } from "../delete-account-button";
 
 export const revalidate = 0;
 
@@ -70,6 +71,25 @@ export default async function AccountSettingsPage() {
           </CardHeader>
           <CardContent>
             <PasswordForm />
+          </CardContent>
+        </Card>
+
+        {/* Delete Account */}
+        <Card className="ring-1 ring-inset ring-red-500/20">
+          <CardHeader>
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-red-500/15">
+                <Trash2 className="h-3.5 w-3.5 text-red-400" />
+              </div>
+              <CardTitle className="text-red-400">Delete Account</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4 text-xs text-text-muted leading-relaxed">
+              Permanently delete your account and all associated data including herds,
+              properties, records, and settings. This affects both the web app and iOS app.
+            </p>
+            <DeleteAccountButton />
           </CardContent>
         </Card>
       </div>
