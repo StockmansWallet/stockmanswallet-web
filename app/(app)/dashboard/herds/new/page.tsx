@@ -22,7 +22,7 @@ export default async function NewHerdPage() {
     .order("property_name");
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="max-w-3xl">
       <PageHeader
         title="Add Herd"
         subtitle="Create a new herd to track your livestock."

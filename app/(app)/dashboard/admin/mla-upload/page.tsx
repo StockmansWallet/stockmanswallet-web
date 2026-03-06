@@ -28,7 +28,7 @@ export default async function MlaUploadPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="max-w-3xl">
       <PageHeader
         title="MLA CSV Upload"
         subtitle="Upload MLA CSV files to populate saleyard-specific pricing data."

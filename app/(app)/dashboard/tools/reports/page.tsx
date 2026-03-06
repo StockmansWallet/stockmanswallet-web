@@ -34,7 +34,7 @@ const reports = [
 
 export default function ReportsPage() {
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="max-w-3xl">
       <PageHeader title="Reports" subtitle="Generate and export reports for your operation." />
       <div className="space-y-3">
         {reports.map((report) => (

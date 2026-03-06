@@ -6,7 +6,7 @@ export const metadata = { title: "Asset Register" };
 
 export default function AssetRegisterPage() {
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="max-w-5xl">
       <PageHeader
         title="Asset Register"
         subtitle="Complete herd listing with current valuations."

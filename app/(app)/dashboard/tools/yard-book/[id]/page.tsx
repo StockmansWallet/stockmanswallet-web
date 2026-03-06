@@ -166,7 +166,7 @@ export default async function YardBookItemPage({
   const days = daysUntil(item.event_date);
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="max-w-4xl">
       <PageHeader
         title={item.title}
         subtitle={catConfig.label}

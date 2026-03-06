@@ -6,7 +6,7 @@ export const metadata = { title: "Kill Sheet History — Grid IQ" };
 
 export default function GridIQHistoryPage() {
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="max-w-4xl">
       <PageHeader title="Kill Sheet History" subtitle="Track historical kill sheet performance." />
       <Card>
         <EmptyState

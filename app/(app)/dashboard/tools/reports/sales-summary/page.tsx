@@ -6,7 +6,7 @@ export const metadata = { title: "Sales Summary" };
 
 export default function SalesSummaryPage() {
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="max-w-5xl">
       <PageHeader
         title="Sales Summary"
         subtitle="Transaction history and performance metrics."

@@ -2,7 +2,7 @@ import { Skeleton, SkeletonCard } from "@/components/ui/skeleton";
 
 export default function HerdsLoading() {
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="max-w-6xl">
       {/* PageHeader */}
       <div className="mb-8 flex items-center justify-between">
         <div>

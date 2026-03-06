@@ -5,7 +5,7 @@ export const metadata = { title: "Add Sale Location" };
 
 export default function NewSaleLocationPage() {
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="max-w-2xl">
       <PageHeader title="Add Sale Location" subtitle="Add a custom sale location." />
       <Card>
         <CardContent className="p-6">

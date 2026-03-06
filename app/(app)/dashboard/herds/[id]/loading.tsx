@@ -20,7 +20,7 @@ function SkeletonInfoCard({ rows = 4 }: { rows?: number }) {
 
 export default function HerdDetailLoading() {
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="max-w-4xl">
       {/* PageHeader */}
       <div className="mb-8 flex items-center justify-between">
         <div>

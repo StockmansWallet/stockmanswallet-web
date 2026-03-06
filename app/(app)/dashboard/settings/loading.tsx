@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SettingsLoading() {
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="max-w-3xl">
       {/* PageHeader */}
       <div className="mb-8">
         <Skeleton className="mb-2 h-8 w-28" />

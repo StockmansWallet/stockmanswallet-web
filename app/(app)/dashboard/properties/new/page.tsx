@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function NewPropertyPage() {
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="max-w-3xl">
       <PageHeader
         title="Add Property"
         subtitle="Add a new property with its default settings."

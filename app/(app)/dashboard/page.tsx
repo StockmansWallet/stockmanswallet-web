@@ -174,7 +174,7 @@ export default async function DashboardPage() {
       : undefined;
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="max-w-6xl">
       {!hasData ? (
         /* ── Empty state ── */
         <div>

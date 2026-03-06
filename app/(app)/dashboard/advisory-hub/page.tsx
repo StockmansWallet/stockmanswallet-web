@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function AdvisoryHubPage() {
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="max-w-6xl">
       <PageHeader
         title="Advisory Hub"
         subtitle="Connect with your advisory team"

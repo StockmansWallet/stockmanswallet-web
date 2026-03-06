@@ -162,7 +162,7 @@ export default async function HerdDetailPage({
   const property = herd.properties as { property_name: string } | null;
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="max-w-4xl">
       <PageHeader
         title={herd.name}
         subtitle={[herd.species, herd.breed, herd.category].filter(Boolean).join(" \u00B7 ")}

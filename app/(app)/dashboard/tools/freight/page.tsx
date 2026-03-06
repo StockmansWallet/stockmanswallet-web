@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function FreightPage() {
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="max-w-4xl">
       <PageHeader
         title="Freight IQ"
         subtitle="Calculate freight costs with deck loading and route costing."

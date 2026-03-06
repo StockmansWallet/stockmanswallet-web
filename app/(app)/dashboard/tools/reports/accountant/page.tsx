@@ -6,7 +6,7 @@ export const metadata = { title: "Accountant Report" };
 
 export default function AccountantReportPage() {
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="max-w-5xl">
       <PageHeader
         title="Accountant Report"
         subtitle="Professional summary report for your accountant or bank manager."

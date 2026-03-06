@@ -6,7 +6,7 @@ export const metadata = { title: "Market Pulse" };
 
 export default function MarketPulsePage() {
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="max-w-4xl">
       <PageHeader title="Market Pulse" subtitle="Physical sales reports and regional price activity." />
       <Card>
         <EmptyState

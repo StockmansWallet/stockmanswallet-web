@@ -36,7 +36,7 @@ const tools = [
 
 export default function ToolsPage() {
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="max-w-4xl">
       <PageHeader
         title="Tools"
         subtitle="Calculators and utilities for your operation."

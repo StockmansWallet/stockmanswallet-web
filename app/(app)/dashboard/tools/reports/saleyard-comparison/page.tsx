@@ -6,7 +6,7 @@ export const metadata = { title: "Saleyard Comparison" };
 
 export default function SaleyardComparisonPage() {
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="max-w-5xl">
       <PageHeader
         title="Saleyard Comparison"
         subtitle="Compare prices across saleyards to find the best market."

@@ -32,7 +32,7 @@ export default async function NewYardBookItemPage() {
   ]);
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="max-w-3xl">
       <PageHeader title="Add Item" subtitle="Add a new item to your yard book." />
       <Card>
         <CardContent className="p-6">

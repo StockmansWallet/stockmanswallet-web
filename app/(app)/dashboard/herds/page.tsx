@@ -138,7 +138,7 @@ export default async function HerdsPage() {
       : 0;
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="max-w-6xl">
       <PageHeader
         title="Herds"
         subtitle="Manage your livestock herds."

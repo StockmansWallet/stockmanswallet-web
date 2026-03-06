@@ -12,7 +12,7 @@ export default async function StockmanIQConversationPage({
   const { id } = await params;
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col" style={{ height: "calc(100vh - 8rem)" }}>
+    <div className="flex max-w-3xl flex-col" style={{ height: "calc(100vh - 8rem)" }}>
       <PageHeader title="Brangus" subtitle={`Conversation ${id.slice(0, 8)}`} />
       <Card className="flex flex-1 flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto p-4">

@@ -22,7 +22,7 @@ const sections = [
 
 export default function MarketPage() {
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="max-w-4xl">
       <PageHeader title="Market" subtitle="Live livestock market intelligence and price indicators." />
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">

@@ -7,7 +7,7 @@ export const metadata = { title: "Upload Grid \u2014 Grid IQ" };
 
 export default function GridIQUploadPage() {
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="max-w-2xl">
       <PageHeader title="Upload Grid" subtitle="Upload a processor grid or kill sheet PDF." />
       <Card>
         <CardContent className="p-6">

@@ -25,7 +25,7 @@ export default async function PropertiesPage() {
     .order("property_name");
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="max-w-6xl">
       <PageHeader
         title="Properties"
         subtitle="Manage your properties and locations."

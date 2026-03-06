@@ -15,7 +15,7 @@ const PLACEHOLDER_INDICATORS = [
 
 export default function IndicatorsPage() {
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="max-w-4xl">
       <PageHeader title="Indicators" subtitle="National MLA livestock price indicators." />
 
       <Card>
