@@ -1,5 +1,23 @@
 # Build Summaries
 
+## Session 6 - 6 Mar 2026
+
+### Summary
+
+Dashboard and sidebar redesign to match the new mockup. Two-column layout, expanded navigation, updated icons, and a properties query fix.
+
+### What's New
+
+**Dashboard redesign** - Switched from single-column to a two-column flex layout. Left column has the portfolio value card (renamed to "Total Herd Value") with centered value and inline stats (head, herds, properties), plus the 12-Month Outlook chart. Right column has the user profile card, properties list (with primary/demo labels), Coming Up (Yard Book), and Growth & Mortality cards. Columns stack independently so cards fit content height without forced row alignment.
+
+**Sidebar overhaul** - Expanded from 7 to 10 top-level nav items (Yard Book, Reports, Freight IQ, Grid IQ, Advisory Hub promoted). Added a bottom section with Plan indicator (Free Plan badge), Help Center, Settings, and Log Out. Replaced the app icon with the full `sw-logo.svg` showing orange tally marks. Sidebar is now sticky, has no background (blends with page), and cards use more transparent backgrounds (`bg-white/[0.03]`). Page background updated to `#1C1B1B`.
+
+**Icon updates** - Properties nav icon changed from custom `IconFarm` to Lucide `MapPinned`. Stockman IQ icon changed from custom SVG to Lucide `Brain`. Cattle tags icon SVG updated to a filled `fillRule evenOdd` style.
+
+**Bug fix** - Fixed properties not appearing on the dashboard. The query was filtering on `is_demo_data` (wrong column name) instead of `is_simulated`, causing Supabase to return null.
+
+---
+
 ## Session 5 - 5 Mar 2026
 
 ### Summary

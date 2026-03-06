@@ -2,6 +2,42 @@
 
 ---
 
+# Session 6 - 6 Mar 2026
+
+## Dashboard Layout Redesign
+
+Complete redesign of the dashboard layout from a single-column to a two-column flex layout. Left column holds the portfolio value card and chart. Right column holds the user profile card, properties, Coming Up (Yard Book), and Growth & Mortality cards. Columns stack independently so cards fit their content height without row alignment forcing gaps.
+
+**Files changed:**
+- `app/(app)/dashboard/page.tsx` - Two-column flex layout, renamed "Total Portfolio Value" to "Total Herd Value", centered value display, moved head/herds/properties stats into portfolio card, fallback alert moved to top-right corner
+
+## Sidebar Redesign
+
+Expanded sidebar navigation from 7 to 10 items. Yard Book, Reports, Freight IQ, Grid IQ, and Advisory Hub are now top-level nav items. Added a bottom section with Plan indicator (Free Plan badge), Help Center link, Settings, and Log Out. Logo changed from app icon to the full `sw-logo.svg` with orange tally marks. Sidebar is now sticky with inset padding, no background colour (blends with main background). Card backgrounds made more transparent (`bg-white/[0.03]`). Background colour updated to `#1C1B1B`.
+
+**Files changed:**
+- `components/app/sidebar.tsx` - Full logo, 10 nav items, bottom section, sticky positioning, no background
+- `components/app/mobile-nav.tsx` - Matching nav items and logo update
+- `app/(app)/layout.tsx` - Adjusted sidebar padding
+
+## Icon Updates
+
+Replaced custom `IconFarm` with Lucide `Landmark` icon for Properties nav (later changed to `MapPinned`). Replaced custom `IconStockmanIQ` with Lucide `Brain` icon. Updated cattle tags SVG from filled to stroke-based style, then to a filled `fillRule evenOdd` version.
+
+**Files changed:**
+- `components/icons/icon-cattle-tags.tsx` - Updated SVG to filled evenOdd style
+- `components/app/sidebar.tsx` - `Landmark` then `MapPinned` for Properties
+- `components/app/mobile-nav.tsx` - Same icon swap
+
+## Properties Query Fix
+
+Fixed dashboard properties query using wrong column name (`is_demo_data` instead of `is_simulated`), which caused Supabase to return null and hide all properties.
+
+**Files changed:**
+- `app/(app)/dashboard/page.tsx` - Corrected column name to `is_simulated`
+
+---
+
 # Session 5 - 5 Mar 2026
 
 ## Lucide-React Icons
