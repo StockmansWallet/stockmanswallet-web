@@ -70,7 +70,8 @@ export default async function YardBookPage() {
         title="Yard Book"
         titleClassName="text-2xl font-bold text-lime-400"
         subtitle="Top Pocket Stuff"
-        subtitleClassName="mt-1 text-sm font-medium text-text-secondary"
+        subtitleClassName="text-sm font-medium text-text-secondary"
+        inline
         actions={
           <Link href="/dashboard/tools/yard-book/new">
             <Button size="sm" variant="lime">

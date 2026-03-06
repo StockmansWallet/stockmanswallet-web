@@ -67,7 +67,10 @@ export default async function GridIQPage() {
     <div className="max-w-6xl">
       <PageHeader
         title="Grid IQ"
-        subtitle="Processor intelligence. What's the smartest selling move right now?"
+        titleClassName="text-2xl font-bold text-teal-400"
+        subtitle="Processor intelligence"
+        subtitleClassName="text-sm font-medium text-text-secondary"
+        inline
         actions={
           <Link href="/dashboard/tools/grid-iq/upload">
             <Button size="sm" variant="teal">

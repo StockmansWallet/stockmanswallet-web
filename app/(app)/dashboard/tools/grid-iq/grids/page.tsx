@@ -29,7 +29,10 @@ export default async function SavedGridsPage() {
     <div className="max-w-6xl">
       <PageHeader
         title="Saved Grids"
-        subtitle="Your uploaded processor price grids."
+        titleClassName="text-2xl font-bold text-teal-400"
+        subtitle="Uploaded processor price grids"
+        subtitleClassName="text-sm font-medium text-text-secondary"
+        inline
         actions={
           <Link href="/dashboard/tools/grid-iq/upload">
             <Button size="sm" variant="teal">

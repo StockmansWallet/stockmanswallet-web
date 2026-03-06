@@ -29,7 +29,10 @@ export default async function KillSheetHistoryPage() {
     <div className="max-w-6xl">
       <PageHeader
         title="Kill Sheet History"
-        subtitle="Track your over-the-hooks performance over time."
+        titleClassName="text-2xl font-bold text-teal-400"
+        subtitle="Over-the-hooks performance"
+        subtitleClassName="text-sm font-medium text-text-secondary"
+        inline
         actions={
           <Link href="/dashboard/tools/grid-iq/upload">
             <Button size="sm" variant="teal">

@@ -32,7 +32,10 @@ export default async function FreightPage() {
     <div className="max-w-6xl">
       <PageHeader
         title="Freight IQ"
-        subtitle="Calculate freight costs with deck loading and route costing."
+        titleClassName="text-2xl font-bold text-sky-400"
+        subtitle="Deck loading and route costing"
+        subtitleClassName="text-sm font-medium text-text-secondary"
+        inline
       />
       <FreightCalculator herds={herds ?? []} properties={properties ?? []} />
     </div>

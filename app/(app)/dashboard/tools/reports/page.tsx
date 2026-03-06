@@ -35,7 +35,13 @@ const reports = [
 export default function ReportsPage() {
   return (
     <div className="max-w-6xl">
-      <PageHeader title="Reports" subtitle="Generate and export reports for your operation." />
+      <PageHeader
+        title="Reports"
+        titleClassName="text-2xl font-bold text-amber-400"
+        subtitle="Generate and export reports"
+        subtitleClassName="text-sm font-medium text-text-secondary"
+        inline
+      />
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
         {reports.map((report) => (
           <Link key={report.href} href={report.href}>
