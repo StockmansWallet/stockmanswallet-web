@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   breedsForSpecies,
@@ -49,11 +47,9 @@ interface HerdFormProps {
   herd?: HerdRow;
   properties: { id: string; property_name: string }[];
   action: (formData: FormData) => Promise<{ error: string } | void>;
-  submitLabel: string;
 }
 
-export function HerdForm({ herd, properties, action, submitLabel }: HerdFormProps) {
-  const router = useRouter();
+export function HerdForm({ herd, properties, action }: HerdFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [species, setSpecies] = useState<string>(herd?.species ?? "Cattle");
@@ -355,15 +351,6 @@ export function HerdForm({ herd, properties, action, submitLabel }: HerdFormProp
         </CardContent>
       </Card>
 
-      {/* Actions - bottom */}
-      <div className="flex items-center gap-3 pt-2">
-        <Button type="submit" disabled={submitting}>
-          {submitting ? "Saving..." : submitLabel}
-        </Button>
-        <Button type="button" variant="ghost" onClick={() => router.back()}>
-          Cancel
-        </Button>
-      </div>
     </form>
   );
 }

@@ -15,8 +15,8 @@ export default function GridIQPage() {
         subtitle="Analyse processor grids and kill sheets. Compare saleyard vs over-the-hooks."
         actions={
           <Link href="/dashboard/tools/grid-iq/upload">
-            <Button>
-              <Upload className="mr-1.5 h-4 w-4" />
+            <Button size="sm">
+              <Upload className="mr-1.5 h-3.5 w-3.5" />
               Upload Grid
             </Button>
           </Link>

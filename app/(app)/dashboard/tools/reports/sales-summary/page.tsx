@@ -10,7 +10,7 @@ export default function SalesSummaryPage() {
       <PageHeader
         title="Sales Summary"
         subtitle="Transaction history and performance metrics."
-        actions={<Button variant="secondary">Export PDF</Button>}
+        actions={<Button variant="secondary" size="sm">Export PDF</Button>}
       />
       <Card>
         <CardContent className="p-6">

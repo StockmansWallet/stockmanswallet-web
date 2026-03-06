@@ -10,7 +10,7 @@ export default function SaleyardComparisonPage() {
       <PageHeader
         title="Saleyard Comparison"
         subtitle="Compare prices across saleyards to find the best market."
-        actions={<Button variant="secondary">Export PDF</Button>}
+        actions={<Button variant="secondary" size="sm">Export PDF</Button>}
       />
       <Card>
         <CardContent className="p-6">

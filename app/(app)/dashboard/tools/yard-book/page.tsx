@@ -70,8 +70,8 @@ export default async function YardBookPage() {
         subtitle="Your digital run sheet. Top pocket stuff."
         actions={
           <Link href="/dashboard/tools/yard-book/new">
-            <Button>
-              <Plus className="mr-1.5 h-4 w-4" />
+            <Button size="sm">
+              <Plus className="mr-1.5 h-3.5 w-3.5" />
               Add Item
             </Button>
           </Link>

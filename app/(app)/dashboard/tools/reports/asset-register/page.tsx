@@ -10,7 +10,7 @@ export default function AssetRegisterPage() {
       <PageHeader
         title="Asset Register"
         subtitle="Complete herd listing with current valuations."
-        actions={<Button variant="secondary">Export PDF</Button>}
+        actions={<Button variant="secondary" size="sm">Export PDF</Button>}
       />
       <Card>
         <CardContent className="p-6">

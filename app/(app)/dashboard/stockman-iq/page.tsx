@@ -28,8 +28,8 @@ export default function StockmanIQPage() {
         subtitle="AI-powered insights and chat for your operation."
         actions={
           <Link href="/dashboard/stockman-iq/chat">
-            <Button>
-              <MessageSquare className="mr-1.5 h-4 w-4" />
+            <Button size="sm">
+              <MessageSquare className="mr-1.5 h-3.5 w-3.5" />
               New Chat
             </Button>
           </Link>

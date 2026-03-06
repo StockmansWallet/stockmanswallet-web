@@ -10,19 +10,19 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-brand text-white hover:bg-brand-dark active:scale-[0.98] disabled:opacity-50",
+    "bg-brand text-white hover:bg-brand-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   secondary:
-    "ring-1 ring-inset ring-white/15 bg-white/5 text-text-primary hover:bg-white/10 active:scale-[0.98]",
+    "ring-1 ring-inset ring-white/15 bg-white/5 text-text-primary hover:bg-white/10 active:scale-[0.97]",
   ghost:
     "text-text-secondary hover:bg-white/8 hover:text-text-primary",
   destructive:
-    "bg-red-500/15 text-red-400 hover:bg-red-500/25 active:scale-[0.98]",
+    "bg-red-500/15 text-red-400 hover:bg-red-500/25 active:scale-[0.97]",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: "rounded-xl px-3 py-1.5 text-xs",
-  md: "rounded-2xl px-5 py-2.5 text-sm",
-  lg: "rounded-2xl px-6 py-3.5 text-sm",
+  sm: "h-8 rounded-full px-3.5 text-[13px]",
+  md: "h-9 rounded-full px-4 text-[13px]",
+  lg: "h-11 rounded-full px-5 text-[14px]",
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(

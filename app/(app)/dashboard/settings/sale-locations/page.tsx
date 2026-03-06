@@ -14,7 +14,7 @@ export default function SaleLocationsPage() {
         subtitle="Manage your saleyards and custom sale locations."
         actions={
           <Link href="/dashboard/settings/sale-locations/new">
-            <Button>Add Location</Button>
+            <Button size="sm">Add Location</Button>
           </Link>
         }
       />

@@ -31,8 +31,8 @@ export default async function PropertiesPage() {
         subtitle="Manage your properties and locations."
         actions={
           <Link href="/dashboard/properties/new">
-            <Button>
-              <Plus className="mr-1.5 h-4 w-4" />
+            <Button size="sm">
+              <Plus className="mr-1.5 h-3.5 w-3.5" />
               Add Property
             </Button>
           </Link>

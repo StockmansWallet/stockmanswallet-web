@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
@@ -27,15 +28,22 @@ export default async function NewHerdPage() {
         title="Add Herd"
         subtitle="Create a new herd to track your livestock."
         actions={
-          <Button type="submit" form="herd-form" size="sm">
-            Add Herd
-          </Button>
+          <>
+            <Link
+              href="/dashboard/herds"
+              className="inline-flex h-8 items-center justify-center rounded-full px-3.5 text-[13px] font-semibold text-text-secondary transition-all duration-150 hover:bg-white/8 hover:text-text-primary"
+            >
+              Cancel
+            </Link>
+            <Button type="submit" form="herd-form" size="sm">
+              Add Herd
+            </Button>
+          </>
         }
       />
       <HerdForm
         properties={properties ?? []}
         action={createHerd}
-        submitLabel="Add Herd"
       />
     </div>
   );

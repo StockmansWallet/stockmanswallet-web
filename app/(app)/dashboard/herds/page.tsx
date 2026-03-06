@@ -144,8 +144,8 @@ export default async function HerdsPage() {
         subtitle="Manage your livestock herds."
         actions={
           <Link href="/dashboard/herds/new">
-            <Button>
-              <Plus className="mr-1.5 h-4 w-4" />
+            <Button size="sm">
+              <Plus className="mr-1.5 h-3.5 w-3.5" />
               Add Herd
             </Button>
           </Link>

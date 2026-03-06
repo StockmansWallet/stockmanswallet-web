@@ -10,7 +10,7 @@ export default function AccountantReportPage() {
       <PageHeader
         title="Accountant Report"
         subtitle="Professional summary report for your accountant or bank manager."
-        actions={<Button variant="secondary">Export PDF</Button>}
+        actions={<Button variant="secondary" size="sm">Export PDF</Button>}
       />
       <Card>
         <CardContent className="p-6">
