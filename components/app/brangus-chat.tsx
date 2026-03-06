@@ -252,12 +252,12 @@ function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
 
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+    <div className={`flex animate-bubble-in ${isUser ? "justify-end" : "justify-start"}`}>
       <div
         className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
           isUser
             ? "bg-brand text-white"
-            : "bg-white/5 text-text-primary"
+            : "bg-[#4D331F] text-text-primary"
         }`}
       >
         {isUser ? (
@@ -330,8 +330,8 @@ function formatInlineText(text: string): string {
 
 function TypingIndicator() {
   return (
-    <div className="flex justify-start">
-      <div className="flex items-center gap-1.5 rounded-2xl bg-white/5 px-4 py-3">
+    <div className="flex justify-start animate-bubble-in">
+      <div className="flex items-center gap-1.5 rounded-2xl bg-[#4D331F] px-4 py-3">
         <span className="h-2 w-2 rounded-full bg-brand/60 animate-bounce [animation-delay:0ms]" />
         <span className="h-2 w-2 rounded-full bg-brand/60 animate-bounce [animation-delay:150ms]" />
         <span className="h-2 w-2 rounded-full bg-brand/60 animate-bounce [animation-delay:300ms]" />
