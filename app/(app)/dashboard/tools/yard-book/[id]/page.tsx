@@ -74,7 +74,8 @@ function SectionIcon({ icon: Icon, className }: { icon: LucideIcon; className?: 
 }
 
 function formatDateAU(dateStr: string): string {
-  const d = new Date(dateStr + "T00:00:00");
+  const dateOnly = dateStr.split("T")[0];
+  const d = new Date(dateOnly + "T00:00:00");
   const day = String(d.getDate()).padStart(2, "0");
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const year = d.getFullYear();
@@ -92,7 +93,8 @@ function formatTime(timeStr: string): string {
 function daysUntil(dateStr: string): number {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const event = new Date(dateStr + "T00:00:00");
+  const dateOnly = dateStr.split("T")[0];
+  const event = new Date(dateOnly + "T00:00:00");
   return Math.floor(
     (event.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
   );

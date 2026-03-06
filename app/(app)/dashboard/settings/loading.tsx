@@ -4,7 +4,7 @@ export default function SettingsLoading() {
   return (
     <div className="max-w-3xl">
       {/* PageHeader */}
-      <div className="mb-5">
+      <div className="mb-4">
         <Skeleton className="mb-2 h-8 w-28" />
         <Skeleton className="h-4 w-56" />
       </div>

@@ -121,9 +121,9 @@ export function YardBookForm({
   }));
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit}>
       {error && (
-        <div className="rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm text-red-400">
+        <div className="mb-6 rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm text-red-400">
           {error}
         </div>
       )}
@@ -149,215 +149,223 @@ export function YardBookForm({
         }
       />
 
-      {/* Title */}
-      <section>
-        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
-          Event Details
-        </h3>
-        <Input
-          id="title"
-          name="title"
-          label="Title"
-          required
-          defaultValue={item?.title ?? ""}
-          placeholder="e.g. Muster Springfield paddock, Drench weaners"
-        />
-      </section>
+      <div className="grid grid-cols-1 gap-x-8 gap-y-8 lg:grid-cols-2">
+        {/* Left column */}
+        <div className="space-y-8">
+          {/* Title */}
+          <section>
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Event Details
+            </h3>
+            <Input
+              id="title"
+              name="title"
+              label="Title"
+              required
+              defaultValue={item?.title ?? ""}
+              placeholder="e.g. Muster Springfield paddock, Drench weaners"
+            />
+          </section>
 
-      {/* Date & Time */}
-      <section>
-        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
-          Date & Time
-        </h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Input
-            id="event_date"
-            name="event_date"
-            label="Event Date"
-            type="date"
-            required
-            defaultValue={item?.event_date ?? ""}
-          />
-          <div>
-            <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-text-secondary">
+          {/* Date & Time */}
+          <section>
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Date & Time
+            </h3>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Input
+                id="event_date"
+                name="event_date"
+                label="Event Date"
+                type="date"
+                required
+                defaultValue={item?.event_date?.split("T")[0] ?? ""}
+              />
+              <div>
+                <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-text-secondary">
+                  <input
+                    type="checkbox"
+                    name="is_all_day"
+                    checked={isAllDay}
+                    onChange={(e) => setIsAllDay(e.target.checked)}
+                    className="h-4 w-4 rounded border-black/20 text-lime-500 accent-lime-500"
+                  />
+                  All day event
+                </label>
+                {!isAllDay && (
+                  <Input
+                    id="event_time"
+                    name="event_time"
+                    type="time"
+                    defaultValue={item?.event_time ?? ""}
+                    className="mt-2"
+                  />
+                )}
+              </div>
+            </div>
+          </section>
+
+          {/* Category */}
+          <section>
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Category
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {CATEGORIES.map((cat) => {
+                const Icon = cat.icon;
+                const isActive = category === cat.value;
+                return (
+                  <button
+                    key={cat.value}
+                    type="button"
+                    onClick={() => setCategory(cat.value)}
+                    className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-medium transition-all ring-1 ring-inset ${
+                      isActive
+                        ? `${cat.bg} ${cat.text} ${cat.ring}`
+                        : "bg-white/5 text-text-muted ring-white/8 hover:bg-white/8 hover:text-text-secondary"
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {cat.label}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Notes */}
+          <section>
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Notes
+            </h3>
+            <textarea
+              id="notes"
+              name="notes"
+              rows={3}
+              defaultValue={item?.notes ?? ""}
+              placeholder="Any additional notes..."
+              className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:ring-1 focus:ring-inset focus:ring-lime-500/60 focus:bg-white/8"
+            />
+          </section>
+        </div>
+
+        {/* Right column */}
+        <div className="space-y-8">
+          {/* Reminders */}
+          <section>
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Reminders
+            </h3>
+            <label className="mb-3 flex items-center gap-2 text-sm text-text-primary">
               <input
                 type="checkbox"
-                name="is_all_day"
-                checked={isAllDay}
-                onChange={(e) => setIsAllDay(e.target.checked)}
-                className="h-4 w-4 rounded border-black/20 text-brand accent-brand"
+                checked={enableReminders}
+                onChange={(e) => setEnableReminders(e.target.checked)}
+                className="h-4 w-4 rounded border-black/20 text-lime-500 accent-lime-500"
               />
-              All day event
+              Enable reminders
             </label>
-            {!isAllDay && (
-              <Input
-                id="event_time"
-                name="event_time"
-                type="time"
-                defaultValue={item?.event_time ?? ""}
-                className="mt-2"
+            {enableReminders && (
+              <div className="flex flex-wrap gap-2">
+                {REMINDER_OPTIONS.map((opt) => {
+                  const isActive = selectedOffsets.has(opt.value);
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => toggleOffset(opt.value)}
+                      className={`inline-flex items-center rounded-xl px-3 py-1.5 text-xs font-medium transition-all ring-1 ring-inset ${
+                        isActive
+                          ? "bg-lime-500/15 text-lime-400 ring-lime-500/25"
+                          : "bg-white/5 text-text-muted ring-white/8 hover:bg-white/8 hover:text-text-secondary"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
+          {/* Recurrence */}
+          <section>
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
+              Recurrence
+            </h3>
+            <label className="mb-3 flex items-center gap-2 text-sm text-text-primary">
+              <input
+                type="checkbox"
+                name="is_recurring"
+                checked={isRecurring}
+                onChange={(e) => setIsRecurring(e.target.checked)}
+                className="h-4 w-4 rounded border-black/20 text-lime-500 accent-lime-500"
+              />
+              Recurring event
+            </label>
+            {isRecurring && (
+              <Select
+                id="recurrence_rule"
+                name="recurrence_rule"
+                label="Repeat"
+                options={RECURRENCE_OPTIONS}
+                placeholder="Select frequency"
+                defaultValue={item?.recurrence_rule_raw ?? ""}
               />
             )}
-          </div>
+          </section>
+
+          {/* Linked Herds */}
+          {herds.length > 0 && (
+            <section>
+              <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
+                Link to Herds
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {herds.map((herd) => {
+                  const isActive = selectedHerdIds.has(herd.id);
+                  return (
+                    <button
+                      key={herd.id}
+                      type="button"
+                      onClick={() => toggleHerd(herd.id)}
+                      className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium transition-all ring-1 ring-inset ${
+                        isActive
+                          ? "bg-lime-500/15 text-lime-400 ring-lime-500/25"
+                          : "bg-white/5 text-text-muted ring-white/8 hover:bg-white/8 hover:text-text-secondary"
+                      }`}
+                    >
+                      <PawPrint className="h-3 w-3" />
+                      {herd.name}
+                      <span className="opacity-60">{herd.head_count}hd</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
+          {/* Property */}
+          {propertyOptions.length > 0 && (
+            <section>
+              <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
+                Property
+              </h3>
+              <Select
+                id="property_id"
+                name="property_id"
+                options={propertyOptions}
+                placeholder="Select property (optional)"
+                defaultValue={item?.property_id ?? ""}
+              />
+            </section>
+          )}
         </div>
-      </section>
-
-      {/* Category */}
-      <section>
-        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
-          Category
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((cat) => {
-            const Icon = cat.icon;
-            const isActive = category === cat.value;
-            return (
-              <button
-                key={cat.value}
-                type="button"
-                onClick={() => setCategory(cat.value)}
-                className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-medium transition-all ring-1 ring-inset ${
-                  isActive
-                    ? `${cat.bg} ${cat.text} ${cat.ring}`
-                    : "bg-white/5 text-text-muted ring-white/8 hover:bg-white/8 hover:text-text-secondary"
-                }`}
-              >
-                <Icon className="h-3.5 w-3.5" />
-                {cat.label}
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Reminders */}
-      <section>
-        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
-          Reminders
-        </h3>
-        <label className="mb-3 flex items-center gap-2 text-sm text-text-primary">
-          <input
-            type="checkbox"
-            checked={enableReminders}
-            onChange={(e) => setEnableReminders(e.target.checked)}
-            className="h-4 w-4 rounded border-black/20 text-brand accent-brand"
-          />
-          Enable reminders
-        </label>
-        {enableReminders && (
-          <div className="flex flex-wrap gap-2">
-            {REMINDER_OPTIONS.map((opt) => {
-              const isActive = selectedOffsets.has(opt.value);
-              return (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => toggleOffset(opt.value)}
-                  className={`inline-flex items-center rounded-xl px-3 py-1.5 text-xs font-medium transition-all ring-1 ring-inset ${
-                    isActive
-                      ? "bg-brand/15 text-brand ring-brand/25"
-                      : "bg-white/5 text-text-muted ring-white/8 hover:bg-white/8 hover:text-text-secondary"
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </section>
-
-      {/* Recurrence */}
-      <section>
-        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
-          Recurrence
-        </h3>
-        <label className="mb-3 flex items-center gap-2 text-sm text-text-primary">
-          <input
-            type="checkbox"
-            name="is_recurring"
-            checked={isRecurring}
-            onChange={(e) => setIsRecurring(e.target.checked)}
-            className="h-4 w-4 rounded border-black/20 text-brand accent-brand"
-          />
-          Recurring event
-        </label>
-        {isRecurring && (
-          <Select
-            id="recurrence_rule"
-            name="recurrence_rule"
-            label="Repeat"
-            options={RECURRENCE_OPTIONS}
-            placeholder="Select frequency"
-            defaultValue={item?.recurrence_rule_raw ?? ""}
-          />
-        )}
-      </section>
-
-      {/* Linked Herds */}
-      {herds.length > 0 && (
-        <section>
-          <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
-            Link to Herds
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {herds.map((herd) => {
-              const isActive = selectedHerdIds.has(herd.id);
-              return (
-                <button
-                  key={herd.id}
-                  type="button"
-                  onClick={() => toggleHerd(herd.id)}
-                  className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium transition-all ring-1 ring-inset ${
-                    isActive
-                      ? "bg-brand/15 text-brand ring-brand/25"
-                      : "bg-white/5 text-text-muted ring-white/8 hover:bg-white/8 hover:text-text-secondary"
-                  }`}
-                >
-                  <PawPrint className="h-3 w-3" />
-                  {herd.name}
-                  <span className="opacity-60">{herd.head_count}hd</span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      {/* Property */}
-      {propertyOptions.length > 0 && (
-        <section>
-          <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
-            Property
-          </h3>
-          <Select
-            id="property_id"
-            name="property_id"
-            options={propertyOptions}
-            placeholder="Select property (optional)"
-            defaultValue={item?.property_id ?? ""}
-          />
-        </section>
-      )}
-
-      {/* Notes */}
-      <section>
-        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
-          Notes
-        </h3>
-        <textarea
-          id="notes"
-          name="notes"
-          rows={3}
-          defaultValue={item?.notes ?? ""}
-          placeholder="Any additional notes..."
-          className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all ring-1 ring-inset ring-white/10 focus:ring-brand/60 focus:bg-white/8"
-        />
-      </section>
+      </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-3">
-        <Button type="submit" disabled={submitting}>
+      <div className="mt-8 flex items-center gap-3">
+        <Button type="submit" variant="lime" disabled={submitting}>
           {submitting ? "Saving..." : submitLabel}
         </Button>
         <Button type="button" variant="ghost" onClick={() => router.back()}>

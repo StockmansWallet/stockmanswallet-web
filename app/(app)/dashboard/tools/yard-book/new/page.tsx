@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent } from "@/components/ui/card";
 import { YardBookForm } from "@/components/app/yard-book-form";
 import { createYardBookItem } from "../actions";
 
@@ -32,18 +31,14 @@ export default async function NewYardBookItemPage() {
   ]);
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-6xl">
       <PageHeader title="Add Item" subtitle="Add a new item to your yard book." />
-      <Card>
-        <CardContent className="p-6">
-          <YardBookForm
-            herds={herds ?? []}
-            properties={properties ?? []}
-            action={createYardBookItem}
-            submitLabel="Add Item"
-          />
-        </CardContent>
-      </Card>
+      <YardBookForm
+        herds={herds ?? []}
+        properties={properties ?? []}
+        action={createYardBookItem}
+        submitLabel="Add Item"
+      />
     </div>
   );
 }

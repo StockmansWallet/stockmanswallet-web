@@ -26,41 +26,36 @@ interface YardBookRunSheetProps {
 
 const CATEGORY_CONFIG: Record<
   YardBookCategory,
-  { icon: LucideIcon; bg: string; text: string; ring: string; iconBg: string }
+  { icon: LucideIcon; bg: string; text: string; iconBg: string }
 > = {
   Livestock: {
     icon: PawPrint,
     bg: "bg-orange-500/15",
     text: "text-orange-400",
-    ring: "ring-orange-500/25",
     iconBg: "bg-orange-500/20",
   },
   Operations: {
     icon: Wrench,
     bg: "bg-amber-700/15",
     text: "text-amber-600",
-    ring: "ring-amber-700/25",
     iconBg: "bg-amber-700/20",
   },
   Finance: {
     icon: DollarSign,
     bg: "bg-blue-500/15",
     text: "text-blue-400",
-    ring: "ring-blue-500/25",
     iconBg: "bg-blue-500/20",
   },
   Family: {
     icon: Home,
     bg: "bg-purple-500/15",
     text: "text-purple-400",
-    ring: "ring-purple-500/25",
     iconBg: "bg-purple-500/20",
   },
   Me: {
     icon: User,
     bg: "bg-green-500/15",
     text: "text-green-400",
-    ring: "ring-green-500/25",
     iconBg: "bg-green-500/20",
   },
 };
@@ -83,7 +78,8 @@ const HORIZON_CONFIG: {
 function daysUntilEvent(eventDateStr: string): number {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const event = new Date(eventDateStr + "T00:00:00");
+  const dateOnly = eventDateStr.split("T")[0];
+  const event = new Date(dateOnly + "T00:00:00");
   return Math.floor((event.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
@@ -114,7 +110,8 @@ function countdownColor(days: number): string {
 }
 
 function formatDateAU(dateStr: string): string {
-  const d = new Date(dateStr + "T00:00:00");
+  const dateOnly = dateStr.split("T")[0];
+  const d = new Date(dateOnly + "T00:00:00");
   const day = String(d.getDate()).padStart(2, "0");
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const year = d.getFullYear();
@@ -216,10 +213,10 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
       <div className="mb-4 flex flex-wrap items-center gap-1.5">
         <button
           onClick={() => setFilterCategory(null)}
-          className={`inline-flex items-center rounded-xl px-3.5 py-1.5 text-xs font-medium transition-all ring-1 ring-inset ${
+          className={`inline-flex items-center rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
             filterCategory === null
-              ? "bg-lime-500/15 text-lime-400 ring-lime-500/25"
-              : "bg-white/5 text-text-muted ring-white/8 hover:bg-white/8 hover:text-text-secondary"
+              ? "bg-lime-500/15 text-lime-400"
+              : "bg-white/5 text-text-muted hover:bg-white/8 hover:text-text-secondary"
           }`}
         >
           All
@@ -234,10 +231,10 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
             <button
               key={cat}
               onClick={() => setFilterCategory(isActive ? null : cat)}
-              className={`inline-flex items-center gap-1 rounded-xl px-3.5 py-1.5 text-xs font-medium transition-all ring-1 ring-inset ${
+              className={`inline-flex items-center gap-1 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
                 isActive
-                  ? `${config.bg} ${config.text} ${config.ring}`
-                  : "bg-white/5 text-text-muted ring-white/8 hover:bg-white/8 hover:text-text-secondary"
+                  ? `${config.bg} ${config.text}`
+                  : "bg-white/5 text-text-muted hover:bg-white/8 hover:text-text-secondary"
               }`}
             >
               <Icon className="h-3 w-3" />
@@ -302,7 +299,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
                     <Link
                       key={item.id}
                       href={`/dashboard/tools/yard-book/${item.id}`}
-                      className="group flex items-center gap-3 rounded-xl px-3 py-3 transition-all hover:bg-white/[0.04] ring-1 ring-inset ring-white/[0.04] hover:ring-white/8"
+                      className="group flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-3 transition-all hover:bg-white/[0.06]"
                     >
                       {/* Category icon */}
                       <div

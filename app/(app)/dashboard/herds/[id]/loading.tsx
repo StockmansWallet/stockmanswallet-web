@@ -25,7 +25,7 @@ export default function HerdDetailLoading() {
   return (
     <div className="max-w-6xl">
       {/* PageHeader */}
-      <div className="mb-5 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between">
         <div>
           <Skeleton className="mb-2 h-8 w-44" />
           <Skeleton className="h-4 w-52" />

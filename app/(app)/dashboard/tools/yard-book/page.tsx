@@ -20,7 +20,8 @@ export const metadata = { title: "Yard Book" };
 function daysUntil(dateStr: string): number {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const event = new Date(dateStr + "T00:00:00");
+  const dateOnly = dateStr.split("T")[0];
+  const event = new Date(dateOnly + "T00:00:00");
   return Math.floor(
     (event.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
   );
@@ -67,7 +68,9 @@ export default async function YardBookPage() {
     <div className="max-w-6xl">
       <PageHeader
         title="Yard Book"
-        subtitle="Your digital run sheet. Top pocket stuff."
+        titleClassName="text-2xl font-bold text-lime-400"
+        subtitle="Top Pocket Stuff"
+        subtitleClassName="mt-1 text-sm font-medium text-text-secondary"
         actions={
           <Link href="/dashboard/tools/yard-book/new">
             <Button size="sm" variant="lime">
@@ -91,7 +94,7 @@ export default async function YardBookPage() {
       ) : (
         <>
           {/* Stats */}
-          <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+          <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
             <StatCard
               icon={<CalendarClock className="h-4 w-4" />}
               label="Upcoming"

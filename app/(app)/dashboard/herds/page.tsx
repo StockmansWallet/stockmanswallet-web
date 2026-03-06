@@ -164,7 +164,7 @@ export default async function HerdsPage() {
       ) : (
         <>
           {/* Stats */}
-          <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+          <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
             <div className="rounded-2xl bg-white/5 p-4 sm:p-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/15">

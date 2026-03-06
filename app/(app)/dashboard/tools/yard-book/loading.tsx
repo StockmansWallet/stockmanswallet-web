@@ -4,7 +4,7 @@ export default function YardBookLoading() {
   return (
     <div className="max-w-6xl">
       {/* PageHeader */}
-      <div className="mb-5 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between">
         <div>
           <Skeleton className="mb-2 h-8 w-28" />
           <Skeleton className="h-4 w-64" />
@@ -13,7 +13,7 @@ export default function YardBookLoading() {
       </div>
 
       {/* Stat cards */}
-      <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
         <SkeletonCard />
         <SkeletonCard />
         <SkeletonCard />

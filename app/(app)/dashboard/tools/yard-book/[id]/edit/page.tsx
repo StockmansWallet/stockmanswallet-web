@@ -1,7 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent } from "@/components/ui/card";
 import { YardBookForm } from "@/components/app/yard-book-form";
 import { updateYardBookItem } from "../../actions";
 
@@ -49,22 +48,18 @@ export default async function EditYardBookItemPage({
   const boundUpdate = updateYardBookItem.bind(null, id);
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-6xl">
       <PageHeader
         title={`Edit: ${item.title}`}
         subtitle={item.category_raw}
       />
-      <Card>
-        <CardContent className="p-6">
-          <YardBookForm
-            item={item}
-            herds={herds ?? []}
-            properties={properties ?? []}
-            action={boundUpdate}
-            submitLabel="Save Changes"
-          />
-        </CardContent>
-      </Card>
+      <YardBookForm
+        item={item}
+        herds={herds ?? []}
+        properties={properties ?? []}
+        action={boundUpdate}
+        submitLabel="Save Changes"
+      />
     </div>
   );
 }
