@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { calculateProjectedWeight, calculateHerdValuation, mapCategoryToMLACategory, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 import { DeleteHerdButton } from "./delete-button";
-import { Pencil, Info, Scale, Heart, MapPin, FileText, DollarSign, AlertTriangle } from "lucide-react";
+import { Pencil, Info, Scale, Heart, MapPin, FileText, DollarSign, AlertTriangle, BarChart3, Clock } from "lucide-react";
 
 export const revalidate = 0;
 
@@ -209,20 +209,38 @@ export default async function HerdDetailPage({
       )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {/* Overview */}
+        {/* Key Metrics - matches iOS PrimaryMetricsCard */}
+        {herdValue > 0 && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2.5">
+                <SectionIcon icon={BarChart3} />
+                <CardTitle>Key Metrics</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
+              <InfoRow label="Price (Per Kilogram)" value={`$${valuation.pricePerKg.toFixed(2)}/kg`} />
+              <InfoRow label="Average Weight" value={`${Math.round(projectedWeight ?? herd.current_weight ?? herd.initial_weight ?? 0)} kg`} />
+              <InfoRow label="Value Per Head" value={`$${Math.round(herdValue / (herd.head_count || 1)).toLocaleString()}`} />
+              <InfoRow label="Saleyard" value={herd.selected_saleyard ?? "No saleyard selected"} />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Physical Attributes - matches iOS HerdDetailsInfoCard */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2.5">
               <SectionIcon icon={Info} />
-              <CardTitle>Overview</CardTitle>
+              <CardTitle>Physical Attributes</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
+            <InfoRow label="Herd Size" value={herd.head_count ? `${herd.head_count.toLocaleString()} head` : null} />
             <InfoRow label="Species" value={herd.species} />
             <InfoRow label="Breed" value={herd.breed} />
-            <InfoRow label="Sex" value={herd.sex} />
             <InfoRow label="Category" value={herd.category} />
-            <InfoRow label="Head Count" value={herd.head_count?.toLocaleString()} />
+            <InfoRow label="Sex" value={herd.sex} />
             <InfoRow label="Age" value={herd.age_months ? `${herd.age_months} months` : null} />
             <InfoRow label="Animal ID" value={herd.animal_id_number} />
             {herd.is_sold && (
@@ -234,18 +252,43 @@ export default async function HerdDetailPage({
           </CardContent>
         </Card>
 
-        {/* Weight & Growth */}
+        {/* Weight Tracking - matches iOS Weight Tracking section */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2.5">
               <SectionIcon icon={Scale} />
-              <CardTitle>Weight & Growth</CardTitle>
+              <CardTitle>Weight Tracking</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
             <InfoRow label="Initial Weight" value={herd.initial_weight ? `${herd.initial_weight} kg` : null} />
+            <InfoRow label="Current Weight" value={herd.current_weight ? `${herd.current_weight} kg` : null} />
             {projectedWeight && <InfoRow label="Projected Weight" value={`${Math.round(projectedWeight)} kg`} />}
             <InfoRow label="Daily Weight Gain" value={herd.daily_weight_gain ? `${herd.daily_weight_gain} kg/day` : null} />
+          </CardContent>
+        </Card>
+
+        {/* Location - matches iOS Location section */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2.5">
+              <SectionIcon icon={MapPin} />
+              <CardTitle>Location</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
+            {property && (
+              <div className="flex items-center justify-between py-3 text-sm">
+                <span className="text-text-muted">Property</span>
+                <Link href={`/dashboard/properties/${herd.property_id}`} className="font-medium text-brand hover:underline">
+                  {property.property_name}
+                </Link>
+              </div>
+            )}
+            <InfoRow label="Paddock" value={herd.paddock_name} />
+            {herd.mortality_rate != null && herd.mortality_rate > 0 && (
+              <InfoRow label="Mortality Rate" value={`${Math.round(herd.mortality_rate * 100)}% annually`} />
+            )}
           </CardContent>
         </Card>
 
@@ -271,26 +314,18 @@ export default async function HerdDetailPage({
           </Card>
         )}
 
-        {/* Location & Market */}
+        {/* Timeline - matches iOS Timeline section */}
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2.5">
-              <SectionIcon icon={MapPin} />
-              <CardTitle>Location & Market</CardTitle>
+              <SectionIcon icon={Clock} />
+              <CardTitle>Timeline</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
-            {property && (
-              <div className="flex items-center justify-between py-3 text-sm">
-                <span className="text-text-muted">Property</span>
-                <Link href={`/dashboard/properties/${herd.property_id}`} className="font-medium text-brand hover:underline">
-                  {property.property_name}
-                </Link>
-              </div>
-            )}
-            <InfoRow label="Paddock" value={herd.paddock_name} />
-            <InfoRow label="Saleyard" value={herd.selected_saleyard} />
-            <InfoRow label="Market Category" value={herd.market_category} />
+            <InfoRow label="Days Held" value={`${Math.max(0, Math.round((Date.now() - new Date(herd.created_at).getTime()) / 86400000))} days`} />
+            <InfoRow label="Created" value={new Date(herd.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })} />
+            <InfoRow label="Last Updated" value={new Date(herd.updated_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })} />
           </CardContent>
         </Card>
 

@@ -167,7 +167,7 @@ export function HerdForm({ herd, properties, action, submitLabel }: HerdFormProp
         <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
           Weight & Growth
         </h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Input
             id="initial_weight"
             name="initial_weight"
@@ -178,13 +178,22 @@ export function HerdForm({ herd, properties, action, submitLabel }: HerdFormProp
             defaultValue={herd?.initial_weight ?? 0}
           />
           <Input
+            id="current_weight"
+            name="current_weight"
+            label="Current Weight (kg)"
+            type="number"
+            step="0.1"
+            min={0}
+            defaultValue={herd?.current_weight ?? herd?.initial_weight ?? 0}
+            helperText="Leave same as initial if unknown"
+          />
+          <Input
             id="daily_weight_gain"
             name="daily_weight_gain"
-            label="Daily Weight Gain (kg)"
+            label="Daily Weight Gain (kg/day)"
             type="number"
             step="0.01"
             defaultValue={herd?.daily_weight_gain ?? 0}
-            helperText="DWG in kg/day"
           />
           <Input
             id="mortality_rate"
