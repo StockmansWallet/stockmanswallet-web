@@ -348,23 +348,10 @@ export function calculateHerdValuation(
     if (basePrice !== null) priceSource = "saleyard";
   }
 
-  // 2b. Try national general (breed=null) price - breed premium safe
-  // iOS resolveGeneralBasePrice() checks saleyard general then national general
-  // BEFORE falling through to breed-specific. We match this order.
-  if (basePrice === null) {
-    const nationalEntries = nationalPriceMap.get(mlaCategory) ?? [];
-    basePrice = resolvePriceFromEntries(nationalEntries, projectedWeight);
-    if (basePrice !== null) {
-      // Use "saleyard" source if saleyard breed-specific data exists (matches iOS:
-      // getMarketPrice returns saleyard source, resolveGeneralBasePrice uses national base)
-      priceSource = (saleyardBreedPriceMap && resolvedSaleyard &&
-        (saleyardBreedPriceMap.get(`${mlaCategory}|${herd.breed}|${resolvedSaleyard}`) ?? []).length > 0)
-        ? "saleyard" : "national";
-    }
-  }
-
-  // 2c. No general base price at any level - try saleyard breed-specific (skip premium)
-  // Only when no general (breed=null) price exists anywhere (matches iOS resolveGeneralBasePrice returning nil)
+  // 2b. Try saleyard breed-specific (skip breed premium - already baked in)
+  // Most MLA CSV data is breed-specific (breed != null), so this is the primary
+  // saleyard price path. Matches iOS getMarketPrice cache lookup order which
+  // checks breed-specific before general at saleyard level.
   if (basePrice === null && saleyardBreedPriceMap && resolvedSaleyard) {
     const breedKey = `${mlaCategory}|${herd.breed}|${resolvedSaleyard}`;
     const breedEntries = saleyardBreedPriceMap.get(breedKey) ?? [];
@@ -373,6 +360,13 @@ export function calculateHerdValuation(
       priceSource = "saleyard";
       skipBreedPremium = true;
     }
+  }
+
+  // 2c. Try national general (breed=null) price - breed premium safe
+  if (basePrice === null) {
+    const nationalEntries = nationalPriceMap.get(mlaCategory) ?? [];
+    basePrice = resolvePriceFromEntries(nationalEntries, projectedWeight);
+    if (basePrice !== null) priceSource = "national";
   }
 
   // 2d. Final fallback to hardcoded defaults
