@@ -1,5 +1,19 @@
 # Build Summaries
 
+## Session 10 - 6 Mar 2026
+
+### Summary
+
+Per-tool accent colors and consistent border radius across the entire web app. Each tool now has its own color identity matching the iOS themes, and all interactive elements use `rounded-xl` for a cohesive look.
+
+### What's New
+
+**Per-tool accent colors** - Every tool section now uses its own accent color instead of the default brand orange, matching the iOS app's theme colors. Grid IQ uses teal, Freight IQ uses sky blue, Yard Book uses lime green, Reports uses amber, and Advisory Hub uses purple. This applies to sidebar active states, buttons, empty states, stat card icons, section icons, links, and filter pills across all tool pages. The Button, EmptyState, and StatCard components all gained new variant/accent props to support tool-specific colors.
+
+**Consistent rounded-xl radius** - Standardised all interactive elements (buttons, nav items, filter pills, tab buttons, inline links) from a mix of `rounded-full` and `rounded-2xl` to `rounded-xl` (12px). This gives the app a cohesive, slightly rounded look across the board. Circular decorative elements (icons, avatars, typing dots) and structural containers (cards, modals) were kept as-is.
+
+---
+
 ## Session 9 - 6 Mar 2026
 
 ### Summary

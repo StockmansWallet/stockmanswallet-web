@@ -452,7 +452,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
 
         {/* Actions */}
         <div className="flex items-center gap-3">
-          <Button type="submit">
+          <Button type="submit" variant="sky">
             Calculate Freight
           </Button>
           {(result || selectedHerdId) && (

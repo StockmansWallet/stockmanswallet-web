@@ -2,6 +2,83 @@
 
 ---
 
+# Session 10 - 6 Mar 2026
+
+## Per-Tool Accent Colors
+
+Added tool-specific accent colors throughout the app, matching each tool's iOS theme color. Each tool now has its own color identity instead of defaulting to the brand orange.
+
+**Color mapping (iOS to Tailwind):**
+- Grid IQ: teal (#00B4A0 -> `teal-500`)
+- Freight IQ: blue (#1399EC -> `sky-500`)
+- Yard Book: green (#87B11B -> `lime-500/600`)
+- Reports: amber (#D4A053 -> `amber-500`)
+- Advisory Hub: purple (#9C6ADE -> `purple-500`)
+
+**Sidebar and mobile nav** - Tool items in both sidebar and mobile nav now show their accent color when active (e.g. Grid IQ highlights teal, Yard Book highlights lime). Main nav items (Dashboard, Herds, Properties, etc.) keep the default brand orange.
+
+**Button component** - Added 5 new colored variants (teal, lime, sky, amber, purple) to the Button component alongside primary/secondary/ghost/destructive. Each variant has matching hover, active, and disabled states.
+
+**EmptyState component** - Added a `variant` prop with 6 color options (brand, teal, lime, sky, amber, purple). Controls the icon background, icon color, and action button color.
+
+**StatCard component** - Added an `accent` prop for tool-specific icon backgrounds (e.g. `accent="lime"` for Yard Book stat cards).
+
+**Page-level updates:**
+- Grid IQ pages: teal buttons, teal "View All" links, teal empty states
+- Yard Book pages: lime buttons, lime stat cards, lime empty states, lime section icons, lime filter pills
+- Freight IQ: sky blue section icons, sky hero card ring, sky price text
+- Reports page: amber icon containers
+- Advisory Hub: purple empty state and icon
+
+**Files changed:**
+- `components/ui/button.tsx` - 5 new colored variants
+- `components/ui/empty-state.tsx` - Variant prop with 6 color options
+- `components/ui/stat-card.tsx` - Accent prop for icon backgrounds
+- `components/app/sidebar.tsx` - Per-tool activeClass on tool items
+- `components/app/mobile-nav.tsx` - Same activeClass pattern with fallback
+- `app/(app)/dashboard/tools/grid-iq/page.tsx` - Teal buttons and links
+- `app/(app)/dashboard/tools/grid-iq/grids/page.tsx` - Teal button and empty state
+- `app/(app)/dashboard/tools/grid-iq/history/page.tsx` - Teal button and empty state
+- `app/(app)/dashboard/tools/yard-book/page.tsx` - Lime button, stat cards, empty state
+- `app/(app)/dashboard/tools/yard-book/[id]/page.tsx` - Lime section icons and links
+- `components/app/yard-book-run-sheet.tsx` - Lime "All" filter pill
+- `app/(app)/dashboard/tools/freight/freight-calculator.tsx` - Sky blue section icons, hero card, price text
+- `app/(app)/dashboard/tools/reports/page.tsx` - Amber icon containers
+- `app/(app)/dashboard/advisory-hub/page.tsx` - Purple empty state and icon
+
+## Consistent Rounded-XL Border Radius
+
+Standardised all interactive elements to `rounded-xl` (12px). Previously buttons used `rounded-full` (pill) and nav items used `rounded-2xl`. Now everything uses `rounded-xl` for a cohesive, slightly rounded look.
+
+**What changed:**
+- Button component: all size classes from `rounded-full` to `rounded-xl`
+- Sidebar nav items: `rounded-2xl` to `rounded-xl`
+- Mobile nav items: `rounded-2xl` to `rounded-xl`
+- EmptyState action buttons: `rounded-full` to `rounded-xl`
+- Tabs component: tab bar container and tab buttons `rounded-2xl` to `rounded-xl`
+- Inline styled links/buttons across pages: updated to `rounded-xl`
+- Filter pills (herds species, yard book category, Grid IQ type selector): `rounded-full` to `rounded-xl`
+- Brangus chat suggested prompt buttons: `rounded-full` to `rounded-xl`
+
+**Kept as-is:** Circular icons/avatars (`rounded-full`), chat typing dots, structural containers (Card, Modal).
+
+**Files changed:**
+- `components/ui/button.tsx` - All size classes
+- `components/ui/empty-state.tsx` - Action buttons
+- `components/ui/tabs.tsx` - Tab bar and buttons
+- `components/app/sidebar.tsx` - All nav items
+- `components/app/mobile-nav.tsx` - All nav items
+- `app/(app)/dashboard/herds/herds-table.tsx` - Species filter pills
+- `app/(app)/dashboard/herds/new/page.tsx` - Cancel link
+- `app/(app)/dashboard/herds/[id]/edit/page.tsx` - Cancel link
+- `app/(app)/dashboard/stockman-iq/page.tsx` - Inline chat link
+- `app/(app)/dashboard/tools/grid-iq/upload/page.tsx` - Cancel link
+- `app/(app)/dashboard/tools/grid-iq/upload/grid-iq-uploader.tsx` - Type selector pills
+- `components/app/yard-book-form.tsx` - Category, reminder, herd pills
+- `components/app/brangus-chat.tsx` - Suggested prompt buttons
+
+---
+
 # Session 9 - 6 Mar 2026
 
 ## Button Styling Standardisation

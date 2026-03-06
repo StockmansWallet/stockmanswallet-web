@@ -176,7 +176,9 @@ The Supabase data migration is the critical path for BOTH platforms. Do it now. 
 - **Admin MLA upload** — admin-only CSV upload page for MLA market data with email whitelist, format auto-detection, chunked upload with progress
 - **Freight IQ** - full 3-step calculator matching iOS: property/herd selection with auto-fill, saleyard destination with haversine distance, 5-field assumptions grid, results with GST/per-head/per-deck breakdown
 - Tool pages scaffolded: Grid IQ, Reports, Market View, Settings
-- UI component library: Card, Button, Input, Badge, PageHeader, EmptyState, etc.
+- **Per-tool accent colors** - Each tool uses its own iOS-matched color: Grid IQ (teal), Freight IQ (sky), Yard Book (lime), Reports (amber), Advisory Hub (purple). Applied to sidebar, buttons, empty states, stat cards, section icons, and links
+- **Consistent rounded-xl** - All interactive elements standardised to `rounded-xl` (12px) for a cohesive look
+- UI component library: Card, Button (9 variants incl. tool colors), Input, Badge, PageHeader, EmptyState (6 color variants), StatCard (6 accent options), Tabs, etc.
 - Lucide-react icons throughout (matching iOS SF Symbols)
 
 ---
