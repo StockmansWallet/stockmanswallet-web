@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent } from "@/components/ui/card";
 import { HerdForm } from "@/components/app/herd-form";
 import { updateHerd } from "../../actions";
 
@@ -41,21 +40,17 @@ export default async function EditHerdPage({
   const boundUpdate = updateHerd.bind(null, id);
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-6xl">
       <PageHeader
         title={`Edit: ${herd.name}`}
         subtitle={[herd.species, herd.breed].join(" · ")}
       />
-      <Card>
-        <CardContent className="p-6">
-          <HerdForm
-            herd={herd}
-            properties={properties ?? []}
-            action={boundUpdate}
-            submitLabel="Save Changes"
-          />
-        </CardContent>
-      </Card>
+      <HerdForm
+        herd={herd}
+        properties={properties ?? []}
+        action={boundUpdate}
+        submitLabel="Save Changes"
+      />
     </div>
   );
 }

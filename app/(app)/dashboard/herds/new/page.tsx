@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent } from "@/components/ui/card";
 import { HerdForm } from "@/components/app/herd-form";
 import { createHerd } from "../actions";
 
@@ -22,20 +21,16 @@ export default async function NewHerdPage() {
     .order("property_name");
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-6xl">
       <PageHeader
         title="Add Herd"
         subtitle="Create a new herd to track your livestock."
       />
-      <Card>
-        <CardContent className="p-6">
-          <HerdForm
-            properties={properties ?? []}
-            action={createHerd}
-            submitLabel="Add Herd"
-          />
-        </CardContent>
-      </Card>
+      <HerdForm
+        properties={properties ?? []}
+        action={createHerd}
+        submitLabel="Add Herd"
+      />
     </div>
   );
 }
