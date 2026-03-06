@@ -4,16 +4,16 @@ export default function PropertyDetailLoading() {
   return (
     <div className="max-w-6xl">
       {/* PageHeader */}
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-5 flex items-center justify-between">
         <div>
           <Skeleton className="mb-2 h-8 w-48" />
           <Skeleton className="h-4 w-32" />
         </div>
-        <Skeleton className="h-9 w-20 rounded-2xl" />
+        <Skeleton className="h-9 w-20 rounded-xl" />
       </div>
 
       {/* Form card */}
-      <div className="rounded-2xl bg-white/5 p-6">
+      <div className="rounded-xl bg-white/5 p-6">
         <div className="space-y-5">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i}>

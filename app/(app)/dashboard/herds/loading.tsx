@@ -4,12 +4,12 @@ export default function HerdsLoading() {
   return (
     <div className="max-w-6xl">
       {/* PageHeader */}
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-5 flex items-center justify-between">
         <div>
           <Skeleton className="mb-2 h-8 w-24" />
           <Skeleton className="h-4 w-56" />
         </div>
-        <Skeleton className="h-10 w-24 rounded-2xl" />
+        <Skeleton className="h-10 w-24 rounded-xl" />
       </div>
 
       {/* Stat cards */}
@@ -21,7 +21,7 @@ export default function HerdsLoading() {
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-2xl bg-white/5">
+      <div className="overflow-hidden rounded-xl bg-white/5">
         {/* Table header */}
         <div className="flex gap-4 border-b border-white/5 px-5 py-3">
           <Skeleton className="h-4 w-32" />

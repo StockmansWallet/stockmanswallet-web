@@ -8,7 +8,7 @@ interface PageHeaderProps {
 
 function PageHeader({ title, subtitle, actions }: PageHeaderProps) {
   return (
-    <div className="mb-8 flex items-start justify-between">
+    <div className="mb-5 flex items-start justify-between">
       <div>
         <h1 className="text-2xl font-bold text-text-primary">{title}</h1>
         {subtitle && (

@@ -4,18 +4,18 @@ export default function PropertiesLoading() {
   return (
     <div className="max-w-6xl">
       {/* PageHeader */}
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-5 flex items-center justify-between">
         <div>
           <Skeleton className="mb-2 h-8 w-32" />
           <Skeleton className="h-4 w-64" />
         </div>
-        <Skeleton className="h-10 w-32 rounded-2xl" />
+        <Skeleton className="h-10 w-32 rounded-xl" />
       </div>
 
       {/* Property cards grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="rounded-2xl bg-white/5 p-5">
+          <div key={i} className="rounded-xl bg-white/5 p-5">
             <div className="mb-3 flex items-start justify-between">
               <Skeleton className="h-4 w-36" />
               <Skeleton className="h-5 w-12 rounded-full" />

@@ -12,16 +12,16 @@ export default function DashboardLoading() {
               <Skeleton className="h-4 w-56" />
             </div>
           </div>
-          <div className="rounded-2xl bg-white/[0.02] p-5">
+          <div className="rounded-xl bg-white/[0.02] p-5">
             <Skeleton className="mb-2 h-3 w-28" />
             <Skeleton className="mx-auto mb-2 h-10 w-52" />
             <Skeleton className="mx-auto h-3 w-20" />
           </div>
-          <div className="rounded-2xl bg-white/[0.02] p-6">
+          <div className="rounded-xl bg-white/[0.02] p-6">
             <Skeleton className="mb-5 h-5 w-40" />
             <Skeleton className="h-[240px] w-full rounded-lg" />
           </div>
-          <div className="rounded-2xl bg-white/[0.02] p-6">
+          <div className="rounded-xl bg-white/[0.02] p-6">
             <Skeleton className="mb-5 h-5 w-36" />
             <Skeleton className="mb-5 h-3 w-full rounded-full" />
             {Array.from({ length: 5 }).map((_, i) => (
@@ -38,7 +38,7 @@ export default function DashboardLoading() {
 
         {/* Right column */}
         <div className="flex w-full flex-col gap-3 lg:w-[340px] lg:gap-4">
-          <div className="rounded-2xl bg-white/[0.02] p-5">
+          <div className="rounded-xl bg-white/[0.02] p-5">
             <div className="flex items-center gap-4">
               <Skeleton className="h-12 w-12 rounded-full" />
               <div>
@@ -47,7 +47,7 @@ export default function DashboardLoading() {
               </div>
             </div>
           </div>
-          <div className="rounded-2xl bg-white/[0.02] p-5">
+          <div className="rounded-xl bg-white/[0.02] p-5">
             <Skeleton className="mb-4 h-5 w-28" />
             <div className="grid grid-cols-3 gap-2">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -58,7 +58,7 @@ export default function DashboardLoading() {
               ))}
             </div>
           </div>
-          <div className="rounded-2xl bg-white/[0.02] p-6">
+          <div className="rounded-xl bg-white/[0.02] p-6">
             <Skeleton className="mb-4 h-5 w-24" />
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="flex items-center justify-between py-3">
@@ -67,7 +67,7 @@ export default function DashboardLoading() {
               </div>
             ))}
           </div>
-          <div className="rounded-2xl bg-white/[0.02] p-6">
+          <div className="rounded-xl bg-white/[0.02] p-6">
             <Skeleton className="mb-4 h-5 w-24" />
             {Array.from({ length: 2 }).map((_, i) => (
               <div key={i} className="flex items-center justify-between py-3">

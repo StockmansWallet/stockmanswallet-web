@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import { Search, ChevronUp, ChevronRight, Home } from "lucide-react";
+import { Search, ChevronUp, ChevronRight, MapPinned } from "lucide-react";
 
 type HerdWithProperty = {
   id: string;
@@ -295,7 +295,7 @@ export function HerdsTable({
                 <div className="flex items-center justify-between border-b border-white/6 px-5 py-3.5">
                   <div className="flex items-center gap-2.5">
                     <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/10">
-                      <Home className="h-3.5 w-3.5 text-brand" />
+                      <MapPinned className="h-3.5 w-3.5 text-brand" />
                     </div>
                     <span className="text-sm font-semibold text-text-primary">
                       {group.name}
@@ -304,7 +304,7 @@ export function HerdsTable({
                       <Badge variant="brand" className="text-[10px] px-1.5 py-0">Primary</Badge>
                     )}
                   </div>
-                  <div className="flex items-center gap-4 text-xs tabular-nums text-text-muted">
+                  <div className="flex items-center gap-4 text-sm font-semibold tabular-nums text-brand">
                     <span>{groupHead.toLocaleString()} head</span>
                     {groupValue > 0 && (
                       <span>${Math.round(groupValue).toLocaleString()}</span>

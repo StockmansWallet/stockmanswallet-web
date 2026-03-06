@@ -91,7 +91,7 @@ export default async function YardBookPage() {
       ) : (
         <>
           {/* Stats */}
-          <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+          <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
             <StatCard
               icon={<CalendarClock className="h-4 w-4" />}
               label="Upcoming"
