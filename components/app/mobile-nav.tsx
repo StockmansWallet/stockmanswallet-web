@@ -19,7 +19,7 @@ import {
   Crown,
   HelpCircle,
   Settings,
-  Landmark,
+  MapPinned,
   LogOut,
 } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
@@ -27,7 +27,7 @@ import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: <Wallet className="h-5 w-5" /> },
   { label: "Herds", href: "/dashboard/herds", icon: <IconCattleTags className="h-5 w-5" /> },
-  { label: "Properties", href: "/dashboard/properties", icon: <Landmark className="h-5 w-5" /> },
+  { label: "Properties", href: "/dashboard/properties", icon: <MapPinned className="h-5 w-5" /> },
   { label: "Stockman IQ", href: "/dashboard/stockman-iq", icon: <Brain className="h-5 w-5" /> },
   { label: "Markets", href: "/dashboard/market", icon: <TrendingUp className="h-5 w-5" /> },
   { label: "Yard Book", href: "/dashboard/tools/yard-book", icon: <BookOpen className="h-5 w-5" /> },

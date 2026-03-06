@@ -20,7 +20,7 @@ export default async function AppLayout({
   return (
     <div className="flex min-h-screen bg-background">
       {/* Desktop sidebar */}
-      <div className="hidden py-4 pl-4 lg:block">
+      <div className="hidden py-4 pl-6 lg:block">
         <div className="sticky top-4">
           <Sidebar userEmail={user.email} />
         </div>

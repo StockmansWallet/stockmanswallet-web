@@ -16,7 +16,7 @@ import {
   Crown,
   HelpCircle,
   Settings,
-  Landmark,
+  MapPinned,
   LogOut,
 } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
@@ -35,7 +35,7 @@ const navItems = [
   {
     label: "Properties",
     href: "/dashboard/properties",
-    icon: <Landmark className="h-5 w-5" />,
+    icon: <MapPinned className="h-5 w-5" />,
   },
   {
     label: "Stockman IQ",
@@ -97,18 +97,18 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
   return (
     <aside className="flex max-h-[calc(100vh-2rem)] w-64 flex-col">
       {/* Logo */}
-      <div className="px-5 py-6">
+      <div className="flex justify-center px-5 pb-8 pt-6">
         <Image
           src="/images/sw-logo.svg"
           alt="Stockman's Wallet"
-          width={180}
-          height={120}
+          width={150}
+          height={100}
           className="opacity-90"
         />
       </div>
 
       {/* Main navigation */}
-      <nav className="space-y-0.5 overflow-y-auto px-3">
+      <nav className="space-y-0.5 overflow-y-auto px-4">
         {navItems.map((item) => (
           <Link
             key={item.href}
@@ -126,7 +126,7 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
       </nav>
 
       {/* Bottom section */}
-      <div className="border-t border-white/5 px-3 py-3">
+      <div className="mx-4 mt-4 border-t border-white/5 px-0 py-4">
         {/* Plan indicator */}
         <Link
           href="/dashboard/settings"
