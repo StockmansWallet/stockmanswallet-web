@@ -15,6 +15,7 @@ import {
   Truck,
   Grid3x3,
   Users,
+  Brain,
   Crown,
   HelpCircle,
   Settings,
@@ -22,13 +23,12 @@ import {
 } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
 import { IconFarm } from "@/components/icons/icon-farm";
-import { IconStockmanIQ } from "@/components/icons/icon-stockmaniq";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: <Wallet className="h-5 w-5" /> },
   { label: "Herds", href: "/dashboard/herds", icon: <IconCattleTags className="h-5 w-5" /> },
   { label: "Properties", href: "/dashboard/properties", icon: <IconFarm className="h-5 w-5" /> },
-  { label: "Stockman IQ", href: "/dashboard/stockman-iq", icon: <IconStockmanIQ className="h-5 w-5" /> },
+  { label: "Stockman IQ", href: "/dashboard/stockman-iq", icon: <Brain className="h-5 w-5" /> },
   { label: "Markets", href: "/dashboard/market", icon: <TrendingUp className="h-5 w-5" /> },
   { label: "Yard Book", href: "/dashboard/tools/yard-book", icon: <BookOpen className="h-5 w-5" /> },
   { label: "Reports", href: "/dashboard/tools/reports", icon: <FileText className="h-5 w-5" /> },
@@ -49,17 +49,14 @@ export function MobileNav({ userEmail }: { userEmail?: string }) {
     <>
       {/* Mobile header */}
       <header className="flex items-center justify-between bg-bg-alt px-4 py-3 lg:hidden">
-        <Link href="/dashboard" className="flex items-center gap-2">
+        <Link href="/dashboard">
           <Image
-            src="/images/sw-logo-tally.svg"
+            src="/images/sw-logo.svg"
             alt="Stockman's Wallet"
-            width={32}
-            height={32}
+            width={140}
+            height={90}
             className="brightness-0 invert opacity-90"
           />
-          <span className="text-sm font-bold text-text-primary">
-            Stockman&apos;s Wallet
-          </span>
         </Link>
         <button
           onClick={() => setOpen(!open)}

@@ -12,6 +12,7 @@ import {
   Truck,
   Grid3x3,
   Users,
+  Brain,
   Crown,
   HelpCircle,
   Settings,
@@ -19,7 +20,6 @@ import {
 } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
 import { IconFarm } from "@/components/icons/icon-farm";
-import { IconStockmanIQ } from "@/components/icons/icon-stockmaniq";
 
 const navItems = [
   {
@@ -40,7 +40,7 @@ const navItems = [
   {
     label: "Stockman IQ",
     href: "/dashboard/stockman-iq",
-    icon: <IconStockmanIQ className="h-5 w-5" />,
+    icon: <Brain className="h-5 w-5" />,
   },
   {
     label: "Markets",
@@ -97,17 +97,14 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
   return (
     <aside className="flex h-screen w-64 flex-col">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 py-6">
+      <div className="px-5 py-6">
         <Image
-          src="/images/sw-logo-tally.svg"
+          src="/images/sw-logo.svg"
           alt="Stockman's Wallet"
-          width={36}
-          height={36}
+          width={180}
+          height={120}
           className="brightness-0 invert opacity-90"
         />
-        <span className="text-sm font-bold text-text-primary">
-          Stockman&apos;s Wallet
-        </span>
       </div>
 
       {/* Main navigation */}
