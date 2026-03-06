@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Plus, Home, ChevronRight } from "lucide-react";
+import { Plus, MapPinned, ChevronRight } from "lucide-react";
 
 export const metadata = {
   title: "Properties",
@@ -57,7 +57,7 @@ export default async function PropertiesPage() {
                   <div className="mb-3 flex items-start justify-between">
                     <div className="flex items-center gap-2.5">
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/15">
-                        <Home className="h-4 w-4 text-brand" />
+                        <MapPinned className="h-4 w-4 text-brand" />
                       </div>
                       <div className="min-w-0">
                         <h3 className="text-sm font-semibold text-text-primary">{property.property_name}</h3>

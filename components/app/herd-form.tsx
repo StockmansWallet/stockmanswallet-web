@@ -89,17 +89,7 @@ export function HerdForm({ herd, properties, action, submitLabel }: HerdFormProp
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Actions - top */}
-      <div className="flex items-center gap-3">
-        <Button type="submit" disabled={submitting}>
-          {submitting ? "Saving..." : submitLabel}
-        </Button>
-        <Button type="button" variant="ghost" onClick={() => router.back()}>
-          Cancel
-        </Button>
-      </div>
-
+    <form id="herd-form" onSubmit={handleSubmit} className="space-y-4">
       {error && (
         <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
           {error}
@@ -365,7 +355,7 @@ export function HerdForm({ herd, properties, action, submitLabel }: HerdFormProp
         </CardContent>
       </Card>
 
-      {/* Actions - bottom (repeat for long forms) */}
+      {/* Actions - bottom */}
       <div className="flex items-center gap-3 pt-2">
         <Button type="submit" disabled={submitting}>
           {submitting ? "Saving..." : submitLabel}

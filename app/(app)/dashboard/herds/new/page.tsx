@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
+import { Button } from "@/components/ui/button";
 import { HerdForm } from "@/components/app/herd-form";
 import { createHerd } from "../actions";
 
@@ -25,6 +26,11 @@ export default async function NewHerdPage() {
       <PageHeader
         title="Add Herd"
         subtitle="Create a new herd to track your livestock."
+        actions={
+          <Button type="submit" form="herd-form" size="sm">
+            Add Herd
+          </Button>
+        }
       />
       <HerdForm
         properties={properties ?? []}

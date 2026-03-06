@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
+import { Button } from "@/components/ui/button";
 import { HerdForm } from "@/components/app/herd-form";
 import { MusterRecordsSection } from "@/components/app/muster-records-section";
 import { HealthRecordsSection } from "@/components/app/health-records-section";
@@ -60,6 +61,11 @@ export default async function EditHerdPage({
       <PageHeader
         title={`Edit: ${herd.name}`}
         subtitle={[herd.species, herd.breed].join(" · ")}
+        actions={
+          <Button type="submit" form="herd-form" size="sm">
+            Save Changes
+          </Button>
+        }
       />
       <HerdForm
         herd={herd}
