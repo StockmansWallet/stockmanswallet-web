@@ -93,7 +93,7 @@ export default async function HerdDetailPage({
     .in("saleyard", saleyardsToFetch)
     .eq("category", mlaCategory)
     .order("data_date", { ascending: false })
-    .limit(10000);
+    .limit(50000);
 
   // Build pricing lookup maps from combined result (same keys as iOS cache)
   const nationalPriceMap = new Map<string, CategoryPriceEntry[]>();

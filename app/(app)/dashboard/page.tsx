@@ -82,7 +82,7 @@ export default async function DashboardPage() {
         .in("saleyard", saleyardsToFetch)
         .in("category", mlaCategories)
         .order("data_date", { ascending: false })
-        .limit(10000)
+        .limit(50000)
     : { data: [] as { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null }[] };
 
   const activeHerds = herds ?? [];
