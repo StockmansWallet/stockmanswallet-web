@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { calculateProjectedWeight, calculateHerdValuation, mapCategoryToMLACategory, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 import { DeleteHerdButton } from "./delete-button";
+import { MusterRecordsSection } from "@/components/app/muster-records-section";
+import { HealthRecordsSection } from "@/components/app/health-records-section";
 import { Pencil, Info, Scale, Heart, MapPin, FileText, DollarSign, AlertTriangle, BarChart3, Clock } from "lucide-react";
 
 export const revalidate = 0;
@@ -45,8 +47,8 @@ export default async function HerdDetailPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Fetch herd + breed premiums in parallel
-  const [herdResult, { data: breedPremiumData }] = await Promise.all([
+  // Fetch herd + breed premiums + records in parallel
+  const [herdResult, { data: breedPremiumData }, { data: musterRecords }, { data: healthRecords }] = await Promise.all([
     supabase
       .from("herd_groups")
       .select("*, properties(property_name)")
@@ -57,6 +59,20 @@ export default async function HerdDetailPage({
     supabase
       .from("breed_premiums")
       .select("breed, premium_percent:premium_pct"),
+    supabase
+      .from("muster_records")
+      .select("id, date, total_head_count, cattle_yard, weaners_count, branders_count, notes")
+      .eq("herd_id", id)
+      .eq("user_id", user!.id)
+      .eq("is_deleted", false)
+      .order("date", { ascending: false }),
+    supabase
+      .from("health_records")
+      .select("id, date, treatment_type, notes")
+      .eq("herd_id", id)
+      .eq("user_id", user!.id)
+      .eq("is_deleted", false)
+      .order("date", { ascending: false }),
   ]);
 
   let herd = herdResult.data;
@@ -328,6 +344,12 @@ export default async function HerdDetailPage({
             <InfoRow label="Last Updated" value={new Date(herd.updated_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })} />
           </CardContent>
         </Card>
+
+        {/* Mustering Records */}
+        <MusterRecordsSection herdId={id} records={musterRecords ?? []} editable />
+
+        {/* Health Records */}
+        <HealthRecordsSection herdId={id} records={healthRecords ?? []} editable />
 
         {/* Notes */}
         {herd.notes && (

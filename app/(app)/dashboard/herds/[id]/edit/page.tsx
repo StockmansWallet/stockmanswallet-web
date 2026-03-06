@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { HerdForm } from "@/components/app/herd-form";
+import { MusterRecordsSection } from "@/components/app/muster-records-section";
+import { HealthRecordsSection } from "@/components/app/health-records-section";
 import { updateHerd } from "../../actions";
 
 export const metadata = {
@@ -19,7 +21,7 @@ export default async function EditHerdPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: herd }, { data: properties }] = await Promise.all([
+  const [{ data: herd }, { data: properties }, { data: musterRecords }, { data: healthRecords }] = await Promise.all([
     supabase
       .from("herd_groups")
       .select("*")
@@ -33,6 +35,20 @@ export default async function EditHerdPage({
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
       .order("property_name"),
+    supabase
+      .from("muster_records")
+      .select("id, date, total_head_count, cattle_yard, weaners_count, branders_count, notes")
+      .eq("herd_id", id)
+      .eq("user_id", user!.id)
+      .eq("is_deleted", false)
+      .order("date", { ascending: false }),
+    supabase
+      .from("health_records")
+      .select("id, date, treatment_type, notes")
+      .eq("herd_id", id)
+      .eq("user_id", user!.id)
+      .eq("is_deleted", false)
+      .order("date", { ascending: false }),
   ]);
 
   if (!herd) notFound();
@@ -51,6 +67,11 @@ export default async function EditHerdPage({
         action={boundUpdate}
         submitLabel="Save Changes"
       />
+
+      <div className="mt-4 space-y-4">
+        <MusterRecordsSection herdId={id} records={musterRecords ?? []} editable />
+        <HealthRecordsSection herdId={id} records={healthRecords ?? []} editable />
+      </div>
     </div>
   );
 }
