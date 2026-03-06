@@ -281,6 +281,9 @@ export default async function HerdDetailPage({
             <InfoRow label="Current Weight" value={herd.current_weight ? `${herd.current_weight} kg` : null} />
             {projectedWeight && <InfoRow label="Projected Weight" value={`${Math.round(projectedWeight)} kg`} />}
             <InfoRow label="Daily Weight Gain" value={herd.daily_weight_gain ? `${herd.daily_weight_gain} kg/day` : null} />
+            {herd.mortality_rate != null && herd.mortality_rate > 0 && (
+              <InfoRow label="Mortality Rate" value={`${Math.round(herd.mortality_rate * 100)}% annually`} />
+            )}
           </CardContent>
         </Card>
 
@@ -302,9 +305,6 @@ export default async function HerdDetailPage({
               </div>
             )}
             <InfoRow label="Paddock" value={herd.paddock_name} />
-            {herd.mortality_rate != null && herd.mortality_rate > 0 && (
-              <InfoRow label="Mortality Rate" value={`${Math.round(herd.mortality_rate * 100)}% annually`} />
-            )}
           </CardContent>
         </Card>
 
