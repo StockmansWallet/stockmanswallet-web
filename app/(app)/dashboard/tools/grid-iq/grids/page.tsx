@@ -32,7 +32,7 @@ export default async function SavedGridsPage() {
         subtitle="Your uploaded processor price grids."
         actions={
           <Link href="/dashboard/tools/grid-iq/upload">
-            <Button size="sm">
+            <Button size="sm" variant="teal">
               <Upload className="mr-1.5 h-3.5 w-3.5" />
               Upload Grid
             </Button>
@@ -115,6 +115,7 @@ export default async function SavedGridsPage() {
             description="Upload a processor grid photo or PDF. Grid IQ will extract the price matrix automatically."
             actionLabel="Upload Grid"
             actionHref="/dashboard/tools/grid-iq/upload"
+            variant="teal"
           />
         </Card>
       )}

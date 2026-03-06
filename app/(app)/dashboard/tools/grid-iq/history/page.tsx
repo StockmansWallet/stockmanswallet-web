@@ -32,7 +32,7 @@ export default async function KillSheetHistoryPage() {
         subtitle="Track your over-the-hooks performance over time."
         actions={
           <Link href="/dashboard/tools/grid-iq/upload">
-            <Button size="sm">
+            <Button size="sm" variant="teal">
               <Upload className="mr-1.5 h-3.5 w-3.5" />
               Upload Kill Sheet
             </Button>
@@ -105,6 +105,7 @@ export default async function KillSheetHistoryPage() {
             description="Upload kill sheets to start tracking your over-the-hooks performance. Kill history improves Grid IQ accuracy with personalised realisation factors."
             actionLabel="Upload Kill Sheet"
             actionHref="/dashboard/tools/grid-iq/upload"
+            variant="teal"
           />
         </Card>
       )}

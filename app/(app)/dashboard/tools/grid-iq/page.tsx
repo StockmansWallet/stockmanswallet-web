@@ -70,7 +70,7 @@ export default async function GridIQPage() {
         subtitle="Processor intelligence. What's the smartest selling move right now?"
         actions={
           <Link href="/dashboard/tools/grid-iq/upload">
-            <Button size="sm">
+            <Button size="sm" variant="teal">
               <Upload className="mr-1.5 h-3.5 w-3.5" />
               Upload Grid
             </Button>
@@ -361,7 +361,7 @@ export default async function GridIQPage() {
                 value with freight and kill history factored in.
               </p>
               <Link href="/dashboard/tools/grid-iq/upload">
-                <Button size="sm" className="mt-4">
+                <Button size="sm" variant="teal" className="mt-4">
                   <Upload className="mr-1.5 h-3.5 w-3.5" />
                   Upload Your First Grid
                 </Button>

@@ -30,11 +30,11 @@ const navItems = [
   { label: "Properties", href: "/dashboard/properties", icon: <MapPinned className="h-5 w-5" /> },
   { label: "Stockman IQ", href: "/dashboard/stockman-iq", icon: <Brain className="h-5 w-5" /> },
   { label: "Markets", href: "/dashboard/market", icon: <TrendingUp className="h-5 w-5" /> },
-  { label: "Yard Book", href: "/dashboard/tools/yard-book", icon: <BookOpen className="h-5 w-5" /> },
-  { label: "Reports", href: "/dashboard/tools/reports", icon: <FileText className="h-5 w-5" /> },
-  { label: "Freight IQ", href: "/dashboard/tools/freight", icon: <Truck className="h-5 w-5" /> },
-  { label: "Grid IQ", href: "/dashboard/tools/grid-iq", icon: <Grid3x3 className="h-5 w-5" /> },
-  { label: "Advisory Hub", href: "/dashboard/advisory-hub", icon: <Users className="h-5 w-5" /> },
+  { label: "Yard Book", href: "/dashboard/tools/yard-book", icon: <BookOpen className="h-5 w-5" />, activeClass: "bg-lime-500/15 text-lime-400" },
+  { label: "Reports", href: "/dashboard/tools/reports", icon: <FileText className="h-5 w-5" />, activeClass: "bg-amber-500/15 text-amber-400" },
+  { label: "Freight IQ", href: "/dashboard/tools/freight", icon: <Truck className="h-5 w-5" />, activeClass: "bg-sky-500/15 text-sky-400" },
+  { label: "Grid IQ", href: "/dashboard/tools/grid-iq", icon: <Grid3x3 className="h-5 w-5" />, activeClass: "bg-teal-500/15 text-teal-400" },
+  { label: "Advisory Hub", href: "/dashboard/advisory-hub", icon: <Users className="h-5 w-5" />, activeClass: "bg-purple-500/15 text-purple-400" },
 ];
 
 export function MobileNav({ userEmail }: { userEmail?: string }) {
@@ -95,7 +95,7 @@ export function MobileNav({ userEmail }: { userEmail?: string }) {
                   onClick={() => setOpen(false)}
                   className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all ${
                     checkActive(item.href)
-                      ? "bg-brand/15 text-brand"
+                      ? (item.activeClass ?? "bg-brand/15 text-brand")
                       : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
                   }`}
                 >
