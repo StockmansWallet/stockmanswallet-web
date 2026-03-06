@@ -2,6 +2,24 @@
 
 ---
 
+# Session 7 - 6 Mar 2026
+
+## MLA Scraper Edge Function - Historic Data Fix
+
+Fixed a critical bug in the `mla-scraper` Supabase Edge Function that caused all uploaded MLA saleyard CSV data to be wiped on each sequential upload. When uploading 41 CSV files, only the last file's data survived (Armidale, the last alphabetically). All web app valuations showed red (national average fallback) because saleyard-specific prices were missing.
+
+**Root cause:** The transactions CSV handler deleted ALL rows matching `MLA Transactions%` before each file's insert, wiping previously uploaded files. Additionally, the per-saleyard+date dedup logic had a destructuring bug (`const [saleyard, , , dataDate]` on a 2-element split) making `dataDate` always undefined, so targeted dedup never worked.
+
+**Fixes applied:**
+- Removed broad delete of all transaction rows - historic data now accumulates across uploads
+- Fixed combo key destructuring so per-saleyard+date dedup works correctly
+- CSV mode handler now returns `prices_inserted` and `insert_errors` in the response
+
+**Files changed:**
+- `StockmansWallet-iOS/StockmansWallet/supabase/functions/mla-scraper/index.ts` - Three fixes in storeCategoryPrices and handleTransactionsCsvMode
+
+---
+
 # Session 6 - 6 Mar 2026
 
 ## Dashboard Layout Redesign

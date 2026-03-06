@@ -57,7 +57,7 @@ export default async function HerdsPage() {
 
   // Fetch pricing data in a single combined query matching iOS prefetchPricesForHerds():
   // - Saleyard + "National" combined, filtered by MLA categories, all breeds
-  // - Ordered by data_date DESC with limit 500 (matches iOS SupabaseMarketService)
+  // - Ordered by data_date DESC - no tight limit since a single saleyard can have 10k+ rows
   // - Expiry filter: only include non-expired entries (matches iOS expiryFilter)
   const saleyards = [...new Set((herds ?? []).map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
   const mlaCategories = [...new Set((herds ?? []).map((h) => mapCategoryToMLACategory(h.category)))];
@@ -70,7 +70,7 @@ export default async function HerdsPage() {
         .in("saleyard", saleyardsToFetch)
         .in("category", mlaCategories)
         .order("data_date", { ascending: false })
-        .limit(500)
+        .limit(10000)
     : { data: [] as { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null }[] };
 
   // Build pricing lookup maps from combined result (same keys as iOS cache)

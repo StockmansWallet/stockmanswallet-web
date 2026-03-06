@@ -1,5 +1,17 @@
 # Build Summaries
 
+## Session 7 - 6 Mar 2026
+
+### Summary
+
+Fixed a critical bug in the MLA scraper Edge Function that was wiping all uploaded saleyard pricing data on each sequential CSV upload, causing all web app valuations to show national average fallback (red) instead of saleyard-specific prices (green).
+
+### What's New
+
+**MLA scraper fix** - When uploading 41 MLA saleyard CSV files, each upload was deleting all previously uploaded transaction data before inserting its own. Only the last file's data (Armidale) survived, leaving 9,685 rows instead of the expected 300,000+. All dashboard valuations showed red because saleyard prices were missing. Three fixes applied: removed the broad delete so historic data accumulates, fixed a destructuring bug in the per-saleyard dedup logic, and added `prices_inserted`/`insert_errors` to the CSV response for upload visibility. This is a shared Supabase Edge Function so the fix benefits both web and iOS apps.
+
+---
+
 ## Session 6 - 6 Mar 2026
 
 ### Summary
