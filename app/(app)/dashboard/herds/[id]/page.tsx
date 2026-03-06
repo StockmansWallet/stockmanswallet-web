@@ -238,7 +238,6 @@ export default async function HerdDetailPage({
               <InfoRow label="Price (Per Kilogram)" value={`$${valuation.pricePerKg.toFixed(2)}/kg`} />
               <InfoRow label="Average Weight" value={`${Math.round(projectedWeight ?? herd.current_weight ?? herd.initial_weight ?? 0)} kg`} />
               <InfoRow label="Value Per Head" value={`$${Math.round(herdValue / (herd.head_count || 1)).toLocaleString()}`} />
-              <InfoRow label="Saleyard" value={herd.selected_saleyard ?? "No saleyard selected"} />
             </CardContent>
           </Card>
         )}
@@ -305,6 +304,7 @@ export default async function HerdDetailPage({
               </div>
             )}
             <InfoRow label="Paddock" value={herd.paddock_name} />
+            <InfoRow label="Saleyard" value={herd.selected_saleyard} />
           </CardContent>
         </Card>
 
