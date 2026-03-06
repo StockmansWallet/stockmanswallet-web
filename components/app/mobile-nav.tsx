@@ -55,7 +55,7 @@ export function MobileNav({ userEmail }: { userEmail?: string }) {
             alt="Stockman's Wallet"
             width={140}
             height={90}
-            className="brightness-0 invert opacity-90"
+            className="opacity-90"
           />
         </Link>
         <button

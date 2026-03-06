@@ -95,7 +95,7 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
     (href !== "/dashboard" && pathname.startsWith(href));
 
   return (
-    <aside className="flex h-screen w-64 flex-col">
+    <aside className="flex max-h-[calc(100vh-2rem)] w-64 flex-col">
       {/* Logo */}
       <div className="px-5 py-6">
         <Image
@@ -103,12 +103,12 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
           alt="Stockman's Wallet"
           width={180}
           height={120}
-          className="brightness-0 invert opacity-90"
+          className="opacity-90"
         />
       </div>
 
       {/* Main navigation */}
-      <nav className="flex-1 space-y-0.5 overflow-y-auto px-3">
+      <nav className="space-y-0.5 overflow-y-auto px-3">
         {navItems.map((item) => (
           <Link
             key={item.href}

@@ -196,21 +196,20 @@ export default async function DashboardPage() {
           </Card>
         </div>
       ) : (
-        <div className="flex flex-col gap-3 lg:flex-row lg:gap-4">
-          {/* Left column */}
-          <div className="flex min-w-0 flex-1 flex-col gap-3 lg:gap-4">
-            <div className="flex items-center">
-              <div>
-                <h1 className="text-2xl font-bold text-text-primary">
-                  G&rsquo;day, {firstName}!
-                </h1>
-                <p className="mt-1 text-sm text-text-muted">
-                  Here&rsquo;s your herd overview.
-                </p>
-              </div>
-            </div>
+        <div>
+          <div className="mb-3 lg:mb-4">
+            <h1 className="text-2xl font-bold text-text-primary">
+              G&rsquo;day, {firstName}!
+            </h1>
+            <p className="mt-1 text-sm text-text-muted">
+              Here&rsquo;s your herd overview.
+            </p>
+          </div>
 
-            <PortfolioValueCard
+          <div className="flex flex-col gap-3 lg:flex-row lg:gap-4">
+            {/* Left column */}
+            <div className="flex min-w-0 flex-1 flex-col gap-3 lg:gap-4">
+              <PortfolioValueCard
               value={portfolioValue}
               changePercent={changePercent}
               fallbackCount={fallbackCount}
@@ -358,6 +357,7 @@ export default async function DashboardPage() {
               totalHead={totalHead}
             />
           </div>
+        </div>
         </div>
       )}
     </div>
