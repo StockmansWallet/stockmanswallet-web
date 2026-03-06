@@ -5,21 +5,45 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/app/(auth)/actions";
-import { Menu, X } from "lucide-react";
+import {
+  Menu,
+  X,
+  Wallet,
+  TrendingUp,
+  BookOpen,
+  FileText,
+  Truck,
+  Grid3x3,
+  Users,
+  Crown,
+  HelpCircle,
+  Settings,
+  LogOut,
+} from "lucide-react";
+import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
+import { IconFarm } from "@/components/icons/icon-farm";
+import { IconStockmanIQ } from "@/components/icons/icon-stockmaniq";
 
 const navItems = [
-  { label: "Dashboard", href: "/dashboard" },
-  { label: "Herds", href: "/dashboard/herds" },
-  { label: "Market", href: "/dashboard/market" },
-  { label: "Properties", href: "/dashboard/properties" },
-  { label: "Stockman IQ", href: "/dashboard/stockman-iq" },
-  { label: "Tools", href: "/dashboard/tools" },
-  { label: "Settings", href: "/dashboard/settings" },
+  { label: "Dashboard", href: "/dashboard", icon: <Wallet className="h-5 w-5" /> },
+  { label: "Herds", href: "/dashboard/herds", icon: <IconCattleTags className="h-5 w-5" /> },
+  { label: "Properties", href: "/dashboard/properties", icon: <IconFarm className="h-5 w-5" /> },
+  { label: "Stockman IQ", href: "/dashboard/stockman-iq", icon: <IconStockmanIQ className="h-5 w-5" /> },
+  { label: "Markets", href: "/dashboard/market", icon: <TrendingUp className="h-5 w-5" /> },
+  { label: "Yard Book", href: "/dashboard/tools/yard-book", icon: <BookOpen className="h-5 w-5" /> },
+  { label: "Reports", href: "/dashboard/tools/reports", icon: <FileText className="h-5 w-5" /> },
+  { label: "Freight IQ", href: "/dashboard/tools/freight", icon: <Truck className="h-5 w-5" /> },
+  { label: "Grid IQ", href: "/dashboard/tools/grid-iq", icon: <Grid3x3 className="h-5 w-5" /> },
+  { label: "Advisory Hub", href: "/dashboard/advisory-hub", icon: <Users className="h-5 w-5" /> },
 ];
 
 export function MobileNav({ userEmail }: { userEmail?: string }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+
+  const checkActive = (href: string) =>
+    pathname === href ||
+    (href !== "/dashboard" && pathname.startsWith(href));
 
   return (
     <>
@@ -27,11 +51,11 @@ export function MobileNav({ userEmail }: { userEmail?: string }) {
       <header className="flex items-center justify-between bg-bg-alt px-4 py-3 lg:hidden">
         <Link href="/dashboard" className="flex items-center gap-2">
           <Image
-            src="/images/app-icon.png"
+            src="/images/sw-logo-tally.svg"
             alt="Stockman's Wallet"
             width={32}
             height={32}
-            className="rounded-xl"
+            className="brightness-0 invert opacity-90"
           />
           <span className="text-sm font-bold text-text-primary">
             Stockman&apos;s Wallet
@@ -56,7 +80,7 @@ export function MobileNav({ userEmail }: { userEmail?: string }) {
             className="absolute inset-0 bg-black/50"
             onClick={() => setOpen(false)}
           />
-          <nav className="absolute right-0 top-0 h-full w-72 bg-bg-alt p-4 shadow-2xl">
+          <nav className="absolute right-0 top-0 flex h-full w-72 flex-col bg-bg-alt p-4 shadow-2xl">
             <div className="mb-6 flex justify-end">
               <button
                 onClick={() => setOpen(false)}
@@ -66,46 +90,68 @@ export function MobileNav({ userEmail }: { userEmail?: string }) {
               </button>
             </div>
 
-            <div className="space-y-0.5">
-              {navItems.map((item) => {
-                const isActive =
-                  pathname === item.href ||
-                  (item.href !== "/dashboard" &&
-                    pathname.startsWith(item.href));
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setOpen(false)}
-                    className={`block rounded-2xl px-3 py-2.5 text-sm font-medium transition-all ${
-                      isActive
-                        ? "bg-brand/15 text-brand"
-                        : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
+            <div className="flex-1 space-y-0.5 overflow-y-auto">
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all ${
+                    checkActive(item.href)
+                      ? "bg-brand/15 text-brand"
+                      : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+                  }`}
+                >
+                  {item.icon}
+                  {item.label}
+                </Link>
+              ))}
             </div>
 
-            <div className="mt-6 pt-4">
-              <div className="rounded-2xl bg-white/5 p-3">
-                {userEmail && (
-                  <p className="mb-2 truncate px-1 text-xs text-text-muted">
-                    {userEmail}
-                  </p>
-                )}
-                <form action={signOut}>
-                  <button
-                    type="submit"
-                    className="w-full rounded-xl px-2 py-2 text-left text-sm font-medium text-text-secondary hover:bg-white/8 hover:text-text-primary"
-                  >
-                    Sign out
-                  </button>
-                </form>
-              </div>
+            <div className="border-t border-white/5 pt-3">
+              <Link
+                href="/dashboard/settings"
+                onClick={() => setOpen(false)}
+                className="mb-1 flex items-center gap-3 rounded-2xl px-3 py-2 text-sm transition-all hover:bg-white/5"
+              >
+                <Crown className="h-4 w-4 text-brand" />
+                <div>
+                  <p className="text-sm font-medium text-text-primary">Plan</p>
+                  <p className="text-xs text-text-muted">Head Stockman</p>
+                </div>
+              </Link>
+
+              <Link
+                href="/dashboard/help"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium text-text-secondary hover:bg-white/5 hover:text-text-primary"
+              >
+                <HelpCircle className="h-4 w-4" />
+                Help Center
+              </Link>
+
+              <Link
+                href="/dashboard/settings"
+                onClick={() => setOpen(false)}
+                className={`flex items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium transition-all ${
+                  checkActive("/dashboard/settings")
+                    ? "bg-brand/15 text-brand"
+                    : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+                }`}
+              >
+                <Settings className="h-4 w-4" />
+                Settings
+              </Link>
+
+              <form action={signOut}>
+                <button
+                  type="submit"
+                  className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium text-text-secondary hover:bg-white/5 hover:text-text-primary"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Log Out
+                </button>
+              </form>
             </div>
           </nav>
         </div>

@@ -7,7 +7,11 @@ import { HerdComposition } from "./herd-composition";
 import { PortfolioChart } from "./portfolio-chart";
 import { calculateHerdValuation, mapCategoryToMLACategory } from "@/lib/engines/valuation-engine";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
-import { Plus, Home, Package } from "lucide-react";
+import { UserProfileCard } from "@/components/app/user-profile-card";
+import { PortfolioValueCard } from "@/components/app/portfolio-value-card";
+import { DashboardQuickActions } from "@/components/app/dashboard-quick-actions";
+import { ComingUpCard } from "@/components/app/coming-up-card";
+import { GrowthMortalityCard } from "@/components/app/growth-mortality-card";
 
 export const revalidate = 0;
 
@@ -22,8 +26,13 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
 
   const firstName = user?.user_metadata?.first_name || "Stockman";
+  const lastName = user?.user_metadata?.last_name || "";
+  const userEmail = user?.email || "";
+  const userRole = user?.user_metadata?.role || "";
 
-  const [{ data: herds }, { data: properties }, { data: breedPremiumData }] = await Promise.all([
+  const todayStr = new Date().toISOString().split("T")[0];
+
+  const [{ data: herds }, { data: properties }, { data: breedPremiumData }, { data: upcomingItems }] = await Promise.all([
     supabase
       .from("herd_groups")
       .select(`id, name, species, breed, category, head_count,
@@ -46,6 +55,16 @@ export default async function DashboardPage() {
     supabase
       .from("breed_premiums")
       .select("breed, premium_percent:premium_pct"),
+    // Upcoming yard book items for Coming Up card
+    supabase
+      .from("yard_book_items")
+      .select("id, title, event_date, event_type, category_raw")
+      .eq("user_id", user!.id)
+      .eq("is_deleted", false)
+      .eq("is_completed", false)
+      .gte("event_date", todayStr)
+      .order("event_date")
+      .limit(5),
   ]);
 
   // Fetch pricing data in a single combined query matching iOS prefetchPricesForHerds():
@@ -136,70 +155,80 @@ export default async function DashboardPage() {
 
   const hasData = activeHerds.length > 0;
 
+  // Compute growth & mortality stats
+  const herdsWithMortality = activeHerds.filter((h) => h.mortality_rate > 0);
+  const avgMortalityRate =
+    herdsWithMortality.length > 0
+      ? herdsWithMortality.reduce((sum, h) => sum + h.mortality_rate, 0) / herdsWithMortality.length
+      : 0;
+  const herdsWithDwg = activeHerds.filter((h) => h.daily_weight_gain > 0);
+  const avgDailyWeightGain =
+    herdsWithDwg.length > 0
+      ? herdsWithDwg.reduce((sum, h) => sum + h.daily_weight_gain, 0) / herdsWithDwg.length
+      : 0;
+
+  // Change ticker: compare month 0 vs month 1 projection
+  const changePercent =
+    chartData.length >= 2 && chartData[0].value > 0
+      ? ((chartData[1].value - chartData[0].value) / chartData[0].value) * 100
+      : undefined;
+
   return (
     <div className="mx-auto max-w-6xl">
-      {/* ── Hero ── */}
-      <div className="mb-8">
-        <p className="text-sm text-text-muted">
-          G&rsquo;day, {firstName}
-        </p>
-
-        {hasData ? (
-          <div className="mt-2">
-            <h1 className="text-4xl font-bold tracking-tight text-text-primary sm:text-5xl">
-              ${Math.round(portfolioValue).toLocaleString()}
-            </h1>
-            <p className="mt-1 text-sm text-text-muted">
-              Portfolio Value
-              {fallbackCount > 0 && (
-                <span className="ml-2 inline-flex items-center rounded-md bg-red-500/15 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
-                  {fallbackCount} {fallbackCount === 1 ? "herd" : "herds"} using national avg
-                </span>
-              )}
-            </p>
-
-            <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm">
-              <span className="text-text-secondary">
-                <span className="font-semibold text-text-primary">{totalHead.toLocaleString()}</span> head
-              </span>
-              <span className="text-text-secondary">
-                <span className="font-semibold text-text-primary">{herdCount}</span> active herds
-              </span>
-              <span className="text-text-secondary">
-                <span className="font-semibold text-text-primary">{propertyCount}</span>{" "}
-                {propertyCount === 1 ? "property" : "properties"}
-              </span>
-              {herdCount > 0 && (
-                <span className="text-text-secondary">
-                  <span className="font-semibold text-text-primary">
-                    {Math.round(totalHead / herdCount)}
-                  </span>{" "}
-                  avg hd/herd
-                </span>
-              )}
-            </div>
-          </div>
-        ) : (
-          <h1 className="mt-1 text-2xl font-bold text-text-primary">
-            Welcome to Stockman&rsquo;s Wallet
-          </h1>
-        )}
-      </div>
-
       {!hasData ? (
         /* ── Empty state ── */
-        <Card>
-          <EmptyState
-            title="No herds yet"
-            description="Add your first herd to see your farm at a glance, or load the demo data from Settings."
-            actionLabel="Add Herd"
-            actionHref="/dashboard/herds/new"
-          />
-        </Card>
+        <div>
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-text-primary">
+              Welcome to Stockman&rsquo;s Wallet
+            </h1>
+            <p className="mt-1 text-sm text-text-muted">
+              Add your first herd to get started.
+            </p>
+          </div>
+          <Card>
+            <EmptyState
+              title="No herds yet"
+              description="Add your first herd to see your farm at a glance, or load the demo data from Settings."
+              actionLabel="Add Herd"
+              actionHref="/dashboard/herds/new"
+            />
+          </Card>
+        </div>
       ) : (
-        <>
-          {/* ── Portfolio Breakdown (full width) ── */}
-          <Card className="mb-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          {/* Row 1: Greeting + User Profile */}
+          <div className="flex items-center">
+            <div>
+              <h1 className="text-2xl font-bold text-text-primary">
+                G&rsquo;day, {firstName}!
+              </h1>
+              <p className="mt-1 text-sm text-text-muted">
+                Here&rsquo;s your portfolio overview.
+              </p>
+            </div>
+          </div>
+          <UserProfileCard
+            firstName={firstName}
+            lastName={lastName}
+            email={userEmail}
+            role={userRole}
+          />
+
+          {/* Row 2: Portfolio Value + Quick Actions/Stats */}
+          <PortfolioValueCard
+            value={portfolioValue}
+            changePercent={changePercent}
+            fallbackCount={fallbackCount}
+          />
+          <DashboardQuickActions
+            totalHead={totalHead}
+            herdCount={herdCount}
+            propertyCount={propertyCount}
+          />
+
+          {/* Row 3: Chart + Coming Up */}
+          <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>12-Month Outlook</CardTitle>
@@ -210,147 +239,113 @@ export default async function DashboardPage() {
               <PortfolioChart data={chartData} />
             </CardContent>
           </Card>
+          <ComingUpCard items={upcomingItems ?? []} />
 
-          {/* ── Main grid ── */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {/* Herd Composition */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Herd Composition</CardTitle>
-                  <Link
-                    href="/dashboard/herds"
-                    className="text-xs font-medium text-brand hover:underline"
-                  >
-                    View all
-                  </Link>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <HerdComposition herds={activeHerds} />
-              </CardContent>
-            </Card>
+          {/* Row 4: Herd Composition + Properties */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Herd Composition</CardTitle>
+                <Link
+                  href="/dashboard/herds"
+                  className="text-xs font-medium text-brand hover:underline"
+                >
+                  View all
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <HerdComposition herds={activeHerds} />
+            </CardContent>
+          </Card>
 
-            {/* Top Herds */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Largest Herds</CardTitle>
-                  <span className="text-xs text-text-muted">by head count</span>
-                </div>
-              </CardHeader>
-              <CardContent className="px-5 pb-5 divide-y divide-white/5">
-                {topHerds.map((herd) => (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Properties</CardTitle>
+                <Link
+                  href="/dashboard/properties"
+                  className="text-xs font-medium text-brand hover:underline"
+                >
+                  View all
+                </Link>
+              </div>
+            </CardHeader>
+            {!properties || properties.length === 0 ? (
+              <EmptyState
+                title="No properties yet"
+                description="Add properties to organise your herds by location."
+                actionLabel="Add Property"
+                actionHref="/dashboard/properties/new"
+              />
+            ) : (
+              <CardContent className="divide-y divide-white/5 px-5 pb-5">
+                {properties.map((prop) => (
                   <Link
-                    key={herd.id}
-                    href={`/dashboard/herds/${herd.id}`}
-                    className="flex items-center justify-between py-3 -mx-2 px-2 rounded-lg transition-colors hover:bg-white/[0.03]"
+                    key={prop.id}
+                    href={`/dashboard/properties/${prop.id}`}
+                    className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
                   >
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-text-primary truncate">
-                        {herd.name}
+                    <div>
+                      <p className="text-sm font-medium text-text-primary">
+                        {prop.property_name}
                       </p>
-                      <p className="text-xs text-text-muted">
-                        {herd.breed} · {herd.category}
-                      </p>
-                    </div>
-                    <div className="ml-4 flex items-center gap-3 flex-shrink-0">
-                      <span className="text-sm font-semibold text-text-primary tabular-nums">
-                        {herd.head_count?.toLocaleString()} hd
-                      </span>
-                      {herd.current_weight > 0 && (
-                        <span className="text-xs text-text-muted tabular-nums">
-                          {herd.current_weight} kg
-                        </span>
+                      {prop.acreage && (
+                        <p className="text-xs text-text-muted">
+                          {prop.acreage.toLocaleString()} acres
+                        </p>
                       )}
                     </div>
+                    <Badge variant="default">{prop.state}</Badge>
                   </Link>
                 ))}
               </CardContent>
-            </Card>
+            )}
+          </Card>
 
-            {/* Properties */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Properties</CardTitle>
-                  <Link
-                    href="/dashboard/properties"
-                    className="text-xs font-medium text-brand hover:underline"
-                  >
-                    View all
-                  </Link>
-                </div>
-              </CardHeader>
-              {!properties || properties.length === 0 ? (
-                <EmptyState
-                  title="No properties yet"
-                  description="Add properties to organise your herds by location."
-                  actionLabel="Add Property"
-                  actionHref="/dashboard/properties/new"
-                />
-              ) : (
-                <CardContent className="px-5 pb-5 divide-y divide-white/5">
-                  {properties.map((prop) => (
-                    <Link
-                      key={prop.id}
-                      href={`/dashboard/properties/${prop.id}`}
-                      className="flex items-center justify-between py-3 -mx-2 px-2 rounded-lg transition-colors hover:bg-white/[0.03]"
-                    >
-                      <div>
-                        <p className="text-sm font-medium text-text-primary">
-                          {prop.property_name}
-                        </p>
-                        {prop.acreage && (
-                          <p className="text-xs text-text-muted">
-                            {prop.acreage.toLocaleString()} acres
-                          </p>
-                        )}
-                      </div>
-                      <Badge variant="default">{prop.state}</Badge>
-                    </Link>
-                  ))}
-                </CardContent>
-              )}
-            </Card>
-
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="px-5 pb-5 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {/* Row 5: Largest Herds + Growth & Mortality */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Largest Herds</CardTitle>
+                <span className="text-xs text-text-muted">by head count</span>
+              </div>
+            </CardHeader>
+            <CardContent className="divide-y divide-white/5 px-5 pb-5">
+              {topHerds.map((herd) => (
                 <Link
-                  href="/dashboard/herds/new"
-                  className="group flex flex-col items-center gap-2 rounded-xl bg-white/[0.03] px-4 py-5 text-center transition-colors hover:bg-white/[0.06]"
+                  key={herd.id}
+                  href={`/dashboard/herds/${herd.id}`}
+                  className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/15 text-brand transition-transform group-hover:scale-105">
-                    <Plus className="h-5 w-5" />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-text-primary">
+                      {herd.name}
+                    </p>
+                    <p className="text-xs text-text-muted">
+                      {herd.breed} &middot; {herd.category}
+                    </p>
                   </div>
-                  <span className="text-xs font-medium text-text-secondary">Add Herd</span>
-                </Link>
-                <Link
-                  href="/dashboard/properties/new"
-                  className="group flex flex-col items-center gap-2 rounded-xl bg-white/[0.03] px-4 py-5 text-center transition-colors hover:bg-white/[0.06]"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/15 text-brand transition-transform group-hover:scale-105">
-                    <Home className="h-5 w-5" />
+                  <div className="ml-4 flex flex-shrink-0 items-center gap-3">
+                    <span className="text-sm font-semibold tabular-nums text-text-primary">
+                      {herd.head_count?.toLocaleString()} hd
+                    </span>
+                    {herd.current_weight > 0 && (
+                      <span className="text-xs tabular-nums text-text-muted">
+                        {herd.current_weight} kg
+                      </span>
+                    )}
                   </div>
-                  <span className="text-xs font-medium text-text-secondary">Add Property</span>
                 </Link>
-                <Link
-                  href="/dashboard/tools"
-                  className="group flex flex-col items-center gap-2 rounded-xl bg-white/[0.03] px-4 py-5 text-center transition-colors hover:bg-white/[0.06]"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/15 text-brand transition-transform group-hover:scale-105">
-                    <Package className="h-5 w-5" />
-                  </div>
-                  <span className="text-xs font-medium text-text-secondary">Freight Calc</span>
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-        </>
+              ))}
+            </CardContent>
+          </Card>
+          <GrowthMortalityCard
+            avgMortalityRate={avgMortalityRate}
+            avgDailyWeightGain={avgDailyWeightGain}
+            totalHead={totalHead}
+          />
+        </div>
       )}
     </div>
   );

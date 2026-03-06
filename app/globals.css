@@ -11,8 +11,8 @@
   --brand-orange-light: #F4A871;
   --brand-orange-dark: #BD580F;
 
-  /* Backgrounds — neutral near-black matching iOS app */
-  --background: #111111;
+  /* Backgrounds — dark tones matching mockup */
+  --background: #1C1B1B;
   --background-alt: #1A1A1A;
 
   /* Surfaces (cards, inputs) */
