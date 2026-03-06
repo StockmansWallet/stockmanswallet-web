@@ -47,7 +47,7 @@ export default async function DashboardPage() {
       .order("name"),
     supabase
       .from("properties")
-      .select("id, property_name, state, acreage")
+      .select("id, property_name, state, acreage, is_demo_data")
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
       .order("property_name"),
@@ -196,7 +196,7 @@ export default async function DashboardPage() {
           </Card>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
           {/* Row 1: Greeting + User Profile */}
           <div className="flex items-center">
             <div>
@@ -220,12 +220,11 @@ export default async function DashboardPage() {
             value={portfolioValue}
             changePercent={changePercent}
             fallbackCount={fallbackCount}
-          />
-          <DashboardQuickActions
             totalHead={totalHead}
             herdCount={herdCount}
             propertyCount={propertyCount}
           />
+          <DashboardQuickActions />
 
           {/* Row 3: Chart + Coming Up */}
           <Card>
@@ -280,25 +279,35 @@ export default async function DashboardPage() {
               />
             ) : (
               <CardContent className="divide-y divide-white/5 px-5 pb-5">
-                {properties.map((prop) => (
-                  <Link
-                    key={prop.id}
-                    href={`/dashboard/properties/${prop.id}`}
-                    className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-text-primary">
-                        {prop.property_name}
-                      </p>
-                      {prop.acreage && (
-                        <p className="text-xs text-text-muted">
-                          {prop.acreage.toLocaleString()} acres
-                        </p>
-                      )}
-                    </div>
-                    <Badge variant="default">{prop.state}</Badge>
-                  </Link>
-                ))}
+                {[...properties]
+                  .sort((a, b) => {
+                    // Non-demo before demo
+                    if (a.is_demo_data !== b.is_demo_data) return a.is_demo_data ? 1 : -1;
+                    return 0;
+                  })
+                  .map((prop, idx, sorted) => {
+                    const isFirstReal = !prop.is_demo_data && idx === 0;
+                    return (
+                      <Link
+                        key={prop.id}
+                        href={`/dashboard/properties/${prop.id}`}
+                        className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
+                      >
+                        <div>
+                          <p className="text-sm font-medium text-text-primary">
+                            {prop.property_name}
+                          </p>
+                          {(isFirstReal || prop.is_demo_data || prop.acreage) && (
+                            <p className="text-xs text-text-muted">
+                              {isFirstReal ? "Primary Property" : prop.is_demo_data ? "Demo" : ""}
+                              {prop.acreage ? `${isFirstReal || prop.is_demo_data ? " · " : ""}${prop.acreage.toLocaleString()} acres` : ""}
+                            </p>
+                          )}
+                        </div>
+                        <Badge variant="default">{prop.state}</Badge>
+                      </Link>
+                    );
+                  })}
               </CardContent>
             )}
           </Card>

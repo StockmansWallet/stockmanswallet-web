@@ -5,9 +5,12 @@ interface PortfolioValueCardProps {
   value: number;
   changePercent?: number;
   fallbackCount: number;
+  totalHead: number;
+  herdCount: number;
+  propertyCount: number;
 }
 
-export function PortfolioValueCard({ value, changePercent, fallbackCount }: PortfolioValueCardProps) {
+export function PortfolioValueCard({ value, changePercent, fallbackCount, totalHead, herdCount, propertyCount }: PortfolioValueCardProps) {
   const isPositive = changePercent !== undefined && changePercent >= 0;
 
   return (
@@ -39,6 +42,22 @@ export function PortfolioValueCard({ value, changePercent, fallbackCount }: Port
             {fallbackCount} {fallbackCount === 1 ? "herd" : "herds"} using national avg
           </span>
         )}
+
+        {/* Stats row */}
+        <div className="mt-4 grid grid-cols-3 gap-2 border-t border-white/5 pt-4">
+          <div className="text-center">
+            <p className="text-xl font-bold text-text-primary">{totalHead.toLocaleString()}</p>
+            <p className="text-[11px] text-text-muted">Head</p>
+          </div>
+          <div className="text-center">
+            <p className="text-xl font-bold text-text-primary">{herdCount}</p>
+            <p className="text-[11px] text-text-muted">Herds</p>
+          </div>
+          <div className="text-center">
+            <p className="text-xl font-bold text-text-primary">{propertyCount}</p>
+            <p className="text-[11px] text-text-muted">Properties</p>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

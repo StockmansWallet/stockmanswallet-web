@@ -95,7 +95,7 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
     (href !== "/dashboard" && pathname.startsWith(href));
 
   return (
-    <aside className="flex h-screen w-64 flex-col bg-bg-alt">
+    <aside className="flex h-screen w-64 flex-col">
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-6">
         <Image

@@ -2,13 +2,7 @@ import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Plus, Home, Truck } from "lucide-react";
 
-interface DashboardQuickActionsProps {
-  totalHead: number;
-  herdCount: number;
-  propertyCount: number;
-}
-
-export function DashboardQuickActions({ totalHead, herdCount, propertyCount }: DashboardQuickActionsProps) {
+export function DashboardQuickActions() {
   return (
     <Card>
       <CardHeader>
@@ -46,21 +40,6 @@ export function DashboardQuickActions({ totalHead, herdCount, propertyCount }: D
           </Link>
         </div>
 
-        {/* Stats row */}
-        <div className="grid grid-cols-3 gap-2 border-t border-white/5 pt-4">
-          <div className="text-center">
-            <p className="text-xl font-bold text-text-primary">{totalHead.toLocaleString()}</p>
-            <p className="text-[11px] text-text-muted">Head</p>
-          </div>
-          <div className="text-center">
-            <p className="text-xl font-bold text-text-primary">{herdCount}</p>
-            <p className="text-[11px] text-text-muted">Active Herds</p>
-          </div>
-          <div className="text-center">
-            <p className="text-xl font-bold text-text-primary">{propertyCount}</p>
-            <p className="text-[11px] text-text-muted">Properties</p>
-          </div>
-        </div>
       </CardContent>
     </Card>
   );
