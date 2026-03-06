@@ -266,7 +266,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
   }
 
   return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
       {/* Left Column: Setup */}
       <form onSubmit={handleCalculate} className="min-w-0 flex-1 space-y-4">
         {/* Step 1: Origin & Herd */}
