@@ -16,10 +16,10 @@ import {
   Crown,
   HelpCircle,
   Settings,
+  Landmark,
   LogOut,
 } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
-import { IconFarm } from "@/components/icons/icon-farm";
 
 const navItems = [
   {
@@ -35,7 +35,7 @@ const navItems = [
   {
     label: "Properties",
     href: "/dashboard/properties",
-    icon: <IconFarm className="h-5 w-5" />,
+    icon: <Landmark className="h-5 w-5" />,
   },
   {
     label: "Stockman IQ",
