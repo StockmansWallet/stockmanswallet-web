@@ -266,8 +266,9 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
   }
 
   return (
-    <div>
-      <form onSubmit={handleCalculate} className="space-y-4">
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
+      {/* Left Column: Setup */}
+      <form onSubmit={handleCalculate} className="min-w-0 flex-1 space-y-4">
         {/* Step 1: Origin & Herd */}
         <Card>
           <CardHeader>
@@ -369,7 +370,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
             </div>
           </CardHeader>
           <CardContent className="px-5 pb-5">
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
               <Input
                 id="weight"
                 name="weight"
@@ -426,7 +427,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 onChange={(e) => { setRate(e.target.value); setResult(null); }}
               />
             </div>
-            <div className="mt-4 flex items-center gap-4">
+            <div className="mt-4 max-w-xs">
               <Select
                 id="category_override"
                 name="category_override"
@@ -436,7 +437,6 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 onChange={(e) => {
                   setCategoryOverrideId(e.target.value);
                   setResult(null);
-                  // Update hpd to match override
                   const cat = freightCategoryLibrary.find((c) => c.id === e.target.value);
                   if (cat) setHeadPerDeck(cat.headsPerDeck.toString());
                   else if (weight) setHeadPerDeck(headsPerDeckForWeight(Number(weight)).toString());
@@ -463,71 +463,85 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
         </div>
       </form>
 
-      {/* Results */}
-      {result && (
-        <div className="mt-6 space-y-4">
-          {/* Hero Cost */}
-          <Card className="bg-brand/5 ring-brand/20">
-            <CardContent className="p-6 text-center">
-              <p className="text-xs font-medium uppercase tracking-wider text-text-muted">
-                Freight Estimate
-              </p>
-              <p className="mt-1 text-4xl font-bold text-brand">
-                ${Math.round(result.totalCost).toLocaleString()}
-                <span className="ml-1.5 text-base font-medium text-text-muted">+GST</span>
-              </p>
-            </CardContent>
-          </Card>
+      {/* Right Column: Results */}
+      <div className="w-full lg:sticky lg:top-6 lg:w-[340px] lg:shrink-0">
+        {result ? (
+          <div className="space-y-4">
+            {/* Hero Cost */}
+            <Card className="bg-brand/5 ring-brand/20">
+              <CardContent className="p-6 text-center">
+                <p className="text-xs font-medium uppercase tracking-wider text-text-muted">
+                  Freight Estimate
+                </p>
+                <p className="mt-1 text-4xl font-bold text-brand">
+                  ${Math.round(result.totalCost).toLocaleString()}
+                  <span className="ml-1.5 text-base font-medium text-text-muted">+GST</span>
+                </p>
+              </CardContent>
+            </Card>
 
-          {/* Cost Breakdown */}
-          <Card>
-            <CardContent className="divide-y divide-white/[0.06] p-0">
-              {[
-                { label: "Freight Cost", icon: <DollarSign className="h-4 w-4" />, value: `$${Math.round(result.totalCost).toLocaleString()}` },
-                { label: "Cost Per Head", icon: <span className="text-xs font-bold">hd</span>, value: `$${Math.round(result.costPerHead).toLocaleString()}` },
-                { label: "Cost Per Deck", icon: <Truck className="h-4 w-4" />, value: `$${Math.round(result.costPerDeck).toLocaleString()}` },
-                { label: "Required Decks", icon: <Truck className="h-4 w-4" />, value: result.decksRequired.toString() },
-              ].map((row) => (
-                <div key={row.label} className="flex items-center justify-between px-5 py-3.5">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 text-text-muted">
-                      {row.icon}
+            {/* Cost Breakdown */}
+            <Card>
+              <CardContent className="divide-y divide-white/[0.06] p-0">
+                {[
+                  { label: "Freight Cost", icon: <DollarSign className="h-4 w-4" />, value: `$${Math.round(result.totalCost).toLocaleString()}` },
+                  { label: "Cost Per Head", icon: <span className="text-xs font-bold">hd</span>, value: `$${Math.round(result.costPerHead).toLocaleString()}` },
+                  { label: "Cost Per Deck", icon: <Truck className="h-4 w-4" />, value: `$${Math.round(result.costPerDeck).toLocaleString()}` },
+                  { label: "Required Decks", icon: <Truck className="h-4 w-4" />, value: result.decksRequired.toString() },
+                ].map((row) => (
+                  <div key={row.label} className="flex items-center justify-between px-4 py-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 text-text-muted">
+                        {row.icon}
+                      </div>
+                      <span className="text-sm font-medium text-text-primary">{row.label}</span>
                     </div>
-                    <span className="text-sm font-medium text-text-primary">{row.label}</span>
+                    <span className="text-sm font-semibold text-text-primary">{row.value}</span>
                   </div>
-                  <span className="text-sm font-semibold text-text-primary">{row.value}</span>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+                ))}
+              </CardContent>
+            </Card>
 
-          {/* Assumptions */}
-          <div className="px-1">
-            <p className="text-xs font-medium text-text-muted">Assumptions</p>
-            <p className="mt-1 text-xs leading-relaxed text-text-muted">
-              {result.freightCategory.displayName} · {result.headsPerDeck} head/deck · {Math.round(result.averageWeightKg)}kg avg weight · ${result.ratePerDeckPerKm.toFixed(2)}/deck/km · {Math.round(result.distanceKm)} km
-            </p>
-            {result.capacitySource === "user_override" && (
-              <p className="mt-1 text-xs text-brand">Category overridden by user</p>
-            )}
-          </div>
-
-          {/* Alerts */}
-          {(result.efficiencyPrompt || result.categoryWarning || result.breederAutoDetectNotice) && (
-            <div className="space-y-3">
-              {result.efficiencyPrompt && (
-                <AlertCard type="success" message={result.efficiencyPrompt} />
-              )}
-              {result.categoryWarning && (
-                <AlertCard type="warning" message={result.categoryWarning} />
-              )}
-              {result.breederAutoDetectNotice && (
-                <AlertCard type="info" message={result.breederAutoDetectNotice} />
+            {/* Assumptions */}
+            <div className="px-1">
+              <p className="text-xs font-medium text-text-muted">Assumptions</p>
+              <p className="mt-1 text-xs leading-relaxed text-text-muted">
+                {result.freightCategory.displayName} · {result.headsPerDeck} head/deck · {Math.round(result.averageWeightKg)}kg avg weight · ${result.ratePerDeckPerKm.toFixed(2)}/deck/km · {Math.round(result.distanceKm)} km
+              </p>
+              {result.capacitySource === "user_override" && (
+                <p className="mt-1 text-xs text-brand">Category overridden by user</p>
               )}
             </div>
-          )}
-        </div>
-      )}
+
+            {/* Alerts */}
+            {(result.efficiencyPrompt || result.categoryWarning || result.breederAutoDetectNotice) && (
+              <div className="space-y-3">
+                {result.efficiencyPrompt && (
+                  <AlertCard type="success" message={result.efficiencyPrompt} />
+                )}
+                {result.categoryWarning && (
+                  <AlertCard type="warning" message={result.categoryWarning} />
+                )}
+                {result.breederAutoDetectNotice && (
+                  <AlertCard type="info" message={result.breederAutoDetectNotice} />
+                )}
+              </div>
+            )}
+          </div>
+        ) : (
+          <Card className="hidden lg:block">
+            <CardContent className="p-6 text-center">
+              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/5">
+                <Truck className="h-5 w-5 text-text-muted" />
+              </div>
+              <p className="mt-3 text-sm font-medium text-text-secondary">Freight Estimate</p>
+              <p className="mt-1 text-xs text-text-muted">
+                Fill in the details and hit calculate to see your freight cost breakdown.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

@@ -2,6 +2,56 @@
 
 ---
 
+# Session 9 - 6 Mar 2026
+
+## Button Styling Standardisation
+
+Redesigned the core Button component for Apple-quality styling. All buttons now use `rounded-full` pill shape with fixed heights per size (sm=h-8, md=h-9, lg=h-11), consistent typography (text-[13px] for sm/md, text-[14px] for lg), and refined hover/active states. Primary variant has `shadow-sm` and softer `active:scale-[0.97]`. All PageHeader action buttons standardised to `size="sm"` with `h-3.5 w-3.5` icons.
+
+**Files changed:**
+- `components/ui/button.tsx` - Core button redesign: pill shape, fixed heights, consistent font sizes
+- `app/(app)/dashboard/herds/page.tsx` - PageHeader button size="sm"
+- `app/(app)/dashboard/properties/page.tsx` - Same
+- `app/(app)/dashboard/tools/yard-book/page.tsx` - Same
+- `app/(app)/dashboard/stockman-iq/page.tsx` - Same
+- `app/(app)/dashboard/tools/grid-iq/page.tsx` - Same
+- `app/(app)/dashboard/settings/sale-locations/page.tsx` - Same
+- 4 report pages (sales-summary, asset-register, accountant, saleyard-comparison) - Export PDF buttons standardised
+
+## Herd Form - Save/Cancel Moved to PageHeader
+
+Removed the bottom Save/Cancel buttons from the herd form. Cancel now appears as a styled link in the PageHeader actions alongside the Save button, using the `form="herd-form"` attribute for cross-element form submission.
+
+**Files changed:**
+- `components/app/herd-form.tsx` - Removed bottom action buttons, removed unused Button/useRouter imports
+- `app/(app)/dashboard/herds/new/page.tsx` - Added Cancel link + Save button to PageHeader actions
+- `app/(app)/dashboard/herds/[id]/edit/page.tsx` - Same pattern, Cancel links to herd detail
+
+## Reports Page Layout Redesign
+
+Redesigned the reports page from a vertical stack to a 2-column responsive grid matching the Tools page layout. Larger icon containers (h-10 w-10), `items-start` alignment, `CardContent` wrapper.
+
+**Files changed:**
+- `app/(app)/dashboard/tools/reports/page.tsx` - 2-column grid layout (`grid-cols-1 sm:grid-cols-2`)
+
+## Freight IQ - Complete Rebuild (iOS Parity)
+
+Rebuilt the Freight IQ calculator to match the iOS app's 3-step wizard flow with real data from Supabase.
+
+**Step 1 (Origin & Herd):** Property selector and herd selector. Selecting a herd auto-fills weight, head count, heads per deck, and sets the origin property. "Custom Job" option for manual entry without selecting a herd.
+
+**Step 2 (Sale Destination):** Saleyard picker from reference data with auto-distance calculation using haversine formula with 1.3x road factor from property coordinates to saleyard coordinates.
+
+**Step 3 (Freight Assumptions):** 5-field grid (Avg Weight, Head Count, Distance, Head Per Deck, Rate) matching iOS layout. All pre-filled but editable. Category override dropdown for manual heads-per-deck adjustment.
+
+**Results:** Centered hero cost card with +GST, icon-row breakdown card (Freight Cost, Cost Per Head, Cost Per Deck, Required Decks), inline assumptions summary, coloured alert cards for weight warnings.
+
+**Files changed:**
+- `app/(app)/dashboard/tools/freight/page.tsx` - Server component fetching herds and properties from Supabase
+- `app/(app)/dashboard/tools/freight/freight-calculator.tsx` - Complete rewrite with 3-step flow, haversine distance, herd auto-fill, weight-band heads-per-deck resolution
+
+---
+
 # Session 8 - 6 Mar 2026
 
 ## Valuation Pipeline Fix - Saleyard Prices Now Resolving

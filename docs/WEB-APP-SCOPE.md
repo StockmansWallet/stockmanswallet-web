@@ -174,7 +174,8 @@ The Supabase data migration is the critical path for BOTH platforms. Do it now. 
 - **Clear All Data** — settings option to permanently delete all user data via Edge Function (double confirmation, affects both web and iOS)
 - **iOS sync** — all create/update/delete mutations set `updated_at` for iOS sync detection
 - **Admin MLA upload** — admin-only CSV upload page for MLA market data with email whitelist, format auto-detection, chunked upload with progress
-- Tool pages scaffolded: Freight IQ, Grid IQ, Reports, Market View, Settings
+- **Freight IQ** - full 3-step calculator matching iOS: property/herd selection with auto-fill, saleyard destination with haversine distance, 5-field assumptions grid, results with GST/per-head/per-deck breakdown
+- Tool pages scaffolded: Grid IQ, Reports, Market View, Settings
 - UI component library: Card, Button, Input, Badge, PageHeader, EmptyState, etc.
 - Lucide-react icons throughout (matching iOS SF Symbols)
 

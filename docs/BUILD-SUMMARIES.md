@@ -1,5 +1,23 @@
 # Build Summaries
 
+## Session 9 - 6 Mar 2026
+
+### Summary
+
+UI polish and iOS feature parity. Standardised button styling to Apple quality, moved form actions to PageHeader, redesigned reports layout, and completely rebuilt Freight IQ to match the iOS app's 3-step calculator flow.
+
+### What's New
+
+**Button styling overhaul** - Redesigned the core Button component for consistent Apple-quality styling across the app. All buttons now use pill shape (`rounded-full`) with fixed heights per size, consistent font sizes, refined hover/active states, and `shadow-sm` on primary buttons. All PageHeader action buttons standardised to `size="sm"` with smaller icons.
+
+**Form actions in PageHeader** - Removed the bottom Save/Cancel buttons from herd create and edit forms. Cancel now appears as a styled link in the top-right PageHeader alongside the Save button. Save uses the `form="herd-form"` attribute for cross-element form submission, keeping the form clean and the actions prominent.
+
+**Reports page redesign** - Changed from a vertical stack to a 2-column responsive grid matching the Tools page layout, with larger icon containers and consistent card styling.
+
+**Freight IQ rebuild** - Complete rewrite to match the iOS app's 3-step wizard flow. The page now fetches real herds and properties from Supabase server-side. Step 1 lets you pick a property and herd (selecting a herd auto-fills weight, head count, heads per deck, and origin property). Step 2 picks a saleyard destination with auto-distance calculation using the haversine formula with a 1.3x road factor. Step 3 shows 5 editable assumption fields (weight, head count, distance, head per deck, rate) matching the iOS layout. Results show a centered hero cost card with GST, an icon-row breakdown (freight cost, cost per head, cost per deck, required decks), an assumptions summary, and colour-coded alert cards.
+
+---
+
 ## Session 7 - 6 Mar 2026
 
 ### Summary
