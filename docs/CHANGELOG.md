@@ -2,6 +2,45 @@
 
 ---
 
+# Session 8 - 6 Mar 2026
+
+## Valuation Pipeline Fix - Saleyard Prices Now Resolving
+
+Fixed three root causes preventing saleyard-specific pricing from working on the web app (all valuations showed red/national fallback despite 323,898 price rows in the database):
+
+1. **Query limit too low:** `.limit(500)` on category_prices queries was far too restrictive. Gracemere alone has 9,845 rows. Only the first 500 (alphabetically "Breeding Cow") were returned. Raised to 50,000 across all three pages (dashboard, herds list, herd detail) and also on iOS SupabaseMarketService.
+2. **Wrong price resolution order:** The valuation engine checked saleyard general prices, then national, then saleyard breed-specific. Since most MLA data is breed-specific (breed != null), national always won before breed-specific got checked. Reordered to: saleyard general -> saleyard breed-specific -> national -> hardcoded fallback.
+3. **Demo seeder wrong saleyard name:** Used `"...Exchange (CQLX)"` instead of `"...Exchange"`, and only 2 of 20 herds had it set. Fixed name and moved to base defaults so all 20 herds get a saleyard.
+
+## Herd Detail Page - Aligned with iOS
+
+Restructured the web herd detail page to match the iOS app's sections and fields:
+- Added Key Metrics card (price/kg, average weight, value per head, saleyard)
+- Added Current Weight to Weight Tracking section
+- Added Mortality Rate to Location section
+- Added Timeline section (days held, created date, last updated)
+- Added Notes section spanning full width
+
+## Herd Form - Added Current Weight Field
+
+Added the missing `current_weight` input to the herd create/edit form and server actions. Previously herds created on the web had null current_weight, showing "---" on the detail page.
+
+## MLA CSV Data Analysis
+
+Confirmed that "Yearling Bull" and "Weaner Bull" categories do NOT exist in raw MLA saleyard CSV data. MLA only reports 10 categories (Bulls, Calves, Cows, Grown Heifer, Grown Steer, Manufacturing Steer, Vealer Heifer, Vealer Steer, Yearling Heifer, Yearling Steer). Demo herds with those categories correctly show red/fallback pricing.
+
+**Files changed:**
+- `lib/engines/valuation-engine.ts` - Fixed price resolution order
+- `app/(app)/dashboard/page.tsx` - Raised query limit to 50,000
+- `app/(app)/dashboard/herds/page.tsx` - Raised query limit to 50,000
+- `app/(app)/dashboard/herds/[id]/page.tsx` - Raised query limit, restructured detail sections
+- `app/(app)/dashboard/herds/actions.ts` - Added current_weight to create/update
+- `components/app/herd-form.tsx` - Added current_weight input field
+- `app/(app)/dashboard/settings/demo-actions.ts` - Fixed saleyard name, applied to all herds
+- (iOS) `Services/Supabase/SupabaseMarketService.swift` - Raised query limit to 50,000
+
+---
+
 # Session 7 - 6 Mar 2026
 
 ## MLA Scraper Edge Function - Historic Data Fix

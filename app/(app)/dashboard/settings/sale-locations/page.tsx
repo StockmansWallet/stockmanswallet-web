@@ -8,7 +8,7 @@ export const metadata = { title: "Sale Locations" };
 
 export default function SaleLocationsPage() {
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-6xl">
       <PageHeader
         title="Sale Locations"
         subtitle="Manage your saleyards and custom sale locations."

@@ -9,7 +9,7 @@ export const metadata = { title: "Grid IQ" };
 
 export default function GridIQPage() {
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-6xl">
       <PageHeader
         title="Grid IQ"
         subtitle="Analyse processor grids and kill sheets. Compare saleyard vs over-the-hooks."

@@ -34,7 +34,7 @@ export default async function PropertyDetailPage({
   const boundUpdate = updateProperty.bind(null, id);
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-6xl">
       <PageHeader
         title={property.property_name}
         subtitle={[property.state, property.property_pic]

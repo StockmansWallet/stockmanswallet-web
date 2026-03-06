@@ -63,7 +63,7 @@ export default async function SettingsPage() {
   const isAdmin = ADMIN_EMAILS.includes(user?.email ?? "");
 
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-6xl">
       <PageHeader
         title="Settings"
         subtitle="Manage your account, preferences, and data."

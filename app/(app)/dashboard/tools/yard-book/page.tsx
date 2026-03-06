@@ -64,7 +64,7 @@ export default async function YardBookPage() {
   const completedCount = allItems.filter((i) => i.is_completed).length;
 
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-6xl">
       <PageHeader
         title="Yard Book"
         subtitle="Your digital run sheet. Top pocket stuff."

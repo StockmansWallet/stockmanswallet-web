@@ -22,7 +22,7 @@ const placeholderInsights = [
 
 export default function StockmanIQPage() {
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-6xl">
       <PageHeader
         title="Stockman IQ"
         subtitle="AI-powered insights and chat for your operation."
