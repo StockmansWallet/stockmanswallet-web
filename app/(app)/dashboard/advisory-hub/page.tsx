@@ -16,9 +16,10 @@ export default function AdvisoryHubPage() {
       />
       <Card>
         <EmptyState
-          icon={<Users className="h-6 w-6 text-brand" />}
+          icon={<Users className="h-6 w-6 text-purple-400" />}
           title="Coming Soon"
           description="The Advisory Hub will let you collaborate with your livestock agent, accountant, banker, and other advisors. Stay tuned."
+          variant="purple"
         />
       </Card>
     </div>

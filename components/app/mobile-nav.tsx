@@ -93,7 +93,7 @@ export function MobileNav({ userEmail }: { userEmail?: string }) {
                   key={item.href}
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all ${
+                  className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
                     checkActive(item.href)
                       ? (item.activeClass ?? "bg-brand/15 text-brand")
                       : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
@@ -109,7 +109,7 @@ export function MobileNav({ userEmail }: { userEmail?: string }) {
               <Link
                 href="/dashboard/settings"
                 onClick={() => setOpen(false)}
-                className="mb-1 flex items-center gap-3 rounded-2xl px-3 py-2 text-sm transition-all hover:bg-white/5"
+                className="mb-1 flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-all hover:bg-white/5"
               >
                 <Crown className="h-4 w-4 text-brand" />
                 <div>
@@ -121,7 +121,7 @@ export function MobileNav({ userEmail }: { userEmail?: string }) {
               <Link
                 href="/dashboard/help"
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium text-text-secondary hover:bg-white/5 hover:text-text-primary"
+                className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-text-secondary hover:bg-white/5 hover:text-text-primary"
               >
                 <HelpCircle className="h-4 w-4" />
                 Help Center
@@ -130,7 +130,7 @@ export function MobileNav({ userEmail }: { userEmail?: string }) {
               <Link
                 href="/dashboard/settings"
                 onClick={() => setOpen(false)}
-                className={`flex items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium transition-all ${
+                className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
                   checkActive("/dashboard/settings")
                     ? "bg-brand/15 text-brand"
                     : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
@@ -143,7 +143,7 @@ export function MobileNav({ userEmail }: { userEmail?: string }) {
               <form action={signOut}>
                 <button
                   type="submit"
-                  className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium text-text-secondary hover:bg-white/5 hover:text-text-primary"
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-text-secondary hover:bg-white/5 hover:text-text-primary"
                 >
                   <LogOut className="h-4 w-4" />
                   Log Out

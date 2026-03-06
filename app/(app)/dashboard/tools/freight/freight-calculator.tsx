@@ -88,8 +88,8 @@ function haversineKm(
 
 function SectionIcon({ icon: Icon }: { icon: React.ComponentType<{ className?: string }> }) {
   return (
-    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
-      <Icon className="h-3.5 w-3.5 text-brand" />
+    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sky-500/15">
+      <Icon className="h-3.5 w-3.5 text-sky-400" />
     </div>
   );
 }
@@ -468,12 +468,12 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
         {result ? (
           <div className="space-y-4">
             {/* Hero Cost */}
-            <Card className="bg-brand/5 ring-brand/20">
+            <Card className="bg-sky-500/5 ring-sky-500/20">
               <CardContent className="p-6 text-center">
                 <p className="text-xs font-medium uppercase tracking-wider text-text-muted">
                   Freight Estimate
                 </p>
-                <p className="mt-1 text-4xl font-bold text-brand">
+                <p className="mt-1 text-4xl font-bold text-sky-400">
                   ${Math.round(result.totalCost).toLocaleString()}
                   <span className="ml-1.5 text-base font-medium text-text-muted">+GST</span>
                 </p>
@@ -509,7 +509,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 {result.freightCategory.displayName} · {result.headsPerDeck} head/deck · {Math.round(result.averageWeightKg)}kg avg weight · ${result.ratePerDeckPerKm.toFixed(2)}/deck/km · {Math.round(result.distanceKm)} km
               </p>
               {result.capacitySource === "user_override" && (
-                <p className="mt-1 text-xs text-brand">Category overridden by user</p>
+                <p className="mt-1 text-xs text-sky-400">Category overridden by user</p>
               )}
             </div>
 

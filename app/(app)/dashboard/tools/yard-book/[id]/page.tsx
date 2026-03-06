@@ -67,8 +67,8 @@ function InfoRow({
 
 function SectionIcon({ icon: Icon, className }: { icon: LucideIcon; className?: string }) {
   return (
-    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${className ?? "bg-brand/15"}`}>
-      <Icon className={`h-3.5 w-3.5 ${className ? "" : "text-brand"}`} />
+    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${className ?? "bg-lime-500/15"}`}>
+      <Icon className={`h-3.5 w-3.5 ${className ? "" : "text-lime-400"}`} />
     </div>
   );
 }
@@ -320,7 +320,7 @@ export default async function YardBookItemPage({
                 >
                   <Link
                     href={`/dashboard/herds/${herd.id}`}
-                    className="font-medium text-brand hover:underline"
+                    className="font-medium text-lime-400 hover:underline"
                   >
                     {herd.name}
                   </Link>

@@ -216,7 +216,7 @@ export function YardBookForm({
                 key={cat.value}
                 type="button"
                 onClick={() => setCategory(cat.value)}
-                className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ring-1 ring-inset ${
+                className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-medium transition-all ring-1 ring-inset ${
                   isActive
                     ? `${cat.bg} ${cat.text} ${cat.ring}`
                     : "bg-white/5 text-text-muted ring-white/8 hover:bg-white/8 hover:text-text-secondary"
@@ -253,7 +253,7 @@ export function YardBookForm({
                   key={opt.value}
                   type="button"
                   onClick={() => toggleOffset(opt.value)}
-                  className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-all ring-1 ring-inset ${
+                  className={`inline-flex items-center rounded-xl px-3 py-1.5 text-xs font-medium transition-all ring-1 ring-inset ${
                     isActive
                       ? "bg-brand/15 text-brand ring-brand/25"
                       : "bg-white/5 text-text-muted ring-white/8 hover:bg-white/8 hover:text-text-secondary"
@@ -308,7 +308,7 @@ export function YardBookForm({
                   key={herd.id}
                   type="button"
                   onClick={() => toggleHerd(herd.id)}
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ring-1 ring-inset ${
+                  className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium transition-all ring-1 ring-inset ${
                     isActive
                       ? "bg-brand/15 text-brand ring-brand/25"
                       : "bg-white/5 text-text-muted ring-white/8 hover:bg-white/8 hover:text-text-secondary"

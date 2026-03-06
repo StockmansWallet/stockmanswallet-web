@@ -122,7 +122,7 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
+              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
                 checkActive(item.href)
                   ? "bg-brand/15 text-brand"
                   : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
@@ -141,7 +141,7 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
                   checkActive(item.href)
                     ? item.activeClass
                     : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
@@ -161,7 +161,7 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium transition-all duration-150 ${
+            className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-150 ${
               checkActive(item.href)
                 ? "bg-brand/15 text-brand"
                 : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
@@ -177,7 +177,7 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
       <div className="mx-4 mt-4 border-t border-white/5 px-0 pt-4 pb-2">
         <Link
           href="/dashboard/settings"
-          className="mb-1 flex items-center gap-3 rounded-2xl px-3 py-2 text-sm transition-all hover:bg-white/5"
+          className="mb-1 flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-all hover:bg-white/5"
         >
           <Crown className="h-4 w-4 text-brand" />
           <div className="min-w-0">
@@ -189,7 +189,7 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
         <form action={signOut}>
           <button
             type="submit"
-            className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium text-text-secondary transition-all hover:bg-white/5 hover:text-text-primary"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-text-secondary transition-all hover:bg-white/5 hover:text-text-primary"
           >
             <LogOut className="h-4 w-4" />
             Log Out

@@ -238,7 +238,7 @@ export default async function GridIQPage() {
                 <CardTitle>Saved Grids</CardTitle>
                 <Link
                   href="/dashboard/tools/grid-iq/grids"
-                  className="text-xs font-medium text-brand hover:underline"
+                  className="text-xs font-medium text-teal-400 hover:underline"
                 >
                   View All
                 </Link>
@@ -309,7 +309,7 @@ export default async function GridIQPage() {
                 <CardTitle>Recent Kill Sheets</CardTitle>
                 <Link
                   href="/dashboard/tools/grid-iq/history"
-                  className="text-xs font-medium text-brand hover:underline"
+                  className="text-xs font-medium text-teal-400 hover:underline"
                 >
                   View All
                 </Link>

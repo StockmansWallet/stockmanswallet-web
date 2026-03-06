@@ -66,7 +66,7 @@ export default async function EditHerdPage({
           <>
             <Link
               href={`/dashboard/herds/${id}`}
-              className="inline-flex h-8 items-center justify-center rounded-full px-3.5 text-[13px] font-semibold text-text-secondary transition-all duration-150 hover:bg-white/8 hover:text-text-primary"
+              className="inline-flex h-8 items-center justify-center rounded-xl px-3.5 text-[13px] font-semibold text-text-secondary transition-all duration-150 hover:bg-white/8 hover:text-text-primary"
             >
               Cancel
             </Link>

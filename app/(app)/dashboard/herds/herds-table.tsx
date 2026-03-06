@@ -251,7 +251,7 @@ export function HerdsTable({
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
+                className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-medium transition-all ${
                   isActive
                     ? "bg-brand/15 text-brand ring-1 ring-inset ring-brand/25"
                     : "bg-white/5 text-text-muted hover:bg-white/8 hover:text-text-secondary"

@@ -70,7 +70,7 @@ export default async function YardBookPage() {
         subtitle="Your digital run sheet. Top pocket stuff."
         actions={
           <Link href="/dashboard/tools/yard-book/new">
-            <Button size="sm">
+            <Button size="sm" variant="lime">
               <Plus className="mr-1.5 h-3.5 w-3.5" />
               Add Item
             </Button>
@@ -85,6 +85,7 @@ export default async function YardBookPage() {
             description="Add tasks, events, and reminders to your run sheet."
             actionLabel="Add Item"
             actionHref="/dashboard/tools/yard-book/new"
+            variant="lime"
           />
         </Card>
       ) : (
@@ -95,11 +96,13 @@ export default async function YardBookPage() {
               icon={<CalendarClock className="h-4 w-4" />}
               label="Upcoming"
               value={String(upcomingCount)}
+              accent="lime"
             />
             <StatCard
               icon={<AlertTriangle className="h-4 w-4" />}
               label="Overdue"
               value={String(overdueCount)}
+              accent="lime"
               change={
                 overdueCount > 0
                   ? { value: `${overdueCount} past due`, positive: false }
@@ -110,11 +113,13 @@ export default async function YardBookPage() {
               icon={<CalendarCheck className="h-4 w-4" />}
               label="Today"
               value={String(todayCount)}
+              accent="lime"
             />
             <StatCard
               icon={<CheckCircle2 className="h-4 w-4" />}
               label="Completed"
               value={String(completedCount)}
+              accent="lime"
             />
           </div>
 

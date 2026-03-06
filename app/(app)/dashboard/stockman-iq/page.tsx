@@ -69,7 +69,7 @@ export default function StockmanIQPage() {
             </div>
             <p className="text-sm font-medium text-text-primary">No conversations yet</p>
             <p className="mt-1 max-w-xs text-xs leading-relaxed text-text-muted">Start a chat with Brangus to get AI-powered insights about your herd and the market.</p>
-            <Link href="/dashboard/stockman-iq/chat" className="mt-4 rounded-full bg-brand px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-brand-dark">
+            <Link href="/dashboard/stockman-iq/chat" className="mt-4 rounded-xl bg-brand px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-brand-dark">
               Chat with Brangus
             </Link>
           </CardContent>

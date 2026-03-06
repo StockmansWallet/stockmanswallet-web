@@ -41,7 +41,7 @@ export default function ReportsPage() {
           <Link key={report.href} href={report.href}>
             <Card className="group h-full transition-all hover:bg-white/[0.07]">
               <CardContent className="flex items-start gap-4 p-5">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/15 text-brand">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 text-amber-400">
                   {report.icon}
                 </div>
                 <div className="min-w-0 flex-1">

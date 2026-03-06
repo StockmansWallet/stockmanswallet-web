@@ -236,7 +236,7 @@ function EmptyState({ onPromptClick }: { onPromptClick: (prompt: string) => void
           <button
             key={prompt}
             onClick={() => onPromptClick(prompt)}
-            className="rounded-full bg-white/5 px-3.5 py-1.5 text-xs text-text-secondary transition-all hover:bg-white/8 hover:text-text-primary"
+            className="rounded-xl bg-white/5 px-3.5 py-1.5 text-xs text-text-secondary transition-all hover:bg-white/8 hover:text-text-primary"
           >
             {prompt}
           </button>
