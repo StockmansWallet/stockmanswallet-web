@@ -47,7 +47,7 @@ export default async function DashboardPage() {
       .order("name"),
     supabase
       .from("properties")
-      .select("id, property_name, state, acreage, is_demo_data")
+      .select("id, property_name, state, acreage, is_simulated")
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
       .order("property_name"),
@@ -321,11 +321,11 @@ export default async function DashboardPage() {
                 <CardContent className="divide-y divide-white/5 px-5 pb-5">
                   {[...properties]
                     .sort((a, b) => {
-                      if (a.is_demo_data !== b.is_demo_data) return a.is_demo_data ? 1 : -1;
+                      if (a.is_simulated !== b.is_simulated) return a.is_simulated ? 1 : -1;
                       return 0;
                     })
                     .map((prop, idx) => {
-                      const isFirstReal = !prop.is_demo_data && idx === 0;
+                      const isFirstReal = !prop.is_simulated && idx === 0;
                       return (
                         <Link
                           key={prop.id}
@@ -336,10 +336,10 @@ export default async function DashboardPage() {
                             <p className="text-sm font-medium text-text-primary">
                               {prop.property_name}
                             </p>
-                            {(isFirstReal || prop.is_demo_data || prop.acreage) && (
+                            {(isFirstReal || prop.is_simulated || prop.acreage) && (
                               <p className="text-xs text-text-muted">
-                                {isFirstReal ? "Primary Property" : prop.is_demo_data ? "Demo" : ""}
-                                {prop.acreage ? `${isFirstReal || prop.is_demo_data ? " · " : ""}${prop.acreage.toLocaleString()} acres` : ""}
+                                {isFirstReal ? "Primary Property" : prop.is_simulated ? "Demo" : ""}
+                                {prop.acreage ? `${isFirstReal || prop.is_simulated ? " · " : ""}${prop.acreage.toLocaleString()} acres` : ""}
                               </p>
                             )}
                           </div>
