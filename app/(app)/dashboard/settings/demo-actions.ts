@@ -47,10 +47,12 @@ export async function seedDemoData() {
   // Shared defaults — PostgREST batch inserts require every row to have the
   // same columns, otherwise missing fields are sent as null (not the DB default).
   // Explicit id: randomUUID() avoids PostgREST schema-cache issues with DB defaults.
+  const defaultSaleyard = "Gracemere Central Queensland Livestock Exchange";
   const base = () => ({
     id: randomUUID(),
     user_id: uid, property_id: pid, is_demo_data: true,
     is_breeder: false, is_pregnant: false, is_sold: false, calving_rate: 0.85,
+    selected_saleyard: defaultSaleyard,
   });
 
   // All 20 herds flagged with is_demo_data: true
@@ -63,7 +65,7 @@ export async function seedDemoData() {
       daily_weight_gain: 0, is_breeder: true, is_pregnant: true,
       calving_rate: 88, breeding_program_type: "ai",
       paddock_name: "Home Paddock",
-      selected_saleyard: "Gracemere Central Queensland Livestock Exchange (CQLX)",
+
       notes: "AI program, Doongara Dozer sire line",
     },
     {
@@ -73,7 +75,7 @@ export async function seedDemoData() {
       daily_weight_gain: 0, is_breeder: true, is_pregnant: true,
       calving_rate: 82, breeding_program_type: "controlled",
       paddock_name: "River Paddock",
-      selected_saleyard: "Gracemere Central Queensland Livestock Exchange (CQLX)",
+
       notes: "First calvers, controlled joining",
     },
     {
