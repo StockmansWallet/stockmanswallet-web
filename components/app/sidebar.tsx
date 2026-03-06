@@ -47,6 +47,9 @@ const navItems = [
     href: "/dashboard/market",
     icon: <TrendingUp className="h-5 w-5" />,
   },
+];
+
+const toolItems = [
   {
     label: "Yard Book",
     href: "/dashboard/tools/yard-book",
@@ -108,37 +111,47 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
       </div>
 
       {/* Main navigation */}
-      <nav className="space-y-0.5 overflow-y-auto px-4">
-        {navItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
-              checkActive(item.href)
-                ? "bg-brand/15 text-brand"
-                : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
-            }`}
-          >
-            {item.icon}
-            {item.label}
-          </Link>
-        ))}
+      <nav className="overflow-y-auto px-4">
+        <div className="space-y-0.5">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
+                checkActive(item.href)
+                  ? "bg-brand/15 text-brand"
+                  : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+              }`}
+            >
+              {item.icon}
+              {item.label}
+            </Link>
+          ))}
+        </div>
+
+        {/* Tools */}
+        <div className="mx-0 mt-4 border-t border-white/5 pt-4">
+          <div className="space-y-0.5">
+            {toolItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
+                  checkActive(item.href)
+                    ? "bg-brand/15 text-brand"
+                    : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+                }`}
+              >
+                {item.icon}
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </div>
       </nav>
 
-      {/* Bottom section */}
-      <div className="mx-4 mt-4 border-t border-white/5 px-0 py-4">
-        {/* Plan indicator */}
-        <Link
-          href="/dashboard/settings"
-          className="mb-1 flex items-center gap-3 rounded-2xl px-3 py-2 text-sm transition-all hover:bg-white/5"
-        >
-          <Crown className="h-4 w-4 text-brand" />
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-text-primary">Plan</p>
-            <p className="text-xs text-text-muted">Head Stockman</p>
-          </div>
-        </Link>
-
+      {/* Help & Settings */}
+      <div className="mx-4 mt-4 border-t border-white/5 px-0 pt-4">
         {bottomNavItems.map((item) => (
           <Link
             key={item.href}
@@ -153,6 +166,20 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
             {item.label}
           </Link>
         ))}
+      </div>
+
+      {/* Plan & Log Out */}
+      <div className="mx-4 mt-4 border-t border-white/5 px-0 pt-4 pb-2">
+        <Link
+          href="/dashboard/settings"
+          className="mb-1 flex items-center gap-3 rounded-2xl px-3 py-2 text-sm transition-all hover:bg-white/5"
+        >
+          <Crown className="h-4 w-4 text-brand" />
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-text-primary">Plan</p>
+            <p className="text-xs text-text-muted">Head Stockman</p>
+          </div>
+        </Link>
 
         <form action={signOut}>
           <button
