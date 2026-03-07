@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Database, FlaskConical } from "lucide-react";
-import { LoadDemoButton, ClearDataButton, ClearAllDataButton } from "../demo-buttons";
+import { Database } from "lucide-react";
+import { ClearAllDataButton } from "../demo-buttons";
 
 export const metadata = { title: "Data Management - Settings" };
 
@@ -33,7 +33,7 @@ export default function DataManagementPage() {
     <div className="max-w-3xl">
       <PageHeader
         title="Data Management"
-        subtitle="Manage your data and demo datasets."
+        subtitle="Manage your data."
         actions={
           <Link
             href="/dashboard/settings"
@@ -71,32 +71,6 @@ export default function DataManagementPage() {
           </CardContent>
         </Card>
 
-        {/* Demo Data */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2.5">
-              <SectionIcon icon={FlaskConical} />
-              <div>
-                <CardTitle>Demo Data</CardTitle>
-                <p className="mt-1 text-xs text-text-muted">
-                  Load sample herds to explore the app without entering real data.
-                </p>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-xl bg-white/[0.03] p-4">
-              <p className="text-sm font-medium text-text-primary">Doongara Station</p>
-              <p className="mt-1 text-xs text-text-muted leading-relaxed">
-                Loads 20 herds and a property from the demo dataset. Replaces any existing demo data.
-              </p>
-              <div className="mt-3 flex items-center gap-3">
-                <LoadDemoButton />
-                <ClearDataButton />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
