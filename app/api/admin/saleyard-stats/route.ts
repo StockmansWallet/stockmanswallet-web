@@ -4,9 +4,17 @@ import { isAdminEmail } from "@/lib/data/admin";
 import { resolveMLASaleyardName } from "@/lib/data/reference-data";
 import type { SaleyardStats } from "@/app/(app)/dashboard/admin/valuation/page";
 
-const PAGE_SIZE = 50000;
+interface AggRow {
+  saleyard: string;
+  entry_count: number;
+  newest_date: string | null;
+  oldest_date: string | null;
+  categories: string[];
+  breeds: string[];
+  weight_ranges: string[];
+}
 
-export async function GET() {
+export async function GET(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -14,48 +22,16 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Paginate through ALL saleyard pricing data (table can be 300k+ rows)
-  const statsMap = new Map<string, {
-    entries: number;
-    newest: string | null;
-    oldest: string | null;
-    categories: Set<string>;
-    breeds: Set<string>;
-    weightRanges: Set<string>;
-    hasBreedSpecific: boolean;
-  }>();
+  // Aggregate in SQL to avoid downloading 344k+ rows
+  const { searchParams } = new URL(request.url);
+  const sinceDate = searchParams.get("since");
 
-  let offset = 0;
-  let hasMore = true;
+  const { data: rows, error } = await supabase.rpc("saleyard_stats", {
+    since_date: sinceDate || null,
+  });
 
-  while (hasMore) {
-    const { data: page, error } = await supabase
-      .from("category_prices")
-      .select("category, saleyard, breed, weight_range, data_date")
-      .neq("saleyard", "National")
-      .range(offset, offset + PAGE_SIZE - 1);
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    const rows = page ?? [];
-    for (const p of rows) {
-      let stats = statsMap.get(p.saleyard);
-      if (!stats) {
-        stats = { entries: 0, newest: null, oldest: null, categories: new Set(), breeds: new Set(), weightRanges: new Set(), hasBreedSpecific: false };
-        statsMap.set(p.saleyard, stats);
-      }
-      stats.entries++;
-      if (!stats.newest || p.data_date > stats.newest) stats.newest = p.data_date;
-      if (!stats.oldest || p.data_date < stats.oldest) stats.oldest = p.data_date;
-      stats.categories.add(p.category);
-      if (p.breed) { stats.breeds.add(p.breed); stats.hasBreedSpecific = true; }
-      if (p.weight_range) stats.weightRanges.add(p.weight_range);
-    }
-
-    hasMore = rows.length === PAGE_SIZE;
-    offset += PAGE_SIZE;
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
   // Count herds per saleyard
@@ -75,17 +51,17 @@ export async function GET() {
     }
   }
 
-  const result: SaleyardStats[] = Array.from(statsMap.entries())
-    .map(([name, s]) => ({
-      name,
-      totalEntries: s.entries,
-      newestDataDate: s.newest,
-      oldestDataDate: s.oldest,
-      categories: Array.from(s.categories).sort(),
-      breeds: Array.from(s.breeds).sort(),
-      weightRanges: Array.from(s.weightRanges).sort(),
-      hasBreedSpecific: s.hasBreedSpecific,
-      herdsUsing: herdCounts.get(name) ?? 0,
+  const result: SaleyardStats[] = (rows as AggRow[])
+    .map((r) => ({
+      name: r.saleyard,
+      totalEntries: r.entry_count,
+      newestDataDate: r.newest_date,
+      oldestDataDate: r.oldest_date,
+      categories: (r.categories ?? []).sort(),
+      breeds: (r.breeds ?? []).filter((b: string) => b !== null).sort(),
+      weightRanges: (r.weight_ranges ?? []).sort(),
+      hasBreedSpecific: (r.breeds ?? []).filter((b: string) => b !== null).length > 0,
+      herdsUsing: herdCounts.get(r.saleyard) ?? 0,
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 

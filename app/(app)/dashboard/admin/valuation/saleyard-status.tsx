@@ -1,8 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { MapPinned, ChevronDown, ChevronRight, Search, Loader2 } from "lucide-react";
 import type { SaleyardStats } from "./page";
+
+const dateRanges = [
+  { label: "All time", value: "" },
+  { label: "Past month", value: "1" },
+  { label: "Past 3 months", value: "3" },
+  { label: "Past 6 months", value: "6" },
+  { label: "Past year", value: "12" },
+  { label: "Past 2 years", value: "24" },
+  { label: "Past 3 years", value: "36" },
+] as const;
+
+function sinceDate(months: string): string | null {
+  if (!months) return null;
+  const d = new Date();
+  d.setMonth(d.getMonth() - parseInt(months));
+  return d.toISOString().slice(0, 10);
+}
 
 function daysSince(dateStr: string | null): number | null {
   if (!dateStr) return null;
@@ -37,16 +54,27 @@ export function SaleyardStatus() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [range, setRange] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/admin/saleyard-stats")
+  const loadData = useCallback((months: string) => {
+    setLoading(true);
+    setError(null);
+    const since = sinceDate(months);
+    const url = since ? `/api/admin/saleyard-stats?since=${since}` : "/api/admin/saleyard-stats";
+    fetch(url)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load saleyard data");
         return res.json();
       })
       .then((data) => setStats(data))
-      .catch((err) => setError(err.message));
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    loadData(range);
+  }, [range, loadData]);
 
   if (error) {
     return (
@@ -56,7 +84,7 @@ export function SaleyardStatus() {
     );
   }
 
-  if (!stats) {
+  if (!stats && loading) {
     return (
       <div className="flex items-center justify-center gap-2 rounded-xl border border-white/[0.06] bg-surface-secondary px-5 py-12">
         <Loader2 className="h-4 w-4 animate-spin text-brand" />
@@ -64,6 +92,8 @@ export function SaleyardStatus() {
       </div>
     );
   }
+
+  if (!stats) return null;
 
   const filtered = stats.filter((s) =>
     s.name.toLowerCase().includes(search.toLowerCase()),
@@ -100,16 +130,34 @@ export function SaleyardStatus() {
         )}
       </div>
 
-      {/* Search */}
-      <div className="relative w-full max-w-sm">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted/50" />
-        <input
-          type="text"
-          placeholder="Search saleyards..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-lg border border-white/[0.06] bg-surface-secondary py-2 pl-9 pr-3 text-xs text-text-primary placeholder:text-text-muted/40 outline-none focus:border-brand/40"
-        />
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative w-full max-w-sm">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted/50" />
+          <input
+            type="text"
+            placeholder="Search saleyards..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-lg border border-white/[0.06] bg-surface-secondary py-2 pl-9 pr-3 text-xs text-text-primary placeholder:text-text-muted/40 outline-none focus:border-brand/40"
+          />
+        </div>
+        <div className="flex flex-wrap gap-1">
+          {dateRanges.map((r) => (
+            <button
+              key={r.value}
+              onClick={() => setRange(r.value)}
+              className={`rounded-md px-2 py-1.5 text-[11px] font-medium transition-colors ${
+                range === r.value
+                  ? "bg-brand/20 text-brand border border-brand/30"
+                  : "bg-white/[0.03] text-text-muted border border-white/[0.06] hover:bg-white/[0.06]"
+              }`}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+        {loading && <Loader2 className="h-3.5 w-3.5 animate-spin text-brand" />}
       </div>
 
       {/* Table */}
