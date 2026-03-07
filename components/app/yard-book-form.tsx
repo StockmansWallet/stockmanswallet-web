@@ -6,31 +6,30 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import {
-  PawPrint,
   Wrench,
   DollarSign,
   Home,
   User,
-  type LucideIcon,
 } from "lucide-react";
+import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
 import type { Database } from "@/lib/types/database";
 import type { YardBookCategory, RecurrenceRule } from "@/lib/types/models";
 
 type YardBookRow = Database["public"]["Tables"]["yard_book_items"]["Row"];
+type IconComponent = React.ComponentType<{ className?: string }>;
 
 const CATEGORIES: {
   value: YardBookCategory;
   label: string;
-  icon: LucideIcon;
+  icon: IconComponent;
   bg: string;
   text: string;
-  ring: string;
 }[] = [
-  { value: "Livestock", label: "Livestock", icon: PawPrint, bg: "bg-orange-500/15", text: "text-orange-400", ring: "ring-orange-500/25" },
-  { value: "Operations", label: "Operations", icon: Wrench, bg: "bg-amber-700/15", text: "text-amber-600", ring: "ring-amber-700/25" },
-  { value: "Finance", label: "Finance", icon: DollarSign, bg: "bg-blue-500/15", text: "text-blue-400", ring: "ring-blue-500/25" },
-  { value: "Family", label: "Family", icon: Home, bg: "bg-purple-500/15", text: "text-purple-400", ring: "ring-purple-500/25" },
-  { value: "Me", label: "Me", icon: User, bg: "bg-green-500/15", text: "text-green-400", ring: "ring-green-500/25" },
+  { value: "Livestock", label: "Livestock", icon: IconCattleTags, bg: "bg-orange-500/15", text: "text-orange-400" },
+  { value: "Operations", label: "Operations", icon: Wrench, bg: "bg-amber-700/15", text: "text-amber-600" },
+  { value: "Finance", label: "Finance", icon: DollarSign, bg: "bg-blue-500/15", text: "text-blue-400" },
+  { value: "Family", label: "Family", icon: Home, bg: "bg-purple-500/15", text: "text-purple-400" },
+  { value: "Me", label: "Me", icon: User, bg: "bg-green-500/15", text: "text-green-400" },
 ];
 
 const REMINDER_OPTIONS = [
@@ -219,10 +218,10 @@ export function YardBookForm({
                     key={cat.value}
                     type="button"
                     onClick={() => setCategory(cat.value)}
-                    className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-medium transition-all ring-1 ring-inset ${
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
                       isActive
-                        ? `${cat.bg} ${cat.text} ${cat.ring}`
-                        : "bg-white/5 text-text-muted ring-white/8 hover:bg-white/8 hover:text-text-secondary"
+                        ? `${cat.bg} ${cat.text}`
+                        : "bg-white/5 text-text-muted hover:bg-white/8 hover:text-text-secondary"
                     }`}
                   >
                     <Icon className="h-3.5 w-3.5" />
@@ -274,10 +273,10 @@ export function YardBookForm({
                       key={opt.value}
                       type="button"
                       onClick={() => toggleOffset(opt.value)}
-                      className={`inline-flex items-center rounded-xl px-3 py-1.5 text-xs font-medium transition-all ring-1 ring-inset ${
+                      className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                         isActive
-                          ? "bg-lime-500/15 text-lime-400 ring-lime-500/25"
-                          : "bg-white/5 text-text-muted ring-white/8 hover:bg-white/8 hover:text-text-secondary"
+                          ? "bg-lime-500/15 text-lime-400"
+                          : "bg-white/5 text-text-muted hover:bg-white/8 hover:text-text-secondary"
                       }`}
                     >
                       {opt.label}
@@ -329,13 +328,13 @@ export function YardBookForm({
                       key={herd.id}
                       type="button"
                       onClick={() => toggleHerd(herd.id)}
-                      className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium transition-all ring-1 ring-inset ${
+                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                         isActive
-                          ? "bg-lime-500/15 text-lime-400 ring-lime-500/25"
-                          : "bg-white/5 text-text-muted ring-white/8 hover:bg-white/8 hover:text-text-secondary"
+                          ? "bg-lime-500/15 text-lime-400"
+                          : "bg-white/5 text-text-muted hover:bg-white/8 hover:text-text-secondary"
                       }`}
                     >
-                      <PawPrint className="h-3 w-3" />
+                      <IconCattleTags className="h-3 w-3" />
                       {herd.name}
                       <span className="opacity-60">{herd.head_count}hd</span>
                     </button>

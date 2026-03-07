@@ -106,6 +106,7 @@ export default async function HerdsPage() {
   // Compute per-herd valuations with price source tracking
   const herdValuesObj: Record<string, number> = {};
   const herdSourcesObj: Record<string, string> = {};
+  const herdPricePerKgObj: Record<string, number> = {};
   let totalValue = 0;
   for (const h of (herds ?? [])) {
     const result = calculateHerdValuation(
@@ -114,6 +115,7 @@ export default async function HerdsPage() {
     );
     herdValuesObj[h.id] = result.netValue;
     herdSourcesObj[h.id] = result.priceSource;
+    herdPricePerKgObj[h.id] = result.pricePerKg;
     totalValue += result.netValue;
   }
 
@@ -219,7 +221,7 @@ export default async function HerdsPage() {
           </div>
 
           {/* Table */}
-          <HerdsTable herds={herds} herdValues={herdValuesObj} herdSources={herdSourcesObj} propertyGroups={propertyGroups} />
+          <HerdsTable herds={herds} herdValues={herdValuesObj} herdSources={herdSourcesObj} herdPricePerKg={herdPricePerKgObj} propertyGroups={propertyGroups} />
         </>
       )}
     </div>

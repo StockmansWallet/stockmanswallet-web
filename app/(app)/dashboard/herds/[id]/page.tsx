@@ -192,180 +192,186 @@ export default async function HerdDetailPage({
         }
       />
 
-      {/* Herd Value */}
-      {herdValue > 0 && (
-        <div className="mb-4 rounded-2xl bg-white/5 p-5">
-          <div className="flex items-center gap-3">
-            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isFallback ? "bg-red-500/15" : "bg-brand/15"}`}>
-              {isFallback
-                ? <AlertTriangle className="h-5 w-5 text-red-400" />
-                : <DollarSign className="h-5 w-5 text-brand" />
-              }
-            </div>
-            <div>
-              <p className="text-xs font-medium text-text-muted">Estimated Herd Value</p>
-              <p className={`mt-0.5 text-2xl font-bold tabular-nums ${isFallback ? "text-red-400" : "text-text-primary"}`}>
-                ${Math.round(herdValue).toLocaleString()}
-              </p>
-              <div className="flex items-center gap-2">
-                {(herd.head_count ?? 0) > 0 && (
-                  <p className={`text-xs ${isFallback ? "text-red-400/70" : "text-text-muted"}`}>
-                    ${Math.round(herdValue / herd.head_count).toLocaleString()} per head
+      <div className="flex flex-col gap-4 lg:flex-row">
+        {/* Left column */}
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
+          {/* Herd Value */}
+          {herdValue > 0 && (
+            <div className="rounded-2xl bg-white/5 p-5">
+              <div className="flex items-center gap-3">
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isFallback ? "bg-red-500/15" : "bg-brand/15"}`}>
+                  {isFallback
+                    ? <AlertTriangle className="h-5 w-5 text-red-400" />
+                    : <DollarSign className="h-5 w-5 text-brand" />
+                  }
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-text-muted">Estimated Herd Value</p>
+                  <p className={`mt-0.5 text-2xl font-bold tabular-nums ${isFallback ? "text-red-400" : "text-text-primary"}`}>
+                    ${Math.round(herdValue).toLocaleString()}
                   </p>
-                )}
-                {isFallback && (
-                  <span className="inline-flex items-center rounded-md bg-red-500/15 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
-                    {valuation.priceSource === "national" ? "National Avg" : "Est. Fallback"}
-                  </span>
-                )}
+                  <div className="flex items-center gap-2">
+                    {(herd.head_count ?? 0) > 0 && (
+                      <p className={`text-xs ${isFallback ? "text-red-400/70" : "text-text-muted"}`}>
+                        ${Math.round(herdValue / herd.head_count).toLocaleString()} per head
+                      </p>
+                    )}
+                    {isFallback && (
+                      <span className="inline-flex items-center rounded-md bg-red-500/15 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
+                        {valuation.priceSource === "national" ? "National Avg" : "Est. Fallback"}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Key Metrics */}
+          {herdValue > 0 && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2.5">
+                  <SectionIcon icon={BarChart3} />
+                  <CardTitle>Key Metrics</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
+                <InfoRow label="Price (Per Kilogram)" value={`$${valuation.pricePerKg.toFixed(2)}/kg`} />
+                <InfoRow label="Average Weight" value={`${Math.round(projectedWeight ?? herd.current_weight ?? herd.initial_weight ?? 0)} kg`} />
+                <InfoRow label="Value Per Head" value={`$${Math.round(herdValue / (herd.head_count || 1)).toLocaleString()}`} />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Weight Tracking */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2.5">
+                <SectionIcon icon={Scale} />
+                <CardTitle>Weight Tracking</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
+              <InfoRow label="Initial Weight" value={herd.initial_weight ? `${herd.initial_weight} kg` : null} />
+              <InfoRow label="Current Weight" value={herd.current_weight ? `${herd.current_weight} kg` : null} />
+              {projectedWeight && <InfoRow label="Projected Weight" value={`${Math.round(projectedWeight)} kg`} />}
+              <InfoRow label="Daily Weight Gain" value={herd.daily_weight_gain ? `${herd.daily_weight_gain} kg/day` : null} />
+              {herd.mortality_rate != null && herd.mortality_rate > 0 && (
+                <InfoRow label="Mortality Rate" value={`${Math.round(herd.mortality_rate * 100)}% annually`} />
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Timeline */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2.5">
+                <SectionIcon icon={Clock} />
+                <CardTitle>Timeline</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
+              <InfoRow label="Days Held" value={`${Math.max(0, Math.round((Date.now() - new Date(herd.created_at).getTime()) / 86400000))} days`} />
+              <InfoRow label="Created" value={new Date(herd.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })} />
+              <InfoRow label="Last Updated" value={new Date(herd.updated_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })} />
+            </CardContent>
+          </Card>
         </div>
-      )}
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {/* Key Metrics - matches iOS PrimaryMetricsCard */}
-        {herdValue > 0 && (
+        {/* Right column */}
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
+          {/* Location */}
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2.5">
-                <SectionIcon icon={BarChart3} />
-                <CardTitle>Key Metrics</CardTitle>
+                <SectionIcon icon={MapPin} />
+                <CardTitle>Location</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
-              <InfoRow label="Price (Per Kilogram)" value={`$${valuation.pricePerKg.toFixed(2)}/kg`} />
-              <InfoRow label="Average Weight" value={`${Math.round(projectedWeight ?? herd.current_weight ?? herd.initial_weight ?? 0)} kg`} />
-              <InfoRow label="Value Per Head" value={`$${Math.round(herdValue / (herd.head_count || 1)).toLocaleString()}`} />
+              {property && (
+                <div className="flex items-center justify-between py-3 text-sm">
+                  <span className="text-text-muted">Property</span>
+                  <Link href={`/dashboard/properties/${herd.property_id}`} className="font-medium text-brand hover:underline">
+                    {property.property_name}
+                  </Link>
+                </div>
+              )}
+              <InfoRow label="Paddock" value={herd.paddock_name} />
+              <InfoRow label="Saleyard" value={herd.selected_saleyard} />
             </CardContent>
           </Card>
-        )}
 
-        {/* Physical Attributes - matches iOS HerdDetailsInfoCard */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2.5">
-              <SectionIcon icon={Info} />
-              <CardTitle>Physical Attributes</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
-            <InfoRow label="Herd Size" value={herd.head_count ? `${herd.head_count.toLocaleString()} head` : null} />
-            <InfoRow label="Species" value={herd.species} />
-            <InfoRow label="Breed" value={herd.breed} />
-            <InfoRow label="Category" value={herd.category} />
-            <InfoRow label="Sex" value={herd.sex} />
-            <InfoRow label="Age" value={herd.age_months ? `${herd.age_months} months` : null} />
-            <InfoRow label="Animal ID" value={herd.animal_id_number} />
-            {herd.is_sold && (
-              <div className="flex items-center justify-between py-3 text-sm">
-                <span className="text-text-muted">Status</span>
-                <Badge variant="danger">Sold</Badge>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Weight Tracking - matches iOS Weight Tracking section */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2.5">
-              <SectionIcon icon={Scale} />
-              <CardTitle>Weight Tracking</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
-            <InfoRow label="Initial Weight" value={herd.initial_weight ? `${herd.initial_weight} kg` : null} />
-            <InfoRow label="Current Weight" value={herd.current_weight ? `${herd.current_weight} kg` : null} />
-            {projectedWeight && <InfoRow label="Projected Weight" value={`${Math.round(projectedWeight)} kg`} />}
-            <InfoRow label="Daily Weight Gain" value={herd.daily_weight_gain ? `${herd.daily_weight_gain} kg/day` : null} />
-            {herd.mortality_rate != null && herd.mortality_rate > 0 && (
-              <InfoRow label="Mortality Rate" value={`${Math.round(herd.mortality_rate * 100)}% annually`} />
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Location - matches iOS Location section */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2.5">
-              <SectionIcon icon={MapPin} />
-              <CardTitle>Location</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
-            {property && (
-              <div className="flex items-center justify-between py-3 text-sm">
-                <span className="text-text-muted">Property</span>
-                <Link href={`/dashboard/properties/${herd.property_id}`} className="font-medium text-brand hover:underline">
-                  {property.property_name}
-                </Link>
-              </div>
-            )}
-            <InfoRow label="Paddock" value={herd.paddock_name} />
-            <InfoRow label="Saleyard" value={herd.selected_saleyard} />
-          </CardContent>
-        </Card>
-
-        {/* Breeding */}
-        {herd.is_breeder && (
+          {/* Physical Attributes */}
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2.5">
-                <SectionIcon icon={Heart} />
-                <CardTitle>Breeding</CardTitle>
+                <SectionIcon icon={Info} />
+                <CardTitle>Physical Attributes</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
-              <div className="flex items-center justify-between py-3 text-sm">
-                <span className="text-text-muted">Pregnant</span>
-                <Badge variant={herd.is_pregnant ? "success" : "default"}>{herd.is_pregnant ? "Yes" : "No"}</Badge>
-              </div>
-              <InfoRow label="Joined Date" value={herd.joined_date} />
-              <InfoRow label="Calving Rate" value={herd.calving_rate ? `${herd.calving_rate}%` : null} />
-              <InfoRow label="Lactation Status" value={herd.lactation_status} />
-              <InfoRow label="Breeding Program" value={herd.breeding_program_type} />
+              <InfoRow label="Herd Size" value={herd.head_count ? `${herd.head_count.toLocaleString()} head` : null} />
+              <InfoRow label="Species" value={herd.species} />
+              <InfoRow label="Breed" value={herd.breed} />
+              <InfoRow label="Category" value={herd.category} />
+              <InfoRow label="Sex" value={herd.sex} />
+              <InfoRow label="Age" value={herd.age_months ? `${herd.age_months} months` : null} />
+              <InfoRow label="Animal ID" value={herd.animal_id_number} />
+              {herd.is_sold && (
+                <div className="flex items-center justify-between py-3 text-sm">
+                  <span className="text-text-muted">Status</span>
+                  <Badge variant="danger">Sold</Badge>
+                </div>
+              )}
             </CardContent>
           </Card>
-        )}
 
-        {/* Timeline - matches iOS Timeline section */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2.5">
-              <SectionIcon icon={Clock} />
-              <CardTitle>Timeline</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
-            <InfoRow label="Days Held" value={`${Math.max(0, Math.round((Date.now() - new Date(herd.created_at).getTime()) / 86400000))} days`} />
-            <InfoRow label="Created" value={new Date(herd.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })} />
-            <InfoRow label="Last Updated" value={new Date(herd.updated_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })} />
-          </CardContent>
-        </Card>
+          {/* Breeding */}
+          {herd.is_breeder && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2.5">
+                  <SectionIcon icon={Heart} />
+                  <CardTitle>Breeding</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
+                <div className="flex items-center justify-between py-3 text-sm">
+                  <span className="text-text-muted">Pregnant</span>
+                  <Badge variant={herd.is_pregnant ? "success" : "default"}>{herd.is_pregnant ? "Yes" : "No"}</Badge>
+                </div>
+                <InfoRow label="Joined Date" value={herd.joined_date} />
+                <InfoRow label="Calving Rate" value={herd.calving_rate ? `${herd.calving_rate}%` : null} />
+                <InfoRow label="Lactation Status" value={herd.lactation_status} />
+                <InfoRow label="Breeding Program" value={herd.breeding_program_type} />
+              </CardContent>
+            </Card>
+          )}
 
-        {/* Mustering Records */}
-        <MusterRecordsSection herdId={id} records={musterRecords ?? []} editable />
+          {/* Mustering Records */}
+          <MusterRecordsSection herdId={id} records={musterRecords ?? []} editable />
 
-        {/* Health Records */}
-        <HealthRecordsSection herdId={id} records={healthRecords ?? []} editable />
-
-        {/* Notes */}
-        {herd.notes && (
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <div className="flex items-center gap-2.5">
-                <SectionIcon icon={FileText} />
-                <CardTitle>Notes</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-secondary">{herd.notes}</p>
-            </CardContent>
-          </Card>
-        )}
+          {/* Health Records */}
+          <HealthRecordsSection herdId={id} records={healthRecords ?? []} editable />
+        </div>
       </div>
+
+      {/* Notes - full width below both columns */}
+      {herd.notes && (
+        <Card className="mt-4">
+          <CardHeader>
+            <div className="flex items-center gap-2.5">
+              <SectionIcon icon={FileText} />
+              <CardTitle>Notes</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-secondary">{herd.notes}</p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

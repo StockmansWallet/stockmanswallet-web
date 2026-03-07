@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
-  PawPrint,
   Wrench,
   DollarSign,
   Home,
@@ -12,8 +11,8 @@ import {
   ChevronRight,
   Eye,
   EyeOff,
-  type LucideIcon,
 } from "lucide-react";
+import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
 import type { Database } from "@/lib/types/database";
 import type { YardBookCategory } from "@/lib/types/models";
 
@@ -24,12 +23,14 @@ interface YardBookRunSheetProps {
   herds: { id: string; name: string; head_count: number }[];
 }
 
+type IconComponent = React.ComponentType<{ className?: string }>;
+
 const CATEGORY_CONFIG: Record<
   YardBookCategory,
-  { icon: LucideIcon; bg: string; text: string; iconBg: string }
+  { icon: IconComponent; bg: string; text: string; iconBg: string }
 > = {
   Livestock: {
-    icon: PawPrint,
+    icon: IconCattleTags,
     bg: "bg-orange-500/15",
     text: "text-orange-400",
     iconBg: "bg-orange-500/20",
@@ -331,7 +332,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
                                   key={i}
                                   className="inline-flex items-center gap-0.5 rounded-full bg-white/8 px-1.5 py-0.5 text-[10px] font-medium text-text-secondary"
                                 >
-                                  <PawPrint className="h-2.5 w-2.5" />
+                                  <IconCattleTags className="h-2.5 w-2.5" />
                                   {name}
                                 </span>
                               ))}

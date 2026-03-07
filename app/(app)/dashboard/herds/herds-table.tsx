@@ -27,24 +27,20 @@ type PropertyGroup = {
 
 const SPECIES_TABS = ["All", "Cattle", "Sheep", "Pig", "Goat"] as const;
 
-const speciesBadgeVariant: Record<string, "brand" | "success" | "info" | "warning"> = {
-  Cattle: "brand",
-  Sheep: "success",
-  Pig: "info",
-  Goat: "warning",
-};
 
-type SortKey = "name" | "breed" | "category" | "head_count" | "current_weight" | "value" | null;
+type SortKey = "name" | "breed" | "category" | "head_count" | "current_weight" | "value" | "price_per_kg" | null;
 
 export function HerdsTable({
   herds,
   herdValues,
   herdSources,
+  herdPricePerKg,
   propertyGroups,
 }: {
   herds: HerdWithProperty[];
   herdValues: Record<string, number>;
   herdSources?: Record<string, string>;
+  herdPricePerKg?: Record<string, number>;
   propertyGroups: PropertyGroup[];
 }) {
   const router = useRouter();
@@ -86,6 +82,9 @@ export function HerdsTable({
       if (sortKey === "value") {
         aVal = herdValues[a.id] ?? 0;
         bVal = herdValues[b.id] ?? 0;
+      } else if (sortKey === "price_per_kg") {
+        aVal = herdPricePerKg?.[a.id] ?? 0;
+        bVal = herdPricePerKg?.[b.id] ?? 0;
       } else {
         aVal = a[sortKey];
         bVal = b[sortKey];
@@ -160,13 +159,16 @@ export function HerdsTable({
     return (
       <>
         <th
+          onClick={() => handleSort("head_count")}
+          className="cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary"
+        >
+          Head <SortIcon column="head_count" />
+        </th>
+        <th
           onClick={() => handleSort("name")}
           className="cursor-pointer select-none px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary"
         >
           Name <SortIcon column="name" />
-        </th>
-        <th className="px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted">
-          Species
         </th>
         <th
           onClick={() => handleSort("breed")}
@@ -181,22 +183,22 @@ export function HerdsTable({
           Category <SortIcon column="category" />
         </th>
         <th
-          onClick={() => handleSort("head_count")}
-          className="cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary"
+          onClick={() => handleSort("price_per_kg")}
+          className="hidden cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary lg:table-cell"
         >
-          Head <SortIcon column="head_count" />
-        </th>
-        <th
-          onClick={() => handleSort("value")}
-          className="cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary"
-        >
-          Value <SortIcon column="value" />
+          $/kg <SortIcon column="price_per_kg" />
         </th>
         <th
           onClick={() => handleSort("current_weight")}
           className="hidden cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary xl:table-cell"
         >
           Weight <SortIcon column="current_weight" />
+        </th>
+        <th
+          onClick={() => handleSort("value")}
+          className="cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary"
+        >
+          Value <SortIcon column="value" />
         </th>
         <th className="w-10 px-3 py-3.5" />
       </>
@@ -207,29 +209,28 @@ export function HerdsTable({
     const value = herdValues[herd.id] ?? 0;
     const source = herdSources?.[herd.id];
     const isFallback = source !== undefined && source !== "saleyard";
+    const pricePerKg = herdPricePerKg?.[herd.id] ?? 0;
     return (
       <tr
         onClick={() => router.push(`/dashboard/herds/${herd.id}`)}
         className="group cursor-pointer transition-colors hover:bg-white/[0.03]"
       >
-        <td className="px-5 py-3.5">
-          <span className="font-medium text-text-primary">{herd.name}</span>
-        </td>
-        <td className="px-5 py-3.5">
-          <Badge variant={speciesBadgeVariant[herd.species] ?? "default"}>
-            {herd.species}
-          </Badge>
-        </td>
-        <td className="hidden px-5 py-3.5 text-text-secondary md:table-cell">{herd.breed}</td>
-        <td className="hidden px-5 py-3.5 text-text-secondary lg:table-cell">{herd.category}</td>
         <td className="px-5 py-3.5 text-right tabular-nums font-medium text-text-primary">
           {herd.head_count?.toLocaleString() ?? "\u2014"}
         </td>
-        <td className={`px-5 py-3.5 text-right tabular-nums ${isFallback ? "text-red-400" : "text-text-secondary"}`}>
-          {value > 0 ? `$${Math.round(value).toLocaleString()}` : "\u2014"}
+        <td className="px-5 py-3.5">
+          <span className="font-medium text-text-primary">{herd.name}</span>
+        </td>
+        <td className="hidden px-5 py-3.5 text-text-secondary md:table-cell">{herd.breed}</td>
+        <td className="hidden px-5 py-3.5 text-text-secondary lg:table-cell">{herd.category}</td>
+        <td className="hidden px-5 py-3.5 text-right tabular-nums text-text-secondary lg:table-cell">
+          {pricePerKg > 0 ? `$${pricePerKg.toFixed(2)}` : "\u2014"}
         </td>
         <td className="hidden px-5 py-3.5 text-right tabular-nums text-text-secondary xl:table-cell">
           {herd.current_weight ? `${herd.current_weight.toLocaleString()} kg` : "\u2014"}
+        </td>
+        <td className={`px-5 py-3.5 text-right tabular-nums ${isFallback ? "text-red-400" : "text-text-secondary"}`}>
+          {value > 0 ? `$${Math.round(value).toLocaleString()}` : "\u2014"}
         </td>
         <td className="px-3 py-3.5">
           <ChevronRight className="h-4 w-4 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
@@ -251,9 +252,9 @@ export function HerdsTable({
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-medium transition-all ${
+                className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
                   isActive
-                    ? "bg-brand/15 text-brand ring-1 ring-inset ring-brand/25"
+                    ? "bg-brand/15 text-brand"
                     : "bg-white/5 text-text-muted hover:bg-white/8 hover:text-text-secondary"
                 }`}
               >
