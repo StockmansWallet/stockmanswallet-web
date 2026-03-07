@@ -9,6 +9,11 @@ import {
   type CategoryPriceEntry,
   type HerdValuationResult,
 } from "@/lib/engines/valuation-engine";
+import {
+  cattleBreeds, sheepBreeds, pigBreeds, goatBreeds,
+  cattleCategories, sheepCategories, pigCategories, goatCategories,
+  saleyards,
+} from "@/lib/data/reference-data";
 
 interface Props {
   priceMaps: SerializedPriceMaps;
@@ -16,6 +21,20 @@ interface Props {
 
 const speciesOptions = ["Cattle", "Sheep", "Pig", "Goat"] as const;
 const breedingPrograms = ["uncontrolled", "controlled", "ai"] as const;
+
+const breedsBySpecies: Record<string, readonly string[]> = {
+  Cattle: cattleBreeds,
+  Sheep: sheepBreeds,
+  Pig: pigBreeds,
+  Goat: goatBreeds,
+};
+
+const categoriesBySpecies: Record<string, readonly string[]> = {
+  Cattle: cattleCategories,
+  Sheep: sheepCategories,
+  Pig: pigCategories,
+  Goat: goatCategories,
+};
 
 function fmtDollar(n: number): string {
   return `$${Math.round(n).toLocaleString()}`;
@@ -96,18 +115,30 @@ export function TestCalculator({ priceMaps }: Props) {
 
         <div className="grid grid-cols-2 gap-3">
           <Field label="Species">
-            <select value={species} onChange={(e) => setSpecies(e.target.value)} className="input-field">
+            <select value={species} onChange={(e) => {
+              const s = e.target.value;
+              setSpecies(s);
+              setBreed((breedsBySpecies[s] ?? [])[0] ?? "");
+              setCategory((categoriesBySpecies[s] ?? [])[0] ?? "");
+            }} className="input-field">
               {speciesOptions.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
           </Field>
           <Field label="Breed">
-            <input value={breed} onChange={(e) => setBreed(e.target.value)} className="input-field" />
+            <select value={breed} onChange={(e) => setBreed(e.target.value)} className="input-field">
+              {(breedsBySpecies[species] ?? []).map((b) => <option key={b} value={b}>{b}</option>)}
+            </select>
           </Field>
           <Field label="Category">
-            <input value={category} onChange={(e) => setCategory(e.target.value)} className="input-field" />
+            <select value={category} onChange={(e) => setCategory(e.target.value)} className="input-field">
+              {(categoriesBySpecies[species] ?? []).map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
           </Field>
           <Field label="Saleyard">
-            <input value={saleyard} onChange={(e) => setSaleyard(e.target.value)} className="input-field" placeholder="Optional" />
+            <select value={saleyard} onChange={(e) => setSaleyard(e.target.value)} className="input-field">
+              <option value="">None (national price)</option>
+              {saleyards.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
           </Field>
           <Field label="Head Count">
             <input type="number" value={headCount} onChange={(e) => setHeadCount(+e.target.value)} className="input-field" />
