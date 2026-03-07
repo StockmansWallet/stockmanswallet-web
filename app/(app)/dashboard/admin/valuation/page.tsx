@@ -48,6 +48,12 @@ export type SerializedPriceMaps = {
   premium: Record<string, number>;
 };
 
+export interface SaleyardCoverage {
+  saleyard: string;
+  categories: string[];
+  breeds: string[];
+}
+
 export interface SaleyardStats {
   name: string;
   totalEntries: number;
@@ -92,7 +98,7 @@ export default async function ValuationPage() {
   const mlaCategories = [...new Set(activeHerds.map((h) => mapCategoryToMLACategory(h.category)))];
   const saleyardsToFetch = [...saleyards, "National"];
 
-  const [{ data: allPrices }, { data: breedPremiumData }] = await Promise.all([
+  const [{ data: allPrices }, { data: breedPremiumData }, { data: coverageData }] = await Promise.all([
     mlaCategories.length > 0
       ? supabase
           .from("category_prices")
@@ -103,6 +109,7 @@ export default async function ValuationPage() {
           .limit(50000)
       : Promise.resolve({ data: [] as { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string }[] }),
     supabase.from("breed_premiums").select("breed, premium_percent:premium_pct"),
+    supabase.rpc("saleyard_coverage") as unknown as { data: SaleyardCoverage[] | null },
   ]);
 
   // Build price maps
@@ -158,7 +165,7 @@ export default async function ValuationPage() {
         title="Valuation Validator"
         subtitle="Full calculation breakdown for every herd. Compare intermediate values to verify correctness."
       />
-      <ValuationValidator herds={herdsWithValuations} priceMaps={serializedMaps} />
+      <ValuationValidator herds={herdsWithValuations} priceMaps={serializedMaps} saleyardCoverage={coverageData ?? []} />
     </div>
   );
 }

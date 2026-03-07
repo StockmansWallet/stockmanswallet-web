@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Calculator } from "lucide-react";
-import type { SerializedPriceMaps } from "./page";
+import type { SerializedPriceMaps, SaleyardCoverage } from "./page";
 import {
   calculateHerdValuation,
   type HerdForValuation,
@@ -18,6 +18,7 @@ import { mapCategoryToMLACategory } from "@/lib/engines/valuation-engine";
 
 interface Props {
   priceMaps: SerializedPriceMaps;
+  saleyardCoverage: SaleyardCoverage[];
 }
 
 const speciesOptions = ["Cattle", "Sheep", "Pig", "Goat"] as const;
@@ -45,7 +46,7 @@ function fmtCents(n: number): string {
   return `$${n.toLocaleString("en-AU", { minimumFractionDigits: 4, maximumFractionDigits: 4 })}`;
 }
 
-export function TestCalculator({ priceMaps }: Props) {
+export function TestCalculator({ priceMaps, saleyardCoverage }: Props) {
   // Form state
   const [species, setSpecies] = useState<string>("Cattle");
   const [breed, setBreed] = useState("Angus");
@@ -78,18 +79,18 @@ export function TestCalculator({ priceMaps }: Props) {
     return cattleBreedPremiums[breed] ?? null;
   }, [breed, maps.premium]);
 
-  // MLA category + saleyard coverage check
+  // MLA category + saleyard coverage check (uses full DB coverage, not just user's herds)
   const mlaCategory = useMemo(() => mapCategoryToMLACategory(category), [category]);
 
   const saleyardHasData = useMemo(() => {
     const result: Record<string, boolean> = {};
     for (const sy of saleyards) {
-      const generalKey = `${mlaCategory}|${sy}`;
-      const breedKey = `${mlaCategory}|${breed}|${sy}`;
-      result[sy] = maps.saleyard.has(generalKey) || maps.saleyardBreed.has(breedKey);
+      const coverage = saleyardCoverage.find((c) => c.saleyard === sy);
+      if (!coverage) { result[sy] = false; continue; }
+      result[sy] = coverage.categories.includes(mlaCategory);
     }
     return result;
-  }, [mlaCategory, breed, maps.saleyard, maps.saleyardBreed]);
+  }, [mlaCategory, saleyardCoverage]);
 
   const sortedSaleyards = useMemo(() => {
     const withData = saleyards.filter((s) => saleyardHasData[s]);

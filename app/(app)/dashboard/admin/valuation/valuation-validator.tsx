@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { HerdWithValuation, SerializedPriceMaps } from "./page";
+import type { HerdWithValuation, SerializedPriceMaps, SaleyardCoverage } from "./page";
 import { LogicPanel } from "./logic-panel";
 import { ValuationTable } from "./valuation-table";
 import { TestCalculator } from "./test-calculator";
@@ -10,9 +10,10 @@ import { SaleyardStatus } from "./saleyard-status";
 interface Props {
   herds: HerdWithValuation[];
   priceMaps: SerializedPriceMaps;
+  saleyardCoverage: SaleyardCoverage[];
 }
 
-export function ValuationValidator({ herds, priceMaps }: Props) {
+export function ValuationValidator({ herds, priceMaps, saleyardCoverage }: Props) {
   const [activeTab, setActiveTab] = useState<"table" | "calculator" | "saleyards">("table");
 
   const totalNetValue = herds.reduce((sum, h) => sum + h.valuation.netValue, 0);
@@ -56,7 +57,7 @@ export function ValuationValidator({ herds, priceMaps }: Props) {
       </div>
 
       {activeTab === "table" && <ValuationTable herds={herds} />}
-      {activeTab === "calculator" && <TestCalculator priceMaps={priceMaps} />}
+      {activeTab === "calculator" && <TestCalculator priceMaps={priceMaps} saleyardCoverage={saleyardCoverage} />}
       {activeTab === "saleyards" && <SaleyardStatus />}
     </div>
   );
