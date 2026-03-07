@@ -26,9 +26,10 @@ function freshnessBg(days: number | null): string {
 
 function freshnessLabel(days: number | null): string {
   if (days === null) return "No data";
+  if (days < 0) return `${Math.abs(days)}d ahead`;
   if (days === 0) return "Today";
-  if (days === 1) return "1 day ago";
-  return `${days} days ago`;
+  if (days === 1) return "1d ago";
+  return `${days}d ago`;
 }
 
 export function SaleyardStatus() {
