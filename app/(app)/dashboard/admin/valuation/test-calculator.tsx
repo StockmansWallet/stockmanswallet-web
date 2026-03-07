@@ -91,6 +91,12 @@ export function TestCalculator({ priceMaps }: Props) {
     return result;
   }, [mlaCategory, breed, maps.saleyard, maps.saleyardBreed]);
 
+  const sortedSaleyards = useMemo(() => {
+    const withData = saleyards.filter((s) => saleyardHasData[s]);
+    const without = saleyards.filter((s) => !saleyardHasData[s]);
+    return [...withData, ...without];
+  }, [saleyardHasData]);
+
   // Calculate on every render (pure function, fast)
   const result: HerdValuationResult | null = useMemo(() => {
     const now = new Date();
@@ -158,9 +164,9 @@ export function TestCalculator({ priceMaps }: Props) {
           <Field label="Saleyard">
             <select value={saleyard} onChange={(e) => setSaleyard(e.target.value)} className="input-field">
               <option value="">None (national price)</option>
-              {saleyards.map((s) => (
-                <option key={s} value={s} style={saleyardHasData[s] ? undefined : { color: "rgba(255,255,255,0.25)" }}>
-                  {s}{saleyardHasData[s] ? "" : " (no data)"}
+              {sortedSaleyards.map((s) => (
+                <option key={s} value={s}>
+                  {saleyardHasData[s] ? `● ${s}` : `○ ${s} (no data)`}
                 </option>
               ))}
             </select>
