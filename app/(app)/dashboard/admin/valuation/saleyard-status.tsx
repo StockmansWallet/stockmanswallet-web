@@ -1,12 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { MapPinned, ChevronDown, ChevronRight, Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { MapPinned, ChevronDown, ChevronRight, Search, Loader2 } from "lucide-react";
 import type { SaleyardStats } from "./page";
-
-interface Props {
-  stats: SaleyardStats[];
-}
 
 function daysSince(dateStr: string | null): number | null {
   if (!dateStr) return null;
@@ -35,9 +31,38 @@ function freshnessLabel(days: number | null): string {
   return `${days} days ago`;
 }
 
-export function SaleyardStatus({ stats }: Props) {
+export function SaleyardStatus() {
+  const [stats, setStats] = useState<SaleyardStats[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/saleyard-stats")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load saleyard data");
+        return res.json();
+      })
+      .then((data) => setStats(data))
+      .catch((err) => setError(err.message));
+  }, []);
+
+  if (error) {
+    return (
+      <div className="rounded-xl border border-red-500/20 bg-red-500/[0.04] px-5 py-8 text-center">
+        <p className="text-sm text-red-400">{error}</p>
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <div className="flex items-center justify-center gap-2 rounded-xl border border-white/[0.06] bg-surface-secondary px-5 py-12">
+        <Loader2 className="h-4 w-4 animate-spin text-brand" />
+        <span className="text-sm text-text-muted">Loading saleyard data...</span>
+      </div>
+    );
+  }
 
   const filtered = stats.filter((s) =>
     s.name.toLowerCase().includes(search.toLowerCase()),
@@ -95,6 +120,7 @@ export function SaleyardStatus({ stats }: Props) {
               <th className="px-3 py-2.5 font-medium text-text-muted">Saleyard</th>
               <th className="px-3 py-2.5 font-medium text-text-muted text-right">Entries</th>
               <th className="px-3 py-2.5 font-medium text-text-muted">Latest Data</th>
+              <th className="px-3 py-2.5 font-medium text-text-muted">Oldest Data</th>
               <th className="px-3 py-2.5 font-medium text-text-muted">Freshness</th>
               <th className="px-3 py-2.5 font-medium text-text-muted text-right">Categories</th>
               <th className="px-3 py-2.5 font-medium text-text-muted text-right">Weight Ranges</th>
@@ -118,6 +144,7 @@ export function SaleyardStatus({ stats }: Props) {
                     <td className="px-3 py-2.5 font-medium text-text-primary">{s.name}</td>
                     <td className="px-3 py-2.5 text-right tabular-nums text-text-primary">{s.totalEntries.toLocaleString()}</td>
                     <td className="px-3 py-2.5 tabular-nums text-text-muted">{s.newestDataDate ?? "-"}</td>
+                    <td className="px-3 py-2.5 tabular-nums text-text-muted">{s.oldestDataDate ?? "-"}</td>
                     <td className={`px-3 py-2.5 font-medium ${freshnessColor(days)}`}>{freshnessLabel(days)}</td>
                     <td className="px-3 py-2.5 text-right tabular-nums text-text-primary">{s.categories.length}</td>
                     <td className="px-3 py-2.5 text-right tabular-nums text-text-primary">{s.weightRanges.length}</td>
@@ -140,7 +167,7 @@ export function SaleyardStatus({ stats }: Props) {
                   </tr>
                   {isExpanded && (
                     <tr className="border-b border-white/[0.04]">
-                      <td colSpan={9} className="bg-white/[0.01] px-6 py-3">
+                      <td colSpan={10} className="bg-white/[0.01] px-6 py-3">
                         <div className="grid gap-3 sm:grid-cols-3">
                           <DetailList title="Categories" items={s.categories} />
                           <DetailList title="Weight Ranges" items={s.weightRanges} />
@@ -159,7 +186,7 @@ export function SaleyardStatus({ stats }: Props) {
             })}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={9} className="px-3 py-8 text-center text-text-muted">
+                <td colSpan={10} className="px-3 py-8 text-center text-text-muted">
                   No saleyards match your search.
                 </td>
               </tr>

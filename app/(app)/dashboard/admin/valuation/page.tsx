@@ -92,62 +92,6 @@ export default async function ValuationPage() {
   const mlaCategories = [...new Set(activeHerds.map((h) => mapCategoryToMLACategory(h.category)))];
   const saleyardsToFetch = [...saleyards, "National"];
 
-  // Fetch ALL saleyard pricing data for the Saleyard Status tab
-  const { data: allSaleyardPrices } = await supabase
-    .from("category_prices")
-    .select("category, saleyard, breed, weight_range, data_date")
-    .neq("saleyard", "National")
-    .order("data_date", { ascending: false })
-    .limit(100000);
-
-  // Aggregate saleyard stats
-  const saleyardStatsMap = new Map<string, {
-    entries: number;
-    newest: string | null;
-    oldest: string | null;
-    categories: Set<string>;
-    breeds: Set<string>;
-    weightRanges: Set<string>;
-    hasBreedSpecific: boolean;
-  }>();
-
-  for (const p of (allSaleyardPrices ?? [])) {
-    let stats = saleyardStatsMap.get(p.saleyard);
-    if (!stats) {
-      stats = { entries: 0, newest: null, oldest: null, categories: new Set(), breeds: new Set(), weightRanges: new Set(), hasBreedSpecific: false };
-      saleyardStatsMap.set(p.saleyard, stats);
-    }
-    stats.entries++;
-    if (!stats.newest || p.data_date > stats.newest) stats.newest = p.data_date;
-    if (!stats.oldest || p.data_date < stats.oldest) stats.oldest = p.data_date;
-    stats.categories.add(p.category);
-    if (p.breed) { stats.breeds.add(p.breed); stats.hasBreedSpecific = true; }
-    if (p.weight_range) stats.weightRanges.add(p.weight_range);
-  }
-
-  // Count herds per saleyard
-  const herdSaleyardCounts = new Map<string, number>();
-  for (const h of activeHerds) {
-    if (h.selected_saleyard) {
-      const resolved = resolveMLASaleyardName(h.selected_saleyard);
-      herdSaleyardCounts.set(resolved, (herdSaleyardCounts.get(resolved) ?? 0) + 1);
-    }
-  }
-
-  const saleyardStatsList: SaleyardStats[] = Array.from(saleyardStatsMap.entries())
-    .map(([name, s]) => ({
-      name,
-      totalEntries: s.entries,
-      newestDataDate: s.newest,
-      oldestDataDate: s.oldest,
-      categories: Array.from(s.categories).sort(),
-      breeds: Array.from(s.breeds).sort(),
-      weightRanges: Array.from(s.weightRanges).sort(),
-      hasBreedSpecific: s.hasBreedSpecific,
-      herdsUsing: herdSaleyardCounts.get(name) ?? 0,
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name));
-
   const [{ data: allPrices }, { data: breedPremiumData }] = await Promise.all([
     mlaCategories.length > 0
       ? supabase
@@ -214,7 +158,7 @@ export default async function ValuationPage() {
         title="Valuation Validator"
         subtitle="Full calculation breakdown for every herd. Compare intermediate values to verify correctness."
       />
-      <ValuationValidator herds={herdsWithValuations} priceMaps={serializedMaps} saleyardStats={saleyardStatsList} />
+      <ValuationValidator herds={herdsWithValuations} priceMaps={serializedMaps} />
     </div>
   );
 }
