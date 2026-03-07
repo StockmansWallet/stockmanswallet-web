@@ -12,8 +12,9 @@ import {
 import {
   cattleBreeds, sheepBreeds, pigBreeds, goatBreeds,
   cattleCategories, sheepCategories, pigCategories, goatCategories,
-  saleyards,
+  saleyards, cattleBreedPremiums,
 } from "@/lib/data/reference-data";
+import { mapCategoryToMLACategory } from "@/lib/engines/valuation-engine";
 
 interface Props {
   priceMaps: SerializedPriceMaps;
@@ -49,11 +50,11 @@ export function TestCalculator({ priceMaps }: Props) {
   const [species, setSpecies] = useState<string>("Cattle");
   const [breed, setBreed] = useState("Angus");
   const [category, setCategory] = useState("Yearling Steer");
-  const [headCount, setHeadCount] = useState(100);
+  const [headCount, setHeadCount] = useState(1);
   const [initialWeight, setInitialWeight] = useState(350);
-  const [dwg, setDwg] = useState(0.8);
+  const [dwg, setDwg] = useState(1);
   const [mortalityRate, setMortalityRate] = useState(1);
-  const [daysAgo, setDaysAgo] = useState(90);
+  const [daysAgo, setDaysAgo] = useState(100);
   const [saleyard, setSaleyard] = useState("");
   const [breedPremiumOverride, setBreedPremiumOverride] = useState("");
   const [isBreeder, setIsBreeder] = useState(false);
@@ -69,6 +70,26 @@ export function TestCalculator({ priceMaps }: Props) {
     saleyardBreed: new Map<string, CategoryPriceEntry[]>(Object.entries(priceMaps.saleyardBreed)),
     premium: new Map<string, number>(Object.entries(priceMaps.premium)),
   }), [priceMaps]);
+
+  // Resolve current breed premium from maps (Supabase override > local fallback)
+  const currentBreedPremium = useMemo(() => {
+    const fromMap = maps.premium.get(breed);
+    if (fromMap !== undefined) return fromMap;
+    return cattleBreedPremiums[breed] ?? null;
+  }, [breed, maps.premium]);
+
+  // MLA category + saleyard coverage check
+  const mlaCategory = useMemo(() => mapCategoryToMLACategory(category), [category]);
+
+  const saleyardHasData = useMemo(() => {
+    const result: Record<string, boolean> = {};
+    for (const sy of saleyards) {
+      const generalKey = `${mlaCategory}|${sy}`;
+      const breedKey = `${mlaCategory}|${breed}|${sy}`;
+      result[sy] = maps.saleyard.has(generalKey) || maps.saleyardBreed.has(breedKey);
+    }
+    return result;
+  }, [mlaCategory, breed, maps.saleyard, maps.saleyardBreed]);
 
   // Calculate on every render (pure function, fast)
   const result: HerdValuationResult | null = useMemo(() => {
@@ -137,7 +158,11 @@ export function TestCalculator({ priceMaps }: Props) {
           <Field label="Saleyard">
             <select value={saleyard} onChange={(e) => setSaleyard(e.target.value)} className="input-field">
               <option value="">None (national price)</option>
-              {saleyards.map((s) => <option key={s} value={s}>{s}</option>)}
+              {saleyards.map((s) => (
+                <option key={s} value={s} style={saleyardHasData[s] ? undefined : { color: "rgba(255,255,255,0.25)" }}>
+                  {s}{saleyardHasData[s] ? "" : " (no data)"}
+                </option>
+              ))}
             </select>
           </Field>
           <Field label="Head Count">
@@ -156,7 +181,7 @@ export function TestCalculator({ priceMaps }: Props) {
             <input type="number" step="0.1" value={mortalityRate} onChange={(e) => setMortalityRate(+e.target.value)} className="input-field" />
           </Field>
           <Field label="Breed Premium Override (%)">
-            <input value={breedPremiumOverride} onChange={(e) => setBreedPremiumOverride(e.target.value)} className="input-field" placeholder="Auto" />
+            <input value={breedPremiumOverride} onChange={(e) => setBreedPremiumOverride(e.target.value)} className="input-field" placeholder={currentBreedPremium !== null ? `Auto (${currentBreedPremium}%)` : "Auto (none)"} />
           </Field>
         </div>
 
