@@ -135,7 +135,7 @@ export function HerdsTable({
     return groups;
   }, [sorted, propertyGroups]);
 
-  const hasMultipleGroups = groupedHerds.length > 1 || (groupedHerds.length === 1 && propertyGroups.length > 1);
+  const showPropertyHeaders = propertyGroups.length > 0;
 
   function handleSort(key: SortKey) {
     if (sortKey === key) {
@@ -285,7 +285,7 @@ export function HerdsTable({
             {search ? "No herds match your search." : "No herds found."}
           </p>
         </div>
-      ) : hasMultipleGroups ? (
+      ) : showPropertyHeaders ? (
         <div className="flex flex-col gap-5">
           {groupedHerds.map((group) => {
             const groupHead = group.herds.reduce((s, h) => s + (h.head_count ?? 0), 0);
