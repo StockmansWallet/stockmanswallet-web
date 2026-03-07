@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { Calculator, Loader2 } from "lucide-react";
-import type { SerializedPriceMaps, SaleyardCoverage } from "./page";
+import type { SerializedPriceMaps, SaleyardCoverage, HerdWithValuation } from "./page";
 import {
   calculateHerdValuation,
   type HerdForValuation,
@@ -19,6 +19,9 @@ import { mapCategoryToMLACategory } from "@/lib/engines/valuation-engine";
 interface Props {
   priceMaps: SerializedPriceMaps;
   saleyardCoverage: SaleyardCoverage[];
+  herds: HerdWithValuation[];
+  prefillHerdId?: string | null;
+  onClearPrefill?: () => void;
 }
 
 const speciesOptions = ["Cattle", "Sheep", "Pig", "Goat"] as const;
@@ -46,7 +49,7 @@ function fmtCents(n: number): string {
   return `$${n.toLocaleString("en-AU", { minimumFractionDigits: 4, maximumFractionDigits: 4 })}`;
 }
 
-export function TestCalculator({ priceMaps, saleyardCoverage }: Props) {
+export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerdId, onClearPrefill }: Props) {
   // Form state
   const [species, setSpecies] = useState<string>("Cattle");
   const [breed, setBreed] = useState("Angus");
@@ -63,6 +66,35 @@ export function TestCalculator({ priceMaps, saleyardCoverage }: Props) {
   const [breedingProgram, setBreedingProgram] = useState<string>("uncontrolled");
   const [calvingRate, setCalvingRate] = useState(85);
   const [joinedDaysAgo, setJoinedDaysAgo] = useState(120);
+  const [prefillName, setPrefillName] = useState<string | null>(null);
+
+  // Pre-fill from herd when navigated from the breakdown table
+  useEffect(() => {
+    if (!prefillHerdId) return;
+    const h = herds.find((x) => x.id === prefillHerdId);
+    if (!h) return;
+    setSpecies(h.species);
+    setBreed(h.breed);
+    setCategory(h.category);
+    setHeadCount(h.head_count);
+    setInitialWeight(h.initial_weight);
+    setDwg(h.daily_weight_gain);
+    setMortalityRate((h.mortality_rate ?? 0.01) * 100);
+    const days = Math.max(0, Math.floor((Date.now() - new Date(h.created_at).getTime()) / 86400000));
+    setDaysAgo(days);
+    setSaleyard(h.selected_saleyard ?? "");
+    setBreedPremiumOverride(h.breed_premium_override != null ? String(h.breed_premium_override) : "");
+    setIsBreeder(h.is_breeder);
+    setIsPregnant(h.is_pregnant);
+    if (h.breeding_program_type) setBreedingProgram(h.breeding_program_type);
+    setCalvingRate((h.calving_rate ?? 0.85) * 100);
+    if (h.joined_date) {
+      const jDays = Math.max(0, Math.floor((Date.now() - new Date(h.joined_date).getTime()) / 86400000));
+      setJoinedDaysAgo(jDays);
+    }
+    setPrefillName(h.name);
+    onClearPrefill?.();
+  }, [prefillHerdId, herds, onClearPrefill]);
 
   // Premium map from server (always available)
   const premiumMap = useMemo(
@@ -202,7 +234,50 @@ export function TestCalculator({ priceMaps, saleyardCoverage }: Props) {
         <div className="flex items-center gap-2 mb-1">
           <Calculator className="h-4 w-4 text-brand" />
           <h3 className="text-sm font-semibold text-text-primary">Test Herd Inputs</h3>
+          {prefillName && (
+            <span className="ml-auto text-[10px] text-brand font-medium">
+              Loaded: {prefillName}
+            </span>
+          )}
         </div>
+        {herds.length > 0 && (
+          <div>
+            <label className="block text-[10px] font-medium text-text-muted mb-1">Load from herd</label>
+            <select
+              value=""
+              onChange={(e) => {
+                const h = herds.find((x) => x.id === e.target.value);
+                if (!h) return;
+                setSpecies(h.species);
+                setBreed(h.breed);
+                setCategory(h.category);
+                setHeadCount(h.head_count);
+                setInitialWeight(h.initial_weight);
+                setDwg(h.daily_weight_gain);
+                setMortalityRate((h.mortality_rate ?? 0.01) * 100);
+                const days = Math.max(0, Math.floor((Date.now() - new Date(h.created_at).getTime()) / 86400000));
+                setDaysAgo(days);
+                setSaleyard(h.selected_saleyard ?? "");
+                setBreedPremiumOverride(h.breed_premium_override != null ? String(h.breed_premium_override) : "");
+                setIsBreeder(h.is_breeder);
+                setIsPregnant(h.is_pregnant);
+                if (h.breeding_program_type) setBreedingProgram(h.breeding_program_type);
+                setCalvingRate((h.calving_rate ?? 0.85) * 100);
+                if (h.joined_date) {
+                  const jDays = Math.max(0, Math.floor((Date.now() - new Date(h.joined_date).getTime()) / 86400000));
+                  setJoinedDaysAgo(jDays);
+                }
+                setPrefillName(h.name);
+              }}
+              className="input-field"
+            >
+              <option value="">Select a herd...</option>
+              {herds.map((h) => (
+                <option key={h.id} value={h.id}>{h.name} ({h.breed}, {h.category})</option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-3">
           <Field label="Species">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import type { HerdWithValuation, SerializedPriceMaps, SaleyardCoverage } from "./page";
 import { LogicPanel } from "./logic-panel";
 import { ValuationTable } from "./valuation-table";
@@ -15,6 +15,12 @@ interface Props {
 
 export function ValuationValidator({ herds, priceMaps, saleyardCoverage }: Props) {
   const [activeTab, setActiveTab] = useState<"table" | "calculator" | "saleyards">("table");
+  const [prefillHerdId, setPrefillHerdId] = useState<string | null>(null);
+
+  const handleTestHerd = useCallback((herdId: string) => {
+    setPrefillHerdId(herdId);
+    setActiveTab("calculator");
+  }, []);
 
   const totalNetValue = herds.reduce((sum, h) => sum + h.valuation.netValue, 0);
   const totalHead = herds.reduce((sum, h) => sum + (h.head_count ?? 0), 0);
@@ -56,8 +62,16 @@ export function ValuationValidator({ herds, priceMaps, saleyardCoverage }: Props
         </TabButton>
       </div>
 
-      {activeTab === "table" && <ValuationTable herds={herds} />}
-      {activeTab === "calculator" && <TestCalculator priceMaps={priceMaps} saleyardCoverage={saleyardCoverage} />}
+      {activeTab === "table" && <ValuationTable herds={herds} onTestHerd={handleTestHerd} />}
+      {activeTab === "calculator" && (
+        <TestCalculator
+          priceMaps={priceMaps}
+          saleyardCoverage={saleyardCoverage}
+          herds={herds}
+          prefillHerdId={prefillHerdId}
+          onClearPrefill={() => setPrefillHerdId(null)}
+        />
+      )}
       {activeTab === "saleyards" && <SaleyardStatus />}
     </div>
   );

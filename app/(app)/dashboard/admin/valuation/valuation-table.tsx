@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { Download, ArrowUpDown, ChevronDown, ChevronRight } from "lucide-react";
+import { Download, ArrowUpDown, ChevronDown, ChevronRight, FlaskConical } from "lucide-react";
 import type { HerdWithValuation } from "./page";
 
 type SortKey = "name" | "netValue" | "physicalValue" | "projectedWeight" | "pricePerKg" | "head_count" | "daysHeld";
@@ -11,6 +11,7 @@ const speciesFilters = ["All", "Cattle", "Sheep", "Pig", "Goat"] as const;
 
 interface Props {
   herds: HerdWithValuation[];
+  onTestHerd?: (herdId: string) => void;
 }
 
 function fmt(n: number, decimals = 0): string {
@@ -30,7 +31,7 @@ function fmtPct(n: number): string {
   return `${n > 0 ? "+" : ""}${fmt(n, 1)}%`;
 }
 
-export function ValuationTable({ herds }: Props) {
+export function ValuationTable({ herds, onTestHerd }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [speciesFilter, setSpeciesFilter] = useState<string>("All");
@@ -198,6 +199,15 @@ export function ValuationTable({ herds }: Props) {
                       <span className="flex items-center gap-1">
                         {isExpanded ? <ChevronDown className="h-3 w-3 text-text-muted" /> : <ChevronRight className="h-3 w-3 text-text-muted" />}
                         {h.name}
+                        {onTestHerd && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onTestHerd(h.id); }}
+                            className="ml-1 rounded p-0.5 text-text-muted hover:text-brand hover:bg-white/[0.06] transition-colors"
+                            title="Test in calculator"
+                          >
+                            <FlaskConical className="h-3 w-3" />
+                          </button>
+                        )}
                       </span>
                     </Td>
                     <Td>{h.breed}</Td>
