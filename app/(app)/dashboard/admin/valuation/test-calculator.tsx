@@ -389,8 +389,8 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
 
           {/* Breakdown cards */}
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            <MiniCard label="Physical Value" value={fmtDollar(result.physicalValue)} />
-            <MiniCard label="Base MV" value={fmtDollar(result.baseMarketValue)} />
+            <MiniCard label="Physical Value (at projected wt)" value={fmtDollar(result.physicalValue)} />
+            <MiniCard label="Base Market Value (at initial wt)" value={fmtDollar(result.baseMarketValue)} />
             <MiniCard label="WG Accrual" value={fmtDollar(result.weightGainAccrual)} color="emerald" />
             <MiniCard label="Mortality" value={result.mortalityDeduction > 0 ? `-${fmtDollar(result.mortalityDeduction)}` : "-"} color="red" />
             <MiniCard label="Breeding Accrual" value={result.breedingAccrual > 0 ? fmtDollar(result.breedingAccrual) : "-"} color="sky" />

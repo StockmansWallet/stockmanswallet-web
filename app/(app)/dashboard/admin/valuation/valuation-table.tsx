@@ -176,7 +176,7 @@ export function ValuationTable({ herds, onTestHerd }: Props) {
               <Th>Premium</Th>
               <SortTh sortKey="pricePerKg" currentKey={sortKey} dir={sortDir} onSort={toggleSort}>Adj $/kg</SortTh>
 
-              <Th>Base MV</Th>
+              <Th>Base Market Val</Th>
               <Th>WG Accrual</Th>
               <SortTh sortKey="physicalValue" currentKey={sortKey} dir={sortDir} onSort={toggleSort}>Physical</SortTh>
               <Th>Breeding</Th>
