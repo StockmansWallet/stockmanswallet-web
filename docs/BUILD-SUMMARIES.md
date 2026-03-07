@@ -2,6 +2,20 @@
 
 ## 7 Mar 2026
 
+### UI Polish - Filter Pills, Icons, Colours, Layout
+* Unified filter pills across app to `rounded-full` with no stroke (matching Yard Book)
+* Tool page icon colours now match iOS: lime (Yard Book), sky (Freight IQ), amber (Reports), teal (Grid IQ)
+* Replaced PawPrint icons with custom IconCattleTags SVG in Yard Book form, run sheet, and detail
+* Rewrote dashboard skeleton loader to match current two-column dashboard layout
+* Reordered herds table columns: HEAD / NAME / BREED / CATEGORY / $/KG / WEIGHT / VALUE
+* Added new $/kg column to herds list using valuation engine output
+* Herd detail page changed from CSS grid to two independent flex columns (matching iOS)
+
+### Property Header Always Visible
+* Property group heading now shows even with a single property (was only shown for 2+)
+
+---
+
 ### Valuation Engine - Stale Weight Bracket Fix
 * Fixed valuations using stale pricing from old MLA data uploads when the current data doesn't have a matching weight bracket (e.g. "400+" existed in Dec 2025 but not Mar 2026)
 * Price resolution now uses only the newest date's brackets, clamping to nearest when no exact match

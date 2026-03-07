@@ -1,18 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import type { HerdWithValuation, SerializedPriceMaps } from "./page";
+import type { HerdWithValuation, SerializedPriceMaps, SaleyardStats } from "./page";
 import { LogicPanel } from "./logic-panel";
 import { ValuationTable } from "./valuation-table";
 import { TestCalculator } from "./test-calculator";
+import { SaleyardStatus } from "./saleyard-status";
 
 interface Props {
   herds: HerdWithValuation[];
   priceMaps: SerializedPriceMaps;
+  saleyardStats: SaleyardStats[];
 }
 
-export function ValuationValidator({ herds, priceMaps }: Props) {
-  const [activeTab, setActiveTab] = useState<"table" | "calculator">("table");
+export function ValuationValidator({ herds, priceMaps, saleyardStats }: Props) {
+  const [activeTab, setActiveTab] = useState<"table" | "calculator" | "saleyards">("table");
 
   const totalNetValue = herds.reduce((sum, h) => sum + h.valuation.netValue, 0);
   const totalHead = herds.reduce((sum, h) => sum + (h.head_count ?? 0), 0);
@@ -49,13 +51,14 @@ export function ValuationValidator({ herds, priceMaps }: Props) {
         <TabButton active={activeTab === "calculator"} onClick={() => setActiveTab("calculator")}>
           Test Calculator
         </TabButton>
+        <TabButton active={activeTab === "saleyards"} onClick={() => setActiveTab("saleyards")}>
+          Saleyard Status
+        </TabButton>
       </div>
 
-      {activeTab === "table" ? (
-        <ValuationTable herds={herds} />
-      ) : (
-        <TestCalculator priceMaps={priceMaps} />
-      )}
+      {activeTab === "table" && <ValuationTable herds={herds} />}
+      {activeTab === "calculator" && <TestCalculator priceMaps={priceMaps} />}
+      {activeTab === "saleyards" && <SaleyardStatus stats={saleyardStats} />}
     </div>
   );
 }

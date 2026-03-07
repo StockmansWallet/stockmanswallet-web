@@ -4,6 +4,33 @@
 
 ## 7 Mar 2026
 
+### UI Polish - Filter Pills, Icons, Colours, Layout
+
+Unified filter pill styling across the app to use `rounded-full` with no stroke, matching the Yard Book reference. Updated tool page icon colours to match iOS (lime for Yard Book, sky for Freight IQ, amber for Reports, teal for Grid IQ). Replaced PawPrint livestock icons with the custom IconCattleTags SVG component across Yard Book form, run sheet, and detail page.
+
+Rewrote the dashboard skeleton loader to match the current dashboard layout (two-column with Portfolio Value, 12-Month Outlook, Herd Composition, Largest Herds on the left and User Profile, Quick Actions, Coming Up, Properties, Growth & Mortality on the right).
+
+Reordered herds list table columns to: HEAD / NAME / BREED / CATEGORY / $/KG / WEIGHT / VALUE. Added a new $/kg column using the valuation engine's `pricePerKg` output. Changed the herd detail page from CSS grid to two independent flex columns that size independently (matching the iOS layout).
+
+**Files changed:**
+- `app/(app)/dashboard/herds/herds-table.tsx` - Reordered columns, added $/kg column and `price_per_kg` sort key, changed filter pills to rounded-full
+- `app/(app)/dashboard/herds/page.tsx` - Added `herdPricePerKgObj` computation, passes to HerdsTable
+- `app/(app)/dashboard/herds/[id]/page.tsx` - Changed from grid to two independent flex columns
+- `app/(app)/dashboard/loading.tsx` - Complete rewrite to match current dashboard layout
+- `app/(app)/dashboard/tools/page.tsx` - Added per-tool `iconBg` and `iconText` colour properties
+- `components/app/yard-book-form.tsx` - Replaced PawPrint with IconCattleTags, rounded-full pills
+- `components/app/yard-book-run-sheet.tsx` - Replaced PawPrint with IconCattleTags
+- `app/(app)/dashboard/tools/yard-book/[id]/page.tsx` - Replaced PawPrint with IconCattleTags
+
+### Property Header Always Visible
+
+Changed the herds list to show property group headings even when only one property exists. Previously the property header (with icon, name, head count and value) was only shown when the user had multiple properties. Now it shows whenever at least one property exists, giving consistent visual structure.
+
+**Files changed:**
+- `app/(app)/dashboard/herds/herds-table.tsx` - Changed `showPropertyHeaders` condition from `propertyGroups.length > 1` to `propertyGroups.length > 0`
+
+---
+
 ### Valuation Engine - Stale Weight Bracket Fix
 
 Fixed a critical valuation bug where weights above the highest bracket in the current MLA data (e.g. 400+ kg) would fall back to stale pricing from older data uploads instead of clamping to the nearest available bracket on the current date. This caused incorrect valuations, for example an Angus Yearling Steer at Charters Towers showing $4.51/kg (stale Dec 2025 "400+" data) instead of $4.13/kg (current Mar 2026 "330-400" bracket + 9% Angus breed premium).
