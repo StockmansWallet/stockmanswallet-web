@@ -167,7 +167,7 @@ export function TestCalculator({ priceMaps, saleyardCoverage }: Props) {
               <option value="">None (national price)</option>
               {sortedSaleyards.map((s) => (
                 <option key={s} value={s}>
-                  {saleyardHasData[s] ? `● ${s}` : `○ ${s} (no data)`}
+                  {saleyardHasData[s] ? `✓ ${s}` : `✗ ${s} (no data)`}
                 </option>
               ))}
             </select>
