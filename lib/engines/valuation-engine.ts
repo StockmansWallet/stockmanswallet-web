@@ -271,12 +271,10 @@ export interface CategoryPriceEntry {
 /**
  * Resolves the best price from a list of CategoryPriceEntry for a given projected weight.
  *
- * Step 1: Find all candidate brackets the weight fits into (inclusive bounds).
- * Step 2: Walk dates from newest to oldest. First date with any candidate bracket wins.
- *   - Boundary weight (multiple candidates): use upper bracket only if BOTH exist
- *     on the same date. If only one exists, use it.
- *   - Non-boundary weight (single candidate): use it if data exists on this date.
- * Fallback: clamp to nearest bracket on the newest date, then any-weight entries.
+ * Uses the newest date's brackets only. If the weight fits a bracket on that date, use it.
+ * If the weight is on a boundary (e.g. exactly 400 matching both "330-400" and "400+"),
+ * prefer the upper bracket. If no bracket fits on the newest date, clamp to nearest.
+ * Never fall back to stale dates - brackets may not exist in newer data.
  */
 function resolvePriceFromEntries(
   entries: CategoryPriceEntry[],
@@ -284,67 +282,36 @@ function resolvePriceFromEntries(
 ): number | null {
   if (entries.length === 0) return null;
 
-  // Collect all unique weight ranges across all entries
-  const allRanges = [...new Set(
-    entries.map((e) => e.weight_range).filter((r): r is string => r !== null)
+  // Find the newest date with data
+  const dates = [...new Set(
+    entries.filter((e) => e.data_date).map((e) => e.data_date as string)
+  )].sort((a, b) => b.localeCompare(a));
+
+  const newestDate = dates[0] ?? null;
+
+  // Work with newest-date entries (or all entries if none have dates)
+  const relevantEntries = newestDate
+    ? entries.filter((e) => e.data_date === newestDate)
+    : entries;
+
+  const availableRanges = [...new Set(
+    relevantEntries.map((e) => e.weight_range).filter((r): r is string => r !== null)
   )];
 
-  // Step 1: find candidate brackets from the full set of known ranges
-  const candidates = findCandidateBrackets(projectedWeight, allRanges);
-  const isBoundary = candidates.length > 1;
-
-  if (candidates.length > 0) {
-    // Step 2: walk dates newest-first, find the first date with candidate data
-    const dates = [...new Set(
-      entries.filter((e) => e.data_date).map((e) => e.data_date as string)
-    )].sort((a, b) => b.localeCompare(a));
-
-    for (const date of dates) {
-      const dateEntries = entries.filter((e) => e.data_date === date);
-      const dateRanges = new Set(
-        dateEntries.map((e) => e.weight_range).filter((r): r is string => r !== null)
-      );
-
-      // Which candidates exist on this date?
-      const available = candidates.filter((c) => dateRanges.has(c));
-      if (available.length === 0) continue;
-
-      let selectedRange: string;
-      if (isBoundary && available.length > 1) {
-        // Both brackets exist on this date - prefer upper (open-ended) bracket
-        selectedRange = available.find((r) => r.endsWith("+")) ?? available[available.length - 1];
-      } else {
-        // Single candidate or only one of multiple candidates exists - use it
-        selectedRange = available[0];
-      }
-
-      const match = dateEntries.find((e) => e.weight_range === selectedRange);
-      if (match) return match.price_per_kg;
-    }
-
-    // No dated entries had candidate data - try undated entries
-    const undated = entries.filter((e) => !e.data_date);
-    for (const c of candidates) {
-      const match = undated.find((e) => e.weight_range === c);
-      if (match) return match.price_per_kg;
-    }
-  }
-
-  // No candidate brackets matched at all - clamp to nearest on newest date
-  const newestDate = entries.find((e) => e.data_date)?.data_date ?? null;
-  const newestRanges = newestDate
-    ? [...new Set(entries.filter((e) => e.data_date === newestDate).map((e) => e.weight_range).filter((r): r is string => r !== null))]
-    : allRanges;
-  const clamped = clampToNearestBracket(projectedWeight, newestRanges);
-  if (clamped) {
-    const match = entries.find((e) => e.weight_range === clamped && (!newestDate || e.data_date === newestDate));
+  // Try exact bracket match (with boundary preference for upper bracket)
+  const matched = matchWeightRange(projectedWeight, availableRanges);
+  if (matched) {
+    const match = relevantEntries.find((e) => e.weight_range === matched);
     if (match) return match.price_per_kg;
   }
 
   // Final fallback: any-weight entries (weight_range is null)
-  const nullRange = entries.filter((e) => e.weight_range === null);
+  const nullRange = relevantEntries.filter((e) => e.weight_range === null);
   if (nullRange.length > 0) return Math.max(...nullRange.map((e) => e.price_per_kg));
-  return Math.max(...entries.map((e) => e.price_per_kg));
+
+  // Absolute fallback: max price from relevant entries
+  if (relevantEntries.length > 0) return Math.max(...relevantEntries.map((e) => e.price_per_kg));
+  return null;
 }
 
 // MARK: - Detailed Valuation Result
