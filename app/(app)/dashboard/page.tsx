@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HerdComposition } from "./herd-composition";
 import { PortfolioChart } from "./portfolio-chart";
-import { calculateHerdValuation, mapCategoryToMLACategory } from "@/lib/engines/valuation-engine";
+import { calculateHerdValuation, mapCategoryToMLACategory, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 import { UserProfileCard } from "@/components/app/user-profile-card";
 import { PortfolioValueCard } from "@/components/app/portfolio-value-card";
@@ -78,12 +78,12 @@ export default async function DashboardPage() {
   const { data: allPrices } = mlaCategories.length > 0
     ? await supabase
         .from("category_prices")
-        .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed")
+        .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
         .in("saleyard", saleyardsToFetch)
         .in("category", mlaCategories)
         .order("data_date", { ascending: false })
         .limit(50000)
-    : { data: [] as { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null }[] };
+    : { data: [] as { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string }[] };
 
   const activeHerds = herds ?? [];
   const totalHead = activeHerds.reduce((sum, h) => sum + (h.head_count ?? 0), 0);
@@ -91,11 +91,11 @@ export default async function DashboardPage() {
   const propertyCount = properties?.length ?? 0;
 
   // Build pricing lookup maps from combined result (same keys as iOS cache)
-  const nationalPriceMap = new Map<string, { price_per_kg: number; weight_range: string | null }[]>();
-  const saleyardPriceMap = new Map<string, { price_per_kg: number; weight_range: string | null }[]>();
-  const saleyardBreedPriceMap = new Map<string, { price_per_kg: number; weight_range: string | null }[]>();
+  const nationalPriceMap = new Map<string, CategoryPriceEntry[]>();
+  const saleyardPriceMap = new Map<string, CategoryPriceEntry[]>();
+  const saleyardBreedPriceMap = new Map<string, CategoryPriceEntry[]>();
   for (const p of (allPrices ?? [])) {
-    const priceEntry = { price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range };
+    const priceEntry = { price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date };
     if (p.saleyard === "National" && p.breed === null) {
       const entries = nationalPriceMap.get(p.category) ?? [];
       entries.push(priceEntry);

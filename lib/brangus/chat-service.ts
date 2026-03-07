@@ -416,7 +416,7 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
     // (PostgREST default 1000-row limit would truncate unfiltered query on 345k+ rows)
     supabase
       .from("category_prices")
-      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed")
+      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
       .eq("saleyard", "National")
       .is("breed", null),
     supabase
@@ -428,11 +428,11 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
   const nationalPriceMap = new Map<string, CategoryPriceEntry[]>();
   const saleyardPriceMap = new Map<string, CategoryPriceEntry[]>();
   const saleyardBreedPriceMap = new Map<string, CategoryPriceEntry[]>();
-  const categoryPricesRaw = (nationalPrices ?? []) as { category: string; price_per_kg: number; weight_range: string | null; saleyard: string | null; breed: string | null }[];
+  const categoryPricesRaw = (nationalPrices ?? []) as { category: string; price_per_kg: number; weight_range: string | null; saleyard: string | null; breed: string | null; data_date: string }[];
 
   for (const p of categoryPricesRaw) {
     const entries = nationalPriceMap.get(p.category) ?? [];
-    entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
+    entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date });
     nationalPriceMap.set(p.category, entries);
   }
 
@@ -444,19 +444,19 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
   if (saleyards.length > 0 && mlaCategories.length > 0) {
     const { data: saleyardPricesData } = await supabase
       .from("category_prices")
-      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed")
+      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
       .in("saleyard", saleyards)
       .in("category", mlaCategories);
-    for (const p of (saleyardPricesData ?? []) as { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null }[]) {
+    for (const p of (saleyardPricesData ?? []) as { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string }[]) {
       if (p.breed === null) {
         const key = `${p.category}|${p.saleyard}`;
         const entries = saleyardPriceMap.get(key) ?? [];
-        entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
+        entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date });
         saleyardPriceMap.set(key, entries);
       } else {
         const key = `${p.category}|${p.breed}|${p.saleyard}`;
         const entries = saleyardBreedPriceMap.get(key) ?? [];
-        entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range });
+        entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date });
         saleyardBreedPriceMap.set(key, entries);
       }
     }

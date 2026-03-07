@@ -105,7 +105,7 @@ export default async function HerdDetailPage({
 
   const { data: allPrices } = await supabase
     .from("category_prices")
-    .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed")
+    .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
     .in("saleyard", saleyardsToFetch)
     .eq("category", mlaCategory)
     .order("data_date", { ascending: false })
@@ -121,7 +121,7 @@ export default async function HerdDetailPage({
   }
 
   for (const p of (allPrices ?? [])) {
-    const priceEntry = { price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range };
+    const priceEntry = { price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date };
     if (p.saleyard === "National" && p.breed === null) {
       const entries = nationalPriceMap.get(p.category) ?? [];
       entries.push(priceEntry);

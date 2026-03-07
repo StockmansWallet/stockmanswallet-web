@@ -87,29 +87,35 @@ export function calculateMortalityDeduction(
 // MARK: - Weight Range Matching
 
 /**
- * Determines which MLA weight bracket a given weight falls into.
- * MLA weight ranges: "200-280", "280-330", "330-400", "400+", etc.
- * Out-of-range weights clamp to nearest bracket (spec Section 1.3 Rule 3).
+ * Returns ALL weight brackets that a given weight could fit into (inclusive bounds).
+ * Ranged brackets (e.g. "330-400"): lower <= weight <= upper
+ * Open-ended brackets (e.g. "400+"): weight >= lower
+ * A boundary weight like 400 can match both "330-400" and "400+".
  */
-export function matchWeightRange(weight: number, availableRanges: string[]): string | null {
-  // First pass: exact bracket match
+export function findCandidateBrackets(weight: number, availableRanges: string[]): string[] {
+  const candidates: string[] = [];
   for (const range of availableRanges) {
     if (range.endsWith("+")) {
       const min = parseFloat(range.slice(0, -1));
-      if (!isNaN(min) && weight >= min) return range;
+      if (!isNaN(min) && weight >= min) candidates.push(range);
     } else if (range.includes("-")) {
       const parts = range.split("-");
       if (parts.length === 2) {
         const min = parseFloat(parts[0]);
         const max = parseFloat(parts[1]);
-        if (!isNaN(min) && !isNaN(max) && weight >= min && weight < max) return range;
+        if (!isNaN(min) && !isNaN(max) && weight >= min && weight <= max) candidates.push(range);
       }
     }
   }
+  return candidates;
+}
 
-  // Second pass: clamp to nearest bracket
+/**
+ * Clamps to the nearest bracket when no candidate brackets exist.
+ * Used as a last resort when the weight falls outside all available ranges.
+ */
+export function clampToNearestBracket(weight: number, availableRanges: string[]): string | null {
   if (availableRanges.length === 0) return null;
-
   let nearestRange: string | null = null;
   let smallestDistance = Infinity;
 
@@ -129,7 +135,7 @@ export function matchWeightRange(weight: number, availableRanges: string[]): str
         const min = parseFloat(parts[0]);
         const max = parseFloat(parts[1]);
         if (!isNaN(min) && !isNaN(max)) {
-          const distance = weight < min ? min - weight : weight - max;
+          const distance = weight < min ? min - weight : Math.max(0, weight - max);
           if (distance < smallestDistance) {
             smallestDistance = distance;
             nearestRange = range;
@@ -140,6 +146,19 @@ export function matchWeightRange(weight: number, availableRanges: string[]): str
   }
 
   return nearestRange;
+}
+
+/**
+ * Backward-compatible wrapper. Returns the single best bracket match.
+ */
+export function matchWeightRange(weight: number, availableRanges: string[]): string | null {
+  const candidates = findCandidateBrackets(weight, availableRanges);
+  if (candidates.length === 1) return candidates[0];
+  if (candidates.length > 1) {
+    // Prefer open-ended bracket on boundary (e.g. "400+" over "330-400")
+    return candidates.find((r) => r.endsWith("+")) ?? candidates[0];
+  }
+  return clampToNearestBracket(weight, availableRanges);
 }
 
 // MARK: - Default Fallback Prices
@@ -246,36 +265,83 @@ export interface HerdForValuation {
 export interface CategoryPriceEntry {
   price_per_kg: number;
   weight_range: string | null;
+  data_date?: string;
 }
 
 /**
  * Resolves the best price from a list of CategoryPriceEntry for a given projected weight.
- * Tries weight-range match first, then falls back to any-weight entry.
  *
- * Multiple entries per weight range are common (one per MLA sale date).
- * Query orders by data_date DESC, so the FIRST entry for each weight range
- * is the most recent price. Use that for valuation.
- * For fallback keys (no weight range), keep the highest price.
+ * Step 1: Find all candidate brackets the weight fits into (inclusive bounds).
+ * Step 2: Walk dates from newest to oldest. First date with any candidate bracket wins.
+ *   - Boundary weight (multiple candidates): use upper bracket only if BOTH exist
+ *     on the same date. If only one exists, use it.
+ *   - Non-boundary weight (single candidate): use it if data exists on this date.
+ * Fallback: clamp to nearest bracket on the newest date, then any-weight entries.
  */
 function resolvePriceFromEntries(
   entries: CategoryPriceEntry[],
   projectedWeight: number
 ): number | null {
   if (entries.length === 0) return null;
-  const weightRanges = entries
-    .map((e) => e.weight_range)
-    .filter((r): r is string => r !== null);
-  const matchedRange =
-    weightRanges.length > 0 ? matchWeightRange(projectedWeight, weightRanges) : null;
 
-  if (matchedRange) {
-    // Take the FIRST entry for the matched weight range (most recent date,
-    // since query orders by data_date DESC).
-    const matched = entries.filter((e) => e.weight_range === matchedRange);
-    if (matched.length > 0) return matched[0].price_per_kg;
+  // Collect all unique weight ranges across all entries
+  const allRanges = [...new Set(
+    entries.map((e) => e.weight_range).filter((r): r is string => r !== null)
+  )];
+
+  // Step 1: find candidate brackets from the full set of known ranges
+  const candidates = findCandidateBrackets(projectedWeight, allRanges);
+  const isBoundary = candidates.length > 1;
+
+  if (candidates.length > 0) {
+    // Step 2: walk dates newest-first, find the first date with candidate data
+    const dates = [...new Set(
+      entries.filter((e) => e.data_date).map((e) => e.data_date as string)
+    )].sort((a, b) => b.localeCompare(a));
+
+    for (const date of dates) {
+      const dateEntries = entries.filter((e) => e.data_date === date);
+      const dateRanges = new Set(
+        dateEntries.map((e) => e.weight_range).filter((r): r is string => r !== null)
+      );
+
+      // Which candidates exist on this date?
+      const available = candidates.filter((c) => dateRanges.has(c));
+      if (available.length === 0) continue;
+
+      let selectedRange: string;
+      if (isBoundary && available.length > 1) {
+        // Both brackets exist on this date - prefer upper (open-ended) bracket
+        selectedRange = available.find((r) => r.endsWith("+")) ?? available[available.length - 1];
+      } else {
+        // Single candidate or only one of multiple candidates exists - use it
+        selectedRange = available[0];
+      }
+
+      const match = dateEntries.find((e) => e.weight_range === selectedRange);
+      if (match) return match.price_per_kg;
+    }
+
+    // No dated entries had candidate data - try undated entries
+    const undated = entries.filter((e) => !e.data_date);
+    for (const c of candidates) {
+      const match = undated.find((e) => e.weight_range === c);
+      if (match) return match.price_per_kg;
+    }
   }
 
-  // Fallback: no weight range match - take the HIGHEST price
+  // No candidate brackets matched at all - clamp to nearest on newest date
+  const newestDate = entries.find((e) => e.data_date)?.data_date ?? null;
+  const newestRanges = newestDate
+    ? [...new Set(entries.filter((e) => e.data_date === newestDate).map((e) => e.weight_range).filter((r): r is string => r !== null))]
+    : allRanges;
+  const clamped = clampToNearestBracket(projectedWeight, newestRanges);
+  if (clamped) {
+    const match = entries.find((e) => e.weight_range === clamped && (!newestDate || e.data_date === newestDate));
+    if (match) return match.price_per_kg;
+  }
+
+  // Final fallback: any-weight entries (weight_range is null)
   const nullRange = entries.filter((e) => e.weight_range === null);
   if (nullRange.length > 0) return Math.max(...nullRange.map((e) => e.price_per_kg));
   return Math.max(...entries.map((e) => e.price_per_kg));
