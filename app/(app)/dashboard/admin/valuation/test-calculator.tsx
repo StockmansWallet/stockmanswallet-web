@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Calculator } from "lucide-react";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { Calculator, Loader2 } from "lucide-react";
 import type { SerializedPriceMaps, SaleyardCoverage } from "./page";
 import {
   calculateHerdValuation,
@@ -64,20 +64,83 @@ export function TestCalculator({ priceMaps, saleyardCoverage }: Props) {
   const [calvingRate, setCalvingRate] = useState(85);
   const [joinedDaysAgo, setJoinedDaysAgo] = useState(120);
 
-  // Reconstruct Maps from serialized data
-  const maps = useMemo(() => ({
-    national: new Map<string, CategoryPriceEntry[]>(Object.entries(priceMaps.national)),
-    saleyard: new Map<string, CategoryPriceEntry[]>(Object.entries(priceMaps.saleyard)),
-    saleyardBreed: new Map<string, CategoryPriceEntry[]>(Object.entries(priceMaps.saleyardBreed)),
-    premium: new Map<string, number>(Object.entries(priceMaps.premium)),
-  }), [priceMaps]);
+  // Premium map from server (always available)
+  const premiumMap = useMemo(
+    () => new Map<string, number>(Object.entries(priceMaps.premium)),
+    [priceMaps.premium],
+  );
+
+  // On-demand price fetching for selected saleyard
+  const [fetchedPrices, setFetchedPrices] = useState<{
+    saleyard: string;
+    national: Map<string, CategoryPriceEntry[]>;
+    sy: Map<string, CategoryPriceEntry[]>;
+    syBreed: Map<string, CategoryPriceEntry[]>;
+  } | null>(null);
+  const [priceLoading, setPriceLoading] = useState(false);
+
+  const fetchPrices = useCallback((sy: string) => {
+    if (!sy) { setFetchedPrices(null); return; }
+    setPriceLoading(true);
+    fetch(`/api/admin/saleyard-prices?saleyard=${encodeURIComponent(sy)}`)
+      .then((res) => res.json())
+      .then((rows: { category: string; final_price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string }[]) => {
+        const national = new Map<string, CategoryPriceEntry[]>();
+        const syMap = new Map<string, CategoryPriceEntry[]>();
+        const syBreed = new Map<string, CategoryPriceEntry[]>();
+        for (const p of rows) {
+          const entry: CategoryPriceEntry = { price_per_kg: p.final_price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date };
+          if (p.saleyard === "National" && !p.breed) {
+            const arr = national.get(p.category) ?? [];
+            arr.push(entry);
+            national.set(p.category, arr);
+          } else if (p.saleyard !== "National") {
+            if (!p.breed) {
+              const key = `${p.category}|${p.saleyard}`;
+              const arr = syMap.get(key) ?? [];
+              arr.push(entry);
+              syMap.set(key, arr);
+            } else {
+              const key = `${p.category}|${p.breed}|${p.saleyard}`;
+              const arr = syBreed.get(key) ?? [];
+              arr.push(entry);
+              syBreed.set(key, arr);
+            }
+          }
+        }
+        setFetchedPrices({ saleyard: sy, national, sy: syMap, syBreed });
+      })
+      .finally(() => setPriceLoading(false));
+  }, []);
+
+  useEffect(() => {
+    fetchPrices(saleyard);
+  }, [saleyard, fetchPrices]);
+
+  // Active price maps: use fetched data for selected saleyard, or server-provided for user's herds
+  const maps = useMemo(() => {
+    if (fetchedPrices && fetchedPrices.saleyard === saleyard) {
+      return {
+        national: fetchedPrices.national,
+        saleyard: fetchedPrices.sy,
+        saleyardBreed: fetchedPrices.syBreed,
+        premium: premiumMap,
+      };
+    }
+    return {
+      national: new Map<string, CategoryPriceEntry[]>(Object.entries(priceMaps.national)),
+      saleyard: new Map<string, CategoryPriceEntry[]>(Object.entries(priceMaps.saleyard)),
+      saleyardBreed: new Map<string, CategoryPriceEntry[]>(Object.entries(priceMaps.saleyardBreed)),
+      premium: premiumMap,
+    };
+  }, [fetchedPrices, saleyard, priceMaps, premiumMap]);
 
   // Resolve current breed premium from maps (Supabase override > local fallback)
   const currentBreedPremium = useMemo(() => {
-    const fromMap = maps.premium.get(breed);
+    const fromMap = premiumMap.get(breed);
     if (fromMap !== undefined) return fromMap;
     return cattleBreedPremiums[breed] ?? null;
-  }, [breed, maps.premium]);
+  }, [breed, premiumMap]);
 
   // MLA category + saleyard coverage check (uses full DB coverage, not just user's herds)
   const mlaCategory = useMemo(() => mapCategoryToMLACategory(category), [category]);
@@ -133,7 +196,7 @@ export function TestCalculator({ priceMaps, saleyardCoverage }: Props) {
   }, [species, breed, category, headCount, initialWeight, dwg, mortalityRate, daysAgo, saleyard, breedPremiumOverride, isBreeder, isPregnant, breedingProgram, calvingRate, joinedDaysAgo, maps]);
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[360px_1fr]">
+    <div className="grid gap-4 lg:grid-cols-[480px_1fr]">
       {/* Input form */}
       <div className="rounded-xl border border-white/[0.06] bg-surface-secondary p-4 space-y-4">
         <div className="flex items-center gap-2 mb-1">
@@ -162,7 +225,7 @@ export function TestCalculator({ priceMaps, saleyardCoverage }: Props) {
               {(categoriesBySpecies[species] ?? []).map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </Field>
-          <Field label="Saleyard">
+          <Field label={priceLoading ? "Saleyard (loading prices...)" : "Saleyard"}>
             <select value={saleyard} onChange={(e) => setSaleyard(e.target.value)} className="input-field">
               <option value="">None (national price)</option>
               {sortedSaleyards.map((s) => (
