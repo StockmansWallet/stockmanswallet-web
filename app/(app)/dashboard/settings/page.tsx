@@ -8,18 +8,14 @@ import {
   MapPinned,
   Database,
   Shield,
+  Calculator,
   ChevronRight,
 } from "lucide-react";
+import { isAdminEmail } from "@/lib/data/admin";
 
 export const revalidate = 0;
 
 export const metadata = { title: "Settings" };
-
-const ADMIN_EMAILS = [
-  "leon@stockmanswallet.com.au",
-  "mil@stockmanswallet.com.au",
-  "luke@stockmanswallet.com.au",
-];
 
 interface NavItemProps {
   href: string;
@@ -52,7 +48,7 @@ export default async function SettingsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const isAdmin = ADMIN_EMAILS.includes(user?.email ?? "");
+  const isAdmin = isAdminEmail(user?.email);
 
   return (
     <div className="max-w-3xl">
@@ -103,14 +99,22 @@ export default async function SettingsPage() {
         {/* Admin Tools */}
         {isAdmin && (
           <Card>
-            <CardContent className="p-0">
+            <CardContent className="divide-y divide-white/[0.04] p-0">
               <NavItem
                 href="/dashboard/admin/mla-upload"
                 icon={Shield}
                 iconBg="bg-emerald-500/15"
                 iconColor="text-emerald-400"
-                label="Admin Tools"
-                description="MLA data upload and management"
+                label="MLA Data Upload"
+                description="Upload MLA CSV files for pricing"
+              />
+              <NavItem
+                href="/dashboard/admin/valuation"
+                icon={Calculator}
+                iconBg="bg-amber-500/15"
+                iconColor="text-amber-400"
+                label="Valuation Validator"
+                description="Full calculation breakdown and testing"
               />
             </CardContent>
           </Card>

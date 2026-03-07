@@ -276,10 +276,15 @@ export interface CategoryPriceEntry {
  * prefer the upper bracket. If no bracket fits on the newest date, clamp to nearest.
  * Never fall back to stale dates - brackets may not exist in newer data.
  */
+interface PriceResolution {
+  price: number;
+  matchedRange: string | null;
+}
+
 function resolvePriceFromEntries(
   entries: CategoryPriceEntry[],
   projectedWeight: number
-): number | null {
+): PriceResolution | null {
   if (entries.length === 0) return null;
 
   // Find the newest date with data
@@ -302,15 +307,15 @@ function resolvePriceFromEntries(
   const matched = matchWeightRange(projectedWeight, availableRanges);
   if (matched) {
     const match = relevantEntries.find((e) => e.weight_range === matched);
-    if (match) return match.price_per_kg;
+    if (match) return { price: match.price_per_kg, matchedRange: matched };
   }
 
   // Final fallback: any-weight entries (weight_range is null)
   const nullRange = relevantEntries.filter((e) => e.weight_range === null);
-  if (nullRange.length > 0) return Math.max(...nullRange.map((e) => e.price_per_kg));
+  if (nullRange.length > 0) return { price: Math.max(...nullRange.map((e) => e.price_per_kg)), matchedRange: null };
 
   // Absolute fallback: max price from relevant entries
-  if (relevantEntries.length > 0) return Math.max(...relevantEntries.map((e) => e.price_per_kg));
+  if (relevantEntries.length > 0) return { price: Math.max(...relevantEntries.map((e) => e.price_per_kg)), matchedRange: null };
   return null;
 }
 
@@ -319,10 +324,26 @@ function resolvePriceFromEntries(
 export type PriceSource = "saleyard" | "national" | "fallback";
 
 export interface HerdValuationResult {
+  herdId?: string;
   netValue: number;
   priceSource: PriceSource;
   pricePerKg: number;
   breedPremiumApplied: number;
+  // Full breakdown (always populated)
+  projectedWeight: number;
+  basePrice: number;
+  physicalValue: number;
+  baseMarketValue: number;
+  weightGainAccrual: number;
+  breedingAccrual: number;
+  grossValue: number;
+  mortalityDeduction: number;
+  daysHeld: number;
+  mortalityRate: number;
+  matchedWeightRange: string | null;
+  mlaCategory: string;
+  valuationDate: string;
+  initialWeight: number;
 }
 
 /**
@@ -349,7 +370,13 @@ export function calculateHerdValuation(
   saleyardBreedPriceMap?: Map<string, CategoryPriceEntry[]>
 ): HerdValuationResult {
   const head = herd.head_count ?? 0;
-  if (head === 0) return { netValue: 0, priceSource: "fallback", pricePerKg: 0, breedPremiumApplied: 0 };
+  if (head === 0) return {
+    netValue: 0, priceSource: "fallback", pricePerKg: 0, breedPremiumApplied: 0,
+    projectedWeight: 0, basePrice: 0, physicalValue: 0, baseMarketValue: 0,
+    weightGainAccrual: 0, breedingAccrual: 0, grossValue: 0, mortalityDeduction: 0,
+    daysHeld: 0, mortalityRate: 0, matchedWeightRange: null, mlaCategory: "",
+    valuationDate: new Date().toISOString(), initialWeight: 0,
+  };
 
   const now = asOf;
   const createdAt = herd.created_at ? new Date(herd.created_at) : now;
@@ -366,9 +393,10 @@ export function calculateHerdValuation(
 
   // 2. Live price - map app category to MLA category, then resolve via hierarchy
   const mlaCategory = mapCategoryToMLACategory(herd.category);
-  let basePrice: number | null = null;
+  let resolved: PriceResolution | null = null;
   let priceSource: PriceSource = "fallback";
   let skipBreedPremium = false;
+  let matchedWeightRange: string | null = null;
 
   // Resolve short saleyard name to full MLA name (e.g. "Charters Towers" -> "Charters Towers Dalrymple Saleyards")
   const resolvedSaleyard = herd.selected_saleyard ? resolveMLASaleyardName(herd.selected_saleyard) : null;
@@ -377,36 +405,31 @@ export function calculateHerdValuation(
   if (saleyardPriceMap && resolvedSaleyard) {
     const saleyardKey = `${mlaCategory}|${resolvedSaleyard}`;
     const saleyardEntries = saleyardPriceMap.get(saleyardKey) ?? [];
-    basePrice = resolvePriceFromEntries(saleyardEntries, projectedWeight);
-    if (basePrice !== null) priceSource = "saleyard";
+    resolved = resolvePriceFromEntries(saleyardEntries, projectedWeight);
+    if (resolved) { priceSource = "saleyard"; matchedWeightRange = resolved.matchedRange; }
   }
 
   // 2b. Try saleyard breed-specific (skip breed premium - already baked in)
-  // Most MLA CSV data is breed-specific (breed != null), so this is the primary
-  // saleyard price path. Matches iOS getMarketPrice cache lookup order which
-  // checks breed-specific before general at saleyard level.
-  if (basePrice === null && saleyardBreedPriceMap && resolvedSaleyard) {
+  if (!resolved && saleyardBreedPriceMap && resolvedSaleyard) {
     const breedKey = `${mlaCategory}|${herd.breed}|${resolvedSaleyard}`;
     const breedEntries = saleyardBreedPriceMap.get(breedKey) ?? [];
-    basePrice = resolvePriceFromEntries(breedEntries, projectedWeight);
-    if (basePrice !== null) {
+    resolved = resolvePriceFromEntries(breedEntries, projectedWeight);
+    if (resolved) {
       priceSource = "saleyard";
       skipBreedPremium = true;
+      matchedWeightRange = resolved.matchedRange;
     }
   }
 
   // 2c. Try national general (breed=null) price - breed premium safe
-  if (basePrice === null) {
+  if (!resolved) {
     const nationalEntries = nationalPriceMap.get(mlaCategory) ?? [];
-    basePrice = resolvePriceFromEntries(nationalEntries, projectedWeight);
-    if (basePrice !== null) priceSource = "national";
+    resolved = resolvePriceFromEntries(nationalEntries, projectedWeight);
+    if (resolved) { priceSource = "national"; matchedWeightRange = resolved.matchedRange; }
   }
 
   // 2d. Final fallback to hardcoded defaults
-  if (basePrice === null) {
-    basePrice = defaultFallbackPrice(herd.category);
-    priceSource = "fallback";
-  }
+  const basePrice = resolved ? resolved.price : defaultFallbackPrice(herd.category);
 
   // 3. Breed premium - only apply to general (breed=null) prices (mirrors iOS resolveGeneralBasePrice guard)
   const rawPremiumPct = skipBreedPremium ? 0 : (herd.breed_premium_override ?? premiumMap.get(herd.breed) ?? 0);
@@ -453,8 +476,31 @@ export function calculateHerdValuation(
     );
   }
 
+  const weightGainAccrual = physicalValue - baseMarketValue;
+  const grossValue = physicalValue + breedingAccrual;
   const netValue = physicalValue - mortalityDeduction + breedingAccrual;
-  return { netValue, priceSource, pricePerKg: adjustedPrice, breedPremiumApplied: rawPremiumPct };
+  const initWeight = herd.initial_weight ?? herd.current_weight ?? 0;
+
+  return {
+    netValue,
+    priceSource,
+    pricePerKg: adjustedPrice,
+    breedPremiumApplied: rawPremiumPct,
+    projectedWeight,
+    basePrice: basePrice ?? 0,
+    physicalValue,
+    baseMarketValue,
+    weightGainAccrual,
+    breedingAccrual,
+    grossValue,
+    mortalityDeduction,
+    daysHeld,
+    mortalityRate,
+    matchedWeightRange,
+    mlaCategory,
+    valuationDate: now.toISOString(),
+    initialWeight: initWeight,
+  };
 }
 
 /**

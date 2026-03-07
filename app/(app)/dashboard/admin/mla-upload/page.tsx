@@ -2,13 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { MlaUploader } from "./mla-uploader";
-
-// Admin email whitelist - must match mla-scraper Edge Function
-const ADMIN_EMAILS = [
-  "leon@stockmanswallet.com.au",
-  "mil@stockmanswallet.com.au",
-  "luke@stockmanswallet.com.au",
-];
+import { isAdminEmail } from "@/lib/data/admin";
 
 export const metadata = { title: "MLA CSV Upload - Admin" };
 
@@ -22,8 +16,7 @@ export default async function MlaUploadPage() {
     redirect("/sign-in");
   }
 
-  // Admin gate - redirect non-admins to dashboard
-  if (!ADMIN_EMAILS.includes(user.email ?? "")) {
+  if (!isAdminEmail(user.email)) {
     redirect("/dashboard");
   }
 
