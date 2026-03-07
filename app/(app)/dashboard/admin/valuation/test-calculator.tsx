@@ -67,12 +67,12 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
   const [calvingRate, setCalvingRate] = useState(85);
   const [joinedDaysAgo, setJoinedDaysAgo] = useState(120);
   const [prefillName, setPrefillName] = useState<string | null>(null);
+  // Exact timestamps from pre-filled herd (for precise fractional-day calculation matching the live engine)
+  const [exactCreatedAt, setExactCreatedAt] = useState<string | null>(null);
+  const [exactJoinedDate, setExactJoinedDate] = useState<string | null>(null);
 
-  // Pre-fill from herd when navigated from the breakdown table
-  useEffect(() => {
-    if (!prefillHerdId) return;
-    const h = herds.find((x) => x.id === prefillHerdId);
-    if (!h) return;
+  // Helper to apply a herd's values to the form
+  const applyHerd = useCallback((h: HerdWithValuation) => {
     setSpecies(h.species);
     setBreed(h.breed);
     setCategory(h.category);
@@ -92,9 +92,20 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
       const jDays = Math.max(0, Math.floor((Date.now() - new Date(h.joined_date).getTime()) / 86400000));
       setJoinedDaysAgo(jDays);
     }
+    // Store exact timestamps so the calculation uses fractional days (matching the live engine)
+    setExactCreatedAt(h.created_at);
+    setExactJoinedDate(h.joined_date);
     setPrefillName(h.name);
+  }, []);
+
+  // Pre-fill from herd when navigated from the breakdown table
+  useEffect(() => {
+    if (!prefillHerdId) return;
+    const h = herds.find((x) => x.id === prefillHerdId);
+    if (!h) return;
+    applyHerd(h);
     onClearPrefill?.();
-  }, [prefillHerdId, herds, onClearPrefill]);
+  }, [prefillHerdId, herds, onClearPrefill, applyHerd]);
 
   // Premium map from server (always available)
   const premiumMap = useMemo(
@@ -193,11 +204,27 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
     return [...withData, ...without];
   }, [saleyardHasData]);
 
+  // Clear exact timestamps when the user manually edits Days Held
+  const handleDaysAgoChange = (value: number) => {
+    setDaysAgo(value);
+    setExactCreatedAt(null);
+  };
+  const handleJoinedDaysAgoChange = (value: number) => {
+    setJoinedDaysAgo(value);
+    setExactJoinedDate(null);
+  };
+
   // Calculate on every render (pure function, fast)
+  // When loaded from a herd, uses the exact created_at timestamp for fractional-day precision
+  // (matching the live valuation engine). Manual input uses whole days.
   const result: HerdValuationResult | null = useMemo(() => {
     const now = new Date();
-    const createdAt = new Date(now.getTime() - daysAgo * 86400000);
-    const joinedDate = isBreeder && isPregnant ? new Date(now.getTime() - joinedDaysAgo * 86400000) : null;
+    const createdAt = exactCreatedAt
+      ? new Date(exactCreatedAt)
+      : new Date(now.getTime() - daysAgo * 86400000);
+    const joinedDate = isBreeder && isPregnant
+      ? (exactJoinedDate ? new Date(exactJoinedDate) : new Date(now.getTime() - joinedDaysAgo * 86400000))
+      : null;
 
     const herd: HerdForValuation = {
       head_count: headCount,
@@ -225,7 +252,7 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
     return calculateHerdValuation(
       herd, maps.national, maps.premium, undefined, maps.saleyard, maps.saleyardBreed,
     );
-  }, [species, breed, category, headCount, initialWeight, dwg, mortalityRate, daysAgo, saleyard, breedPremiumOverride, isBreeder, isPregnant, breedingProgram, calvingRate, joinedDaysAgo, maps]);
+  }, [species, breed, category, headCount, initialWeight, dwg, mortalityRate, daysAgo, saleyard, breedPremiumOverride, isBreeder, isPregnant, breedingProgram, calvingRate, joinedDaysAgo, maps, exactCreatedAt, exactJoinedDate]);
 
   return (
     <div className="grid gap-4 lg:grid-cols-[480px_1fr]">
@@ -235,8 +262,8 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
           <Calculator className="h-4 w-4 text-brand" />
           <h3 className="text-sm font-semibold text-text-primary">Test Herd Inputs</h3>
           {prefillName && (
-            <span className="ml-auto text-[10px] text-brand font-medium">
-              Loaded: {prefillName}
+            <span className="ml-auto text-[10px] text-brand font-medium" title="Uses exact creation timestamp for precise fractional-day calculation, matching the live valuation.">
+              Loaded: {prefillName} (exact match)
             </span>
           )}
         </div>
@@ -248,26 +275,7 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
               onChange={(e) => {
                 const h = herds.find((x) => x.id === e.target.value);
                 if (!h) return;
-                setSpecies(h.species);
-                setBreed(h.breed);
-                setCategory(h.category);
-                setHeadCount(h.head_count);
-                setInitialWeight(h.initial_weight);
-                setDwg(h.daily_weight_gain);
-                setMortalityRate((h.mortality_rate ?? 0.01) * 100);
-                const days = Math.max(0, Math.floor((Date.now() - new Date(h.created_at).getTime()) / 86400000));
-                setDaysAgo(days);
-                setSaleyard(h.selected_saleyard ?? "");
-                setBreedPremiumOverride(h.breed_premium_override != null ? String(h.breed_premium_override) : "");
-                setIsBreeder(h.is_breeder);
-                setIsPregnant(h.is_pregnant);
-                if (h.breeding_program_type) setBreedingProgram(h.breeding_program_type);
-                setCalvingRate((h.calving_rate ?? 0.85) * 100);
-                if (h.joined_date) {
-                  const jDays = Math.max(0, Math.floor((Date.now() - new Date(h.joined_date).getTime()) / 86400000));
-                  setJoinedDaysAgo(jDays);
-                }
-                setPrefillName(h.name);
+                applyHerd(h);
               }}
               className="input-field"
             >
@@ -319,8 +327,13 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
           <Field label="DWG (kg/day)">
             <input type="number" step="0.1" value={dwg} onChange={(e) => setDwg(+e.target.value)} className="input-field" />
           </Field>
-          <Field label="Days Held">
-            <input type="number" value={daysAgo} onChange={(e) => setDaysAgo(+e.target.value)} className="input-field" />
+          <Field label={exactCreatedAt ? "Days Held (using exact time)" : "Days Held"}>
+            <input type="number" value={daysAgo} onChange={(e) => handleDaysAgoChange(+e.target.value)} className="input-field" />
+            {exactCreatedAt && (
+              <span className="text-[9px] text-text-muted mt-0.5 block">
+                Exact: {((Date.now() - new Date(exactCreatedAt).getTime()) / 86400000).toFixed(2)}d - editing clears exact mode
+              </span>
+            )}
           </Field>
           <Field label="Mortality Rate (%)">
             <input type="number" step="0.1" value={mortalityRate} onChange={(e) => setMortalityRate(+e.target.value)} className="input-field" />
@@ -355,7 +368,7 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
                 <input type="number" value={calvingRate} onChange={(e) => setCalvingRate(+e.target.value)} className="input-field" />
               </Field>
               <Field label="Joined (days ago)">
-                <input type="number" value={joinedDaysAgo} onChange={(e) => setJoinedDaysAgo(+e.target.value)} className="input-field" />
+                <input type="number" value={joinedDaysAgo} onChange={(e) => handleJoinedDaysAgoChange(+e.target.value)} className="input-field" />
               </Field>
             </div>
           )}
