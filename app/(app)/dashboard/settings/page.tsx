@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   User,
   Bell,
@@ -13,7 +13,6 @@ import {
   FlaskConical,
 } from "lucide-react";
 import { isAdminEmail } from "@/lib/data/admin";
-import { LoadDemoButton, ClearDataButton } from "./demo-buttons";
 
 export const revalidate = 0;
 
@@ -95,35 +94,14 @@ export default async function SettingsPage() {
               label="Data Management"
               description="Clear all data"
             />
-          </CardContent>
-        </Card>
-
-        {/* Demo Data */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
-                <FlaskConical className="h-3.5 w-3.5 text-brand" />
-              </div>
-              <div>
-                <CardTitle>Demo Data</CardTitle>
-                <p className="mt-1 text-xs text-text-muted">
-                  Load sample herds to explore the app without entering real data.
-                </p>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-xl bg-white/[0.03] p-4">
-              <p className="text-sm font-medium text-text-primary">Doongara Station</p>
-              <p className="mt-1 text-xs text-text-muted leading-relaxed">
-                Loads 20 herds and a property from the demo dataset. Replaces any existing demo data.
-              </p>
-              <div className="mt-3 flex items-center gap-3">
-                <LoadDemoButton />
-                <ClearDataButton />
-              </div>
-            </div>
+            <NavItem
+              href="/dashboard/settings/demo"
+              icon={FlaskConical}
+              iconBg="bg-lime-500/15"
+              iconColor="text-lime-400"
+              label="Demo Data"
+              description="Load sample herds to explore the app"
+            />
           </CardContent>
         </Card>
 
