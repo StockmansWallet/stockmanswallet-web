@@ -26,8 +26,27 @@
 
 ### Herd Form - Sex Removed, Breed Premium Added
 * Removed Sex field from herd create/edit form (now auto-derived from category)
-* Added Breed Premium Override field in Weight & Growth section
+* Added Breed Premium Override field with auto-premium placeholder (e.g. "Auto (9%)")
 * Removed Sex row from herd detail page, added Breed Premium row
+
+### Valuation Engine - Calves at Foot
+* Added calves-at-foot value calculation matching iOS implementation
+* Parses `additional_info` for calf head count, age, and weight
+* Species-specific daily weight gain (Cattle 0.9 kg/day, Sheep 0.25 kg/day)
+* Fixed uncontrolled breeding accrual to use `created_at` instead of `joined_date`
+
+### Valuation Validator - Formula Walkthrough Enhancements
+* Added category mapping info (e.g. "Breeder Cow -> Breeding Cow")
+* Rounded all walkthrough values and price cards to 2 decimal places
+
+### MLA Category Mapping - PTIC and Feeder Cows
+* Added `Cows|PTIC` and `Cows|Feeder` mappings to Breeding Cow
+* Previously fell through unmatched in scraper and reference data
+
+### Data Cleanup - Quarterly MLA Records Purged
+* Deleted 293,308 rows of quarterly historical data (2023-12-31 to 2025-12-31, Breeding Cow only)
+* Deleted remaining stale weekly data (2024-2025)
+* Table cleared for fresh weekly CSV uploads going back to 2024
 
 ---
 

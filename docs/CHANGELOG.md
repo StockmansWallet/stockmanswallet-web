@@ -49,14 +49,44 @@ Added data date to the formula walkthrough box (shows which MLA data date the pr
 
 ### Herd Form - Removed Sex, Added Breed Premium
 
-Removed the Sex field from the herd create/edit form (sex is now derived from category). Added a Breed Premium Override field to the Weight & Growth section, allowing users to override the automatic breed premium percentage. The server actions now auto-derive sex from category keywords (Bull, Steer, Barrow, Buck, Wether = Male, everything else = Female).
+Removed the Sex field from the herd create/edit form (sex is now derived from category). Added a Breed Premium Override field to the Weight & Growth section, allowing users to override the automatic breed premium percentage. The placeholder shows the auto-applied premium (e.g. "Auto (9%)") so users can see what's being applied before deciding to override. The server actions now auto-derive sex from category keywords (Bull, Steer, Barrow, Buck, Wether = Male, everything else = Female).
 
 Also removed the Sex info row from the herd detail page and added a Breed Premium row showing the applied premium percentage.
 
 **Files changed:**
-- `components/app/herd-form.tsx` - Removed Sex select, added Breed Premium Override input
+- `components/app/herd-form.tsx` - Removed Sex select, added Breed Premium Override input with auto-premium placeholder
 - `app/(app)/dashboard/herds/actions.ts` - Added `deriveSexFromCategory()`, added `breed_premium_override` to create/update
 - `app/(app)/dashboard/herds/[id]/page.tsx` - Removed Sex row, added Breed Premium row
+
+### Valuation Engine - Calves at Foot
+
+Added calves-at-foot value calculation to the web valuation engine, matching the iOS implementation. Parses the `additional_info` field for "Calves at Foot: X head, Y months, Z kg" data. Calculates calf value using species-specific daily weight gain (Cattle 0.9 kg/day, Sheep 0.25 kg/day) projected from the recording date. Calf value is added to the breeding accrual component.
+
+Also fixed uncontrolled breeding accrual start date to use `created_at` (herd entry date) instead of `joined_date`, matching iOS behaviour.
+
+**Files changed:**
+- `lib/engines/valuation-engine.ts` - Added `parseCalvesAtFoot()`, `calculateCalfAtFootValue()`, wired into `calculateHerdValuation()`, fixed uncontrolled breeding start date
+- `lib/brangus/types.ts` - Added `additional_info` and `calf_weight_recorded_date` to HerdRow interface
+- `app/(app)/dashboard/page.tsx` - Added `additional_info`, `calf_weight_recorded_date`, `updated_at` to select query
+- `app/(app)/dashboard/admin/valuation/page.tsx` - Added same fields to select query
+
+### Valuation Validator - Formula Walkthrough Enhancements
+
+Added category mapping info to the formula walkthrough (shows e.g. "Category Mapping: Breeder Cow -> Breeding Cow") so the MLA category lookup can be verified. Rounded all formula walkthrough values to 2 decimal places for readability (was 4dp). Also rounded the Base $/kg and Adj $/kg result cards to 2dp.
+
+**Files changed:**
+- `app/(app)/dashboard/admin/valuation/test-calculator.tsx` - Added category mapping line, 2dp rounding throughout walkthrough and price cards
+
+### MLA Category Mapping - PTIC and Feeder Cows
+
+Added `Cows|PTIC` and `Cows|Feeder` to the CSV category map, both mapping to "Breeding Cow". Previously these MLA sale prefixes had no mapping and fell through unmatched. PTIC (Pregnant Tested In Calf) and Feeder cows now group with Breeding Cow pricing.
+
+**Files changed:**
+- `lib/data/reference-data.ts` - Added PTIC and Feeder cow mappings to `csvCategoryMap`
+
+### Data Cleanup - Quarterly MLA Records Purged
+
+Deleted all quarterly historical data from the `category_prices` table (293,308 rows across 9 quarterly dates from 2023-12-31 to 2025-12-31). This data was accidentally uploaded from quarterly MLA CSVs and contained only Breeding Cow category, polluting price lookups for saleyards that didn't have more recent weekly data. Also deleted remaining stale weekly data (4,012 rows from 2024-2025). Table cleared entirely in preparation for fresh weekly CSV uploads going back to 2024.
 
 ---
 
