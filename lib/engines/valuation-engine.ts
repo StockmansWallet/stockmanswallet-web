@@ -288,6 +288,7 @@ export interface CategoryPriceEntry {
 interface PriceResolution {
   price: number;
   matchedRange: string | null;
+  dataDate: string | null;
 }
 
 function resolvePriceFromEntries(
@@ -316,15 +317,15 @@ function resolvePriceFromEntries(
   const matched = matchWeightRange(projectedWeight, availableRanges);
   if (matched) {
     const match = relevantEntries.find((e) => e.weight_range === matched);
-    if (match) return { price: match.price_per_kg, matchedRange: matched };
+    if (match) return { price: match.price_per_kg, matchedRange: matched, dataDate: newestDate };
   }
 
   // Final fallback: any-weight entries (weight_range is null)
   const nullRange = relevantEntries.filter((e) => e.weight_range === null);
-  if (nullRange.length > 0) return { price: Math.max(...nullRange.map((e) => e.price_per_kg)), matchedRange: null };
+  if (nullRange.length > 0) return { price: Math.max(...nullRange.map((e) => e.price_per_kg)), matchedRange: null, dataDate: newestDate };
 
   // Absolute fallback: max price from relevant entries
-  if (relevantEntries.length > 0) return { price: Math.max(...relevantEntries.map((e) => e.price_per_kg)), matchedRange: null };
+  if (relevantEntries.length > 0) return { price: Math.max(...relevantEntries.map((e) => e.price_per_kg)), matchedRange: null, dataDate: newestDate };
   return null;
 }
 
@@ -353,6 +354,7 @@ export interface HerdValuationResult {
   mlaCategory: string;
   valuationDate: string;
   initialWeight: number;
+  dataDate: string | null;
 }
 
 /**
@@ -384,7 +386,7 @@ export function calculateHerdValuation(
     projectedWeight: 0, basePrice: 0, physicalValue: 0, baseMarketValue: 0,
     weightGainAccrual: 0, breedingAccrual: 0, grossValue: 0, mortalityDeduction: 0,
     daysHeld: 0, mortalityRate: 0, matchedWeightRange: null, mlaCategory: "",
-    valuationDate: new Date().toISOString(), initialWeight: 0,
+    valuationDate: new Date().toISOString(), initialWeight: 0, dataDate: null,
   };
 
   const now = asOf;
@@ -509,6 +511,7 @@ export function calculateHerdValuation(
     mlaCategory,
     valuationDate: now.toISOString(),
     initialWeight: initWeight,
+    dataDate: resolved?.dataDate ?? null,
   };
 }
 

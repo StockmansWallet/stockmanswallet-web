@@ -389,6 +389,8 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
 
           {/* Breakdown cards */}
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <MiniCard label="Base $/kg" value={fmtCents(result.basePrice)} />
+            <MiniCard label="Adj $/kg" value={fmtCents(result.pricePerKg)} />
             <MiniCard label="Physical Value (at projected wt)" value={fmtDollar(result.physicalValue)} />
             <MiniCard label="Base Market Value (at initial wt)" value={fmtDollar(result.baseMarketValue)} />
             <MiniCard label="WG Accrual" value={fmtDollar(result.weightGainAccrual)} color="emerald" />
@@ -406,7 +408,7 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
             </p>
             <div className="space-y-1.5 font-mono text-[11px] text-amber-200/80">
               <p>ProjectedWeight = {initialWeight} + ({dwg} x {result.daysHeld}) = <strong>{result.projectedWeight.toFixed(1)} kg</strong></p>
-              <p>BasePrice = {fmtCents(result.basePrice)} /kg ({result.priceSource}{result.matchedWeightRange ? `, ${result.matchedWeightRange} bracket` : ""})</p>
+              <p>BasePrice = {fmtCents(result.basePrice)} /kg ({result.priceSource}{result.matchedWeightRange ? `, ${result.matchedWeightRange} bracket` : ""}, data: {result.dataDate ?? "fallback"})</p>
               {result.breedPremiumApplied !== 0 && (
                 <p>BreedPremium = {fmtCents(result.basePrice)} x (1 + {result.breedPremiumApplied}%) = <strong>{fmtCents(result.pricePerKg)} /kg</strong></p>
               )}

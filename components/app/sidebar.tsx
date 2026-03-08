@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/app/(auth)/actions";
+import { isAdminEmail } from "@/lib/data/admin";
 import {
   Wallet,
   TrendingUp,
@@ -18,6 +19,8 @@ import {
   Settings,
   MapPinned,
   LogOut,
+  FlaskConical,
+  Upload,
 } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
 
@@ -79,6 +82,21 @@ const toolItems = [
     href: "/dashboard/advisory-hub",
     icon: <Users className="h-5 w-5" />,
     activeClass: "bg-purple-500/15 text-purple-400",
+  },
+];
+
+const adminItems = [
+  {
+    label: "Valuation Validator",
+    href: "/dashboard/admin/valuation",
+    icon: <FlaskConical className="h-5 w-5" />,
+    activeClass: "bg-amber-500/15 text-amber-400",
+  },
+  {
+    label: "MLA Data Upload",
+    href: "/dashboard/admin/mla-upload",
+    icon: <Upload className="h-5 w-5" />,
+    activeClass: "bg-amber-500/15 text-amber-400",
   },
 ];
 
@@ -153,6 +171,27 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
             ))}
           </div>
         </div>
+        {/* Admin */}
+        {isAdminEmail(userEmail) && (
+          <div className="mx-0 mt-4 border-t border-white/5 pt-4">
+            <div className="space-y-0.5">
+              {adminItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
+                    checkActive(item.href)
+                      ? item.activeClass
+                      : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+                  }`}
+                >
+                  {item.icon}
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Help & Settings */}
