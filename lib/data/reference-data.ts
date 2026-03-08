@@ -540,6 +540,8 @@ export const mlaCsvCategoryMapping: Record<string, string> = {
   "Cows|Processor": "Wet Cow",
   "Cows|Restocker": "Breeding Cow",
   "Cows|Dairy": "Wet Cow",
+  "Cows|PTIC": "Breeding Cow",
+  "Cows|Feeder": "Breeding Cow",
   "Bulls|*": "Grown Bull",
   "Manufacturing Steer|*": "Grown Steer",
   "Calves|*": "Weaner Steer",
