@@ -40,12 +40,26 @@ Moved Valuation Validator and MLA Data Upload from the Settings page to their ow
 - `components/app/sidebar.tsx` - Added admin section with `adminItems` array, gated by `isAdminEmail()`
 - `app/(app)/dashboard/settings/page.tsx` - Removed admin tools card (they now live in the sidebar)
 
-### Valuation Validator - UI Improvements
+### Valuation Validator renamed to Valuation Lab
 
-Added data date to the formula walkthrough box (shows which MLA data date the price comes from). Added Base $/kg and Adj $/kg cards to the test calculator results. Rearranged result cards into a cleaner 2-row x 5-column layout: Row 1 shows pricing info (Price Source, Base $/kg, Adj $/kg, Proj. Weight, Base Market Value), Row 2 shows value components (WG Accrual, Physical Value, Mortality, Breeding Accrual, Gross Value).
+Renamed the admin tool from "Valuation Validator" to "Valuation Lab" across the sidebar, page header, and metadata title.
+
+Major layout overhaul:
+- Added icons to all 4 tabs (Table, Flask, Map Pin, Book). Active tab uses rose/maroon theme matching the sidebar.
+- Summary strip now shows Herds, Total Head, Herds Net Value, Per Head, and price source badges. Removed standalone hero cards from top bar.
+- Test Calculator results: Net Value and Per Head now appear as orange hero cards in a top row of the results grid, updating reactively as inputs change. Price Source sits alongside them.
+- Breakdown cards use a 3-column grid layout.
+- Formula walkthrough values rounded to 2 decimal places. Base Price, Price Data Source, and Latest Data Date shown on separate lines.
+- Calculation Logic tab shows content directly (removed dropdown toggle), amber/yellow theme.
+- Herd Breakdown table: moved beaker (test in calculator) icon from inline with herd name to its own column at the far right of each row for cleaner appearance.
 
 **Files changed:**
-- `app/(app)/dashboard/admin/valuation/test-calculator.tsx` - Added data date to walkthrough, added price cards, rearranged grid to 5-column layout
+- `app/(app)/dashboard/admin/valuation/valuation-validator.tsx` - Renamed, new summary strip, rose tab theme, icons
+- `app/(app)/dashboard/admin/valuation/valuation-table.tsx` - Moved beaker icon to dedicated rightmost column
+- `app/(app)/dashboard/admin/valuation/test-calculator.tsx` - Hero row for Net Value/Per Head, 3-col grid, 2dp rounding
+- `app/(app)/dashboard/admin/valuation/logic-panel.tsx` - Removed dropdown, direct content display
+- `app/(app)/dashboard/admin/valuation/page.tsx` - Updated title to "Valuation Lab"
+- `components/app/sidebar.tsx` - Renamed sidebar item to "Valuation Lab"
 
 ### Herd Form - Removed Sex, Added Breed Premium
 

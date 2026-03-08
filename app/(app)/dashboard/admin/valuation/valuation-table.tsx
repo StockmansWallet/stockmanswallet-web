@@ -158,7 +158,7 @@ export function ValuationTable({ herds, onTestHerd }: Props) {
               {/* Price */}
               <ColGroup label="PRICE RESOLUTION" span={4} />
               {/* Breakdown */}
-              <ColGroup label="VALUATION BREAKDOWN" span={7} />
+              <ColGroup label="VALUATION BREAKDOWN" span={8} />
             </tr>
             <tr className="border-b border-white/[0.06] bg-surface-secondary/50">
               <Th sticky>Name</Th>
@@ -183,6 +183,8 @@ export function ValuationTable({ herds, onTestHerd }: Props) {
               <Th>Gross</Th>
               <Th>Mortality</Th>
               <SortTh sortKey="netValue" currentKey={sortKey} dir={sortDir} onSort={toggleSort}>Net Value</SortTh>
+              <Th />
+
             </tr>
           </thead>
           <tbody>
@@ -199,15 +201,6 @@ export function ValuationTable({ herds, onTestHerd }: Props) {
                       <span className="flex items-center gap-1">
                         {isExpanded ? <ChevronDown className="h-3 w-3 text-text-muted" /> : <ChevronRight className="h-3 w-3 text-text-muted" />}
                         {h.name}
-                        {onTestHerd && (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); onTestHerd(h.id); }}
-                            className="ml-1 rounded p-0.5 text-text-muted hover:text-brand hover:bg-white/[0.06] transition-colors"
-                            title="Test in calculator"
-                          >
-                            <FlaskConical className="h-3 w-3" />
-                          </button>
-                        )}
                       </span>
                     </Td>
                     <Td>{h.breed}</Td>
@@ -235,10 +228,21 @@ export function ValuationTable({ herds, onTestHerd }: Props) {
                     <Td right>{fmtDollar(v.grossValue)}</Td>
                     <Td right className={v.mortalityDeduction > 0 ? "text-red-400" : ""}>{v.mortalityDeduction > 0 ? `-${fmtDollar(v.mortalityDeduction)}` : "-"}</Td>
                     <Td right className="font-semibold text-text-primary">{fmtDollar(v.netValue)}</Td>
+                    <Td>
+                      {onTestHerd && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onTestHerd(h.id); }}
+                          className="rounded p-0.5 text-text-muted/40 hover:text-brand hover:bg-white/[0.06] transition-colors"
+                          title="Test in calculator"
+                        >
+                          <FlaskConical className="h-3 w-3" />
+                        </button>
+                      )}
+                    </Td>
                   </tr>
                   {isExpanded && (
                     <tr className="bg-white/[0.015]">
-                      <td colSpan={19} className="px-4 py-3">
+                      <td colSpan={20} className="px-4 py-3">
                         <ExpandedDetail herd={h} />
                       </td>
                     </tr>
@@ -268,6 +272,7 @@ export function ValuationTable({ herds, onTestHerd }: Props) {
               <Td right>{fmtDollar(totals.grossValue)}</Td>
               <Td right className="text-red-400">{totals.mortalityDeduction > 0 ? `-${fmtDollar(totals.mortalityDeduction)}` : "-"}</Td>
               <Td right className="text-brand">{fmtDollar(totals.netValue)}</Td>
+              <Td />
             </tr>
           </tfoot>
         </table>

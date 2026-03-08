@@ -19,10 +19,14 @@
 * Moved Valuation Validator and MLA Data Upload from Settings page to dedicated admin section in sidebar
 * Each tool has unique colour theme (rose/emerald), section only visible to admin emails
 
-### Valuation Validator - UI Improvements
-* Added data date to formula walkthrough (shows which MLA data date the price comes from)
-* Added Base $/kg and Adj $/kg result cards
-* Rearranged result cards into 2-row x 5-column layout for better readability
+### Valuation Lab (renamed from Valuation Validator)
+* Renamed to "Valuation Lab" across sidebar, page header, and metadata
+* Added icons to all 4 tabs, active tab uses rose/maroon theme
+* Summary strip: added Per Head, renamed to "Herds Net Value", removed standalone hero cards
+* Test Calculator: Net Value and Per Head now in reactive orange hero cards within results grid
+* Results use 3-column grid layout, formula walkthrough rounded to 2dp
+* Calculation Logic tab shows content directly (no dropdown), amber theme
+* Herd Breakdown: moved beaker icon to dedicated column at far right of each row
 
 ### Herd Form - Sex Removed, Breed Premium Added
 * Removed Sex field from herd create/edit form (now auto-derived from category)
