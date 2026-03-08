@@ -45,8 +45,8 @@ function fmtDollar(n: number): string {
   return `$${Math.round(n).toLocaleString()}`;
 }
 
-function fmtCents(n: number): string {
-  return `$${n.toLocaleString("en-AU", { minimumFractionDigits: 4, maximumFractionDigits: 4 })}`;
+function fmtCents(n: number, decimals = 4): string {
+  return `$${n.toLocaleString("en-AU", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
 }
 
 export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerdId, onClearPrefill }: Props) {
@@ -390,8 +390,8 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
           {/* Breakdown cards */}
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
             <MiniCard label="Price Source" value={result.priceSource} badge />
-            <MiniCard label="Base $/kg" value={fmtCents(result.basePrice)} />
-            <MiniCard label="Adj $/kg" value={fmtCents(result.pricePerKg)} />
+            <MiniCard label="Base $/kg" value={fmtCents(result.basePrice, 2)} />
+            <MiniCard label="Adj $/kg" value={fmtCents(result.pricePerKg, 2)} />
             <MiniCard label="Proj. Weight" value={`${result.projectedWeight.toFixed(1)} kg`} />
             <MiniCard label="Base Market Value" value={fmtDollar(result.baseMarketValue)} />
             <MiniCard label="WG Accrual" value={fmtDollar(result.weightGainAccrual)} color="emerald" />
