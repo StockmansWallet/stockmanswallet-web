@@ -156,7 +156,16 @@ export function matchWeightRange(weight: number, availableRanges: string[]): str
   if (candidates.length === 1) return candidates[0];
   if (candidates.length > 1) {
     // Prefer open-ended bracket on boundary (e.g. "400+" over "330-400")
-    return candidates.find((r) => r.endsWith("+")) ?? candidates[0];
+    const openEnded = candidates.find((r) => r.endsWith("+"));
+    if (openEnded) return openEnded;
+    // On boundary between two ranged brackets (e.g. "330-400" and "400-500"),
+    // prefer the upper bracket (where weight matches the lower bound).
+    // This is deterministic regardless of query result ordering.
+    const upper = candidates.find((r) => {
+      const parts = r.split("-");
+      return parts.length === 2 && parseFloat(parts[0]) === weight;
+    });
+    return upper ?? candidates[0];
   }
   return clampToNearestBracket(weight, availableRanges);
 }
