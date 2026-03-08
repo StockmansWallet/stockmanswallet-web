@@ -411,12 +411,12 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
             </p>
             <div className="space-y-1.5 font-mono text-[11px] text-amber-200/80">
               <p>ProjectedWeight = {initialWeight} + ({dwg} x {result.daysHeld}) = <strong>{result.projectedWeight.toFixed(1)} kg</strong></p>
-              <p>BasePrice = {fmtCents(result.basePrice)} /kg ({result.priceSource}{result.matchedWeightRange ? `, ${result.matchedWeightRange} bracket` : ""}, data: {result.dataDate ?? "fallback"})</p>
+              <p>BasePrice = {fmtCents(result.basePrice, 2)} /kg ({result.priceSource}{result.matchedWeightRange ? `, ${result.matchedWeightRange} bracket` : ""}, data: {result.dataDate ?? "fallback"})</p>
               {result.breedPremiumApplied !== 0 && (
-                <p>BreedPremium = {fmtCents(result.basePrice)} x (1 + {result.breedPremiumApplied}%) = <strong>{fmtCents(result.pricePerKg)} /kg</strong></p>
+                <p>BreedPremium = {fmtCents(result.basePrice, 2)} x (1 + {result.breedPremiumApplied}%) = <strong>{fmtCents(result.pricePerKg, 2)} /kg</strong></p>
               )}
-              <p>PhysicalValue = {headCount} x {result.projectedWeight.toFixed(1)} x {fmtCents(result.pricePerKg)} = <strong>{fmtDollar(result.physicalValue)}</strong></p>
-              <p>BaseMarketValue = {headCount} x {initialWeight} x {fmtCents(result.pricePerKg)} = <strong>{fmtDollar(result.baseMarketValue)}</strong></p>
+              <p>PhysicalValue = {headCount} x {result.projectedWeight.toFixed(1)} x {fmtCents(result.pricePerKg, 2)} = <strong>{fmtDollar(result.physicalValue)}</strong></p>
+              <p>BaseMarketValue = {headCount} x {initialWeight} x {fmtCents(result.pricePerKg, 2)} = <strong>{fmtDollar(result.baseMarketValue)}</strong></p>
               <p>WeightGainAccrual = {fmtDollar(result.physicalValue)} - {fmtDollar(result.baseMarketValue)} = <strong>{fmtDollar(result.weightGainAccrual)}</strong></p>
               {result.mortalityDeduction > 0 && (
                 <p>Mortality = {fmtDollar(result.baseMarketValue)} x ({result.daysHeld}/365) x {mortalityRate}% = <strong>-{fmtDollar(result.mortalityDeduction)}</strong></p>
