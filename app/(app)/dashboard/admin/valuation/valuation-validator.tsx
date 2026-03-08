@@ -31,25 +31,21 @@ export function ValuationValidator({ herds, priceMaps, saleyardCoverage }: Props
 
   return (
     <div className="space-y-4">
-      {/* Summary strip + Net Value cards */}
-      <div className="flex items-stretch gap-2">
-        <div className="flex flex-1 flex-wrap items-center gap-3 rounded-xl border border-white/[0.06] bg-surface-secondary px-4 py-3">
-          <Stat label="Herds" value={herds.length.toString()} />
-          <Divider />
-          <Stat label="Total Head" value={totalHead.toLocaleString()} />
-          <Divider />
-          <Stat label="Portfolio Net Value" value={`$${Math.round(totalNetValue).toLocaleString()}`} accent />
-          <Divider />
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-text-muted">Price sources:</span>
-            <Badge color="emerald" label={`${saleyardCount} saleyard`} />
-            <Badge color="amber" label={`${nationalCount} national`} />
-            {fallbackCount > 0 && <Badge color="red" label={`${fallbackCount} fallback`} />}
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <HeroCard label="Net Value" value={`$${Math.round(totalNetValue).toLocaleString()}`} />
-          <HeroCard label="Per Head" value={totalHead > 0 ? `$${Math.round(totalNetValue / totalHead).toLocaleString()}` : "-"} />
+      {/* Summary strip */}
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-white/[0.06] bg-surface-secondary px-4 py-3">
+        <Stat label="Herds" value={herds.length.toString()} />
+        <Divider />
+        <Stat label="Total Head" value={totalHead.toLocaleString()} />
+        <Divider />
+        <Stat label="Herds Net Value" value={`$${Math.round(totalNetValue).toLocaleString()}`} accent />
+        <Divider />
+        <Stat label="Per Head" value={totalHead > 0 ? `$${Math.round(totalNetValue / totalHead).toLocaleString()}` : "-"} accent />
+        <Divider />
+        <div className="flex items-center gap-2 text-xs">
+          <span className="text-text-muted">Price sources:</span>
+          <Badge color="emerald" label={`${saleyardCount} saleyard`} />
+          <Badge color="amber" label={`${nationalCount} national`} />
+          {fallbackCount > 0 && <Badge color="red" label={`${fallbackCount} fallback`} />}
         </div>
       </div>
 
@@ -110,15 +106,6 @@ function Badge({ color, label }: { color: "emerald" | "amber" | "red"; label: st
     <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium ${colors[color]}`}>
       {label}
     </span>
-  );
-}
-
-function HeroCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex flex-col justify-center rounded-xl border border-brand/20 bg-brand/[0.04] px-8 py-3 min-w-[140px]">
-      <p className="text-[10px] text-text-muted mb-0.5">{label}</p>
-      <p className="text-2xl font-bold tabular-nums text-brand">{value}</p>
-    </div>
   );
 }
 

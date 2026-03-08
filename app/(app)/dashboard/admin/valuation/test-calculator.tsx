@@ -380,7 +380,20 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
 
       {/* Results */}
       {result && (
-        <div className="space-y-4">
+        <div className="space-y-2">
+          {/* Hero row - Net Value, Per Head, Price Source */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="rounded-lg border border-brand/20 bg-brand/[0.06] px-3 py-2">
+              <p className="text-[10px] text-text-muted mb-0.5">Net Value</p>
+              <p className="text-lg font-bold tabular-nums text-brand">{fmtDollar(result.netValue)}</p>
+            </div>
+            <div className="rounded-lg border border-brand/20 bg-brand/[0.06] px-3 py-2">
+              <p className="text-[10px] text-text-muted mb-0.5">Per Head</p>
+              <p className="text-lg font-bold tabular-nums text-brand">{fmtDollar(result.netValue / headCount)}</p>
+            </div>
+            <MiniCard label="Price Source" value={result.priceSource} badge />
+          </div>
+
           {/* Breakdown cards - 3 column grid */}
           <div className="grid grid-cols-3 gap-2">
             <MiniCard label="Base Market Value" value={fmtDollar(result.baseMarketValue)} />
@@ -393,9 +406,6 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
             <MiniCard label="Mortality" value={result.mortalityDeduction > 0 ? `-${fmtDollar(result.mortalityDeduction)}` : "-"} color="red" />
             <MiniCard label="Breeding Accrual" value={result.breedingAccrual > 0 ? fmtDollar(result.breedingAccrual) : "-"} color="sky" />
           </div>
-
-          {/* Price Source */}
-          <MiniCard label="Price Source" value={result.priceSource} badge />
 
           {/* Formula walkthrough */}
           <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.04] px-4 py-3">
