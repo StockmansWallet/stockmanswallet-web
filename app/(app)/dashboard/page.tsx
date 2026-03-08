@@ -67,23 +67,37 @@ export default async function DashboardPage() {
       .limit(5),
   ]);
 
-  // Fetch pricing data in a single combined query matching iOS prefetchPricesForHerds():
-  // - Saleyard + "National" combined, filtered by MLA categories, all breeds
-  // - Ordered by data_date DESC - no tight limit since a single saleyard can have 10k+ rows
-  // - Expiry filter: only include non-expired entries (matches iOS expiryFilter)
+  // Fetch pricing data in two parallel queries to avoid 50k limit truncating national prices
+  // when multiple saleyards have large datasets. National prices are fetched separately to
+  // guarantee they're always complete (critical for fallback resolution).
   const saleyards = [...new Set((herds ?? []).map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
   const mlaCategories = [...new Set((herds ?? []).map((h) => mapCategoryToMLACategory(h.category)))];
-  const saleyardsToFetch = [...saleyards, "National"];
 
-  const { data: allPrices } = mlaCategories.length > 0
-    ? await supabase
-        .from("category_prices")
-        .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
-        .in("saleyard", saleyardsToFetch)
-        .in("category", mlaCategories)
-        .order("data_date", { ascending: false })
-        .limit(50000)
-    : { data: [] as { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string }[] };
+  type PriceRow = { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string };
+  const emptyPrices: PriceRow[] = [];
+
+  const [{ data: saleyardPrices }, { data: nationalPrices }] = mlaCategories.length > 0
+    ? await Promise.all([
+        saleyards.length > 0
+          ? supabase
+              .from("category_prices")
+              .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
+              .in("saleyard", saleyards)
+              .in("category", mlaCategories)
+              .order("data_date", { ascending: false })
+              .limit(50000)
+          : Promise.resolve({ data: emptyPrices }),
+        supabase
+          .from("category_prices")
+          .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
+          .eq("saleyard", "National")
+          .in("category", mlaCategories)
+          .order("data_date", { ascending: false })
+          .limit(5000),
+      ])
+    : [{ data: emptyPrices }, { data: emptyPrices }];
+
+  const allPrices = [...(saleyardPrices ?? []), ...(nationalPrices ?? [])];
 
   const activeHerds = herds ?? [];
   const totalHead = activeHerds.reduce((sum, h) => sum + (h.head_count ?? 0), 0);

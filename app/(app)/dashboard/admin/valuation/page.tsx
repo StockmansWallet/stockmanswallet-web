@@ -89,28 +89,41 @@ export default async function ValuationPage() {
 
   const activeHerds = herds ?? [];
 
-  // Fetch pricing data (same as dashboard)
+  // Fetch pricing data in two parallel queries to avoid 50k limit truncating national prices
   const saleyards = [...new Set(
     activeHerds
       .map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null)
       .filter(Boolean),
   )] as string[];
   const mlaCategories = [...new Set(activeHerds.map((h) => mapCategoryToMLACategory(h.category)))];
-  const saleyardsToFetch = [...saleyards, "National"];
 
-  const [{ data: allPrices }, { data: breedPremiumData }, { data: coverageData }] = await Promise.all([
+  type PriceRow = { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string };
+  const emptyPrices: PriceRow[] = [];
+
+  const [{ data: saleyardPrices }, { data: nationalPrices }, { data: breedPremiumData }, { data: coverageData }] = await Promise.all([
+    mlaCategories.length > 0 && saleyards.length > 0
+      ? supabase
+          .from("category_prices")
+          .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
+          .in("saleyard", saleyards)
+          .in("category", mlaCategories)
+          .order("data_date", { ascending: false })
+          .limit(50000)
+      : Promise.resolve({ data: emptyPrices }),
     mlaCategories.length > 0
       ? supabase
           .from("category_prices")
           .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
-          .in("saleyard", saleyardsToFetch)
+          .eq("saleyard", "National")
           .in("category", mlaCategories)
           .order("data_date", { ascending: false })
-          .limit(50000)
-      : Promise.resolve({ data: [] as { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string }[] }),
+          .limit(5000)
+      : Promise.resolve({ data: emptyPrices }),
     supabase.from("breed_premiums").select("breed, premium_percent:premium_pct"),
     supabase.rpc("saleyard_coverage") as unknown as { data: SaleyardCoverage[] | null },
   ]);
+
+  const allPrices = [...(saleyardPrices ?? []), ...(nationalPrices ?? [])];
 
   // Build price maps
   const nationalPriceMap = new Map<string, CategoryPriceEntry[]>();
