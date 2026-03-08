@@ -58,7 +58,7 @@ export function ValuationValidator({ herds, priceMaps, saleyardCoverage }: Props
         <TabButton active={activeTab === "table"} onClick={() => setActiveTab("table")} icon={Table2}>
           Herd Breakdown
         </TabButton>
-        <TabButton active={activeTab === "calculator"} onClick={() => setActiveTab("calculator")} accent icon={FlaskConical}>
+        <TabButton active={activeTab === "calculator"} onClick={() => setActiveTab("calculator")} icon={FlaskConical}>
           Test Calculator
         </TabButton>
         <TabButton active={activeTab === "saleyards"} onClick={() => setActiveTab("saleyards")} icon={MapPin}>
@@ -122,15 +122,13 @@ function HeroCard({ label, value }: { label: string; value: string }) {
   );
 }
 
-function TabButton({ active, onClick, children, accent, icon: Icon }: { active: boolean; onClick: () => void; children: React.ReactNode; accent?: boolean; icon?: React.ComponentType<{ className?: string }> }) {
+function TabButton({ active, onClick, children, icon: Icon }: { active: boolean; onClick: () => void; children: React.ReactNode; icon?: React.ComponentType<{ className?: string }> }) {
   return (
     <button
       onClick={onClick}
       className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
         active
-          ? accent
-            ? "bg-brand text-white"
-            : "bg-white/[0.08] text-text-primary"
+          ? "bg-rose-500/15 text-rose-400"
           : "text-text-muted hover:text-text-primary hover:bg-white/[0.04]"
       }`}
     >

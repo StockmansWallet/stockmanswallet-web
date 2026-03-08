@@ -1,29 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronDown, ChevronRight, BookOpen } from "lucide-react";
-
 export function LogicPanel() {
-  const [open, setOpen] = useState(false);
-
   return (
-    <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.04]">
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex w-full items-center gap-2.5 px-4 py-3 text-left transition-colors hover:bg-amber-500/[0.04]"
-      >
-        <BookOpen className="h-4 w-4 text-amber-400" />
-        <span className="text-sm font-medium text-amber-300">Calculation Logic</span>
-        {open ? (
-          <ChevronDown className="ml-auto h-4 w-4 text-amber-400/60" />
-        ) : (
-          <ChevronRight className="ml-auto h-4 w-4 text-amber-400/60" />
-        )}
-      </button>
-
-      {open && (
-        <div className="border-t border-amber-500/10 px-4 py-4">
-          <pre className="overflow-x-auto text-[11px] leading-relaxed font-mono text-amber-200/80">
+    <div className="rounded-xl border border-white/[0.06] bg-surface-secondary px-5 py-4">
+      <pre className="overflow-x-auto text-[11px] leading-relaxed font-mono text-text-secondary">
 {`PROJECTED WEIGHT
   Standard:   ProjectedWeight = InitialWeight + (DWG x DaysElapsed)
   Split DWG:  ProjectedWeight = InitialWeight + (OldDWG x DaysPhase1) + (NewDWG x DaysPhase2)
@@ -56,10 +36,10 @@ PRE-BIRTH ACCRUAL (breeders only, pregnant with joined date)
   AccruedPct       = min(1.0, DaysElapsed / 365)
   PreBirthAccrual  = ExpectedProgeny x AccruedPct x CalfBirthWeight x AdjustedPrice
   Accrual start:
-    - Uncontrolled:     joinedDate
+    - Uncontrolled:     createdAt (herd entry date)
     - AI / Controlled:  midpoint of joiningPeriodStart and joiningPeriodEnd
 
-CALVES AT FOOT (iOS only, not yet in web engine)
+CALVES AT FOOT
   CurrentCalfWeight   = RecordedWeight + (0.9 kg/day x DaysSinceRecorded)  [cattle]
                       = RecordedWeight + (0.25 kg/day x DaysSinceRecorded) [sheep]
   CalvesAtFootValue   = CalfHeadCount x CurrentCalfWeight x AdjustedPrice
@@ -73,9 +53,7 @@ GROSS VALUE
 
 NET VALUE
   NetValue = PhysicalValue - MortalityDeduction + BreedingAccrual`}
-          </pre>
-        </div>
-      )}
+      </pre>
     </div>
   );
 }
