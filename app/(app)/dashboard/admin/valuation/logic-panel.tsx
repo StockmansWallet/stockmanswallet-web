@@ -2,8 +2,8 @@
 
 export function LogicPanel() {
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-surface-secondary px-5 py-4">
-      <pre className="overflow-x-auto text-[11px] leading-relaxed font-mono text-text-secondary">
+    <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.04] px-5 py-4">
+      <pre className="overflow-x-auto text-[11px] leading-relaxed font-mono text-amber-200/80">
 {`PROJECTED WEIGHT
   Standard:   ProjectedWeight = InitialWeight + (DWG x DaysElapsed)
   Split DWG:  ProjectedWeight = InitialWeight + (OldDWG x DaysPhase1) + (NewDWG x DaysPhase2)

@@ -32,7 +32,7 @@ export function ValuationValidator({ herds, priceMaps, saleyardCoverage }: Props
   return (
     <div className="space-y-4">
       {/* Summary strip + Net Value cards */}
-      <div className="flex items-stretch gap-3">
+      <div className="flex items-stretch gap-2">
         <div className="flex flex-1 flex-wrap items-center gap-3 rounded-xl border border-white/[0.06] bg-surface-secondary px-4 py-3">
           <Stat label="Herds" value={herds.length.toString()} />
           <Divider />
@@ -115,7 +115,7 @@ function Badge({ color, label }: { color: "emerald" | "amber" | "red"; label: st
 
 function HeroCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col justify-center rounded-xl border border-brand/20 bg-brand/[0.04] px-5 py-3 min-w-[120px]">
+    <div className="flex flex-col justify-center rounded-xl border border-brand/20 bg-brand/[0.04] px-8 py-3 min-w-[140px]">
       <p className="text-[10px] text-text-muted mb-0.5">{label}</p>
       <p className="text-2xl font-bold tabular-nums text-brand">{value}</p>
     </div>
