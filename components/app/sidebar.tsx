@@ -87,7 +87,7 @@ const toolItems = [
 
 const adminItems = [
   {
-    label: "Valuation Validator",
+    label: "Valuation Lab",
     href: "/dashboard/admin/valuation",
     icon: <FlaskConical className="h-5 w-5" />,
     activeClass: "bg-rose-500/15 text-rose-400",

@@ -13,7 +13,7 @@ import { ValuationValidator } from "./valuation-validator";
 
 export const revalidate = 0;
 
-export const metadata = { title: "Valuation Validator - Admin" };
+export const metadata = { title: "Valuation Lab - Admin" };
 
 export interface HerdWithValuation {
   id: string;
@@ -176,7 +176,7 @@ export default async function ValuationPage() {
   return (
     <div className="max-w-[1600px]">
       <PageHeader
-        title="Valuation Validator"
+        title="Valuation Lab"
         subtitle="Full calculation breakdown for every herd. Compare intermediate values to verify correctness."
       />
       <ValuationValidator herds={herdsWithValuations} priceMaps={serializedMaps} saleyardCoverage={coverageData ?? []} />

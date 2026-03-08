@@ -381,28 +381,21 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
       {/* Results */}
       {result && (
         <div className="space-y-4">
-          {/* Net value hero */}
-          <div className="rounded-xl border border-brand/20 bg-brand/[0.04] px-5 py-4">
-            <p className="text-xs text-text-muted mb-1">Net Value</p>
-            <p className="text-3xl font-bold tabular-nums text-brand">{fmtDollar(result.netValue)}</p>
-            <p className="text-xs text-text-muted mt-1">
-              {fmtDollar(result.netValue / headCount)} per head
-            </p>
-          </div>
-
-          {/* Breakdown cards */}
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-            <MiniCard label="Price Source" value={result.priceSource} badge />
+          {/* Breakdown cards - 3 column grid */}
+          <div className="grid grid-cols-3 gap-2">
+            <MiniCard label="Base Market Value" value={fmtDollar(result.baseMarketValue)} />
+            <MiniCard label="Physical Value" value={fmtDollar(result.physicalValue)} />
+            <MiniCard label="Gross Value" value={fmtDollar(result.grossValue)} />
+            <MiniCard label="Proj. Weight" value={`${result.projectedWeight.toFixed(1)} kg`} />
             <MiniCard label="Base $/kg" value={fmtCents(result.basePrice, 2)} />
             <MiniCard label="Adj $/kg" value={fmtCents(result.pricePerKg, 2)} />
-            <MiniCard label="Proj. Weight" value={`${result.projectedWeight.toFixed(1)} kg`} />
-            <MiniCard label="Base Market Value" value={fmtDollar(result.baseMarketValue)} />
             <MiniCard label="WG Accrual" value={fmtDollar(result.weightGainAccrual)} color="emerald" />
-            <MiniCard label="Physical Value" value={fmtDollar(result.physicalValue)} />
             <MiniCard label="Mortality" value={result.mortalityDeduction > 0 ? `-${fmtDollar(result.mortalityDeduction)}` : "-"} color="red" />
             <MiniCard label="Breeding Accrual" value={result.breedingAccrual > 0 ? fmtDollar(result.breedingAccrual) : "-"} color="sky" />
-            <MiniCard label="Gross Value" value={fmtDollar(result.grossValue)} />
           </div>
+
+          {/* Price Source */}
+          <MiniCard label="Price Source" value={result.priceSource} badge />
 
           {/* Formula walkthrough */}
           <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.04] px-4 py-3">
@@ -411,7 +404,9 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
             </p>
             <div className="space-y-1.5 font-mono text-[11px] text-amber-200/80">
               <p>ProjectedWeight = {initialWeight} + ({dwg} x {result.daysHeld}) = <strong>{result.projectedWeight.toFixed(1)} kg</strong></p>
-              <p>BasePrice = {fmtCents(result.basePrice, 2)} /kg ({result.priceSource}{result.matchedWeightRange ? `, ${result.matchedWeightRange} bracket` : ""}, data: {result.dataDate ?? "fallback"})</p>
+              <p>BasePrice = {fmtCents(result.basePrice, 2)} /kg</p>
+              <p className="text-amber-200/50">Price Data Source = ({result.priceSource === "saleyard" ? "Saleyard" : result.priceSource === "national" ? "National" : "Fallback"}){result.matchedWeightRange ? `, ${result.matchedWeightRange} bracket` : ""}</p>
+              <p className="text-amber-200/50">Latest Data Source Date = {result.dataDate ?? "fallback"}</p>
               {result.breedPremiumApplied !== 0 && (
                 <p>BreedPremium = {fmtCents(result.basePrice, 2)} x (1 + {result.breedPremiumApplied}%) = <strong>{fmtCents(result.pricePerKg, 2)} /kg</strong></p>
               )}

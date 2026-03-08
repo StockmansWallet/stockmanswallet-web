@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { Table2, FlaskConical, MapPin, BookOpen } from "lucide-react";
 import type { HerdWithValuation, SerializedPriceMaps, SaleyardCoverage } from "./page";
 import { LogicPanel } from "./logic-panel";
 import { ValuationTable } from "./valuation-table";
@@ -14,7 +15,7 @@ interface Props {
 }
 
 export function ValuationValidator({ herds, priceMaps, saleyardCoverage }: Props) {
-  const [activeTab, setActiveTab] = useState<"table" | "calculator" | "saleyards">("table");
+  const [activeTab, setActiveTab] = useState<"table" | "calculator" | "saleyards" | "logic">("table");
   const [prefillHerdId, setPrefillHerdId] = useState<string | null>(null);
 
   const handleTestHerd = useCallback((herdId: string) => {
@@ -30,35 +31,41 @@ export function ValuationValidator({ herds, priceMaps, saleyardCoverage }: Props
 
   return (
     <div className="space-y-4">
-      {/* Summary strip */}
-      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-white/[0.06] bg-surface-secondary px-4 py-3">
-        <Stat label="Herds" value={herds.length.toString()} />
-        <Divider />
-        <Stat label="Total Head" value={totalHead.toLocaleString()} />
-        <Divider />
-        <Stat label="Portfolio Net Value" value={`$${Math.round(totalNetValue).toLocaleString()}`} accent />
-        <Divider />
-        <div className="flex items-center gap-2 text-xs">
-          <span className="text-text-muted">Price sources:</span>
-          <Badge color="emerald" label={`${saleyardCount} saleyard`} />
-          <Badge color="amber" label={`${nationalCount} national`} />
-          {fallbackCount > 0 && <Badge color="red" label={`${fallbackCount} fallback`} />}
+      {/* Summary strip + Net Value cards */}
+      <div className="flex items-stretch gap-3">
+        <div className="flex flex-1 flex-wrap items-center gap-3 rounded-xl border border-white/[0.06] bg-surface-secondary px-4 py-3">
+          <Stat label="Herds" value={herds.length.toString()} />
+          <Divider />
+          <Stat label="Total Head" value={totalHead.toLocaleString()} />
+          <Divider />
+          <Stat label="Portfolio Net Value" value={`$${Math.round(totalNetValue).toLocaleString()}`} accent />
+          <Divider />
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-text-muted">Price sources:</span>
+            <Badge color="emerald" label={`${saleyardCount} saleyard`} />
+            <Badge color="amber" label={`${nationalCount} national`} />
+            {fallbackCount > 0 && <Badge color="red" label={`${fallbackCount} fallback`} />}
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <HeroCard label="Net Value" value={`$${Math.round(totalNetValue).toLocaleString()}`} />
+          <HeroCard label="Per Head" value={totalHead > 0 ? `$${Math.round(totalNetValue / totalHead).toLocaleString()}` : "-"} />
         </div>
       </div>
 
-      {/* Logic panel */}
-      <LogicPanel />
-
       {/* Tab switcher */}
       <div className="flex items-center gap-1 rounded-lg border border-white/[0.06] bg-surface-secondary p-1 w-fit">
-        <TabButton active={activeTab === "table"} onClick={() => setActiveTab("table")}>
+        <TabButton active={activeTab === "table"} onClick={() => setActiveTab("table")} icon={Table2}>
           Herd Breakdown
         </TabButton>
-        <TabButton active={activeTab === "calculator"} onClick={() => setActiveTab("calculator")}>
+        <TabButton active={activeTab === "calculator"} onClick={() => setActiveTab("calculator")} accent icon={FlaskConical}>
           Test Calculator
         </TabButton>
-        <TabButton active={activeTab === "saleyards"} onClick={() => setActiveTab("saleyards")}>
+        <TabButton active={activeTab === "saleyards"} onClick={() => setActiveTab("saleyards")} icon={MapPin}>
           Saleyard Status
+        </TabButton>
+        <TabButton active={activeTab === "logic"} onClick={() => setActiveTab("logic")} icon={BookOpen}>
+          Calculation Logic
         </TabButton>
       </div>
 
@@ -73,6 +80,7 @@ export function ValuationValidator({ herds, priceMaps, saleyardCoverage }: Props
         />
       )}
       {activeTab === "saleyards" && <SaleyardStatus />}
+      {activeTab === "logic" && <LogicPanel />}
     </div>
   );
 }
@@ -105,16 +113,28 @@ function Badge({ color, label }: { color: "emerald" | "amber" | "red"; label: st
   );
 }
 
-function TabButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+function HeroCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex flex-col justify-center rounded-xl border border-brand/20 bg-brand/[0.04] px-5 py-3 min-w-[120px]">
+      <p className="text-[10px] text-text-muted mb-0.5">{label}</p>
+      <p className="text-2xl font-bold tabular-nums text-brand">{value}</p>
+    </div>
+  );
+}
+
+function TabButton({ active, onClick, children, accent, icon: Icon }: { active: boolean; onClick: () => void; children: React.ReactNode; accent?: boolean; icon?: React.ComponentType<{ className?: string }> }) {
   return (
     <button
       onClick={onClick}
-      className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+      className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
         active
-          ? "bg-white/[0.08] text-text-primary"
+          ? accent
+            ? "bg-brand text-white"
+            : "bg-white/[0.08] text-text-primary"
           : "text-text-muted hover:text-text-primary hover:bg-white/[0.04]"
       }`}
     >
+      {Icon && <Icon className="h-3.5 w-3.5" />}
       {children}
     </button>
   );
