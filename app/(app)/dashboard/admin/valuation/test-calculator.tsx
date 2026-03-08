@@ -388,17 +388,17 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
           </div>
 
           {/* Breakdown cards */}
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+            <MiniCard label="Price Source" value={result.priceSource} badge />
             <MiniCard label="Base $/kg" value={fmtCents(result.basePrice)} />
             <MiniCard label="Adj $/kg" value={fmtCents(result.pricePerKg)} />
-            <MiniCard label="Physical Value (at projected wt)" value={fmtDollar(result.physicalValue)} />
-            <MiniCard label="Base Market Value (at initial wt)" value={fmtDollar(result.baseMarketValue)} />
+            <MiniCard label="Proj. Weight" value={`${result.projectedWeight.toFixed(1)} kg`} />
+            <MiniCard label="Base Market Value" value={fmtDollar(result.baseMarketValue)} />
             <MiniCard label="WG Accrual" value={fmtDollar(result.weightGainAccrual)} color="emerald" />
+            <MiniCard label="Physical Value" value={fmtDollar(result.physicalValue)} />
             <MiniCard label="Mortality" value={result.mortalityDeduction > 0 ? `-${fmtDollar(result.mortalityDeduction)}` : "-"} color="red" />
             <MiniCard label="Breeding Accrual" value={result.breedingAccrual > 0 ? fmtDollar(result.breedingAccrual) : "-"} color="sky" />
             <MiniCard label="Gross Value" value={fmtDollar(result.grossValue)} />
-            <MiniCard label="Proj. Weight" value={`${result.projectedWeight.toFixed(1)} kg`} />
-            <MiniCard label="Price Source" value={result.priceSource} badge />
           </div>
 
           {/* Formula walkthrough */}

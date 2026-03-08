@@ -21,11 +21,6 @@ const SPECIES_OPTIONS = [
   { value: "Goat", label: "Goat" },
 ];
 
-const SEX_OPTIONS = [
-  { value: "Male", label: "Male" },
-  { value: "Female", label: "Female" },
-];
-
 const BREEDING_PROGRAM_OPTIONS = [
   { value: "", label: "None" },
   { value: "ai", label: "AI" },
@@ -136,14 +131,6 @@ export function HerdForm({ herd, properties, action }: HerdFormProps) {
               defaultValue={herd?.breed ?? ""}
             />
             <Select
-              id="sex"
-              name="sex"
-              label="Sex"
-              required
-              options={SEX_OPTIONS}
-              defaultValue={herd?.sex ?? "Female"}
-            />
-            <Select
               id="category"
               name="category"
               label="Category"
@@ -219,6 +206,16 @@ export function HerdForm({ herd, properties, action }: HerdFormProps) {
               min={0}
               max={100}
               defaultValue={herd?.mortality_rate != null ? herd.mortality_rate * 100 : 0}
+            />
+            <Input
+              id="breed_premium_override"
+              name="breed_premium_override"
+              label="Breed Premium (%)"
+              type="number"
+              step="0.1"
+              defaultValue={herd?.breed_premium_override ?? ""}
+              placeholder="Auto"
+              helperText="Leave blank for automatic breed premium"
             />
           </div>
         </CardContent>

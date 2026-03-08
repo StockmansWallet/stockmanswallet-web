@@ -4,6 +4,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
+const MALE_KEYWORDS = ["Bull", "Steer", "Barrow", "Buck", "Wether"];
+
+function deriveSexFromCategory(category: string): "Male" | "Female" {
+  return MALE_KEYWORDS.some((k) => category.includes(k)) ? "Male" : "Female";
+}
+
 export async function createHerd(formData: FormData) {
   const supabase = await createClient();
   const {
@@ -12,14 +18,19 @@ export async function createHerd(formData: FormData) {
 
   if (!user) return { error: "Not authenticated" };
 
+  const category = formData.get("category") as string;
+  const sex = deriveSexFromCategory(category);
+  const breedPremiumRaw = formData.get("breed_premium_override") as string;
+  const breedPremiumOverride = breedPremiumRaw ? parseFloat(breedPremiumRaw) : null;
+
   const { error } = await supabase.from("herd_groups").insert({
     id: crypto.randomUUID(),
     user_id: user.id,
     name: formData.get("name") as string,
     species: formData.get("species") as "Cattle" | "Sheep" | "Pig" | "Goat",
     breed: formData.get("breed") as string,
-    sex: formData.get("sex") as "Male" | "Female",
-    category: formData.get("category") as string,
+    sex,
+    category,
     age_months: Number(formData.get("age_months")) || 0,
     head_count: Number(formData.get("head_count")) || 1,
     initial_weight: Number(formData.get("initial_weight")) || 0,
@@ -43,6 +54,7 @@ export async function createHerd(formData: FormData) {
     notes: (formData.get("notes") as string) || null,
     animal_id_number:
       (formData.get("animal_id_number") as string) || null,
+    breed_premium_override: breedPremiumOverride,
     updated_at: new Date().toISOString(),
   });
 
@@ -60,6 +72,11 @@ export async function updateHerd(id: string, formData: FormData) {
 
   if (!user) return { error: "Not authenticated" };
 
+  const updateCategory = formData.get("category") as string;
+  const updateSex = deriveSexFromCategory(updateCategory);
+  const updatePremiumRaw = formData.get("breed_premium_override") as string;
+  const updatePremiumOverride = updatePremiumRaw ? parseFloat(updatePremiumRaw) : null;
+
   const { error } = await supabase
     .from("herd_groups")
     .update({
@@ -70,8 +87,8 @@ export async function updateHerd(id: string, formData: FormData) {
         | "Pig"
         | "Goat",
       breed: formData.get("breed") as string,
-      sex: formData.get("sex") as "Male" | "Female",
-      category: formData.get("category") as string,
+      sex: updateSex,
+      category: updateCategory,
       age_months: Number(formData.get("age_months")) || 0,
       head_count: Number(formData.get("head_count")) || 1,
       initial_weight: Number(formData.get("initial_weight")) || 0,
@@ -96,6 +113,7 @@ export async function updateHerd(id: string, formData: FormData) {
       notes: (formData.get("notes") as string) || null,
       animal_id_number:
         (formData.get("animal_id_number") as string) || null,
+      breed_premium_override: updatePremiumOverride,
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)

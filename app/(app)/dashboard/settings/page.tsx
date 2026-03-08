@@ -8,7 +8,6 @@ import {
   MapPinned,
   Database,
   Shield,
-  Calculator,
   ChevronRight,
   FlaskConical,
 } from "lucide-react";
@@ -105,29 +104,6 @@ export default async function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Admin Tools */}
-        {isAdmin && (
-          <Card>
-            <CardContent className="divide-y divide-white/[0.04] p-0">
-              <NavItem
-                href="/dashboard/admin/mla-upload"
-                icon={Shield}
-                iconBg="bg-emerald-500/15"
-                iconColor="text-emerald-400"
-                label="MLA Data Upload"
-                description="Upload MLA CSV files for pricing"
-              />
-              <NavItem
-                href="/dashboard/admin/valuation"
-                icon={Calculator}
-                iconBg="bg-amber-500/15"
-                iconColor="text-amber-400"
-                label="Valuation Validator"
-                description="Full calculation breakdown and testing"
-              />
-            </CardContent>
-          </Card>
-        )}
 
       </div>
     </div>

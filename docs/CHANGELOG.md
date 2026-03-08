@@ -2,6 +2,64 @@
 
 ---
 
+## 8 Mar 2026
+
+### Data Cleanup - Future-Dated MLA Records Removed
+
+Removed 29,178 future-dated records from `category_prices` table. These were accidentally uploaded from quarterly MLA CSV data instead of weekly, containing entries with `data_date` forward of today. Verified `mla_physical_reports` had zero future-dated records. No code changes required.
+
+### Price Inconsistency Fix - Split Batch Queries
+
+Fixed valuations showing different prices on batch pages (dashboard, herds list, admin) vs the herd detail page for the same herd. Root cause was twofold:
+
+1. **Supabase `max_rows` was 1,000** (default). All `.limit(50000)` calls were silently capped at 1,000 rows. Batch pages querying multiple saleyards and categories exceeded 1,000 matching rows, so older saleyard data (e.g. Charters Towers from 2026-02-15) was truncated. The herd detail page queried a single saleyard and stayed under 1,000. Fixed by increasing `max_rows` to 50,000 via Supabase Management API.
+
+2. **National prices crowded out by saleyard data.** Even with the row limit raised, a single combined query for saleyard + National data risks national entries being pushed out when saleyard datasets are large. Split the single price query into two parallel queries (saleyard prices + national prices) on all three batch pages. National prices now have a dedicated 5,000-row query that cannot be truncated by saleyard data volume.
+
+**Files changed:**
+- `app/(app)/dashboard/page.tsx` - Split combined price query into parallel saleyard + national queries
+- `app/(app)/dashboard/herds/page.tsx` - Same split query pattern
+- `app/(app)/dashboard/admin/valuation/page.tsx` - Same split query pattern
+
+### Weight Bracket Boundary Selection Fix
+
+Fixed non-deterministic weight bracket selection when a weight sits exactly on a bracket boundary (e.g. 400kg matching both "330-400" and "400-500"). The previous code used `candidates[0]` as fallback when no open-ended bracket existed, which depended on Supabase query result ordering. Now deterministically prefers the upper bracket (where weight matches the lower bound), consistent with the existing preference for open-ended brackets.
+
+**Files changed:**
+- `lib/engines/valuation-engine.ts` - Added upper-bracket preference in `matchWeightRange()` for ranged bracket boundaries
+
+### Supabase Configuration
+
+- Increased PostgREST `max_rows` from 1,000 to 50,000 via Management API. This is a server-side setting, no code change required.
+
+### Admin Tools - Sidebar Navigation
+
+Moved Valuation Validator and MLA Data Upload from the Settings page to their own admin-only section in the sidebar. Each tool has a unique colour theme (rose for Valuation Validator, emerald for MLA Data Upload). The section is only visible to admin emails.
+
+**Files changed:**
+- `components/app/sidebar.tsx` - Added admin section with `adminItems` array, gated by `isAdminEmail()`
+- `app/(app)/dashboard/settings/page.tsx` - Removed admin tools card (they now live in the sidebar)
+
+### Valuation Validator - UI Improvements
+
+Added data date to the formula walkthrough box (shows which MLA data date the price comes from). Added Base $/kg and Adj $/kg cards to the test calculator results. Rearranged result cards into a cleaner 2-row x 5-column layout: Row 1 shows pricing info (Price Source, Base $/kg, Adj $/kg, Proj. Weight, Base Market Value), Row 2 shows value components (WG Accrual, Physical Value, Mortality, Breeding Accrual, Gross Value).
+
+**Files changed:**
+- `app/(app)/dashboard/admin/valuation/test-calculator.tsx` - Added data date to walkthrough, added price cards, rearranged grid to 5-column layout
+
+### Herd Form - Removed Sex, Added Breed Premium
+
+Removed the Sex field from the herd create/edit form (sex is now derived from category). Added a Breed Premium Override field to the Weight & Growth section, allowing users to override the automatic breed premium percentage. The server actions now auto-derive sex from category keywords (Bull, Steer, Barrow, Buck, Wether = Male, everything else = Female).
+
+Also removed the Sex info row from the herd detail page and added a Breed Premium row showing the applied premium percentage.
+
+**Files changed:**
+- `components/app/herd-form.tsx` - Removed Sex select, added Breed Premium Override input
+- `app/(app)/dashboard/herds/actions.ts` - Added `deriveSexFromCategory()`, added `breed_premium_override` to create/update
+- `app/(app)/dashboard/herds/[id]/page.tsx` - Removed Sex row, added Breed Premium row
+
+---
+
 ## 7 Mar 2026
 
 ### UI Polish - Filter Pills, Icons, Colours, Layout

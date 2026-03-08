@@ -90,13 +90,13 @@ const adminItems = [
     label: "Valuation Validator",
     href: "/dashboard/admin/valuation",
     icon: <FlaskConical className="h-5 w-5" />,
-    activeClass: "bg-amber-500/15 text-amber-400",
+    activeClass: "bg-rose-500/15 text-rose-400",
   },
   {
     label: "MLA Data Upload",
     href: "/dashboard/admin/mla-upload",
     icon: <Upload className="h-5 w-5" />,
-    activeClass: "bg-amber-500/15 text-amber-400",
+    activeClass: "bg-emerald-500/15 text-emerald-400",
   },
 ];
 

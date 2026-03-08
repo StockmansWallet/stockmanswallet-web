@@ -1,5 +1,36 @@
 # Build Summaries
 
+## 8 Mar 2026
+
+### Data Cleanup - Future-Dated MLA Records
+* Removed 29,178 future-dated records from `category_prices` (quarterly CSV data uploaded instead of weekly)
+
+### Price Inconsistency Fix
+* Fixed herds showing different valuations on dashboard/herds list vs herd detail page
+* Root cause: Supabase `max_rows` was 1,000 (default), silently capping all queries. Batch pages exceeded the limit, losing older saleyard data
+* Increased `max_rows` to 50,000 via Supabase Management API
+* Split batch price queries into parallel saleyard + national queries to prevent national prices being crowded out
+
+### Weight Bracket Boundary Fix
+* Fixed non-deterministic bracket selection at boundary weights (e.g. 400kg matching both "330-400" and "400-500")
+* Now deterministically prefers the upper bracket instead of depending on query result order
+
+### Admin Tools - Sidebar Navigation
+* Moved Valuation Validator and MLA Data Upload from Settings page to dedicated admin section in sidebar
+* Each tool has unique colour theme (rose/emerald), section only visible to admin emails
+
+### Valuation Validator - UI Improvements
+* Added data date to formula walkthrough (shows which MLA data date the price comes from)
+* Added Base $/kg and Adj $/kg result cards
+* Rearranged result cards into 2-row x 5-column layout for better readability
+
+### Herd Form - Sex Removed, Breed Premium Added
+* Removed Sex field from herd create/edit form (now auto-derived from category)
+* Added Breed Premium Override field in Weight & Growth section
+* Removed Sex row from herd detail page, added Breed Premium row
+
+---
+
 ## 7 Mar 2026
 
 ### UI Polish - Filter Pills, Icons, Colours, Layout
