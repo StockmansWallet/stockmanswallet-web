@@ -40,7 +40,8 @@ export default async function DashboardPage() {
                dwg_change_date, previous_dwg, created_at,
                is_breeder, is_pregnant, joined_date, calving_rate,
                breeding_program_type, joining_period_start, joining_period_end,
-               breed_premium_override, mortality_rate, is_sold, selected_saleyard`)
+               breed_premium_override, mortality_rate, is_sold, selected_saleyard,
+               additional_info, calf_weight_recorded_date, updated_at`)
       .eq("user_id", user!.id)
       .eq("is_sold", false)
       .eq("is_deleted", false)

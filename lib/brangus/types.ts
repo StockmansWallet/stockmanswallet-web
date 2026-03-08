@@ -90,6 +90,8 @@ export interface HerdRow {
   property_id: string | null;
   paddock_name: string | null;
   notes: string | null;
+  additional_info: string | null;
+  calf_weight_recorded_date: string | null;
 }
 
 export interface PropertyRow {

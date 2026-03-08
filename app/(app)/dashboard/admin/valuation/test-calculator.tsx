@@ -247,6 +247,9 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
       joining_period_start: null,
       joining_period_end: null,
       selected_saleyard: saleyard || null,
+      additional_info: null,
+      calf_weight_recorded_date: null,
+      updated_at: new Date().toISOString(),
     };
 
     return calculateHerdValuation(

@@ -84,6 +84,65 @@ export function calculateMortalityDeduction(
   return marketValue * (daysHeld / 365) * mortalityRateAnnual;
 }
 
+// MARK: - Calves at Foot (spec Section 3)
+
+/**
+ * Parses "Calves at Foot: X head, Y months[, Z kg]" from additional_info string.
+ * Matches iOS HerdGroup+CalvesAtFoot.swift parsing logic.
+ */
+export function parseCalvesAtFoot(additionalInfo: string | null): { headCount: number; ageMonths: number; averageWeight: number | null } | null {
+  if (!additionalInfo) return null;
+  const match = additionalInfo.match(/Calves at Foot: ([^|\n]+)/);
+  if (!match) return null;
+
+  const parts = match[1].split(", ");
+  let headCount: number | null = null;
+  let ageMonths: number | null = null;
+  let averageWeight: number | null = null;
+
+  for (const part of parts) {
+    if (part.includes("head")) {
+      headCount = parseInt(part.replace(" head", "").trim(), 10);
+    } else if (part.includes("months")) {
+      ageMonths = parseInt(part.replace(" months", "").trim(), 10);
+    } else if (part.includes("kg")) {
+      averageWeight = parseFloat(part.replace(" kg", "").trim());
+    }
+  }
+
+  if (headCount == null || headCount <= 0 || ageMonths == null) return null;
+  return { headCount, ageMonths, averageWeight };
+}
+
+/**
+ * Calculates calves at foot value per spec Section 3.
+ * Uses species-specific DWG (Cattle 0.9, Sheep 0.25 kg/day).
+ * If user provided a weight, applies ongoing DWG from recording date.
+ * Otherwise estimates from age.
+ */
+export function calculateCalfAtFootValue(
+  calvesData: { headCount: number; ageMonths: number; averageWeight: number | null },
+  weightRecordedAt: Date,
+  species: string,
+  pricePerKg: number,
+  asOfDate: Date
+): number {
+  const dwg = species === "Cattle" ? 0.9 : 0.25;
+  let currentCalfWeight: number;
+
+  if (calvesData.averageWeight != null && calvesData.averageWeight > 0) {
+    // Per spec Section 3.2 - apply ongoing DWG from calf weight recording date
+    const daysSinceRecorded = Math.max(0, Math.floor((asOfDate.getTime() - weightRecordedAt.getTime()) / 86400000));
+    currentCalfWeight = calvesData.averageWeight + dwg * daysSinceRecorded;
+  } else {
+    // No user weight - estimate from age (fallback)
+    const daysOld = calvesData.ageMonths * 30;
+    currentCalfWeight = dwg * daysOld;
+  }
+
+  return calvesData.headCount * currentCalfWeight * pricePerKg;
+}
+
 // MARK: - Weight Range Matching
 
 /**
@@ -268,6 +327,9 @@ export interface HerdForValuation {
   joining_period_start: string | null;
   joining_period_end: string | null;
   selected_saleyard: string | null;
+  additional_info: string | null;
+  calf_weight_recorded_date: string | null;
+  updated_at: string;
 }
 
 // Price entry with optional weight range (matches category_prices table structure)
@@ -459,7 +521,11 @@ export function calculateHerdValuation(
   let breedingAccrual = 0;
   if (herd.is_breeder && herd.is_pregnant && herd.joined_date) {
     let accrualStart: Date;
-    if (
+    const isUncontrolled = herd.breeding_program_type === "uncontrolled";
+    if (isUncontrolled) {
+      // Uncontrolled: start from herd entry date (matches iOS spec Section 2.3)
+      accrualStart = new Date(herd.created_at);
+    } else if (
       (herd.breeding_program_type === "ai" || herd.breeding_program_type === "controlled") &&
       herd.joining_period_start &&
       herd.joining_period_end
@@ -468,6 +534,7 @@ export function calculateHerdValuation(
       const pEnd = new Date(herd.joining_period_end).getTime();
       accrualStart = new Date((pStart + pEnd) / 2);
     } else {
+      // Fallback: use joinedDate if period dates not available
       accrualStart = new Date(herd.joined_date);
     }
     const calvingDays = daysBetween(accrualStart, now);
@@ -486,6 +553,25 @@ export function calculateHerdValuation(
       adjustedPrice
     );
   }
+
+  // 6. Calves at Foot Value per spec Section 3 (breeders only)
+  let calvesAtFootValue = 0;
+  const calvesData = parseCalvesAtFoot(herd.additional_info);
+  if (calvesData) {
+    const weightRecordDate = herd.calf_weight_recorded_date
+      ? new Date(herd.calf_weight_recorded_date)
+      : new Date(herd.updated_at);
+    calvesAtFootValue = calculateCalfAtFootValue(
+      calvesData,
+      weightRecordDate,
+      herd.species,
+      adjustedPrice,
+      now
+    );
+  }
+
+  // Combined breeding accrual (pre-birth + calves at foot)
+  breedingAccrual = breedingAccrual + calvesAtFootValue;
 
   const weightGainAccrual = physicalValue - baseMarketValue;
   const grossValue = physicalValue + breedingAccrual;
