@@ -8,6 +8,7 @@ import {
   breedsForSpecies,
   categoriesForSpecies,
   saleyards,
+  cattleBreedPremiums,
 } from "@/lib/data/reference-data";
 import type { Database } from "@/lib/types/database";
 import { Info, Scale, Heart, MapPin, FileText } from "lucide-react";
@@ -48,7 +49,10 @@ export function HerdForm({ herd, properties, action }: HerdFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [species, setSpecies] = useState<string>(herd?.species ?? "Cattle");
+  const [breed, setBreed] = useState<string>(herd?.breed ?? "");
   const [isBreeder, setIsBreeder] = useState(herd?.is_breeder ?? false);
+
+  const autoPremium = species === "Cattle" ? cattleBreedPremiums[breed] ?? null : null;
 
   const breedOptions = breedsForSpecies(species).map((b) => ({
     value: b,
@@ -119,7 +123,7 @@ export function HerdForm({ herd, properties, action }: HerdFormProps) {
               required
               options={SPECIES_OPTIONS}
               value={species}
-              onChange={(e) => setSpecies(e.target.value)}
+              onChange={(e) => { setSpecies(e.target.value); setBreed(breedsForSpecies(e.target.value)[0] ?? ""); }}
             />
             <Select
               id="breed"
@@ -128,7 +132,8 @@ export function HerdForm({ herd, properties, action }: HerdFormProps) {
               required
               options={breedOptions}
               placeholder="Select breed"
-              defaultValue={herd?.breed ?? ""}
+              value={breed}
+              onChange={(e) => setBreed(e.target.value)}
             />
             <Select
               id="category"
@@ -214,7 +219,7 @@ export function HerdForm({ herd, properties, action }: HerdFormProps) {
               type="number"
               step="0.1"
               defaultValue={herd?.breed_premium_override ?? ""}
-              placeholder="Auto"
+              placeholder={autoPremium !== null ? `Auto (${autoPremium}%)` : "Auto (none)"}
               helperText="Leave blank for automatic breed premium"
             />
           </div>
