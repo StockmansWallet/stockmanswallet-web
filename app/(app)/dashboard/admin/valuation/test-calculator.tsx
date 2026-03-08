@@ -427,7 +427,7 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
               <p className="pt-1 border-t border-amber-500/10">
                 NetValue = {fmtDollar(result.physicalValue)} - {fmtDollar(result.mortalityDeduction)} + {fmtDollar(result.breedingAccrual)} = <strong className="text-amber-300">{fmtDollar(result.netValue)}</strong>
               </p>
-              <p className="text-amber-200/50 text-[10px]">MLA Category: {result.mlaCategory}</p>
+              <p className="text-amber-200/50 text-[10px]">Category Mapping: {category} → {result.mlaCategory}</p>
             </div>
           </div>
         </div>
