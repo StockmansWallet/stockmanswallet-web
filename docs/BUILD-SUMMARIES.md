@@ -1,5 +1,17 @@
 # Build Summaries
 
+## 9 Mar 2026
+
+### Cow Category Mapping Fix
+* All cow types (Breeder Cow, Breeder Heifer, Wet Cow, Cull Cow) now map to "Cows" instead of "Breeding Cow"/"Wet Cow"
+* Was causing saleyard price lookups to fail silently (no "Breeding Cow" category in MLA data)
+* Now matches iOS mapping
+
+### Formula Walkthrough Layout
+* Moved data source info (price source, date, category mapping) below NetValue as grouped reference section
+
+---
+
 ## 8 Mar 2026
 
 ### Data Cleanup - Future-Dated MLA Records

@@ -2,6 +2,24 @@
 
 ---
 
+## 9 Mar 2026
+
+### Cow Category Mapping Fix
+
+Fixed cow category mapping that caused all cow herds to show fallback prices instead of saleyard data. `mapCategoryToMLACategory` was mapping "Breeder Cow" to "Breeding Cow" and "Cull Cow" to "Wet Cow", but the MLA data only has a single "Cows" category. Updated to map all cow types (Breeder Cow, Breeder Heifer, Wet Cow, Cull Cow) to "Cows", matching the iOS app. Also simplified `mlaCsvCategoryMapping` to use a single `"Cows|*"` wildcard instead of per-prefix entries (Processor, Restocker, Dairy, PTIC, Feeder).
+
+**Files changed:**
+- `lib/data/reference-data.ts` - Updated `mapCategoryToMLACategory` and `mlaCsvCategoryMapping`
+
+### Formula Walkthrough Layout
+
+Moved Price Data Source, Latest Data Source Date, and Category Mapping from inline in the calculation steps to a grouped reference section below the NetValue line, separated by a divider.
+
+**Files changed:**
+- `app/(app)/dashboard/admin/valuation/test-calculator.tsx` - Reorganised walkthrough layout
+
+---
+
 ## 8 Mar 2026
 
 ### Data Cleanup - Future-Dated MLA Records Removed
