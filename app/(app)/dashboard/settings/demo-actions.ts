@@ -18,6 +18,12 @@ function monthsAgo(n: number): string {
   d.setMonth(d.getMonth() - n);
   return d.toISOString();
 }
+// event_time column is timestamptz - build a full timestamp with the desired time
+function timeOfDay(hour: number, minute: number): string {
+  const d = new Date();
+  d.setHours(hour, minute, 0, 0);
+  return d.toISOString();
+}
 
 export async function seedDemoData() {
   const supabase = await createClient();
@@ -265,14 +271,14 @@ export async function seedDemoData() {
     // FINANCE (3)
     { ...yb(), title: "BAS lodgement", event_date: daysFromNow(30), category_raw: "Finance", is_recurring: true, recurrence_rule_raw: "Monthly", notes: "Quarterly BAS due. Send invoices to accountant.", reminder_offsets: [14, 7] },
     { ...yb(), title: "Livestock insurance renewal", event_date: daysFromNow(60), category_raw: "Finance", is_recurring: true, recurrence_rule_raw: "Annual", notes: "Review policy with broker. Update herd values.", reminder_offsets: [30, 7] },
-    { ...yb(), title: "Accountant meeting - quarterly review", event_date: daysFromNow(35), category_raw: "Finance", is_all_day: false, event_time: "10:00", notes: "Quarterly review with accountant. Bring sale receipts and freight invoices." },
+    { ...yb(), title: "Accountant meeting - quarterly review", event_date: daysFromNow(35), category_raw: "Finance", is_all_day: false, event_time: timeOfDay(10, 0), notes: "Quarterly review with accountant. Bring sale receipts and freight invoices." },
     // FAMILY (3)
     { ...yb(), title: "School holidays start", event_date: daysFromNow(25), category_raw: "Family", notes: "Kids home for 2 weeks. Plan station activities." },
     { ...yb(), title: "Wedding anniversary", event_date: daysAgo(8), category_raw: "Family", is_completed: true, completed_date: daysAgo(8), notes: "Dinner in Emerald." },
     { ...yb(), title: "Pony Club rally day", event_date: daysFromNow(3), category_raw: "Family", notes: "Emerald Pony Club. Drop kids 8am, pick up 3pm.", reminder_offsets: [1] },
     // ME (4)
-    { ...yb(), title: "GP appointment", event_date: daysFromNow(10), category_raw: "Me", is_all_day: false, event_time: "14:30", notes: "Annual check-up. Dr Wilson, Emerald Medical Centre.", reminder_offsets: [1] },
-    { ...yb(), title: "Rotary meeting", event_date: daysFromNow(18), category_raw: "Me", is_all_day: false, event_time: "18:00", is_recurring: true, recurrence_rule_raw: "Monthly", notes: "Emerald Rotary Club monthly dinner." },
+    { ...yb(), title: "GP appointment", event_date: daysFromNow(10), category_raw: "Me", is_all_day: false, event_time: timeOfDay(14, 30), notes: "Annual check-up. Dr Wilson, Emerald Medical Centre.", reminder_offsets: [1] },
+    { ...yb(), title: "Rotary meeting", event_date: daysFromNow(18), category_raw: "Me", is_all_day: false, event_time: timeOfDay(18, 0), is_recurring: true, recurrence_rule_raw: "Monthly", notes: "Emerald Rotary Club monthly dinner." },
     { ...yb(), title: "Fishing trip - Fairbairn Dam", event_date: daysFromNow(28), category_raw: "Me", notes: "Weekend trip with mates. Barramundi season." },
     { ...yb(), title: "Ag-Grow field day", event_date: daysFromNow(42), category_raw: "Me", notes: "Annual Emerald Ag-Grow. Check new fencing equipment.", reminder_offsets: [7, 1] },
   ]);

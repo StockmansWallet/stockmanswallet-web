@@ -4,6 +4,16 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
+// event_time column is timestamptz - convert "HH:MM" from <input type="time"> to full ISO timestamp
+function parseEventTime(time: string | null): string | null {
+  if (!time) return null;
+  const [h, m] = time.split(":").map(Number);
+  if (isNaN(h) || isNaN(m)) return null;
+  const d = new Date();
+  d.setHours(h, m, 0, 0);
+  return d.toISOString();
+}
+
 export async function createYardBookItem(formData: FormData) {
   const supabase = await createClient();
   const {
@@ -22,7 +32,7 @@ export async function createYardBookItem(formData: FormData) {
     title: formData.get("title") as string,
     event_date: formData.get("event_date") as string,
     is_all_day: formData.get("is_all_day") === "on",
-    event_time: eventTime || null,
+    event_time: parseEventTime(eventTime),
     category_raw:
       (formData.get("category") as
         | "Livestock"
@@ -77,7 +87,7 @@ export async function updateYardBookItem(id: string, formData: FormData) {
       title: formData.get("title") as string,
       event_date: formData.get("event_date") as string,
       is_all_day: formData.get("is_all_day") === "on",
-      event_time: eventTime || null,
+      event_time: parseEventTime(eventTime),
       category_raw:
         (formData.get("category") as
           | "Livestock"
