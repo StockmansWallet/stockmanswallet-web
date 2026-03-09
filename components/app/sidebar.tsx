@@ -21,6 +21,7 @@ import {
   LogOut,
   FlaskConical,
   Upload,
+  BookMarked,
 } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
 
@@ -97,6 +98,12 @@ const adminItems = [
     href: "/dashboard/admin/mla-upload",
     icon: <Upload className="h-5 w-5" />,
     activeClass: "bg-emerald-500/15 text-emerald-400",
+  },
+  {
+    label: "Changelog",
+    href: "/dashboard/admin/changelog",
+    icon: <BookMarked className="h-5 w-5" />,
+    activeClass: "bg-blue-500/15 text-blue-400",
   },
 ];
 
