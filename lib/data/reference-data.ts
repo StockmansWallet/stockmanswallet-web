@@ -468,7 +468,10 @@ export function mapCategoryToMLACategory(appCategory: string): string {
   switch (appCategory) {
     case "Breeder Cow":
     case "Breeder Heifer":
-      return "Breeding Cow";
+    case "Wet Cow":
+    case "Cull Cow":
+      // MLA CSV only has "Cows" - no Breeding/Wet/Cull distinction
+      return "Cows";
     case "Weaner Heifer":
     case "Yearling Heifer":
     case "Feeder Heifer":
@@ -476,8 +479,6 @@ export function mapCategoryToMLACategory(appCategory: string): string {
       return "Heifer";
     case "Feeder Steer":
       return "Yearling Steer";
-    case "Cull Cow":
-      return "Wet Cow";
     case "Cull Bull":
       return "Grown Bull";
     default:
@@ -537,11 +538,8 @@ export const mlaCsvCategoryMapping: Record<string, string> = {
   "Vealer Heifer|*": "Heifer",
   "Grown Steer|*": "Grown Steer",
   "Grown Heifer|*": "Heifer",
-  "Cows|Processor": "Wet Cow",
-  "Cows|Restocker": "Breeding Cow",
-  "Cows|Dairy": "Wet Cow",
-  "Cows|PTIC": "Breeding Cow",
-  "Cows|Feeder": "Breeding Cow",
+  // Cows - all sale prefixes map to single "Cows" category (MLA doesn't distinguish)
+  "Cows|*": "Cows",
   "Bulls|*": "Grown Bull",
   "Manufacturing Steer|*": "Grown Steer",
   "Calves|*": "Weaner Steer",
