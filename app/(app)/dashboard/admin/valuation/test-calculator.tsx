@@ -415,8 +415,6 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
             <div className="space-y-1.5 font-mono text-[11px] text-amber-200/80">
               <p>ProjectedWeight = {initialWeight} + ({dwg} x {result.daysHeld}) = <strong>{result.projectedWeight.toFixed(1)} kg</strong></p>
               <p>BasePrice = {fmtCents(result.basePrice, 2)} /kg</p>
-              <p className="text-amber-200/50">Price Data Source = ({result.priceSource === "saleyard" ? "Saleyard" : result.priceSource === "national" ? "National" : "Fallback"}){result.matchedWeightRange ? `, ${result.matchedWeightRange} bracket` : ""}</p>
-              <p className="text-amber-200/50">Latest Data Source Date = {result.dataDate ?? "fallback"}</p>
               {result.breedPremiumApplied !== 0 && (
                 <p>BreedPremium = {fmtCents(result.basePrice, 2)} x (1 + {result.breedPremiumApplied}%) = <strong>{fmtCents(result.pricePerKg, 2)} /kg</strong></p>
               )}
@@ -432,7 +430,11 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
               <p className="pt-1 border-t border-amber-500/10">
                 NetValue = {fmtDollar(result.physicalValue)} - {fmtDollar(result.mortalityDeduction)} + {fmtDollar(result.breedingAccrual)} = <strong className="text-amber-300">{fmtDollar(result.netValue)}</strong>
               </p>
-              <p className="text-amber-200/50 text-[10px]">Category Mapping: {category} → {result.mlaCategory}</p>
+              <div className="pt-1.5 mt-1 border-t border-amber-500/10 space-y-0.5 text-amber-200/50 text-[10px]">
+                <p>Price Data Source = ({result.priceSource === "saleyard" ? "Saleyard" : result.priceSource === "national" ? "National" : "Fallback"}){result.matchedWeightRange ? `, ${result.matchedWeightRange} bracket` : ""}</p>
+                <p>Latest Data Source Date = {result.dataDate ?? "fallback"}</p>
+                <p>Category Mapping: {category} → {result.mlaCategory}</p>
+              </div>
             </div>
           </div>
         </div>
