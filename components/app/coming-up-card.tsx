@@ -8,12 +8,13 @@ interface YardBookItem {
   id: string;
   title: string;
   event_date: string;
-  event_type: string | null;
   category_raw: string | null;
 }
 
 function formatDate(dateStr: string): string {
-  const d = new Date(dateStr + "T00:00:00");
+  // event_date is timestamptz - extract date portion for local comparison
+  const datePart = dateStr.includes("T") ? dateStr.split("T")[0] : dateStr.split(" ")[0];
+  const d = new Date(datePart + "T00:00:00");
   const now = new Date();
   const diffMs = d.getTime() - now.getTime();
   const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));

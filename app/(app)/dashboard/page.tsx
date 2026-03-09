@@ -59,7 +59,7 @@ export default async function DashboardPage() {
     // Upcoming yard book items for Coming Up card
     supabase
       .from("yard_book_items")
-      .select("id, title, event_date, event_type, category_raw")
+      .select("id, title, event_date, category_raw")
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
       .eq("is_completed", false)
