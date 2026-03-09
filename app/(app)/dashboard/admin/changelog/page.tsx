@@ -27,7 +27,7 @@ export default async function ChangelogPage() {
     .select("*")
     .order("date", { ascending: false })
     .order("platform")
-    .order("sort_order");
+    .order("sort_order", { ascending: false });
 
   const updates: DevUpdate[] = error ? [] : (data as DevUpdate[]);
   const timeline = groupByDate(updates);
