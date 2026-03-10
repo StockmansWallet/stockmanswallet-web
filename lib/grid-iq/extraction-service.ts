@@ -347,11 +347,19 @@ function reconcileHeadCount(
 ): HeadCountReconciliation {
   const summaryHeadCount = data.totalHeadCount || 0;
   const extractedLineItemCount = data.lineItems?.length || 0;
-  const isMatched = summaryHeadCount === extractedLineItemCount;
+
+  // Summary-only kill sheets (e.g. JBS Abattoir Feedback) have category totals
+  // but no per-head line items. This is expected, not a mismatch.
+  const isSummaryOnly = extractedLineItemCount === 0 && summaryHeadCount > 0 &&
+    (data.categorySummaries?.length ?? 0) > 0;
+
+  const isMatched = isSummaryOnly || summaryHeadCount === extractedLineItemCount;
   const difference = Math.abs(summaryHeadCount - extractedLineItemCount);
 
   let message = "";
-  if (!isMatched) {
+  if (isSummaryOnly) {
+    message = `Summary-only kill sheet: ${summaryHeadCount} head across ${data.categorySummaries?.length ?? 0} categories. No per-head line items in this format.`;
+  } else if (!isMatched) {
     if (extractedLineItemCount < summaryHeadCount) {
       message = `The kill sheet summary reports ${summaryHeadCount} head, but only ${extractedLineItemCount} line items were extracted. ${difference} records may be missing.`;
     } else {

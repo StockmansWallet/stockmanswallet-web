@@ -170,6 +170,7 @@ export function GridIQUploader() {
         const { error: insertError } = await supabase
           .from("processor_grids")
           .insert({
+            id: crypto.randomUUID(),
             user_id: session.user.id,
             processor_name: grid.processorName || "Unknown Processor",
             grid_code: grid.gridCode,
@@ -190,6 +191,7 @@ export function GridIQUploader() {
         const { error: insertError } = await supabase
           .from("kill_sheet_records")
           .insert({
+            id: crypto.randomUUID(),
             user_id: session.user.id,
             processor_name: ks.processorName || "Unknown Processor",
             kill_date: ks.killDate || new Date().toISOString().split("T")[0],
