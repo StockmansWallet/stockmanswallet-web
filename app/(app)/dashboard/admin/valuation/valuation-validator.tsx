@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Table2, FlaskConical, MapPin, BookOpen } from "lucide-react";
+import { Table2, FlaskConical, MapPin, BookOpen, GitCompareArrows } from "lucide-react";
 import type { HerdWithValuation, SerializedPriceMaps, SaleyardCoverage } from "./page";
 import { LogicPanel } from "./logic-panel";
 import { ValuationTable } from "./valuation-table";
 import { TestCalculator } from "./test-calculator";
 import { SaleyardStatus } from "./saleyard-status";
+import { MappingPanel } from "./mapping-panel";
 
 interface Props {
   herds: HerdWithValuation[];
@@ -15,7 +16,7 @@ interface Props {
 }
 
 export function ValuationValidator({ herds, priceMaps, saleyardCoverage }: Props) {
-  const [activeTab, setActiveTab] = useState<"table" | "calculator" | "saleyards" | "logic">("table");
+  const [activeTab, setActiveTab] = useState<"table" | "calculator" | "saleyards" | "logic" | "mapping">("table");
   const [prefillHerdId, setPrefillHerdId] = useState<string | null>(null);
 
   const handleTestHerd = useCallback((herdId: string) => {
@@ -63,6 +64,9 @@ export function ValuationValidator({ herds, priceMaps, saleyardCoverage }: Props
         <TabButton active={activeTab === "logic"} onClick={() => setActiveTab("logic")} icon={BookOpen}>
           Calculation Logic
         </TabButton>
+        <TabButton active={activeTab === "mapping"} onClick={() => setActiveTab("mapping")} icon={GitCompareArrows}>
+          Mapping
+        </TabButton>
       </div>
 
       {activeTab === "table" && <ValuationTable herds={herds} onTestHerd={handleTestHerd} />}
@@ -77,6 +81,7 @@ export function ValuationValidator({ herds, priceMaps, saleyardCoverage }: Props
       )}
       {activeTab === "saleyards" && <SaleyardStatus />}
       {activeTab === "logic" && <LogicPanel />}
+      {activeTab === "mapping" && <MappingPanel />}
     </div>
   );
 }
