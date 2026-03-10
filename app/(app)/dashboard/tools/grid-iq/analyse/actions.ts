@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import {
   calculateHerdValuation,
@@ -36,14 +35,14 @@ export async function createAnalysis(formData: FormData) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("Not authenticated");
+  if (!user) return { error: "Not authenticated" };
 
   const gridId = formData.get("gridId") as string;
   const herdId = formData.get("herdId") as string;
   const killSheetId = (formData.get("killSheetId") as string) || null;
   const analysisMode: AnalysisMode = killSheetId ? "post_sale" : "pre_sale";
 
-  if (!gridId || !herdId) throw new Error("Grid and herd are required");
+  if (!gridId || !herdId) return { error: "Grid and herd are required" };
 
   // 1. Fetch grid, herd, kill sheet, property in parallel
   const [{ data: grid }, { data: herd }, killSheetResult, { data: breedPremiumData }] = await Promise.all([
@@ -82,8 +81,8 @@ export async function createAnalysis(formData: FormData) {
     supabase.from("breed_premiums").select("breed, premium_percent:premium_pct"),
   ]);
 
-  if (!grid) throw new Error("Grid not found");
-  if (!herd) throw new Error("Herd not found");
+  if (!grid) return { error: "Grid not found" };
+  if (!herd) return { error: "Herd not found" };
 
   // 2. Fetch property coordinates (for freight)
   let propertyLat: number | null = null;
@@ -357,9 +356,9 @@ export async function createAnalysis(formData: FormData) {
   });
 
   if (error) {
-    throw new Error(`Failed to save analysis: ${error.message}`);
+    return { error: `Failed to save analysis: ${error.message}` };
   }
 
   revalidatePath("/dashboard/tools/grid-iq");
-  redirect(`/dashboard/tools/grid-iq/analysis/${newId}`);
+  return { analysisId: newId };
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { createAnalysis } from "./actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -72,6 +73,7 @@ function formatCurrency(value: number | null): string {
 }
 
 export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
+  const router = useRouter();
   const [selectedGridId, setSelectedGridId] = useState<string | null>(null);
   const [selectedHerdId, setSelectedHerdId] = useState<string | null>(null);
   const [selectedKillSheetId, setSelectedKillSheetId] = useState<string | null>(null);
@@ -107,7 +109,12 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
     if (selectedKillSheetId) formData.set("killSheetId", selectedKillSheetId);
     startTransition(async () => {
       try {
-        await createAnalysis(formData);
+        const result = await createAnalysis(formData);
+        if (result?.error) {
+          setError(result.error);
+        } else if (result?.analysisId) {
+          router.push(`/dashboard/tools/grid-iq/analysis/${result.analysisId}`);
+        }
       } catch (e) {
         setError(e instanceof Error ? e.message : "Analysis failed");
       }

@@ -6,6 +6,7 @@ export default function GridIQLayout({ children }: { children: React.ReactNode }
     <div className="max-w-6xl">
       <PageHeader
         title="Grid IQ"
+        titleHref="/dashboard/tools/grid-iq"
         titleClassName="text-4xl font-bold text-teal-400"
         subtitle="Processor intelligence"
         subtitleClassName="text-sm font-medium text-text-secondary"

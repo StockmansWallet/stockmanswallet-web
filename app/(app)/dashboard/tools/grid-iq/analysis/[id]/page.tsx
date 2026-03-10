@@ -43,8 +43,8 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
   if (!analysis) notFound();
 
   const a = analysis as Record<string, unknown>;
-  const mode = (a.analysis_mode as string) ?? "preSale";
-  const isPostSale = mode === "postSale";
+  const mode = (a.analysis_mode as string) ?? "pre_sale";
+  const isPostSale = mode === "post_sale";
   const advantage = (a.grid_iq_advantage as number) ?? 0;
 
   // Debug: Sell window status mapping

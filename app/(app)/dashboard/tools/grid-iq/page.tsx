@@ -104,7 +104,7 @@ export default async function GridIQPage() {
                             a.analysis_date as string
                           ).toLocaleDateString("en-AU")}
                         </p>
-                        {mode === "postSale" && (
+                        {mode === "post_sale" && (
                           <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-text-muted">
                             Post-Sale
                           </span>
