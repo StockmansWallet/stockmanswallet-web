@@ -2,7 +2,7 @@
 // Mirrors iOS StockmanIQChatService - handles API calls, tool loop, system prompt
 
 import { createClient } from "../supabase/client";
-import { calculateHerdValue, mapCategoryToMLACategory, type CategoryPriceEntry } from "../engines/valuation-engine";
+import { calculateHerdValue, mapCategoryToMLACategory, categoryFallback, type CategoryPriceEntry } from "../engines/valuation-engine";
 import { cattleBreedPremiums } from "../data/reference-data";
 import { toolDefinitions, executeTool } from "./tools";
 import type {
@@ -472,7 +472,8 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
   // Filter by user's saleyards + MLA categories to stay under PostgREST 1000-row limit
   const activeHerdsList = (herds ?? []).filter((h: { is_sold: boolean }) => !h.is_sold);
   const saleyards = [...new Set(activeHerdsList.map((h: { selected_saleyard: string | null }) => h.selected_saleyard).filter(Boolean))] as string[];
-  const mlaCategories = [...new Set(activeHerdsList.map((h: { category: string }) => mapCategoryToMLACategory(h.category)))];
+  const primaryCategories = [...new Set(activeHerdsList.map((h: { category: string }) => mapCategoryToMLACategory(h.category)))];
+  const mlaCategories = [...new Set([...primaryCategories, ...primaryCategories.map(c => categoryFallback(c)).filter((c): c is string => c !== null)])];
   if (saleyards.length > 0 && mlaCategories.length > 0) {
     const { data: saleyardPricesData } = await supabase
       .from("category_prices")

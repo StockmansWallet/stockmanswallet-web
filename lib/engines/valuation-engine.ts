@@ -4,6 +4,16 @@
 
 import { mapCategoryToMLACategory, resolveMLASaleyardName } from "../data/reference-data";
 
+// MARK: - Category Fallback
+// Debug: Returns an alternate MLA category when the primary has no price data.
+// "Yearling Heifer" falls back to "Heifer" if no distinct pricing exists.
+export function categoryFallback(mlaCategory: string): string | null {
+  switch (mlaCategory) {
+    case "Yearling Heifer": return "Heifer";
+    default: return null;
+  }
+}
+
 // MARK: - Constants
 
 export const BREEDING_ACCRUAL_CYCLE_DAYS = 365;
@@ -501,7 +511,34 @@ export function calculateHerdValuation(
     if (resolved) { priceSource = "national"; matchedWeightRange = resolved.matchedRange; }
   }
 
-  // 2d. Final fallback to hardcoded defaults
+  // 2d. Try fallback category if primary found nothing (e.g. "Yearling Heifer" -> "Heifer")
+  if (!resolved) {
+    const fallbackCat = categoryFallback(mlaCategory);
+    if (fallbackCat) {
+      // Try saleyard general for fallback
+      if (saleyardPriceMap && resolvedSaleyard) {
+        const fbSyKey = `${fallbackCat}|${resolvedSaleyard}`;
+        const fbSyEntries = saleyardPriceMap.get(fbSyKey) ?? [];
+        resolved = resolvePriceFromEntries(fbSyEntries, projectedWeight);
+        if (resolved) { priceSource = "saleyard"; matchedWeightRange = resolved.matchedRange; }
+      }
+      // Try saleyard breed-specific for fallback
+      if (!resolved && saleyardBreedPriceMap && resolvedSaleyard) {
+        const fbBreedKey = `${fallbackCat}|${herd.breed}|${resolvedSaleyard}`;
+        const fbBreedEntries = saleyardBreedPriceMap.get(fbBreedKey) ?? [];
+        resolved = resolvePriceFromEntries(fbBreedEntries, projectedWeight);
+        if (resolved) { priceSource = "saleyard"; skipBreedPremium = true; matchedWeightRange = resolved.matchedRange; }
+      }
+      // Try national for fallback
+      if (!resolved) {
+        const fbNatEntries = nationalPriceMap.get(fallbackCat) ?? [];
+        resolved = resolvePriceFromEntries(fbNatEntries, projectedWeight);
+        if (resolved) { priceSource = "national"; matchedWeightRange = resolved.matchedRange; }
+      }
+    }
+  }
+
+  // 2e. Final fallback to hardcoded defaults
   const basePrice = resolved ? resolved.price : defaultFallbackPrice(herd.category);
 
   // 3. Breed premium - only apply to general (breed=null) prices (mirrors iOS resolveGeneralBasePrice guard)

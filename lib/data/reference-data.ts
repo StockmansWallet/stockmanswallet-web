@@ -473,10 +473,10 @@ export function mapCategoryToMLACategory(appCategory: string): string {
       // MLA CSV only has "Cows" - no Breeding/Wet/Cull distinction
       return "Cows";
     case "Weaner Heifer":
-    case "Yearling Heifer":
     case "Feeder Heifer":
     case "Grown Heifer (Un-Joined)":
       return "Heifer";
+    // "Yearling Heifer" falls through to default - maps to itself for distinct MLA pricing
     case "Feeder Steer":
       return "Yearling Steer";
     case "Cull Bull":
@@ -533,7 +533,7 @@ export function getPhysicalSaleyardShortNames(): string[] {
 
 export const mlaCsvCategoryMapping: Record<string, string> = {
   "Yearling Steer|*": "Yearling Steer",
-  "Yearling Heifer|*": "Heifer",
+  "Yearling Heifer|*": "Yearling Heifer",
   "Vealer Steer|*": "Weaner Steer",
   "Vealer Heifer|*": "Heifer",
   "Grown Steer|*": "Grown Steer",

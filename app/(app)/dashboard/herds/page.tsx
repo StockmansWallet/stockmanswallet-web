@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HerdsTable } from "./herds-table";
 import { Plus, Tags, Layers, DollarSign, Scale } from "lucide-react";
-import { calculateHerdValuation, mapCategoryToMLACategory, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import { calculateHerdValuation, mapCategoryToMLACategory, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 
 export const revalidate = 0;
@@ -58,7 +58,8 @@ export default async function HerdsPage() {
   // Fetch pricing data in two parallel queries to avoid 50k limit truncating national prices
   // when multiple saleyards have large datasets.
   const saleyards = [...new Set((herds ?? []).map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
-  const mlaCategories = [...new Set((herds ?? []).map((h) => mapCategoryToMLACategory(h.category)))];
+  const primaryCategories = [...new Set((herds ?? []).map((h) => mapCategoryToMLACategory(h.category)))];
+  const mlaCategories = [...new Set([...primaryCategories, ...primaryCategories.map(c => categoryFallback(c)).filter((c): c is string => c !== null)])];
 
   type PriceRow = { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string };
   const emptyPrices: PriceRow[] = [];

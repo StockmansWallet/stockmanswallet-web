@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HerdComposition } from "./herd-composition";
 import { PortfolioChart } from "./portfolio-chart";
-import { calculateHerdValuation, mapCategoryToMLACategory, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import { calculateHerdValuation, mapCategoryToMLACategory, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 import { UserProfileCard } from "@/components/app/user-profile-card";
 import { PortfolioValueCard } from "@/components/app/portfolio-value-card";
@@ -72,7 +72,8 @@ export default async function DashboardPage() {
   // when multiple saleyards have large datasets. National prices are fetched separately to
   // guarantee they're always complete (critical for fallback resolution).
   const saleyards = [...new Set((herds ?? []).map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
-  const mlaCategories = [...new Set((herds ?? []).map((h) => mapCategoryToMLACategory(h.category)))];
+  const primaryCategories = [...new Set((herds ?? []).map((h) => mapCategoryToMLACategory(h.category)))];
+  const mlaCategories = [...new Set([...primaryCategories, ...primaryCategories.map(c => categoryFallback(c)).filter((c): c is string => c !== null)])];
 
   type PriceRow = { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string };
   const emptyPrices: PriceRow[] = [];

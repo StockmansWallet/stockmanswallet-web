@@ -14,7 +14,7 @@ import {
   cattleCategories, sheepCategories, pigCategories, goatCategories,
   saleyards, cattleBreedPremiums,
 } from "@/lib/data/reference-data";
-import { mapCategoryToMLACategory } from "@/lib/engines/valuation-engine";
+import { mapCategoryToMLACategory, categoryFallback } from "@/lib/engines/valuation-engine";
 
 interface Props {
   priceMaps: SerializedPriceMaps;
@@ -193,7 +193,8 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
     for (const sy of saleyards) {
       const coverage = saleyardCoverage.find((c) => c.saleyard === sy);
       if (!coverage) { result[sy] = false; continue; }
-      result[sy] = coverage.categories.includes(mlaCategory);
+      const fallbackCat = categoryFallback(mlaCategory);
+      result[sy] = coverage.categories.includes(mlaCategory) || (fallbackCat !== null && coverage.categories.includes(fallbackCat));
     }
     return result;
   }, [mlaCategory, saleyardCoverage]);

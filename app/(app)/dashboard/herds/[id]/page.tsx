@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { calculateProjectedWeight, calculateHerdValuation, mapCategoryToMLACategory, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import { calculateProjectedWeight, calculateHerdValuation, mapCategoryToMLACategory, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 import { DeleteHerdButton } from "./delete-button";
 import { MusterRecordsSection } from "@/components/app/muster-records-section";
@@ -96,6 +96,8 @@ export default async function HerdDetailPage({
   // - Ordered by data_date DESC - no tight limit since a single saleyard can have 10k+ rows
   // - Expiry filter: only include non-expired entries (matches iOS expiryFilter)
   const mlaCategory = mapCategoryToMLACategory(herd.category);
+  const fallbackCat = categoryFallback(mlaCategory);
+  const categoriesToFetch = fallbackCat ? [mlaCategory, fallbackCat] : [mlaCategory];
   const resolvedSaleyard = herd.selected_saleyard
     ? resolveMLASaleyardName(herd.selected_saleyard)
     : null;
@@ -107,7 +109,7 @@ export default async function HerdDetailPage({
     .from("category_prices")
     .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
     .in("saleyard", saleyardsToFetch)
-    .eq("category", mlaCategory)
+    .in("category", categoriesToFetch)
     .order("data_date", { ascending: false })
     .limit(50000);
 

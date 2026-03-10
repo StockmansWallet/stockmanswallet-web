@@ -5,6 +5,7 @@ import { isAdminEmail } from "@/lib/data/admin";
 import {
   calculateHerdValuation,
   mapCategoryToMLACategory,
+  categoryFallback,
   type CategoryPriceEntry,
   type HerdValuationResult,
 } from "@/lib/engines/valuation-engine";
@@ -96,7 +97,8 @@ export default async function ValuationPage() {
       .map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null)
       .filter(Boolean),
   )] as string[];
-  const mlaCategories = [...new Set(activeHerds.map((h) => mapCategoryToMLACategory(h.category)))];
+  const primaryCategories = [...new Set(activeHerds.map((h) => mapCategoryToMLACategory(h.category)))];
+  const mlaCategories = [...new Set([...primaryCategories, ...primaryCategories.map(c => categoryFallback(c)).filter((c): c is string => c !== null)])];
 
   type PriceRow = { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string };
   const emptyPrices: PriceRow[] = [];
