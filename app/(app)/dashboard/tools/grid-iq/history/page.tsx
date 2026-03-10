@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Upload, FileText, ChevronRight } from "lucide-react";
+import { Upload, FileText, ChevronRight, ArrowLeft } from "lucide-react";
 
 export const metadata = { title: "Kill Sheet History - Grid IQ" };
 
@@ -27,6 +27,15 @@ export default async function KillSheetHistoryPage() {
 
   return (
     <div className="max-w-6xl">
+      <div className="mb-4">
+        <Link href="/dashboard/tools/grid-iq">
+          <Button variant="ghost" size="sm" className="gap-1.5 text-text-muted hover:text-text-primary">
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Grid IQ
+          </Button>
+        </Link>
+      </div>
+
       <PageHeader
         title="Kill Sheet History"
         titleClassName="text-2xl font-bold text-teal-400"

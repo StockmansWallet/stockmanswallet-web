@@ -191,7 +191,7 @@ export default async function GridIQPage() {
       {safeAnalyses.length > 0 && (
         <div className="mt-6">
           <Card>
-            <CardHeader>
+            <CardHeader className="border-b border-white/[0.06]">
               <CardTitle>Recent Analyses</CardTitle>
             </CardHeader>
             <CardContent className="divide-y divide-white/[0.06] p-0">
@@ -257,7 +257,7 @@ export default async function GridIQPage() {
       {safeGrids.length > 0 && (
         <div className="mt-4">
           <Card>
-            <CardHeader>
+            <CardHeader className="border-b border-white/[0.06]">
               <div className="flex items-center justify-between">
                 <CardTitle>Saved Grids</CardTitle>
                 <Link
@@ -330,7 +330,7 @@ export default async function GridIQPage() {
       {safeKillSheets.length > 0 && (
         <div className="mt-4">
           <Card>
-            <CardHeader>
+            <CardHeader className="border-b border-white/[0.06]">
               <div className="flex items-center justify-between">
                 <CardTitle>Recent Kill Sheets</CardTitle>
                 <Link
