@@ -79,7 +79,7 @@ function DataTable<T extends Record<string, unknown>>({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={searchPlaceholder}
-            className="w-full max-w-xs rounded-xl border border-black/10 bg-white px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-white/10 dark:bg-white/5"
+            className="w-full max-w-xs rounded-xl border border-black/10 bg-white px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-border dark:bg-surface"
           />
         </div>
       )}
@@ -87,7 +87,7 @@ function DataTable<T extends Record<string, unknown>>({
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-black/5 dark:border-white/10">
+            <tr className="border-b border-black/5 dark:border-border">
               {columns.map((col) => (
                 <th
                   key={col.key}
@@ -121,8 +121,8 @@ function DataTable<T extends Record<string, unknown>>({
                 <tr
                   key={String(row[keyField])}
                   onClick={onRowClick ? () => onRowClick(row) : undefined}
-                  className={`border-b border-black/5 transition-colors dark:border-white/5 ${
-                    onRowClick ? "cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02]" : ""
+                  className={`border-b border-black/5 transition-colors dark:border-surface ${
+                    onRowClick ? "cursor-pointer hover:bg-black/[0.02] dark:hover:bg-surface-lowest" : ""
                   }`}
                 >
                   {columns.map((col) => (

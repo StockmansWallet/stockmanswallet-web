@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { StatCard } from "@/components/ui/stat-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HerdsTable } from "./herds-table";
 import { Plus, Tags, Layers, DollarSign, Scale } from "lucide-react";
@@ -161,8 +162,8 @@ export default async function HerdsPage() {
         subtitle="Manage your livestock herds."
         actions={
           <Link href="/dashboard/herds/new">
-            <Button size="sm">
-              <Plus className="mr-1.5 h-3.5 w-3.5" />
+            <Button size="md">
+              <Plus className="mr-1.5 h-4 w-4" />
               Add Herd
             </Button>
           </Link>
@@ -182,61 +183,20 @@ export default async function HerdsPage() {
         <>
           {/* Stats */}
           <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-            <div className="rounded-2xl bg-white/5 p-4 sm:p-5">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/15">
-                  <DollarSign className="h-4 w-4 text-brand" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium text-text-muted">Total Value</p>
-                  <p className="mt-0.5 text-xl font-bold tabular-nums text-text-primary">
-                    ${Math.round(totalValue).toLocaleString()}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-2xl bg-white/5 p-4 sm:p-5">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/15">
-                  <Tags className="h-4 w-4 text-brand" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium text-text-muted">Total Head</p>
-                  <p className="mt-0.5 text-xl font-bold tabular-nums text-text-primary">{totalHead.toLocaleString()}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-2xl bg-white/5 p-4 sm:p-5">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/15">
-                  <Layers className="h-4 w-4 text-brand" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium text-text-muted">Herds</p>
-                  <p className="mt-0.5 text-xl font-bold tabular-nums text-text-primary">{herds.length}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-2xl bg-white/5 p-4 sm:p-5">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/15">
-                  <Scale className="h-4 w-4 text-brand" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium text-text-muted">Avg Weight</p>
-                  <p className="mt-0.5 text-xl font-bold tabular-nums text-text-primary">
-                    {avgWeight > 0 ? `${avgWeight} kg` : "\u2014"}
-                  </p>
-                </div>
-              </div>
-            </div>
+            <StatCard icon={<DollarSign className="h-4 w-4" />} label="Total Value" value={`$${Math.round(totalValue).toLocaleString()}`} />
+            <StatCard icon={<Tags className="h-4 w-4" />} label="Total Head" value={totalHead.toLocaleString()} />
+            <StatCard icon={<Layers className="h-4 w-4" />} label="Herds" value={String(herds.length)} />
+            <StatCard icon={<Scale className="h-4 w-4" />} label="Avg Weight" value={avgWeight > 0 ? `${avgWeight} kg` : "\u2014"} />
           </div>
 
           {/* Table */}
-          <HerdsTable herds={herds} herdValues={herdValuesObj} herdSources={herdSourcesObj} herdPricePerKg={herdPricePerKgObj} propertyGroups={propertyGroups} />
+          <HerdsTable
+            herds={herds}
+            herdValues={herdValuesObj}
+            herdSources={herdSourcesObj}
+            herdPricePerKg={herdPricePerKgObj}
+            propertyGroups={propertyGroups}
+          />
         </>
       )}
     </div>

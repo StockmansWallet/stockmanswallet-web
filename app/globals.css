@@ -16,12 +16,20 @@
   --background-alt: #1A1A1A;
 
   /* Surfaces (cards, inputs) */
+  --surface-lowest: rgba(255, 255, 255, 0.02);
   --surface: rgba(255, 255, 255, 0.05);
   --surface-raised: rgba(255, 255, 255, 0.08);
   --surface-high: rgba(255, 255, 255, 0.12);
+  --surface-hover: rgba(255, 255, 255, 0.03);
 
-  /* Borders */
+  /* Borders & dividers */
+  --divider: rgba(255, 255, 255, 0.04);
+  --border-subtle: rgba(255, 255, 255, 0.06);
   --border: rgba(255, 255, 255, 0.08);
+
+  /* Rings */
+  --ring-subtle: rgba(255, 255, 255, 0.10);
+  --ring-medium: rgba(255, 255, 255, 0.15);
 
   /* Text */
   --text-primary: #FFFFFF;
@@ -45,10 +53,16 @@
   --color-brand-light: var(--brand-orange-light);
   --color-brand-dark: var(--brand-orange-dark);
   --color-bg-alt: var(--background-alt);
+  --color-surface-lowest: var(--surface-lowest);
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
   --color-surface-high: var(--surface-high);
+  --color-surface-hover: var(--surface-hover);
+  --color-divider: var(--divider);
+  --color-border-subtle: var(--border-subtle);
   --color-border: var(--border);
+  --color-ring-subtle: var(--ring-subtle);
+  --color-ring-medium: var(--ring-medium);
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);

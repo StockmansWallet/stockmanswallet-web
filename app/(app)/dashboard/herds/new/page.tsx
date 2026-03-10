@@ -1,7 +1,5 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
-import { Button } from "@/components/ui/button";
 import { HerdForm } from "@/components/app/herd-form";
 import { createHerd } from "../actions";
 
@@ -23,27 +21,16 @@ export default async function NewHerdPage() {
     .order("property_name");
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-6xl pb-24">
       <PageHeader
         title="Add Herd"
         subtitle="Create a new herd to track your livestock."
-        actions={
-          <>
-            <Link
-              href="/dashboard/herds"
-              className="inline-flex h-8 items-center justify-center rounded-xl px-3.5 text-[13px] font-semibold text-text-secondary transition-all duration-150 hover:bg-white/8 hover:text-text-primary"
-            >
-              Cancel
-            </Link>
-            <Button type="submit" form="herd-form" size="sm">
-              Add Herd
-            </Button>
-          </>
-        }
       />
       <HerdForm
         properties={properties ?? []}
         action={createHerd}
+        submitLabel="Add Herd"
+        cancelHref="/dashboard/herds"
       />
     </div>
   );

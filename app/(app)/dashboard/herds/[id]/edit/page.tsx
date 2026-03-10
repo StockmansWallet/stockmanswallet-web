@@ -1,8 +1,6 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
-import { Button } from "@/components/ui/button";
 import { HerdForm } from "@/components/app/herd-form";
 import { MusterRecordsSection } from "@/components/app/muster-records-section";
 import { HealthRecordsSection } from "@/components/app/health-records-section";
@@ -58,28 +56,17 @@ export default async function EditHerdPage({
   const boundUpdate = updateHerd.bind(null, id);
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-6xl pb-24">
       <PageHeader
         title={`Edit: ${herd.name}`}
         subtitle={[herd.species, herd.breed].join(" · ")}
-        actions={
-          <>
-            <Link
-              href={`/dashboard/herds/${id}`}
-              className="inline-flex h-8 items-center justify-center rounded-xl px-3.5 text-[13px] font-semibold text-text-secondary transition-all duration-150 hover:bg-white/8 hover:text-text-primary"
-            >
-              Cancel
-            </Link>
-            <Button type="submit" form="herd-form" size="sm">
-              Save Changes
-            </Button>
-          </>
-        }
       />
       <HerdForm
         herd={herd}
         properties={properties ?? []}
         action={boundUpdate}
+        submitLabel="Save Changes"
+        cancelHref={`/dashboard/herds/${id}`}
       />
 
       <div className="mt-4 space-y-4">

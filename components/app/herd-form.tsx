@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   breedsForSpecies,
@@ -43,9 +45,11 @@ interface HerdFormProps {
   herd?: HerdRow;
   properties: { id: string; property_name: string }[];
   action: (formData: FormData) => Promise<{ error: string } | void>;
+  submitLabel?: string;
+  cancelHref?: string;
 }
 
-export function HerdForm({ herd, properties, action }: HerdFormProps) {
+export function HerdForm({ herd, properties, action, submitLabel = "Save", cancelHref }: HerdFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [species, setSpecies] = useState<string>(herd?.species ?? "Cattle");
@@ -348,11 +352,28 @@ export function HerdForm({ herd, properties, action }: HerdFormProps) {
             rows={3}
             defaultValue={herd?.notes ?? ""}
             placeholder="Any additional notes about this herd..."
-            className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all ring-1 ring-inset ring-white/10 focus:ring-brand/60 focus:bg-white/8"
+            className="w-full rounded-xl bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all ring-1 ring-inset ring-ring-subtle focus:ring-brand/60 focus:bg-surface-raised"
           />
         </CardContent>
       </Card>
 
+      {/* Sticky bottom action bar */}
+      {(submitLabel || cancelHref) && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/80 backdrop-blur-xl">
+          <div className="mx-auto flex max-w-6xl items-center justify-end gap-3 px-6 py-3 lg:px-8">
+            {cancelHref && (
+              <Link href={cancelHref}>
+                <Button type="button" variant="ghost" size="md">
+                  Cancel
+                </Button>
+              </Link>
+            )}
+            <Button type="submit" form="herd-form" size="md" disabled={submitting}>
+              {submitting ? "Saving..." : submitLabel}
+            </Button>
+          </div>
+        </div>
+      )}
     </form>
   );
 }

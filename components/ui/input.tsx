@@ -21,10 +21,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           id={id}
-          className={`w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all ${
+          className={`w-full rounded-xl bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all ${
             error
               ? "ring-1 ring-inset ring-red-500/60 focus:ring-red-500"
-              : "focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-white/8"
+              : "focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
           } ${className}`}
           {...props}
         />

@@ -213,7 +213,7 @@ export function HerdsTable({
     return (
       <tr
         onClick={() => router.push(`/dashboard/herds/${herd.id}`)}
-        className="group cursor-pointer transition-colors hover:bg-white/[0.03]"
+        className="group cursor-pointer transition-colors hover:bg-surface-hover"
       >
         <td className="px-5 py-3.5 text-right tabular-nums font-medium text-text-primary">
           {herd.head_count?.toLocaleString() ?? "\u2014"}
@@ -243,7 +243,7 @@ export function HerdsTable({
     <div>
       {/* Toolbar: species pills + search */}
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex gap-1.5">
+        <div className="flex gap-1.5 overflow-x-auto">
           {SPECIES_TABS.map((tab) => {
             const count = tab === "All" ? herds.length : speciesCounts[tab] || 0;
             if (tab !== "All" && count === 0) return null;
@@ -252,10 +252,10 @@ export function HerdsTable({
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
+                className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
                   isActive
                     ? "bg-brand/15 text-brand"
-                    : "bg-white/5 text-text-muted hover:bg-white/8 hover:text-text-secondary"
+                    : "bg-surface text-text-muted hover:bg-surface-raised hover:text-text-secondary"
                 }`}
               >
                 {tab}
@@ -274,13 +274,13 @@ export function HerdsTable({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search herds..."
-            className="w-full rounded-xl border border-white/8 bg-white/5 py-2 pl-9 pr-4 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand/50 focus:ring-2 focus:ring-brand/20 sm:w-64"
+            className="w-full rounded-xl border border-border bg-surface py-2 pl-9 pr-4 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand/50 focus:ring-2 focus:ring-brand/20 sm:w-64"
           />
         </div>
       </div>
 
       {sorted.length === 0 ? (
-        <div className="overflow-hidden rounded-2xl bg-white/5">
+        <div className="overflow-hidden rounded-2xl bg-surface">
           <p className="px-5 py-16 text-center text-sm text-text-muted">
             {search ? "No herds match your search." : "No herds found."}
           </p>
@@ -291,9 +291,9 @@ export function HerdsTable({
             const groupHead = group.herds.reduce((s, h) => s + (h.head_count ?? 0), 0);
             const groupValue = group.herds.reduce((s, h) => s + (herdValues[h.id] ?? 0), 0);
             return (
-              <div key={group.id ?? "_unassigned"} className="overflow-hidden rounded-2xl bg-white/5">
+              <div key={group.id ?? "_unassigned"} className="overflow-hidden rounded-2xl bg-surface">
                 {/* Property header */}
-                <div className="flex items-center justify-between border-b border-white/6 px-5 py-3.5">
+                <div className="flex items-center justify-between border-b border-border-subtle px-5 py-3.5">
                   <div className="flex items-center gap-2.5">
                     <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/10">
                       <MapPinned className="h-3.5 w-3.5 text-brand" />
@@ -316,18 +316,18 @@ export function HerdsTable({
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm">
                     <thead>
-                      <tr className="border-b border-white/6">
+                      <tr className="border-b border-border-subtle">
                         <TableHeaders />
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/[0.04]">
+                    <tbody className="divide-y divide-divider">
                       {group.herds.map((herd) => (
                         <HerdRow key={herd.id} herd={herd} />
                       ))}
                     </tbody>
                   </table>
                 </div>
-                <div className="border-t border-white/6 px-5 py-2.5">
+                <div className="border-t border-border-subtle px-5 py-2.5">
                   <p className="text-xs text-text-muted">
                     {group.herds.length} {group.herds.length === 1 ? "herd" : "herds"}
                   </p>
@@ -337,22 +337,22 @@ export function HerdsTable({
           })}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl bg-white/5">
+        <div className="overflow-hidden rounded-2xl bg-surface">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-white/6">
+                <tr className="border-b border-border-subtle">
                   <TableHeaders />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.04]">
+              <tbody className="divide-y divide-divider">
                 {sorted.map((herd) => (
                   <HerdRow key={herd.id} herd={herd} />
                 ))}
               </tbody>
             </table>
           </div>
-          <div className="border-t border-white/6 px-5 py-3">
+          <div className="border-t border-border-subtle px-5 py-3">
             <p className="text-xs text-text-muted">
               {sorted.length === herds.length
                 ? `${herds.length} ${herds.length === 1 ? "herd" : "herds"}`

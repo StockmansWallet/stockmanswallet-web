@@ -51,7 +51,7 @@ function Modal({ open, onClose, title, children, size = "md" }: ModalProps) {
 
       {/* Panel */}
       <div
-        className={`relative w-full ${sizeClasses[size]} rounded-2xl bg-[#1A1A1A] p-6 shadow-2xl ring-1 ring-inset ring-white/10`}
+        className={`relative w-full ${sizeClasses[size]} rounded-2xl bg-bg-alt p-6 shadow-2xl ring-1 ring-inset ring-ring-subtle`}
       >
         {/* Header */}
         {title && (
@@ -59,7 +59,7 @@ function Modal({ open, onClose, title, children, size = "md" }: ModalProps) {
             <h2 className="text-lg font-semibold text-text-primary">{title}</h2>
             <button
               onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-white/8 hover:text-text-primary"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-raised hover:text-text-primary"
             >
               <X className="h-5 w-5" />
             </button>

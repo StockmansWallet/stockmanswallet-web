@@ -24,7 +24,7 @@ interface StatCardProps {
 
 function StatCard({ label, value, change, icon, accent = "brand" }: StatCardProps) {
   return (
-    <div className="rounded-2xl bg-white/5 p-5">
+    <div className="rounded-2xl bg-surface p-5">
       <div className="flex items-start justify-between">
         <p className="text-xs font-medium text-text-muted uppercase tracking-wide">{label}</p>
         {icon && (

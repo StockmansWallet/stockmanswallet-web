@@ -12,9 +12,9 @@ const variantClasses: Record<ButtonVariant, string> = {
   primary:
     "bg-brand text-white hover:bg-brand-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   secondary:
-    "ring-1 ring-inset ring-white/15 bg-white/5 text-text-primary hover:bg-white/10 active:scale-[0.97]",
+    "ring-1 ring-inset ring-ring-medium bg-surface text-text-primary hover:bg-surface-high active:scale-[0.97]",
   ghost:
-    "text-text-secondary hover:bg-white/8 hover:text-text-primary",
+    "text-text-secondary hover:bg-surface-raised hover:text-text-primary",
   destructive:
     "bg-red-500/15 text-red-400 hover:bg-red-500/25 active:scale-[0.97]",
   teal:
