@@ -53,6 +53,11 @@ export interface ChatDataStore {
   saleyardPriceMap: Map<string, CategoryPriceEntry[]>;
   premiumMap: Map<string, number>;
 
+  // Grid IQ data (for Brangus tool lookups)
+  gridIQAnalyses: GridIQAnalysisRow[];
+  killSheets: KillSheetRow[];
+  processorGrids: ProcessorGridRow[];
+
   // Pending mutations from tool calls (persisted after response)
   pendingYardBookEvents: PendingYardBookEvent[];
   pendingYardBookActions: PendingYardBookAction[];
@@ -148,6 +153,71 @@ export interface CategoryPriceRow {
   price_per_kg: number;
   weight_range: string | null;
   saleyard: string | null;
+}
+
+// MARK: - Grid IQ Row Types (for Brangus tool lookups)
+
+export interface GridIQAnalysisRow {
+  id: string;
+  herd_group_id: string;
+  processor_grid_id: string;
+  kill_sheet_record_id: string | null;
+  analysis_date: string;
+  herd_name: string;
+  processor_name: string;
+  mla_market_value: number;
+  headline_grid_value: number;
+  realisation_factor: number;
+  realistic_grid_outcome: number;
+  freight_to_saleyard: number;
+  freight_to_processor: number;
+  net_saleyard_value: number;
+  net_processor_value: number;
+  grid_iq_advantage: number;
+  sell_window_status_raw: string;
+  sell_window_detail: string;
+  days_to_target: number | null;
+  head_count: number;
+  estimated_carcase_weight: number;
+  dressing_percentage: number;
+  is_using_personalised_data: boolean;
+  analysis_mode: string | null;
+  gcr: number | null;
+  grid_risk: number | null;
+  kill_score: number | null;
+  grid_compliance_score: number | null;
+  fat_compliance_score: number | null;
+  dentition_compliance_score: number | null;
+  processor_fit_score: number | null;
+  processor_fit_label_raw: string | null;
+  opportunity_value: number | null;
+  opportunity_driver: string | null;
+}
+
+export interface KillSheetRow {
+  id: string;
+  processor_name: string;
+  kill_date: string;
+  total_head_count: number;
+  total_body_weight: number;
+  total_gross_value: number;
+  average_body_weight: number;
+  average_price_per_kg: number;
+  average_value_per_head: number;
+  condemns: number;
+  realisation_factor: number | null;
+  herd_group_id: string | null;
+  property_name: string | null;
+  notes: string | null;
+}
+
+export interface ProcessorGridRow {
+  id: string;
+  processor_name: string;
+  grid_code: string | null;
+  grid_date: string;
+  expiry_date: string | null;
+  location: string | null;
 }
 
 // MARK: - Pending Mutations

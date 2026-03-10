@@ -47,7 +47,7 @@ export default async function GridIQPage() {
       supabase
         .from("grid_iq_analyses")
         .select(
-          "id, herd_name, processor_name, analysis_date, net_saleyard_value, net_processor_value, grid_iq_advantage, sell_window_status_raw, created_at"
+          "id, herd_name, processor_name, analysis_date, net_saleyard_value, net_processor_value, grid_iq_advantage, sell_window_status_raw, kill_score, gcr, analysis_mode, created_at"
         )
         .eq("user_id", user!.id)
         .eq("is_deleted", false)
@@ -198,20 +198,41 @@ export default async function GridIQPage() {
               {safeAnalyses.map((a: Record<string, unknown>) => {
                 const advantage = (a.grid_iq_advantage as number) ?? 0;
                 const isProcessor = advantage > 0;
+                const killScore = a.kill_score as number | null;
+                const gcr = a.gcr as number | null;
+                const mode = a.analysis_mode as string | null;
                 return (
-                  <div
+                  <Link
                     key={a.id as string}
-                    className="flex items-center justify-between px-5 py-3.5"
+                    href={`/dashboard/tools/grid-iq/analysis/${a.id}`}
+                    className="flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-white/[0.04]"
                   >
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-text-primary">
                         {a.herd_name as string} vs {a.processor_name as string}
                       </p>
-                      <p className="mt-0.5 text-xs text-text-muted">
-                        {new Date(
-                          a.analysis_date as string
-                        ).toLocaleDateString("en-AU")}
-                      </p>
+                      <div className="mt-0.5 flex items-center gap-2">
+                        <p className="text-xs text-text-muted">
+                          {new Date(
+                            a.analysis_date as string
+                          ).toLocaleDateString("en-AU")}
+                        </p>
+                        {mode === "postSale" && (
+                          <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-text-muted">
+                            Post-Sale
+                          </span>
+                        )}
+                        {killScore !== null && (
+                          <span className={`text-[10px] font-medium ${killScore >= 85 ? "text-emerald-400" : killScore >= 70 ? "text-teal-400" : killScore >= 50 ? "text-amber-400" : "text-red-400"}`}>
+                            KS {killScore.toFixed(0)}
+                          </span>
+                        )}
+                        {gcr !== null && (
+                          <span className="text-[10px] text-text-muted">
+                            GCR {gcr.toFixed(0)}%
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div className="text-right">
                       <p
@@ -224,7 +245,7 @@ export default async function GridIQPage() {
                         {Math.abs(Math.round(advantage)).toLocaleString()}
                       </p>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </CardContent>

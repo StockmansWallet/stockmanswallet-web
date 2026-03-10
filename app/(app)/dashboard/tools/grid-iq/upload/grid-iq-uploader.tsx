@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +12,12 @@ import {
   Grid3x3,
   FileSpreadsheet,
   Loader2,
+  CheckCircle,
+  AlertTriangle,
 } from "lucide-react";
+import { extractDocument } from "@/lib/grid-iq/extraction-service";
+import type { ExtractionResult } from "@/lib/grid-iq/types";
+import { createClient } from "@/lib/supabase/client";
 
 type UploadType = "grid" | "killsheet";
 
@@ -22,7 +28,15 @@ const ACCEPTED_TYPES = [
   "application/pdf",
   "text/csv",
   "text/plain",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-excel",
 ];
+
+// Check file extension for types that browsers may not recognise
+const ACCEPTED_EXTENSIONS = new Set([
+  "jpg", "jpeg", "png", "heic", "pdf", "csv", "txt", "tsv", "xlsx", "xls",
+]);
+
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 function formatFileSize(bytes: number): string {
@@ -31,7 +45,10 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function getFileIcon(type: string) {
+function getFileIcon(type: string, name: string) {
+  const ext = name.split(".").pop()?.toLowerCase() || "";
+  if (ext === "xlsx" || ext === "xls")
+    return <FileSpreadsheet className="h-5 w-5 text-emerald-400" />;
   if (type.startsWith("image/"))
     return <FileImage className="h-5 w-5 text-blue-400" />;
   if (type === "application/pdf")
@@ -40,26 +57,41 @@ function getFileIcon(type: string) {
 }
 
 export function GridIQUploader() {
+  const router = useRouter();
   const [uploadType, setUploadType] = useState<UploadType>("grid");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<ExtractionResult | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [headCountConfirmed, setHeadCountConfirmed] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback((f: File) => {
     setError(null);
+    setResult(null);
+    setHeadCountConfirmed(false);
 
-    if (!ACCEPTED_TYPES.includes(f.type) && !f.name.endsWith(".heic")) {
+    const ext = f.name.split(".").pop()?.toLowerCase() || "";
+    if (!ACCEPTED_TYPES.includes(f.type) && !ACCEPTED_EXTENSIONS.has(ext)) {
       setError(
-        "Unsupported file type. Please upload a JPG, PNG, PDF, CSV, or TXT file."
+        "Unsupported file type. Please upload an Excel, PDF, CSV, TXT, or image file."
       );
       return;
     }
 
     if (f.size > MAX_FILE_SIZE) {
       setError("File is too large. Maximum size is 50MB.");
+      return;
+    }
+
+    // Block legacy .xls
+    if (ext === "xls") {
+      setError(
+        "Legacy .xls format is not supported. Please save as .xlsx and try again."
+      );
       return;
     }
 
@@ -107,22 +139,114 @@ export function GridIQUploader() {
     if (!file) return;
     setIsProcessing(true);
     setError(null);
+    setResult(null);
 
-    // TODO: Send file to extraction Edge Function
-    // For now, simulate processing
-    await new Promise((r) => setTimeout(r, 2000));
-    setIsProcessing(false);
-    setError(
-      "AI extraction is not yet available on the web. Upload grids via the iOS app for now."
-    );
+    try {
+      const extractionResult = await extractDocument(file, uploadType);
+      setResult(extractionResult);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Extraction failed. Please try again.";
+      setError(message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!result) return;
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session?.user?.id) throw new Error("Not authenticated.");
+
+      if (result.documentType === "grid" && result.gridData) {
+        const grid = result.gridData;
+        const { error: insertError } = await supabase
+          .from("processor_grids")
+          .insert({
+            user_id: session.user.id,
+            processor_name: grid.processorName || "Unknown Processor",
+            grid_code: grid.gridCode,
+            grid_date: grid.gridDate || new Date().toISOString().split("T")[0],
+            expiry_date: grid.expiryDate,
+            contact_name: grid.contactName,
+            contact_phone: grid.contactPhone,
+            contact_email: grid.contactEmail,
+            location: grid.location,
+            notes: grid.notes,
+            entries: grid.entries,
+          });
+
+        if (insertError) throw new Error(insertError.message);
+        router.push("/dashboard/tools/grid-iq/grids");
+      } else if (result.documentType === "killsheet" && result.killSheetData) {
+        const ks = result.killSheetData;
+        const { error: insertError } = await supabase
+          .from("kill_sheet_records")
+          .insert({
+            user_id: session.user.id,
+            processor_name: ks.processorName || "Unknown Processor",
+            kill_date: ks.killDate || new Date().toISOString().split("T")[0],
+            vendor_code: ks.vendorCode,
+            pic: ks.pic,
+            property_name: ks.propertyName,
+            booking_reference: ks.bookingReference,
+            booking_type: ks.bookingType,
+            total_head_count: ks.totalHeadCount,
+            total_body_weight: ks.totalBodyWeight,
+            total_gross_value: ks.totalGrossValue,
+            average_body_weight:
+              ks.averageBodyWeight ||
+              (ks.totalHeadCount > 0
+                ? ks.totalBodyWeight / ks.totalHeadCount
+                : 0),
+            average_price_per_kg:
+              ks.averagePricePerKg ||
+              (ks.totalBodyWeight > 0
+                ? ks.totalGrossValue / ks.totalBodyWeight
+                : 0),
+            average_value_per_head:
+              ks.totalHeadCount > 0
+                ? ks.totalGrossValue / ks.totalHeadCount
+                : 0,
+            condemns: ks.condemns,
+            category_summaries: ks.categorySummaries || [],
+            grade_distribution: ks.gradeDistribution || [],
+            line_items: ks.lineItems || [],
+          });
+
+        if (insertError) throw new Error(insertError.message);
+        router.push("/dashboard/tools/grid-iq/history");
+      }
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to save. Please try again.";
+      setError(message);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleClear = () => {
     setFile(null);
     setPreview(null);
     setError(null);
+    setResult(null);
+    setHeadCountConfirmed(false);
     if (inputRef.current) inputRef.current.value = "";
   };
+
+  // Check if save should be blocked by head count mismatch
+  const hasPendingMismatch =
+    result?.reconciliation &&
+    !result.reconciliation.isMatched &&
+    !headCountConfirmed;
 
   return (
     <div className="space-y-4">
@@ -176,7 +300,7 @@ export function GridIQUploader() {
                   : `Drop your ${uploadType === "grid" ? "processor grid" : "kill sheet"} here`}
               </p>
               <p className="mt-1 text-xs text-text-muted">
-                JPG, PNG, PDF, CSV, or TXT supported
+                Excel, PDF, CSV, TXT, or image supported
               </p>
               <Button
                 variant="secondary"
@@ -192,7 +316,7 @@ export function GridIQUploader() {
               <input
                 ref={inputRef}
                 type="file"
-                accept=".jpg,.jpeg,.png,.heic,.pdf,.csv,.txt"
+                accept=".jpg,.jpeg,.png,.heic,.pdf,.csv,.txt,.xlsx"
                 onChange={handleInputChange}
                 className="hidden"
               />
@@ -209,7 +333,7 @@ export function GridIQUploader() {
                   />
                 ) : (
                   <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-white/5">
-                    {getFileIcon(file.type)}
+                    {getFileIcon(file.type, file.name)}
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
@@ -217,8 +341,8 @@ export function GridIQUploader() {
                     {file.name}
                   </p>
                   <p className="mt-0.5 text-xs text-text-muted">
-                    {formatFileSize(file.size)} ·{" "}
-                    {file.type.split("/")[1]?.toUpperCase() || "File"}
+                    {formatFileSize(file.size)} .{" "}
+                    {file.name.split(".").pop()?.toUpperCase() || "File"}
                   </p>
                   <p className="mt-1 text-xs text-teal-400">
                     {uploadType === "grid"
@@ -228,36 +352,66 @@ export function GridIQUploader() {
                 </div>
                 <button
                   onClick={handleClear}
-                  className="rounded-lg p-1.5 text-text-muted transition-colors hover:bg-white/10 hover:text-text-primary"
+                  disabled={isProcessing || isSaving}
+                  className="rounded-lg p-1.5 text-text-muted transition-colors hover:bg-white/10 hover:text-text-primary disabled:opacity-50"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
 
-              {/* Extract Button */}
+              {/* Extraction Result */}
+              {result && (
+                <ExtractionResultView
+                  result={result}
+                  headCountConfirmed={headCountConfirmed}
+                  onConfirmHeadCount={() => setHeadCountConfirmed(true)}
+                  onRetry={handleClear}
+                />
+              )}
+
+              {/* Action Buttons */}
               <div className="flex items-center gap-3">
-                <Button
-                  onClick={handleExtract}
-                  disabled={isProcessing}
-                >
-                  {isProcessing ? (
-                    <>
-                      <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                      Extracting...
-                    </>
-                  ) : (
-                    <>
-                      Extract &{" "}
-                      {uploadType === "grid" ? "Analyse" : "Save"}
-                    </>
-                  )}
-                </Button>
+                {!result ? (
+                  <Button
+                    onClick={handleExtract}
+                    disabled={isProcessing}
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                        Extracting...
+                      </>
+                    ) : (
+                      <>
+                        Extract{" "}
+                        {uploadType === "grid" ? "Grid" : "Kill Sheet"}
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleSave}
+                    disabled={isSaving || !!hasPendingMismatch}
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="mr-1.5 h-3.5 w-3.5" />
+                        Confirm & Save
+                      </>
+                    )}
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   onClick={handleClear}
-                  disabled={isProcessing}
+                  disabled={isProcessing || isSaving}
                 >
-                  Clear
+                  {result ? "Start Over" : "Clear"}
                 </Button>
               </div>
             </div>
@@ -275,10 +429,123 @@ export function GridIQUploader() {
       <div className="px-1">
         <p className="text-xs leading-relaxed text-text-muted">
           {uploadType === "grid"
-            ? "Upload a photo or PDF of your processor grid. Grid IQ will use AI to extract the price matrix, grade codes, and weight bands automatically."
-            : "Upload a photo or PDF of your kill sheet. Grid IQ will extract head counts, grades, weights, and pricing to track your over-the-hooks performance."}
+            ? "Upload an Excel (.xlsx), PDF, or image of your processor grid. Grid IQ extracts the price matrix, grade codes, and weight bands automatically."
+            : "Upload an Excel (.xlsx), PDF, or image of your kill sheet. Grid IQ extracts head counts, grades, weights, and pricing to track your over-the-hooks performance."}
         </p>
       </div>
+    </div>
+  );
+}
+
+// Extraction result display component
+function ExtractionResultView({
+  result,
+  headCountConfirmed,
+  onConfirmHeadCount,
+  onRetry,
+}: {
+  result: ExtractionResult;
+  headCountConfirmed: boolean;
+  onConfirmHeadCount: () => void;
+  onRetry: () => void;
+}) {
+  if (result.documentType === "grid" && result.gridData) {
+    const grid = result.gridData;
+    return (
+      <div className="rounded-xl bg-emerald-500/5 p-4 ring-1 ring-inset ring-emerald-500/20">
+        <div className="flex items-center gap-2 mb-3">
+          <CheckCircle className="h-4 w-4 text-emerald-400" />
+          <span className="text-sm font-medium text-emerald-400">
+            Grid Extracted{result.parsedViaAI ? " (AI)" : ""}
+          </span>
+        </div>
+        <div className="space-y-1.5 text-sm">
+          <DetailRow label="Processor" value={grid.processorName || "Unknown"} />
+          {grid.gridCode && <DetailRow label="Grid Code" value={grid.gridCode} />}
+          {grid.gridDate && <DetailRow label="Date" value={grid.gridDate} />}
+          <DetailRow label="Grade Entries" value={`${grid.entries.length}`} />
+          {grid.entries.some((e) => e.gender) && (
+            <DetailRow
+              label="Gender Tabs"
+              value={`Male: ${grid.entries.filter((e) => e.gender === "male").length}, Female: ${grid.entries.filter((e) => e.gender === "female").length}`}
+            />
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (result.documentType === "killsheet" && result.killSheetData) {
+    const ks = result.killSheetData;
+    const recon = result.reconciliation;
+
+    return (
+      <div className="space-y-3">
+        <div className="rounded-xl bg-emerald-500/5 p-4 ring-1 ring-inset ring-emerald-500/20">
+          <div className="flex items-center gap-2 mb-3">
+            <CheckCircle className="h-4 w-4 text-emerald-400" />
+            <span className="text-sm font-medium text-emerald-400">
+              Kill Sheet Extracted{result.parsedViaAI ? " (AI)" : ""}
+            </span>
+          </div>
+          <div className="space-y-1.5 text-sm">
+            <DetailRow label="Processor" value={ks.processorName || "Unknown"} />
+            {ks.killDate && <DetailRow label="Kill Date" value={ks.killDate} />}
+            <DetailRow label="Total Head" value={`${ks.totalHeadCount}`} />
+            <DetailRow
+              label="Total Weight"
+              value={`${Math.round(ks.totalBodyWeight)} kg`}
+            />
+            <DetailRow
+              label="Total Value"
+              value={`$${ks.totalGrossValue.toLocaleString("en-AU", { minimumFractionDigits: 2 })}`}
+            />
+            <DetailRow
+              label="Line Items"
+              value={`${ks.lineItems?.length || 0}`}
+            />
+          </div>
+        </div>
+
+        {/* Head count reconciliation warning */}
+        {recon && !recon.isMatched && (
+          <div className="rounded-xl bg-amber-500/10 p-4 ring-1 ring-inset ring-amber-500/20">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle className="h-4 w-4 text-amber-400" />
+              <span className="text-sm font-medium text-amber-400">
+                Head Count Mismatch
+              </span>
+            </div>
+            <p className="text-sm text-amber-300/80 mb-3">{recon.message}</p>
+            {!headCountConfirmed ? (
+              <div className="flex gap-2">
+                <Button variant="secondary" size="sm" onClick={onRetry}>
+                  Retry Upload
+                </Button>
+                <Button variant="ghost" size="sm" onClick={onConfirmHeadCount}>
+                  Use Anyway
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 text-xs text-emerald-400">
+                <CheckCircle className="h-3 w-3" />
+                Confirmed by user
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return null;
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between">
+      <span className="text-text-muted">{label}</span>
+      <span className="font-medium text-text-primary">{value}</span>
     </div>
   );
 }

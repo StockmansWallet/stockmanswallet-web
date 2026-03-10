@@ -117,6 +117,36 @@ export const toolDefinitions = [
       required: ["action", "title"],
     },
   },
+  {
+    name: "lookup_grid_iq_data",
+    description:
+      "Retrieves Grid IQ analysis data including processor grid comparisons, kill sheet results, Kill Score, GCR (Grid Capture Ratio), and Grid Risk metrics. Use when the user asks about processor grids, kill sheets, Kill Score, GCR, grid performance, over-the-hooks results, or carcass data.",
+    input_schema: {
+      type: "object",
+      properties: {
+        query_type: {
+          type: "string",
+          enum: [
+            "grid_iq_summary",
+            "analysis_details",
+            "kill_history",
+            "grid_details",
+            "compare_channels",
+          ],
+          description: "What Grid IQ data to retrieve.",
+        },
+        herd_name: {
+          type: "string",
+          description: "Herd name to filter analyses by.",
+        },
+        processor_name: {
+          type: "string",
+          description: "Processor name to filter by.",
+        },
+      },
+      required: ["query_type"],
+    },
+  },
 ];
 
 // MARK: - Tool Execution
@@ -135,6 +165,8 @@ export function executeTool(
       return executeCreateYardBookEvent(input, store);
     case "manage_yard_book_event":
       return executeManageYardBookEvent(input, store);
+    case "lookup_grid_iq_data":
+      return executeGridIQLookup(input, store);
     default:
       return `Error: Unknown tool '${toolName}'`;
   }
@@ -659,6 +691,286 @@ function executeManageYardBookEvent(input: Record<string, unknown>, store: ChatD
   } else {
     return `Deleted "${match.title}" from Yard Book.`;
   }
+}
+
+// MARK: - Grid IQ Lookup Tool
+
+function executeGridIQLookup(input: Record<string, unknown>, store: ChatDataStore): string {
+  const queryType = input.query_type as string;
+  if (!queryType) return "Error: Missing query_type parameter.";
+
+  switch (queryType) {
+    case "grid_iq_summary":
+      return lookupGridIQSummary(store);
+    case "analysis_details":
+      return lookupAnalysisDetails(input.herd_name as string | undefined, input.processor_name as string | undefined, store);
+    case "kill_history":
+      return lookupKillHistory(input.herd_name as string | undefined, input.processor_name as string | undefined, store);
+    case "grid_details":
+      return lookupGridDetails(input.processor_name as string | undefined, store);
+    case "compare_channels":
+      return lookupChannelComparison(input.herd_name as string | undefined, store);
+    default:
+      return `Error: Unknown query_type '${queryType}'`;
+  }
+}
+
+function lookupGridIQSummary(store: ChatDataStore): string {
+  const lines = ["GRID IQ SUMMARY:"];
+  lines.push(`Analyses: ${store.gridIQAnalyses.length}`);
+  lines.push(`Kill sheets: ${store.killSheets.length}`);
+  lines.push(`Processor grids: ${store.processorGrids.length}`);
+
+  if (store.gridIQAnalyses.length === 0) {
+    lines.push("\nNo Grid IQ analyses found. Upload a processor grid and run an analysis to get started.");
+    return lines.join("\n");
+  }
+
+  // Debug: Show latest analyses
+  const sorted = [...store.gridIQAnalyses].sort((a, b) => b.analysis_date.localeCompare(a.analysis_date));
+  lines.push("\nLATEST ANALYSES:");
+  for (const a of sorted.slice(0, 5)) {
+    const date = new Date(a.analysis_date).toLocaleDateString("en-AU");
+    const mode = a.analysis_mode === "postSale" ? "Post-Sale" : "Pre-Sale";
+    let line = `- ${a.herd_name} x ${a.processor_name} (${date}, ${mode})`;
+    line += `: Grid advantage $${Math.round(a.grid_iq_advantage).toLocaleString()}`;
+    if (a.kill_score !== null) line += `, Kill Score: ${a.kill_score.toFixed(1)}`;
+    if (a.gcr !== null) line += `, GCR: ${a.gcr.toFixed(1)}%`;
+    lines.push(line);
+  }
+
+  // Debug: Show processor grid list
+  if (store.processorGrids.length > 0) {
+    lines.push("\nPROCESSOR GRIDS:");
+    for (const g of store.processorGrids) {
+      const date = new Date(g.grid_date).toLocaleDateString("en-AU");
+      let line = `- ${g.processor_name} (${date})`;
+      if (g.grid_code) line += ` [${g.grid_code}]`;
+      if (g.expiry_date) {
+        const expiry = new Date(g.expiry_date).toLocaleDateString("en-AU");
+        line += `, expires ${expiry}`;
+      }
+      lines.push(line);
+    }
+  }
+
+  return lines.join("\n");
+}
+
+function lookupAnalysisDetails(
+  herdName: string | undefined,
+  processorName: string | undefined,
+  store: ChatDataStore
+): string {
+  let filtered = store.gridIQAnalyses;
+
+  if (herdName) {
+    const lowered = herdName.toLowerCase();
+    filtered = filtered.filter((a) => a.herd_name.toLowerCase().includes(lowered));
+  }
+  if (processorName) {
+    const lowered = processorName.toLowerCase();
+    filtered = filtered.filter((a) => a.processor_name.toLowerCase().includes(lowered));
+  }
+
+  if (filtered.length === 0) {
+    const hint = herdName || processorName ? ` matching '${herdName || processorName}'` : "";
+    return `No Grid IQ analyses found${hint}. Available analyses: ${store.gridIQAnalyses.map((a) => `${a.herd_name} x ${a.processor_name}`).join(", ") || "none"}`;
+  }
+
+  // Debug: Show the most recent matching analysis in detail
+  const sorted = [...filtered].sort((a, b) => b.analysis_date.localeCompare(a.analysis_date));
+  const a = sorted[0];
+  const date = new Date(a.analysis_date).toLocaleDateString("en-AU");
+  const mode = a.analysis_mode === "postSale" ? "Post-Sale Audit" : "Pre-Sale Planning";
+
+  const lines = [`GRID IQ ANALYSIS - ${a.herd_name} x ${a.processor_name}:`];
+  lines.push(`Date: ${date}`);
+  lines.push(`Mode: ${mode}`);
+  lines.push(`Head count: ${a.head_count}`);
+  lines.push(`Estimated carcase weight: ${a.estimated_carcase_weight.toFixed(1)}kg`);
+  lines.push(`Dressing %: ${(a.dressing_percentage * 100).toFixed(1)}%`);
+  lines.push(`Data: ${a.is_using_personalised_data ? "Personalised (kill history)" : "Industry baseline"}`);
+  lines.push("");
+  lines.push("VALUE COMPARISON:");
+  lines.push(`MLA saleyard value: $${Math.round(a.mla_market_value).toLocaleString()}`);
+  lines.push(`Headline grid value: $${Math.round(a.headline_grid_value).toLocaleString()}`);
+  lines.push(`Realisation factor: ${(a.realisation_factor * 100).toFixed(1)}%`);
+  lines.push(`Realistic grid outcome: $${Math.round(a.realistic_grid_outcome).toLocaleString()}`);
+  lines.push(`Freight to saleyard: $${Math.round(a.freight_to_saleyard).toLocaleString()}`);
+  lines.push(`Freight to processor: $${Math.round(a.freight_to_processor).toLocaleString()}`);
+  lines.push(`Net saleyard: $${Math.round(a.net_saleyard_value).toLocaleString()}`);
+  lines.push(`Net processor: $${Math.round(a.net_processor_value).toLocaleString()}`);
+  lines.push(`Grid IQ advantage: $${Math.round(a.grid_iq_advantage).toLocaleString()}`);
+  lines.push("");
+  lines.push("SELL WINDOW:");
+  lines.push(`Status: ${a.sell_window_status_raw}`);
+  lines.push(`Detail: ${a.sell_window_detail}`);
+  if (a.days_to_target !== null) lines.push(`Days to target: ${a.days_to_target}`);
+
+  // Debug: Processor fit
+  if (a.processor_fit_score !== null) {
+    lines.push("");
+    lines.push(`Processor fit: ${a.processor_fit_score.toFixed(0)}/100 (${a.processor_fit_label_raw ?? ""})`);
+  }
+
+  // Debug: Opportunity
+  if (a.opportunity_value !== null) {
+    lines.push("");
+    lines.push("OPPORTUNITY:");
+    lines.push(`Value: $${Math.round(a.opportunity_value).toLocaleString()}`);
+    if (a.opportunity_driver) lines.push(`Driver: ${a.opportunity_driver}`);
+  }
+
+  // Debug: Post-sale scorecard metrics
+  if (a.kill_score !== null || a.gcr !== null) {
+    lines.push("");
+    lines.push("SCORECARD:");
+    if (a.kill_score !== null) {
+      const label = a.kill_score >= 85 ? "Excellent" : a.kill_score >= 70 ? "Good" : a.kill_score >= 50 ? "Fair" : "Poor";
+      lines.push(`Kill Score: ${a.kill_score.toFixed(1)}/100 (${label})`);
+    }
+    if (a.gcr !== null) lines.push(`GCR (Grid Capture Ratio): ${a.gcr.toFixed(1)}%`);
+    if (a.grid_risk !== null) lines.push(`Grid Risk: ${a.grid_risk.toFixed(1)}%`);
+    if (a.grid_compliance_score !== null) lines.push(`Grid compliance: ${a.grid_compliance_score.toFixed(1)}%`);
+    if (a.fat_compliance_score !== null) lines.push(`Fat compliance: ${a.fat_compliance_score.toFixed(1)}%`);
+    if (a.dentition_compliance_score !== null) lines.push(`Dentition compliance: ${a.dentition_compliance_score.toFixed(1)}%`);
+  }
+
+  // Debug: Show count if multiple analyses match
+  if (sorted.length > 1) {
+    lines.push(`\n(Showing most recent of ${sorted.length} matching analyses)`);
+  }
+
+  return lines.join("\n");
+}
+
+function lookupKillHistory(
+  herdName: string | undefined,
+  processorName: string | undefined,
+  store: ChatDataStore
+): string {
+  if (store.killSheets.length === 0) return "No kill sheet records found. Upload a kill sheet via Grid IQ to get started.";
+
+  let filtered = store.killSheets;
+  if (processorName) {
+    const lowered = processorName.toLowerCase();
+    filtered = filtered.filter((k) => k.processor_name.toLowerCase().includes(lowered));
+  }
+  if (herdName) {
+    // Debug: Filter by linked herd if available
+    const herd = findHerd(herdName, store.herds);
+    if (herd) {
+      const herdFiltered = filtered.filter((k) => k.herd_group_id === herd.id);
+      if (herdFiltered.length > 0) filtered = herdFiltered;
+    }
+  }
+
+  const sorted = [...filtered].sort((a, b) => b.kill_date.localeCompare(a.kill_date));
+  const lines = [`KILL SHEET HISTORY (${sorted.length} records):`];
+
+  for (const k of sorted.slice(0, 10)) {
+    const date = new Date(k.kill_date).toLocaleDateString("en-AU");
+    lines.push("");
+    lines.push(`- ${k.processor_name} (${date}):`);
+    lines.push(`  Head: ${k.total_head_count}`);
+    lines.push(`  Total body weight: ${k.total_body_weight.toFixed(1)}kg`);
+    lines.push(`  Avg body weight: ${k.average_body_weight.toFixed(1)}kg`);
+    lines.push(`  Gross value: $${Math.round(k.total_gross_value).toLocaleString()}`);
+    lines.push(`  Avg $/kg: $${k.average_price_per_kg.toFixed(2)}`);
+    lines.push(`  Avg $/head: $${Math.round(k.average_value_per_head).toLocaleString()}`);
+    if (k.condemns > 0) lines.push(`  Condemns: ${k.condemns}`);
+    if (k.realisation_factor !== null) lines.push(`  Realisation factor: ${(k.realisation_factor * 100).toFixed(1)}%`);
+    if (k.property_name) lines.push(`  Property: ${k.property_name}`);
+  }
+
+  return lines.join("\n");
+}
+
+function lookupGridDetails(processorName: string | undefined, store: ChatDataStore): string {
+  if (store.processorGrids.length === 0) return "No processor grids found. Upload a grid via Grid IQ to get started.";
+
+  let filtered = store.processorGrids;
+  if (processorName) {
+    const lowered = processorName.toLowerCase();
+    filtered = filtered.filter((g) => g.processor_name.toLowerCase().includes(lowered));
+  }
+
+  if (filtered.length === 0) {
+    const available = store.processorGrids.map((g) => g.processor_name).join(", ");
+    return `No grids found matching '${processorName}'. Available: ${available}`;
+  }
+
+  const lines = [`PROCESSOR GRIDS (${filtered.length}):`];
+  for (const g of filtered) {
+    const date = new Date(g.grid_date).toLocaleDateString("en-AU");
+    lines.push("");
+    lines.push(`- ${g.processor_name}:`);
+    if (g.grid_code) lines.push(`  Grid code: ${g.grid_code}`);
+    lines.push(`  Date: ${date}`);
+    if (g.expiry_date) {
+      const expiry = new Date(g.expiry_date);
+      const isExpired = expiry < new Date();
+      lines.push(`  Expiry: ${expiry.toLocaleDateString("en-AU")}${isExpired ? " (EXPIRED)" : ""}`);
+    }
+    if (g.location) lines.push(`  Location: ${g.location}`);
+
+    // Debug: Show analyses using this grid
+    const gridAnalyses = store.gridIQAnalyses.filter((a) => a.processor_grid_id === g.id);
+    if (gridAnalyses.length > 0) {
+      lines.push(`  Analyses using this grid: ${gridAnalyses.length}`);
+    }
+  }
+
+  return lines.join("\n");
+}
+
+function lookupChannelComparison(herdName: string | undefined, store: ChatDataStore): string {
+  if (store.gridIQAnalyses.length === 0) return "No Grid IQ analyses found. Run an analysis to compare saleyard vs processor channels.";
+
+  let filtered = store.gridIQAnalyses;
+  if (herdName) {
+    const lowered = herdName.toLowerCase();
+    filtered = filtered.filter((a) => a.herd_name.toLowerCase().includes(lowered));
+  }
+
+  if (filtered.length === 0) {
+    return `No analyses found for '${herdName}'. Available: ${store.gridIQAnalyses.map((a) => a.herd_name).join(", ")}`;
+  }
+
+  // Debug: Group by herd, show latest analysis per processor
+  const byHerd = new Map<string, typeof filtered>();
+  for (const a of filtered) {
+    const existing = byHerd.get(a.herd_name) ?? [];
+    existing.push(a);
+    byHerd.set(a.herd_name, existing);
+  }
+
+  const lines = ["CHANNEL COMPARISON (Saleyard vs Processor):"];
+
+  for (const [name, analyses] of byHerd) {
+    lines.push(`\n${name}:`);
+    // Debug: Show latest analysis per processor
+    const latestByProcessor = new Map<string, typeof analyses[0]>();
+    for (const a of analyses) {
+      const existing = latestByProcessor.get(a.processor_name);
+      if (!existing || a.analysis_date > existing.analysis_date) {
+        latestByProcessor.set(a.processor_name, a);
+      }
+    }
+
+    for (const [proc, a] of latestByProcessor) {
+      const advantage = a.grid_iq_advantage;
+      const better = advantage > 0 ? "Processor" : "Saleyard";
+      lines.push(`  ${proc}:`);
+      lines.push(`    Net saleyard: $${Math.round(a.net_saleyard_value).toLocaleString()}`);
+      lines.push(`    Net processor: $${Math.round(a.net_processor_value).toLocaleString()}`);
+      lines.push(`    Advantage: $${Math.round(Math.abs(advantage)).toLocaleString()} to ${better}`);
+      lines.push(`    Sell window: ${a.sell_window_status_raw}`);
+    }
+  }
+
+  return lines.join("\n");
 }
 
 // MARK: - Helpers

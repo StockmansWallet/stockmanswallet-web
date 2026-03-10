@@ -68,6 +68,7 @@ YOUR TOOLS:
 2. calculate_freight: Calculates exact freight costs via Freight IQ. Use this EVERY TIME the user asks about transport costs.
 3. create_yard_book_event: Creates events in the user's Yard Book.
 4. manage_yard_book_event: Marks a Yard Book event as complete or deletes it.
+5. lookup_grid_iq_data: Retrieves Grid IQ data - processor grid comparisons, kill sheet results, Kill Score, GCR, and Grid Risk. Use when the user asks about processor grids, kill sheets, grid performance, or over-the-hooks results. Available query types: grid_iq_summary, analysis_details, kill_history, grid_details, compare_channels.
 
 TOOL USAGE RULES:
 - Call lookup_portfolio_data BEFORE answering any data question
@@ -107,6 +108,12 @@ IMPORTANT FOR FREIGHT QUESTIONS:
 
   indexLines.push("Market data: Available (use lookup tool)");
   indexLines.push("Freight data: Available (use lookup tool or calculate_freight tool)");
+
+  // Debug: Add Grid IQ summary to portfolio index
+  if (store.gridIQAnalyses.length > 0 || store.killSheets.length > 0 || store.processorGrids.length > 0) {
+    indexLines.push(`Grid IQ: ${store.gridIQAnalyses.length} analyses, ${store.killSheets.length} kill sheets, ${store.processorGrids.length} grids (use lookup_grid_iq_data tool)`);
+  }
+
   sections.push(indexLines.join("\n"));
 
   // App guidance
@@ -362,7 +369,7 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
 
   const userId = user.id;
 
-  // Parallel fetch all data needed for chat
+  // Parallel fetch all data needed for chat (including Grid IQ data)
   const [
     { data: herds },
     { data: properties },
@@ -372,6 +379,9 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
     { data: healthRecords },
     { data: nationalPrices },
     { data: breedPremiums },
+    { data: gridIQAnalyses },
+    { data: killSheets },
+    { data: processorGrids },
   ] = await Promise.all([
     supabase
       .from("herd_groups")
@@ -422,6 +432,28 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
     supabase
       .from("breed_premiums")
       .select("breed, premium_percent:premium_pct"),
+    // Debug: Grid IQ data for Brangus tool lookups
+    supabase
+      .from("grid_iq_analyses")
+      .select("id, herd_group_id, processor_grid_id, kill_sheet_record_id, analysis_date, herd_name, processor_name, mla_market_value, headline_grid_value, realisation_factor, realistic_grid_outcome, freight_to_saleyard, freight_to_processor, net_saleyard_value, net_processor_value, grid_iq_advantage, sell_window_status_raw, sell_window_detail, days_to_target, head_count, estimated_carcase_weight, dressing_percentage, is_using_personalised_data, analysis_mode, gcr, grid_risk, kill_score, grid_compliance_score, fat_compliance_score, dentition_compliance_score, processor_fit_score, processor_fit_label_raw, opportunity_value, opportunity_driver")
+      .eq("user_id", userId)
+      .eq("is_deleted", false)
+      .order("analysis_date", { ascending: false })
+      .limit(50),
+    supabase
+      .from("kill_sheet_records")
+      .select("id, processor_name, kill_date, total_head_count, total_body_weight, total_gross_value, average_body_weight, average_price_per_kg, average_value_per_head, condemns, realisation_factor, herd_group_id, property_name, notes")
+      .eq("user_id", userId)
+      .eq("is_deleted", false)
+      .order("kill_date", { ascending: false })
+      .limit(50),
+    supabase
+      .from("processor_grids")
+      .select("id, processor_name, grid_code, grid_date, expiry_date, location")
+      .eq("user_id", userId)
+      .eq("is_deleted", false)
+      .order("grid_date", { ascending: false })
+      .limit(20),
   ]);
 
   // Build national pricing map from parallel-fetched data
@@ -493,6 +525,9 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
     nationalPriceMap,
     saleyardPriceMap,
     premiumMap,
+    gridIQAnalyses: gridIQAnalyses ?? [],
+    killSheets: killSheets ?? [],
+    processorGrids: processorGrids ?? [],
     pendingYardBookEvents: [],
     pendingYardBookActions: [],
   };
