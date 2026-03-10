@@ -24,7 +24,7 @@ export default async function GridIQUploadPage({
         inline
         compact
       />
-      <GridIQUploader initialType={initialType} />
+      <GridIQUploader key={initialType} initialType={initialType} />
     </div>
   );
 }
