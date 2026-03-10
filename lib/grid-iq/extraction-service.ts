@@ -54,6 +54,7 @@ export async function extractDocument(
 /**
  * Send structured file to grid-iq-parser Edge Function for direct parsing.
  * Used for Excel, CSV, and TXT files.
+ * Falls back to AI extraction if parser returns empty data.
  */
 async function extractViaParser(
   file: File,
@@ -71,13 +72,28 @@ async function extractViaParser(
     throw new Error(response.error);
   }
 
+  // If parser explicitly says AI is needed and has text content, use AI
+  if (response.requires_ai && response.text_content) {
+    console.log("Grid IQ: Parser requires AI, using text fallback");
+    return await extractViaTextAI(response.text_content, uploadType, accessToken);
+  }
+
   if (response.requires_ai) {
     throw new Error(
       "This file format requires AI extraction. Please try a different format or use the iOS app."
     );
   }
 
-  return buildResult(response, uploadType, false);
+  const result = buildResult(response, uploadType, false);
+
+  // Check if parser returned empty data - fall back to AI if text content available
+  const isEmpty = isExtractionEmpty(result);
+  if (isEmpty && response.text_content) {
+    console.warn("Grid IQ: Parser returned empty data, falling back to AI extraction");
+    return await extractViaTextAI(response.text_content, uploadType, accessToken);
+  }
+
+  return result;
 }
 
 /**
@@ -188,6 +204,100 @@ async function extractViaAI(
   } else {
     result.killSheetData = parsed as KillSheetParserData;
     // Head count reconciliation for kill sheets
+    if (result.killSheetData) {
+      result.reconciliation = reconcileHeadCount(result.killSheetData);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Check if an extraction result has no meaningful data.
+ */
+function isExtractionEmpty(result: ExtractionResult): boolean {
+  if (result.documentType === "grid") {
+    return !result.gridData?.entries?.length;
+  }
+  if (result.documentType === "killsheet") {
+    const ks = result.killSheetData;
+    return !ks?.lineItems?.length && (ks?.totalHeadCount ?? 0) === 0;
+  }
+  return true;
+}
+
+/**
+ * Extract data from CSV/text content using Claude AI via claude-proxy.
+ * Used as fallback when structured parser returns empty results.
+ */
+async function extractViaTextAI(
+  textContent: string,
+  uploadType: "grid" | "killsheet",
+  accessToken: string
+): Promise<ExtractionResult> {
+  const systemPrompt =
+    uploadType === "grid" ? gridSystemPrompt() : killSheetSystemPrompt();
+
+  // Truncate text to fit within token limits (approx 4 chars per token)
+  const maxChars = uploadType === "grid" ? 80000 : 40000;
+  const truncatedText = textContent.length > maxChars
+    ? textContent.substring(0, maxChars) + "\n\n[Content truncated]"
+    : textContent;
+
+  const requestBody = {
+    model: CLAUDE_MODEL,
+    max_tokens: uploadType === "grid" ? 32768 : 16384,
+    system: systemPrompt,
+    messages: [
+      {
+        role: "user",
+        content: `Extract all data from this ${uploadType === "grid" ? "processor grid" : "kill sheet"} spreadsheet data and return the JSON.\n\n${truncatedText}`,
+      },
+    ],
+    purpose: "grid-iq-text",
+  };
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+  const res = await fetch(`${supabaseUrl}/functions/v1/claude-proxy`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+      apikey: supabaseAnonKey,
+    },
+    body: JSON.stringify(requestBody),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("Claude proxy error (text fallback):", res.status, errorText);
+    if (res.status === 429)
+      throw new Error("Too many requests. Please wait a moment and try again.");
+    throw new Error(`AI extraction failed (HTTP ${res.status}). Please try again.`);
+  }
+
+  const data = await res.json();
+  const responseText = data.content?.[0]?.text;
+
+  if (!responseText) {
+    throw new Error("No response from AI. Please try again.");
+  }
+
+  const jsonString = extractJSON(responseText);
+  const parsed = JSON.parse(jsonString);
+
+  const result: ExtractionResult = {
+    documentType: uploadType,
+    confidence: 0.85,
+    parsedViaAI: true,
+  };
+
+  if (uploadType === "grid") {
+    result.gridData = parsed as GridParserData;
+  } else {
+    result.killSheetData = parsed as KillSheetParserData;
     if (result.killSheetData) {
       result.reconciliation = reconcileHeadCount(result.killSheetData);
     }

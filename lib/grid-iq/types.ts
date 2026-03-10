@@ -10,6 +10,8 @@ export interface ParserResponse {
   male_sheet?: string | null;
   female_sheet?: string | null;
   column_mapping?: Record<string, string> | null;
+  // CSV text fallback when structured parsing yields empty results
+  text_content?: string | null;
   message?: string;
   error?: string;
 }
