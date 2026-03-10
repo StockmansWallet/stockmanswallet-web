@@ -287,9 +287,10 @@ export default async function GridIQPage() {
                   daysUntilExpiry <= 7;
 
                 return (
-                  <div
+                  <Link
                     key={g.id as string}
-                    className="flex items-center justify-between px-5 py-3.5"
+                    href={`/dashboard/tools/grid-iq/grids/${g.id}`}
+                    className="group flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-white/[0.04]"
                   >
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-text-primary">
@@ -316,7 +317,8 @@ export default async function GridIQPage() {
                           : `${daysUntilExpiry}d left`}
                       </div>
                     )}
-                  </div>
+                    <ChevronRight className="ml-2 h-4 w-4 shrink-0 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
+                  </Link>
                 );
               })}
             </CardContent>
@@ -341,9 +343,10 @@ export default async function GridIQPage() {
             </CardHeader>
             <CardContent className="divide-y divide-white/[0.06] p-0">
               {safeKillSheets.map((ks: Record<string, unknown>) => (
-                <div
+                <Link
                   key={ks.id as string}
-                  className="flex items-center justify-between px-5 py-3.5"
+                  href={`/dashboard/tools/grid-iq/history/${ks.id}`}
+                  className="group flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-white/[0.04]"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-text-primary">
@@ -362,7 +365,8 @@ export default async function GridIQPage() {
                       ks.total_gross_value as number
                     ).toLocaleString()}
                   </p>
-                </div>
+                  <ChevronRight className="ml-2 h-4 w-4 shrink-0 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
+                </Link>
               ))}
             </CardContent>
           </Card>
