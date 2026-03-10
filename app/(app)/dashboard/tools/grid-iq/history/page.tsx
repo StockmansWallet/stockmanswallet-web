@@ -50,8 +50,9 @@ export default async function KillSheetHistoryPage() {
               const rf = ks.realisation_factor as number | null;
 
               return (
-                <div
+                <Link
                   key={ks.id as string}
+                  href={`/dashboard/tools/grid-iq/history/${ks.id}`}
                   className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/[0.03]"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/15">
@@ -96,7 +97,7 @@ export default async function KillSheetHistoryPage() {
                     </p>
                   </div>
                   <ChevronRight className="h-4 w-4 shrink-0 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
-                </div>
+                </Link>
               );
             })}
           </CardContent>

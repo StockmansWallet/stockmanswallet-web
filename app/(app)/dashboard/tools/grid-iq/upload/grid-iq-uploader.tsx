@@ -21,6 +21,29 @@ import { createClient } from "@/lib/supabase/client";
 
 type UploadType = "grid" | "killsheet";
 
+// Normalise date strings to YYYY-MM-DD for PostgreSQL.
+// Handles DD/MM/YYYY (Australian), MM/DD/YYYY, and YYYY-MM-DD.
+function normaliseDate(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  const s = raw.trim();
+  // Already ISO format
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.split("T")[0];
+  // DD/MM/YYYY or D/M/YYYY (Australian)
+  const slashParts = s.match(/^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})$/);
+  if (slashParts) {
+    const a = parseInt(slashParts[1], 10);
+    const b = parseInt(slashParts[2], 10);
+    const year = slashParts[3];
+    // If first part > 12, it must be DD/MM/YYYY
+    if (a > 12) return `${year}-${String(b).padStart(2, "0")}-${String(a).padStart(2, "0")}`;
+    // If second part > 12, it must be MM/DD/YYYY
+    if (b > 12) return `${year}-${String(a).padStart(2, "0")}-${String(b).padStart(2, "0")}`;
+    // Ambiguous - assume Australian DD/MM/YYYY
+    return `${year}-${String(b).padStart(2, "0")}-${String(a).padStart(2, "0")}`;
+  }
+  return s;
+}
+
 const ACCEPTED_TYPES = [
   "image/jpeg",
   "image/png",
@@ -174,8 +197,8 @@ export function GridIQUploader() {
             user_id: session.user.id,
             processor_name: grid.processorName || "Unknown Processor",
             grid_code: grid.gridCode,
-            grid_date: grid.gridDate || new Date().toISOString().split("T")[0],
-            expiry_date: grid.expiryDate,
+            grid_date: normaliseDate(grid.gridDate) || new Date().toISOString().split("T")[0],
+            expiry_date: normaliseDate(grid.expiryDate),
             contact_name: grid.contactName,
             contact_phone: grid.contactPhone,
             contact_email: grid.contactEmail,
@@ -194,7 +217,7 @@ export function GridIQUploader() {
             id: crypto.randomUUID(),
             user_id: session.user.id,
             processor_name: ks.processorName || "Unknown Processor",
-            kill_date: ks.killDate || new Date().toISOString().split("T")[0],
+            kill_date: normaliseDate(ks.killDate) || new Date().toISOString().split("T")[0],
             vendor_code: ks.vendorCode,
             pic: ks.pic,
             property_name: ks.propertyName,
