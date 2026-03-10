@@ -423,7 +423,7 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
               <p>BaseMarketValue = {headCount} x {initialWeight} x {fmtCents(result.pricePerKg, 2)} = <strong>{fmtDollar(result.baseMarketValue)}</strong></p>
               <p>WeightGainAccrual = {fmtDollar(result.physicalValue)} - {fmtDollar(result.baseMarketValue)} = <strong>{fmtDollar(result.weightGainAccrual)}</strong></p>
               {result.mortalityDeduction > 0 && (
-                <p>Mortality = {fmtDollar(result.baseMarketValue)} x ({result.daysHeld}/365) x {mortalityRate}% = <strong>-{fmtDollar(result.mortalityDeduction)}</strong></p>
+                <p>Mortality = {fmtDollar(result.physicalValue)} x ({result.daysHeld}/365) x {mortalityRate}% = <strong>-{fmtDollar(result.mortalityDeduction)}</strong></p>
               )}
               {result.breedingAccrual > 0 && (
                 <p>BreedingAccrual = <strong>{fmtDollar(result.breedingAccrual)}</strong></p>

@@ -307,7 +307,7 @@ function ExpandedDetail({ herd }: { herd: HerdWithValuation }) {
     `BaseMarketValue = ${herd.head_count} x ${herd.initial_weight} x $${v.pricePerKg.toFixed(4)} = ${fmtDollar(v.baseMarketValue)}`,
     `WeightGainAccrual = ${fmtDollar(v.physicalValue)} - ${fmtDollar(v.baseMarketValue)} = ${fmtDollar(v.weightGainAccrual)}`,
     ...(v.mortalityDeduction > 0
-      ? [`MortalityDeduction = ${fmtDollar(v.baseMarketValue)} x (${v.daysHeld}/365) x ${((v.mortalityRate ?? 0) * 100).toFixed(1)}% = ${fmtDollar(v.mortalityDeduction)}`]
+      ? [`MortalityDeduction = ${fmtDollar(v.physicalValue)} x (${v.daysHeld}/365) x ${((v.mortalityRate ?? 0) * 100).toFixed(1)}% = ${fmtDollar(v.mortalityDeduction)}`]
       : []),
     ...(v.breedingAccrual > 0
       ? [`BreedingAccrual = ${fmtDollar(v.breedingAccrual)}`]

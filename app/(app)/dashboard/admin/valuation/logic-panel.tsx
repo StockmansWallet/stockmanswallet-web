@@ -45,8 +45,8 @@ CALVES AT FOOT
   CalvesAtFootValue   = CalfHeadCount x CurrentCalfWeight x AdjustedPrice
 
 MORTALITY DEDUCTION
-  MortalityDeduction = BaseMarketValue x (DaysHeld / 365) x AnnualMortalityRate
-  Applied to base market value only (initial weight, not projected)
+  MortalityDeduction = PhysicalValue x (DaysHeld / 365) x AnnualMortalityRate
+  Applied to physical value (projected weight)
 
 GROSS VALUE
   GrossValue = PhysicalValue + BreedingAccrual

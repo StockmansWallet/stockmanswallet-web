@@ -549,10 +549,10 @@ export function calculateHerdValuation(
   const physicalValue = head * projectedWeight * adjustedPrice;
   const baseMarketValue = head * (herd.initial_weight ?? herd.current_weight ?? 0) * adjustedPrice;
 
-  // 4. Mortality deduction (linear, on initial weight only)
+  // 4. Mortality deduction (linear, on physical value / projected weight)
   const daysHeld = daysBetween(createdAt, now);
   const mortalityRate = herd.mortality_rate ?? 0.05;
-  const mortalityDeduction = calculateMortalityDeduction(baseMarketValue, mortalityRate, daysHeld);
+  const mortalityDeduction = calculateMortalityDeduction(physicalValue, mortalityRate, daysHeld);
 
   // 5. Pre-birth breeding accrual (pregnant breeders with a joining date)
   let breedingAccrual = 0;
