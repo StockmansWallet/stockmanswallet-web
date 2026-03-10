@@ -42,11 +42,11 @@ export default async function GridIQPage() {
       supabase
         .from("grid_iq_analyses")
         .select(
-          "id, herd_name, processor_name, analysis_date, net_saleyard_value, net_processor_value, grid_iq_advantage, sell_window_status_raw, kill_score, gcr, analysis_mode, created_at"
+          "id, herd_name, processor_name, analysis_date, net_saleyard_value, net_processor_value, grid_iq_advantage, sell_window_status_raw, kill_score, gcr, analysis_mode, updated_at"
         )
         .eq("user_id", user!.id)
         .eq("is_deleted", false)
-        .order("created_at", { ascending: false })
+        .order("updated_at", { ascending: false })
         .limit(5),
     ]);
 
@@ -73,7 +73,7 @@ export default async function GridIQPage() {
                 )}
               </div>
               <Link
-                href="/dashboard/tools/grid-iq/analyse"
+                href="/dashboard/tools/grid-iq/analyses"
                 className="text-xs font-medium text-teal-400 hover:underline"
               >
                 View All

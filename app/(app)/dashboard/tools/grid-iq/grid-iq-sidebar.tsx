@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Plus, Upload, Grid3x3, FileText } from "lucide-react";
+import { Plus, Upload, Grid3x3, FileText, TrendingUp } from "lucide-react";
 
 const createItems = [
   {
@@ -25,6 +25,12 @@ const createItems = [
 ];
 
 const viewItems = [
+  {
+    label: "View Analyses",
+    href: "/dashboard/tools/grid-iq/analyses",
+    icon: TrendingUp,
+    matchPrefix: "/dashboard/tools/grid-iq/analyses",
+  },
   {
     label: "View Grids",
     href: "/dashboard/tools/grid-iq/grids",

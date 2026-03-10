@@ -67,6 +67,7 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
         titleClassName="text-2xl font-bold text-teal-400"
         subtitle={`${new Date(a.analysis_date as string).toLocaleDateString("en-AU")} - ${isPostSale ? "Post-Sale Audit" : "Pre-Sale Planning"}`}
         subtitleClassName="text-sm text-text-secondary"
+        compact
       />
 
       {/* Value Comparison */}
@@ -226,6 +227,14 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
       <div className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-teal-500/10 py-3 text-sm font-medium text-teal-400">
         <Check className="h-4 w-4" />
         Analysis saved
+      </div>
+
+      <div className="mt-3 flex justify-center">
+        <Link href="/dashboard/tools/grid-iq">
+          <Button variant="teal" size="md">
+            Done
+          </Button>
+        </Link>
       </div>
     </div>
   );
