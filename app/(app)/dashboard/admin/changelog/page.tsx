@@ -36,6 +36,7 @@ export default async function ChangelogPage() {
     <div className="max-w-4xl">
       <PageHeader
         title="Changelog"
+        titleClassName="text-4xl font-bold text-blue-400"
         subtitle="iOS and web app build updates."
       />
       <ChangelogTimeline days={timeline} />

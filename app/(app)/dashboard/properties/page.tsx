@@ -28,6 +28,7 @@ export default async function PropertiesPage() {
     <div className="max-w-6xl">
       <PageHeader
         title="Properties"
+        titleClassName="text-4xl font-bold text-brand"
         subtitle="Manage your properties and locations."
         actions={
           <Link href="/dashboard/properties/new">

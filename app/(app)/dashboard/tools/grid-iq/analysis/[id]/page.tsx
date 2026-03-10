@@ -17,6 +17,7 @@ import {
   CheckCircle,
   TrendingUp,
   Zap,
+  Check,
 } from "lucide-react";
 
 interface PageProps {
@@ -52,7 +53,7 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
 
   return (
     <div className="max-w-3xl">
-      <div className="mb-4">
+      <div className="mb-4 sm:hidden">
         <Link href="/dashboard/tools/grid-iq">
           <Button variant="ghost" size="sm" className="gap-1.5 text-text-muted hover:text-text-primary">
             <ArrowLeft className="h-3.5 w-3.5" />
@@ -63,7 +64,7 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
 
       <PageHeader
         title={`${a.herd_name} vs ${a.processor_name}`}
-        titleClassName="text-xl font-bold text-teal-400"
+        titleClassName="text-2xl font-bold text-teal-400"
         subtitle={`${new Date(a.analysis_date as string).toLocaleDateString("en-AU")} - ${isPostSale ? "Post-Sale Audit" : "Pre-Sale Planning"}`}
         subtitleClassName="text-sm text-text-secondary"
       />
@@ -220,6 +221,12 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
           <BrangusCommentarySection commentary={a.brangus_commentary as { bullets?: string[]; narrative?: string }} />
         </div>
       )}
+
+      {/* Saved Confirmation */}
+      <div className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-teal-500/10 py-3 text-sm font-medium text-teal-400">
+        <Check className="h-4 w-4" />
+        Analysis saved
+      </div>
     </div>
   );
 }

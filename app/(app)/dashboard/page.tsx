@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -194,14 +195,11 @@ export default async function DashboardPage() {
       {!hasData ? (
         /* ── Empty state ── */
         <div>
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-text-primary">
-              Welcome to Stockman&rsquo;s Wallet
-            </h1>
-            <p className="mt-1 text-sm text-text-muted">
-              Add your first herd to get started.
-            </p>
-          </div>
+          <PageHeader
+            title="Welcome to Stockman&#8217;s Wallet"
+            titleClassName="text-4xl font-bold text-brand"
+            subtitle="Add your first herd to get started."
+          />
           <Card>
             <EmptyState
               title="No herds yet"
@@ -213,14 +211,11 @@ export default async function DashboardPage() {
         </div>
       ) : (
         <div>
-          <div className="mb-3 lg:mb-4">
-            <h1 className="text-2xl font-bold text-text-primary">
-              G&rsquo;day, {firstName}!
-            </h1>
-            <p className="mt-1 text-sm text-text-muted">
-              Here&rsquo;s your herd overview.
-            </p>
-          </div>
+          <PageHeader
+            title={`G\u2019day, ${firstName}!`}
+            titleClassName="text-4xl font-bold text-brand"
+            subtitle="Here&#8217;s your herd overview."
+          />
 
           <div className="flex flex-col gap-3 lg:flex-row lg:gap-4">
             {/* Left column */}

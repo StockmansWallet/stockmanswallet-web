@@ -47,6 +47,7 @@ export default function ToolsPage() {
     <div className="max-w-6xl">
       <PageHeader
         title="Tools"
+        titleClassName="text-4xl font-bold text-brand"
         subtitle="Calculators and utilities for your operation."
       />
 

@@ -1,16 +1,13 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
-  Grid3x3,
-  Upload,
-  FileText,
-  Target,
   ChevronRight,
   AlertTriangle,
-  Plus,
+  TrendingUp,
+  Grid3x3,
+  FileText,
 } from "lucide-react";
 
 export const metadata = { title: "Grid IQ" };
@@ -62,293 +59,225 @@ export default async function GridIQPage() {
     safeAnalyses.length > 0;
 
   return (
-    <div className="max-w-6xl">
-      <PageHeader
-        title="Grid IQ"
-        titleClassName="text-2xl font-bold text-teal-400"
-        subtitle="Processor intelligence"
-        subtitleClassName="text-sm font-medium text-text-secondary"
-        inline
-        actions={
-          <Link href="/dashboard/tools/grid-iq/upload">
-            <Button size="sm" variant="teal">
-              <Upload className="mr-1.5 h-3.5 w-3.5" />
-              Upload Grid
-            </Button>
-          </Link>
-        }
-      />
-
-      {/* Two-column layout: actions left, lists right */}
-      <div className="flex flex-col gap-4 sm:flex-row">
-        {/* Left column - Action buttons */}
-        <div className="flex w-full flex-col gap-3 sm:w-56 sm:shrink-0">
-          <Link href="/dashboard/tools/grid-iq/upload">
-            <Card className="group transition-all hover:bg-white/[0.07]">
-              <CardContent className="flex items-center gap-3 p-3.5">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-500/15">
-                  <Plus className="h-4.5 w-4.5 text-teal-400" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-sm font-semibold text-text-primary">
-                    New Analysis
-                  </h3>
-                  <p className="text-[11px] text-text-muted">
-                    Upload and compare
-                  </p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
-              </CardContent>
-            </Card>
-          </Link>
-          <Link href="/dashboard/tools/grid-iq/grids">
-            <Card className="group transition-all hover:bg-white/[0.07]">
-              <CardContent className="flex items-center gap-3 p-3.5">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-500/15">
-                  <Grid3x3 className="h-4.5 w-4.5 text-teal-400" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-sm font-semibold text-text-primary">
-                    Saved Grids
-                  </h3>
-                  <p className="text-[11px] text-text-muted">
-                    {safeGrids.length > 0
-                      ? `${safeGrids.length} grid${safeGrids.length !== 1 ? "s" : ""}`
-                      : "No grids yet"}
-                  </p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
-              </CardContent>
-            </Card>
-          </Link>
-          <Link href="/dashboard/tools/grid-iq/history">
-            <Card className="group transition-all hover:bg-white/[0.07]">
-              <CardContent className="flex items-center gap-3 p-3.5">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-500/15">
-                  <FileText className="h-4.5 w-4.5 text-teal-400" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-sm font-semibold text-text-primary">
-                    Kill Sheets
-                  </h3>
-                  <p className="text-[11px] text-text-muted">
-                    {safeKillSheets.length > 0
-                      ? `${safeKillSheets.length} sheet${safeKillSheets.length !== 1 ? "s" : ""}`
-                      : "No sheets yet"}
-                  </p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
-              </CardContent>
-            </Card>
-          </Link>
-        </div>
-
-        {/* Right column - Lists */}
-        <div className="min-w-0 flex-1 space-y-4">
-          {/* Recent Analyses */}
-          {safeAnalyses.length > 0 && (
-            <Card>
-              <CardHeader className="border-b border-white/[0.06]">
-                <CardTitle>Recent Analyses</CardTitle>
-              </CardHeader>
-              <CardContent className="divide-y divide-white/[0.06] p-0">
-                {safeAnalyses.map((a: Record<string, unknown>) => {
-                  const advantage = (a.grid_iq_advantage as number) ?? 0;
-                  const isProcessor = advantage > 0;
-                  const killScore = a.kill_score as number | null;
-                  const gcr = a.gcr as number | null;
-                  const mode = a.analysis_mode as string | null;
-                  return (
-                    <Link
-                      key={a.id as string}
-                      href={`/dashboard/tools/grid-iq/analysis/${a.id}`}
-                      className="flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-white/[0.04]"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-text-primary">
-                          {a.herd_name as string} vs {a.processor_name as string}
-                        </p>
-                        <div className="mt-0.5 flex items-center gap-2">
-                          <p className="text-xs text-text-muted">
-                            {new Date(
-                              a.analysis_date as string
-                            ).toLocaleDateString("en-AU")}
-                          </p>
-                          {mode === "postSale" && (
-                            <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-text-muted">
-                              Post-Sale
-                            </span>
-                          )}
-                          {killScore !== null && (
-                            <span className={`text-[10px] font-medium ${killScore >= 85 ? "text-emerald-400" : killScore >= 70 ? "text-teal-400" : killScore >= 50 ? "text-amber-400" : "text-red-400"}`}>
-                              KS {killScore.toFixed(0)}
-                            </span>
-                          )}
-                          {gcr !== null && (
-                            <span className="text-[10px] text-text-muted">
-                              GCR {gcr.toFixed(0)}%
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p
-                          className={`text-sm font-semibold ${isProcessor ? "text-emerald-400" : "text-brand"}`}
-                        >
-                          {isProcessor ? "Over-the-Hooks" : "Saleyard"}
-                        </p>
-                        <p className="text-xs text-text-muted">
-                          {isProcessor ? "+" : ""}$
-                          {Math.abs(Math.round(advantage)).toLocaleString()}
-                        </p>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Saved Grids */}
-          {safeGrids.length > 0 && (
-            <Card>
-              <CardHeader className="border-b border-white/[0.06]">
-                <div className="flex items-center justify-between">
-                  <CardTitle>Saved Grids</CardTitle>
+    <div>
+      <div className="space-y-4">
+        {/* Grid Analysis */}
+        <Card>
+          <CardHeader className="border-b border-white/[0.06]">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-teal-400" />
+                <CardTitle>Grid Analysis</CardTitle>
+                {safeAnalyses.length > 0 && (
+                  <Badge className="bg-teal-500/15 text-teal-400">{safeAnalyses.length}</Badge>
+                )}
+              </div>
+              <Link
+                href="/dashboard/tools/grid-iq/analyse"
+                className="text-xs font-medium text-teal-400 hover:underline"
+              >
+                View All
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent className="divide-y divide-white/[0.06] p-0">
+            {safeAnalyses.length > 0 ? (
+              safeAnalyses.map((a: Record<string, unknown>) => {
+                const advantage = (a.grid_iq_advantage as number) ?? 0;
+                const isProcessor = advantage > 0;
+                const killScore = a.kill_score as number | null;
+                const gcr = a.gcr as number | null;
+                const mode = a.analysis_mode as string | null;
+                return (
                   <Link
-                    href="/dashboard/tools/grid-iq/grids"
-                    className="text-xs font-medium text-teal-400 hover:underline"
+                    key={a.id as string}
+                    href={`/dashboard/tools/grid-iq/analysis/${a.id}`}
+                    className="flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-white/[0.04]"
                   >
-                    View All
-                  </Link>
-                </div>
-              </CardHeader>
-              <CardContent className="divide-y divide-white/[0.06] p-0">
-                {safeGrids.map((g: Record<string, unknown>) => {
-                  const expiry = g.expiry_date
-                    ? new Date(g.expiry_date as string)
-                    : null;
-                  const now = new Date();
-                  const daysUntilExpiry = expiry
-                    ? Math.ceil(
-                        (expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-                      )
-                    : null;
-                  const isExpired =
-                    daysUntilExpiry !== null && daysUntilExpiry < 0;
-                  const isExpiringSoon =
-                    daysUntilExpiry !== null &&
-                    daysUntilExpiry >= 0 &&
-                    daysUntilExpiry <= 7;
-
-                  return (
-                    <Link
-                      key={g.id as string}
-                      href={`/dashboard/tools/grid-iq/grids/${g.id}`}
-                      className="group flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-white/[0.04]"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-text-primary">
-                          {g.processor_name as string}
-                        </p>
-                        <p className="mt-0.5 text-xs text-text-muted">
-                          {g.grid_code ? `${g.grid_code} · ` : ""}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-text-primary">
+                        {a.herd_name as string} vs {a.processor_name as string}
+                      </p>
+                      <div className="mt-0.5 flex items-center gap-2">
+                        <p className="text-xs text-text-muted">
                           {new Date(
-                            g.grid_date as string
+                            a.analysis_date as string
                           ).toLocaleDateString("en-AU")}
                         </p>
+                        {mode === "postSale" && (
+                          <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-text-muted">
+                            Post-Sale
+                          </span>
+                        )}
+                        {killScore !== null && (
+                          <span className={`text-[10px] font-medium ${killScore >= 85 ? "text-emerald-400" : killScore >= 70 ? "text-teal-400" : killScore >= 50 ? "text-amber-400" : "text-red-400"}`}>
+                            KS {killScore.toFixed(0)}
+                          </span>
+                        )}
+                        {gcr !== null && (
+                          <span className="text-[10px] text-text-muted">
+                            GCR {gcr.toFixed(0)}%
+                          </span>
+                        )}
                       </div>
-                      {(isExpired || isExpiringSoon) && (
-                        <div
-                          className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-                            isExpired
-                              ? "bg-red-500/15 text-red-400"
-                              : "bg-amber-500/15 text-amber-400"
-                          }`}
-                        >
-                          <AlertTriangle className="h-3 w-3" />
-                          {isExpired
-                            ? "Expired"
-                            : `${daysUntilExpiry}d left`}
-                        </div>
-                      )}
-                      <ChevronRight className="ml-2 h-4 w-4 shrink-0 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
-                    </Link>
-                  );
-                })}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Recent Kill Sheets */}
-          {safeKillSheets.length > 0 && (
-            <Card>
-              <CardHeader className="border-b border-white/[0.06]">
-                <div className="flex items-center justify-between">
-                  <CardTitle>Recent Kill Sheets</CardTitle>
-                  <Link
-                    href="/dashboard/tools/grid-iq/history"
-                    className="text-xs font-medium text-teal-400 hover:underline"
-                  >
-                    View All
+                    </div>
+                    <div className="text-right">
+                      <p
+                        className={`text-sm font-semibold ${isProcessor ? "text-emerald-400" : "text-brand"}`}
+                      >
+                        {isProcessor ? "Over-the-Hooks" : "Saleyard"}
+                      </p>
+                      <p className="text-xs text-text-muted">
+                        {isProcessor ? "+" : ""}$
+                        {Math.abs(Math.round(advantage)).toLocaleString()}
+                      </p>
+                    </div>
                   </Link>
-                </div>
-              </CardHeader>
-              <CardContent className="divide-y divide-white/[0.06] p-0">
-                {safeKillSheets.map((ks: Record<string, unknown>) => (
+                );
+              })
+            ) : (
+              <div className="px-5 py-6 text-center text-xs text-text-muted">
+                No analyses yet. Select New Analysis to get started.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Grids */}
+        <Card>
+          <CardHeader className="border-b border-white/[0.06]">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Grid3x3 className="h-4 w-4 text-teal-400" />
+                <CardTitle>Grids</CardTitle>
+                {safeGrids.length > 0 && (
+                  <Badge className="bg-teal-500/15 text-teal-400">{safeGrids.length}</Badge>
+                )}
+              </div>
+              <Link
+                href="/dashboard/tools/grid-iq/grids"
+                className="text-xs font-medium text-teal-400 hover:underline"
+              >
+                View All
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent className="divide-y divide-white/[0.06] p-0">
+            {safeGrids.length > 0 ? (
+              safeGrids.map((g: Record<string, unknown>) => {
+                const expiry = g.expiry_date
+                  ? new Date(g.expiry_date as string)
+                  : null;
+                const now = new Date();
+                const daysUntilExpiry = expiry
+                  ? Math.ceil(
+                      (expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+                    )
+                  : null;
+                const isExpired =
+                  daysUntilExpiry !== null && daysUntilExpiry < 0;
+                const isExpiringSoon =
+                  daysUntilExpiry !== null &&
+                  daysUntilExpiry >= 0 &&
+                  daysUntilExpiry <= 7;
+
+                return (
                   <Link
-                    key={ks.id as string}
-                    href={`/dashboard/tools/grid-iq/history/${ks.id}`}
+                    key={g.id as string}
+                    href={`/dashboard/tools/grid-iq/grids/${g.id}`}
                     className="group flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-white/[0.04]"
                   >
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-text-primary">
-                        {ks.processor_name as string}
+                        {g.processor_name as string}
                       </p>
                       <p className="mt-0.5 text-xs text-text-muted">
+                        {g.grid_code ? `${g.grid_code} · ` : ""}
                         {new Date(
-                          ks.kill_date as string
-                        ).toLocaleDateString("en-AU")}{" "}
-                        · {ks.total_head_count as number} head
+                          g.grid_date as string
+                        ).toLocaleDateString("en-AU")}
                       </p>
                     </div>
-                    <p className="text-sm font-semibold text-text-primary">
-                      $
-                      {Math.round(
-                        ks.total_gross_value as number
-                      ).toLocaleString()}
-                    </p>
+                    {(isExpired || isExpiringSoon) && (
+                      <div
+                        className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                          isExpired
+                            ? "bg-red-500/15 text-red-400"
+                            : "bg-amber-500/15 text-amber-400"
+                        }`}
+                      >
+                        <AlertTriangle className="h-3 w-3" />
+                        {isExpired
+                          ? "Expired"
+                          : `${daysUntilExpiry}d left`}
+                      </div>
+                    )}
                     <ChevronRight className="ml-2 h-4 w-4 shrink-0 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
                   </Link>
-                ))}
-              </CardContent>
-            </Card>
-          )}
+                );
+              })
+            ) : (
+              <div className="px-5 py-6 text-center text-xs text-text-muted">
+                No grids uploaded yet. Select New Grid to upload one.
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-          {/* Empty State - shown when no data */}
-          {!hasData && (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-teal-500/10">
-                  <Target className="h-6 w-6 text-teal-400" />
-                </div>
-                <h3 className="mt-4 text-sm font-semibold text-text-primary">
-                  No analyses yet
-                </h3>
-                <p className="mx-auto mt-1.5 max-w-sm text-xs leading-relaxed text-text-muted">
-                  Upload a processor grid to compare saleyard vs over-the-hooks
-                  value with freight and kill history factored in.
-                </p>
-                <Link href="/dashboard/tools/grid-iq/upload">
-                  <Button size="sm" variant="teal" className="mt-4">
-                    <Upload className="mr-1.5 h-3.5 w-3.5" />
-                    Upload Your First Grid
-                  </Button>
+        {/* Kill Sheets */}
+        <Card>
+          <CardHeader className="border-b border-white/[0.06]">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-teal-400" />
+                <CardTitle>Kill Sheets</CardTitle>
+                {safeKillSheets.length > 0 && (
+                  <Badge className="bg-teal-500/15 text-teal-400">{safeKillSheets.length}</Badge>
+                )}
+              </div>
+              <Link
+                href="/dashboard/tools/grid-iq/history"
+                className="text-xs font-medium text-teal-400 hover:underline"
+              >
+                View All
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent className="divide-y divide-white/[0.06] p-0">
+            {safeKillSheets.length > 0 ? (
+              safeKillSheets.map((ks: Record<string, unknown>) => (
+                <Link
+                  key={ks.id as string}
+                  href={`/dashboard/tools/grid-iq/history/${ks.id}`}
+                  className="group flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-white/[0.04]"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-text-primary">
+                      {ks.processor_name as string}
+                    </p>
+                    <p className="mt-0.5 text-xs text-text-muted">
+                      {new Date(
+                        ks.kill_date as string
+                      ).toLocaleDateString("en-AU")}{" "}
+                      · {ks.total_head_count as number} head
+                    </p>
+                  </div>
+                  <p className="text-sm font-semibold text-text-primary">
+                    $
+                    {Math.round(
+                      ks.total_gross_value as number
+                    ).toLocaleString()}
+                  </p>
+                  <ChevronRight className="ml-2 h-4 w-4 shrink-0 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
                 </Link>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+              ))
+            ) : (
+              <div className="px-5 py-6 text-center text-xs text-text-muted">
+                No kill sheets uploaded yet. Select New Kill Sheet to upload one.
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

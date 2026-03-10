@@ -37,7 +37,7 @@ export default function ReportsPage() {
     <div className="max-w-6xl">
       <PageHeader
         title="Reports"
-        titleClassName="text-2xl font-bold text-amber-400"
+        titleClassName="text-4xl font-bold text-amber-400"
         subtitle="Generate and export reports"
         subtitleClassName="text-sm font-medium text-text-secondary"
         inline

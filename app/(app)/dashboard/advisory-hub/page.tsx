@@ -12,7 +12,7 @@ export default function AdvisoryHubPage() {
     <div className="max-w-6xl">
       <PageHeader
         title="Advisory Hub"
-        titleClassName="text-2xl font-bold text-purple-400"
+        titleClassName="text-4xl font-bold text-purple-400"
         subtitle="Connect with your advisory team"
         subtitleClassName="text-sm font-medium text-text-secondary"
         inline

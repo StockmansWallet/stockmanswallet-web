@@ -97,9 +97,9 @@ function getFileIcon(type: string, name: string) {
   return <FileSpreadsheet className="h-5 w-5 text-emerald-400" />;
 }
 
-export function GridIQUploader() {
+export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadType }) {
   const router = useRouter();
-  const [uploadType, setUploadType] = useState<UploadType>("grid");
+  const [uploadType, setUploadType] = useState<UploadType>(initialType);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -293,32 +293,6 @@ export function GridIQUploader() {
 
   return (
     <div className="space-y-4">
-      {/* Type Selector */}
-      <div className="flex gap-2">
-        {(
-          [
-            { key: "grid", label: "Processor Grid", icon: Grid3x3 },
-            { key: "killsheet", label: "Kill Sheet", icon: FileText },
-          ] as const
-        ).map((t) => (
-          <button
-            key={t.key}
-            onClick={() => {
-              setUploadType(t.key);
-              handleClear();
-            }}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all ${
-              uploadType === t.key
-                ? "bg-teal-500/15 text-teal-400 ring-1 ring-inset ring-teal-500/30"
-                : "bg-white/5 text-text-muted hover:bg-white/8 hover:text-text-secondary"
-            }`}
-          >
-            <t.icon className="h-4 w-4" />
-            {t.label}
-          </button>
-        ))}
-      </div>
-
       {/* Drop Zone */}
       <Card>
         <CardContent className="p-6">

@@ -25,6 +25,7 @@ export default function StockmanIQPage() {
     <div className="max-w-6xl">
       <PageHeader
         title="Stockman IQ"
+        titleClassName="text-4xl font-bold text-brand"
         subtitle="AI-powered insights and chat for your operation."
         actions={
           <Link href="/dashboard/stockman-iq/chat">

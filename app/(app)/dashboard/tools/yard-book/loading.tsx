@@ -4,7 +4,7 @@ export default function YardBookLoading() {
   return (
     <div className="max-w-6xl">
       {/* PageHeader */}
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mt-[68px] mb-8 flex items-center justify-between">
         <div>
           <Skeleton className="mb-2 h-8 w-28" />
           <Skeleton className="h-4 w-64" />

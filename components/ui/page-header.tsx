@@ -7,6 +7,7 @@ interface PageHeaderProps {
   titleClassName?: string;
   subtitleClassName?: string;
   inline?: boolean;
+  compact?: boolean;
 }
 
 function PageHeader({
@@ -16,11 +17,12 @@ function PageHeader({
   titleClassName,
   subtitleClassName,
   inline,
+  compact,
 }: PageHeaderProps) {
   return (
-    <div className="mb-4 flex items-center justify-between">
+    <div className={`flex items-center justify-between ${compact ? "mb-3" : `mb-8 ${inline ? "mt-[68px]" : "mt-11"}`}`}>
       <div className={inline ? "flex items-baseline gap-3" : undefined}>
-        <h1 className={titleClassName ?? "text-2xl font-bold text-text-primary"}>{title}</h1>
+        <h1 className={titleClassName ?? "text-4xl font-bold text-text-primary"}>{title}</h1>
         {subtitle && (
           <p className={subtitleClassName ?? (inline ? "text-sm text-text-muted" : "mt-1 text-sm text-text-muted")}>
             {subtitle}

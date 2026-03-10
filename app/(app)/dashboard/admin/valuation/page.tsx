@@ -179,6 +179,7 @@ export default async function ValuationPage() {
     <div className="max-w-[1600px]">
       <PageHeader
         title="Valuation Lab"
+        titleClassName="text-4xl font-bold text-rose-400"
         subtitle="Full calculation breakdown for every herd. Compare intermediate values to verify correctness."
       />
       <ValuationValidator herds={herdsWithValuations} priceMaps={serializedMaps} saleyardCoverage={coverageData ?? []} />

@@ -25,7 +25,7 @@ function SectionIcon({ icon: Icon }: { icon: React.ComponentType<{ className?: s
 export default function MarketPage() {
   return (
     <div className="max-w-6xl">
-      <PageHeader title="Market" subtitle="Live livestock market intelligence and price indicators." />
+      <PageHeader title="Market" titleClassName="text-4xl font-bold text-brand" subtitle="Live livestock market intelligence and price indicators." />
 
       <div className="space-y-4">
         {/* National Indicators */}

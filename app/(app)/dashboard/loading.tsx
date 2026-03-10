@@ -4,7 +4,7 @@ export default function DashboardLoading() {
   return (
     <div className="max-w-6xl">
       {/* Page header */}
-      <div className="mb-3 lg:mb-4">
+      <div className="mt-11 mb-8">
         <Skeleton className="mb-2 h-7 w-48" />
         <Skeleton className="h-4 w-56" />
       </div>

@@ -1,25 +1,30 @@
-import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
 import { GridIQUploader } from "./grid-iq-uploader";
 
 export const metadata = { title: "Upload - Grid IQ" };
 
-export default function GridIQUploadPage() {
+export default async function GridIQUploadPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ type?: string }>;
+}) {
+  const { type } = await searchParams;
+  const initialType = type === "killsheet" ? "killsheet" : "grid";
+
   return (
     <div className="max-w-3xl">
       <PageHeader
-        title="Upload"
-        subtitle="Upload a processor grid or kill sheet to analyse."
-        actions={
-          <Link
-            href="/dashboard/tools/grid-iq"
-            className="inline-flex h-8 items-center justify-center rounded-xl px-3.5 text-[13px] font-semibold text-text-secondary transition-all duration-150 hover:bg-white/8 hover:text-text-primary"
-          >
-            Cancel
-          </Link>
+        title={initialType === "killsheet" ? "Upload Kill Sheet" : "Upload Grid"}
+        titleClassName="text-2xl font-semibold text-text-primary"
+        subtitle={initialType === "killsheet"
+          ? "Upload a kill sheet to track over-the-hooks performance."
+          : "Upload a processor grid photo or PDF to extract the price matrix."
         }
+        subtitleClassName="text-sm text-text-muted"
+        inline
+        compact
       />
-      <GridIQUploader />
+      <GridIQUploader initialType={initialType} />
     </div>
   );
 }

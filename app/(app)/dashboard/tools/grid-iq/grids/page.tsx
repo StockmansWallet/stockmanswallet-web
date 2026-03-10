@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Upload, AlertTriangle, Grid3x3, ChevronRight, ArrowLeft } from "lucide-react";
+import { AlertTriangle, Grid3x3, ChevronRight, ArrowLeft } from "lucide-react";
 
 export const metadata = { title: "Saved Grids - Grid IQ" };
 
@@ -26,8 +26,8 @@ export default async function SavedGridsPage() {
   const safeGrids = grids ?? [];
 
   return (
-    <div className="max-w-6xl">
-      <div className="mb-4">
+    <div>
+      <div className="mb-4 sm:hidden">
         <Link href="/dashboard/tools/grid-iq">
           <Button variant="ghost" size="sm" className="gap-1.5 text-text-muted hover:text-text-primary">
             <ArrowLeft className="h-3.5 w-3.5" />
@@ -38,18 +38,11 @@ export default async function SavedGridsPage() {
 
       <PageHeader
         title="Saved Grids"
-        titleClassName="text-2xl font-bold text-teal-400"
+        titleClassName="text-2xl font-semibold text-text-primary"
         subtitle="Uploaded processor price grids"
-        subtitleClassName="text-sm font-medium text-text-secondary"
+        subtitleClassName="text-sm text-text-muted"
         inline
-        actions={
-          <Link href="/dashboard/tools/grid-iq/upload">
-            <Button size="sm" variant="teal">
-              <Upload className="mr-1.5 h-3.5 w-3.5" />
-              Upload Grid
-            </Button>
-          </Link>
-        }
+        compact
       />
 
       {safeGrids.length > 0 ? (

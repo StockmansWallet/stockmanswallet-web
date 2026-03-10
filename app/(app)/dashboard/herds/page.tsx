@@ -157,6 +157,7 @@ export default async function HerdsPage() {
     <div className="max-w-6xl">
       <PageHeader
         title="Herds"
+        titleClassName="text-4xl font-bold text-brand"
         subtitle="Manage your livestock herds."
         actions={
           <Link href="/dashboard/herds/new">

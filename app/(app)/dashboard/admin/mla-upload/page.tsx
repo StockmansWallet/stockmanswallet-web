@@ -24,6 +24,7 @@ export default async function MlaUploadPage() {
     <div className="max-w-3xl">
       <PageHeader
         title="MLA CSV Upload"
+        titleClassName="text-4xl font-bold text-emerald-400"
         subtitle="Upload MLA CSV files to populate saleyard-specific pricing data."
       />
       <MlaUploader userEmail={user.email ?? ""} />
