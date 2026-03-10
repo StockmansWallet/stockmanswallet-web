@@ -44,6 +44,24 @@ function normaliseDate(raw: string | null | undefined): string | null {
   return s;
 }
 
+// Add UUID ids to nested JSONB entries so iOS Codable can decode them.
+// iOS ProcessorGridEntry, WeightBandPrice, KillSheetCategorySummary, etc.
+// all expect an `id: UUID` field.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function addIdsToEntries(entries: any[]): any[] {
+  return entries.map((entry) => {
+    const withId = { id: crypto.randomUUID(), ...entry };
+    // Also add ids to nested weightBandPrices if present
+    if (Array.isArray(withId.weightBandPrices)) {
+      withId.weightBandPrices = withId.weightBandPrices.map(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (wbp: any) => ({ id: crypto.randomUUID(), ...wbp })
+      );
+    }
+    return withId;
+  });
+}
+
 const ACCEPTED_TYPES = [
   "image/jpeg",
   "image/png",
@@ -204,7 +222,7 @@ export function GridIQUploader() {
             contact_email: grid.contactEmail,
             location: grid.location,
             notes: grid.notes,
-            entries: grid.entries,
+            entries: addIdsToEntries(grid.entries),
           });
 
         if (insertError) throw new Error(insertError.message);
@@ -241,9 +259,9 @@ export function GridIQUploader() {
                 ? ks.totalGrossValue / ks.totalHeadCount
                 : 0,
             condemns: ks.condemns,
-            category_summaries: ks.categorySummaries || [],
-            grade_distribution: ks.gradeDistribution || [],
-            line_items: ks.lineItems || [],
+            category_summaries: addIdsToEntries(ks.categorySummaries || []),
+            grade_distribution: addIdsToEntries(ks.gradeDistribution || []),
+            line_items: addIdsToEntries(ks.lineItems || []),
           });
 
         if (insertError) throw new Error(insertError.message);
