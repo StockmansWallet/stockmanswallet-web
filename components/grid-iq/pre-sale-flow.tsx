@@ -105,6 +105,7 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
   }
 
   // Step 3: Consignment builder
+  const [consignmentName, setConsignmentName] = useState("");
   const [processorName, setProcessorName] = useState("");
   const [plantLocation, setPlantLocation] = useState("");
   const [bookingReference, setBookingReference] = useState("");
@@ -158,6 +159,7 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
 
     const formData = new FormData();
     formData.set("gridId", selectedGridId!);
+    formData.set("consignmentName", consignmentName);
     formData.set("processorName", processorName);
     formData.set("plantLocation", plantLocation);
     formData.set("bookingReference", bookingReference);
@@ -408,9 +410,30 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
       {/* Step 3: Build Consignment */}
       {step === 3 && (
         <section>
-          <p className="mb-3 text-xs text-text-muted">
-            Select cattle from your herd groups to build a processor consignment. Cattle are not sold yet.
-          </p>
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-xs text-text-muted">
+              Select cattle from your herd groups to build a processor consignment. Cattle are not sold yet.
+            </p>
+            <Button variant="ghost" size="sm" onClick={() => setStep(2)} className="shrink-0 text-xs">
+              <ChevronLeft className="mr-1 h-3.5 w-3.5" />Back
+            </Button>
+          </div>
+
+          {/* Consignment name */}
+          <Card className="mb-4">
+            <CardContent className="space-y-3 p-4">
+              <div>
+                <label className="mb-1 block text-[11px] text-text-muted">Consignment Name</label>
+                <input
+                  type="text"
+                  value={consignmentName}
+                  onChange={(e) => setConsignmentName(e.target.value)}
+                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-teal-500/50 focus:outline-none"
+                  placeholder="e.g. Cull Cows - Canal Creek Paddock"
+                />
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Processor details */}
           <Card className="mb-4">
@@ -586,23 +609,18 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
                 <div className="mb-3 rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-400">{error}</div>
               )}
 
-              <div className="flex gap-2">
-                <Button variant="ghost" onClick={() => setStep(2)} className="flex-shrink-0">
-                  <ChevronLeft className="mr-1 h-4 w-4" />Back
-                </Button>
-                <Button
-                  variant="teal"
-                  className="flex-1"
-                  disabled={!canGenerate || isPending}
-                  onClick={handleGenerate}
-                >
-                  {isPending ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating Analysis...</>
-                  ) : (
-                    "Generate Comparison"
-                  )}
-                </Button>
-              </div>
+              <Button
+                variant="teal"
+                className="w-full"
+                disabled={!canGenerate || isPending}
+                onClick={handleGenerate}
+              >
+                {isPending ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating Analysis...</>
+                ) : (
+                  "Generate Comparison"
+                )}
+              </Button>
 
               {!canGenerate && (
                 <p className="mt-2 text-center text-[11px] text-text-muted">

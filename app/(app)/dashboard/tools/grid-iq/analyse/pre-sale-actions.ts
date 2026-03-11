@@ -68,6 +68,7 @@ export async function createPreSaleAnalysis(formData: FormData) {
 
   // Parse inputs
   const gridId = formData.get("gridId") as string;
+  const consignmentName = (formData.get("consignmentName") as string) || null;
   const processorName = formData.get("processorName") as string;
   const plantLocation = (formData.get("plantLocation") as string) || null;
   const bookingReference = (formData.get("bookingReference") as string) || null;
@@ -378,6 +379,7 @@ export async function createPreSaleAnalysis(formData: FormData) {
   const { error: consignmentError } = await supabase.from("consignments").insert({
     id: consignmentId,
     user_id: user.id,
+    consignment_name: consignmentName,
     processor_name: resolvedProcessorName,
     plant_location: plantLocation,
     booking_reference: bookingReference,
