@@ -273,11 +273,13 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
             </div>
           )}
 
-          <div className="mt-4 flex justify-end gap-2">
-            <Link href="/dashboard/tools/grid-iq/upload?type=grid">
-              <Button variant="ghost" size="sm">
-                <Upload className="mr-1 h-3 w-3" />Upload New Grid
-              </Button>
+          <div className="mt-4 flex items-center justify-between">
+            <Link
+              href="/dashboard/tools/grid-iq/upload?type=grid"
+              className="flex items-center gap-1.5 text-xs font-medium text-text-muted transition-colors hover:text-teal-400"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Upload new grid
             </Link>
             <Button variant="teal" disabled={!selectedGridId} onClick={() => setStep(2)}>
               Next <ChevronRight className="ml-1 h-4 w-4" />
