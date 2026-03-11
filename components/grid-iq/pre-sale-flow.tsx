@@ -215,9 +215,17 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
       {/* Step 1: Select Grid */}
       {step === 1 && (
         <section>
-          <p className="mb-3 text-xs text-text-muted">
-            Choose the processor grid to analyse against. Only one grid is used per analysis.
-          </p>
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-xs text-text-muted">
+              Choose the processor grid to analyse against. Only one grid is used per analysis.
+            </p>
+            <Link href="/dashboard/tools/grid-iq/upload?type=grid">
+              <Button size="sm" variant="ghost" className="shrink-0 text-xs">
+                <Upload className="mr-1.5 h-3.5 w-3.5" />
+                Upload Grid
+              </Button>
+            </Link>
+          </div>
 
           {grids.length === 0 ? (
             <Card className="border-dashed">
@@ -273,14 +281,7 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
             </div>
           )}
 
-          <div className="mt-4 flex items-center justify-between">
-            <Link
-              href="/dashboard/tools/grid-iq/upload?type=grid"
-              className="flex items-center gap-1.5 text-xs font-medium text-text-muted transition-colors hover:text-teal-400"
-            >
-              <Upload className="h-3.5 w-3.5" />
-              Upload new grid
-            </Link>
+          <div className="mt-4 flex justify-end">
             <Button variant="teal" disabled={!selectedGridId} onClick={() => setStep(2)}>
               Next <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
@@ -291,9 +292,17 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
       {/* Step 2: Historical Kill Sheets */}
       {step === 2 && (
         <section>
-          <p className="mb-3 text-xs text-text-muted">
-            Select historical kill sheets to personalise this analysis. Deselect any you don&apos;t want included.
-          </p>
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-xs text-text-muted">
+              Select historical kill sheets to personalise this analysis. Deselect any you don&apos;t want included.
+            </p>
+            <Link href="/dashboard/tools/grid-iq/upload?type=killsheet">
+              <Button size="sm" variant="ghost" className="shrink-0 text-xs">
+                <Upload className="mr-1.5 h-3.5 w-3.5" />
+                Upload Kill Sheet
+              </Button>
+            </Link>
+          </div>
 
           {killSheetCount === 0 ? (
             <Card className="border-dashed">
@@ -347,26 +356,20 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
                 })}
               </div>
 
-              {/* Show more / less toggle + actions */}
-              <div className="mt-3 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {killSheetCount > 3 && !showAllKillSheets && (
+              {/* Show more / less toggle */}
+              {killSheetCount > 3 && (
+                <div className="mt-3">
+                  {!showAllKillSheets ? (
                     <Button variant="ghost" size="sm" className="text-xs" onClick={() => setShowAllKillSheets(true)}>
                       Show all {killSheetCount} kill sheets
                     </Button>
-                  )}
-                  {showAllKillSheets && killSheetCount > 3 && (
+                  ) : (
                     <Button variant="ghost" size="sm" className="text-xs" onClick={() => setShowAllKillSheets(false)}>
                       Show fewer
                     </Button>
                   )}
                 </div>
-                <Link href="/dashboard/tools/grid-iq/upload?type=killsheet">
-                  <Button size="sm" variant="ghost" className="text-xs">
-                    <Upload className="mr-1 h-3 w-3" />Upload More
-                  </Button>
-                </Link>
-              </div>
+              )}
 
               {/* Selection summary */}
               <p className="mt-2 text-xs text-text-muted">
