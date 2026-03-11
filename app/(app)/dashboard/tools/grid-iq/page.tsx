@@ -31,7 +31,7 @@ export default async function GridIQPage() {
         .eq("user_id", user!.id)
         .eq("is_deleted", false)
         .order("created_at", { ascending: false })
-        .limit(5),
+        .limit(3),
       supabase
         .from("kill_sheet_records")
         .select(
@@ -40,7 +40,7 @@ export default async function GridIQPage() {
         .eq("user_id", user!.id)
         .eq("is_deleted", false)
         .order("created_at", { ascending: false })
-        .limit(5),
+        .limit(3),
       supabase
         .from("grid_iq_analyses")
         .select(
@@ -49,7 +49,7 @@ export default async function GridIQPage() {
         .eq("user_id", user!.id)
         .eq("is_deleted", false)
         .order("updated_at", { ascending: false })
-        .limit(5),
+        .limit(3),
       supabase
         .from("consignments")
         .select(
@@ -58,7 +58,7 @@ export default async function GridIQPage() {
         .eq("user_id", user!.id)
         .eq("is_deleted", false)
         .order("updated_at", { ascending: false })
-        .limit(5),
+        .limit(3),
       supabase
         .from("consignments")
         .select(
@@ -68,7 +68,7 @@ export default async function GridIQPage() {
         .eq("is_deleted", false)
         .in("status", ["draft", "confirmed"])
         .order("updated_at", { ascending: false })
-        .limit(5),
+        .limit(3),
     ]);
 
   const safeGrids = grids ?? [];
@@ -78,11 +78,10 @@ export default async function GridIQPage() {
   const safePending = pendingConsignments ?? [];
 
   return (
-    <div>
-      <div className="space-y-4">
-        {/* Pending Consignments - Action Needed */}
-        {safePending.length > 0 && (
-          <Card className="border-amber-500/20">
+    <div className="space-y-4">
+      {/* Pending Consignments - Action Needed (full width) */}
+      {safePending.length > 0 && (
+        <Card className="border-amber-500/20">
             <CardHeader className="border-b border-amber-500/10">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -125,8 +124,10 @@ export default async function GridIQPage() {
               ))}
             </CardContent>
           </Card>
-        )}
+      )}
 
+      {/* Two-column grid */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* Grid Analysis */}
         <Card>
           <CardHeader className="border-b border-white/[0.06]">
