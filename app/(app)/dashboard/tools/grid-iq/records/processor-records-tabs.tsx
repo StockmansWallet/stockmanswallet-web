@@ -230,9 +230,5 @@ function KillSheetsTab({ killSheets }: { killSheets: KillSheetRecord[] }) {
 // MARK: - Upload Tab
 
 function UploadTab() {
-  return (
-    <div className="max-w-3xl">
-      <GridIQUploader initialType="grid" />
-    </div>
-  );
+  return <GridIQUploader initialType="grid" />;
 }
