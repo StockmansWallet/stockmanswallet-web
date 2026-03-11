@@ -84,9 +84,8 @@ export function MessageInput({ onSend, hideTypeSelector, placeholder = "Write a 
         <Button
           type="submit"
           variant="purple"
-          size="icon"
           disabled={loading || !content.trim()}
-          className="h-10 w-10 shrink-0 rounded-full"
+          className="!p-0 h-10 w-10 shrink-0 rounded-full"
         >
           <Send className="h-4 w-4" />
         </Button>
