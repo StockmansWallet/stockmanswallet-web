@@ -38,6 +38,14 @@ export default async function ProducerConnectionDetailPage({
 
   if (!connection || connection.target_user_id !== user.id) notFound();
 
+  // Mark any unread notifications for this connection as read
+  await supabase
+    .from("notifications")
+    .update({ is_read: true })
+    .eq("user_id", user.id)
+    .eq("related_connection_id", id)
+    .eq("is_read", false);
+
   const conn = connection as ConnectionRequest;
   const categoryConfig = getCategoryConfig(conn.requester_role);
   const isActive = hasActivePermission(conn);

@@ -32,6 +32,14 @@ export default async function FarmerConnectionDetailPage({
 
   if (!connection) notFound();
 
+  // Mark any unread notifications for this connection as read
+  await supabase
+    .from("notifications")
+    .update({ is_read: true })
+    .eq("user_id", user.id)
+    .eq("related_connection_id", id)
+    .eq("is_read", false);
+
   const conn = connection as ConnectionRequest;
   const isRequester = conn.requester_user_id === user.id;
   const otherUserId = isRequester ? conn.target_user_id : conn.requester_user_id;

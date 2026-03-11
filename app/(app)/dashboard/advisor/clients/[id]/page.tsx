@@ -41,6 +41,14 @@ export default async function ClientDetailPage({
     notFound();
   }
 
+  // Mark any unread notifications for this connection as read
+  await supabase
+    .from("notifications")
+    .update({ is_read: true })
+    .eq("user_id", user.id)
+    .eq("related_connection_id", id)
+    .eq("is_read", false);
+
   const conn = connection as ConnectionRequest;
 
   // Get client display name
