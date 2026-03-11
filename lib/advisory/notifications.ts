@@ -14,6 +14,20 @@ export async function createNotification(
   supabase: SupabaseClient,
   params: NotificationParams
 ) {
+  // For message notifications, skip if there's already an unread one for this connection.
+  // The user only needs one "new message" alert per conversation until they read it.
+  if (params.type === "new_message" && params.connectionId) {
+    const { count } = await supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", params.userId)
+      .eq("type", "new_message")
+      .eq("related_connection_id", params.connectionId)
+      .eq("is_read", false);
+
+    if (count && count > 0) return;
+  }
+
   await supabase.rpc("create_notification", {
     p_user_id: params.userId,
     p_type: params.type,

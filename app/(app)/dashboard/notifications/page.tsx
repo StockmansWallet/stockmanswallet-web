@@ -82,7 +82,7 @@ export default async function NotificationsPage() {
               <p className="mb-2 text-xs font-medium uppercase tracking-wider text-text-muted">
                 {date}
               </p>
-              <div className="space-y-1">
+              <div className="space-y-2">
                 {items.map((n) => {
                   const Icon = typeIcons[n.type] ?? Bell;
                   return (
