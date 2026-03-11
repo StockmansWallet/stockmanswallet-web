@@ -8,7 +8,9 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { KillScoreCard } from "@/components/grid-iq/kill-score-card";
+import { PaymentCheckCard } from "@/components/grid-iq/payment-check-card";
 import { AnalysisComparison } from "@/components/grid-iq/analysis-comparison";
+import type { PaymentCheckResult } from "@/lib/engines/grid-iq-payment-check";
 import {
   ArrowLeft,
   Target,
@@ -41,6 +43,19 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
     .single();
 
   if (!analysis) notFound();
+
+  // Fetch payment check result from kill sheet (if linked)
+  let paymentCheck: PaymentCheckResult | null = null;
+  if (analysis.kill_sheet_record_id) {
+    const { data: ksRecord } = await supabase
+      .from("kill_sheet_records")
+      .select("payment_check_result")
+      .eq("id", analysis.kill_sheet_record_id)
+      .single();
+    if (ksRecord?.payment_check_result) {
+      paymentCheck = ksRecord.payment_check_result as PaymentCheckResult;
+    }
+  }
 
   const a = analysis as Record<string, unknown>;
   const mode = (a.analysis_mode as string) ?? "pre_sale";
@@ -213,6 +228,13 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
             dentitionCompliance={a.dentition_compliance_score as number | null}
             realisationFactor={a.realisation_factor as number}
           />
+        </div>
+      )}
+
+      {/* Payment Check */}
+      {isPostSale && paymentCheck && (
+        <div className="mt-4">
+          <PaymentCheckCard result={paymentCheck} />
         </div>
       )}
 

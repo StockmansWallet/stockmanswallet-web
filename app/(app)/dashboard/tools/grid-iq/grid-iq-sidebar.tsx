@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Plus, Upload, Grid3x3, FileText, TrendingUp } from "lucide-react";
+import { Plus, Upload, Grid3x3, FileText, TrendingUp, Truck, BarChart3 } from "lucide-react";
 
 const createItems = [
   {
@@ -42,6 +42,18 @@ const viewItems = [
     href: "/dashboard/tools/grid-iq/history",
     icon: FileText,
     matchPrefix: "/dashboard/tools/grid-iq/history",
+  },
+  {
+    label: "Consignments",
+    href: "/dashboard/tools/grid-iq/consignments",
+    icon: Truck,
+    matchPrefix: "/dashboard/tools/grid-iq/consignments",
+  },
+  {
+    label: "Performance",
+    href: "/dashboard/tools/grid-iq/performance",
+    icon: BarChart3,
+    matchPrefix: "/dashboard/tools/grid-iq/performance",
   },
 ];
 

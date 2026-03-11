@@ -18,6 +18,9 @@ import {
   type AnalysisMode,
 } from "@/lib/engines/grid-iq-engine";
 import type { KillSheetForScoring, KillSheetLineItem, GridEntry } from "@/lib/engines/kill-score-engine";
+import { runPaymentCheck } from "@/lib/engines/grid-iq-payment-check";
+import { generateBrangusCommentary } from "@/lib/grid-iq/commentary-service";
+import { computeProducerProfile } from "@/lib/grid-iq/producer-profile";
 
 // Haversine distance (km) between two lat/lon points
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -208,11 +211,22 @@ export async function createAnalysis(formData: FormData) {
 
   const estimatedCarcaseWeight = projectedLiveWeight * dressingPct;
 
-  // 6. Realisation factor
+  // 6. Realisation factor - prefer kill sheet > producer profile > baseline
   let realisationFactor = BASELINE_REALISATION_FACTOR;
   if (killSheetData?.realisation_factor && killSheetData.realisation_factor > 0) {
     realisationFactor = killSheetData.realisation_factor;
     isPersonalised = true;
+  } else {
+    // Use historical average RF from producer profile if available
+    try {
+      const profile = await computeProducerProfile(user.id);
+      if (profile.averageRF != null && profile.averageRF > 0) {
+        realisationFactor = profile.averageRF;
+        isPersonalised = true;
+      }
+    } catch (e) {
+      console.warn("Could not fetch producer profile for RF:", e);
+    }
   }
 
   // 7. Freight calculations
@@ -358,6 +372,35 @@ export async function createAnalysis(formData: FormData) {
   if (error) {
     return { error: `Failed to save analysis: ${error.message}` };
   }
+
+  // 11. Payment check - audit kill sheet prices against grid (post-sale only)
+  if (killSheetForScoring && killSheetForScoring.lineItems.length > 0) {
+    try {
+      const paymentResult = runPaymentCheck(
+        killSheetForScoring.lineItems,
+        killSheetForScoring.totalGrossValue,
+        gridEntries,
+        herd.sex,
+      );
+      // Store on the kill sheet record
+      await supabase
+        .from("kill_sheet_records")
+        .update({ payment_check_result: paymentResult })
+        .eq("id", killSheetForScoring.id);
+    } catch (e) {
+      console.error("Payment check failed (non-blocking):", e);
+    }
+  }
+
+  // 12. Generate Brangus commentary asynchronously (non-blocking)
+  generateBrangusCommentary({
+    analysisId: newId,
+    herdName: herd.name,
+    herdCategory: herd.category,
+    processorName: grid.processor_name,
+    analysisMode,
+    result,
+  }).catch((e) => console.error("Commentary generation failed (non-blocking):", e));
 
   revalidatePath("/dashboard/tools/grid-iq");
   return { analysisId: newId };

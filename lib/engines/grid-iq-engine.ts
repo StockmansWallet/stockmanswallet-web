@@ -270,8 +270,9 @@ export function estimateDefaultGrade(
   return entries[0]?.gradeCode ?? "J";
 }
 
-// Find the grid price for a specific grade and weight
-function findGridPrice(
+// Find the grid price for a specific grade and weight.
+// Exported for payment check audit.
+export function findGridPrice(
   entries: GridEntry[], gradeCode: string, bodyWeightKg: number
 ): number | null {
   const entry = entries.find(e => e.gradeCode === gradeCode);

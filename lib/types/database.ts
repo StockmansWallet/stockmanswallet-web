@@ -702,6 +702,87 @@ export type Database = {
           notes?: string | null;
         };
       };
+      consignments: {
+        Row: {
+          id: string;
+          user_id: string;
+          processor_name: string;
+          plant_location: string | null;
+          booking_reference: string | null;
+          kill_date: string | null;
+          status: "draft" | "confirmed" | "completed";
+          total_head_count: number | null;
+          total_gross_value: number | null;
+          total_net_value: number | null;
+          processor_grid_id: string | null;
+          kill_sheet_record_id: string | null;
+          notes: string | null;
+          is_deleted: boolean;
+          deleted_at: string | null;
+          last_synced_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          user_id: string;
+          processor_name: string;
+          plant_location?: string | null;
+          booking_reference?: string | null;
+          kill_date?: string | null;
+          status?: "draft" | "confirmed" | "completed";
+          total_head_count?: number | null;
+          total_gross_value?: number | null;
+          total_net_value?: number | null;
+          processor_grid_id?: string | null;
+          kill_sheet_record_id?: string | null;
+          notes?: string | null;
+          is_deleted?: boolean;
+        };
+        Update: {
+          processor_name?: string;
+          plant_location?: string | null;
+          booking_reference?: string | null;
+          kill_date?: string | null;
+          status?: "draft" | "confirmed" | "completed";
+          total_head_count?: number | null;
+          total_gross_value?: number | null;
+          total_net_value?: number | null;
+          processor_grid_id?: string | null;
+          kill_sheet_record_id?: string | null;
+          notes?: string | null;
+          is_deleted?: boolean;
+          deleted_at?: string | null;
+        };
+      };
+      consignment_allocations: {
+        Row: {
+          id: string;
+          consignment_id: string;
+          herd_group_id: string;
+          head_count: number;
+          category: string | null;
+          average_weight: number | null;
+          total_value: number | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          consignment_id: string;
+          herd_group_id: string;
+          head_count: number;
+          category?: string | null;
+          average_weight?: number | null;
+          total_value?: number | null;
+        };
+        Update: {
+          head_count?: number;
+          category?: string | null;
+          average_weight?: number | null;
+          total_value?: number | null;
+        };
+      };
     };
   };
 };

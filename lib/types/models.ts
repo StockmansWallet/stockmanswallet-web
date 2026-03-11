@@ -315,8 +315,19 @@ export interface KillSheetLineItem {
 }
 
 export interface PaymentCheckResult {
-  status: string;
-  [key: string]: unknown;
+  totalExpectedValue: number;
+  totalActualValue: number;
+  matchCount: number;
+  lineDiscrepancies: {
+    bodyNumber: number;
+    gradeCode: string;
+    weightBandKg: number;
+    expectedPricePerKg: number;
+    actualPricePerKg: number;
+    expectedGrossValue: number;
+    actualGrossValue: number;
+    reason: string | null;
+  }[];
 }
 
 // MARK: - Freight Types

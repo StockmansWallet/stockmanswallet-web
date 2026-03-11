@@ -10,6 +10,13 @@ import type {
   KillSheetParserData,
   HeadCountReconciliation,
 } from "./types";
+import { compressImage, isCompressibleImage } from "./image-utils";
+import {
+  chunkPDF,
+  mergeKillSheetChunks,
+  killSheetHeaderPrompt,
+  killSheetLineItemPrompt,
+} from "./pdf-chunker";
 
 const CLAUDE_MODEL = "claude-haiku-4-5-20251001";
 
@@ -97,15 +104,80 @@ async function extractViaParser(
 }
 
 /**
- * Handle PDF files - try grid-iq-parser first, fall back to AI if needed.
+ * Handle PDF files - chunk large kill sheet PDFs, send smaller ones directly.
+ * Grids are always sent as a single document (they're rarely multi-page).
  */
 async function extractPDF(
   file: File,
   uploadType: "grid" | "killsheet",
-  accessToken: string
+  accessToken: string,
+  onProgress?: (message: string) => void
 ): Promise<ExtractionResult> {
-  // PDFs go directly to AI extraction since grid-iq-parser just returns metadata for PDFs
-  return await extractViaAI(file, uploadType, accessToken);
+  // Grids: always single-shot extraction
+  if (uploadType === "grid") {
+    return await extractViaAI(file, uploadType, accessToken);
+  }
+
+  // Kill sheets: check if chunking is needed
+  const chunkInfo = await chunkPDF(file);
+
+  if (!chunkInfo.needsChunking) {
+    // Small PDF - extract as single document
+    return await extractViaAI(file, uploadType, accessToken);
+  }
+
+  // Large PDF - chunked extraction
+  console.log(`Grid IQ: PDF has ${chunkInfo.totalPages} pages, splitting into ${chunkInfo.chunks.length} chunks`);
+  onProgress?.(`Processing ${chunkInfo.totalPages}-page PDF in ${chunkInfo.chunks.length} chunks...`);
+
+  // Step 1: Extract header/summary from first chunk
+  const headerChunk = chunkInfo.chunks[0];
+  onProgress?.(`Extracting header and summaries (pages 1-${headerChunk.endPage})...`);
+
+  const headerData = await extractChunkViaAI(
+    headerChunk.base64,
+    killSheetHeaderPrompt(),
+    accessToken,
+  );
+  const headerParsed = JSON.parse(extractJSON(headerData)) as KillSheetParserData;
+
+  // Step 2: Extract line items from remaining chunks
+  const lineItemChunks: KillSheetParserData[] = [];
+  const dataChunks = chunkInfo.chunks.filter((c) => !c.isHeaderChunk);
+
+  for (const chunk of dataChunks) {
+    onProgress?.(`Extracting line items (pages ${chunk.startPage}-${chunk.endPage})...`);
+    console.log(`Grid IQ: Processing chunk ${chunk.index} - ${chunk.label}`);
+
+    const chunkData = await extractChunkViaAI(
+      chunk.base64,
+      killSheetLineItemPrompt(),
+      accessToken,
+    );
+    const chunkParsed = JSON.parse(extractJSON(chunkData)) as KillSheetParserData;
+    lineItemChunks.push(chunkParsed);
+  }
+
+  // Step 3: Merge all chunks
+  onProgress?.("Merging extracted data...");
+  const merged = mergeKillSheetChunks(headerParsed, lineItemChunks);
+
+  const result: ExtractionResult = {
+    documentType: "killsheet",
+    confidence: 0.85,
+    parsedViaAI: true,
+    killSheetData: merged,
+  };
+
+  if (result.killSheetData) {
+    result.reconciliation = reconcileHeadCount(result.killSheetData);
+  }
+
+  console.log(
+    `Grid IQ: Chunked extraction complete - ${merged.lineItems?.length ?? 0} line items from ${chunkInfo.totalPages} pages`
+  );
+
+  return result;
 }
 
 /**
@@ -116,8 +188,14 @@ async function extractViaAI(
   uploadType: "grid" | "killsheet",
   accessToken: string
 ): Promise<ExtractionResult> {
-  const base64 = await fileToBase64(file);
-  const mediaType = detectMediaType(file);
+  // Compress images to reduce cost and latency (mirrors iOS normaliseImageData)
+  let base64: string;
+  if (isCompressibleImage(file)) {
+    base64 = await compressImage(file);
+  } else {
+    base64 = await fileToBase64(file);
+  }
+  const mediaType = isCompressibleImage(file) ? "image/jpeg" : detectMediaType(file);
 
   const systemPrompt =
     uploadType === "grid" ? gridSystemPrompt() : killSheetSystemPrompt();
@@ -183,6 +261,7 @@ async function extractViaAI(
 
   const data = await res.json();
   const textContent = data.content?.[0]?.text;
+  const wasTruncated = data.stop_reason === "max_tokens";
 
   if (!textContent) {
     throw new Error("No response from AI. Please try again.");
@@ -197,6 +276,7 @@ async function extractViaAI(
     documentType: uploadType,
     confidence: 0.85,
     parsedViaAI: true,
+    wasTruncated,
   };
 
   if (uploadType === "grid") {
@@ -224,6 +304,73 @@ function isExtractionEmpty(result: ExtractionResult): boolean {
     return !ks?.lineItems?.length && (ks?.totalHeadCount ?? 0) === 0;
   }
   return true;
+}
+
+/**
+ * Extract data from a single PDF chunk using a specific system prompt.
+ * Used by the chunked PDF extraction pipeline.
+ */
+async function extractChunkViaAI(
+  base64: string,
+  systemPrompt: string,
+  accessToken: string,
+): Promise<string> {
+  const requestBody = {
+    model: CLAUDE_MODEL,
+    max_tokens: 16384,
+    system: systemPrompt,
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "document",
+            source: {
+              type: "base64",
+              media_type: "application/pdf",
+              data: base64,
+            },
+          },
+          {
+            type: "text",
+            text: "Extract all data from this document and return the JSON.",
+          },
+        ],
+      },
+    ],
+    anthropic_beta: "pdfs-2024-09-25",
+    purpose: "grid-iq-vision",
+  };
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+  const res = await fetch(`${supabaseUrl}/functions/v1/claude-proxy`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+      apikey: supabaseAnonKey,
+    },
+    body: JSON.stringify(requestBody),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("Claude proxy error (chunk):", res.status, errorText);
+    if (res.status === 429)
+      throw new Error("Too many requests. Please wait a moment and try again.");
+    throw new Error(`Chunk extraction failed (HTTP ${res.status}). Please try again.`);
+  }
+
+  const data = await res.json();
+  const textContent = data.content?.[0]?.text;
+
+  if (!textContent) {
+    throw new Error("No response from AI for this chunk. Please try again.");
+  }
+
+  return textContent;
 }
 
 /**
@@ -280,6 +427,7 @@ async function extractViaTextAI(
 
   const data = await res.json();
   const responseText = data.content?.[0]?.text;
+  const wasTruncated = data.stop_reason === "max_tokens";
 
   if (!responseText) {
     throw new Error("No response from AI. Please try again.");
@@ -292,6 +440,7 @@ async function extractViaTextAI(
     documentType: uploadType,
     confidence: 0.85,
     parsedViaAI: true,
+    wasTruncated,
   };
 
   if (uploadType === "grid") {
@@ -328,14 +477,15 @@ function buildResult(
     }
   }
 
-  // Check if document type doesn't match what user selected
-  if (
-    response.document_type !== "unknown" &&
-    response.document_type !== uploadType
-  ) {
-    console.warn(
-      `Grid IQ: File classified as ${response.document_type} but user selected ${uploadType}`
-    );
+  // Surface document type mismatch to user (not just console.warn)
+  if (response.document_type !== "unknown") {
+    result.detectedType = response.document_type;
+    if (response.document_type !== uploadType) {
+      result.typeMismatch = true;
+      console.warn(
+        `Grid IQ: File classified as ${response.document_type} but user selected ${uploadType}`
+      );
+    }
   }
 
   return result;

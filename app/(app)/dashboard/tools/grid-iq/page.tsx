@@ -8,6 +8,7 @@ import {
   TrendingUp,
   Grid3x3,
   FileText,
+  Truck,
 } from "lucide-react";
 
 export const metadata = { title: "Grid IQ" };
@@ -19,7 +20,7 @@ export default async function GridIQPage() {
   } = await supabase.auth.getUser();
 
   // Fetch saved grids and kill sheets in parallel
-  const [{ data: grids }, { data: killSheets }, { data: analyses }] =
+  const [{ data: grids }, { data: killSheets }, { data: analyses }, { data: consignments }] =
     await Promise.all([
       supabase
         .from("processor_grids")
@@ -48,15 +49,26 @@ export default async function GridIQPage() {
         .eq("is_deleted", false)
         .order("updated_at", { ascending: false })
         .limit(5),
+      supabase
+        .from("consignments")
+        .select(
+          "id, processor_name, plant_location, booking_reference, kill_date, status, total_head_count, total_gross_value, updated_at"
+        )
+        .eq("user_id", user!.id)
+        .eq("is_deleted", false)
+        .order("updated_at", { ascending: false })
+        .limit(5),
     ]);
 
   const safeGrids = grids ?? [];
   const safeKillSheets = killSheets ?? [];
   const safeAnalyses = analyses ?? [];
+  const safeConsignments = consignments ?? [];
   const hasData =
     safeGrids.length > 0 ||
     safeKillSheets.length > 0 ||
-    safeAnalyses.length > 0;
+    safeAnalyses.length > 0 ||
+    safeConsignments.length > 0;
 
   return (
     <div>
@@ -274,6 +286,72 @@ export default async function GridIQPage() {
             ) : (
               <div className="px-5 py-6 text-center text-xs text-text-muted">
                 No kill sheets uploaded yet. Select New Kill Sheet to upload one.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Consignments */}
+        <Card>
+          <CardHeader className="border-b border-white/[0.06]">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Truck className="h-4 w-4 text-teal-400" />
+                <CardTitle>Consignments</CardTitle>
+                {safeConsignments.length > 0 && (
+                  <Badge className="bg-teal-500/15 text-teal-400">{safeConsignments.length}</Badge>
+                )}
+              </div>
+              <Link
+                href="/dashboard/tools/grid-iq/consignments"
+                className="text-xs font-medium text-teal-400 hover:underline"
+              >
+                View All
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent className="divide-y divide-white/[0.06] p-0">
+            {safeConsignments.length > 0 ? (
+              safeConsignments.map((c: Record<string, unknown>) => {
+                const status = c.status as string;
+                const badgeCls = status === "completed"
+                  ? "bg-emerald-500/15 text-emerald-400"
+                  : status === "confirmed"
+                    ? "bg-teal-500/15 text-teal-400"
+                    : "bg-white/[0.06] text-text-muted";
+                return (
+                  <Link
+                    key={c.id as string}
+                    href={`/dashboard/tools/grid-iq/consignments/${c.id}`}
+                    className="group flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-white/[0.04]"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-text-primary">
+                        {c.processor_name as string}
+                        {(c.plant_location as string | null) ? ` - ${c.plant_location}` : ""}
+                      </p>
+                      <div className="mt-0.5 flex items-center gap-2 text-xs text-text-muted">
+                        {(c.kill_date as string | null) && (
+                          <span>{new Date(c.kill_date as string).toLocaleDateString("en-AU")}</span>
+                        )}
+                        <span>{c.total_head_count as number ?? 0} head</span>
+                        <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${badgeCls}`}>
+                          {status.charAt(0).toUpperCase() + status.slice(1)}
+                        </span>
+                      </div>
+                    </div>
+                    {(c.total_gross_value as number | null) != null && (c.total_gross_value as number) > 0 && (
+                      <p className="text-sm font-semibold text-emerald-400">
+                        ${Math.round(c.total_gross_value as number).toLocaleString()}
+                      </p>
+                    )}
+                    <ChevronRight className="ml-2 h-4 w-4 shrink-0 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
+                  </Link>
+                );
+              })
+            ) : (
+              <div className="px-5 py-6 text-center text-xs text-text-muted">
+                No consignments yet. Create one to track processor bookings.
               </div>
             )}
           </CardContent>

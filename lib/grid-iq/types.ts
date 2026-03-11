@@ -118,6 +118,11 @@ export interface ExtractionResult {
   killSheetData?: KillSheetParserData;
   // Head count reconciliation
   reconciliation?: HeadCountReconciliation;
+  // Document type validation - detected type vs user-selected type
+  detectedType?: "grid" | "killsheet" | "unknown";
+  typeMismatch?: boolean;
+  // Truncation detection - true if AI response was cut short
+  wasTruncated?: boolean;
 }
 
 export interface HeadCountReconciliation {

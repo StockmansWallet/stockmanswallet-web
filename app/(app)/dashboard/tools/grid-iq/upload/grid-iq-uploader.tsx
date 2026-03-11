@@ -108,12 +108,14 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
   const [result, setResult] = useState<ExtractionResult | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [headCountConfirmed, setHeadCountConfirmed] = useState(false);
+  const [typeMismatchConfirmed, setTypeMismatchConfirmed] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback((f: File) => {
     setError(null);
     setResult(null);
     setHeadCountConfirmed(false);
+    setTypeMismatchConfirmed(false);
 
     const ext = f.name.split(".").pop()?.toLowerCase() || "";
     if (!ACCEPTED_TYPES.includes(f.type) && !ACCEPTED_EXTENSIONS.has(ext)) {
@@ -282,17 +284,53 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
     setError(null);
     setResult(null);
     setHeadCountConfirmed(false);
+    setTypeMismatchConfirmed(false);
     if (inputRef.current) inputRef.current.value = "";
   };
 
-  // Check if save should be blocked by head count mismatch
+  // Check if save should be blocked by head count mismatch or type mismatch
   const hasPendingMismatch =
     result?.reconciliation &&
     !result.reconciliation.isMatched &&
     !headCountConfirmed;
 
+  const hasPendingTypeMismatch =
+    result?.typeMismatch && !typeMismatchConfirmed;
+
+  const saveBlocked = !!hasPendingMismatch || !!hasPendingTypeMismatch;
+
   return (
     <div className="space-y-4">
+      {/* Type Toggle */}
+      {!result && (
+        <div className="flex items-center gap-2 rounded-xl bg-white/[0.03] p-1">
+          <button
+            type="button"
+            onClick={() => setUploadType("grid")}
+            className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+              uploadType === "grid"
+                ? "bg-teal-500/15 text-teal-400"
+                : "text-text-muted hover:text-text-primary"
+            }`}
+          >
+            <Grid3x3 className="mr-1.5 inline-block h-3.5 w-3.5" />
+            Processor Grid
+          </button>
+          <button
+            type="button"
+            onClick={() => setUploadType("killsheet")}
+            className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+              uploadType === "killsheet"
+                ? "bg-teal-500/15 text-teal-400"
+                : "text-text-muted hover:text-text-primary"
+            }`}
+          >
+            <FileText className="mr-1.5 inline-block h-3.5 w-3.5" />
+            Kill Sheet
+          </button>
+        </div>
+      )}
+
       {/* Drop Zone */}
       <Card>
         <CardContent className="p-6">
@@ -382,6 +420,13 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
                   result={result}
                   headCountConfirmed={headCountConfirmed}
                   onConfirmHeadCount={() => setHeadCountConfirmed(true)}
+                  typeMismatchConfirmed={typeMismatchConfirmed}
+                  onConfirmTypeMismatch={() => setTypeMismatchConfirmed(true)}
+                  onSwitchType={(newType: UploadType) => {
+                    setUploadType(newType);
+                    setTypeMismatchConfirmed(true);
+                  }}
+                  uploadType={uploadType}
                   onRetry={handleClear}
                 />
               )}
@@ -408,7 +453,7 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
                 ) : (
                   <Button
                     onClick={handleSave}
-                    disabled={isSaving || !!hasPendingMismatch}
+                    disabled={isSaving || saveBlocked}
                   >
                     {isSaving ? (
                       <>
@@ -459,103 +504,155 @@ function ExtractionResultView({
   result,
   headCountConfirmed,
   onConfirmHeadCount,
+  typeMismatchConfirmed,
+  onConfirmTypeMismatch,
+  onSwitchType,
+  uploadType,
   onRetry,
 }: {
   result: ExtractionResult;
   headCountConfirmed: boolean;
   onConfirmHeadCount: () => void;
+  typeMismatchConfirmed: boolean;
+  onConfirmTypeMismatch: () => void;
+  onSwitchType: (type: UploadType) => void;
+  uploadType: UploadType;
   onRetry: () => void;
 }) {
-  if (result.documentType === "grid" && result.gridData) {
-    const grid = result.gridData;
-    return (
-      <div className="rounded-xl bg-emerald-500/5 p-4 ring-1 ring-inset ring-emerald-500/20">
-        <div className="flex items-center gap-2 mb-3">
-          <CheckCircle className="h-4 w-4 text-emerald-400" />
-          <span className="text-sm font-medium text-emerald-400">
-            Grid Extracted{result.parsedViaAI ? " (AI)" : ""}
-          </span>
-        </div>
-        <div className="space-y-1.5 text-sm">
-          <DetailRow label="Processor" value={grid.processorName || "Unknown"} />
-          {grid.gridCode && <DetailRow label="Grid Code" value={grid.gridCode} />}
-          {grid.gridDate && <DetailRow label="Date" value={grid.gridDate} />}
-          <DetailRow label="Grade Entries" value={`${grid.entries.length}`} />
-          {grid.entries.some((e) => e.gender) && (
-            <DetailRow
-              label="Gender Tabs"
-              value={`Male: ${grid.entries.filter((e) => e.gender === "male").length}, Female: ${grid.entries.filter((e) => e.gender === "female").length}`}
-            />
-          )}
-        </div>
-      </div>
-    );
-  }
+  const typeMismatchLabel = result.detectedType === "grid" ? "Processor Grid" : "Kill Sheet";
+  const selectedLabel = uploadType === "grid" ? "Processor Grid" : "Kill Sheet";
 
-  if (result.documentType === "killsheet" && result.killSheetData) {
-    const ks = result.killSheetData;
-    const recon = result.reconciliation;
+  return (
+    <div className="space-y-3">
+      {/* Document type mismatch warning */}
+      {result.typeMismatch && !typeMismatchConfirmed && (
+        <div className="rounded-xl bg-amber-500/10 p-4 ring-1 ring-inset ring-amber-500/20">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="h-4 w-4 text-amber-400" />
+            <span className="text-sm font-medium text-amber-400">
+              Document Type Mismatch
+            </span>
+          </div>
+          <p className="text-sm text-amber-300/80 mb-3">
+            This file looks like a <span className="font-medium text-amber-300">{typeMismatchLabel}</span>,
+            {" "}but you selected <span className="font-medium text-amber-300">{selectedLabel}</span>.
+            Please confirm the correct type before saving.
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => onSwitchType(result.detectedType as UploadType)}
+            >
+              Switch to {typeMismatchLabel}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={onConfirmTypeMismatch}>
+              Keep as {selectedLabel}
+            </Button>
+          </div>
+        </div>
+      )}
 
-    return (
-      <div className="space-y-3">
+      {/* Truncation warning */}
+      {result.wasTruncated && (
+        <div className="rounded-xl bg-amber-500/10 p-4 ring-1 ring-inset ring-amber-500/20">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="h-4 w-4 text-amber-400" />
+            <span className="text-sm font-medium text-amber-400">
+              Incomplete Extraction
+            </span>
+          </div>
+          <p className="text-sm text-amber-300/80">
+            The AI response was cut short due to document size. Some data may be missing.
+            Try uploading a clearer image, or split a large PDF into smaller sections.
+          </p>
+        </div>
+      )}
+
+      {/* Grid extraction result */}
+      {result.documentType === "grid" && result.gridData && (
         <div className="rounded-xl bg-emerald-500/5 p-4 ring-1 ring-inset ring-emerald-500/20">
           <div className="flex items-center gap-2 mb-3">
             <CheckCircle className="h-4 w-4 text-emerald-400" />
             <span className="text-sm font-medium text-emerald-400">
-              Kill Sheet Extracted{result.parsedViaAI ? " (AI)" : ""}
+              Grid Extracted{result.parsedViaAI ? " (AI)" : ""}
             </span>
           </div>
           <div className="space-y-1.5 text-sm">
-            <DetailRow label="Processor" value={ks.processorName || "Unknown"} />
-            {ks.killDate && <DetailRow label="Kill Date" value={ks.killDate} />}
-            <DetailRow label="Total Head" value={`${ks.totalHeadCount}`} />
-            <DetailRow
-              label="Total Weight"
-              value={`${Math.round(ks.totalBodyWeight)} kg`}
-            />
-            <DetailRow
-              label="Total Value"
-              value={`$${ks.totalGrossValue.toLocaleString("en-AU", { minimumFractionDigits: 2 })}`}
-            />
-            <DetailRow
-              label="Line Items"
-              value={`${ks.lineItems?.length || 0}`}
-            />
-          </div>
-        </div>
-
-        {/* Head count reconciliation warning */}
-        {recon && !recon.isMatched && (
-          <div className="rounded-xl bg-amber-500/10 p-4 ring-1 ring-inset ring-amber-500/20">
-            <div className="flex items-center gap-2 mb-2">
-              <AlertTriangle className="h-4 w-4 text-amber-400" />
-              <span className="text-sm font-medium text-amber-400">
-                Head Count Mismatch
-              </span>
-            </div>
-            <p className="text-sm text-amber-300/80 mb-3">{recon.message}</p>
-            {!headCountConfirmed ? (
-              <div className="flex gap-2">
-                <Button variant="secondary" size="sm" onClick={onRetry}>
-                  Retry Upload
-                </Button>
-                <Button variant="ghost" size="sm" onClick={onConfirmHeadCount}>
-                  Use Anyway
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5 text-xs text-emerald-400">
-                <CheckCircle className="h-3 w-3" />
-                Confirmed by user
-              </div>
+            <DetailRow label="Processor" value={result.gridData.processorName || "Unknown"} />
+            {result.gridData.gridCode && <DetailRow label="Grid Code" value={result.gridData.gridCode} />}
+            {result.gridData.gridDate && <DetailRow label="Date" value={result.gridData.gridDate} />}
+            <DetailRow label="Grade Entries" value={`${result.gridData.entries.length}`} />
+            {result.gridData.entries.some((e) => e.gender) && (
+              <DetailRow
+                label="Gender Tabs"
+                value={`Male: ${result.gridData.entries.filter((e) => e.gender === "male").length}, Female: ${result.gridData.entries.filter((e) => e.gender === "female").length}`}
+              />
             )}
           </div>
-        )}
-      </div>
-    );
-  }
+        </div>
+      )}
 
-  return null;
+      {/* Kill sheet extraction result */}
+      {result.documentType === "killsheet" && result.killSheetData && (
+        <>
+          <div className="rounded-xl bg-emerald-500/5 p-4 ring-1 ring-inset ring-emerald-500/20">
+            <div className="flex items-center gap-2 mb-3">
+              <CheckCircle className="h-4 w-4 text-emerald-400" />
+              <span className="text-sm font-medium text-emerald-400">
+                Kill Sheet Extracted{result.parsedViaAI ? " (AI)" : ""}
+              </span>
+            </div>
+            <div className="space-y-1.5 text-sm">
+              <DetailRow label="Processor" value={result.killSheetData.processorName || "Unknown"} />
+              {result.killSheetData.killDate && <DetailRow label="Kill Date" value={result.killSheetData.killDate} />}
+              <DetailRow label="Total Head" value={`${result.killSheetData.totalHeadCount}`} />
+              <DetailRow
+                label="Total Weight"
+                value={`${Math.round(result.killSheetData.totalBodyWeight)} kg`}
+              />
+              <DetailRow
+                label="Total Value"
+                value={`$${result.killSheetData.totalGrossValue.toLocaleString("en-AU", { minimumFractionDigits: 2 })}`}
+              />
+              <DetailRow
+                label="Line Items"
+                value={`${result.killSheetData.lineItems?.length || 0}`}
+              />
+            </div>
+          </div>
+
+          {/* Head count reconciliation warning */}
+          {result.reconciliation && !result.reconciliation.isMatched && (
+            <div className="rounded-xl bg-amber-500/10 p-4 ring-1 ring-inset ring-amber-500/20">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertTriangle className="h-4 w-4 text-amber-400" />
+                <span className="text-sm font-medium text-amber-400">
+                  Head Count Mismatch
+                </span>
+              </div>
+              <p className="text-sm text-amber-300/80 mb-3">{result.reconciliation.message}</p>
+              {!headCountConfirmed ? (
+                <div className="flex gap-2">
+                  <Button variant="secondary" size="sm" onClick={onRetry}>
+                    Retry Upload
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={onConfirmHeadCount}>
+                    Use Anyway
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 text-xs text-emerald-400">
+                  <CheckCircle className="h-3 w-3" />
+                  Confirmed by user
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
 }
 
 function DetailRow({ label, value }: { label: string; value: string }) {
