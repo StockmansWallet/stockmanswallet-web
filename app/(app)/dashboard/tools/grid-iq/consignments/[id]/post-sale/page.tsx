@@ -32,7 +32,7 @@ export default async function PostSalePage({ params }: PageProps) {
       .eq("consignment_id", id),
     supabase
       .from("kill_sheet_records")
-      .select("id, processor_name, kill_date, total_head_count, total_gross_value")
+      .select("id, record_name, processor_name, kill_date, total_head_count, total_gross_value")
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
       .is("consignment_id", null)
@@ -89,7 +89,7 @@ export default async function PostSalePage({ params }: PageProps) {
         allocations={enrichedAllocations}
         availableKillSheets={(availableKillSheets ?? []).map((ks) => ({
           id: ks.id,
-          processorName: ks.processor_name,
+          processorName: ks.record_name || ks.processor_name,
           killDate: ks.kill_date,
           totalHeadCount: ks.total_head_count ?? 0,
           totalGrossValue: ks.total_gross_value ?? 0,

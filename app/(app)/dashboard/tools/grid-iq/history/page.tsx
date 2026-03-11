@@ -17,7 +17,7 @@ export default async function KillSheetHistoryPage() {
   const { data: killSheets } = await supabase
     .from("kill_sheet_records")
     .select(
-      "id, processor_name, grid_code, kill_date, total_head_count, total_body_weight, total_gross_value, average_body_weight, average_price_per_kg, condemns, realisation_factor, created_at"
+      "id, record_name, processor_name, grid_code, kill_date, total_head_count, total_body_weight, total_gross_value, average_body_weight, average_price_per_kg, condemns, realisation_factor, created_at"
     )
     .eq("user_id", user!.id)
     .eq("is_deleted", false)
@@ -62,9 +62,10 @@ export default async function KillSheetHistoryPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-text-primary">
-                      {ks.processor_name as string}
+                      {(ks.record_name as string | null) || (ks.processor_name as string)}
                     </p>
                     <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-text-muted">
+                      {ks.record_name && <span>{ks.processor_name as string}</span>}
                       <span>
                         {new Date(
                           ks.kill_date as string

@@ -71,13 +71,12 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
           <EditableProcessorName
             recordId={id}
             table="kill_sheet_records"
-            initialName={String(ks.processor_name)}
+            initialName={String((ks.record_name as string | null) || ks.processor_name)}
           />
-          {(ks.kill_date as string | null) ? (
-            <p className="mt-0.5 text-sm font-medium text-text-secondary">
-              {new Date(ks.kill_date as string).toLocaleDateString("en-AU")}
-            </p>
-          ) : null}
+          <p className="mt-0.5 text-sm font-medium text-text-secondary">
+            {String(ks.processor_name)}
+            {(ks.kill_date as string | null) ? ` - ${new Date(ks.kill_date as string).toLocaleDateString("en-AU")}` : ""}
+          </p>
         </div>
         <KillSheetDeleteButton killSheetId={id} />
       </div>

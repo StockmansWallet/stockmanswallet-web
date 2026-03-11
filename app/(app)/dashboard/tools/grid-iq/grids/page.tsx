@@ -17,7 +17,7 @@ export default async function SavedGridsPage() {
   const { data: grids } = await supabase
     .from("processor_grids")
     .select(
-      "id, processor_name, grid_code, grid_date, expiry_date, location, notes, created_at"
+      "id, grid_name, processor_name, grid_code, grid_date, expiry_date, location, notes, created_at"
     )
     .eq("user_id", user!.id)
     .eq("is_deleted", false)
@@ -76,9 +76,10 @@ export default async function SavedGridsPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-text-primary">
-                      {g.processor_name as string}
+                      {(g.grid_name as string | null) || (g.processor_name as string)}
                     </p>
                     <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-text-muted">
+                      {g.grid_name && <span>{g.processor_name as string}</span>}
                       {g.grid_code ? <span>{String(g.grid_code)}</span> : null}
                       <span>
                         {new Date(

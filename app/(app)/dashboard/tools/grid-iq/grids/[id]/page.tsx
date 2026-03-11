@@ -60,13 +60,12 @@ export default async function GridDetailPage({ params }: PageProps) {
           <EditableProcessorName
             recordId={id}
             table="processor_grids"
-            initialName={String(g.processor_name)}
+            initialName={String((g.grid_name as string | null) || g.processor_name)}
           />
-          {(g.grid_code as string | null) ? (
-            <p className="mt-0.5 text-sm font-medium text-text-secondary">
-              {String(g.grid_code)}
-            </p>
-          ) : null}
+          <p className="mt-0.5 text-sm font-medium text-text-secondary">
+            {String(g.processor_name)}
+            {(g.grid_code as string | null) ? ` - ${String(g.grid_code)}` : ""}
+          </p>
         </div>
         <GridDeleteButton gridId={id} />
       </div>

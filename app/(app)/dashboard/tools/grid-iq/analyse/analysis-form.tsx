@@ -19,6 +19,7 @@ import Link from "next/link";
 
 interface GridSummary {
   id: string;
+  grid_name: string | null;
   processor_name: string;
   grid_code: string | null;
   grid_date: string | null;
@@ -39,6 +40,7 @@ interface HerdSummary {
 
 interface KillSheetSummary {
   id: string;
+  record_name: string | null;
   processor_name: string;
   grid_code: string | null;
   kill_date: string | null;
@@ -173,7 +175,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-text-primary">
-                        {grid.processor_name}
+                        {grid.grid_name || grid.processor_name}
                       </p>
                       <p className="text-xs text-text-muted">
                         {grid.grid_code ? `${grid.grid_code} - ` : ""}
@@ -317,7 +319,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
                         <p className="truncate text-sm font-medium text-text-primary">
-                          {ks.processor_name}
+                          {ks.record_name || ks.processor_name}
                         </p>
                         {suggested && !selected && (
                           <Badge className="shrink-0 bg-teal-500/15 text-[9px] text-teal-400">
@@ -362,7 +364,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
           <div className="flex justify-between">
             <span className="text-text-muted">Processor Grid</span>
             <span className="text-text-primary">
-              {selectedGrid ? selectedGrid.processor_name : "Not selected"}
+              {selectedGrid ? (selectedGrid.grid_name || selectedGrid.processor_name) : "Not selected"}
             </span>
           </div>
           <div className="flex justify-between">
@@ -377,7 +379,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
             <span className="text-text-muted">Kill Sheet</span>
             <span className="text-text-primary">
               {selectedKillSheet
-                ? `${selectedKillSheet.processor_name} - ${formatDate(selectedKillSheet.kill_date)}`
+                ? `${selectedKillSheet.record_name || selectedKillSheet.processor_name} - ${formatDate(selectedKillSheet.kill_date)}`
                 : "None (pre-sale)"}
             </span>
           </div>

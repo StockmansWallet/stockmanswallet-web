@@ -28,6 +28,7 @@ interface HerdOption {
 
 interface GridOption {
   id: string;
+  grid_name: string | null;
   processor_name: string;
   grid_code: string | null;
 }
@@ -186,7 +187,7 @@ export function ConsignmentForm({ herds, grids }: ConsignmentFormProps) {
                 placeholder="Select a grid (optional)"
                 options={grids.map((g) => ({
                   value: g.id,
-                  label: `${g.processor_name}${g.grid_code ? ` - ${g.grid_code}` : ""}`,
+                  label: `${g.grid_name || g.processor_name}${g.grid_code ? ` - ${g.grid_code}` : ""}`,
                 }))}
               />
             )}

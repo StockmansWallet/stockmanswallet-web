@@ -537,9 +537,6 @@ function ExtractionResultView({
   onGridNameChange: (name: string | null) => void;
   fileName: string;
 }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [draftRecordName, setDraftRecordName] = useState("");
-
   const isGrid = result.documentType === "grid";
   const rawProcessorName = isGrid
     ? result.gridData?.processorName
@@ -552,19 +549,6 @@ function ExtractionResultView({
 
   const typeMismatchLabel = result.detectedType === "grid" ? "Processor Grid" : "Kill Sheet";
   const selectedLabel = uploadType === "grid" ? "Processor Grid" : "Kill Sheet";
-
-  const handleStartEdit = () => {
-    setDraftRecordName(recordNameDisplay);
-    setIsEditing(true);
-  };
-
-  const handleSaveEdit = () => {
-    const trimmedRecord = draftRecordName.trim();
-    if (trimmedRecord) {
-      onGridNameChange(trimmedRecord !== defaultRecordName ? trimmedRecord : null);
-    }
-    setIsEditing(false);
-  };
 
   return (
     <div className="space-y-3">
@@ -616,48 +600,19 @@ function ExtractionResultView({
       {/* Grid extraction result */}
       {result.documentType === "grid" && result.gridData && (
         <div className="rounded-xl bg-emerald-500/5 p-4 ring-1 ring-inset ring-emerald-500/20">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-emerald-400" />
-              <span className="text-sm font-medium text-emerald-400">
-                Grid Extracted{result.parsedViaAI ? " (AI)" : ""}
-              </span>
-            </div>
-            {!isEditing && (
-              <button
-                onClick={handleStartEdit}
-                className="text-xs font-medium text-teal-400 hover:text-teal-300 transition-colors"
-              >
-                Edit Details
-              </button>
-            )}
+          <div className="flex items-center gap-2 mb-3">
+            <CheckCircle className="h-4 w-4 text-emerald-400" />
+            <span className="text-sm font-medium text-emerald-400">
+              Grid Extracted{result.parsedViaAI ? " (AI)" : ""}
+            </span>
           </div>
           <div className="space-y-1.5 text-sm">
-            {isEditing ? (
-              <>
-                <EditField label={recordNameLabel} value={draftRecordName} onChange={setDraftRecordName} />
-                <DetailRow label="File Name" value={fileName} />
-                <div className="flex justify-end gap-2 pt-1">
-                  <button
-                    onClick={() => setIsEditing(false)}
-                    className="rounded px-2.5 py-1 text-xs text-text-muted hover:text-text-primary transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSaveEdit}
-                    className="rounded px-2.5 py-1 text-xs font-medium text-teal-400 hover:bg-teal-500/10 transition-colors"
-                  >
-                    Save
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <DetailRow label={recordNameLabel} value={recordNameDisplay} />
-                <DetailRow label="File Name" value={fileName} />
-              </>
-            )}
+            <EditField
+              label={recordNameLabel}
+              value={recordNameDisplay}
+              onChange={(v) => onGridNameChange(v || null)}
+            />
+            <DetailRow label="File Name" value={fileName} />
             <hr className="border-white/10 my-1" />
             <DetailRow label="Processor" value={processorDisplay} />
             {result.gridData.gridCode && <DetailRow label="Grid Code" value={result.gridData.gridCode} />}
@@ -677,48 +632,19 @@ function ExtractionResultView({
       {result.documentType === "killsheet" && result.killSheetData && (
         <>
           <div className="rounded-xl bg-emerald-500/5 p-4 ring-1 ring-inset ring-emerald-500/20">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-emerald-400" />
-                <span className="text-sm font-medium text-emerald-400">
-                  Kill Sheet Extracted{result.parsedViaAI ? " (AI)" : ""}
-                </span>
-              </div>
-              {!isEditing && (
-                <button
-                  onClick={handleStartEdit}
-                  className="text-xs font-medium text-teal-400 hover:text-teal-300 transition-colors"
-                >
-                  Edit Details
-                </button>
-              )}
+            <div className="flex items-center gap-2 mb-3">
+              <CheckCircle className="h-4 w-4 text-emerald-400" />
+              <span className="text-sm font-medium text-emerald-400">
+                Kill Sheet Extracted{result.parsedViaAI ? " (AI)" : ""}
+              </span>
             </div>
             <div className="space-y-1.5 text-sm">
-              {isEditing ? (
-                <>
-                  <EditField label={recordNameLabel} value={draftRecordName} onChange={setDraftRecordName} />
-                  <DetailRow label="File Name" value={fileName} />
-                  <div className="flex justify-end gap-2 pt-1">
-                    <button
-                      onClick={() => setIsEditing(false)}
-                      className="rounded px-2.5 py-1 text-xs text-text-muted hover:text-text-primary transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleSaveEdit}
-                      className="rounded px-2.5 py-1 text-xs font-medium text-teal-400 hover:bg-teal-500/10 transition-colors"
-                    >
-                      Save
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <DetailRow label={recordNameLabel} value={recordNameDisplay} />
-                  <DetailRow label="File Name" value={fileName} />
-                </>
-              )}
+              <EditField
+                label={recordNameLabel}
+                value={recordNameDisplay}
+                onChange={(v) => onGridNameChange(v || null)}
+              />
+              <DetailRow label="File Name" value={fileName} />
               <hr className="border-white/10 my-1" />
               <DetailRow label="Processor" value={processorDisplay} />
               {result.killSheetData.killDate && <DetailRow label="Kill Date" value={result.killSheetData.killDate} />}

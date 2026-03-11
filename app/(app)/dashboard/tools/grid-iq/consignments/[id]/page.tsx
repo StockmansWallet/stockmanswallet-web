@@ -70,7 +70,7 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
   if (consignment.kill_sheet_record_id) {
     const { data: ks } = await supabase
       .from("kill_sheet_records")
-      .select("id, processor_name, kill_date, total_head_count, total_gross_value, total_body_weight")
+      .select("id, record_name, processor_name, kill_date, total_head_count, total_gross_value, total_body_weight")
       .eq("id", consignment.kill_sheet_record_id)
       .single();
     killSheet = ks as Record<string, unknown> | null;
@@ -90,7 +90,7 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
   // Fetch unlinked kill sheets for linking
   const { data: availableKillSheets } = await supabase
     .from("kill_sheet_records")
-    .select("id, processor_name, kill_date, total_head_count")
+    .select("id, record_name, processor_name, kill_date, total_head_count")
     .eq("user_id", user!.id)
     .eq("is_deleted", false)
     .is("consignment_id", null)
@@ -225,7 +225,7 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-text-primary">
-                  {killSheet.processor_name as string}
+                  {(killSheet.record_name as string | null) || (killSheet.processor_name as string)}
                 </p>
                 <div className="mt-0.5 flex items-center gap-3 text-xs text-text-muted">
                   {(killSheet.kill_date as string | null) && (
@@ -336,7 +336,7 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
           hasKillSheet={!!consignment.kill_sheet_record_id}
           availableKillSheets={(availableKillSheets ?? []).map((ks) => ({
             id: ks.id,
-            label: `${ks.processor_name}${ks.kill_date ? ` - ${new Date(ks.kill_date).toLocaleDateString("en-AU")}` : ""} (${ks.total_head_count} head)`,
+            label: `${ks.record_name || ks.processor_name}${ks.kill_date ? ` - ${new Date(ks.kill_date).toLocaleDateString("en-AU")}` : ""} (${ks.total_head_count} head)`,
           }))}
         />
       )}

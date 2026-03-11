@@ -17,7 +17,7 @@ export default async function NewAnalysisPage() {
   const [{ data: grids }, { data: herds }, { data: killSheets }] = await Promise.all([
     supabase
       .from("processor_grids")
-      .select("id, processor_name, grid_code, grid_date, expiry_date, entries, location_latitude, location_longitude, created_at")
+      .select("id, grid_name, processor_name, grid_code, grid_date, expiry_date, entries, location_latitude, location_longitude, created_at")
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
       .order("created_at", { ascending: false }),
@@ -31,7 +31,7 @@ export default async function NewAnalysisPage() {
       .order("name"),
     supabase
       .from("kill_sheet_records")
-      .select("id, processor_name, grid_code, kill_date, total_head_count, total_gross_value")
+      .select("id, record_name, processor_name, grid_code, kill_date, total_head_count, total_gross_value")
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
       .order("created_at", { ascending: false }),

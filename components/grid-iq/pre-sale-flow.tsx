@@ -16,6 +16,7 @@ import { createPreSaleAnalysis } from "@/app/(app)/dashboard/tools/grid-iq/analy
 
 interface GridSummary {
   id: string;
+  grid_name: string | null;
   processor_name: string;
   grid_code: string | null;
   grid_date: string | null;
@@ -38,6 +39,7 @@ interface HerdSummary {
 
 interface KillSheetSummary {
   id: string;
+  record_name: string | null;
   processor_name: string;
   grid_code: string | null;
   kill_date: string | null;
@@ -258,7 +260,7 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
                         <Grid3x3 className={`h-4 w-4 ${selected ? "text-teal-400" : "text-text-muted"}`} />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-text-primary">{grid.processor_name}</p>
+                        <p className="truncate text-sm font-medium text-text-primary">{grid.grid_name || grid.processor_name}</p>
                         <p className="text-xs text-text-muted">
                           {grid.grid_code ? `${grid.grid_code} - ` : ""}{formatDate(grid.grid_date)}
                           {grid.entries ? ` - ${(grid.entries as unknown[]).length} entries` : ""}
@@ -344,7 +346,7 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
                           <FileText className={`h-4 w-4 ${isSelected ? "text-teal-400" : "text-text-muted"}`} />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-text-primary">{ks.processor_name}</p>
+                          <p className="truncate text-sm font-medium text-text-primary">{ks.record_name || ks.processor_name}</p>
                           <p className="text-xs text-text-muted">
                             {formatDate(ks.kill_date)} - {ks.total_head_count ?? 0} head
                             {ks.total_gross_value ? ` - ${formatCurrency(ks.total_gross_value)}` : ""}
@@ -556,7 +558,7 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
               <div className="mb-4 flex flex-col gap-1.5 text-xs">
                 <div className="flex justify-between">
                   <span className="text-text-muted">Processor Grid</span>
-                  <span className="text-text-primary">{selectedGrid?.processor_name ?? "Not selected"}</span>
+                  <span className="text-text-primary">{selectedGrid ? (selectedGrid.grid_name || selectedGrid.processor_name) : "Not selected"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-text-muted">Kill Sheets Selected</span>

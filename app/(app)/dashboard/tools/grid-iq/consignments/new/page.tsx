@@ -26,7 +26,7 @@ export default async function NewConsignmentPage() {
   // Fetch user's grids for optional linking
   const { data: grids } = await supabase
     .from("processor_grids")
-    .select("id, processor_name, grid_code")
+    .select("id, grid_name, processor_name, grid_code")
     .eq("user_id", user!.id)
     .eq("is_deleted", false)
     .order("updated_at", { ascending: false });

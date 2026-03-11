@@ -32,7 +32,7 @@ export function EditableProcessorName({
       const supabase = createClient();
       const { error } = await supabase
         .from(table)
-        .update({ processor_name: trimmed })
+        .update({ [table === "processor_grids" ? "grid_name" : "record_name"]: trimmed })
         .eq("id", recordId);
 
       if (error) throw error;
