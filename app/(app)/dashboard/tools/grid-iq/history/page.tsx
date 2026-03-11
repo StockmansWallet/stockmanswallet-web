@@ -65,7 +65,7 @@ export default async function KillSheetHistoryPage() {
                       {(ks.record_name as string | null) || (ks.processor_name as string)}
                     </p>
                     <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-text-muted">
-                      {ks.record_name && <span>{ks.processor_name as string}</span>}
+                      {(ks.record_name as string | null) ? <span>{ks.processor_name as string}</span> : null}
                       <span>
                         {new Date(
                           ks.kill_date as string

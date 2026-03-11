@@ -79,7 +79,7 @@ export default async function SavedGridsPage() {
                       {(g.grid_name as string | null) || (g.processor_name as string)}
                     </p>
                     <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-text-muted">
-                      {g.grid_name && <span>{g.processor_name as string}</span>}
+                      {(g.grid_name as string | null) ? <span>{g.processor_name as string}</span> : null}
                       {g.grid_code ? <span>{String(g.grid_code)}</span> : null}
                       <span>
                         {new Date(
