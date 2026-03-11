@@ -43,14 +43,14 @@ export default async function GridDetailPage({ params }: PageProps) {
   return (
     <div className="max-w-4xl">
       <div className="mb-4">
-        <Link href="/dashboard/tools/grid-iq/grids">
+        <Link href="/dashboard/tools/grid-iq/records?tab=grids">
           <Button
             variant="ghost"
             size="sm"
             className="gap-1.5 text-text-muted hover:text-text-primary"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            Saved Grids
+            Processor Records
           </Button>
         </Link>
       </div>

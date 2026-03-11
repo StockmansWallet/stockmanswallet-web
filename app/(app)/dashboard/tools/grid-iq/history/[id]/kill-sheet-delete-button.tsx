@@ -26,7 +26,7 @@ export function KillSheetDeleteButton({
         .eq("id", killSheetId);
 
       if (error) throw error;
-      router.push("/dashboard/tools/grid-iq/history");
+      router.push("/dashboard/tools/grid-iq/records?tab=killsheets");
       router.refresh();
     } catch {
       setIsDeleting(false);

@@ -54,14 +54,14 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
   return (
     <div className="max-w-4xl">
       <div className="mb-4">
-        <Link href="/dashboard/tools/grid-iq/history">
+        <Link href="/dashboard/tools/grid-iq/records?tab=killsheets">
           <Button
             variant="ghost"
             size="sm"
             className="gap-1.5 text-text-muted hover:text-text-primary"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            Kill Sheet History
+            Processor Records
           </Button>
         </Link>
       </div>

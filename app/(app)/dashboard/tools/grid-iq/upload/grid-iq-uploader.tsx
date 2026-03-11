@@ -228,7 +228,7 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
           });
 
         if (insertError) throw new Error(insertError.message);
-        router.push("/dashboard/tools/grid-iq/grids");
+        router.push("/dashboard/tools/grid-iq/records?tab=grids");
       } else if (result.documentType === "killsheet" && result.killSheetData) {
         const ks = result.killSheetData;
         const { error: insertError } = await supabase
@@ -267,7 +267,7 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
           });
 
         if (insertError) throw new Error(insertError.message);
-        router.push("/dashboard/tools/grid-iq/history");
+        router.push("/dashboard/tools/grid-iq/records?tab=killsheets");
       }
     } catch (err) {
       const message =

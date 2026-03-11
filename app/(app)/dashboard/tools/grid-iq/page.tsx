@@ -139,7 +139,7 @@ export default async function GridIQPage() {
                 )}
               </div>
               <Link
-                href="/dashboard/tools/grid-iq/analyses"
+                href="/dashboard/tools/grid-iq/saved"
                 className="text-xs font-medium text-teal-400 hover:underline"
               >
                 View All
@@ -221,7 +221,7 @@ export default async function GridIQPage() {
                 )}
               </div>
               <Link
-                href="/dashboard/tools/grid-iq/grids"
+                href="/dashboard/tools/grid-iq/records?tab=grids"
                 className="text-xs font-medium text-teal-400 hover:underline"
               >
                 View All
@@ -302,7 +302,7 @@ export default async function GridIQPage() {
                 )}
               </div>
               <Link
-                href="/dashboard/tools/grid-iq/history"
+                href="/dashboard/tools/grid-iq/records?tab=killsheets"
                 className="text-xs font-medium text-teal-400 hover:underline"
               >
                 View All

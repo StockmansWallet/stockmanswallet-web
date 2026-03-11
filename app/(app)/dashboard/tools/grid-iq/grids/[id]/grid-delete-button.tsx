@@ -22,7 +22,7 @@ export function GridDeleteButton({ gridId }: { gridId: string }) {
         .eq("id", gridId);
 
       if (error) throw error;
-      router.push("/dashboard/tools/grid-iq/grids");
+      router.push("/dashboard/tools/grid-iq/records?tab=grids");
       router.refresh();
     } catch {
       setIsDeleting(false);
