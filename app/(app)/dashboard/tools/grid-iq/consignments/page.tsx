@@ -29,7 +29,7 @@ export default async function ConsignmentsListPage() {
 
   const { data: consignments } = await supabase
     .from("consignments")
-    .select("id, processor_name, plant_location, booking_reference, kill_date, status, total_head_count, total_gross_value, updated_at")
+    .select("id, consignment_name, processor_name, plant_location, booking_reference, kill_date, status, total_head_count, total_gross_value, updated_at")
     .eq("user_id", user!.id)
     .eq("is_deleted", false)
     .order("updated_at", { ascending: false });
@@ -80,10 +80,11 @@ export default async function ConsignmentsListPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-text-primary">
-                      {c.processor_name}
-                      {c.plant_location ? ` - ${c.plant_location}` : ""}
+                      {c.consignment_name || c.processor_name}
                     </p>
                     <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-text-muted">
+                      {c.consignment_name && <span>{c.processor_name}</span>}
+                      {c.plant_location && <span>{c.plant_location}</span>}
                       {c.kill_date && (
                         <span>{new Date(c.kill_date).toLocaleDateString("en-AU")}</span>
                       )}

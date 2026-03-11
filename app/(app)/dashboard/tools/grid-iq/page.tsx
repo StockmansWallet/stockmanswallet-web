@@ -53,7 +53,7 @@ export default async function GridIQPage() {
       supabase
         .from("consignments")
         .select(
-          "id, processor_name, plant_location, booking_reference, kill_date, status, total_head_count, total_gross_value, updated_at"
+          "id, consignment_name, processor_name, plant_location, booking_reference, kill_date, status, total_head_count, total_gross_value, updated_at"
         )
         .eq("user_id", user!.id)
         .eq("is_deleted", false)
@@ -62,7 +62,7 @@ export default async function GridIQPage() {
       supabase
         .from("consignments")
         .select(
-          "id, processor_name, plant_location, kill_date, status, total_head_count, processor_grid_id, updated_at"
+          "id, consignment_name, processor_name, plant_location, kill_date, status, total_head_count, processor_grid_id, updated_at"
         )
         .eq("user_id", user!.id)
         .eq("is_deleted", false)
@@ -106,10 +106,10 @@ export default async function GridIQPage() {
                 >
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-text-primary">
-                      {c.processor_name as string}
-                      {(c.plant_location as string | null) ? ` - ${c.plant_location}` : ""}
+                      {(c.consignment_name as string | null) || (c.processor_name as string)}
                     </p>
                     <div className="mt-0.5 flex items-center gap-2 text-xs text-text-muted">
+                      {(c.consignment_name as string | null) && <span>{c.processor_name as string}</span>}
                       {(c.kill_date as string | null) && (
                         <span>{new Date(c.kill_date as string).toLocaleDateString("en-AU")}</span>
                       )}
@@ -382,10 +382,10 @@ export default async function GridIQPage() {
                   >
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-text-primary">
-                        {c.processor_name as string}
-                        {(c.plant_location as string | null) ? ` - ${c.plant_location}` : ""}
+                        {(c.consignment_name as string | null) || (c.processor_name as string)}
                       </p>
                       <div className="mt-0.5 flex items-center gap-2 text-xs text-text-muted">
+                        {(c.consignment_name as string | null) && <span>{c.processor_name as string}</span>}
                         {(c.kill_date as string | null) && (
                           <span>{new Date(c.kill_date as string).toLocaleDateString("en-AU")}</span>
                         )}

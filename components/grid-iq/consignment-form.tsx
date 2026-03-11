@@ -144,6 +144,14 @@ export function ConsignmentForm({ herds, grids }: ConsignmentFormProps) {
             </div>
             <p className="text-sm font-semibold text-text-primary">Processor Details</p>
           </div>
+          <div className="mb-4">
+            <Input
+              id="consignmentName"
+              name="consignmentName"
+              label="Consignment Name"
+              placeholder="e.g. Cull Cows - Canal Creek Paddock"
+            />
+          </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Input
               id="processorName"

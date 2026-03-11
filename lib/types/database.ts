@@ -706,6 +706,7 @@ export type Database = {
         Row: {
           id: string;
           user_id: string;
+          consignment_name: string | null;
           processor_name: string;
           plant_location: string | null;
           booking_reference: string | null;
@@ -726,6 +727,7 @@ export type Database = {
         Insert: {
           id: string;
           user_id: string;
+          consignment_name?: string | null;
           processor_name: string;
           plant_location?: string | null;
           booking_reference?: string | null;
@@ -740,6 +742,7 @@ export type Database = {
           is_deleted?: boolean;
         };
         Update: {
+          consignment_name?: string | null;
           processor_name?: string;
           plant_location?: string | null;
           booking_reference?: string | null;

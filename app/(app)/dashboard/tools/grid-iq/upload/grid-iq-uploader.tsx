@@ -110,6 +110,7 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
   const [headCountConfirmed, setHeadCountConfirmed] = useState(false);
   const [typeMismatchConfirmed, setTypeMismatchConfirmed] = useState(false);
   const [nameOverride, setNameOverride] = useState<string | null>(null);
+  const [gridNameOverride, setGridNameOverride] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback((f: File) => {
@@ -118,6 +119,7 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
     setHeadCountConfirmed(false);
     setTypeMismatchConfirmed(false);
     setNameOverride(null);
+    setGridNameOverride(null);
 
     const ext = f.name.split(".").pop()?.toLowerCase() || "";
     if (!ACCEPTED_TYPES.includes(f.type) && !ACCEPTED_EXTENSIONS.has(ext)) {
@@ -212,12 +214,15 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
 
       if (result.documentType === "grid" && result.gridData) {
         const grid = result.gridData;
+        const effectiveProcessor = nameOverride || grid.processorName || "Unknown Processor";
         const { error: insertError } = await supabase
           .from("processor_grids")
           .insert({
             id: crypto.randomUUID(),
             user_id: session.user.id,
-            processor_name: nameOverride || grid.processorName || "Unknown Processor",
+            processor_name: effectiveProcessor,
+            grid_name: gridNameOverride || `${effectiveProcessor} - Grid`,
+            source_file_name: file?.name || null,
             grid_code: grid.gridCode,
             grid_date: normaliseDate(grid.gridDate) || new Date().toISOString().split("T")[0],
             expiry_date: normaliseDate(grid.expiryDate),
@@ -233,12 +238,15 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
         router.push("/dashboard/tools/grid-iq/records?tab=grids");
       } else if (result.documentType === "killsheet" && result.killSheetData) {
         const ks = result.killSheetData;
+        const effectiveProcessor = nameOverride || ks.processorName || "Unknown Processor";
         const { error: insertError } = await supabase
           .from("kill_sheet_records")
           .insert({
             id: crypto.randomUUID(),
             user_id: session.user.id,
-            processor_name: nameOverride || ks.processorName || "Unknown Processor",
+            processor_name: effectiveProcessor,
+            record_name: gridNameOverride || `${effectiveProcessor} - Kill Sheet`,
+            source_file_name: file?.name || null,
             kill_date: normaliseDate(ks.killDate) || new Date().toISOString().split("T")[0],
             vendor_code: ks.vendorCode,
             pic: ks.pic,
@@ -287,6 +295,8 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
     setResult(null);
     setHeadCountConfirmed(false);
     setTypeMismatchConfirmed(false);
+    setNameOverride(null);
+    setGridNameOverride(null);
     if (inputRef.current) inputRef.current.value = "";
   };
 
@@ -432,6 +442,9 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
                   onRetry={handleClear}
                   nameOverride={nameOverride}
                   onNameChange={setNameOverride}
+                  gridName={gridNameOverride}
+                  onGridNameChange={setGridNameOverride}
+                  fileName={file?.name || ""}
                 />
               )}
 
@@ -515,6 +528,9 @@ function ExtractionResultView({
   onRetry,
   nameOverride,
   onNameChange,
+  gridName,
+  onGridNameChange,
+  fileName,
 }: {
   result: ExtractionResult;
   headCountConfirmed: boolean;
@@ -526,9 +542,54 @@ function ExtractionResultView({
   onRetry: () => void;
   nameOverride: string | null;
   onNameChange: (name: string | null) => void;
+  gridName: string | null;
+  onGridNameChange: (name: string | null) => void;
+  fileName: string;
 }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [draftProcessor, setDraftProcessor] = useState("");
+  const [draftRecordName, setDraftRecordName] = useState("");
+
+  const isGrid = result.documentType === "grid";
+  const rawProcessorName = isGrid
+    ? result.gridData?.processorName
+    : result.killSheetData?.processorName;
+  const processorDisplay = nameOverride ?? rawProcessorName ?? "Unknown";
+  const recordNameLabel = isGrid ? "Grid Name" : "Kill Sheet Name";
+  const defaultSuffix = isGrid ? "Grid" : "Kill Sheet";
+  const defaultRecordName = `${processorDisplay} - ${defaultSuffix}`;
+  const recordNameDisplay = gridName ?? defaultRecordName;
+
   const typeMismatchLabel = result.detectedType === "grid" ? "Processor Grid" : "Kill Sheet";
   const selectedLabel = uploadType === "grid" ? "Processor Grid" : "Kill Sheet";
+
+  const handleStartEdit = () => {
+    setDraftProcessor(processorDisplay);
+    setDraftRecordName(recordNameDisplay);
+    setIsEditing(true);
+  };
+
+  const handleProcessorDraftChange = (value: string) => {
+    const oldDefault = `${draftProcessor} - ${defaultSuffix}`;
+    setDraftProcessor(value);
+    if (draftRecordName === oldDefault) {
+      setDraftRecordName(`${value} - ${defaultSuffix}`);
+    }
+  };
+
+  const handleSaveEdit = () => {
+    const trimmedProcessor = draftProcessor.trim();
+    const trimmedRecord = draftRecordName.trim();
+    if (trimmedProcessor) {
+      onNameChange(trimmedProcessor !== rawProcessorName ? trimmedProcessor : null);
+    }
+    if (trimmedRecord) {
+      const effectiveProcessor = trimmedProcessor || rawProcessorName || "Unknown";
+      const newDefault = `${effectiveProcessor} - ${defaultSuffix}`;
+      onGridNameChange(trimmedRecord !== newDefault ? trimmedRecord : null);
+    }
+    setIsEditing(false);
+  };
 
   return (
     <div className="space-y-3">
@@ -580,28 +641,67 @@ function ExtractionResultView({
       {/* Grid extraction result */}
       {result.documentType === "grid" && result.gridData && (
         <div className="rounded-xl bg-emerald-500/5 p-4 ring-1 ring-inset ring-emerald-500/20">
-          <div className="flex items-center gap-2 mb-3">
-            <CheckCircle className="h-4 w-4 text-emerald-400" />
-            <span className="text-sm font-medium text-emerald-400">
-              Grid Extracted{result.parsedViaAI ? " (AI)" : ""}
-            </span>
-          </div>
-          <div className="space-y-1.5 text-sm">
-            <EditableNameRow
-              label="Processor"
-              value={nameOverride ?? result.gridData.processorName ?? "Unknown"}
-              onChange={onNameChange}
-            />
-            {result.gridData.gridCode && <DetailRow label="Grid Code" value={result.gridData.gridCode} />}
-            {result.gridData.gridDate && <DetailRow label="Date" value={result.gridData.gridDate} />}
-            <DetailRow label="Grade Entries" value={`${result.gridData.entries.length}`} />
-            {result.gridData.entries.some((e) => e.gender) && (
-              <DetailRow
-                label="Gender Tabs"
-                value={`Male: ${result.gridData.entries.filter((e) => e.gender === "male").length}, Female: ${result.gridData.entries.filter((e) => e.gender === "female").length}`}
-              />
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-emerald-400" />
+              <span className="text-sm font-medium text-emerald-400">
+                Grid Extracted{result.parsedViaAI ? " (AI)" : ""}
+              </span>
+            </div>
+            {!isEditing && (
+              <button
+                onClick={handleStartEdit}
+                className="text-xs font-medium text-teal-400 hover:text-teal-300 transition-colors"
+              >
+                Edit Details
+              </button>
             )}
           </div>
+          {isEditing ? (
+            <div className="space-y-2.5 text-sm">
+              <EditField label="Processor" value={draftProcessor} onChange={handleProcessorDraftChange} />
+              <EditField label={recordNameLabel} value={draftRecordName} onChange={setDraftRecordName} />
+              <DetailRow label="File Name" value={fileName} />
+              {result.gridData.gridCode && <DetailRow label="Grid Code" value={result.gridData.gridCode} />}
+              {result.gridData.gridDate && <DetailRow label="Date" value={result.gridData.gridDate} />}
+              <DetailRow label="Grade Entries" value={`${result.gridData.entries.length}`} />
+              {result.gridData.entries.some((e) => e.gender) && (
+                <DetailRow
+                  label="Gender Tabs"
+                  value={`Male: ${result.gridData.entries.filter((e) => e.gender === "male").length}, Female: ${result.gridData.entries.filter((e) => e.gender === "female").length}`}
+                />
+              )}
+              <div className="flex justify-end gap-2 pt-1">
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="rounded px-2.5 py-1 text-xs text-text-muted hover:text-text-primary transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveEdit}
+                  className="rounded px-2.5 py-1 text-xs font-medium text-teal-400 hover:bg-teal-500/10 transition-colors"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-1.5 text-sm">
+              <DetailRow label="Processor" value={processorDisplay} />
+              <DetailRow label={recordNameLabel} value={recordNameDisplay} />
+              <DetailRow label="File Name" value={fileName} />
+              {result.gridData.gridCode && <DetailRow label="Grid Code" value={result.gridData.gridCode} />}
+              {result.gridData.gridDate && <DetailRow label="Date" value={result.gridData.gridDate} />}
+              <DetailRow label="Grade Entries" value={`${result.gridData.entries.length}`} />
+              {result.gridData.entries.some((e) => e.gender) && (
+                <DetailRow
+                  label="Gender Tabs"
+                  value={`Male: ${result.gridData.entries.filter((e) => e.gender === "male").length}, Female: ${result.gridData.entries.filter((e) => e.gender === "female").length}`}
+                />
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -609,33 +709,77 @@ function ExtractionResultView({
       {result.documentType === "killsheet" && result.killSheetData && (
         <>
           <div className="rounded-xl bg-emerald-500/5 p-4 ring-1 ring-inset ring-emerald-500/20">
-            <div className="flex items-center gap-2 mb-3">
-              <CheckCircle className="h-4 w-4 text-emerald-400" />
-              <span className="text-sm font-medium text-emerald-400">
-                Kill Sheet Extracted{result.parsedViaAI ? " (AI)" : ""}
-              </span>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-emerald-400" />
+                <span className="text-sm font-medium text-emerald-400">
+                  Kill Sheet Extracted{result.parsedViaAI ? " (AI)" : ""}
+                </span>
+              </div>
+              {!isEditing && (
+                <button
+                  onClick={handleStartEdit}
+                  className="text-xs font-medium text-teal-400 hover:text-teal-300 transition-colors"
+                >
+                  Edit Details
+                </button>
+              )}
             </div>
-            <div className="space-y-1.5 text-sm">
-              <EditableNameRow
-                label="Processor"
-                value={nameOverride ?? result.killSheetData.processorName ?? "Unknown"}
-                onChange={onNameChange}
-              />
-              {result.killSheetData.killDate && <DetailRow label="Kill Date" value={result.killSheetData.killDate} />}
-              <DetailRow label="Total Head" value={`${result.killSheetData.totalHeadCount}`} />
-              <DetailRow
-                label="Total Weight"
-                value={`${Math.round(result.killSheetData.totalBodyWeight)} kg`}
-              />
-              <DetailRow
-                label="Total Value"
-                value={`$${result.killSheetData.totalGrossValue.toLocaleString("en-AU", { minimumFractionDigits: 2 })}`}
-              />
-              <DetailRow
-                label="Line Items"
-                value={`${result.killSheetData.lineItems?.length || 0}`}
-              />
-            </div>
+            {isEditing ? (
+              <div className="space-y-2.5 text-sm">
+                <EditField label="Processor" value={draftProcessor} onChange={handleProcessorDraftChange} />
+                <EditField label={recordNameLabel} value={draftRecordName} onChange={setDraftRecordName} />
+                <DetailRow label="File Name" value={fileName} />
+                {result.killSheetData.killDate && <DetailRow label="Kill Date" value={result.killSheetData.killDate} />}
+                <DetailRow label="Total Head" value={`${result.killSheetData.totalHeadCount}`} />
+                <DetailRow
+                  label="Total Weight"
+                  value={`${Math.round(result.killSheetData.totalBodyWeight)} kg`}
+                />
+                <DetailRow
+                  label="Total Value"
+                  value={`$${result.killSheetData.totalGrossValue.toLocaleString("en-AU", { minimumFractionDigits: 2 })}`}
+                />
+                <DetailRow
+                  label="Line Items"
+                  value={`${result.killSheetData.lineItems?.length || 0}`}
+                />
+                <div className="flex justify-end gap-2 pt-1">
+                  <button
+                    onClick={() => setIsEditing(false)}
+                    className="rounded px-2.5 py-1 text-xs text-text-muted hover:text-text-primary transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveEdit}
+                    className="rounded px-2.5 py-1 text-xs font-medium text-teal-400 hover:bg-teal-500/10 transition-colors"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-1.5 text-sm">
+                <DetailRow label="Processor" value={processorDisplay} />
+                <DetailRow label={recordNameLabel} value={recordNameDisplay} />
+                <DetailRow label="File Name" value={fileName} />
+                {result.killSheetData.killDate && <DetailRow label="Kill Date" value={result.killSheetData.killDate} />}
+                <DetailRow label="Total Head" value={`${result.killSheetData.totalHeadCount}`} />
+                <DetailRow
+                  label="Total Weight"
+                  value={`${Math.round(result.killSheetData.totalBodyWeight)} kg`}
+                />
+                <DetailRow
+                  label="Total Value"
+                  value={`$${result.killSheetData.totalGrossValue.toLocaleString("en-AU", { minimumFractionDigits: 2 })}`}
+                />
+                <DetailRow
+                  label="Line Items"
+                  value={`${result.killSheetData.lineItems?.length || 0}`}
+                />
+              </div>
+            )}
           </div>
 
           {/* Head count reconciliation warning */}
@@ -680,85 +824,24 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function EditableNameRow({
+function EditField({
   label,
   value,
   onChange,
 }: {
   label: string;
   value: string;
-  onChange: (name: string | null) => void;
+  onChange: (value: string) => void;
 }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [draft, setDraft] = useState(value);
-
-  const handleSave = () => {
-    const trimmed = draft.trim();
-    if (trimmed && trimmed !== value) {
-      onChange(trimmed);
-    }
-    setIsEditing(false);
-  };
-
-  if (isEditing) {
-    return (
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-text-muted">{label}</span>
-        <div className="flex items-center gap-1.5">
-          <input
-            type="text"
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleSave();
-              if (e.key === "Escape") setIsEditing(false);
-            }}
-            autoFocus
-            className="w-48 rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-sm font-medium text-text-primary outline-none focus:border-teal-400/50 focus:ring-1 focus:ring-teal-400/25"
-          />
-          <button
-            onClick={handleSave}
-            className="rounded px-1.5 py-0.5 text-xs font-medium text-teal-400 hover:bg-teal-500/10"
-          >
-            Save
-          </button>
-          <button
-            onClick={() => setIsEditing(false)}
-            className="rounded px-1.5 py-0.5 text-xs text-text-muted hover:text-text-primary"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between gap-2">
       <span className="text-text-muted">{label}</span>
-      <button
-        onClick={() => {
-          setDraft(value);
-          setIsEditing(true);
-        }}
-        className="group flex items-center gap-1.5 font-medium text-text-primary hover:text-teal-400"
-        title="Click to rename"
-      >
-        {value}
-        <svg
-          className="h-3 w-3 text-text-muted/50 group-hover:text-teal-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={2}
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
-          />
-        </svg>
-      </button>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-56 rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-sm font-medium text-text-primary text-right outline-none focus:border-teal-400/50 focus:ring-1 focus:ring-teal-400/25"
+      />
     </div>
   );
 }

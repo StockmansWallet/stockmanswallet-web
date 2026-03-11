@@ -113,12 +113,12 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
 
       <div className="flex items-start justify-between">
         <PageHeader
-          title={consignment.processor_name}
+          title={consignment.consignment_name || consignment.processor_name}
           titleClassName="text-2xl font-bold text-teal-400"
           subtitle={
-            consignment.plant_location
-              ? consignment.plant_location
-              : undefined
+            consignment.consignment_name
+              ? `${consignment.processor_name}${consignment.plant_location ? ` - ${consignment.plant_location}` : ""}`
+              : consignment.plant_location || undefined
           }
           subtitleClassName="text-sm text-text-secondary"
           compact

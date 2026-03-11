@@ -9,6 +9,7 @@ export async function createConsignment(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
+  const consignmentName = (formData.get("consignmentName") as string) || null;
   const processorName = formData.get("processorName") as string;
   const plantLocation = (formData.get("plantLocation") as string) || null;
   const bookingReference = (formData.get("bookingReference") as string) || null;
@@ -51,6 +52,7 @@ export async function createConsignment(formData: FormData) {
   const { error: insertError } = await supabase.from("consignments").insert({
     id: consignmentId,
     user_id: user.id,
+    consignment_name: consignmentName,
     processor_name: processorName,
     plant_location: plantLocation,
     booking_reference: bookingReference,
@@ -223,6 +225,7 @@ export async function updateConsignment(formData: FormData) {
   if (!user) return { error: "Not authenticated" };
 
   const consignmentId = formData.get("consignmentId") as string;
+  const consignmentName = formData.get("consignmentName") as string | null;
   const processorName = (formData.get("processorName") as string) || null;
   const plantLocation = (formData.get("plantLocation") as string) || null;
   const bookingReference = (formData.get("bookingReference") as string) || null;
@@ -272,6 +275,7 @@ export async function updateConsignment(formData: FormData) {
     total_head_count: totalHead,
     updated_at: new Date().toISOString(),
   };
+  if (consignmentName !== null) updateData.consignment_name = consignmentName || null;
   if (processorName) updateData.processor_name = processorName;
   if (plantLocation !== null) updateData.plant_location = plantLocation;
   if (bookingReference !== null) updateData.booking_reference = bookingReference;
