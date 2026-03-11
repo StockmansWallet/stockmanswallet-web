@@ -9,7 +9,7 @@ export default function StockmanIQChatPage() {
     <div className="flex max-w-3xl flex-col" style={{ height: "calc(100vh - 8rem)" }}>
       <PageHeader title="Brangus" subtitle="Your AI livestock advisor" />
 
-      <Card className="flex flex-1 flex-col overflow-hidden">
+      <Card className="flex flex-1 flex-col overflow-hidden rounded-3xl">
         <BrangusChat />
       </Card>
     </div>

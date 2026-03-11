@@ -3,7 +3,39 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { createNotification, notifyDenial } from "@/lib/advisory/notifications";
-import type { MessageType } from "@/lib/types/advisory";
+import type { AdvisoryMessage, MessageType } from "@/lib/types/advisory";
+
+export async function fetchFarmerMessages(connectionId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Not authenticated", messages: [] };
+
+  const { data: connection } = await supabase
+    .from("connection_requests")
+    .select("id, requester_user_id, target_user_id")
+    .eq("id", connectionId)
+    .eq("connection_type", "farmer_peer")
+    .eq("status", "approved")
+    .single();
+
+  if (!connection) return { error: "Connection not found", messages: [] };
+
+  const isParty =
+    connection.requester_user_id === user.id ||
+    connection.target_user_id === user.id;
+  if (!isParty) return { error: "Connection not found", messages: [] };
+
+  const { data: messages } = await supabase
+    .from("advisory_messages")
+    .select("*")
+    .eq("connection_id", connectionId)
+    .order("created_at", { ascending: true });
+
+  return { messages: (messages ?? []) as AdvisoryMessage[] };
+}
 
 export async function sendFarmerMessage(
   connectionId: string,

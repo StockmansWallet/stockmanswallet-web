@@ -4,10 +4,13 @@
 // Handles message display, input, API calls, and tool execution loop
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Brain, Send, Loader2, AlertCircle } from "lucide-react";
+import { Brain, Loader2, AlertCircle } from "lucide-react";
 import { sendMessage, buildSystemPrompt, loadChatDataStore } from "@/lib/brangus/chat-service";
 import type { ChatMessage, AnthropicMessage, ChatDataStore } from "@/lib/brangus/types";
 import { createClient } from "@/lib/supabase/client";
+import { ChatBubble } from "@/components/app/chat/chat-bubble";
+import { ChatInput } from "@/components/app/chat/chat-input";
+import { TypingIndicator } from "@/components/app/chat/typing-indicator";
 
 const SUGGESTED_PROMPTS = [
   "What's my portfolio worth today?",
@@ -18,10 +21,14 @@ const SUGGESTED_PROMPTS = [
   "Give me a breakdown of all my herds",
 ];
 
+// Brangus brand brown (matches Theme+StockmanIQ.swift)
+const BRANGUS_BG = "#4D331F";
+// User brand color
+const USER_BG = "var(--color-brand)";
+
 export function BrangusChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [conversationHistory, setConversationHistory] = useState<AnthropicMessage[]>([]);
-  const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialising, setIsInitialising] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +36,7 @@ export function BrangusChat() {
   const [systemPrompt, setSystemPrompt] = useState("");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const postTypingIdRef = useRef<string | null>(null);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -98,18 +105,16 @@ export function BrangusChat() {
     dataStore.pendingYardBookActions = [];
   }, []);
 
-  const handleSend = useCallback(async (text?: string) => {
-    const messageText = text ?? inputValue.trim();
-    if (!messageText || isLoading || !store) return;
+  const handleSend = useCallback(async (text: string) => {
+    if (!text || isLoading || !store) return;
 
-    setInputValue("");
     setError(null);
 
     // Add user message to UI
     const userMessage: ChatMessage = {
       id: crypto.randomUUID(),
       role: "user",
-      content: messageText,
+      content: text,
       timestamp: new Date(),
     };
     setMessages((prev) => [...prev, userMessage]);
@@ -117,19 +122,20 @@ export function BrangusChat() {
 
     try {
       const { assistantText, updatedHistory } = await sendMessage(
-        messageText,
+        text,
         conversationHistory,
         store,
         systemPrompt
       );
 
-      // Add assistant message to UI
+      // Add assistant message to UI (fade in, not bounce, since it replaces typing indicator)
       const assistantMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: "assistant",
         content: assistantText,
         timestamp: new Date(),
       };
+      postTypingIdRef.current = assistantMessage.id;
       setMessages((prev) => [...prev, assistantMessage]);
       setConversationHistory(updatedHistory);
 
@@ -140,16 +146,8 @@ export function BrangusChat() {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
-      inputRef.current?.focus();
     }
-  }, [inputValue, isLoading, store, conversationHistory, systemPrompt, persistMutations]);
-
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  }, [handleSend]);
+  }, [isLoading, store, conversationHistory, systemPrompt, persistMutations]);
 
   // Loading state
   if (isInitialising) {
@@ -164,15 +162,33 @@ export function BrangusChat() {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-2">
         {messages.length === 0 ? (
           <EmptyState onPromptClick={(prompt) => handleSend(prompt)} />
         ) : (
-          <div className="mx-auto max-w-2xl space-y-4">
-            {messages.map((msg) => (
-              <MessageBubble key={msg.id} message={msg} />
-            ))}
-            {isLoading && <TypingIndicator />}
+          <div className="mx-auto max-w-2xl space-y-3">
+            {messages.map((msg) => {
+              const isUser = msg.role === "user";
+              const isPostTyping = msg.id === postTypingIdRef.current;
+              return (
+                <ChatBubble
+                  key={msg.id}
+                  side={isUser ? "right" : "left"}
+                  bgClass={isUser ? "bg-brand" : "bg-[#4D331F]"}
+                  tailColor={isUser ? USER_BG : BRANGUS_BG}
+                  textClass={isUser ? "text-white" : "text-text-primary"}
+                  animate
+                  animationType={isPostTyping ? "fade" : "bounce"}
+                >
+                  {isUser ? (
+                    msg.content
+                  ) : (
+                    <FormattedResponse text={msg.content} />
+                  )}
+                </ChatBubble>
+              );
+            })}
+            {isLoading && <TypingIndicator bgColor={BRANGUS_BG} dotClass="bg-brand/60" />}
             <div ref={messagesEndRef} />
           </div>
         )}
@@ -188,28 +204,14 @@ export function BrangusChat() {
 
       {/* Input area */}
       <div className="border-t border-white/6 p-4">
-        <div className="mx-auto flex max-w-2xl items-end gap-2">
-          <textarea
-            ref={inputRef}
-            rows={1}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyDown}
+        <div className="mx-auto max-w-2xl">
+          <ChatInput
+            onSend={handleSend}
             placeholder="Ask Brangus anything..."
-            disabled={isLoading}
-            className="flex-1 resize-none rounded-xl bg-white/5 px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none ring-1 ring-inset ring-white/10 transition-all focus:ring-brand/60 focus:bg-white/8 disabled:opacity-50"
+            disabled={!store}
+            loading={isLoading}
+            accentClass="bg-brand hover:bg-brand-dark"
           />
-          <button
-            onClick={() => handleSend()}
-            disabled={isLoading || !inputValue.trim()}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand text-white transition-colors hover:bg-brand-dark disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-          </button>
         </div>
       </div>
     </div>
@@ -241,30 +243,6 @@ function EmptyState({ onPromptClick }: { onPromptClick: (prompt: string) => void
             {prompt}
           </button>
         ))}
-      </div>
-    </div>
-  );
-}
-
-// MARK: - Message Bubble
-
-function MessageBubble({ message }: { message: ChatMessage }) {
-  const isUser = message.role === "user";
-
-  return (
-    <div className={`flex animate-bubble-in ${isUser ? "justify-end" : "justify-start"}`}>
-      <div
-        className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-          isUser
-            ? "bg-brand text-white"
-            : "bg-[#4D331F] text-text-primary"
-        }`}
-      >
-        {isUser ? (
-          <p className="whitespace-pre-wrap">{message.content}</p>
-        ) : (
-          <FormattedResponse text={message.content} />
-        )}
       </div>
     </div>
   );
@@ -326,16 +304,3 @@ function formatInlineText(text: string): string {
   return text.replace(/\*\*(.*?)\*\*/g, "$1");
 }
 
-// MARK: - Typing Indicator
-
-function TypingIndicator() {
-  return (
-    <div className="flex justify-start animate-bubble-in">
-      <div className="flex items-center gap-1.5 rounded-2xl bg-[#4D331F] px-4 py-3">
-        <span className="h-2 w-2 rounded-full bg-brand/60 animate-bounce [animation-delay:0ms]" />
-        <span className="h-2 w-2 rounded-full bg-brand/60 animate-bounce [animation-delay:150ms]" />
-        <span className="h-2 w-2 rounded-full bg-brand/60 animate-bounce [animation-delay:300ms]" />
-      </div>
-    </div>
-  );
-}

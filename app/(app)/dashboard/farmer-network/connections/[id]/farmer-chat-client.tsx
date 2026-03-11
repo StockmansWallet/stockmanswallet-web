@@ -1,9 +1,15 @@
 "use client";
 
+import { useState, useEffect, useRef, useCallback } from "react";
 import { MessageThread } from "@/components/app/advisory/message-thread";
-import { MessageInput } from "@/components/app/advisory/message-input";
-import { sendFarmerMessage } from "./actions";
-import type { AdvisoryMessage, MessageType } from "@/lib/types/advisory";
+import { ChatInput } from "@/components/app/chat/chat-input";
+import { TypingIndicator } from "@/components/app/chat/typing-indicator";
+import { useTypingIndicator } from "@/hooks/use-typing-indicator";
+import { sendFarmerMessage, fetchFarmerMessages } from "./actions";
+import type { AdvisoryMessage } from "@/lib/types/advisory";
+
+const POLL_INTERVAL = 5000;
+const OTHER_BG = "#2A2929";
 
 interface FarmerChatClientProps {
   connectionId: string;
@@ -15,25 +21,102 @@ interface FarmerChatClientProps {
 export function FarmerChatClient({
   connectionId,
   currentUserId,
-  messages,
+  messages: initialMessages,
   participants,
 }: FarmerChatClientProps) {
-  const handleSend = async (content: string, type: MessageType) => {
-    return sendFarmerMessage(connectionId, content, type);
-  };
+  const [messages, setMessages] = useState<AdvisoryMessage[]>(initialMessages);
+  const [animatedIds, setAnimatedIds] = useState<Set<string>>(new Set());
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const { peerIsTyping, notifyTyping } = useTypingIndicator(
+    `chat:${connectionId}`,
+    currentUserId
+  );
+
+  // Auto-scroll to bottom on new messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, peerIsTyping]);
+
+  // Poll for new messages
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const result = await fetchFarmerMessages(connectionId);
+      if (result.messages && result.messages.length > 0) {
+        setMessages((prev) => {
+          const prevIds = new Set(prev.map((m) => m.id));
+          const incoming = result.messages;
+          const brandNew = incoming.filter((m) => !prevIds.has(m.id));
+
+          if (brandNew.length > 0) {
+            setAnimatedIds((ids) => {
+              const next = new Set(ids);
+              brandNew.forEach((m) => next.add(m.id));
+              return next;
+            });
+            return incoming;
+          }
+          return prev;
+        });
+      }
+    }, POLL_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, [connectionId]);
+
+  const handleSend = useCallback(async (text: string) => {
+    // Optimistic add
+    const optimisticMsg: AdvisoryMessage = {
+      id: `optimistic-${Date.now()}`,
+      connection_id: connectionId,
+      sender_user_id: currentUserId,
+      message_type: "general_note",
+      content: text,
+      created_at: new Date().toISOString(),
+    };
+
+    setMessages((prev) => [...prev, optimisticMsg]);
+    setAnimatedIds((ids) => new Set(ids).add(optimisticMsg.id));
+
+    const result = await sendFarmerMessage(connectionId, text, "general_note");
+
+    if (result?.error) {
+      setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
+      return;
+    }
+
+    // Fetch real messages to replace optimistic
+    const refreshed = await fetchFarmerMessages(connectionId);
+    if (refreshed.messages) {
+      setMessages(refreshed.messages);
+    }
+  }, [connectionId, currentUserId]);
 
   return (
-    <>
-      <MessageThread
-        messages={messages}
-        currentUserId={currentUserId}
-        participants={participants}
-      />
-      <MessageInput
-        onSend={handleSend}
-        hideTypeSelector
-        placeholder="Write a message..."
-      />
-    </>
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      {/* Messages area - starts at top, scrolls down */}
+      <div className="flex-1 overflow-y-auto px-1 pt-2 pb-2">
+        <div className="space-y-3">
+          <MessageThread
+            messages={messages}
+            currentUserId={currentUserId}
+            participants={participants}
+            animatedMessageIds={animatedIds}
+          />
+          {peerIsTyping && <TypingIndicator bgColor={OTHER_BG} dotClass="bg-white/50" />}
+          <div ref={messagesEndRef} />
+        </div>
+      </div>
+
+      {/* Input area */}
+      <div className="shrink-0 border-t border-white/6 pt-3">
+        <ChatInput
+          onSend={handleSend}
+          onTyping={notifyTyping}
+          placeholder="Write a message..."
+          accentClass="bg-purple-500 hover:bg-purple-600"
+        />
+      </div>
+    </div>
   );
 }

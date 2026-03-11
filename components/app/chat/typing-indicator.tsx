@@ -1,0 +1,45 @@
+"use client";
+
+interface TypingIndicatorProps {
+  /** Solid opaque background color for the bubble */
+  bgColor: string;
+  /** Color for the bouncing dots */
+  dotClass?: string;
+}
+
+/**
+ * Shared typing indicator bubble with three bouncing dots.
+ * Used by both Brangus AI chat and farmer peer chat.
+ */
+export function TypingIndicator({
+  bgColor,
+  dotClass = "bg-white/50",
+}: TypingIndicatorProps) {
+  return (
+    <div className="flex justify-start animate-bubble-in" style={{ transformOrigin: "bottom left" }}>
+      <div className="relative">
+        <div
+          className="flex items-center gap-1.5 rounded-3xl px-4 py-3"
+          style={{ backgroundColor: bgColor }}
+        >
+          <span className={`h-2 w-2 rounded-full ${dotClass} animate-bounce [animation-delay:0ms]`} />
+          <span className={`h-2 w-2 rounded-full ${dotClass} animate-bounce [animation-delay:150ms]`} />
+          <span className={`h-2 w-2 rounded-full ${dotClass} animate-bounce [animation-delay:300ms]`} />
+        </div>
+        <svg
+          width="22"
+          height="17"
+          viewBox="0 0 22.37 16.55"
+          fill="none"
+          className="absolute -bottom-[10px] left-[4px]"
+          style={{ transform: "scaleX(-1)" }}
+        >
+          <path
+            d="M0,4.5s1.82-.06,5.8,5.76c3.03,4.43,6.92,5.51,10.01,6.09,4.81.9,8.2-1.45,5.76-1.96-1.77-.37-5.28-2.66-5.09-7.46.21-5.51,2.28-6.94,2.28-6.94L0,4.5Z"
+            fill={bgColor}
+          />
+        </svg>
+      </div>
+    </div>
+  );
+}

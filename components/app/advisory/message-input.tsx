@@ -43,7 +43,7 @@ export function MessageInput({ onSend, hideTypeSelector, placeholder = "Write a 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-4 space-y-2">
+    <form onSubmit={handleSubmit} className="space-y-2">
       {!hideTypeSelector && (
         <div className="flex items-center gap-2">
           <select
@@ -59,20 +59,34 @@ export function MessageInput({ onSend, hideTypeSelector, placeholder = "Write a 
           </select>
         </div>
       )}
-      <div className="flex gap-2">
-        <textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder={placeholder}
-          rows={2}
-          className="flex-1 resize-none rounded-xl border border-white/10 bg-surface-raised px-3 py-2 text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-purple-500/50"
-        />
+      <div className="flex items-end gap-2">
+        <div className="flex flex-1 items-end rounded-2xl border border-white/10 bg-surface-raised px-3 py-2">
+          <textarea
+            value={content}
+            onChange={(e) => {
+              setContent(e.target.value);
+              // Auto-resize
+              const el = e.target;
+              el.style.height = "auto";
+              el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit(e);
+              }
+            }}
+            placeholder={placeholder}
+            rows={1}
+            className="max-h-[120px] flex-1 resize-none bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none"
+          />
+        </div>
         <Button
           type="submit"
           variant="purple"
-          size="sm"
+          size="icon"
           disabled={loading || !content.trim()}
-          className="self-end"
+          className="h-10 w-10 shrink-0 rounded-full"
         >
           <Send className="h-4 w-4" />
         </Button>

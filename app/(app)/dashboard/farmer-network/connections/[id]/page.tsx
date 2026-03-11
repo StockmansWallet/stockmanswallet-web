@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { FarmerChatClient } from "./farmer-chat-client";
 import type { ConnectionRequest, AdvisoryMessage } from "@/lib/types/advisory";
 
@@ -70,7 +70,7 @@ export default async function FarmerConnectionDetailPage({
   };
 
   return (
-    <div className="max-w-3xl">
+    <div className="flex h-[calc(100vh-6rem)] max-w-3xl flex-col pb-4">
       <PageHeader
         title={otherName}
         titleClassName="text-4xl font-bold text-orange-400"
@@ -86,11 +86,8 @@ export default async function FarmerConnectionDetailPage({
         </p>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Chat</CardTitle>
-        </CardHeader>
-        <CardContent className="px-5 pb-5">
+      <Card className="flex min-h-0 flex-1 flex-col rounded-3xl">
+        <CardContent className="flex min-h-0 flex-1 flex-col px-5 pb-5 pt-5">
           <FarmerChatClient
             connectionId={id}
             currentUserId={user.id}
