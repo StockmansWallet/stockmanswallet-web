@@ -74,6 +74,7 @@ export async function createPreSaleAnalysis(formData: FormData) {
   const killDate = (formData.get("killDate") as string) || null;
   const notes = (formData.get("notes") as string) || null;
   const allocationsJSON = formData.get("allocations") as string;
+  const killSheetIdsJSON = formData.get("killSheetIds") as string | null;
 
   if (!gridId) return { error: "Processor grid is required" };
 
@@ -100,10 +101,19 @@ export async function createPreSaleAnalysis(formData: FormData) {
   const gridEntries = (grid.entries ?? []) as GridEntry[];
   const resolvedProcessorName = processorName || grid.processor_name;
 
+  // Parse selected kill sheet IDs (if any)
+  let selectedKillSheetIds: string[] | undefined;
+  if (killSheetIdsJSON) {
+    try {
+      const parsed = JSON.parse(killSheetIdsJSON);
+      if (Array.isArray(parsed) && parsed.length > 0) selectedKillSheetIds = parsed;
+    } catch { /* ignore parse errors */ }
+  }
+
   // 2. Fetch breed premiums + producer profile in parallel
   const [{ data: breedPremiumData }, profile] = await Promise.all([
     supabase.from("breed_premiums").select("breed, premium_percent:premium_pct"),
-    computeProducerProfile(user.id).catch(() => null),
+    computeProducerProfile(user.id, selectedKillSheetIds).catch(() => null),
   ]);
 
   const premiumMap = new Map<string, number>(Object.entries(cattleBreedPremiums));

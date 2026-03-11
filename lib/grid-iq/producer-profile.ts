@@ -30,19 +30,26 @@ export interface ProducerProfile {
 }
 
 /**
- * Compute the producer performance profile from all historical kill sheets and analyses.
- * Returns null if the user has no data.
+ * Compute the producer performance profile from historical kill sheets and analyses.
+ * If killSheetIds is provided, only those kill sheets are used.
+ * Otherwise, all kill sheets for the user are used.
  */
-export async function computeProducerProfile(userId: string): Promise<ProducerProfile> {
+export async function computeProducerProfile(userId: string, killSheetIds?: string[]): Promise<ProducerProfile> {
   const supabase = await createClient();
 
-  // Fetch all kill sheets (sorted newest first)
-  const { data: killSheets } = await supabase
+  // Fetch kill sheets (filtered or all, sorted newest first)
+  let query = supabase
     .from("kill_sheet_records")
     .select("id, total_head_count, total_body_weight, total_gross_value, realisation_factor, line_items, grade_distribution, kill_date")
     .eq("user_id", userId)
     .eq("is_deleted", false)
     .order("kill_date", { ascending: false });
+
+  if (killSheetIds && killSheetIds.length > 0) {
+    query = query.in("id", killSheetIds);
+  }
+
+  const { data: killSheets } = await query;
 
   // Fetch all post-sale analyses
   const { data: analyses } = await supabase

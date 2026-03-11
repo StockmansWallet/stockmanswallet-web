@@ -87,8 +87,20 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
   const [selectedGridId, setSelectedGridId] = useState<string | null>(null);
   const selectedGrid = grids.find((g) => g.id === selectedGridId);
 
-  // Step 2: Kill sheets (informational - all are used via producer profile)
+  // Step 2: Kill sheets (user selects which to use for producer profile)
   const killSheetCount = killSheets.length;
+  const [selectedKillSheetIds, setSelectedKillSheetIds] = useState<Set<string>>(
+    () => new Set(killSheets.slice(0, 3).map((ks) => ks.id))
+  );
+  const [showAllKillSheets, setShowAllKillSheets] = useState(false);
+
+  function toggleKillSheet(id: string) {
+    setSelectedKillSheetIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
 
   // Step 3: Consignment builder
   const [processorName, setProcessorName] = useState("");
@@ -156,6 +168,9 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
         category: a.category,
       }))
     ));
+    if (selectedKillSheetIds.size > 0) {
+      formData.set("killSheetIds", JSON.stringify([...selectedKillSheetIds]));
+    }
 
     startTransition(async () => {
       try {
@@ -274,18 +289,9 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
       {/* Step 2: Historical Kill Sheets */}
       {step === 2 && (
         <section>
-          {/* Accuracy note */}
-          <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-teal-500/20 bg-teal-500/5 px-4 py-3">
-            <Info className="mt-0.5 h-4 w-4 shrink-0 text-teal-400" />
-            <div>
-              <p className="text-sm font-medium text-teal-400">Improve your accuracy</p>
-              <p className="mt-0.5 text-xs text-text-secondary">
-                The more kill sheets you upload, the more accurate your processor analysis will become.
-                Grid IQ uses your historical kill data to personalise dressing percentages, realisation factors,
-                and grade predictions.
-              </p>
-            </div>
-          </div>
+          <p className="mb-3 text-xs text-text-muted">
+            Select historical kill sheets to personalise this analysis. Deselect any you don&apos;t want included.
+          </p>
 
           {killSheetCount === 0 ? (
             <Card className="border-dashed">
@@ -303,43 +309,83 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
             </Card>
           ) : (
             <>
-              <div className="mb-3 flex items-center justify-between">
-                <p className="text-xs text-text-muted">
-                  {killSheetCount} kill sheet{killSheetCount !== 1 ? "s" : ""} in your library.
-                  All are automatically used to improve analysis accuracy.
-                </p>
+              {/* Selectable kill sheet cards */}
+              <div className="flex flex-col gap-2">
+                {(showAllKillSheets ? killSheets : killSheets.slice(0, 3)).map((ks) => {
+                  const isSelected = selectedKillSheetIds.has(ks.id);
+                  return (
+                    <Card
+                      key={ks.id}
+                      className={`cursor-pointer transition-all ${
+                        isSelected ? "border-teal-500/50 bg-teal-500/10" : "hover:bg-white/[0.04]"
+                      }`}
+                      onClick={() => toggleKillSheet(ks.id)}
+                    >
+                      <CardContent className="flex items-center gap-3 p-3">
+                        <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border ${
+                          isSelected
+                            ? "border-teal-500 bg-teal-500"
+                            : "border-white/[0.15] bg-white/[0.04]"
+                        }`}>
+                          {isSelected && <Check className="h-3 w-3 text-white" />}
+                        </div>
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.06]">
+                          <FileText className={`h-4 w-4 ${isSelected ? "text-teal-400" : "text-text-muted"}`} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium text-text-primary">{ks.processor_name}</p>
+                          <p className="text-xs text-text-muted">
+                            {formatDate(ks.kill_date)} - {ks.total_head_count ?? 0} head
+                            {ks.total_gross_value ? ` - ${formatCurrency(ks.total_gross_value)}` : ""}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+
+              {/* Show more / less toggle + actions */}
+              <div className="mt-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {killSheetCount > 3 && !showAllKillSheets && (
+                    <Button variant="ghost" size="sm" className="text-xs" onClick={() => setShowAllKillSheets(true)}>
+                      Show all {killSheetCount} kill sheets
+                    </Button>
+                  )}
+                  {showAllKillSheets && killSheetCount > 3 && (
+                    <Button variant="ghost" size="sm" className="text-xs" onClick={() => setShowAllKillSheets(false)}>
+                      Show fewer
+                    </Button>
+                  )}
+                </div>
                 <Link href="/dashboard/tools/grid-iq/upload?type=killsheet">
                   <Button size="sm" variant="ghost" className="text-xs">
                     <Upload className="mr-1 h-3 w-3" />Upload More
                   </Button>
                 </Link>
               </div>
-              <div className="flex flex-col gap-2">
-                {killSheets.slice(0, 5).map((ks) => (
-                  <Card key={ks.id} className="bg-white/[0.02]">
-                    <CardContent className="flex items-center gap-3 p-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.06]">
-                        <FileText className="h-4 w-4 text-text-muted" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-text-primary">{ks.processor_name}</p>
-                        <p className="text-xs text-text-muted">
-                          {formatDate(ks.kill_date)} - {ks.total_head_count ?? 0} head
-                          {ks.total_gross_value ? ` - ${formatCurrency(ks.total_gross_value)}` : ""}
-                        </p>
-                      </div>
-                      <Check className="h-4 w-4 text-emerald-400" />
-                    </CardContent>
-                  </Card>
-                ))}
-                {killSheetCount > 5 && (
-                  <p className="text-center text-xs text-text-muted">
-                    + {killSheetCount - 5} more kill sheets in library
-                  </p>
-                )}
-              </div>
+
+              {/* Selection summary */}
+              <p className="mt-2 text-xs text-text-muted">
+                {selectedKillSheetIds.size} of {killSheetCount} selected
+                {selectedKillSheetIds.size === 0 && " - industry averages will be used"}
+              </p>
             </>
           )}
+
+          {/* Accuracy note - below kill sheets */}
+          <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-teal-500/20 bg-teal-500/5 px-4 py-3">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-teal-400" />
+            <div>
+              <p className="text-sm font-medium text-teal-400">Improve your accuracy</p>
+              <p className="mt-0.5 text-xs text-text-secondary">
+                The more kill sheets you upload, the more accurate your processor analysis will become.
+                Grid IQ uses your historical kill data to personalise dressing percentages, realisation factors,
+                and grade predictions.
+              </p>
+            </div>
+          </div>
 
           <div className="mt-4 flex justify-between">
             <Button variant="ghost" onClick={() => setStep(1)}>
@@ -508,8 +554,12 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
                   <span className="text-text-primary">{selectedGrid?.processor_name ?? "Not selected"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-text-muted">Kill Sheets in Library</span>
-                  <span className="text-text-primary">{killSheetCount} {killSheetCount === 0 ? "(using industry averages)" : ""}</span>
+                  <span className="text-text-muted">Kill Sheets Selected</span>
+                  <span className="text-text-primary">
+                    {selectedKillSheetIds.size > 0
+                      ? `${selectedKillSheetIds.size} of ${killSheetCount}`
+                      : "None (using industry averages)"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-text-muted">Total Head</span>
