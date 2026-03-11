@@ -9,6 +9,7 @@ import {
   Grid3x3,
   FileText,
   Truck,
+  ArrowRight,
 } from "lucide-react";
 
 export const metadata = { title: "Grid IQ" };
@@ -20,7 +21,7 @@ export default async function GridIQPage() {
   } = await supabase.auth.getUser();
 
   // Fetch saved grids and kill sheets in parallel
-  const [{ data: grids }, { data: killSheets }, { data: analyses }, { data: consignments }] =
+  const [{ data: grids }, { data: killSheets }, { data: analyses }, { data: consignments }, { data: pendingConsignments }] =
     await Promise.all([
       supabase
         .from("processor_grids")
@@ -58,21 +59,74 @@ export default async function GridIQPage() {
         .eq("is_deleted", false)
         .order("updated_at", { ascending: false })
         .limit(5),
+      supabase
+        .from("consignments")
+        .select(
+          "id, processor_name, plant_location, kill_date, status, total_head_count, processor_grid_id, updated_at"
+        )
+        .eq("user_id", user!.id)
+        .eq("is_deleted", false)
+        .in("status", ["draft", "confirmed"])
+        .order("updated_at", { ascending: false })
+        .limit(5),
     ]);
 
   const safeGrids = grids ?? [];
   const safeKillSheets = killSheets ?? [];
   const safeAnalyses = analyses ?? [];
   const safeConsignments = consignments ?? [];
-  const hasData =
-    safeGrids.length > 0 ||
-    safeKillSheets.length > 0 ||
-    safeAnalyses.length > 0 ||
-    safeConsignments.length > 0;
+  const safePending = pendingConsignments ?? [];
 
   return (
     <div>
       <div className="space-y-4">
+        {/* Pending Consignments - Action Needed */}
+        {safePending.length > 0 && (
+          <Card className="border-amber-500/20">
+            <CardHeader className="border-b border-amber-500/10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Truck className="h-4 w-4 text-amber-400" />
+                  <CardTitle className="text-amber-400">Pending Consignments</CardTitle>
+                  <Badge className="bg-amber-500/15 text-amber-400">{safePending.length}</Badge>
+                </div>
+                <Link
+                  href="/dashboard/tools/grid-iq/consignments"
+                  className="text-xs font-medium text-amber-400 hover:underline"
+                >
+                  View All
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent className="divide-y divide-white/[0.06] p-0">
+              {safePending.map((c: Record<string, unknown>) => (
+                <Link
+                  key={c.id as string}
+                  href={`/dashboard/tools/grid-iq/consignments/${c.id}`}
+                  className="group flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-white/[0.04]"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-text-primary">
+                      {c.processor_name as string}
+                      {(c.plant_location as string | null) ? ` - ${c.plant_location}` : ""}
+                    </p>
+                    <div className="mt-0.5 flex items-center gap-2 text-xs text-text-muted">
+                      {(c.kill_date as string | null) && (
+                        <span>{new Date(c.kill_date as string).toLocaleDateString("en-AU")}</span>
+                      )}
+                      <span>{c.total_head_count as number ?? 0} head</span>
+                      <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-400">
+                        {(c.processor_grid_id as string | null) ? "Ready for post-kill" : "Draft"}
+                      </span>
+                    </div>
+                  </div>
+                  <ArrowRight className="ml-2 h-4 w-4 shrink-0 text-amber-400/50 transition-all group-hover:translate-x-0.5 group-hover:text-amber-400" />
+                </Link>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Grid Analysis */}
         <Card>
           <CardHeader className="border-b border-white/[0.06]">

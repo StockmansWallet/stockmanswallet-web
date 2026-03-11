@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
-import { AnalysisForm } from "./analysis-form";
+import { PreSaleFlow } from "@/components/grid-iq/pre-sale-flow";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -17,32 +17,21 @@ export default async function NewAnalysisPage() {
   const [{ data: grids }, { data: herds }, { data: killSheets }] = await Promise.all([
     supabase
       .from("processor_grids")
-      .select("id, processor_name, grid_code, grid_date, expiry_date, entries, created_at")
+      .select("id, processor_name, grid_code, grid_date, expiry_date, entries, location_latitude, location_longitude, created_at")
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
       .order("created_at", { ascending: false }),
     supabase
       .from("herd_groups")
-      .select(
-        `id, name, species, breed, sex, category, head_count,
-         initial_weight, current_weight, daily_weight_gain,
-         dwg_change_date, previous_dwg, created_at,
-         is_breeder, is_pregnant, joined_date, calving_rate,
-         breeding_program_type, joining_period_start, joining_period_end,
-         breed_premium_override, mortality_rate, selected_saleyard,
-         additional_info, calf_weight_recorded_date, updated_at, property_id`
-      )
+      .select("id, name, species, breed, sex, category, head_count")
       .eq("user_id", user!.id)
       .eq("is_sold", false)
       .eq("is_deleted", false)
+      .gt("head_count", 0)
       .order("name"),
     supabase
       .from("kill_sheet_records")
-      .select(
-        `id, processor_name, grid_code, kill_date, total_head_count,
-         total_gross_value, total_body_weight, average_body_weight,
-         realisation_factor`
-      )
+      .select("id, processor_name, grid_code, kill_date, total_head_count, total_gross_value")
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
       .order("created_at", { ascending: false }),
@@ -61,12 +50,12 @@ export default async function NewAnalysisPage() {
       <PageHeader
         title="New Analysis"
         titleClassName="text-2xl font-semibold text-text-primary"
-        subtitle="Compare saleyard vs over-the-hooks"
+        subtitle="Build a consignment and compare processor vs saleyard returns"
         subtitleClassName="text-sm text-text-muted"
         inline
         compact
       />
-      <AnalysisForm
+      <PreSaleFlow
         grids={grids ?? []}
         herds={(herds ?? []).filter((h) => h.species === "Cattle")}
         killSheets={killSheets ?? []}

@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { KillScoreCard } from "@/components/grid-iq/kill-score-card";
 import { PaymentCheckCard } from "@/components/grid-iq/payment-check-card";
 import { AnalysisComparison } from "@/components/grid-iq/analysis-comparison";
+import { CategoryBreakdown } from "@/components/grid-iq/category-breakdown";
+import { PredictionAccuracy } from "@/components/grid-iq/prediction-accuracy";
 import type { PaymentCheckResult } from "@/lib/engines/grid-iq-payment-check";
 import {
   ArrowLeft,
@@ -57,12 +59,28 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
     }
   }
 
+  // Fetch sibling analysis for prediction accuracy (post-sale vs pre-sale)
+  let siblingAnalysis: Record<string, unknown> | null = null;
+  if (analysis.consignment_id) {
+    const siblingMode = analysis.analysis_mode === "post_sale" ? "pre_sale" : "post_sale";
+    const { data: sibling } = await supabase
+      .from("grid_iq_analyses")
+      .select("id, analysis_mode, analysis_date, net_saleyard_value, net_processor_value, grid_iq_advantage")
+      .eq("consignment_id", analysis.consignment_id)
+      .eq("analysis_mode", siblingMode)
+      .eq("is_deleted", false)
+      .limit(1)
+      .single();
+    if (sibling) siblingAnalysis = sibling as Record<string, unknown>;
+  }
+
   const a = analysis as Record<string, unknown>;
   const mode = (a.analysis_mode as string) ?? "pre_sale";
   const isPostSale = mode === "post_sale";
   const advantage = (a.grid_iq_advantage as number) ?? 0;
+  const categoryResults = (a.category_results ?? []) as Array<Record<string, unknown>>;
+  const consignmentId = a.consignment_id as string | null;
 
-  // Debug: Sell window status mapping
   const sellWindowStatus = a.sell_window_status_raw as string;
   const sellWindowConfig = getSellWindowConfig(sellWindowStatus);
 
@@ -100,6 +118,48 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
           headCount={a.head_count as number}
         />
       </div>
+
+      {/* Per-Category Breakdown (multi-herd consignments) */}
+      {categoryResults.length > 1 && (
+        <div className="mt-4">
+          <CategoryBreakdown
+            categoryResults={categoryResults.map((r) => ({
+              herdGroupId: r.herdGroupId as string,
+              herdName: r.herdName as string,
+              category: r.category as string,
+              headCount: r.headCount as number,
+              netSaleyardValue: r.netSaleyardValue as number,
+              netProcessorValue: r.netProcessorValue as number,
+              gridIQAdvantage: r.gridIQAdvantage as number,
+              sellWindowStatus: r.sellWindowStatus as string,
+              daysToTarget: r.daysToTarget as number | null,
+              dressingPercentage: r.dressingPercentage as number,
+              realisationFactor: r.realisationFactor as number,
+              isUsingPersonalisedData: r.isUsingPersonalisedData as boolean,
+            }))}
+            totalHead={a.head_count as number}
+            totalNetSaleyard={a.net_saleyard_value as number}
+            totalNetProcessor={a.net_processor_value as number}
+            totalAdvantage={advantage}
+          />
+        </div>
+      )}
+
+      {/* Prediction Accuracy (post-sale with pre-sale sibling) */}
+      {isPostSale && siblingAnalysis && (
+        <div className="mt-4">
+          <PredictionAccuracy
+            preSaleNetProcessor={siblingAnalysis.net_processor_value as number}
+            preSaleNetSaleyard={siblingAnalysis.net_saleyard_value as number}
+            preSaleAdvantage={siblingAnalysis.grid_iq_advantage as number}
+            actualNetProcessor={a.net_processor_value as number}
+            actualNetSaleyard={a.net_saleyard_value as number}
+            actualAdvantage={advantage}
+            preSaleDate={siblingAnalysis.analysis_date as string}
+            postSaleDate={a.analysis_date as string}
+          />
+        </div>
+      )}
 
       {/* Herd Details Row */}
       <div className="mt-4">
@@ -251,7 +311,14 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
         Analysis saved
       </div>
 
-      <div className="mt-3 flex justify-center">
+      <div className="mt-3 flex justify-center gap-2">
+        {consignmentId && (
+          <Link href={`/dashboard/tools/grid-iq/consignments/${consignmentId}`}>
+            <Button variant="ghost" size="md">
+              View Consignment
+            </Button>
+          </Link>
+        )}
         <Link href="/dashboard/tools/grid-iq">
           <Button variant="teal" size="md">
             Done

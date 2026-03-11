@@ -216,6 +216,84 @@ export async function completeSale(consignmentId: string) {
   return { success: true };
 }
 
+// Update an existing consignment - replaces allocations and metadata
+export async function updateConsignment(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const consignmentId = formData.get("consignmentId") as string;
+  const processorName = (formData.get("processorName") as string) || null;
+  const plantLocation = (formData.get("plantLocation") as string) || null;
+  const bookingReference = (formData.get("bookingReference") as string) || null;
+  const killDate = (formData.get("killDate") as string) || null;
+  const notes = (formData.get("notes") as string) || null;
+  const allocationsJSON = formData.get("allocations") as string;
+
+  if (!consignmentId) return { error: "Consignment ID is required" };
+
+  // Verify consignment exists and is editable
+  const { data: existing } = await supabase
+    .from("consignments")
+    .select("id, status")
+    .eq("id", consignmentId)
+    .eq("user_id", user.id)
+    .single();
+  if (!existing) return { error: "Consignment not found" };
+  if (existing.status === "completed") return { error: "Cannot edit a completed consignment" };
+
+  let allocations: { herdGroupId: string; headCount: number; category: string }[];
+  try {
+    allocations = JSON.parse(allocationsJSON || "[]");
+  } catch {
+    return { error: "Invalid allocations data" };
+  }
+  if (allocations.length === 0) return { error: "At least one herd allocation is required" };
+
+  const totalHead = allocations.reduce((sum, a) => sum + a.headCount, 0);
+  if (totalHead <= 0) return { error: "Total head count must be greater than zero" };
+
+  // Validate head counts
+  for (const alloc of allocations) {
+    const { data: herd } = await supabase
+      .from("herd_groups")
+      .select("head_count, name")
+      .eq("id", alloc.herdGroupId)
+      .eq("user_id", user.id)
+      .single();
+    if (!herd) return { error: `Herd not found: ${alloc.herdGroupId}` };
+    if (alloc.headCount > (herd.head_count ?? 0)) {
+      return { error: `Cannot allocate ${alloc.headCount} head from "${herd.name}" - only ${herd.head_count} available` };
+    }
+  }
+
+  // Update consignment metadata
+  const updateData: Record<string, unknown> = {
+    total_head_count: totalHead,
+    updated_at: new Date().toISOString(),
+  };
+  if (processorName) updateData.processor_name = processorName;
+  if (plantLocation !== null) updateData.plant_location = plantLocation;
+  if (bookingReference !== null) updateData.booking_reference = bookingReference;
+  if (killDate !== null) updateData.kill_date = killDate || null;
+  if (notes !== null) updateData.notes = notes;
+
+  await supabase.from("consignments").update(updateData).eq("id", consignmentId);
+
+  // Replace allocations
+  await supabase.from("consignment_allocations").delete().eq("consignment_id", consignmentId);
+  const allocationRows = allocations.map((a) => ({
+    consignment_id: consignmentId,
+    herd_group_id: a.herdGroupId,
+    head_count: a.headCount,
+    category: a.category || null,
+  }));
+  await supabase.from("consignment_allocations").insert(allocationRows);
+
+  revalidatePath("/dashboard/tools/grid-iq");
+  return { success: true, consignmentId };
+}
+
 // Delete (soft) a consignment
 export async function deleteConsignment(consignmentId: string) {
   const supabase = await createClient();

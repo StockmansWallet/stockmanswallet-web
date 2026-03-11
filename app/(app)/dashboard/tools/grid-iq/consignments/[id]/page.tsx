@@ -16,6 +16,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { ConsignmentActions } from "./consignment-actions";
+import { TrendingUp } from "lucide-react";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -74,6 +75,17 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
       .single();
     killSheet = ks as Record<string, unknown> | null;
   }
+
+  // Fetch linked analyses
+  const { data: linkedAnalyses } = await supabase
+    .from("grid_iq_analyses")
+    .select("id, analysis_mode, analysis_date, grid_iq_advantage, kill_score, head_count")
+    .eq("consignment_id", id)
+    .eq("is_deleted", false)
+    .order("analysis_date", { ascending: false });
+
+  const preSaleAnalysis = (linkedAnalyses ?? []).find((a) => a.analysis_mode === "pre_sale");
+  const postSaleAnalysis = (linkedAnalyses ?? []).find((a) => a.analysis_mode === "post_sale");
 
   // Fetch unlinked kill sheets for linking
   const { data: availableKillSheets } = await supabase
@@ -227,6 +239,78 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
                   ${Math.round(killSheet.total_gross_value as number).toLocaleString()}
                 </span>
               )}
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Linked Analyses */}
+      {(preSaleAnalysis || postSaleAnalysis) && (
+        <Card className="mt-4">
+          <CardContent className="p-0">
+            <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-3">
+              <TrendingUp className="h-4 w-4 text-teal-400" />
+              <span className="text-sm font-semibold text-teal-400">Analyses</span>
+            </div>
+            <div className="divide-y divide-white/[0.04]">
+              {preSaleAnalysis && (
+                <Link
+                  href={`/dashboard/tools/grid-iq/analysis/${preSaleAnalysis.id}`}
+                  className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-white/[0.03]"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-500/10">
+                    <TrendingUp className="h-4 w-4 text-teal-400" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-text-primary">Pre-Sale Comparison</p>
+                    <p className="text-xs text-text-muted">
+                      {new Date(preSaleAnalysis.analysis_date).toLocaleDateString("en-AU")}
+                      {preSaleAnalysis.grid_iq_advantage != null && (
+                        <span className={preSaleAnalysis.grid_iq_advantage > 0 ? " text-emerald-400" : " text-brand"}>
+                          {" "}Grid IQ: ${Math.abs(Math.round(preSaleAnalysis.grid_iq_advantage)).toLocaleString()}
+                          {preSaleAnalysis.grid_iq_advantage > 0 ? " processor" : " saleyard"}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </Link>
+              )}
+              {postSaleAnalysis && (
+                <Link
+                  href={`/dashboard/tools/grid-iq/analysis/${postSaleAnalysis.id}`}
+                  className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-white/[0.03]"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
+                    <TrendingUp className="h-4 w-4 text-amber-400" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-text-primary">Post-Kill Analysis</p>
+                    <p className="text-xs text-text-muted">
+                      {new Date(postSaleAnalysis.analysis_date).toLocaleDateString("en-AU")}
+                      {postSaleAnalysis.kill_score != null && (
+                        <span> - Kill Score: {postSaleAnalysis.kill_score}</span>
+                      )}
+                    </p>
+                  </div>
+                </Link>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Post-sale flow entry */}
+      {!isCompleted && !postSaleAnalysis && consignment.processor_grid_id && (
+        <Card className="mt-4 border-amber-500/20">
+          <CardContent className="p-4 text-center">
+            <p className="mb-2 text-sm font-medium text-text-primary">Ready for post-kill analysis?</p>
+            <p className="mb-3 text-xs text-text-muted">
+              Upload the actual kill sheet from the processor to run the post-kill analysis and confirm the sale.
+            </p>
+            <Link href={`/dashboard/tools/grid-iq/consignments/${id}/post-sale`}>
+              <Button variant="teal" size="sm">
+                Start Post-Kill Analysis
+              </Button>
             </Link>
           </CardContent>
         </Card>
