@@ -109,7 +109,6 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
   const [isSaving, setIsSaving] = useState(false);
   const [headCountConfirmed, setHeadCountConfirmed] = useState(false);
   const [typeMismatchConfirmed, setTypeMismatchConfirmed] = useState(false);
-  const [nameOverride, setNameOverride] = useState<string | null>(null);
   const [gridNameOverride, setGridNameOverride] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -118,7 +117,6 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
     setResult(null);
     setHeadCountConfirmed(false);
     setTypeMismatchConfirmed(false);
-    setNameOverride(null);
     setGridNameOverride(null);
 
     const ext = f.name.split(".").pop()?.toLowerCase() || "";
@@ -214,7 +212,7 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
 
       if (result.documentType === "grid" && result.gridData) {
         const grid = result.gridData;
-        const effectiveProcessor = nameOverride || grid.processorName || "Unknown Processor";
+        const effectiveProcessor = grid.processorName || "Unknown Processor";
         const { error: insertError } = await supabase
           .from("processor_grids")
           .insert({
@@ -238,7 +236,7 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
         router.push("/dashboard/tools/grid-iq/records?tab=grids");
       } else if (result.documentType === "killsheet" && result.killSheetData) {
         const ks = result.killSheetData;
-        const effectiveProcessor = nameOverride || ks.processorName || "Unknown Processor";
+        const effectiveProcessor = ks.processorName || "Unknown Processor";
         const { error: insertError } = await supabase
           .from("kill_sheet_records")
           .insert({
@@ -295,7 +293,6 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
     setResult(null);
     setHeadCountConfirmed(false);
     setTypeMismatchConfirmed(false);
-    setNameOverride(null);
     setGridNameOverride(null);
     if (inputRef.current) inputRef.current.value = "";
   };
@@ -440,8 +437,6 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
                   }}
                   uploadType={uploadType}
                   onRetry={handleClear}
-                  nameOverride={nameOverride}
-                  onNameChange={setNameOverride}
                   gridName={gridNameOverride}
                   onGridNameChange={setGridNameOverride}
                   fileName={file?.name || ""}
@@ -526,8 +521,6 @@ function ExtractionResultView({
   onSwitchType,
   uploadType,
   onRetry,
-  nameOverride,
-  onNameChange,
   gridName,
   onGridNameChange,
   fileName,
@@ -540,21 +533,18 @@ function ExtractionResultView({
   onSwitchType: (type: UploadType) => void;
   uploadType: UploadType;
   onRetry: () => void;
-  nameOverride: string | null;
-  onNameChange: (name: string | null) => void;
   gridName: string | null;
   onGridNameChange: (name: string | null) => void;
   fileName: string;
 }) {
   const [isEditing, setIsEditing] = useState(false);
-  const [draftProcessor, setDraftProcessor] = useState("");
   const [draftRecordName, setDraftRecordName] = useState("");
 
   const isGrid = result.documentType === "grid";
   const rawProcessorName = isGrid
     ? result.gridData?.processorName
     : result.killSheetData?.processorName;
-  const processorDisplay = nameOverride ?? rawProcessorName ?? "Unknown";
+  const processorDisplay = rawProcessorName || "Unknown";
   const recordNameLabel = isGrid ? "Grid Name" : "Kill Sheet Name";
   const defaultSuffix = isGrid ? "Grid" : "Kill Sheet";
   const defaultRecordName = `${processorDisplay} - ${defaultSuffix}`;
@@ -564,29 +554,14 @@ function ExtractionResultView({
   const selectedLabel = uploadType === "grid" ? "Processor Grid" : "Kill Sheet";
 
   const handleStartEdit = () => {
-    setDraftProcessor(processorDisplay);
     setDraftRecordName(recordNameDisplay);
     setIsEditing(true);
   };
 
-  const handleProcessorDraftChange = (value: string) => {
-    const oldDefault = `${draftProcessor} - ${defaultSuffix}`;
-    setDraftProcessor(value);
-    if (draftRecordName === oldDefault) {
-      setDraftRecordName(`${value} - ${defaultSuffix}`);
-    }
-  };
-
   const handleSaveEdit = () => {
-    const trimmedProcessor = draftProcessor.trim();
     const trimmedRecord = draftRecordName.trim();
-    if (trimmedProcessor) {
-      onNameChange(trimmedProcessor !== rawProcessorName ? trimmedProcessor : null);
-    }
     if (trimmedRecord) {
-      const effectiveProcessor = trimmedProcessor || rawProcessorName || "Unknown";
-      const newDefault = `${effectiveProcessor} - ${defaultSuffix}`;
-      onGridNameChange(trimmedRecord !== newDefault ? trimmedRecord : null);
+      onGridNameChange(trimmedRecord !== defaultRecordName ? trimmedRecord : null);
     }
     setIsEditing(false);
   };
@@ -657,51 +632,44 @@ function ExtractionResultView({
               </button>
             )}
           </div>
-          {isEditing ? (
-            <div className="space-y-2.5 text-sm">
-              <EditField label="Processor" value={draftProcessor} onChange={handleProcessorDraftChange} />
-              <EditField label={recordNameLabel} value={draftRecordName} onChange={setDraftRecordName} />
-              <DetailRow label="File Name" value={fileName} />
-              {result.gridData.gridCode && <DetailRow label="Grid Code" value={result.gridData.gridCode} />}
-              {result.gridData.gridDate && <DetailRow label="Date" value={result.gridData.gridDate} />}
-              <DetailRow label="Grade Entries" value={`${result.gridData.entries.length}`} />
-              {result.gridData.entries.some((e) => e.gender) && (
-                <DetailRow
-                  label="Gender Tabs"
-                  value={`Male: ${result.gridData.entries.filter((e) => e.gender === "male").length}, Female: ${result.gridData.entries.filter((e) => e.gender === "female").length}`}
-                />
-              )}
-              <div className="flex justify-end gap-2 pt-1">
-                <button
-                  onClick={() => setIsEditing(false)}
-                  className="rounded px-2.5 py-1 text-xs text-text-muted hover:text-text-primary transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSaveEdit}
-                  className="rounded px-2.5 py-1 text-xs font-medium text-teal-400 hover:bg-teal-500/10 transition-colors"
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-1.5 text-sm">
-              <DetailRow label="Processor" value={processorDisplay} />
-              <DetailRow label={recordNameLabel} value={recordNameDisplay} />
-              <DetailRow label="File Name" value={fileName} />
-              {result.gridData.gridCode && <DetailRow label="Grid Code" value={result.gridData.gridCode} />}
-              {result.gridData.gridDate && <DetailRow label="Date" value={result.gridData.gridDate} />}
-              <DetailRow label="Grade Entries" value={`${result.gridData.entries.length}`} />
-              {result.gridData.entries.some((e) => e.gender) && (
-                <DetailRow
-                  label="Gender Tabs"
-                  value={`Male: ${result.gridData.entries.filter((e) => e.gender === "male").length}, Female: ${result.gridData.entries.filter((e) => e.gender === "female").length}`}
-                />
-              )}
-            </div>
-          )}
+          <div className="space-y-1.5 text-sm">
+            {isEditing ? (
+              <>
+                <EditField label={recordNameLabel} value={draftRecordName} onChange={setDraftRecordName} />
+                <DetailRow label="File Name" value={fileName} />
+                <div className="flex justify-end gap-2 pt-1">
+                  <button
+                    onClick={() => setIsEditing(false)}
+                    className="rounded px-2.5 py-1 text-xs text-text-muted hover:text-text-primary transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveEdit}
+                    className="rounded px-2.5 py-1 text-xs font-medium text-teal-400 hover:bg-teal-500/10 transition-colors"
+                  >
+                    Save
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <DetailRow label={recordNameLabel} value={recordNameDisplay} />
+                <DetailRow label="File Name" value={fileName} />
+              </>
+            )}
+            <hr className="border-white/10 my-1" />
+            <DetailRow label="Processor" value={processorDisplay} />
+            {result.gridData.gridCode && <DetailRow label="Grid Code" value={result.gridData.gridCode} />}
+            {result.gridData.gridDate && <DetailRow label="Date" value={result.gridData.gridDate} />}
+            <DetailRow label="Grade Entries" value={`${result.gridData.entries.length}`} />
+            {result.gridData.entries.some((e) => e.gender) && (
+              <DetailRow
+                label="Gender Tabs"
+                value={`Male: ${result.gridData.entries.filter((e) => e.gender === "male").length}, Female: ${result.gridData.entries.filter((e) => e.gender === "female").length}`}
+              />
+            )}
+          </div>
         </div>
       )}
 
@@ -725,61 +693,49 @@ function ExtractionResultView({
                 </button>
               )}
             </div>
-            {isEditing ? (
-              <div className="space-y-2.5 text-sm">
-                <EditField label="Processor" value={draftProcessor} onChange={handleProcessorDraftChange} />
-                <EditField label={recordNameLabel} value={draftRecordName} onChange={setDraftRecordName} />
-                <DetailRow label="File Name" value={fileName} />
-                {result.killSheetData.killDate && <DetailRow label="Kill Date" value={result.killSheetData.killDate} />}
-                <DetailRow label="Total Head" value={`${result.killSheetData.totalHeadCount}`} />
-                <DetailRow
-                  label="Total Weight"
-                  value={`${Math.round(result.killSheetData.totalBodyWeight)} kg`}
-                />
-                <DetailRow
-                  label="Total Value"
-                  value={`$${result.killSheetData.totalGrossValue.toLocaleString("en-AU", { minimumFractionDigits: 2 })}`}
-                />
-                <DetailRow
-                  label="Line Items"
-                  value={`${result.killSheetData.lineItems?.length || 0}`}
-                />
-                <div className="flex justify-end gap-2 pt-1">
-                  <button
-                    onClick={() => setIsEditing(false)}
-                    className="rounded px-2.5 py-1 text-xs text-text-muted hover:text-text-primary transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSaveEdit}
-                    className="rounded px-2.5 py-1 text-xs font-medium text-teal-400 hover:bg-teal-500/10 transition-colors"
-                  >
-                    Save
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-1.5 text-sm">
-                <DetailRow label="Processor" value={processorDisplay} />
-                <DetailRow label={recordNameLabel} value={recordNameDisplay} />
-                <DetailRow label="File Name" value={fileName} />
-                {result.killSheetData.killDate && <DetailRow label="Kill Date" value={result.killSheetData.killDate} />}
-                <DetailRow label="Total Head" value={`${result.killSheetData.totalHeadCount}`} />
-                <DetailRow
-                  label="Total Weight"
-                  value={`${Math.round(result.killSheetData.totalBodyWeight)} kg`}
-                />
-                <DetailRow
-                  label="Total Value"
-                  value={`$${result.killSheetData.totalGrossValue.toLocaleString("en-AU", { minimumFractionDigits: 2 })}`}
-                />
-                <DetailRow
-                  label="Line Items"
-                  value={`${result.killSheetData.lineItems?.length || 0}`}
-                />
-              </div>
-            )}
+            <div className="space-y-1.5 text-sm">
+              {isEditing ? (
+                <>
+                  <EditField label={recordNameLabel} value={draftRecordName} onChange={setDraftRecordName} />
+                  <DetailRow label="File Name" value={fileName} />
+                  <div className="flex justify-end gap-2 pt-1">
+                    <button
+                      onClick={() => setIsEditing(false)}
+                      className="rounded px-2.5 py-1 text-xs text-text-muted hover:text-text-primary transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSaveEdit}
+                      className="rounded px-2.5 py-1 text-xs font-medium text-teal-400 hover:bg-teal-500/10 transition-colors"
+                    >
+                      Save
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <DetailRow label={recordNameLabel} value={recordNameDisplay} />
+                  <DetailRow label="File Name" value={fileName} />
+                </>
+              )}
+              <hr className="border-white/10 my-1" />
+              <DetailRow label="Processor" value={processorDisplay} />
+              {result.killSheetData.killDate && <DetailRow label="Kill Date" value={result.killSheetData.killDate} />}
+              <DetailRow label="Total Head" value={`${result.killSheetData.totalHeadCount}`} />
+              <DetailRow
+                label="Total Weight"
+                value={`${Math.round(result.killSheetData.totalBodyWeight)} kg`}
+              />
+              <DetailRow
+                label="Total Value"
+                value={`$${result.killSheetData.totalGrossValue.toLocaleString("en-AU", { minimumFractionDigits: 2 })}`}
+              />
+              <DetailRow
+                label="Line Items"
+                value={`${result.killSheetData.lineItems?.length || 0}`}
+              />
+            </div>
           </div>
 
           {/* Head count reconciliation warning */}
