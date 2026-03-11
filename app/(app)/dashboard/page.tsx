@@ -13,6 +13,7 @@ import { PortfolioValueCard } from "@/components/app/portfolio-value-card";
 import { DashboardQuickActions } from "@/components/app/dashboard-quick-actions";
 import { ComingUpCard } from "@/components/app/coming-up-card";
 import { GrowthMortalityCard } from "@/components/app/growth-mortality-card";
+import { AdvisorRedirect } from "@/components/app/advisory/advisor-redirect";
 
 export const revalidate = 0;
 
@@ -191,186 +192,189 @@ export default async function DashboardPage() {
       : undefined;
 
   return (
-    <div className="max-w-6xl">
-      {!hasData ? (
-        /* ── Empty state ── */
-        <div>
-          <PageHeader
-            title="Welcome to Stockman&#8217;s Wallet"
-            titleClassName="text-4xl font-bold text-brand"
-            subtitle="Add your first herd to get started."
-          />
-          <Card>
-            <EmptyState
-              title="No herds yet"
-              description="Add your first herd to see your farm at a glance, or load the demo data from Settings."
-              actionLabel="Add Herd"
-              actionHref="/dashboard/herds/new"
+    <>
+      <AdvisorRedirect />
+      <div className="max-w-6xl">
+        {!hasData ? (
+          /* Empty state */
+          <div>
+            <PageHeader
+              title="Welcome to Stockman&#8217;s Wallet"
+              titleClassName="text-4xl font-bold text-brand"
+              subtitle="Add your first herd to get started."
             />
-          </Card>
-        </div>
-      ) : (
-        <div>
-          <PageHeader
-            title={`G\u2019day, ${firstName}!`}
-            titleClassName="text-4xl font-bold text-brand"
-            subtitle="Here&#8217;s your herd overview."
-          />
-
-          <div className="flex flex-col gap-3 lg:flex-row lg:gap-4">
-            {/* Left column */}
-            <div className="flex min-w-0 flex-1 flex-col gap-3 lg:gap-4">
-              <PortfolioValueCard
-              value={portfolioValue}
-              changePercent={changePercent}
-              fallbackCount={fallbackCount}
-              totalHead={totalHead}
-              herdCount={herdCount}
-              propertyCount={propertyCount}
-            />
-
             <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>12-Month Outlook</CardTitle>
-                  <span className="text-xs text-text-muted">projected portfolio value</span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <PortfolioChart data={chartData} />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Herd Composition</CardTitle>
-                  <Link
-                    href="/dashboard/herds"
-                    className="text-xs font-medium text-brand hover:underline"
-                  >
-                    View all
-                  </Link>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <HerdComposition herds={activeHerds} />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Largest Herds</CardTitle>
-                  <span className="text-xs text-text-muted">by head count</span>
-                </div>
-              </CardHeader>
-              <CardContent className="divide-y divide-white/5 px-5 pb-5">
-                {topHerds.map((herd) => (
-                  <Link
-                    key={herd.id}
-                    href={`/dashboard/herds/${herd.id}`}
-                    className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-text-primary">
-                        {herd.name}
-                      </p>
-                      <p className="text-xs text-text-muted">
-                        {herd.breed} &middot; {herd.category}
-                      </p>
-                    </div>
-                    <div className="ml-4 flex flex-shrink-0 items-center gap-3">
-                      <span className="text-sm font-semibold tabular-nums text-text-primary">
-                        {herd.head_count?.toLocaleString()} hd
-                      </span>
-                      {herd.current_weight > 0 && (
-                        <span className="text-xs tabular-nums text-text-muted">
-                          {herd.current_weight} kg
-                        </span>
-                      )}
-                    </div>
-                  </Link>
-                ))}
-              </CardContent>
+              <EmptyState
+                title="No herds yet"
+                description="Add your first herd to see your farm at a glance, or load the demo data from Settings."
+                actionLabel="Add Herd"
+                actionHref="/dashboard/herds/new"
+              />
             </Card>
           </div>
-
-          {/* Right column */}
-          <div className="flex w-full flex-col gap-3 lg:w-[340px] lg:gap-4">
-            <UserProfileCard
-              firstName={firstName}
-              lastName={lastName}
-              email={userEmail}
-              role={userRole}
+        ) : (
+          <div>
+            <PageHeader
+              title={`G\u2019day, ${firstName}!`}
+              titleClassName="text-4xl font-bold text-brand"
+              subtitle="Here&#8217;s your herd overview."
             />
 
-            <DashboardQuickActions />
+            <div className="flex flex-col gap-3 lg:flex-row lg:gap-4">
+              {/* Left column */}
+              <div className="flex min-w-0 flex-1 flex-col gap-3 lg:gap-4">
+                <PortfolioValueCard
+                value={portfolioValue}
+                changePercent={changePercent}
+                fallbackCount={fallbackCount}
+                totalHead={totalHead}
+                herdCount={herdCount}
+                propertyCount={propertyCount}
+              />
 
-            <ComingUpCard items={upcomingItems ?? []} />
-
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Properties</CardTitle>
-                  <Link
-                    href="/dashboard/properties"
-                    className="text-xs font-medium text-brand hover:underline"
-                  >
-                    View all
-                  </Link>
-                </div>
-              </CardHeader>
-              {!properties || properties.length === 0 ? (
-                <EmptyState
-                  title="No properties yet"
-                  description="Add properties to organise your herds by location."
-                  actionLabel="Add Property"
-                  actionHref="/dashboard/properties/new"
-                />
-              ) : (
-                <CardContent className="divide-y divide-white/5 px-5 pb-5">
-                  {[...properties]
-                    .sort((a, b) => {
-                      if (a.is_simulated !== b.is_simulated) return a.is_simulated ? 1 : -1;
-                      return 0;
-                    })
-                    .map((prop, idx) => {
-                      const isFirstReal = !prop.is_simulated && idx === 0;
-                      return (
-                        <Link
-                          key={prop.id}
-                          href={`/dashboard/properties/${prop.id}`}
-                          className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
-                        >
-                          <div>
-                            <p className="text-sm font-medium text-text-primary">
-                              {prop.property_name}
-                            </p>
-                            {(isFirstReal || prop.is_simulated || prop.acreage) && (
-                              <p className="text-xs text-text-muted">
-                                {isFirstReal ? "Primary Property" : prop.is_simulated ? "Demo" : ""}
-                                {prop.acreage ? `${isFirstReal || prop.is_simulated ? " · " : ""}${prop.acreage.toLocaleString()} acres` : ""}
-                              </p>
-                            )}
-                          </div>
-                          <Badge variant="default">{prop.state}</Badge>
-                        </Link>
-                      );
-                    })}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>12-Month Outlook</CardTitle>
+                    <span className="text-xs text-text-muted">projected portfolio value</span>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <PortfolioChart data={chartData} />
                 </CardContent>
-              )}
-            </Card>
+              </Card>
 
-            <GrowthMortalityCard
-              avgMortalityRate={avgMortalityRate}
-              avgDailyWeightGain={avgDailyWeightGain}
-              totalHead={totalHead}
-            />
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Herd Composition</CardTitle>
+                    <Link
+                      href="/dashboard/herds"
+                      className="text-xs font-medium text-brand hover:underline"
+                    >
+                      View all
+                    </Link>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <HerdComposition herds={activeHerds} />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Largest Herds</CardTitle>
+                    <span className="text-xs text-text-muted">by head count</span>
+                  </div>
+                </CardHeader>
+                <CardContent className="divide-y divide-white/5 px-5 pb-5">
+                  {topHerds.map((herd) => (
+                    <Link
+                      key={herd.id}
+                      href={`/dashboard/herds/${herd.id}`}
+                      className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-text-primary">
+                          {herd.name}
+                        </p>
+                        <p className="text-xs text-text-muted">
+                          {herd.breed} &middot; {herd.category}
+                        </p>
+                      </div>
+                      <div className="ml-4 flex flex-shrink-0 items-center gap-3">
+                        <span className="text-sm font-semibold tabular-nums text-text-primary">
+                          {herd.head_count?.toLocaleString()} hd
+                        </span>
+                        {herd.current_weight > 0 && (
+                          <span className="text-xs tabular-nums text-text-muted">
+                            {herd.current_weight} kg
+                          </span>
+                        )}
+                      </div>
+                    </Link>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Right column */}
+            <div className="flex w-full flex-col gap-3 lg:w-[340px] lg:gap-4">
+              <UserProfileCard
+                firstName={firstName}
+                lastName={lastName}
+                email={userEmail}
+                role={userRole}
+              />
+
+              <DashboardQuickActions />
+
+              <ComingUpCard items={upcomingItems ?? []} />
+
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Properties</CardTitle>
+                    <Link
+                      href="/dashboard/properties"
+                      className="text-xs font-medium text-brand hover:underline"
+                    >
+                      View all
+                    </Link>
+                  </div>
+                </CardHeader>
+                {!properties || properties.length === 0 ? (
+                  <EmptyState
+                    title="No properties yet"
+                    description="Add properties to organise your herds by location."
+                    actionLabel="Add Property"
+                    actionHref="/dashboard/properties/new"
+                  />
+                ) : (
+                  <CardContent className="divide-y divide-white/5 px-5 pb-5">
+                    {[...properties]
+                      .sort((a, b) => {
+                        if (a.is_simulated !== b.is_simulated) return a.is_simulated ? 1 : -1;
+                        return 0;
+                      })
+                      .map((prop, idx) => {
+                        const isFirstReal = !prop.is_simulated && idx === 0;
+                        return (
+                          <Link
+                            key={prop.id}
+                            href={`/dashboard/properties/${prop.id}`}
+                            className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
+                          >
+                            <div>
+                              <p className="text-sm font-medium text-text-primary">
+                                {prop.property_name}
+                              </p>
+                              {(isFirstReal || prop.is_simulated || prop.acreage) && (
+                                <p className="text-xs text-text-muted">
+                                  {isFirstReal ? "Primary Property" : prop.is_simulated ? "Demo" : ""}
+                                  {prop.acreage ? `${isFirstReal || prop.is_simulated ? " · " : ""}${prop.acreage.toLocaleString()} acres` : ""}
+                                </p>
+                              )}
+                            </div>
+                            <Badge variant="default">{prop.state}</Badge>
+                          </Link>
+                        );
+                      })}
+                  </CardContent>
+                )}
+              </Card>
+
+              <GrowthMortalityCard
+                avgMortalityRate={avgMortalityRate}
+                avgDailyWeightGain={avgDailyWeightGain}
+                totalHead={totalHead}
+              />
+            </div>
           </div>
-        </div>
-        </div>
-      )}
-    </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 }

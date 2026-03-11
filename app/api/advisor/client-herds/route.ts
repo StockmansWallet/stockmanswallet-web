@@ -1,0 +1,96 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
+
+/**
+ * POST /api/advisor/client-herds
+ * Fetches a client's herds for an authorized advisor.
+ * Uses service role to bypass RLS (advisor cannot read another user's herds directly).
+ * Read-only - no mutations allowed.
+ */
+export async function POST(request: NextRequest) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
+  const body = await request.json();
+  const { clientUserId } = body;
+
+  if (!clientUserId) {
+    return NextResponse.json({ error: "clientUserId required" }, { status: 400 });
+  }
+
+  // Verify active permission window via user's own supabase client (RLS allows this)
+  const { data: connection } = await supabase
+    .from("connection_requests")
+    .select("*")
+    .eq("requester_user_id", user.id)
+    .eq("target_user_id", clientUserId)
+    .eq("status", "approved")
+    .single();
+
+  if (!connection) {
+    return NextResponse.json({ error: "No approved connection" }, { status: 403 });
+  }
+
+  if (
+    !connection.permission_expires_at ||
+    new Date(connection.permission_expires_at) <= new Date()
+  ) {
+    return NextResponse.json({ error: "Permission expired" }, { status: 403 });
+  }
+
+  // Use service role to read client's data (bypasses RLS)
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceRoleKey) {
+    return NextResponse.json(
+      { error: "Service role key not configured" },
+      { status: 500 }
+    );
+  }
+
+  const serviceClient = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    serviceRoleKey
+  );
+
+  // Fetch client's herds (read-only)
+  const { data: herds, error: herdsError } = await serviceClient
+    .from("herd_groups")
+    .select("*")
+    .eq("user_id", clientUserId)
+    .eq("is_deleted", false)
+    .order("name");
+
+  if (herdsError) {
+    return NextResponse.json({ error: herdsError.message }, { status: 500 });
+  }
+
+  // Fetch client's properties for context
+  const { data: properties } = await serviceClient
+    .from("properties")
+    .select("id, property_name, state, region, default_saleyard")
+    .eq("user_id", clientUserId);
+
+  // Fetch client profile for display info
+  const { data: clientProfile } = await serviceClient
+    .from("user_profiles")
+    .select("display_name, company_name, property_name, state, region")
+    .eq("user_id", clientUserId)
+    .single();
+
+  return NextResponse.json({
+    herds: herds ?? [],
+    properties: properties ?? [],
+    clientProfile: clientProfile ?? null,
+    connection: {
+      id: connection.id,
+      permission_expires_at: connection.permission_expires_at,
+    },
+  });
+}

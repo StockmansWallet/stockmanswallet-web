@@ -1,0 +1,112 @@
+"use server";
+
+import { createClient } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
+import { createNotification, notifyDenial } from "@/lib/advisory/notifications";
+import type { MessageType } from "@/lib/types/advisory";
+
+export async function sendFarmerMessage(
+  connectionId: string,
+  content: string,
+  messageType: MessageType
+) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Not authenticated" };
+
+  // Verify user is a party on this farmer_peer connection
+  const { data: connection } = await supabase
+    .from("connection_requests")
+    .select("id, requester_user_id, target_user_id")
+    .eq("id", connectionId)
+    .eq("connection_type", "farmer_peer")
+    .eq("status", "approved")
+    .single();
+
+  if (!connection) return { error: "Connection not found" };
+
+  const isRequester = connection.requester_user_id === user.id;
+  const isTarget = connection.target_user_id === user.id;
+  if (!isRequester && !isTarget) return { error: "Connection not found" };
+
+  const { error } = await supabase.from("advisory_messages").insert({
+    connection_id: connectionId,
+    sender_user_id: user.id,
+    message_type: "general_note",
+    content,
+  });
+
+  if (error) return { error: error.message };
+
+  // Notify the other party
+  const recipientId = isRequester
+    ? connection.target_user_id
+    : connection.requester_user_id;
+
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("display_name")
+    .eq("user_id", user.id)
+    .single();
+  const senderName = profile?.display_name ?? "A farmer";
+
+  await createNotification(supabase, {
+    userId: recipientId,
+    type: "new_message",
+    title: `New message from ${senderName}`,
+    link: `/dashboard/farmer-network/connections/${connectionId}`,
+    connectionId,
+  });
+
+  revalidatePath(`/dashboard/farmer-network/connections/${connectionId}`);
+  return { success: true };
+}
+
+export async function disconnectFarmer(connectionId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Not authenticated" };
+
+  const { data: connection } = await supabase
+    .from("connection_requests")
+    .select("id, requester_user_id, target_user_id")
+    .eq("id", connectionId)
+    .eq("connection_type", "farmer_peer")
+    .single();
+
+  if (!connection) return { error: "Connection not found" };
+
+  const isRequester = connection.requester_user_id === user.id;
+  const isTarget = connection.target_user_id === user.id;
+  if (!isRequester && !isTarget) return { error: "Connection not found" };
+
+  const { error } = await supabase
+    .from("connection_requests")
+    .update({ status: "expired" })
+    .eq("id", connectionId);
+
+  if (error) return { error: error.message };
+
+  // Notify the other party
+  const recipientId = isRequester
+    ? connection.target_user_id
+    : connection.requester_user_id;
+
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("display_name")
+    .eq("user_id", user.id)
+    .single();
+  const name = profile?.display_name ?? "A farmer";
+
+  await notifyDenial(supabase, recipientId, name, connectionId);
+
+  revalidatePath("/dashboard/farmer-network");
+  return { success: true };
+}

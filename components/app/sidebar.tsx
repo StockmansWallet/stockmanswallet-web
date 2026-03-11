@@ -5,132 +5,54 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/app/(auth)/actions";
 import { isAdminEmail } from "@/lib/data/admin";
+import { useViewMode } from "@/lib/hooks/use-view-mode";
+import { ViewModeToggle } from "@/components/app/view-mode-toggle";
+import { Bell, Crown, LogOut } from "lucide-react";
+import { NotificationBadge } from "@/components/app/notification-badge";
 import {
-  Wallet,
-  TrendingUp,
-  BookOpen,
-  FileText,
-  Truck,
-  Grid3x3,
-  Users,
-  Brain,
-  Crown,
-  HelpCircle,
-  Settings,
-  MapPinned,
-  LogOut,
-  FlaskConical,
-  Upload,
-  BookMarked,
-} from "lucide-react";
-import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
+  farmerNavItems,
+  farmerToolItems,
+  advisorNavItems,
+  advisorToolItems,
+  adminItems,
+  bottomNavItems,
+  type NavItem,
+} from "@/lib/navigation/nav-config";
 
-const navItems = [
-  {
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: <Wallet className="h-5 w-5" />,
-  },
-  {
-    label: "Herds",
-    href: "/dashboard/herds",
-    icon: <IconCattleTags className="h-5 w-5" />,
-  },
-  {
-    label: "Properties",
-    href: "/dashboard/properties",
-    icon: <MapPinned className="h-5 w-5" />,
-  },
-  {
-    label: "Stockman IQ",
-    href: "/dashboard/stockman-iq",
-    icon: <Brain className="h-5 w-5" />,
-  },
-  {
-    label: "Markets",
-    href: "/dashboard/market",
-    icon: <TrendingUp className="h-5 w-5" />,
-  },
-];
-
-const toolItems = [
-  {
-    label: "Yard Book",
-    href: "/dashboard/tools/yard-book",
-    icon: <BookOpen className="h-5 w-5" />,
-    activeClass: "bg-lime-500/15 text-lime-400",
-  },
-  {
-    label: "Reports",
-    href: "/dashboard/tools/reports",
-    icon: <FileText className="h-5 w-5" />,
-    activeClass: "bg-amber-500/15 text-amber-400",
-  },
-  {
-    label: "Freight IQ",
-    href: "/dashboard/tools/freight",
-    icon: <Truck className="h-5 w-5" />,
-    activeClass: "bg-sky-500/15 text-sky-400",
-  },
-  {
-    label: "Grid IQ",
-    href: "/dashboard/tools/grid-iq",
-    icon: <Grid3x3 className="h-5 w-5" />,
-    activeClass: "bg-teal-500/15 text-teal-400",
-  },
-  {
-    label: "Advisory Hub",
-    href: "/dashboard/advisory-hub",
-    icon: <Users className="h-5 w-5" />,
-    activeClass: "bg-purple-500/15 text-purple-400",
-  },
-];
-
-const adminItems = [
-  {
-    label: "Valuation Lab",
-    href: "/dashboard/admin/valuation",
-    icon: <FlaskConical className="h-5 w-5" />,
-    activeClass: "bg-rose-500/15 text-rose-400",
-  },
-  {
-    label: "MLA Data Upload",
-    href: "/dashboard/admin/mla-upload",
-    icon: <Upload className="h-5 w-5" />,
-    activeClass: "bg-emerald-500/15 text-emerald-400",
-  },
-  {
-    label: "Changelog",
-    href: "/dashboard/admin/changelog",
-    icon: <BookMarked className="h-5 w-5" />,
-    activeClass: "bg-blue-500/15 text-blue-400",
-  },
-];
-
-const bottomNavItems = [
-  {
-    label: "Help Center",
-    href: "/dashboard/help",
-    icon: <HelpCircle className="h-4 w-4" />,
-  },
-  {
-    label: "Settings",
-    href: "/dashboard/settings",
-    icon: <Settings className="h-4 w-4" />,
-  },
-];
+function NavLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
+  return (
+    <Link
+      href={item.href}
+      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
+        isActive
+          ? (item.activeClass ?? "bg-brand/15 text-brand")
+          : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+      }`}
+    >
+      {item.icon}
+      {item.label}
+    </Link>
+  );
+}
 
 export function Sidebar({ userEmail }: { userEmail?: string }) {
   const pathname = usePathname();
+  const { viewMode } = useViewMode();
 
-  const checkActive = (href: string) =>
-    pathname === href ||
-    (href !== "/dashboard" && pathname.startsWith(href));
+  const checkActive = (href: string) => {
+    if (pathname === href) return true;
+    // Avoid prefix collisions: /dashboard/advisor should not match /dashboard/advisor/clients
+    if (href === "/dashboard" || href === "/dashboard/advisor") return false;
+    return pathname.startsWith(href);
+  };
+
+  const mainItems = viewMode === "farmer" ? farmerNavItems : advisorNavItems;
+  const toolItems = viewMode === "farmer" ? farmerToolItems : advisorToolItems;
 
   return (
     <aside className="flex h-full w-64 flex-col">
-      {/* Zone 1: Logo - pinned top */}
-      <div className="flex shrink-0 justify-center px-5 pb-8 pt-6">
+      {/* Zone 1: Logo */}
+      <div className="flex shrink-0 justify-center px-5 pb-4 pt-6">
         <Image
           src="/images/sw-logo.svg"
           alt="Stockman's Wallet"
@@ -140,69 +62,55 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
         />
       </div>
 
-      {/* Zone 2: Scrollable navigation - fills available space */}
+      {/* View mode toggle */}
+      <ViewModeToggle />
+
+      {/* Zone 2: Scrollable navigation */}
       <nav className="min-h-0 flex-1 overflow-y-auto scrollbar-none px-4">
         <div className="space-y-0.5">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
-                checkActive(item.href)
-                  ? "bg-brand/15 text-brand"
-                  : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
-              }`}
-            >
-              {item.icon}
-              {item.label}
-            </Link>
+          {mainItems.map((item) => (
+            <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
           ))}
         </div>
 
         {/* Tools */}
-        <div className="mx-0 mt-4 border-t border-white/5 pt-4">
-          <div className="space-y-0.5">
-            {toolItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
-                  checkActive(item.href)
-                    ? item.activeClass
-                    : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
-                }`}
-              >
-                {item.icon}
-                {item.label}
-              </Link>
-            ))}
+        {toolItems.length > 0 && (
+          <div className="mx-0 mt-4 border-t border-white/5 pt-4">
+            <div className="space-y-0.5">
+              {toolItems.map((item) => (
+                <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Admin */}
         {isAdminEmail(userEmail) && (
           <div className="mx-0 mt-4 border-t border-white/5 pt-4">
             <div className="space-y-0.5">
               {adminItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
-                    checkActive(item.href)
-                      ? item.activeClass
-                      : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
-                  }`}
-                >
-                  {item.icon}
-                  {item.label}
-                </Link>
+                <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
               ))}
             </div>
           </div>
         )}
 
-        {/* Help & Settings */}
+        {/* Notifications + Help & Settings */}
         <div className="mt-4 border-t border-white/5 pt-4">
+          <Link
+            href="/dashboard/notifications"
+            className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-150 ${
+              checkActive("/dashboard/notifications")
+                ? "bg-brand/15 text-brand"
+                : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+            }`}
+          >
+            <div className="relative">
+              <Bell className="h-4 w-4" />
+              <NotificationBadge />
+            </div>
+            Notifications
+          </Link>
           {bottomNavItems.map((item) => (
             <Link
               key={item.href}
@@ -220,7 +128,7 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
         </div>
       </nav>
 
-      {/* Zone 3: Plan & Log Out - pinned bottom */}
+      {/* Zone 3: Plan & Log Out */}
       <div className="shrink-0 border-t border-white/5 px-4 pt-4 pb-2">
         <Link
           href="/dashboard/settings"

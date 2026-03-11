@@ -5,45 +5,26 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/app/(auth)/actions";
+import { useViewMode } from "@/lib/hooks/use-view-mode";
+import { ViewModeToggle } from "@/components/app/view-mode-toggle";
+import { Menu, X, Crown, HelpCircle, Settings, LogOut } from "lucide-react";
+import { NotificationBell } from "@/components/app/notification-bell";
 import {
-  Menu,
-  X,
-  Wallet,
-  TrendingUp,
-  BookOpen,
-  FileText,
-  Truck,
-  Grid3x3,
-  Users,
-  Brain,
-  Crown,
-  HelpCircle,
-  Settings,
-  MapPinned,
-  LogOut,
-} from "lucide-react";
-import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
-
-const navItems = [
-  { label: "Dashboard", href: "/dashboard", icon: <Wallet className="h-5 w-5" /> },
-  { label: "Herds", href: "/dashboard/herds", icon: <IconCattleTags className="h-5 w-5" /> },
-  { label: "Properties", href: "/dashboard/properties", icon: <MapPinned className="h-5 w-5" /> },
-  { label: "Stockman IQ", href: "/dashboard/stockman-iq", icon: <Brain className="h-5 w-5" /> },
-  { label: "Markets", href: "/dashboard/market", icon: <TrendingUp className="h-5 w-5" /> },
-  { label: "Yard Book", href: "/dashboard/tools/yard-book", icon: <BookOpen className="h-5 w-5" />, activeClass: "bg-lime-500/15 text-lime-400" },
-  { label: "Reports", href: "/dashboard/tools/reports", icon: <FileText className="h-5 w-5" />, activeClass: "bg-amber-500/15 text-amber-400" },
-  { label: "Freight IQ", href: "/dashboard/tools/freight", icon: <Truck className="h-5 w-5" />, activeClass: "bg-sky-500/15 text-sky-400" },
-  { label: "Grid IQ", href: "/dashboard/tools/grid-iq", icon: <Grid3x3 className="h-5 w-5" />, activeClass: "bg-teal-500/15 text-teal-400" },
-  { label: "Advisory Hub", href: "/dashboard/advisory-hub", icon: <Users className="h-5 w-5" />, activeClass: "bg-purple-500/15 text-purple-400" },
-];
+  farmerMobileItems,
+  advisorMobileItems,
+  type NavItem,
+} from "@/lib/navigation/nav-config";
 
 export function MobileNav({ userEmail }: { userEmail?: string }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const { viewMode } = useViewMode();
 
   const checkActive = (href: string) =>
     pathname === href ||
     (href !== "/dashboard" && pathname.startsWith(href));
+
+  const navItems: NavItem[] = viewMode === "farmer" ? farmerMobileItems : advisorMobileItems;
 
   return (
     <>
@@ -58,16 +39,15 @@ export function MobileNav({ userEmail }: { userEmail?: string }) {
             className="opacity-90"
           />
         </Link>
-        <button
-          onClick={() => setOpen(!open)}
-          className="rounded-xl p-2 text-text-secondary hover:bg-white/8"
-        >
-          {open ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <Menu className="h-5 w-5" />
-          )}
-        </button>
+        <div className="flex items-center gap-2">
+          <NotificationBell />
+          <button
+            onClick={() => setOpen(!open)}
+            className="rounded-xl p-2 text-text-secondary hover:bg-white/8"
+          >
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </header>
 
       {/* Mobile menu overlay */}
@@ -78,7 +58,7 @@ export function MobileNav({ userEmail }: { userEmail?: string }) {
             onClick={() => setOpen(false)}
           />
           <nav className="absolute right-0 top-0 flex h-full w-72 flex-col bg-bg-alt p-4 shadow-2xl">
-            <div className="mb-6 flex justify-end">
+            <div className="mb-4 flex justify-end">
               <button
                 onClick={() => setOpen(false)}
                 className="rounded-xl p-2 text-text-secondary hover:bg-white/8"
@@ -86,6 +66,9 @@ export function MobileNav({ userEmail }: { userEmail?: string }) {
                 <X className="h-5 w-5" />
               </button>
             </div>
+
+            {/* View mode toggle */}
+            <ViewModeToggle />
 
             <div className="flex-1 space-y-0.5 overflow-y-auto">
               {navItems.map((item) => (
