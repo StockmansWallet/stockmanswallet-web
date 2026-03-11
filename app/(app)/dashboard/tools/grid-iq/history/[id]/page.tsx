@@ -3,7 +3,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +15,7 @@ import {
   Layers,
 } from "lucide-react";
 import { KillSheetDeleteButton } from "./kill-sheet-delete-button";
+import { EditableProcessorName } from "../../components/editable-processor-name";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -66,18 +66,21 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
         </Link>
       </div>
 
-      <PageHeader
-        title={String(ks.processor_name)}
-        titleClassName="text-2xl font-bold text-teal-400"
-        subtitle={
-          ks.kill_date
-            ? new Date(ks.kill_date as string).toLocaleDateString("en-AU")
-            : undefined
-        }
-        subtitleClassName="text-sm font-medium text-text-secondary"
-        inline
-        actions={<KillSheetDeleteButton killSheetId={id} />}
-      />
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <EditableProcessorName
+            recordId={id}
+            table="kill_sheet_records"
+            initialName={String(ks.processor_name)}
+          />
+          {(ks.kill_date as string | null) ? (
+            <p className="mt-0.5 text-sm font-medium text-text-secondary">
+              {new Date(ks.kill_date as string).toLocaleDateString("en-AU")}
+            </p>
+          ) : null}
+        </div>
+        <KillSheetDeleteButton killSheetId={id} />
+      </div>
 
       {/* Summary Stats */}
       <Card className="mt-4">

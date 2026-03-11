@@ -3,11 +3,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Grid3x3, Calendar, MapPin, User, Phone, Mail } from "lucide-react";
 import { GridDeleteButton } from "./grid-delete-button";
+import { EditableProcessorName } from "../../components/editable-processor-name";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -55,14 +55,21 @@ export default async function GridDetailPage({ params }: PageProps) {
         </Link>
       </div>
 
-      <PageHeader
-        title={String(g.processor_name)}
-        titleClassName="text-2xl font-bold text-teal-400"
-        subtitle={g.grid_code ? String(g.grid_code) : undefined}
-        subtitleClassName="text-sm font-medium text-text-secondary"
-        inline
-        actions={<GridDeleteButton gridId={id} />}
-      />
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <EditableProcessorName
+            recordId={id}
+            table="processor_grids"
+            initialName={String(g.processor_name)}
+          />
+          {(g.grid_code as string | null) ? (
+            <p className="mt-0.5 text-sm font-medium text-text-secondary">
+              {String(g.grid_code)}
+            </p>
+          ) : null}
+        </div>
+        <GridDeleteButton gridId={id} />
+      </div>
 
       {/* Metadata */}
       <Card className="mt-4">

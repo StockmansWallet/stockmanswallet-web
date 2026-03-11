@@ -109,6 +109,7 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
   const [isSaving, setIsSaving] = useState(false);
   const [headCountConfirmed, setHeadCountConfirmed] = useState(false);
   const [typeMismatchConfirmed, setTypeMismatchConfirmed] = useState(false);
+  const [nameOverride, setNameOverride] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback((f: File) => {
@@ -116,6 +117,7 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
     setResult(null);
     setHeadCountConfirmed(false);
     setTypeMismatchConfirmed(false);
+    setNameOverride(null);
 
     const ext = f.name.split(".").pop()?.toLowerCase() || "";
     if (!ACCEPTED_TYPES.includes(f.type) && !ACCEPTED_EXTENSIONS.has(ext)) {
@@ -215,7 +217,7 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
           .insert({
             id: crypto.randomUUID(),
             user_id: session.user.id,
-            processor_name: grid.processorName || "Unknown Processor",
+            processor_name: nameOverride || grid.processorName || "Unknown Processor",
             grid_code: grid.gridCode,
             grid_date: normaliseDate(grid.gridDate) || new Date().toISOString().split("T")[0],
             expiry_date: normaliseDate(grid.expiryDate),
@@ -236,7 +238,7 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
           .insert({
             id: crypto.randomUUID(),
             user_id: session.user.id,
-            processor_name: ks.processorName || "Unknown Processor",
+            processor_name: nameOverride || ks.processorName || "Unknown Processor",
             kill_date: normaliseDate(ks.killDate) || new Date().toISOString().split("T")[0],
             vendor_code: ks.vendorCode,
             pic: ks.pic,
@@ -428,6 +430,8 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
                   }}
                   uploadType={uploadType}
                   onRetry={handleClear}
+                  nameOverride={nameOverride}
+                  onNameChange={setNameOverride}
                 />
               )}
 
@@ -509,6 +513,8 @@ function ExtractionResultView({
   onSwitchType,
   uploadType,
   onRetry,
+  nameOverride,
+  onNameChange,
 }: {
   result: ExtractionResult;
   headCountConfirmed: boolean;
@@ -518,6 +524,8 @@ function ExtractionResultView({
   onSwitchType: (type: UploadType) => void;
   uploadType: UploadType;
   onRetry: () => void;
+  nameOverride: string | null;
+  onNameChange: (name: string | null) => void;
 }) {
   const typeMismatchLabel = result.detectedType === "grid" ? "Processor Grid" : "Kill Sheet";
   const selectedLabel = uploadType === "grid" ? "Processor Grid" : "Kill Sheet";
@@ -579,7 +587,11 @@ function ExtractionResultView({
             </span>
           </div>
           <div className="space-y-1.5 text-sm">
-            <DetailRow label="Processor" value={result.gridData.processorName || "Unknown"} />
+            <EditableNameRow
+              label="Processor"
+              value={nameOverride ?? result.gridData.processorName ?? "Unknown"}
+              onChange={onNameChange}
+            />
             {result.gridData.gridCode && <DetailRow label="Grid Code" value={result.gridData.gridCode} />}
             {result.gridData.gridDate && <DetailRow label="Date" value={result.gridData.gridDate} />}
             <DetailRow label="Grade Entries" value={`${result.gridData.entries.length}`} />
@@ -604,7 +616,11 @@ function ExtractionResultView({
               </span>
             </div>
             <div className="space-y-1.5 text-sm">
-              <DetailRow label="Processor" value={result.killSheetData.processorName || "Unknown"} />
+              <EditableNameRow
+                label="Processor"
+                value={nameOverride ?? result.killSheetData.processorName ?? "Unknown"}
+                onChange={onNameChange}
+              />
               {result.killSheetData.killDate && <DetailRow label="Kill Date" value={result.killSheetData.killDate} />}
               <DetailRow label="Total Head" value={`${result.killSheetData.totalHeadCount}`} />
               <DetailRow
@@ -660,6 +676,89 @@ function DetailRow({ label, value }: { label: string; value: string }) {
     <div className="flex justify-between">
       <span className="text-text-muted">{label}</span>
       <span className="font-medium text-text-primary">{value}</span>
+    </div>
+  );
+}
+
+function EditableNameRow({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (name: string | null) => void;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+
+  const handleSave = () => {
+    const trimmed = draft.trim();
+    if (trimmed && trimmed !== value) {
+      onChange(trimmed);
+    }
+    setIsEditing(false);
+  };
+
+  if (isEditing) {
+    return (
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-text-muted">{label}</span>
+        <div className="flex items-center gap-1.5">
+          <input
+            type="text"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSave();
+              if (e.key === "Escape") setIsEditing(false);
+            }}
+            autoFocus
+            className="w-48 rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-sm font-medium text-text-primary outline-none focus:border-teal-400/50 focus:ring-1 focus:ring-teal-400/25"
+          />
+          <button
+            onClick={handleSave}
+            className="rounded px-1.5 py-0.5 text-xs font-medium text-teal-400 hover:bg-teal-500/10"
+          >
+            Save
+          </button>
+          <button
+            onClick={() => setIsEditing(false)}
+            className="rounded px-1.5 py-0.5 text-xs text-text-muted hover:text-text-primary"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-text-muted">{label}</span>
+      <button
+        onClick={() => {
+          setDraft(value);
+          setIsEditing(true);
+        }}
+        className="group flex items-center gap-1.5 font-medium text-text-primary hover:text-teal-400"
+        title="Click to rename"
+      >
+        {value}
+        <svg
+          className="h-3 w-3 text-text-muted/50 group-hover:text-teal-400"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={2}
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+          />
+        </svg>
+      </button>
     </div>
   );
 }
