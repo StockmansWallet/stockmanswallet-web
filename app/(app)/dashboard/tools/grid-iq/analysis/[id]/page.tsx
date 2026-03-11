@@ -21,8 +21,9 @@ import {
   CheckCircle,
   TrendingUp,
   Zap,
-  Check,
+  Truck,
 } from "lucide-react";
+import { AnalysisDeleteButton } from "./analysis-delete-button";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -305,25 +306,24 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
         </div>
       )}
 
-      {/* Saved Confirmation */}
-      <div className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-teal-500/10 py-3 text-sm font-medium text-teal-400">
-        <Check className="h-4 w-4" />
-        Analysis saved
-      </div>
-
-      <div className="mt-3 flex justify-center gap-2">
-        {consignmentId && (
-          <Link href={`/dashboard/tools/grid-iq/consignments/${consignmentId}`}>
-            <Button variant="ghost" size="md">
-              View Consignment
+      {/* Actions */}
+      <div className="mt-6 flex items-center justify-between">
+        <AnalysisDeleteButton analysisId={id} />
+        <div className="flex items-center gap-2">
+          {consignmentId && (
+            <Link href={`/dashboard/tools/grid-iq/consignments/${consignmentId}`}>
+              <Button variant="ghost" size="sm">
+                <Truck className="mr-1.5 h-3.5 w-3.5" />
+                View Consignment
+              </Button>
+            </Link>
+          )}
+          <Link href="/dashboard/tools/grid-iq/saved">
+            <Button variant="teal" size="sm">
+              Done
             </Button>
           </Link>
-        )}
-        <Link href="/dashboard/tools/grid-iq">
-          <Button variant="teal" size="md">
-            Done
-          </Button>
-        </Link>
+        </div>
       </div>
     </div>
   );
