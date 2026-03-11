@@ -128,9 +128,9 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
     (href !== "/dashboard" && pathname.startsWith(href));
 
   return (
-    <aside className="flex max-h-[calc(100vh-2rem)] w-64 flex-col">
-      {/* Logo */}
-      <div className="flex justify-center px-5 pb-8 pt-6">
+    <aside className="flex h-full w-64 flex-col">
+      {/* Zone 1: Logo - pinned top */}
+      <div className="flex shrink-0 justify-center px-5 pb-8 pt-6">
         <Image
           src="/images/sw-logo.svg"
           alt="Stockman's Wallet"
@@ -140,8 +140,8 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
         />
       </div>
 
-      {/* Scrollable navigation */}
-      <nav className="overflow-y-auto px-4 pb-2">
+      {/* Zone 2: Scrollable navigation - fills available space */}
+      <nav className="min-h-0 flex-1 overflow-y-auto scrollbar-none px-4">
         <div className="space-y-0.5">
           {navItems.map((item) => (
             <Link
@@ -178,6 +178,7 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
             ))}
           </div>
         </div>
+
         {/* Admin */}
         {isAdminEmail(userEmail) && (
           <div className="mx-0 mt-4 border-t border-white/5 pt-4">
@@ -217,31 +218,31 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
             </Link>
           ))}
         </div>
-
-        {/* Plan & Log Out */}
-        <div className="mt-4 border-t border-white/5 pt-4">
-          <Link
-            href="/dashboard/settings"
-            className="mb-1 flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-all hover:bg-white/5"
-          >
-            <Crown className="h-4 w-4 text-brand" />
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-text-primary">Plan</p>
-              <p className="text-xs text-text-muted">Head Stockman</p>
-            </div>
-          </Link>
-
-          <form action={signOut}>
-            <button
-              type="submit"
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-text-secondary transition-all hover:bg-white/5 hover:text-text-primary"
-            >
-              <LogOut className="h-4 w-4" />
-              Log Out
-            </button>
-          </form>
-        </div>
       </nav>
+
+      {/* Zone 3: Plan & Log Out - pinned bottom */}
+      <div className="shrink-0 border-t border-white/5 px-4 pt-4 pb-2">
+        <Link
+          href="/dashboard/settings"
+          className="mb-1 flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-all hover:bg-white/5"
+        >
+          <Crown className="h-4 w-4 text-brand" />
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-text-primary">Plan</p>
+            <p className="text-xs text-text-muted">Head Stockman</p>
+          </div>
+        </Link>
+
+        <form action={signOut}>
+          <button
+            type="submit"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-text-secondary transition-all hover:bg-white/5 hover:text-text-primary"
+          >
+            <LogOut className="h-4 w-4" />
+            Log Out
+          </button>
+        </form>
+      </div>
     </aside>
   );
 }
