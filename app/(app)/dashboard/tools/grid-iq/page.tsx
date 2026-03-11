@@ -26,7 +26,7 @@ export default async function GridIQPage() {
       supabase
         .from("processor_grids")
         .select(
-          "id, processor_name, grid_code, grid_date, expiry_date, created_at"
+          "id, grid_name, processor_name, grid_code, grid_date, expiry_date, created_at"
         )
         .eq("user_id", user!.id)
         .eq("is_deleted", false)
@@ -35,7 +35,7 @@ export default async function GridIQPage() {
       supabase
         .from("kill_sheet_records")
         .select(
-          "id, processor_name, kill_date, total_head_count, total_gross_value, created_at"
+          "id, record_name, processor_name, kill_date, total_head_count, total_gross_value, created_at"
         )
         .eq("user_id", user!.id)
         .eq("is_deleted", false)
@@ -256,9 +256,10 @@ export default async function GridIQPage() {
                   >
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-text-primary">
-                        {g.processor_name as string}
+                        {(g.grid_name as string | null) || (g.processor_name as string)}
                       </p>
                       <p className="mt-0.5 text-xs text-text-muted">
+                        {(g.grid_name as string | null) ? `${g.processor_name as string} · ` : ""}
                         {g.grid_code ? `${g.grid_code} · ` : ""}
                         {new Date(
                           g.grid_date as string
@@ -320,9 +321,10 @@ export default async function GridIQPage() {
                 >
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-text-primary">
-                      {ks.processor_name as string}
+                      {(ks.record_name as string | null) || (ks.processor_name as string)}
                     </p>
                     <p className="mt-0.5 text-xs text-text-muted">
+                      {(ks.record_name as string | null) ? `${ks.processor_name as string} · ` : ""}
                       {new Date(
                         ks.kill_date as string
                       ).toLocaleDateString("en-AU")}{" "}

@@ -13,6 +13,7 @@ import { GridIQUploader } from "../upload/grid-iq-uploader";
 
 interface GridRecord {
   id: string;
+  grid_name: string | null;
   processor_name: string;
   grid_code: string | null;
   grid_date: string | null;
@@ -23,6 +24,7 @@ interface GridRecord {
 
 interface KillSheetRecord {
   id: string;
+  record_name: string | null;
   processor_name: string;
   grid_code: string | null;
   kill_date: string | null;
@@ -130,8 +132,11 @@ function GridsTab({ grids }: { grids: GridRecord[] }) {
                 <Grid3x3 className="h-5 w-5 text-teal-400" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-text-primary">{g.processor_name}</p>
+                <p className="text-sm font-medium text-text-primary">
+                  {g.grid_name || g.processor_name}
+                </p>
                 <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-text-muted">
+                  {g.grid_name && <span>{g.processor_name}</span>}
                   {g.grid_code ? <span>{g.grid_code}</span> : null}
                   {g.grid_date && (
                     <span>{new Date(g.grid_date).toLocaleDateString("en-AU")}</span>
@@ -195,8 +200,11 @@ function KillSheetsTab({ killSheets }: { killSheets: KillSheetRecord[] }) {
                 <FileText className="h-5 w-5 text-teal-400" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-text-primary">{ks.processor_name}</p>
+                <p className="text-sm font-medium text-text-primary">
+                  {ks.record_name || ks.processor_name}
+                </p>
                 <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-text-muted">
+                  {ks.record_name && <span>{ks.processor_name}</span>}
                   {ks.kill_date && (
                     <span>{new Date(ks.kill_date).toLocaleDateString("en-AU")}</span>
                   )}

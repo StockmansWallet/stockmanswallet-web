@@ -20,7 +20,7 @@ export default async function ProcessorRecordsPage({
     supabase
       .from("processor_grids")
       .select(
-        "id, processor_name, grid_code, grid_date, expiry_date, location, notes, created_at"
+        "id, grid_name, processor_name, grid_code, grid_date, expiry_date, location, notes, created_at"
       )
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
@@ -28,7 +28,7 @@ export default async function ProcessorRecordsPage({
     supabase
       .from("kill_sheet_records")
       .select(
-        "id, processor_name, grid_code, kill_date, total_head_count, total_body_weight, total_gross_value, average_body_weight, average_price_per_kg, condemns, realisation_factor, created_at"
+        "id, record_name, processor_name, grid_code, kill_date, total_head_count, total_body_weight, total_gross_value, average_body_weight, average_price_per_kg, condemns, realisation_factor, created_at"
       )
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
