@@ -38,10 +38,12 @@ export function NotificationBell() {
 
   useEffect(() => {
     const supabase = createClient();
+    let userId: string | null = null;
 
     async function fetchNotifications() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+      userId = user.id;
 
       const { data } = await supabase
         .from("notifications")
@@ -57,9 +59,25 @@ export function NotificationBell() {
 
     fetchNotifications();
 
-    // Poll every 30 seconds for new notifications
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
+    // Subscribe to realtime inserts for instant badge updates
+    const channel = supabase
+      .channel("notifications-bell")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notifications" },
+        (payload) => {
+          const row = payload.new as AppNotification;
+          // RLS filters to current user, but double-check
+          if (userId && row.user_id !== userId) return;
+          setNotifications((prev) => [row, ...prev].slice(0, 10));
+          setUnreadCount((c) => c + 1);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   // Close dropdown on outside click
