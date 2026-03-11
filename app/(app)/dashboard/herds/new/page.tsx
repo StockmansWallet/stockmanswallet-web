@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
-import { HerdForm } from "@/components/app/herd-form";
+import { AddHerdWizard } from "@/components/app/add-herd-wizard";
 import { createHerd } from "../actions";
 
 export const metadata = {
@@ -21,16 +21,14 @@ export default async function NewHerdPage() {
     .order("property_name");
 
   return (
-    <div className="max-w-6xl pb-24">
+    <div className="max-w-3xl">
       <PageHeader
         title="Add Herd"
         subtitle="Create a new herd to track your livestock."
       />
-      <HerdForm
+      <AddHerdWizard
         properties={properties ?? []}
         action={createHerd}
-        submitLabel="Add Herd"
-        cancelHref="/dashboard/herds"
       />
     </div>
   );
