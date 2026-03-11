@@ -21,7 +21,7 @@ import {
   Scale,
 } from "lucide-react";
 
-export const metadata = { title: "Performance - Grid IQ" };
+export const metadata = { title: "Historic Results - Grid IQ" };
 
 export default async function PerformancePage() {
   const supabase = await createClient();
@@ -78,7 +78,7 @@ export default async function PerformancePage() {
       </div>
 
       <PageHeader
-        title="Performance"
+        title="Historic Results"
         titleClassName="text-2xl font-semibold text-text-primary"
         subtitle="Historical kill performance metrics and trends"
         subtitleClassName="text-sm text-text-muted"
