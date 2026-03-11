@@ -414,7 +414,7 @@ export async function createPreSaleAnalysis(formData: FormData) {
     kill_sheet_record_id: null,
     analysis_date: now,
     updated_at: now,
-    herd_name: herdNames,
+    herd_name: consignmentName || herdNames,
     processor_name: resolvedProcessorName,
     analysis_mode: "pre_sale",
     head_count: totalHead,

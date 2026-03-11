@@ -23,6 +23,7 @@ import {
   Zap,
   Truck,
 } from "lucide-react";
+import { EditableProcessorName } from "../../components/editable-processor-name";
 import { AnalysisDeleteButton } from "./analysis-delete-button";
 
 interface PageProps {
@@ -96,13 +97,26 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
         </Link>
       </div>
 
-      <PageHeader
-        title={`${a.herd_name} vs ${a.processor_name}`}
-        titleClassName="text-2xl font-bold text-teal-400"
-        subtitle={`${new Date(a.analysis_date as string).toLocaleDateString("en-AU")} - ${isPostSale ? "Post-Sale Audit" : "Pre-Sale Planning"}`}
-        subtitleClassName="text-sm text-text-secondary"
-        compact
-      />
+      <div className="mb-4">
+        <div className="flex flex-wrap items-center gap-x-2">
+          <EditableProcessorName
+            recordId={id}
+            table="grid_iq_analyses"
+            column="herd_name"
+            initialName={(a.herd_name as string) ?? "Untitled"}
+          />
+          <span className="text-2xl font-bold text-text-muted">vs</span>
+          <EditableProcessorName
+            recordId={id}
+            table="grid_iq_analyses"
+            column="processor_name"
+            initialName={(a.processor_name as string) ?? "Unknown"}
+          />
+        </div>
+        <p className="mt-1 text-sm text-text-secondary">
+          {new Date(a.analysis_date as string).toLocaleDateString("en-AU")} - {isPostSale ? "Post-Sale Audit" : "Pre-Sale Planning"}
+        </p>
+      </div>
 
       {/* Value Comparison */}
       <div className="mt-4">

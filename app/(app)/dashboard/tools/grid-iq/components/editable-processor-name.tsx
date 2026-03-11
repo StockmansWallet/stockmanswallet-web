@@ -6,13 +6,15 @@ import { createClient } from "@/lib/supabase/client";
 
 interface EditableProcessorNameProps {
   recordId: string;
-  table: "processor_grids" | "kill_sheet_records";
+  table: "processor_grids" | "kill_sheet_records" | "grid_iq_analyses";
+  column?: string;
   initialName: string;
 }
 
 export function EditableProcessorName({
   recordId,
   table,
+  column,
   initialName,
 }: EditableProcessorNameProps) {
   const [name, setName] = useState(initialName);
@@ -32,7 +34,7 @@ export function EditableProcessorName({
       const supabase = createClient();
       const { error } = await supabase
         .from(table)
-        .update({ [table === "processor_grids" ? "grid_name" : "record_name"]: trimmed })
+        .update({ [column ?? (table === "processor_grids" ? "grid_name" : "record_name")]: trimmed })
         .eq("id", recordId);
 
       if (error) throw error;

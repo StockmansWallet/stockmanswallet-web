@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Grid3x3, FileText, TrendingUp, ChevronRight } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { Grid3x3, FileText, TrendingUp, ChevronRight, Trash2, Loader2, CheckSquare } from "lucide-react";
 
 // MARK: - Types
 
@@ -38,17 +41,42 @@ const tabs: { id: TabId; label: string; icon: typeof Grid3x3 }[] = [
 
 export function SavedAnalysisTabs({ defaultTab, analyses }: Props) {
   const [activeTab, setActiveTab] = useState<TabId>(defaultTab as TabId);
+  const [selecting, setSelecting] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const preSaleAnalyses = analyses.filter((a) => a.analysis_mode !== "post_sale");
   const postKillAnalyses = analyses.filter((a) => a.analysis_mode === "post_sale");
   const displayed = activeTab === "pre-sale" ? preSaleAnalyses : postKillAnalyses;
 
+  const exitSelecting = () => {
+    setSelecting(false);
+    setSelected(new Set());
+  };
+
+  const handleTabChange = (tab: TabId) => {
+    setActiveTab(tab);
+    setSelected(new Set());
+  };
+
   return (
     <div>
       {/* Page heading */}
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold text-text-primary">Saved Analysis</h2>
-        <p className="mt-0.5 text-sm text-text-muted">Pre-sale comparisons and post-kill results</p>
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-text-primary">Saved Analysis</h2>
+          <p className="mt-0.5 text-sm text-text-muted">Pre-sale comparisons and post-kill results</p>
+        </div>
+        {displayed.length > 0 && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className={selecting ? "text-teal-400" : "text-text-muted"}
+            onClick={() => (selecting ? exitSelecting() : setSelecting(true))}
+          >
+            <CheckSquare className="mr-1.5 h-3.5 w-3.5" />
+            {selecting ? "Cancel" : "Select"}
+          </Button>
+        )}
       </div>
 
       {/* Tab bar */}
@@ -60,7 +88,7 @@ export function SavedAnalysisTabs({ defaultTab, analyses }: Props) {
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => handleTabChange(tab.id)}
               className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
                 active
                   ? "bg-teal-500/15 text-teal-400"
@@ -80,14 +108,34 @@ export function SavedAnalysisTabs({ defaultTab, analyses }: Props) {
       </div>
 
       {/* Tab content */}
-      <AnalysisList analyses={displayed} tab={activeTab} />
+      <AnalysisList
+        analyses={displayed}
+        tab={activeTab}
+        selecting={selecting}
+        selected={selected}
+        onSelectedChange={setSelected}
+        onDone={exitSelecting}
+      />
     </div>
   );
 }
 
 // MARK: - Analysis List
 
-function AnalysisList({ analyses, tab }: { analyses: AnalysisRecord[]; tab: TabId }) {
+interface AnalysisListProps {
+  analyses: AnalysisRecord[];
+  tab: TabId;
+  selecting: boolean;
+  selected: Set<string>;
+  onSelectedChange: (s: Set<string>) => void;
+  onDone: () => void;
+}
+
+function AnalysisList({ analyses, tab, selecting, selected, onSelectedChange, onDone }: AnalysisListProps) {
+  const router = useRouter();
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
   if (analyses.length === 0) {
     return (
       <Card>
@@ -106,65 +154,201 @@ function AnalysisList({ analyses, tab }: { analyses: AnalysisRecord[]; tab: TabI
     );
   }
 
-  return (
-    <Card>
-      <CardContent className="divide-y divide-white/[0.06] p-0">
-        {analyses.map((a) => {
-          const advantage = a.grid_iq_advantage ?? 0;
-          const isProcessor = advantage > 0;
-          const killScore = a.kill_score;
-          const gcr = a.gcr;
+  const allSelected = analyses.length > 0 && analyses.every((a) => selected.has(a.id));
 
-          return (
-            <Link
-              key={a.id}
-              href={`/dashboard/tools/grid-iq/analysis/${a.id}`}
-              className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/[0.03]"
+  const toggleOne = (id: string) => {
+    const next = new Set(selected);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    onSelectedChange(next);
+  };
+
+  const toggleAll = () => {
+    if (allSelected) {
+      onSelectedChange(new Set());
+    } else {
+      onSelectedChange(new Set(analyses.map((a) => a.id)));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selected.size === 0) return;
+    setIsDeleting(true);
+    try {
+      const supabase = createClient();
+      const now = new Date().toISOString();
+      const { error } = await supabase
+        .from("grid_iq_analyses")
+        .update({ is_deleted: true, deleted_at: now })
+        .in("id", Array.from(selected));
+
+      if (error) throw error;
+      onDone();
+      router.refresh();
+    } catch {
+      setIsDeleting(false);
+      setShowConfirm(false);
+    }
+  };
+
+  return (
+    <>
+      {/* Select All row */}
+      {selecting && (
+        <div className="mb-2 flex items-center justify-between px-1">
+          <button
+            onClick={toggleAll}
+            className="flex items-center gap-2 text-xs text-text-muted hover:text-text-primary"
+          >
+            <span
+              className={`flex h-4 w-4 items-center justify-center rounded border transition-colors ${
+                allSelected
+                  ? "border-teal-400 bg-teal-400 text-black"
+                  : "border-white/20 bg-white/[0.04]"
+              }`}
             >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/15">
-                <TrendingUp className="h-5 w-5 text-teal-400" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-text-primary">
-                  {a.herd_name ?? "Multi-herd"} vs {a.processor_name ?? "Unknown"}
-                </p>
-                <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-text-muted">
-                  {a.analysis_date && (
-                    <span>{new Date(a.analysis_date).toLocaleDateString("en-AU")}</span>
-                  )}
-                  {killScore !== null && (
-                    <span
-                      className={`text-[10px] font-medium ${
-                        killScore >= 85
-                          ? "text-emerald-400"
-                          : killScore >= 70
-                            ? "text-teal-400"
-                            : killScore >= 50
-                              ? "text-amber-400"
-                              : "text-red-400"
-                      }`}
-                    >
-                      KS {killScore.toFixed(0)}
-                    </span>
-                  )}
-                  {gcr !== null && <span className="text-[10px]">GCR {gcr.toFixed(0)}%</span>}
+              {allSelected && <span className="text-[10px] font-bold">&#10003;</span>}
+            </span>
+            Select All ({analyses.length})
+          </button>
+          {selected.size > 0 && (
+            <span className="text-xs text-teal-400">{selected.size} selected</span>
+          )}
+        </div>
+      )}
+
+      <Card>
+        <CardContent className="divide-y divide-white/[0.06] p-0">
+          {analyses.map((a) => {
+            const advantage = a.grid_iq_advantage ?? 0;
+            const isProcessor = advantage > 0;
+            const killScore = a.kill_score;
+            const gcr = a.gcr;
+            const checked = selected.has(a.id);
+
+            const content = (
+              <>
+                {selecting && (
+                  <span
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
+                      checked
+                        ? "border-teal-400 bg-teal-400 text-black"
+                        : "border-white/20 bg-white/[0.04]"
+                    }`}
+                  >
+                    {checked && <span className="text-xs font-bold">&#10003;</span>}
+                  </span>
+                )}
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/15">
+                  <TrendingUp className="h-5 w-5 text-teal-400" />
                 </div>
-              </div>
-              <div className="text-right">
-                <p
-                  className={`text-sm font-semibold ${isProcessor ? "text-emerald-400" : "text-brand"}`}
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-text-primary">
+                    {a.herd_name ?? "Multi-herd"} vs {a.processor_name ?? "Unknown"}
+                  </p>
+                  <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-text-muted">
+                    {a.analysis_date && (
+                      <span>{new Date(a.analysis_date).toLocaleDateString("en-AU")}</span>
+                    )}
+                    {killScore !== null && (
+                      <span
+                        className={`text-[10px] font-medium ${
+                          killScore >= 85
+                            ? "text-emerald-400"
+                            : killScore >= 70
+                              ? "text-teal-400"
+                              : killScore >= 50
+                                ? "text-amber-400"
+                                : "text-red-400"
+                        }`}
+                      >
+                        KS {killScore.toFixed(0)}
+                      </span>
+                    )}
+                    {gcr !== null && <span className="text-[10px]">GCR {gcr.toFixed(0)}%</span>}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p
+                    className={`text-sm font-semibold ${isProcessor ? "text-emerald-400" : "text-brand"}`}
+                  >
+                    {isProcessor ? "Over-the-Hooks" : "Saleyard"}
+                  </p>
+                  <p className="text-xs text-text-muted">
+                    {isProcessor ? "+" : ""}${Math.abs(Math.round(advantage)).toLocaleString()}
+                  </p>
+                </div>
+                {!selecting && (
+                  <ChevronRight className="h-4 w-4 shrink-0 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
+                )}
+              </>
+            );
+
+            if (selecting) {
+              return (
+                <button
+                  key={a.id}
+                  onClick={() => toggleOne(a.id)}
+                  className="group flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-white/[0.03]"
                 >
-                  {isProcessor ? "Over-the-Hooks" : "Saleyard"}
-                </p>
-                <p className="text-xs text-text-muted">
-                  {isProcessor ? "+" : ""}${Math.abs(Math.round(advantage)).toLocaleString()}
-                </p>
+                  {content}
+                </button>
+              );
+            }
+
+            return (
+              <Link
+                key={a.id}
+                href={`/dashboard/tools/grid-iq/analysis/${a.id}`}
+                className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/[0.03]"
+              >
+                {content}
+              </Link>
+            );
+          })}
+        </CardContent>
+      </Card>
+
+      {/* Bulk delete bar */}
+      {selecting && selected.size > 0 && (
+        <div className="mt-4">
+          {showConfirm ? (
+            <div className="flex items-center justify-between rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3">
+              <span className="text-sm text-red-400">
+                Delete {selected.size} {selected.size === 1 ? "analysis" : "analyses"}?
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setShowConfirm(false)}
+                  disabled={isDeleting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={handleBulkDelete}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Trash2 className="mr-1.5 h-3.5 w-3.5" />}
+                  Confirm
+                </Button>
               </div>
-              <ChevronRight className="h-4 w-4 shrink-0 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
-            </Link>
-          );
-        })}
-      </CardContent>
-    </Card>
+            </div>
+          ) : (
+            <Button
+              variant="ghost"
+              className="w-full text-red-400 hover:bg-red-500/10 hover:text-red-400"
+              onClick={() => setShowConfirm(true)}
+            >
+              <Trash2 className="mr-1.5 h-4 w-4" />
+              Delete Selected ({selected.size})
+            </Button>
+          )}
+        </div>
+      )}
+    </>
   );
 }
