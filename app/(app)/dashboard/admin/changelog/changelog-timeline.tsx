@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronRight, Smartphone, Globe } from "lucide-react";
+import { ChevronDown, ChevronRight, Smartphone, Globe, Database } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import type { TimelineDay, DevUpdate } from "@/lib/types/dev-docs";
 import { ChangelogEntry } from "./changelog-entry";
 
-type PlatformFilter = "all" | "ios" | "web";
+type PlatformFilter = "all" | "ios" | "web" | "supabase";
 
 export function ChangelogTimeline({ days }: { days: TimelineDay[] }) {
   const [filter, setFilter] = useState<PlatformFilter>("all");
@@ -27,7 +27,7 @@ export function ChangelogTimeline({ days }: { days: TimelineDay[] }) {
     .filter((day) => day.entries.length > 0);
 
   const platforms = (entries: DevUpdate[]) => {
-    const has = { ios: false, web: false };
+    const has = { ios: false, web: false, supabase: false };
     for (const e of entries) has[e.platform] = true;
     return has;
   };
@@ -43,19 +43,29 @@ export function ChangelogTimeline({ days }: { days: TimelineDay[] }) {
     <div className="space-y-3">
       {/* Filter pills */}
       <div className="flex gap-2">
-        {(["all", "ios", "web"] as const).map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-all duration-150 ${
-              filter === f
-                ? "bg-white/12 text-text-primary"
-                : "text-text-muted hover:bg-white/5 hover:text-text-secondary"
-            }`}
-          >
-            {f === "all" ? "All" : f === "ios" ? "iOS" : "Web"}
-          </button>
-        ))}
+        {(["all", "ios", "web", "supabase"] as const).map((f) => {
+          const label =
+            f === "all"
+              ? "All"
+              : f === "ios"
+                ? "iOS"
+                : f === "web"
+                  ? "Web"
+                  : "Supabase";
+          return (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-all duration-150 ${
+                filter === f
+                  ? "bg-white/12 text-text-primary"
+                  : "text-text-muted hover:bg-white/5 hover:text-text-secondary"
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Timeline */}
@@ -100,6 +110,12 @@ export function ChangelogTimeline({ days }: { days: TimelineDay[] }) {
                     <Badge variant="success">
                       <Globe className="mr-1 h-3 w-3" />
                       Web
+                    </Badge>
+                  )}
+                  {p.supabase && (
+                    <Badge variant="warning">
+                      <Database className="mr-1 h-3 w-3" />
+                      Supabase
                     </Badge>
                   )}
                 </div>

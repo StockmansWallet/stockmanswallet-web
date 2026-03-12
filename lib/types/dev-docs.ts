@@ -1,6 +1,6 @@
 export interface DevUpdate {
   id: string;
-  platform: "ios" | "web";
+  platform: "ios" | "web" | "supabase";
   date: string;
   build_label: string | null;
   title: string;
