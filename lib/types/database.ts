@@ -786,6 +786,56 @@ export type Database = {
           total_value?: number | null;
         };
       };
+      brangus_conversations: {
+        Row: {
+          id: string;
+          user_id: string;
+          title: string | null;
+          preview_text: string | null;
+          created_at: string;
+          updated_at: string;
+          is_deleted: boolean;
+          deleted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          title?: string | null;
+          preview_text?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          is_deleted?: boolean;
+          deleted_at?: string | null;
+        };
+        Update: {
+          title?: string | null;
+          preview_text?: string | null;
+          updated_at?: string;
+          is_deleted?: boolean;
+          deleted_at?: string | null;
+        };
+      };
+      brangus_messages: {
+        Row: {
+          id: string;
+          conversation_id: string;
+          user_id: string;
+          role: "user" | "assistant";
+          content: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          conversation_id: string;
+          user_id: string;
+          role: "user" | "assistant";
+          content: string;
+          created_at?: string;
+        };
+        Update: {
+          content?: string;
+        };
+      };
     };
   };
 };

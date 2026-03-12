@@ -326,7 +326,7 @@ async function callBrangusAPI(
 
 // MARK: - Response Sanitisation
 
-function sanitiseResponse(text: string): string {
+export function sanitiseResponse(text: string): string {
   let result = text;
 
   // Strip em-dashes and en-dashes

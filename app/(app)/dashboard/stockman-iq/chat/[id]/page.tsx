@@ -1,8 +1,10 @@
+import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
-import { Send } from "lucide-react";
+import { fetchConversationsServer, fetchMessagesServer } from "@/lib/brangus/conversation-service-server";
+import { ConversationReview } from "@/components/app/brangus/conversation-review";
 
-export const metadata = { title: "Chat \u2014 Stockman IQ" };
+export const metadata = { title: "Chat - Stockman IQ" };
 
 export default async function StockmanIQConversationPage({
   params,
@@ -11,25 +13,28 @@ export default async function StockmanIQConversationPage({
 }) {
   const { id } = await params;
 
+  // Fetch conversation (RLS ensures user owns it)
+  const conversations = await fetchConversationsServer();
+  const conversation = conversations.find((c) => c.id === id);
+  if (!conversation) notFound();
+
+  const messages = await fetchMessagesServer(id);
+
+  const date = new Date(conversation.created_at).toLocaleDateString("en-AU", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
   return (
     <div className="flex max-w-3xl flex-col" style={{ height: "calc(100vh - 8rem)" }}>
-      <PageHeader title="Brangus" subtitle={`Conversation ${id.slice(0, 8)}`} />
+      <PageHeader
+        title={conversation.title ?? "Conversation"}
+        subtitle={date}
+        compact
+      />
       <Card className="flex flex-1 flex-col overflow-hidden">
-        <div className="flex-1 overflow-y-auto p-4">
-          <p className="text-sm text-text-muted">Conversation history will appear here.</p>
-        </div>
-        <div className="border-t border-white/6 p-4">
-          <div className="flex items-end gap-2">
-            <textarea
-              rows={1}
-              placeholder="Continue the conversation..."
-              className="flex-1 resize-none rounded-xl bg-white/5 px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none ring-1 ring-inset ring-white/10 transition-all focus:ring-brand/60 focus:bg-white/8"
-            />
-            <button className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-white transition-colors hover:bg-brand-dark">
-              <Send className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
+        <ConversationReview conversation={conversation} messages={messages} />
       </Card>
     </div>
   );

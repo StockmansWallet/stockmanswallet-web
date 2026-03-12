@@ -6,6 +6,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Brain, Loader2, AlertCircle } from "lucide-react";
 import { sendMessage, buildSystemPrompt, loadChatDataStore } from "@/lib/brangus/chat-service";
+import { createConversation, saveMessage, autoTitleConversation } from "@/lib/brangus/conversation-service";
 import type { ChatMessage, AnthropicMessage, ChatDataStore } from "@/lib/brangus/types";
 import { createClient } from "@/lib/supabase/client";
 import { ChatBubble } from "@/components/app/chat/chat-bubble";
@@ -37,6 +38,9 @@ export function BrangusChat() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const postTypingIdRef = useRef<string | null>(null);
+  const conversationIdRef = useRef<string | null>(null);
+  const userIdRef = useRef<string | null>(null);
+  const hasRequestedTitleRef = useRef(false);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -49,6 +53,10 @@ export function BrangusChat() {
 
     async function init() {
       try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) userIdRef.current = user.id;
+
         const dataStore = await loadChatDataStore();
         if (cancelled) return;
         const prompt = buildSystemPrompt(dataStore);
@@ -109,6 +117,17 @@ export function BrangusChat() {
     if (!text || isLoading || !store) return;
 
     setError(null);
+    const userId = userIdRef.current;
+
+    // Create conversation on first send
+    if (!conversationIdRef.current && userId) {
+      try {
+        const conv = await createConversation(userId);
+        conversationIdRef.current = conv.id;
+      } catch (err) {
+        console.error("Failed to create conversation:", err);
+      }
+    }
 
     // Add user message to UI
     const userMessage: ChatMessage = {
@@ -119,6 +138,14 @@ export function BrangusChat() {
     };
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
+
+    // Persist user message (non-blocking)
+    const convId = conversationIdRef.current;
+    if (convId && userId) {
+      saveMessage(convId, userId, "user", text).catch((err) =>
+        console.error("Failed to persist user message:", err)
+      );
+    }
 
     try {
       const { assistantText, updatedHistory } = await sendMessage(
@@ -138,6 +165,21 @@ export function BrangusChat() {
       postTypingIdRef.current = assistantMessage.id;
       setMessages((prev) => [...prev, assistantMessage]);
       setConversationHistory(updatedHistory);
+
+      // Persist assistant message (non-blocking)
+      if (convId && userId) {
+        saveMessage(convId, userId, "assistant", assistantText).catch((err) =>
+          console.error("Failed to persist assistant message:", err)
+        );
+      }
+
+      // Auto-title after first exchange
+      if (convId && !hasRequestedTitleRef.current) {
+        hasRequestedTitleRef.current = true;
+        autoTitleConversation(convId, text, assistantText).catch((err) =>
+          console.error("Auto-title failed:", err)
+        );
+      }
 
       // Persist any yard book mutations
       await persistMutations(store);
