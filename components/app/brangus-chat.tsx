@@ -12,6 +12,7 @@ import { createClient } from "@/lib/supabase/client";
 import { ChatBubble } from "@/components/app/chat/chat-bubble";
 import { ChatInput } from "@/components/app/chat/chat-input";
 import { TypingIndicator } from "@/components/app/chat/typing-indicator";
+import { QuickInsightRow } from "@/components/app/chat/quick-insight-row";
 
 const SUGGESTED_PROMPTS = [
   "What's my portfolio worth today?",
@@ -148,7 +149,7 @@ export function BrangusChat() {
     }
 
     try {
-      const { assistantText, updatedHistory } = await sendMessage(
+      const { assistantText, updatedHistory, quickInsights } = await sendMessage(
         text,
         conversationHistory,
         store,
@@ -161,6 +162,7 @@ export function BrangusChat() {
         role: "assistant",
         content: assistantText,
         timestamp: new Date(),
+        quickInsights,
       };
       postTypingIdRef.current = assistantMessage.id;
       setMessages((prev) => [...prev, assistantMessage]);
@@ -213,21 +215,27 @@ export function BrangusChat() {
               const isUser = msg.role === "user";
               const isPostTyping = msg.id === postTypingIdRef.current;
               return (
-                <ChatBubble
-                  key={msg.id}
-                  side={isUser ? "right" : "left"}
-                  bgClass={isUser ? "bg-brand" : "bg-[#4D331F]"}
-                  tailColor={isUser ? USER_BG : BRANGUS_BG}
-                  textClass={isUser ? "text-white" : "text-text-primary"}
-                  animate
-                  animationType={isPostTyping ? "fade" : "bounce"}
-                >
-                  {isUser ? (
-                    msg.content
-                  ) : (
-                    <FormattedResponse text={msg.content} />
+                <div key={msg.id}>
+                  <ChatBubble
+                    side={isUser ? "right" : "left"}
+                    bgClass={isUser ? "bg-brand" : "bg-[#4D331F]"}
+                    tailColor={isUser ? USER_BG : BRANGUS_BG}
+                    textClass={isUser ? "text-white" : "text-text-primary"}
+                    animate
+                    animationType={isPostTyping ? "fade" : "bounce"}
+                  >
+                    {isUser ? (
+                      msg.content
+                    ) : (
+                      <FormattedResponse text={msg.content} />
+                    )}
+                  </ChatBubble>
+                  {msg.quickInsights && msg.quickInsights.length > 0 && (
+                    <div className="mt-2 ml-3 animate-fade-in">
+                      <QuickInsightRow insights={msg.quickInsights} />
+                    </div>
                   )}
-                </ChatBubble>
+                </div>
               );
             })}
             {isLoading && <TypingIndicator bgColor={BRANGUS_BG} dotClass="bg-brand/60" />}

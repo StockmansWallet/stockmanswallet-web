@@ -4,13 +4,14 @@
 import { createClient } from "../supabase/client";
 import { calculateHerdValue, mapCategoryToMLACategory, categoryFallback, type CategoryPriceEntry } from "../engines/valuation-engine";
 import { cattleBreedPremiums } from "../data/reference-data";
-import { toolDefinitions, executeTool } from "./tools";
+import { toolDefinitions, executeTool, DISPLAY_ONLY_TOOLS } from "./tools";
 import type {
   ChatMessage,
   AnthropicMessage,
   AnthropicContentBlock,
   AnthropicResponse,
   ChatDataStore,
+  QuickInsight,
 } from "./types";
 
 const MODEL = "claude-haiku-4-5-20251001";
@@ -69,12 +70,17 @@ YOUR TOOLS:
 3. create_yard_book_event: Creates events in the user's Yard Book.
 4. manage_yard_book_event: Marks a Yard Book event as complete or deletes it.
 5. lookup_grid_iq_data: Retrieves Grid IQ data - processor grid comparisons, kill sheet results, Kill Score, GCR, and Grid Risk. Use when the user asks about processor grids, kill sheets, grid performance, or over-the-hooks results. Available query types: grid_iq_summary, analysis_details, kill_history, grid_details, compare_channels.
+6. display_summary_cards: Shows small visual summary cards below your response highlighting key figures. Call this alongside your final text response when you cite 2 or more specific numbers (dollar values, prices, head counts, weights, dates). Do NOT call for greetings, how-to answers, or responses with no numeric data. Max 4 cards.
 
 TOOL USAGE RULES:
 - Call lookup_portfolio_data BEFORE answering any data question
 - You can call multiple lookups if needed
 - Always use calculate_freight for freight. Never give a rough estimate
 - Confirm Yard Book events after creation
+- Call display_summary_cards alongside your final text when you cite 2+ key figures
+- Each card should show a distinct metric. Do NOT repeat the same figure in multiple cards
+- Use sentiment: positive for gains/good news, negative for losses/warnings, neutral for facts
+- Include units in the value ($/kg, head, km) so cards are self-explanatory
 
 IMPORTANT FOR FREIGHT QUESTIONS:
 - The freight calculator is called "Freight IQ" - always reference it by name
@@ -175,6 +181,8 @@ FORMATTING:
 User: "What are my yearling steers worth?"
 [You call lookup_portfolio_data(query_type: "herd_details", herd_name: "Angus Steers")]
 [You call lookup_portfolio_data(query_type: "market_prices", category: "Yearling Steer")]
+[After receiving tool results, you respond with text AND call display_summary_cards]
+[display_summary_cards cards: [{label: "Price/kg", value: "$3.42/kg", subtitle: "MLA saleyard data", sentiment: "neutral"}, {label: "Herd Value", value: "$187,128", subtitle: "120 head at 380kg", sentiment: "neutral"}]]
 Assistant: Here's the go on your 120 Angus yearling steers at Springfield. They're tracking at $3.42/kg (MLA saleyard data).
 
 At 380kg, that's $1,559 a head or $187,128 for the lot. Tidy little position you've got there.
@@ -183,6 +191,8 @@ Want me to check what freight to Roma would cost?
 
 User: "How's my portfolio looking?"
 [You call lookup_portfolio_data(query_type: "portfolio_summary")]
+[After receiving tool results, you respond with text AND call display_summary_cards]
+[display_summary_cards cards: [{label: "Portfolio Value", value: "$1,842,500", subtitle: "8 herds, 1,240 head", sentiment: "positive"}, {label: "Total Head", value: "1,240", subtitle: "across 8 herds", sentiment: "neutral"}]]
 Assistant: Not too shabby. You've got $1,842,500 on the books across 8 herds and 1,240 head.
 
 The bulk of that's in your breeders, they're doing the heavy lifting. Your yearling steers are punching above their weight too at current prices.
@@ -205,7 +215,7 @@ export async function sendMessage(
   conversationHistory: AnthropicMessage[],
   store: ChatDataStore,
   systemPrompt: string
-): Promise<{ assistantText: string; updatedHistory: AnthropicMessage[] }> {
+): Promise<{ assistantText: string; updatedHistory: AnthropicMessage[]; quickInsights?: QuickInsight[] }> {
   // Add user message to history
   const history: AnthropicMessage[] = [
     ...conversationHistory,
@@ -214,6 +224,7 @@ export async function sendMessage(
 
   let currentHistory = history;
   let rounds = 0;
+  let pendingInsights: QuickInsight[] | undefined;
 
   while (rounds < MAX_TOOL_ROUNDS) {
     rounds++;
@@ -221,6 +232,15 @@ export async function sendMessage(
     const response = await callBrangusAPI(systemPrompt, currentHistory);
     if (!response) {
       throw new Error("Failed to get a response from Brangus. Please try again.");
+    }
+
+    // Extract display_summary_cards from any response (display-only, no tool_result)
+    const displayBlocks = response.content.filter(
+      (b) => b.type === "tool_use" && DISPLAY_ONLY_TOOLS.has(b.name ?? "")
+    );
+    for (const block of displayBlocks) {
+      const cards = extractQuickInsights(block.input as Record<string, unknown>);
+      if (cards.length > 0) pendingInsights = cards;
     }
 
     if (response.stop_reason === "end_turn" || response.stop_reason === "max_tokens") {
@@ -236,21 +256,55 @@ export async function sendMessage(
         { role: "assistant", content: response.content },
       ];
 
-      return { assistantText: text, updatedHistory: currentHistory };
+      return { assistantText: text, updatedHistory: currentHistory, quickInsights: pendingInsights };
     }
 
     if (response.stop_reason === "tool_use") {
+      // Separate executable tools from display-only tools
+      const executableBlocks = response.content.filter(
+        (b) => b.type === "tool_use" && !DISPLAY_ONLY_TOOLS.has(b.name ?? "")
+      );
+
+      // If only display tools remain, extract text and return
+      // Must include tool_results for display tools so API history stays valid
+      if (executableBlocks.length === 0) {
+        const textBlocks = response.content
+          .filter((b) => b.type === "text")
+          .map((b) => b.text ?? "");
+        const rawText = textBlocks.join("\n").trim();
+        const text = sanitiseResponse(rawText);
+
+        // Build dummy tool_results for display-only tools (API requires matching results)
+        const displayResults: AnthropicContentBlock[] = displayBlocks.map((b) => ({
+          type: "tool_result" as const,
+          tool_use_id: b.id!,
+          content: "displayed",
+        }));
+
+        currentHistory = [
+          ...currentHistory,
+          { role: "assistant", content: response.content },
+          { role: "user", content: displayResults },
+        ];
+
+        return { assistantText: text, updatedHistory: currentHistory, quickInsights: pendingInsights };
+      }
+
       // Add assistant response with tool_use blocks to history
       currentHistory = [
         ...currentHistory,
         { role: "assistant", content: response.content },
       ];
 
-      // Execute all tools and collect results
-      const toolUseBlocks = response.content.filter((b) => b.type === "tool_use");
-      const toolResultBlocks: AnthropicContentBlock[] = [];
+      // Execute only non-display tools and collect results
+      // Include dummy results for display-only tools (API requires matching tool_results)
+      const toolResultBlocks: AnthropicContentBlock[] = displayBlocks.map((b) => ({
+        type: "tool_result" as const,
+        tool_use_id: b.id!,
+        content: "displayed",
+      }));
 
-      for (const block of toolUseBlocks) {
+      for (const block of executableBlocks) {
         const result = executeTool(
           block.name!,
           block.input as Record<string, unknown>,
@@ -278,6 +332,22 @@ export async function sendMessage(
   }
 
   throw new Error("Brangus ran out of tool rounds. Please try a simpler question.");
+}
+
+// Extract QuickInsight cards from display_summary_cards tool input
+function extractQuickInsights(input: Record<string, unknown>): QuickInsight[] {
+  const cards = input.cards as Array<Record<string, unknown>> | undefined;
+  if (!Array.isArray(cards)) return [];
+
+  return cards
+    .filter((c) => c.label && c.value && c.sentiment)
+    .map((c) => ({
+      id: crypto.randomUUID(),
+      label: c.label as string,
+      value: c.value as string,
+      subtitle: (c.subtitle as string) || undefined,
+      sentiment: c.sentiment as "positive" | "negative" | "neutral",
+    }));
 }
 
 // MARK: - API Call

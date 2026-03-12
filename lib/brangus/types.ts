@@ -9,6 +9,17 @@ export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  // Quick insight cards from display_summary_cards tool (display-only, no tool_result sent)
+  quickInsights?: QuickInsight[];
+}
+
+// Quick insight card extracted from display_summary_cards tool_use blocks
+export interface QuickInsight {
+  id: string;
+  label: string;
+  value: string;
+  subtitle?: string;
+  sentiment: "positive" | "negative" | "neutral";
 }
 
 // MARK: - Anthropic API Types

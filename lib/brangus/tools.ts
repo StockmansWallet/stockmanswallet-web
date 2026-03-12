@@ -147,7 +147,36 @@ export const toolDefinitions = [
       required: ["query_type"],
     },
   },
+  {
+    name: "display_summary_cards",
+    description:
+      "Displays 2-4 small summary cards below your response highlighting key figures. Call this at the END of your response (alongside your text) when you mention 2 or more specific numbers (prices, values, dates, head counts). Each card shows one key figure. Do NOT call this for greetings, how-to answers, or responses with no numeric data.",
+    input_schema: {
+      type: "object",
+      properties: {
+        cards: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              label: { type: "string", description: "Short label, max 20 chars (e.g. 'Portfolio Value', 'Price/kg', 'Freight Cost')" },
+              value: { type: "string", description: "The key figure (e.g. '$187,128', '$3.42/kg', '120 head')" },
+              subtitle: { type: "string", description: "Brief context, max 30 chars (e.g. 'MLA saleyard data', '+ $234 GST')" },
+              sentiment: { type: "string", enum: ["positive", "negative", "neutral"], description: "positive for gains/good news, negative for losses/warnings, neutral for facts" },
+            },
+            required: ["label", "value", "sentiment"],
+          },
+          maxItems: 4,
+          minItems: 2,
+        },
+      },
+      required: ["cards"],
+    },
+  },
 ];
+
+// Display-only tools (no tool_result sent back to API)
+export const DISPLAY_ONLY_TOOLS = new Set(["display_summary_cards"]);
 
 // MARK: - Tool Execution
 
