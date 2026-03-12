@@ -3,7 +3,9 @@ import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/app/sidebar";
 import { MobileNav } from "@/components/app/mobile-nav";
 import { AppProviders } from "@/components/app/app-providers";
+import { TopBar } from "@/components/app/top-bar";
 import { isAdvisorRole } from "@/lib/types/advisory";
+import { isAdminEmail } from "@/lib/data/admin";
 
 export default async function AppLayout({
   children,
@@ -30,6 +32,8 @@ export default async function AppLayout({
     ? "advisor" as const
     : "farmer" as const;
 
+  const showViewToggle = isAdminEmail(user.email);
+
   return (
     <AppProviders defaultMode={defaultMode}>
       <div className="flex min-h-screen bg-background">
@@ -43,7 +47,8 @@ export default async function AppLayout({
         {/* Main content */}
         <div className="flex flex-1 flex-col">
           <MobileNav userEmail={user.email} />
-          <main className="flex-1 overflow-y-auto px-6 pb-6 lg:px-8 lg:pt-4 lg:pb-8">
+          <TopBar showViewToggle={showViewToggle} />
+          <main className="flex-1 overflow-y-auto px-6 pb-6 lg:px-8 lg:pb-8">
             {children}
           </main>
         </div>

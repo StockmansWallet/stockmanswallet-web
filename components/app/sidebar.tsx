@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { signOut } from "@/app/(auth)/actions";
 import { isAdminEmail } from "@/lib/data/admin";
 import { useViewMode } from "@/lib/hooks/use-view-mode";
-import { Bell, Briefcase, Crown, LogOut, Tractor } from "lucide-react";
+import { Bell, Crown, LogOut } from "lucide-react";
 import { NotificationBadge } from "@/components/app/notification-badge";
 import {
   farmerNavItems,
@@ -36,8 +36,7 @@ function NavLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
 
 export function Sidebar({ userEmail }: { userEmail?: string }) {
   const pathname = usePathname();
-  const router = useRouter();
-  const { viewMode, setViewMode } = useViewMode();
+  const { viewMode } = useViewMode();
 
   const checkActive = (href: string) => {
     if (pathname === href) return true;
@@ -90,34 +89,6 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
               ))}
             </div>
 
-            {/* Switch User */}
-            <p className="mt-4 px-3 text-[10px] font-semibold uppercase tracking-wider text-text-muted">
-              Switch User
-            </p>
-            <div className="mt-1 space-y-0.5">
-              <button
-                onClick={() => { setViewMode("farmer"); router.push("/dashboard"); }}
-                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
-                  viewMode === "farmer"
-                    ? "bg-brand/15 text-brand"
-                    : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
-                }`}
-              >
-                <Tractor className="h-5 w-5" />
-                Farmer
-              </button>
-              <button
-                onClick={() => { setViewMode("advisor"); router.push("/dashboard/advisor"); }}
-                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
-                  viewMode === "advisor"
-                    ? "bg-purple-500/15 text-purple-400"
-                    : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
-                }`}
-              >
-                <Briefcase className="h-5 w-5" />
-                Advisor
-              </button>
-            </div>
           </div>
         )}
 
