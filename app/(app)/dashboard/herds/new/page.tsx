@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
-import { AddHerdWizard } from "@/components/app/add-herd-wizard";
+import { AddHerdForm } from "@/components/app/add-herd-form";
 import { createHerd } from "../actions";
 
 export const metadata = {
@@ -15,7 +15,7 @@ export default async function NewHerdPage() {
 
   const { data: properties } = await supabase
     .from("properties")
-    .select("id, property_name")
+    .select("id, property_name, is_default, latitude, longitude, state")
     .eq("user_id", user!.id)
     .eq("is_deleted", false)
     .order("property_name");
@@ -26,7 +26,7 @@ export default async function NewHerdPage() {
         title="Add Herd"
         subtitle="Create a new herd to track your livestock."
       />
-      <AddHerdWizard
+      <AddHerdForm
         properties={properties ?? []}
         action={createHerd}
       />

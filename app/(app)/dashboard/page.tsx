@@ -14,6 +14,7 @@ import { DashboardQuickActions } from "@/components/app/dashboard-quick-actions"
 import { ComingUpCard } from "@/components/app/coming-up-card";
 import { GrowthMortalityCard } from "@/components/app/growth-mortality-card";
 import { AdvisorRedirect } from "@/components/app/advisory/advisor-redirect";
+import { DashboardSaleyardSelector } from "@/components/app/dashboard-saleyard-selector";
 
 export const revalidate = 0;
 
@@ -21,7 +22,8 @@ export const metadata = {
   title: "Dashboard",
 };
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ saleyard?: string }> }) {
+  const { saleyard: saleyardOverride } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -73,7 +75,12 @@ export default async function DashboardPage() {
   // Fetch pricing data in two parallel queries to avoid 50k limit truncating national prices
   // when multiple saleyards have large datasets. National prices are fetched separately to
   // guarantee they're always complete (critical for fallback resolution).
-  const saleyards = [...new Set((herds ?? []).map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
+  // When a saleyard override is active (from the dashboard selector), fetch prices for that
+  // saleyard only. Otherwise fetch for each herd's individual saleyard.
+  const resolvedOverride = saleyardOverride ? resolveMLASaleyardName(saleyardOverride) : null;
+  const saleyards = resolvedOverride
+    ? [resolvedOverride]
+    : [...new Set((herds ?? []).map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
   const primaryCategories = [...new Set((herds ?? []).map((h) => mapCategoryToMLACategory(h.category)))];
   const mlaCategories = [...new Set([...primaryCategories, ...primaryCategories.map(c => categoryFallback(c)).filter((c): c is string => c !== null)])];
 
@@ -139,11 +146,16 @@ export default async function DashboardPage() {
   }
 
   // Portfolio value using full iOS valuation formula with price source tracking
+  // When saleyard override is active, inject it into each herd so the valuation engine
+  // uses the override saleyard for price resolution (matches iOS DashboardView behaviour).
   let portfolioValue = 0;
   let fallbackCount = 0;
   for (const h of activeHerds) {
+    const herdWithOverride = saleyardOverride
+      ? { ...h, selected_saleyard: saleyardOverride }
+      : h;
     const result = calculateHerdValuation(
-      h as Parameters<typeof calculateHerdValuation>[0],
+      herdWithOverride as Parameters<typeof calculateHerdValuation>[0],
       nationalPriceMap, premiumMap, undefined, saleyardPriceMap, saleyardBreedPriceMap
     );
     portfolioValue += result.netValue;
@@ -158,10 +170,13 @@ export default async function DashboardPage() {
     const label = `${monthNames[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`;
     const futureDate = new Date(now.getTime() + i * 30 * 86_400_000);
     const value = activeHerds.reduce(
-      (sum, h) => sum + calculateHerdValuation(
-        h as Parameters<typeof calculateHerdValuation>[0],
-        nationalPriceMap, premiumMap, futureDate, saleyardPriceMap, saleyardBreedPriceMap
-      ).netValue,
+      (sum, h) => {
+        const herdWithOverride = saleyardOverride ? { ...h, selected_saleyard: saleyardOverride } : h;
+        return sum + calculateHerdValuation(
+          herdWithOverride as Parameters<typeof calculateHerdValuation>[0],
+          nationalPriceMap, premiumMap, futureDate, saleyardPriceMap, saleyardBreedPriceMap
+        ).netValue;
+      },
       0
     );
     return { month: label, value: Math.round(value) };
@@ -223,15 +238,6 @@ export default async function DashboardPage() {
             <div className="flex flex-col gap-3 lg:flex-row lg:gap-4">
               {/* Left column */}
               <div className="flex min-w-0 flex-1 flex-col gap-3 lg:gap-4">
-                <PortfolioValueCard
-                value={portfolioValue}
-                changePercent={changePercent}
-                fallbackCount={fallbackCount}
-                totalHead={totalHead}
-                herdCount={herdCount}
-                propertyCount={propertyCount}
-              />
-
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -243,6 +249,28 @@ export default async function DashboardPage() {
                   <PortfolioChart data={chartData} />
                 </CardContent>
               </Card>
+
+              {/* Stats row */}
+              <div className="grid grid-cols-3 gap-3">
+                <Card>
+                  <CardContent className="px-4 py-3 text-center">
+                    <p className="text-xs text-text-muted">Head</p>
+                    <p className="text-xl font-bold text-text-primary">{totalHead.toLocaleString()}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="px-4 py-3 text-center">
+                    <p className="text-xs text-text-muted">Herds</p>
+                    <p className="text-xl font-bold text-text-primary">{herdCount}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="px-4 py-3 text-center">
+                    <p className="text-xs text-text-muted">Properties</p>
+                    <p className="text-xl font-bold text-text-primary">{propertyCount}</p>
+                  </CardContent>
+                </Card>
+              </div>
 
               <Card>
                 <CardHeader>
@@ -308,7 +336,15 @@ export default async function DashboardPage() {
                 role={userRole}
               />
 
+              <PortfolioValueCard
+                value={portfolioValue}
+                changePercent={changePercent}
+                fallbackCount={fallbackCount}
+              />
+
               <DashboardQuickActions />
+
+              <DashboardSaleyardSelector currentSaleyard={saleyardOverride ?? null} />
 
               <ComingUpCard items={upcomingItems ?? []} />
 
