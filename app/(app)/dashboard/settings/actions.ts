@@ -131,7 +131,10 @@ export async function updateBio(formData: FormData) {
   return { success: "Bio updated." };
 }
 
-export async function updateVisibility(formData: FormData) {
+export async function updateVisibilityToggle(field: string, value: boolean) {
+  const allowed = ["is_discoverable", "is_discoverable_to_farmers", "is_listed_in_directory"];
+  if (!allowed.includes(field)) return { error: "Invalid field" };
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -141,20 +144,11 @@ export async function updateVisibility(formData: FormData) {
 
   const base = await getProfileBase(supabase, user.id, user.email);
 
-  // Checkboxes only appear in FormData if checked
-  const isDiscoverable = formData.has("is_discoverable");
-  const isDiscoverableToFarmers = formData.has("is_discoverable_to_farmers");
-  const isListedInDirectory = formData.has("is_listed_in_directory");
-
-  const err = await upsertProfile(supabase, base, {
-    is_discoverable: isDiscoverable,
-    is_discoverable_to_farmers: isDiscoverableToFarmers,
-    is_listed_in_directory: isListedInDirectory,
-  });
+  const err = await upsertProfile(supabase, base, { [field]: value });
   if (err) return { error: err };
 
   revalidatePath("/dashboard/settings");
-  return { success: "Visibility settings updated." };
+  return { success: true };
 }
 
 export async function updatePassword(formData: FormData) {

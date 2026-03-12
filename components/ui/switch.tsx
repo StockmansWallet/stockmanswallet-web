@@ -1,5 +1,11 @@
 "use client";
 
+const COLOR_CLASSES: Record<string, string> = {
+  brand: "peer-checked:bg-brand peer-focus-visible:ring-brand/60",
+  blue: "peer-checked:bg-blue-500 peer-focus-visible:ring-blue-500/60",
+  green: "peer-checked:bg-green-500 peer-focus-visible:ring-green-500/60",
+};
+
 interface SwitchProps {
   id?: string;
   name?: string;
@@ -9,6 +15,7 @@ interface SwitchProps {
   label?: string;
   description?: string;
   disabled?: boolean;
+  color?: "brand" | "blue" | "green";
 }
 
 export function Switch({
@@ -20,7 +27,10 @@ export function Switch({
   label,
   description,
   disabled,
+  color = "brand",
 }: SwitchProps) {
+  const colorClass = COLOR_CLASSES[color];
+
   return (
     <label
       htmlFor={id}
@@ -37,7 +47,7 @@ export function Switch({
           onChange={(e) => onChange?.(e.target.checked)}
           className="peer sr-only"
         />
-        <div className="h-6 w-11 rounded-full bg-white/10 transition-colors peer-checked:bg-brand peer-focus-visible:ring-2 peer-focus-visible:ring-brand/60 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-background" />
+        <div className={`h-6 w-11 rounded-full bg-white/10 transition-colors ${colorClass} peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-background`} />
         <div className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5" />
       </div>
       {(label || description) && (

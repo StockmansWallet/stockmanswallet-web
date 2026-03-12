@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
-import { updateVisibility } from "./actions";
+import { updateVisibilityToggle } from "./actions";
 
 export function VisibilityForm({
   isAdvisor,
@@ -16,63 +15,66 @@ export function VisibilityForm({
   isDiscoverableToFarmers: boolean;
   isListedInDirectory: boolean;
 }) {
-  const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const [values, setValues] = useState({
+    is_discoverable: isDiscoverable,
+    is_discoverable_to_farmers: isDiscoverableToFarmers,
+    is_listed_in_directory: isListedInDirectory,
+  });
+  const [saving, setSaving] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setMessage(null);
-    setSubmitting(true);
+  async function handleToggle(field: keyof typeof values, checked: boolean) {
+    setError(null);
+    setSaving(field);
+    setValues((prev) => ({ ...prev, [field]: checked }));
 
-    const formData = new FormData(e.currentTarget);
-    const result = await updateVisibility(formData);
+    const result = await updateVisibilityToggle(field, checked);
 
     if (result?.error) {
-      setMessage({ type: "error", text: result.error });
-    } else if (result?.success) {
-      setMessage({ type: "success", text: result.success });
+      setError(result.error);
+      setValues((prev) => ({ ...prev, [field]: !checked }));
     }
-    setSubmitting(false);
+    setSaving(null);
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      {message && (
-        <div
-          className={`rounded-xl border px-4 py-3 text-sm ${
-            message.type === "error"
-              ? "border-red-800 bg-red-900/20 text-red-400"
-              : "border-green-800 bg-green-900/20 text-green-400"
-          }`}
-        >
-          {message.text}
+    <div className="space-y-5">
+      {error && (
+        <div className="rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm text-red-400">
+          {error}
         </div>
       )}
 
       {isAdvisor ? (
         <Switch
           id="is_listed_in_directory"
-          name="is_listed_in_directory"
-          defaultChecked={isListedInDirectory}
+          checked={values.is_listed_in_directory}
+          onChange={(c) => handleToggle("is_listed_in_directory", c)}
+          disabled={saving === "is_listed_in_directory"}
           label="List in Advisor Directory"
           description="Farmers can find you when browsing or searching the directory."
+          color="blue"
         />
       ) : (
         <>
           <Switch
             id="is_discoverable"
-            name="is_discoverable"
-            defaultChecked={isDiscoverable}
+            checked={values.is_discoverable}
+            onChange={(c) => handleToggle("is_discoverable", c)}
+            disabled={saving === "is_discoverable"}
             label="Visible to Advisors"
             description="Your accountant, banker, or agent can find you by name or property."
+            color="blue"
           />
 
           <Switch
             id="is_discoverable_to_farmers"
-            name="is_discoverable_to_farmers"
-            defaultChecked={isDiscoverableToFarmers}
+            checked={values.is_discoverable_to_farmers}
+            onChange={(c) => handleToggle("is_discoverable_to_farmers", c)}
+            disabled={saving === "is_discoverable_to_farmers"}
             label="Visible to Farmers"
             description="Other farmers on Stockman's Wallet can find you in the Farmer Network."
+            color="green"
           />
         </>
       )}
@@ -82,10 +84,6 @@ export function VisibilityForm({
           ? "Control whether farmers can find you in the advisor directory."
           : "Control who can find you on Stockman's Wallet. You can turn these off at any time."}
       </p>
-
-      <Button type="submit" disabled={submitting}>
-        {submitting ? "Saving..." : "Save Visibility"}
-      </Button>
-    </form>
+    </div>
   );
 }
