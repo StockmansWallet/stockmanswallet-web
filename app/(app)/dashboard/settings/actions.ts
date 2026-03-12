@@ -26,18 +26,17 @@ export async function updateProfile(formData: FormData) {
 
   if (authError) return { error: authError.message };
 
-  // Update user_profiles table (role)
+  // Update user_profiles table (role + display_name)
   if (role) {
+    const displayName = [firstName, lastName].filter(Boolean).join(" ") || user.email || "";
     const { error: profileError } = await supabase
       .from("user_profiles")
-      .upsert(
-        {
-          user_id: user.id,
-          role,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "user_id" }
-      );
+      .update({
+        role,
+        display_name: displayName,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", user.id);
 
     if (profileError) return { error: profileError.message };
   }
