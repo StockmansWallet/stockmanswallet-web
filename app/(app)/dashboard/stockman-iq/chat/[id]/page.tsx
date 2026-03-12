@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
+import { ArrowLeft } from "lucide-react";
 import { fetchConversationsServer, fetchMessagesServer } from "@/lib/brangus/conversation-service-server";
 import { ConversationReview } from "@/components/app/brangus/conversation-review";
 
@@ -32,6 +34,15 @@ export default async function StockmanIQConversationPage({
         title={conversation.title ?? "Conversation"}
         subtitle={date}
         compact
+        actions={
+          <Link
+            href="/dashboard/stockman-iq"
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-text-secondary transition-colors hover:bg-white/[0.05] hover:text-text-primary"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Link>
+        }
       />
       <Card className="flex flex-1 flex-col overflow-hidden">
         <ConversationReview conversation={conversation} messages={messages} />
