@@ -4,7 +4,8 @@
 // Matches iOS review mode: no input bar, just message history
 
 import { useState, useRef, useEffect } from "react";
-import { Copy, Download, Check } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, Copy, Download, Check } from "lucide-react";
 import { ChatBubble } from "@/components/app/chat/chat-bubble";
 import { formatConversationForExport } from "@/lib/brangus/conversation-service";
 import type { BrangusConversationRow, BrangusMessageRow } from "@/lib/brangus/conversation-service";
@@ -56,8 +57,17 @@ export function ConversationReview({ conversation, messages }: ConversationRevie
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      {/* Export toolbar */}
-      <div className="flex items-center justify-end gap-2 px-4 py-2 border-b border-white/6">
+      {/* Toolbar */}
+      <div className="flex items-center gap-2 px-4 py-2 border-b border-white/6">
+        <Link
+          href="/dashboard/stockman-iq"
+          className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.05] hover:text-text-primary"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back
+        </Link>
+        <div className="flex-1" />
+        <div className="flex items-center gap-2">
         <button
           onClick={handleCopy}
           className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.05] hover:text-text-primary"
@@ -72,6 +82,7 @@ export function ConversationReview({ conversation, messages }: ConversationRevie
           <Download className="h-3.5 w-3.5" />
           Download
         </button>
+        </div>
       </div>
 
       {/* Messages */}

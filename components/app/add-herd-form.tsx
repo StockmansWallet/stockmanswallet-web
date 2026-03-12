@@ -428,7 +428,20 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                 <div className="flex items-start gap-2 text-xs text-text-muted sm:max-w-[60%]">
                   <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                   <span>
-                    {breedPremiumDescription(breed)}{" "}
+                    {(() => {
+                      const desc = breedPremiumDescription(breed);
+                      const dotIdx = desc.indexOf(".");
+                      if (dotIdx === -1) return desc;
+                      const first = desc.slice(0, dotIdx + 1);
+                      const rest = desc.slice(dotIdx + 1).trim();
+                      return (
+                        <>
+                          <span className="text-amber-400">{first}</span>
+                          {rest && <> {rest}</>}
+                        </>
+                      );
+                    })()}
+                    <br />
                     Override the default to reflect your local market,
                     bloodline quality, or program status. Use a positive value
                     for premium or negative for discount.
@@ -442,10 +455,10 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                   aria-checked={breedPremiumConfirmed}
                   aria-label="Confirm breed premium"
                   onClick={() => setBreedPremiumConfirmed(!breedPremiumConfirmed)}
-                  className={`flex shrink-0 items-center gap-3 rounded-lg border px-4 py-3 text-left transition-colors hover:bg-surface-secondary/80 ${
+                  className={`flex shrink-0 items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors hover:bg-surface-secondary/80 ${
                     breedPremiumConfirmed
                       ? "border-border bg-surface-secondary"
-                      : "border-brand/40 bg-surface-secondary"
+                      : "border-brand/40 shadow-[0_0_8px_#D9762F40] bg-surface-secondary"
                   }`}
                 >
                   <span
@@ -462,13 +475,14 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                     )}
                   </span>
                   <span className="text-sm text-text-primary">
-                    Confirm breed premium
+                    Confirm{" "}
                     {autoPremium !== null && !breedPremiumOverride && (
-                      <span className="ml-1 text-text-muted">({autoPremium > 0 ? "+" : ""}{autoPremium}%)</span>
+                      <span className="text-amber-400">{autoPremium > 0 ? "+" : ""}{autoPremium}%</span>
                     )}
                     {breedPremiumOverride && (
-                      <span className="ml-1 text-text-muted">(custom: {Number(breedPremiumOverride) > 0 ? "+" : ""}{breedPremiumOverride}%)</span>
+                      <span className="text-amber-400">{Number(breedPremiumOverride) > 0 ? "+" : ""}{breedPremiumOverride}%</span>
                     )}
+                    {" "}breed premium
                   </span>
                 </button>
               </div>
@@ -815,7 +829,7 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
       {/* ----------------------------------------------------------------- */}
       {/* Sticky save bar                                                    */}
       {/* ----------------------------------------------------------------- */}
-      <div className="sticky bottom-0 z-30 -mx-6 border-t border-border bg-background/80 backdrop-blur-xl lg:-mx-8">
+      <div className="sticky bottom-0 z-30 -mx-6 bg-background/80 backdrop-blur-xl lg:-mx-8">
         <div className="flex items-center justify-end px-6 py-3 lg:px-8">
           <Button type="button" size="md" disabled={!canSave} onClick={handleSave}>
             {submitting ? "Saving..." : "Save Herd"}
