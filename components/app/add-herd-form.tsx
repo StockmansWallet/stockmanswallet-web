@@ -166,23 +166,27 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
   const [category, setCategory] = useState("");
   const [breedPremiumOverride, setBreedPremiumOverride] = useState("");
 
+  // Section 1 - Breed premium confirmation
+  const [breedPremiumConfirmed, setBreedPremiumConfirmed] = useState(false);
+
   // Section 2 - Herd Size
   const [headCount, setHeadCount] = useState("");
   const [ageMonths, setAgeMonths] = useState("");
   const [initialWeight, setInitialWeight] = useState("");
 
-  // Section 3 - Growth & Mortality (now text inputs, all optional)
-  const [calvingRate, setCalvingRate] = useState("50");
-  const [dailyWeightGain, setDailyWeightGain] = useState("0");
-  const [mortalityRate, setMortalityRate] = useState("0");
+  // Section 3 - Growth & Mortality
+  const [calvingRate, setCalvingRate] = useState("");
+  const [dailyWeightGain, setDailyWeightGain] = useState("");
+  const [mortalityRate, setMortalityRate] = useState("");
 
-  // Section 4 - Calves at Foot (breeder only, checkbox gated)
-  const [calvesAtFoot, setCalvesAtFoot] = useState(false);
+  // Section 4 - Calves at Foot (breeder only, yes/no gate)
+  const [calvesAtFootAnswer, setCalvesAtFootAnswer] = useState<"" | "yes" | "no">("");
   const [calvesHeadCount, setCalvesHeadCount] = useState("");
   const [calvesAgeMonths, setCalvesAgeMonths] = useState("");
   const [calvesWeight, setCalvesWeight] = useState("");
 
-  // Section 5 - Breeding Details (breeder only)
+  // Section 5 - Breeding Details (breeder only, yes/no gate)
+  const [breedingDetailsAnswer, setBreedingDetailsAnswer] = useState<"" | "yes" | "no">("");
   const [breedingProgram, setBreedingProgram] = useState<BreedingProgram>("");
   const [joiningStart, setJoiningStart] = useState("");
   const [joiningEnd, setJoiningEnd] = useState("");
@@ -239,23 +243,24 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
   );
 
   // Section unlock checks
-  const section1Done = name.trim().length > 0 && species !== "" && breed !== "" && category !== "";
-  const section2Done = Number(headCount) > 0 && Number(initialWeight) > 0;
-  const section3Done = true; // all optional
-  // Calves at Foot + Breeding are breeder-only; both optional for unlock
-  const section4Done = true;
-  const section5Done = true;
-  const section6Done = true;
+  const section1Done = name.trim().length > 0 && species !== "" && breed !== "" && category !== "" && breedPremiumConfirmed;
+  const section2Done = Number(headCount) > 0 && ageMonths !== "" && Number(initialWeight) > 0;
+  const section3Done = dailyWeightGain !== "" && mortalityRate !== "" && (!isBreeder || calvingRate !== "");
+  // Calves at Foot: if yes, detail fields must be filled before advancing
+  const calvesDetailsDone = calvesHeadCount !== "" && calvesAgeMonths !== "" && calvesWeight !== "";
+  const section4FullyDone = calvesAtFootAnswer === "no" || (calvesAtFootAnswer === "yes" && calvesDetailsDone);
 
-  // Progressive reveal
+  // Progressive reveal - each section waits for the previous to be confirmed
   const showSection2 = section1Done;
   const showSection3 = showSection2 && section2Done;
-  const showSection4 = showSection3 && section3Done && isBreeder; // Calves at Foot
-  const showSection5 = showSection4 && section4Done && isBreeder; // Breeding Details
+  const showSection4 = showSection3 && section3Done && isBreeder; // Calves at Foot question
+  const showSection4b = showSection4 && calvesAtFootAnswer === "yes"; // Calves detail fields
+  const showSection5 = showSection4 && section4FullyDone; // Breeding question
+  const showSection5b = showSection5 && breedingDetailsAnswer === "yes"; // Breeding detail fields
   const showSection6 = isBreeder
-    ? showSection5 && section5Done
+    ? showSection5 && (breedingDetailsAnswer === "no" || breedingDetailsAnswer === "yes")
     : showSection3 && section3Done;
-  const showSection7 = showSection6 && section6Done;
+  const showSection7 = showSection6;
 
   // Save enabled - saleyard required, rest validated
   const canSave = section1Done && section2Done && saleyard !== "" && !submitting;
@@ -266,6 +271,7 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
     setBreed(breedsForSpecies(newSpecies)[0] ?? "");
     setCategory("");
     setBreedPremiumOverride("");
+    setBreedPremiumConfirmed(false);
   }
 
   function handleCategoryChange(v: string) {
@@ -274,10 +280,11 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
       setBreedingProgram("");
       setJoiningStart("");
       setJoiningEnd("");
-      setCalvesAtFoot(false);
+      setCalvesAtFootAnswer("");
       setCalvesHeadCount("");
       setCalvesAgeMonths("");
       setCalvesWeight("");
+      setBreedingDetailsAnswer("");
     }
   }
 
@@ -308,7 +315,7 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
       if (joiningStart) formData.set("joining_period_start", joiningStart);
       if (joiningEnd) formData.set("joining_period_end", joiningEnd);
 
-      if (calvesAtFoot && (calvesHeadCount || calvesAgeMonths || calvesWeight)) {
+      if (calvesAtFootAnswer === "yes" && (calvesHeadCount || calvesAgeMonths || calvesWeight)) {
         const parts = [];
         if (calvesHeadCount) parts.push(`Calves at Foot: ${calvesHeadCount} head`);
         if (calvesAgeMonths) parts.push(`${calvesAgeMonths} months`);
@@ -350,6 +357,7 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
               id="name"
               label="Herd Name"
               required
+              hint={!name.trim()}
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Breeders, Steers, Heifers"
@@ -359,6 +367,7 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
               id="category"
               label="Category"
               required
+              hint={!category}
               options={categoryOptions}
               groups={categoryGroups}
               placeholder="Select category"
@@ -379,11 +388,12 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
               id="breed"
               label="Breed"
               required
+              hint={!breed}
               custom
               options={breedOptions}
               placeholder="Select breed"
               value={breed}
-              onChange={(e) => setBreed(e.target.value)}
+              onChange={(e) => { setBreed(e.target.value); setBreedPremiumConfirmed(false); }}
             />
           </div>
 
@@ -401,31 +411,68 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
               id="breed_premium_override"
               label="Custom Breed Premium (%)"
               type="number"
-              step="0.1"
+              step="1"
               value={breedPremiumOverride}
-              onChange={(e) => setBreedPremiumOverride(e.target.value)}
-              placeholder={autoPremium !== null ? `Auto (${autoPremium}%)` : "Auto (none)"}
+              onChange={(e) => { setBreedPremiumOverride(e.target.value); setBreedPremiumConfirmed(false); }}
+              placeholder={autoPremium !== null ? `Default for ${breed} is ${autoPremium}%` : "No default premium"}
+              nudgeDefault={autoPremium ?? 0}
             />
           </div>
 
-          {/* Breed premium info */}
+          {/* Breed premium footer: divider, info left, confirm right */}
           {breed && (
-            <p className="flex items-start gap-2 text-xs text-text-muted">
-              <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-              <span>{breedPremiumDescription(breed)}</span>
-            </p>
-          )}
+            <>
+              <div className="border-t border-border" />
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                {/* Info text - left side */}
+                <div className="flex items-start gap-2 text-xs text-text-muted sm:max-w-[60%]">
+                  <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  <span>
+                    {breedPremiumDescription(breed)}{" "}
+                    Override the default to reflect your local market,
+                    bloodline quality, or program status. Use a positive value
+                    for premium or negative for discount.
+                  </span>
+                </div>
 
-          {/* Custom adjustment explanation */}
-          {breed && (
-            <p className="flex items-start gap-2 text-xs text-text-muted">
-              <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-              <span>
-                Override the default breed premium to reflect your local market,
-                bloodline quality, or program status (in comparison to market average).
-                Use a positive value for premium or negative for discount.
-              </span>
-            </p>
+                {/* Confirm checkbox - right side */}
+                <button
+                  type="button"
+                  role="checkbox"
+                  aria-checked={breedPremiumConfirmed}
+                  aria-label="Confirm breed premium"
+                  onClick={() => setBreedPremiumConfirmed(!breedPremiumConfirmed)}
+                  className={`flex shrink-0 items-center gap-3 rounded-lg border px-4 py-3 text-left transition-colors hover:bg-surface-secondary/80 ${
+                    breedPremiumConfirmed
+                      ? "border-border bg-surface-secondary"
+                      : "border-brand/40 bg-surface-secondary"
+                  }`}
+                >
+                  <span
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
+                      breedPremiumConfirmed
+                        ? "border-brand bg-brand"
+                        : "border-text-muted"
+                    }`}
+                  >
+                    {breedPremiumConfirmed && (
+                      <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </span>
+                  <span className="text-sm text-text-primary">
+                    Confirm breed premium
+                    {autoPremium !== null && !breedPremiumOverride && (
+                      <span className="ml-1 text-text-muted">({autoPremium > 0 ? "+" : ""}{autoPremium}%)</span>
+                    )}
+                    {breedPremiumOverride && (
+                      <span className="ml-1 text-text-muted">(custom: {Number(breedPremiumOverride) > 0 ? "+" : ""}{breedPremiumOverride}%)</span>
+                    )}
+                  </span>
+                </button>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
@@ -446,6 +493,7 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                 type="number"
                 min={1}
                 required
+                hint={!headCount}
                 value={headCount}
                 onChange={(e) => setHeadCount(e.target.value)}
                 placeholder="Number of head"
@@ -455,6 +503,8 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                 label="Average Age (months)"
                 type="number"
                 min={0}
+                required
+                hint={!ageMonths}
                 value={ageMonths}
                 onChange={(e) => setAgeMonths(e.target.value)}
                 placeholder="Months"
@@ -466,6 +516,7 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                 step="0.1"
                 min={0}
                 required
+                hint={!initialWeight}
                 value={initialWeight}
                 onChange={(e) => setInitialWeight(e.target.value)}
                 placeholder="Average weight"
@@ -476,7 +527,7 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
       </Section>
 
       {/* ----------------------------------------------------------------- */}
-      {/* Section 3: Growth & Mortality (input fields, all optional)          */}
+      {/* Section 3: Growth & Mortality                                       */}
       {/* ----------------------------------------------------------------- */}
       <Section show={showSection3}>
         <Card>
@@ -488,37 +539,43 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
               {isBreeder && (
                 <Input
                   id="calving_rate"
-                  label="Calving Rate (optional)"
+                  label="Calving Rate (%)"
                   type="number"
                   min={0}
                   max={100}
                   step={1}
+                  required
+                  hint={!calvingRate}
                   value={calvingRate}
                   onChange={(e) => setCalvingRate(e.target.value)}
-                  placeholder="50%"
+                  placeholder="%"
                 />
               )}
               <Input
                 id="daily_weight_gain"
-                label="Daily Weight Gain (optional)"
+                label="Daily Weight Gain (kg/day)"
                 type="number"
                 min={0}
                 max={3}
                 step={0.1}
+                required
+                hint={!dailyWeightGain}
                 value={dailyWeightGain}
                 onChange={(e) => setDailyWeightGain(e.target.value)}
-                placeholder="0 kg/day"
+                placeholder="kg/day"
               />
               <Input
                 id="mortality_rate"
-                label="Mortality Rate (optional)"
+                label="Mortality Rate (%)"
                 type="number"
                 min={0}
                 max={30}
                 step={1}
                 value={mortalityRate}
+                required
+                hint={!mortalityRate}
                 onChange={(e) => setMortalityRate(e.target.value)}
-                placeholder="0%"
+                placeholder="%"
               />
             </div>
           </CardContent>
@@ -526,101 +583,146 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
       </Section>
 
       {/* ----------------------------------------------------------------- */}
-      {/* Section 4: Calves at Foot (breeder only, checkbox gated)           */}
+      {/* Section 4: Calves at Foot question (breeder only)                  */}
       {/* ----------------------------------------------------------------- */}
       <Section show={showSection4}>
         <Card>
           <CardHeader>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                role="checkbox"
-                aria-checked={calvesAtFoot}
-                aria-label="Calves at Foot"
-                onClick={() => {
-                  setCalvesAtFoot(!calvesAtFoot);
-                  if (calvesAtFoot) {
-                    setCalvesHeadCount("");
-                    setCalvesAgeMonths("");
-                    setCalvesWeight("");
-                  }
-                }}
-                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
-                  calvesAtFoot
-                    ? "border-brand bg-brand"
-                    : "border-text-muted hover:border-text-secondary"
-                }`}
-              >
-                {calvesAtFoot && (
-                  <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-              </button>
-              <div>
-                <CardTitle className="text-base">Calves at Foot</CardTitle>
-                <p className="mt-1 text-sm text-text-secondary">
-                  Record any calves currently with this herd.
-                </p>
-              </div>
-            </div>
+            <CardTitle className="text-base">Calves at Foot</CardTitle>
+            <p className="mt-1 text-sm text-text-secondary">
+              Does this herd have any calves at foot?
+            </p>
           </CardHeader>
+          <CardContent className="px-5 pb-5">
+            <div className="flex gap-3">
+              {(["yes", "no"] as const).map((opt) => (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => {
+                    setCalvesAtFootAnswer(opt);
+                    if (opt === "no") {
+                      setCalvesHeadCount("");
+                      setCalvesAgeMonths("");
+                      setCalvesWeight("");
+                    }
+                  }}
+                  className={`rounded-full px-6 py-2 text-sm font-medium transition-colors ${
+                    calvesAtFootAnswer === opt
+                      ? "bg-brand text-white"
+                      : "bg-surface-secondary text-text-secondary hover:text-text-primary"
+                  }`}
+                >
+                  {opt === "yes" ? "Yes" : "No"}
+                </button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </Section>
 
-          {calvesAtFoot && (
-            <CardContent className="space-y-4 px-5 pb-5">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <Input
-                  id="calves_head"
-                  label="Head Count"
-                  type="number"
-                  min={0}
-                  required
-                  value={calvesHeadCount}
-                  onChange={(e) => setCalvesHeadCount(e.target.value)}
-                  placeholder="Number of calves"
-                />
-                <Input
-                  id="calves_age"
-                  label="Avg Age (months)"
-                  type="number"
-                  min={0}
-                  required
-                  value={calvesAgeMonths}
-                  onChange={(e) => setCalvesAgeMonths(e.target.value)}
-                  placeholder="Months"
-                />
-                <Input
-                  id="calves_weight"
-                  label="Avg Weight (kg)"
-                  type="number"
-                  step="0.1"
-                  min={0}
-                  required
-                  value={calvesWeight}
-                  onChange={(e) => setCalvesWeight(e.target.value)}
-                  placeholder="Weight in kg"
-                />
-              </div>
+      {/* Section 4b: Calves at Foot detail fields */}
+      <Section show={showSection4b}>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Calf Details</CardTitle>
+            <p className="mt-1 text-sm text-text-secondary">
+              Record the calves currently with this herd.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4 px-5 pb-5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <Input
+                id="calves_head"
+                label="Head Count"
+                type="number"
+                min={0}
+                required
+                hint={!calvesHeadCount}
+                value={calvesHeadCount}
+                onChange={(e) => setCalvesHeadCount(e.target.value)}
+                placeholder="Number of calves"
+              />
+              <Input
+                id="calves_age"
+                label="Avg Age (months)"
+                type="number"
+                min={0}
+                required
+                hint={!calvesAgeMonths}
+                value={calvesAgeMonths}
+                onChange={(e) => setCalvesAgeMonths(e.target.value)}
+                placeholder="Months"
+              />
+              <Input
+                id="calves_weight"
+                label="Avg Weight (kg)"
+                type="number"
+                step="0.1"
+                min={0}
+                required
+                hint={!calvesWeight}
+                value={calvesWeight}
+                onChange={(e) => setCalvesWeight(e.target.value)}
+                placeholder="Weight in kg"
+              />
+            </div>
 
-              <p className="flex items-start gap-2 text-xs text-text-muted">
-                <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                <span>
-                  Calving accrual commences at the midpoint of the joining period,
-                  reaching 100% at calving (approximately 9 months).
-                </span>
-              </p>
-            </CardContent>
-          )}
+            <p className="flex items-start gap-2 text-xs text-text-muted">
+              <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <span>
+                Calving accrual commences at the midpoint of the joining period,
+                reaching 100% at calving (approximately 9 months).
+              </span>
+            </p>
+          </CardContent>
         </Card>
       </Section>
 
       {/* ----------------------------------------------------------------- */}
-      {/* Section 5: Breeding Details (breeder only, optional)               */}
+      {/* Section 5: Breeding Details question (breeder only)                */}
       {/* ----------------------------------------------------------------- */}
       <Section show={showSection5}>
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Breeding Details</CardTitle>
+            <p className="mt-1 text-sm text-text-secondary">
+              Do you want to add breeding details?
+            </p>
+          </CardHeader>
+          <CardContent className="px-5 pb-5">
+            <div className="flex gap-3">
+              {(["yes", "no"] as const).map((opt) => (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => {
+                    setBreedingDetailsAnswer(opt);
+                    if (opt === "no") {
+                      setBreedingProgram("");
+                      setJoiningStart("");
+                      setJoiningEnd("");
+                    }
+                  }}
+                  className={`rounded-full px-6 py-2 text-sm font-medium transition-colors ${
+                    breedingDetailsAnswer === opt
+                      ? "bg-brand text-white"
+                      : "bg-surface-secondary text-text-secondary hover:text-text-primary"
+                  }`}
+                >
+                  {opt === "yes" ? "Yes" : "No"}
+                </button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </Section>
+
+      {/* Section 5b: Breeding detail fields */}
+      <Section show={showSection5b}>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Breeding Program</CardTitle>
             <p className="mt-1 text-sm text-text-secondary">How is this herd bred?</p>
           </CardHeader>
           <CardContent className="space-y-4 px-5 pb-5">
@@ -693,6 +795,7 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
             <Select
               id="saleyard"
               required
+              hint={!saleyard}
               custom
               options={saleyardData.flat}
               groups={saleyardData.groups}

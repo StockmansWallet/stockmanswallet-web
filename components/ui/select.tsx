@@ -19,6 +19,8 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   groups?: OptionGroup[];
   placeholder?: string;
   custom?: boolean;
+  /** Show a subtle orange ring to indicate the field still needs input */
+  hint?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -68,6 +70,7 @@ function GroupedSelect({
   value,
   onChange,
   required,
+  hint,
 }: SelectProps) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -180,7 +183,9 @@ function GroupedSelect({
             ? "ring-1 ring-inset ring-red-500/60"
             : open
               ? "ring-1 ring-inset ring-brand/60 bg-surface-raised"
-              : "focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
+              : hint
+                ? "ring-1 ring-inset ring-brand/40 focus:ring-brand/60 focus:bg-surface-raised"
+                : "focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
         }`}
       >
         <span className="truncate">{selectedLabel || placeholder || "Select"}</span>
@@ -232,7 +237,7 @@ function GroupedSelect({
 // ---------------------------------------------------------------------------
 
 const NativeSelect = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, error, helperText, id, options, placeholder, className = "", groups: _groups, custom: _custom, ...props }, ref) => {
+  ({ label, error, helperText, id, options, placeholder, className = "", groups: _groups, custom: _custom, hint, ...props }, ref) => {
     return (
       <div>
         {label && (
@@ -250,7 +255,9 @@ const NativeSelect = forwardRef<HTMLSelectElement, SelectProps>(
             className={`w-full appearance-none rounded-xl bg-surface py-3 pl-4 pr-10 text-sm text-text-primary outline-none transition-all ${
               error
                 ? "ring-1 ring-inset ring-red-500/60 focus:ring-red-500"
-                : "focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
+                : hint
+                  ? "ring-1 ring-inset ring-brand/40 focus:ring-brand/60 focus:bg-surface-raised"
+                  : "focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
             } ${className}`}
             {...props}
           >

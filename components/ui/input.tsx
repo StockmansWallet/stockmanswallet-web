@@ -5,10 +5,14 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
   helperText?: string;
+  /** Starting value for number stepper arrows when the field is empty */
+  nudgeDefault?: number;
+  /** Show a subtle orange ring to indicate the field still needs input */
+  hint?: boolean;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, helperText, id, className = "", type, step, min, max, onChange, value, ...props }, ref) => {
+  ({ label, error, helperText, id, className = "", type, step, min, max, onChange, value, nudgeDefault, hint, ...props }, ref) => {
     const isNumber = type === "number";
     const internalRef = useRef<HTMLInputElement>(null);
     const inputRef = (ref as React.RefObject<HTMLInputElement>) || internalRef;
@@ -16,7 +20,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     const nudge = useCallback(
       (direction: 1 | -1) => {
         const s = Number(step) || 1;
-        const current = Number(value) || 0;
+        const isEmpty = value === "" || value === undefined || value === null;
+        const current = isEmpty && nudgeDefault !== undefined ? nudgeDefault : (Number(value) || 0);
         let next = current + s * direction;
         // Respect min/max bounds
         if (min !== undefined && next < Number(min)) next = Number(min);
@@ -31,7 +36,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           currentTarget: syntheticTarget,
         } as unknown as React.ChangeEvent<HTMLInputElement>);
       },
-      [value, step, min, max, onChange],
+      [value, step, min, max, onChange, nudgeDefault],
     );
 
     const hasTrailingIcon = isNumber;
@@ -61,7 +66,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             } ${
               error
                 ? "ring-1 ring-inset ring-red-500/60 focus:ring-red-500"
-                : "focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
+                : hint
+                  ? "ring-1 ring-inset ring-brand/40 focus:ring-brand/60 focus:bg-surface-raised"
+                  : "focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
             } ${className}`}
             {...props}
           />
