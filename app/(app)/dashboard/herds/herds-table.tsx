@@ -280,7 +280,7 @@ export function HerdsTable({
       </div>
 
       {sorted.length === 0 ? (
-        <div className="overflow-hidden rounded-2xl bg-surface">
+        <div className="overflow-hidden rounded-2xl bg-surface-lowest">
           <p className="px-5 py-16 text-center text-sm text-text-muted">
             {search ? "No herds match your search." : "No herds found."}
           </p>
@@ -291,7 +291,7 @@ export function HerdsTable({
             const groupHead = group.herds.reduce((s, h) => s + (h.head_count ?? 0), 0);
             const groupValue = group.herds.reduce((s, h) => s + (herdValues[h.id] ?? 0), 0);
             return (
-              <div key={group.id ?? "_unassigned"} className="overflow-hidden rounded-2xl bg-surface">
+              <div key={group.id ?? "_unassigned"} className="overflow-hidden rounded-2xl bg-surface-lowest">
                 {/* Property header */}
                 <div className="flex items-center justify-between border-b border-border-subtle px-5 py-3.5">
                   <div className="flex items-center gap-2.5">
@@ -337,7 +337,7 @@ export function HerdsTable({
           })}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl bg-surface">
+        <div className="overflow-hidden rounded-2xl bg-surface-lowest">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
