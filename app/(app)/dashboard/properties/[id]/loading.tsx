@@ -4,7 +4,7 @@ export default function PropertyDetailLoading() {
   return (
     <div className="max-w-6xl">
       {/* PageHeader */}
-      <div className="mt-11 mb-8 flex items-center justify-between">
+      <div className="flex h-[var(--layout-header-h)] items-end justify-between pb-4 max-lg:pt-6">
         <div>
           <Skeleton className="mb-2 h-8 w-48" />
           <Skeleton className="h-4 w-32" />

@@ -43,7 +43,7 @@ export default async function AppLayout({
         {/* Main content */}
         <div className="flex flex-1 flex-col">
           <MobileNav userEmail={user.email} />
-          <main className="flex-1 overflow-y-auto p-6 lg:p-8">
+          <main className="flex-1 overflow-y-auto px-6 pb-6 lg:px-8 lg:pt-4 lg:pb-8">
             {children}
           </main>
         </div>

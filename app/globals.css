@@ -12,7 +12,7 @@
   --brand-orange-dark: #BD580F;
 
   /* Backgrounds — dark tones matching mockup */
-  --background: #1C1B1B;
+  --background: #1F1B18;
   --background-alt: #1A1A1A;
 
   /* Surfaces (cards, inputs) */
@@ -38,6 +38,9 @@
 
   /* Foreground (alias) */
   --foreground: #FFFFFF;
+
+  /* Layout */
+  --layout-header-h: 120px;
 
   /* Semantic */
   --success: #7CA749;

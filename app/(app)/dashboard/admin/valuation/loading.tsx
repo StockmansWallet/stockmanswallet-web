@@ -4,7 +4,7 @@ export default function ValuationLoading() {
   return (
     <div className="max-w-[1600px]">
       {/* PageHeader */}
-      <div className="mt-11 mb-8">
+      <div className="flex h-[var(--layout-header-h)] items-end pb-4 max-lg:pt-6">
         <Skeleton className="mb-2 h-8 w-48" />
         <Skeleton className="h-4 w-80" />
       </div>

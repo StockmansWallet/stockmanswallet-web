@@ -24,17 +24,35 @@ function PageHeader({
 }: PageHeaderProps) {
   const titleEl = <h1 className={titleClassName ?? "text-4xl font-bold text-text-primary"}>{title}</h1>;
 
-  return (
-    <div className={`flex items-center justify-between ${compact ? "mb-3" : `mb-8 ${inline ? "mt-[68px]" : "mt-11"}`}`}>
-      <div className={inline ? "flex items-baseline gap-3" : undefined}>
-        {titleHref ? <Link href={titleHref}>{titleEl}</Link> : titleEl}
-        {subtitle && (
-          <p className={subtitleClassName ?? (inline ? "text-sm text-text-muted" : "mt-1 text-sm text-text-muted")}>
-            {subtitle}
-          </p>
-        )}
+  if (compact) {
+    return (
+      <div className="mb-3 flex items-center justify-between">
+        <div className={inline ? "flex items-baseline gap-3" : undefined}>
+          {titleHref ? <Link href={titleHref}>{titleEl}</Link> : titleEl}
+          {subtitle && (
+            <p className={subtitleClassName ?? (inline ? "text-sm text-text-muted" : "mt-1 text-sm text-text-muted")}>
+              {subtitle}
+            </p>
+          )}
+        </div>
+        {actions && <div className="flex items-center gap-2">{actions}</div>}
       </div>
-      {actions && <div className="flex items-center gap-2">{actions}</div>}
+    );
+  }
+
+  return (
+    <div className="flex h-[var(--layout-header-h)] items-end pb-4 max-lg:pt-6">
+      <div className="flex flex-1 items-center justify-between">
+        <div className={inline ? "flex items-baseline gap-3" : undefined}>
+          {titleHref ? <Link href={titleHref}>{titleEl}</Link> : titleEl}
+          {subtitle && (
+            <p className={subtitleClassName ?? (inline ? "text-sm text-text-muted" : "mt-1 text-sm text-text-muted")}>
+              {subtitle}
+            </p>
+          )}
+        </div>
+        {actions && <div className="flex items-center gap-2">{actions}</div>}
+      </div>
     </div>
   );
 }
