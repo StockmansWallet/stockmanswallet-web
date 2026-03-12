@@ -25,7 +25,7 @@ export default function HerdDetailLoading() {
   return (
     <div className="max-w-6xl">
       {/* PageHeader */}
-      <div className="flex h-[var(--layout-header-h)] items-end justify-between pb-4 max-lg:pt-6">
+      <div className="flex items-end justify-between pb-4 pt-6">
         <div>
           <Skeleton className="mb-2 h-8 w-44" />
           <Skeleton className="h-4 w-52" />

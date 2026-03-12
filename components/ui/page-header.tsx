@@ -41,7 +41,7 @@ function PageHeader({
   }
 
   return (
-    <div className="flex h-[var(--layout-header-h)] items-end pb-4 max-lg:pt-6">
+    <div className="pb-4 pt-6">
       <div className="flex flex-1 items-center justify-between">
         <div className={inline ? "flex items-baseline gap-3" : undefined}>
           {titleHref ? <Link href={titleHref}>{titleEl}</Link> : titleEl}

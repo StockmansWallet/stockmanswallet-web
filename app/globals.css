@@ -39,9 +39,6 @@
   /* Foreground (alias) */
   --foreground: #FFFFFF;
 
-  /* Layout */
-  --layout-header-h: 120px;
-
   /* Semantic */
   --success: #7CA749;
   --warning: #DB9B4D;

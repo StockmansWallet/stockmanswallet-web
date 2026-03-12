@@ -59,14 +59,6 @@ export function ProfileForm({
         </div>
       )}
 
-      <Input
-        id="email"
-        label="Email"
-        value={email}
-        disabled
-        helperText="Email cannot be changed"
-      />
-
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Input
           id="first_name"
@@ -83,6 +75,14 @@ export function ProfileForm({
           placeholder="Last name"
         />
       </div>
+
+      <Input
+        id="email"
+        label="Email"
+        value={email}
+        disabled
+        helperText="Email cannot be changed"
+      />
 
       <Select
         id="role"

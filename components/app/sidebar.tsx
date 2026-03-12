@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/app/(auth)/actions";
 import { isAdminEmail } from "@/lib/data/admin";
@@ -50,19 +49,8 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
 
   return (
     <aside className="flex h-full w-64 flex-col">
-      {/* Zone 1: Logo - height matches content header zone */}
-      <div className="flex h-[var(--layout-header-h)] shrink-0 items-center justify-center px-5">
-        <Image
-          src="/images/sw-logo.svg"
-          alt="Stockman's Wallet"
-          width={150}
-          height={100}
-          className="max-h-20 w-auto opacity-90"
-        />
-      </div>
-
-      {/* Zone 2: Scrollable navigation */}
-      <nav className="min-h-0 flex-1 overflow-y-auto scrollbar-none px-4">
+      {/* Scrollable navigation */}
+      <nav className="min-h-0 flex-1 overflow-y-auto scrollbar-none px-4 pt-4">
         <div className="space-y-0.5">
           {mainItems.map((item) => (
             <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />

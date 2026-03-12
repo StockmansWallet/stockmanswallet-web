@@ -1,0 +1,44 @@
+import { forwardRef, type TextareaHTMLAttributes } from "react";
+
+interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+  label?: string;
+  error?: string;
+  helperText?: string;
+}
+
+const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
+  ({ label, error, helperText, id, className = "", ...props }, ref) => {
+    return (
+      <div>
+        {label && (
+          <label
+            htmlFor={id}
+            className="mb-1.5 block text-sm font-medium text-text-secondary"
+          >
+            {label}
+          </label>
+        )}
+        <textarea
+          ref={ref}
+          id={id}
+          className={`w-full rounded-xl bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all resize-none ${
+            error
+              ? "ring-1 ring-inset ring-red-500/60 focus:ring-red-500"
+              : "focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
+          } ${className}`}
+          {...props}
+        />
+        {error && (
+          <p className="mt-1.5 text-xs text-red-400">{error}</p>
+        )}
+        {helperText && !error && (
+          <p className="mt-1.5 text-xs text-text-muted">{helperText}</p>
+        )}
+      </div>
+    );
+  }
+);
+Textarea.displayName = "Textarea";
+
+export { Textarea };
+export type { TextareaProps };

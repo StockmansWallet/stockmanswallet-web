@@ -36,18 +36,26 @@ export default async function AppLayout({
 
   return (
     <AppProviders defaultMode={defaultMode}>
-      <div className="flex min-h-screen bg-background">
-        {/* Desktop sidebar */}
-        <div className="hidden lg:block">
-          <div className="sticky top-0 h-screen py-4 pl-6">
-            <Sidebar userEmail={user.email} />
-          </div>
-        </div>
+      <div className="flex min-h-screen flex-col bg-background">
+        {/* Mobile nav */}
+        <MobileNav userEmail={user.email} />
 
-        {/* Main content */}
-        <div className="flex flex-1 flex-col">
-          <MobileNav userEmail={user.email} />
-          <TopBar showViewToggle={showViewToggle} />
+        {/* Desktop top header bar - full width */}
+        <TopBar
+          showViewToggle={showViewToggle}
+          firstName={user.user_metadata?.first_name || ""}
+          lastName={user.user_metadata?.last_name || ""}
+          email={user.email || ""}
+        />
+
+        {/* Desktop sidebar + content */}
+        <div className="flex flex-1">
+          <div className="hidden lg:block">
+            <div className="sticky top-20 h-[calc(100vh-5rem)] py-4 pl-6">
+              <Sidebar userEmail={user.email} />
+            </div>
+          </div>
+
           <main className="flex-1 overflow-y-auto px-6 pb-6 lg:px-8 lg:pb-8">
             {children}
           </main>

@@ -8,7 +8,6 @@ import { HerdComposition } from "./herd-composition";
 import { PortfolioChart } from "./portfolio-chart";
 import { calculateHerdValuation, mapCategoryToMLACategory, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
-import { UserProfileCard } from "@/components/app/user-profile-card";
 import { PortfolioValueCard } from "@/components/app/portfolio-value-card";
 import { DashboardQuickActions } from "@/components/app/dashboard-quick-actions";
 import { ComingUpCard } from "@/components/app/coming-up-card";
@@ -31,9 +30,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
   const firstName = user?.user_metadata?.first_name || "Stockman";
   const lastName = user?.user_metadata?.last_name || "";
-  const userEmail = user?.email || "";
-  const userRole = user?.user_metadata?.role || "";
-
   const todayStr = new Date().toISOString().split("T")[0];
 
   const [{ data: herds }, { data: properties }, { data: breedPremiumData }, { data: upcomingItems }] = await Promise.all([
@@ -329,22 +325,15 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
             {/* Right column */}
             <div className="flex w-full flex-col gap-3 lg:w-[340px] lg:gap-4">
-              <UserProfileCard
-                firstName={firstName}
-                lastName={lastName}
-                email={userEmail}
-                role={userRole}
-              />
-
               <PortfolioValueCard
                 value={portfolioValue}
                 changePercent={changePercent}
                 fallbackCount={fallbackCount}
               />
 
-              <DashboardQuickActions />
-
               <DashboardSaleyardSelector currentSaleyard={saleyardOverride ?? null} />
+
+              <DashboardQuickActions />
 
               <ComingUpCard items={upcomingItems ?? []} />
 

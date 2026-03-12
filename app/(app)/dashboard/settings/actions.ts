@@ -47,6 +47,93 @@ export async function updateProfile(formData: FormData) {
   return { success: "Profile updated." };
 }
 
+export async function updateContactDetails(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Not authenticated" };
+
+  const contactEmail = formData.get("contact_email") as string;
+  const contactPhone = formData.get("contact_phone") as string;
+  const companyName = formData.get("company_name") as string | null;
+  const propertyName = formData.get("property_name") as string | null;
+
+  const updates: Record<string, unknown> = {
+    user_id: user.id,
+    contact_email: contactEmail || null,
+    contact_phone: contactPhone || null,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (companyName !== null) updates.company_name = companyName || null;
+  if (propertyName !== null) updates.property_name = propertyName || null;
+
+  const { error } = await supabase
+    .from("user_profiles")
+    .update(updates)
+    .eq("user_id", user.id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/settings");
+  return { success: "Contact details updated." };
+}
+
+export async function updateBio(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Not authenticated" };
+
+  const bio = formData.get("bio") as string;
+
+  const { error } = await supabase
+    .from("user_profiles")
+    .update({
+      bio: bio || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("user_id", user.id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/settings");
+  return { success: "Bio updated." };
+}
+
+export async function updateVisibility(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Not authenticated" };
+
+  // Checkboxes only appear in FormData if checked
+  const isDiscoverable = formData.has("is_discoverable");
+  const isDiscoverableToFarmers = formData.has("is_discoverable_to_farmers");
+  const isListedInDirectory = formData.has("is_listed_in_directory");
+
+  const { error } = await supabase
+    .from("user_profiles")
+    .update({
+      is_discoverable: isDiscoverable,
+      is_discoverable_to_farmers: isDiscoverableToFarmers,
+      is_listed_in_directory: isListedInDirectory,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("user_id", user.id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/settings");
+  return { success: "Visibility settings updated." };
+}
+
 export async function updatePassword(formData: FormData) {
   const supabase = await createClient();
   const {

@@ -4,7 +4,7 @@ export default function DashboardLoading() {
   return (
     <div className="max-w-6xl">
       {/* Page header */}
-      <div className="flex h-[var(--layout-header-h)] items-end pb-4 max-lg:pt-6">
+      <div className="pb-4 pt-6">
         <Skeleton className="mb-2 h-7 w-48" />
         <Skeleton className="h-4 w-56" />
       </div>

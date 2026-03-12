@@ -43,11 +43,11 @@ export function Header() {
           <Image
             src="/images/sw-logo-tally.svg"
             alt="Stockman's Wallet"
-            width={36}
-            height={36}
-            className="h-9 w-9"
+            width={44}
+            height={44}
+            className="h-11 w-11"
           />
-          <span className="text-lg font-bold text-white">Stockman&apos;s Wallet</span>
+          <span className="text-xl font-bold text-white">Stockman&apos;s Wallet</span>
         </Link>
 
         {/* Desktop Nav */}

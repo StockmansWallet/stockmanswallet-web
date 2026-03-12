@@ -27,46 +27,50 @@ export default function MarketPage() {
     <div className="max-w-6xl">
       <PageHeader title="Market" titleClassName="text-4xl font-bold text-brand" subtitle="Live livestock market intelligence and price indicators." />
 
-      <div className="space-y-4">
-        {/* National Indicators */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2.5">
-              <SectionIcon icon={TrendingUp} />
-              <CardTitle>National Indicators</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="divide-y divide-white/[0.04] p-0 px-5 pb-5">
-            {PLACEHOLDER_INDICATORS.map((ind) => (
-              <div key={ind.name} className="flex items-center justify-between py-3.5">
-                <p className="text-sm text-text-secondary">{ind.name}</p>
-                <div className="text-right">
-                  <p className="text-sm font-semibold tabular-nums text-text-primary">
-                    {ind.value} <span className="font-normal text-text-muted">{ind.unit}</span>
-                  </p>
-                </div>
+      <div className="flex flex-col gap-4 lg:flex-row">
+        {/* Left column - Market Pulse */}
+        <div className="flex-1 space-y-4">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2.5">
+                <SectionIcon icon={Activity} />
+                <CardTitle>Market Pulse</CardTitle>
               </div>
-            ))}
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent>
+              <EmptyState
+                title="Market pulse coming soon"
+                description="Live saleyard sale reports, regional price comparisons, and physical market activity will appear here."
+              />
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* Market Pulse */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2.5">
-              <SectionIcon icon={Activity} />
-              <CardTitle>Market Pulse</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <EmptyState
-              title="Market pulse coming soon"
-              description="Live saleyard sale reports, regional price comparisons, and physical market activity will appear here."
-            />
-          </CardContent>
-        </Card>
+        {/* Right column - National Indicators */}
+        <div className="w-full space-y-4 lg:w-[380px]">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2.5">
+                <SectionIcon icon={TrendingUp} />
+                <CardTitle>National Indicators</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="divide-y divide-white/[0.04] p-0 px-5 pb-5">
+              {PLACEHOLDER_INDICATORS.map((ind) => (
+                <div key={ind.name} className="flex items-center justify-between py-3.5">
+                  <p className="text-sm text-text-secondary">{ind.name}</p>
+                  <div className="text-right">
+                    <p className="text-sm font-semibold tabular-nums text-text-primary">
+                      {ind.value} <span className="font-normal text-text-muted">{ind.unit}</span>
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
 
-        <p className="text-xs text-text-muted">Market data integration coming soon.</p>
+          <p className="text-xs text-text-muted">Market data integration coming soon.</p>
+        </div>
       </div>
     </div>
   );
