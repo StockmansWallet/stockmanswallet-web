@@ -13,10 +13,10 @@ export const FEATURES: Feature[] = [
   {
     id: 'portfolio-dashboard',
     name: 'Portfolio Dashboard',
-    description: 'See your total livestock portfolio value at a glance. Live MLA market data updates your herds automatically, so you always know what your cattle are worth.',
+    description: 'See your total livestock portfolio value at a glance. Live saleyard market data updates your herds automatically, so you always know what your cattle are worth.',
     accentColor: '#D9762F',
     accentColorLight: '#F4A871',
-    bullets: ['Live MLA market pricing', 'Performance charts with time-range scrubbing', 'Capital concentration breakdown'],
+    bullets: ['Live saleyard market pricing', 'Performance charts with time-range scrubbing', 'Capital concentration breakdown'],
     icon: 'chart',
   },
   {
@@ -93,7 +93,7 @@ export const HOW_IT_WORKS_STEPS: Step[] = [
   {
     number: 2,
     title: 'Get real-time valuations',
-    description: 'Live MLA market data prices your herds automatically. Watch your portfolio value update daily with breeding accruals, weight gain projections, and mortality adjustments.',
+    description: 'Live saleyard market data prices your herds automatically. Watch your portfolio value update daily with breeding accruals, weight gain projections, and mortality adjustments.',
   },
   {
     number: 3,
@@ -114,7 +114,7 @@ export const PRICING_TIERS: PricingTier[] = [
     features: [
       { name: '1 property', included: true },
       { name: 'Unlimited herds', included: true },
-      { name: 'Live MLA market pricing', included: true },
+      { name: 'Live saleyard market pricing', included: true },
       { name: '50 Brangus AI queries/month', included: true },
       { name: '5 freight calculations/month', included: true },
       { name: 'Yard Book with reminders', included: true },
@@ -136,7 +136,7 @@ export const PRICING_TIERS: PricingTier[] = [
     features: [
       { name: 'Unlimited properties', included: true },
       { name: 'Unlimited herds', included: true },
-      { name: 'Live MLA market pricing', included: true },
+      { name: 'Live saleyard market pricing', included: true },
       { name: '150 Brangus AI queries/month', included: true },
       { name: '15 freight calculations/month', included: true },
       { name: 'Grid IQ processor analysis', included: true },

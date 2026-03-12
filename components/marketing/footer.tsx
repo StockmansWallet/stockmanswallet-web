@@ -20,7 +20,7 @@ export function Footer() {
               <span className="text-lg font-bold text-white">Stockman&apos;s Wallet</span>
             </div>
             <p className="mt-3 text-sm leading-relaxed text-text-secondary">
-              Intelligent Livestock Valuation. Real MLA market data, real-time herd valuations, and AI-powered capital timing intelligence for Australian producers.
+              Intelligent Livestock Valuation. Real market data, real-time herd valuations, and AI-powered capital timing intelligence for Australian producers.
             </p>
           </div>
 

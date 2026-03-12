@@ -1,4 +1,5 @@
 import Hero from '@/components/marketing/sections/hero'
+import Stats from '@/components/marketing/sections/stats'
 import Features from '@/components/marketing/sections/features'
 import HowItWorks from '@/components/marketing/sections/how-it-works'
 import StockmanIQ from '@/components/marketing/sections/stockman-iq'
@@ -11,6 +12,7 @@ export default function HomePage() {
   return (
     <>
       <Hero />
+      <Stats />
       <Features />
       <HowItWorks />
       <StockmanIQ />

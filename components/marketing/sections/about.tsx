@@ -1,31 +1,52 @@
+'use client'
+
+import { motion } from 'framer-motion'
 import { TEAM_MEMBERS } from '@/lib/marketing/constants'
-import SectionHeading from '@/components/marketing/ui/section-heading'
-import TeamMemberCard from '@/components/marketing/ui/team-member'
-import FadeInOnScroll from '@/components/marketing/animations/fade-in-on-scroll'
-import StaggerChildren, { StaggerItem } from '@/components/marketing/animations/stagger-children'
 
 export default function About() {
   return (
-    <section id="about" className="bg-bg-deep py-20 lg:py-28">
+    <section id="about" className="relative py-24 lg:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionHeading
-          eyebrow="About"
-          title="Built by Australians, for Australian producers"
-        />
-
-        <FadeInOnScroll>
-          <p className="mx-auto mb-12 max-w-2xl text-center text-base leading-relaxed text-text-secondary">
-            Stockman&apos;s Wallet was born in Queensland from a simple question: why don&apos;t livestock producers have the same portfolio tools as share market investors? We&apos;re building the capital intelligence platform that Australian agriculture deserves.
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center"
+        >
+          <span className="text-sm font-medium uppercase tracking-wider text-brand">About</span>
+          <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl lg:text-5xl">
+            Built by Australians, for{' '}
+            <br className="hidden sm:block" />
+            Australian producers
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-text-secondary">
+            We believe livestock producers deserve the same quality of financial tools available to equity investors. Real data, intelligent analysis, professional-grade reporting.
           </p>
-        </FadeInOnScroll>
+        </motion.div>
 
-        <StaggerChildren className="mx-auto grid max-w-3xl gap-6 sm:grid-cols-3">
-          {TEAM_MEMBERS.map((member) => (
-            <StaggerItem key={member.name}>
-              <TeamMemberCard member={member} />
-            </StaggerItem>
+        <div className="mx-auto mt-16 grid max-w-3xl gap-8 sm:grid-cols-3">
+          {TEAM_MEMBERS.map((member, i) => (
+            <motion.div
+              key={member.name}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+              className="text-center"
+            >
+              {/* Avatar */}
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-brand/15 bg-brand/10">
+                <span className="text-lg font-bold text-brand">
+                  {member.name.split(' ').map(n => n[0]).join('')}
+                </span>
+              </div>
+              <h3 className="mt-4 text-base font-medium text-white">{member.name}</h3>
+              <p className="text-sm font-medium text-brand">{member.role}</p>
+              <p className="mt-2 text-xs text-text-muted">{member.bio}</p>
+            </motion.div>
           ))}
-        </StaggerChildren>
+        </div>
       </div>
     </section>
   )

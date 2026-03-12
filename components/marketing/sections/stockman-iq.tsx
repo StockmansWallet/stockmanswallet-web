@@ -1,105 +1,193 @@
-import SectionHeading from '@/components/marketing/ui/section-heading'
-import FadeInOnScroll from '@/components/marketing/animations/fade-in-on-scroll'
-import LandingButton from '@/components/marketing/ui/landing-button'
-import LandingCard from '@/components/marketing/ui/landing-card'
+'use client'
+
+import { useState, useEffect, useRef } from 'react'
+import { motion, useInView } from 'framer-motion'
+
+const CHAT_MESSAGES = [
+  {
+    role: 'user' as const,
+    text: 'When should I sell my Brahman steers for the best return?',
+  },
+  {
+    role: 'assistant' as const,
+    text: 'Based on your 45 Brahman steers at 420kg with 1.2kg/day gain, here is my analysis:',
+  },
+]
+
+const INSIGHT_CARDS = [
+  { label: 'Best Sale Month', value: 'October', detail: 'at 520kg live weight' },
+  { label: 'Projected Value', value: '$147,712', detail: 'net of freight' },
+  { label: 'Sell vs Hold', value: '+$12,400', detail: 'selling in Oct vs Dec', positive: true },
+]
+
+function TypingText({ text, delay, onComplete }: { text: string; delay: number; onComplete?: () => void }) {
+  const [displayed, setDisplayed] = useState('')
+  const [started, setStarted] = useState(false)
+
+  useEffect(() => {
+    const startTimer = setTimeout(() => setStarted(true), delay)
+    return () => clearTimeout(startTimer)
+  }, [delay])
+
+  useEffect(() => {
+    if (!started) return
+    let i = 0
+    const timer = setInterval(() => {
+      i++
+      setDisplayed(text.slice(0, i))
+      if (i >= text.length) {
+        clearInterval(timer)
+        onComplete?.()
+      }
+    }, 18)
+    return () => clearInterval(timer)
+  }, [started, text, onComplete])
+
+  if (!started) return null
+
+  return (
+    <span>
+      {displayed}
+      {displayed.length < text.length && (
+        <span className="inline-block h-4 w-0.5 animate-pulse bg-brand ml-0.5" />
+      )}
+    </span>
+  )
+}
 
 export default function StockmanIQ() {
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true, margin: '-100px' })
+  const [showInsights, setShowInsights] = useState(false)
+
   return (
-    <section id="stockman-iq" className="py-20 lg:py-28">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
-          {/* Text Content */}
-          <div className="flex flex-col justify-center">
-            <FadeInOnScroll>
-              <SectionHeading
-                eyebrow="Stockman IQ"
-                title="Meet Brangus, your AI livestock advisor"
-                subtitle="Ask when to sell, where to sell, and what you'll net after freight."
-                centered={false}
-              />
-            </FadeInOnScroll>
+    <section id="stockman-iq" className="relative py-24 lg:py-32 overflow-hidden">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid items-center gap-16 lg:grid-cols-2 lg:gap-20">
+          {/* Text */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <span className="text-sm font-medium uppercase tracking-wider text-brand">Stockman IQ</span>
+            <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl lg:text-5xl">
+              AI-powered capital
+              <br />
+              timing intelligence
+            </h2>
+            <p className="mt-6 max-w-md text-base leading-relaxed text-text-secondary">
+              Ask questions in plain English. Get data-driven insights on when to sell, where to sell, and what you will net after freight and fees.
+            </p>
+            <ul className="mt-8 space-y-4">
+              {[
+                'Natural language questions about your herds',
+                'Voice input and output with Australian accent',
+                'Portfolio-aware responses using your live data',
+                'Create yard book events from conversation',
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand/15">
+                    <svg className="h-3 w-3 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-sm text-text-secondary">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
 
-            <FadeInOnScroll delay={0.15}>
-              <ul className="space-y-4">
-                {[
-                  { title: 'Natural language questions', desc: 'Ask about your herds, market trends, freight costs, and farm operations in plain English.' },
-                  { title: 'Voice input and output', desc: 'Hands-free mode with ElevenLabs natural voice. Perfect for when you are out in the paddock.' },
-                  { title: 'Portfolio-aware responses', desc: 'Brangus references your actual herd data, properties, sales history, and upcoming events.' },
-                  { title: 'Action from conversation', desc: 'Create Yard Book events, calculate freight, and manage tasks directly from chat.' },
-                ].map((item) => (
-                  <li key={item.title} className="flex gap-3">
-                    <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand/20">
-                      <svg className="h-3 w-3 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-white">{item.title}</p>
-                      <p className="text-sm text-text-secondary">{item.desc}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </FadeInOnScroll>
-
-            <FadeInOnScroll delay={0.3}>
-              <div className="mt-8">
-                <LandingButton href="#signup">Get Early Access</LandingButton>
-              </div>
-            </FadeInOnScroll>
-          </div>
-
-          {/* Chat Mockup + Insight Cards */}
-          <FadeInOnScroll direction="left" delay={0.2} className="flex flex-col gap-6">
-            {/* Chat Interface Mockup */}
-            <LandingCard className="glass overflow-hidden">
-              <div className="mb-4 flex items-center gap-3 border-b border-white/5 pb-4">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand">
-                  <span className="text-xs font-bold text-white">B</span>
+          {/* Chat Demo */}
+          <motion.div
+            ref={ref}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="relative"
+          >
+            <div className="rounded-3xl border border-white/[0.06] bg-bg-card-1 p-6 shadow-2xl sm:p-8">
+              {/* Chat header */}
+              <div className="mb-6 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/20">
+                  <svg className="h-5 w-5 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                  </svg>
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-white">Brangus</p>
-                  <p className="text-xs text-text-tertiary">AI Livestock Advisor</p>
+                  <p className="text-xs text-text-muted">Stockman IQ Assistant</p>
+                </div>
+                <div className="ml-auto flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
+                  <span className="text-xs text-text-muted">Online</span>
                 </div>
               </div>
 
               {/* Messages */}
               <div className="space-y-4">
-                {/* User message */}
-                <div className="flex justify-end">
-                  <div className="max-w-[80%] rounded-[16px] rounded-br-[4px] bg-brand px-4 py-3">
-                    <p className="text-sm text-white">When should I sell my Brahman steers?</p>
-                  </div>
-                </div>
+                {inView && (
+                  <>
+                    {/* User message */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: 0.3 }}
+                      className="flex justify-end"
+                    >
+                      <div className="max-w-[85%] rounded-2xl rounded-br-md bg-brand/20 px-4 py-3">
+                        <p className="text-sm text-white">{CHAT_MESSAGES[0].text}</p>
+                      </div>
+                    </motion.div>
 
-                {/* Bot response */}
-                <div className="flex justify-start">
-                  <div className="max-w-[85%] rounded-[16px] rounded-bl-[4px] bg-bg-card-2 px-4 py-3">
-                    <p className="text-sm leading-relaxed text-text-secondary">
-                      Based on your 100 Brahman steers at 350 kg gaining 0.8 kg/day, and 5-year MLA price trends for Roma, <span className="font-medium text-brand-light">October looks like your strongest sale window</span>. At projected weight of 422 kg and current trends, you are looking at approximately <span className="font-medium text-brand-light">$147,700 gross value</span>.
-                    </p>
-                    <p className="mt-2 text-sm leading-relaxed text-text-secondary">
-                      Freight to Roma from your property would cost approximately $1,240 (2 decks), netting you around <span className="font-medium text-brand-light">$146,460 after transport</span>.
-                    </p>
+                    {/* AI message */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: 1.2 }}
+                      className="flex justify-start"
+                    >
+                      <div className="max-w-[85%] rounded-2xl rounded-bl-md bg-bg-card-2 px-4 py-3">
+                        <p className="text-sm text-text-secondary leading-relaxed">
+                          <TypingText
+                            text={CHAT_MESSAGES[1].text}
+                            delay={1500}
+                            onComplete={() => setShowInsights(true)}
+                          />
+                        </p>
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+
+                {/* Insight cards */}
+                {showInsights && (
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    {INSIGHT_CARDS.map((card, i) => (
+                      <motion.div
+                        key={card.label}
+                        initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ duration: 0.4, delay: i * 0.15 }}
+                        className="rounded-xl border border-white/[0.06] bg-bg-card-2 p-3"
+                      >
+                        <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">{card.label}</p>
+                        <p className={`mt-1 text-lg font-bold ${card.positive ? 'text-success' : 'text-white'}`}>
+                          {card.value}
+                        </p>
+                        <p className="text-[11px] text-text-muted">{card.detail}</p>
+                      </motion.div>
+                    ))}
                   </div>
-                </div>
+                )}
               </div>
-            </LandingCard>
-
-            {/* Insight Cards */}
-            <div className="grid grid-cols-2 gap-3">
-              <LandingCard level={2} className="text-center">
-                <p className="text-xs font-semibold uppercase tracking-wider text-brand">Best Sale Month</p>
-                <p className="mt-2 text-2xl font-bold text-white">October</p>
-                <p className="mt-1 text-xs text-text-tertiary">Based on 5-year trends</p>
-              </LandingCard>
-              <LandingCard level={2} className="text-center">
-                <p className="text-xs font-semibold uppercase tracking-wider text-success">Sell vs Hold</p>
-                <p className="mt-2 text-2xl font-bold text-white">+$12,400</p>
-                <p className="mt-1 text-xs text-text-tertiary">If held 60 more days</p>
-              </LandingCard>
             </div>
-          </FadeInOnScroll>
+
+            {/* Glow */}
+            <div className="absolute -inset-6 -z-10 rounded-3xl bg-brand/[0.04] blur-3xl" />
+          </motion.div>
         </div>
       </div>
     </section>

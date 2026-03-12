@@ -1,137 +1,176 @@
+'use client'
+
+import { useRef } from 'react'
 import Image from 'next/image'
-import FadeInOnScroll from '@/components/marketing/animations/fade-in-on-scroll'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import EmailForm from '@/components/marketing/ui/email-form'
 
 export default function Hero() {
+  const sectionRef = useRef<HTMLElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start start', 'end start'],
+  })
+
+  const phoneY = useTransform(scrollYProgress, [0, 1], [0, 80])
+  const textY = useTransform(scrollYProgress, [0, 1], [0, -40])
+
   return (
-    <section id="hero" className="relative flex min-h-screen items-center overflow-hidden pt-16">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-brand/5 via-bg-primary to-bg-primary" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(217,118,47,0.08)_0%,_transparent_60%)]" />
+    <section
+      ref={sectionRef}
+      id="hero"
+      className="relative flex min-h-[100dvh] items-center overflow-hidden"
+    >
+      {/* Subtle top-left radial gradient - centre pushed far off-screen so only the soft tail is visible */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: 'radial-gradient(ellipse 2200px 2200px at -500px -500px, rgba(217,118,47,0.12) 0%, transparent 70%)',
+        }}
+      />
 
-      <div className="relative mx-auto grid max-w-7xl gap-12 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8 lg:py-32">
-        {/* Text Content */}
-        <div className="flex flex-col justify-center">
-          <FadeInOnScroll>
-            <p className="mb-4 text-sm font-semibold uppercase tracking-wider text-brand">
-              Australian AgTech
-            </p>
-          </FadeInOnScroll>
+      {/* Noise texture to eliminate gradient banding */}
+      <div
+        className="pointer-events-none absolute inset-0 mix-blend-soft-light"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`,
+          opacity: 0.1,
+        }}
+      />
 
-          <FadeInOnScroll delay={0.1}>
-            <h1 className="text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
-              Know what your cattle are worth.{' '}
-              <span className="text-brand">Every day.</span>
-            </h1>
-          </FadeInOnScroll>
-
-          <FadeInOnScroll delay={0.2}>
-            <p className="mt-4 text-lg text-brand-light font-medium">
+      {/* Content */}
+      <div className="relative mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
+        <div className="grid items-center gap-16 lg:grid-cols-2 lg:gap-20">
+          {/* Text Column */}
+          <motion.div
+            style={{ y: textY }}
+            className="flex flex-col items-start"
+          >
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-sm font-medium tracking-wide text-brand-light"
+            >
               Intelligent Livestock Valuation
-            </p>
-          </FadeInOnScroll>
+            </motion.p>
 
-          <FadeInOnScroll delay={0.3}>
-            <p className="mt-4 max-w-lg text-base leading-relaxed text-text-secondary">
-              Real MLA market data. Real-time herd valuations. Zero guesswork. Capital timing intelligence for Australian livestock producers and rural advisors.
-            </p>
-          </FadeInOnScroll>
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+              className="mt-5 text-[clamp(2.5rem,5vw,4.5rem)] font-semibold leading-[1.05] tracking-tight text-white"
+            >
+              Know what your
+              <br />
+              livestock are worth.
+              <br />
+              <span className="bg-gradient-to-br from-brand-light via-brand to-brand-dark bg-clip-text text-transparent">
+                Every day.
+              </span>
+            </motion.h1>
 
-          <FadeInOnScroll delay={0.4}>
-            <div className="mt-8">
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="mt-6 max-w-md text-lg leading-relaxed text-text-secondary"
+            >
+              Live saleyard market data. Real-time herd valuations. AI-powered capital timing intelligence for Australian producers and rural advisors.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="mt-10 w-full max-w-md"
+            >
               <EmailForm />
-            </div>
-          </FadeInOnScroll>
+              <p className="mt-3 text-xs text-text-muted">
+                Join the waitlist. Free early access for founding members.
+              </p>
+            </motion.div>
 
-          <FadeInOnScroll delay={0.5}>
-            <div className="mt-6 flex items-center gap-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.7 }}
+              className="mt-8 flex items-center gap-4"
+            >
               <Image
                 src="/images/download-on-app-store.svg"
                 alt="Download on the App Store"
                 width={120}
                 height={40}
-                className="h-10 w-auto"
+                className="h-10 w-auto opacity-60 transition-opacity hover:opacity-100"
               />
-              <p className="text-xs text-text-tertiary">iPhone (iOS 18.0+)</p>
-            </div>
-          </FadeInOnScroll>
-        </div>
+              <span className="text-xs text-text-muted">iPhone, iOS 18.0+</span>
+            </motion.div>
+          </motion.div>
 
-        {/* App Mockup */}
-        <FadeInOnScroll direction="left" delay={0.3} className="flex items-center justify-center">
-          <div className="relative">
-            {/* Phone — clean frameless mockup */}
-            <div className="relative mx-auto w-[280px] sm:w-[300px]">
+          {/* Phone Column */}
+          <motion.div
+            style={{ y: phoneY }}
+            className="relative flex items-center justify-center"
+          >
+            {/* Phone mockup */}
+            <motion.div
+              initial={{ opacity: 0, y: 40, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="relative z-10 w-[260px] sm:w-[280px] lg:w-[300px]"
+            >
               <Image
                 src="/images/mockup-dashboard.png"
-                alt="Stockman's Wallet app dashboard showing livestock portfolio valuation"
+                alt="Stockman's Wallet app dashboard"
                 width={390}
                 height={844}
-                className="w-full drop-shadow-[0_20px_60px_rgba(217,118,47,0.15)]"
+                className="w-full"
                 priority
               />
-            </div>
+            </motion.div>
 
-            {/* Floating Portfolio Value Card */}
-            <div className="absolute -left-36 top-8 hidden w-56 rounded-[20px] border border-white/[0.08] bg-[rgba(39,31,22,0.7)] p-5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl lg:block">
-              <p className="text-xs text-text-tertiary">Portfolio Value</p>
-              <p className="mt-1 text-3xl font-bold text-white">$1.52M</p>
-              <div className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-success/15 px-2.5 py-0.5">
+            {/* Floating card: Portfolio Value */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, delay: 0.8 }}
+              className="absolute -left-4 top-12 z-20 hidden w-52 rounded-2xl glass p-4 shadow-2xl lg:block xl:-left-20"
+            >
+              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Portfolio Value</p>
+              <p className="mt-1 text-2xl font-semibold text-white">$1.52M</p>
+              <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5">
                 <svg className="h-3 w-3 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M7 17l5-5 3 3 4-4" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 11h4v4" />
                 </svg>
-                <span className="text-xs font-semibold text-success">+6,319%</span>
+                <span className="text-[11px] font-semibold text-success">+6.3%</span>
               </div>
-            </div>
+            </motion.div>
 
-            {/* Floating Chart Card */}
-            <div className="absolute -right-32 bottom-24 hidden w-60 rounded-[20px] border border-white/[0.08] bg-[rgba(39,31,22,0.7)] p-5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl lg:block">
-              <div className="mb-3 flex items-center justify-between">
-                <p className="text-xs font-medium text-text-secondary">Performance</p>
-                <p className="text-xs text-brand">All Time</p>
+            {/* Floating card: AI Insight */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, delay: 1.0 }}
+              className="absolute -right-4 bottom-28 z-20 hidden w-56 rounded-2xl glass p-4 shadow-2xl lg:block xl:-right-16"
+            >
+              <div className="flex items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/20">
+                  <svg className="h-4 w-4 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                  </svg>
+                </div>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-brand-light">Stockman IQ</p>
               </div>
-              <svg viewBox="0 0 200 80" className="w-full" fill="none">
-                <defs>
-                  <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#D9762F" stopOpacity="0.3" />
-                    <stop offset="100%" stopColor="#D9762F" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M0 70 L10 68 L25 65 L40 60 L55 55 L65 48 L75 45 L85 40 L95 38 L105 32 L115 28 L125 25 L135 22 L145 18 L155 15 L165 14 L175 12 L185 10 L200 8 L200 80 L0 80 Z"
-                  fill="url(#chartGradient)"
-                />
-                <path
-                  d="M0 70 L10 68 L25 65 L40 60 L55 55 L65 48 L75 45 L85 40 L95 38 L105 32 L115 28 L125 25 L135 22 L145 18 L155 15 L165 14 L175 12 L185 10 L200 8"
-                  stroke="#D9762F"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <circle cx="200" cy="8" r="3" fill="#D9762F" />
-              </svg>
-              <div className="mt-3 flex gap-1">
-                {['1D', '7D', '1M', '3M', '6M', 'All'].map((range) => (
-                  <span
-                    key={range}
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                      range === 'All'
-                        ? 'bg-brand/20 text-brand'
-                        : 'text-text-tertiary'
-                    }`}
-                  >
-                    {range}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Glow effect */}
-            <div className="absolute -inset-10 -z-10 rounded-full bg-brand/10 blur-3xl" />
-          </div>
-        </FadeInOnScroll>
+              <p className="mt-2 text-xs leading-relaxed text-text-secondary">
+                Optimal sale window: <span className="font-semibold text-white">October</span> at <span className="font-semibold text-white">520kg</span>
+              </p>
+            </motion.div>
+          </motion.div>
+        </div>
       </div>
+
     </section>
   )
 }
