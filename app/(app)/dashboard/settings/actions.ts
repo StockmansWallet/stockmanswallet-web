@@ -3,6 +3,52 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { roleToSnakeCase } from "@/lib/types/advisory";
+
+type SupabaseClient = Awaited<ReturnType<typeof createClient>>;
+
+/**
+ * Build the required base fields for user_profiles upsert.
+ * Matches iOS FarmerDiscoveryService.UserProfilePayload pattern.
+ */
+async function getProfileBase(supabase: SupabaseClient, userId: string, email?: string) {
+  // Try to read existing row for current display_name and role
+  const { data: existing } = await supabase
+    .from("user_profiles")
+    .select("display_name, role")
+    .eq("user_id", userId)
+    .single();
+
+  // Get auth metadata for name
+  const { data: { user } } = await supabase.auth.getUser();
+  const firstName = user?.user_metadata?.first_name || "";
+  const lastName = user?.user_metadata?.last_name || "";
+  const displayName = [firstName, lastName].filter(Boolean).join(" ") || email || "";
+
+  return {
+    user_id: userId,
+    display_name: displayName || existing?.display_name || email || "",
+    role: existing?.role || "farmer_grazier",
+  };
+}
+
+/**
+ * Upsert user_profiles row. Matches iOS pattern:
+ * .upsert(payload, onConflict: "user_id")
+ */
+async function upsertProfile(
+  supabase: SupabaseClient,
+  base: { user_id: string; display_name: string; role: string },
+  fields: Record<string, unknown>,
+) {
+  const { error } = await supabase
+    .from("user_profiles")
+    .upsert(
+      { ...base, ...fields, updated_at: new Date().toISOString() },
+      { onConflict: "user_id" },
+    );
+  return error?.message || null;
+}
 
 export async function updateProfile(formData: FormData) {
   const supabase = await createClient();
@@ -18,28 +64,19 @@ export async function updateProfile(formData: FormData) {
 
   // Update auth metadata (name)
   const { error: authError } = await supabase.auth.updateUser({
-    data: {
-      first_name: firstName,
-      last_name: lastName,
-    },
+    data: { first_name: firstName, last_name: lastName },
   });
 
   if (authError) return { error: authError.message };
 
-  // Update user_profiles table (role + display_name)
-  if (role) {
-    const displayName = [firstName, lastName].filter(Boolean).join(" ") || user.email || "";
-    const { error: profileError } = await supabase
-      .from("user_profiles")
-      .update({
-        role,
-        display_name: displayName,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("user_id", user.id);
-
-    if (profileError) return { error: profileError.message };
-  }
+  // Upsert user_profiles
+  const displayName = [firstName, lastName].filter(Boolean).join(" ") || user.email || "";
+  const err = await upsertProfile(
+    supabase,
+    { user_id: user.id, display_name: displayName, role: roleToSnakeCase(role) },
+    {},
+  );
+  if (err) return { error: err };
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/settings");
@@ -54,27 +91,23 @@ export async function updateContactDetails(formData: FormData) {
 
   if (!user) return { error: "Not authenticated" };
 
+  const base = await getProfileBase(supabase, user.id, user.email);
+
   const contactEmail = formData.get("contact_email") as string;
   const contactPhone = formData.get("contact_phone") as string;
   const companyName = formData.get("company_name") as string | null;
   const propertyName = formData.get("property_name") as string | null;
 
-  const updates: Record<string, unknown> = {
-    user_id: user.id,
+  const fields: Record<string, unknown> = {
     contact_email: contactEmail || null,
     contact_phone: contactPhone || null,
-    updated_at: new Date().toISOString(),
   };
 
-  if (companyName !== null) updates.company_name = companyName || null;
-  if (propertyName !== null) updates.property_name = propertyName || null;
+  if (companyName !== null) fields.company_name = companyName || null;
+  if (propertyName !== null) fields.property_name = propertyName || null;
 
-  const { error } = await supabase
-    .from("user_profiles")
-    .update(updates)
-    .eq("user_id", user.id);
-
-  if (error) return { error: error.message };
+  const err = await upsertProfile(supabase, base, fields);
+  if (err) return { error: err };
 
   revalidatePath("/dashboard/settings");
   return { success: "Contact details updated." };
@@ -88,17 +121,11 @@ export async function updateBio(formData: FormData) {
 
   if (!user) return { error: "Not authenticated" };
 
+  const base = await getProfileBase(supabase, user.id, user.email);
   const bio = formData.get("bio") as string;
 
-  const { error } = await supabase
-    .from("user_profiles")
-    .update({
-      bio: bio || null,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("user_id", user.id);
-
-  if (error) return { error: error.message };
+  const err = await upsertProfile(supabase, base, { bio: bio || null });
+  if (err) return { error: err };
 
   revalidatePath("/dashboard/settings");
   return { success: "Bio updated." };
@@ -112,22 +139,19 @@ export async function updateVisibility(formData: FormData) {
 
   if (!user) return { error: "Not authenticated" };
 
+  const base = await getProfileBase(supabase, user.id, user.email);
+
   // Checkboxes only appear in FormData if checked
   const isDiscoverable = formData.has("is_discoverable");
   const isDiscoverableToFarmers = formData.has("is_discoverable_to_farmers");
   const isListedInDirectory = formData.has("is_listed_in_directory");
 
-  const { error } = await supabase
-    .from("user_profiles")
-    .update({
-      is_discoverable: isDiscoverable,
-      is_discoverable_to_farmers: isDiscoverableToFarmers,
-      is_listed_in_directory: isListedInDirectory,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("user_id", user.id);
-
-  if (error) return { error: error.message };
+  const err = await upsertProfile(supabase, base, {
+    is_discoverable: isDiscoverable,
+    is_discoverable_to_farmers: isDiscoverableToFarmers,
+    is_listed_in_directory: isListedInDirectory,
+  });
+  if (err) return { error: err };
 
   revalidatePath("/dashboard/settings");
   return { success: "Visibility settings updated." };
@@ -182,7 +206,6 @@ export async function deleteAccount() {
   const jwt = sessionData.session?.access_token;
   if (!jwt) return { error: "No active session" };
 
-  // Call the delete-account Edge Function
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const response = await fetch(`${supabaseUrl}/functions/v1/delete-account`, {
     method: "POST",
@@ -197,7 +220,6 @@ export async function deleteAccount() {
     return { error: body.error || `Server error (${response.status})` };
   }
 
-  // Sign out after account deletion
   await supabase.auth.signOut();
   redirect("/login");
 }
