@@ -9,6 +9,15 @@ import { useRef, useState, useCallback } from "react";
 import { ChevronRight } from "lucide-react";
 import type { QuickInsight, CardAction } from "@/lib/brangus/types";
 
+// Abbreviate common terms so card text fits without truncation
+function compact(text: string): string {
+  return text
+    .replace(/\bhead\b/gi, "h")
+    .replace(/\bherds\b/gi, "herds")
+    .replace(/\bacross\b/gi, "across")
+    .replace(/\bactive herds\b/gi, "herds");
+}
+
 const sentimentColor: Record<QuickInsight["sentiment"], string> = {
   positive: "text-success",
   negative: "text-error",
@@ -26,7 +35,7 @@ function QuickInsightCard({
 
   return (
     <div
-      className={`flex min-w-[100px] max-w-[150px] shrink-0 flex-col gap-1 rounded-xl border border-white/8 bg-white/5 px-3 py-2.5 ${
+      className={`flex min-w-[100px] max-w-[180px] shrink-0 flex-col gap-1 rounded-xl border border-white/8 bg-white/5 px-3 py-2.5 ${
         hasTap ? "cursor-pointer transition-opacity hover:opacity-80" : ""
       }`}
       onClick={hasTap ? () => onCardAction(insight.action!) : undefined}
@@ -52,12 +61,12 @@ function QuickInsightCard({
       <span
         className={`text-[17px] font-bold leading-tight ${sentimentColor[insight.sentiment]} truncate`}
       >
-        {insight.value}
+        {compact(insight.value)}
       </span>
       <span
         className={`text-[10px] truncate ${insight.subtitle ? "text-text-secondary" : "text-transparent"}`}
       >
-        {insight.subtitle || "\u00A0"}
+        {insight.subtitle ? compact(insight.subtitle) : "\u00A0"}
       </span>
     </div>
   );
@@ -121,7 +130,7 @@ export function QuickInsightRow({
   return (
     <div
       ref={containerRef}
-      className={`flex gap-2 overflow-x-auto pb-1 pl-4 scrollbar-none ${isDragging ? "cursor-grabbing select-none" : "cursor-grab"}`}
+      className={`flex gap-2 overflow-x-auto pb-1 px-3 scrollbar-none ${isDragging ? "cursor-grabbing select-none" : "cursor-grab"}`}
       onMouseDown={handleMouseDown}
       onMouseMove={isDragging ? handleMouseMove : undefined}
       onMouseUp={handleMouseUp}

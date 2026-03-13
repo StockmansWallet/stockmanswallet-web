@@ -540,7 +540,7 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
       .select("*")
       .eq("user_id", userId)
       .eq("is_deleted", false)
-      .order("date"),
+      .order("event_date"),
     supabase
       .from("muster_records")
       .select("*")

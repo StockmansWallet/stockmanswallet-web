@@ -24,8 +24,8 @@ const SUGGESTED_PROMPTS = [
   "Give me a breakdown of all my herds",
 ];
 
-// Brangus brand brown (matches Theme+StockmanIQ.swift)
-const BRANGUS_BG = "#4D331F";
+// Brangus bubble background - warm brown
+const BRANGUS_BG = "#44372D";
 // User brand color
 const USER_BG = "var(--color-brand)";
 
@@ -252,9 +252,9 @@ export function BrangusChat() {
                 <ChatBubble
                   key={msg.id}
                   side={isUser ? "right" : "left"}
-                  bgClass={isUser ? "bg-brand" : "bg-[#4D331F]"}
+                  bgClass={isUser ? "bg-brand" : "bg-[#44372D]"}
                   tailColor={isUser ? USER_BG : BRANGUS_BG}
-                  textClass={isUser ? "text-white" : "text-text-primary"}
+                  textClass={isUser ? "text-white" : "text-white/80"}
                   animate
                   animationType={isPostTyping ? "fade" : "bounce"}
                 >
@@ -335,6 +335,11 @@ function EmptyState({ onPromptClick }: { onPromptClick: (prompt: string) => void
 
 // MARK: - Formatted Response (renders markdown-like formatting)
 
+// Detect "Heading - body text" pattern (e.g. "Brahman Steers - 42 head, sitting at 350kg...")
+// Handles both plain labels and **bold** markdown labels from Brangus
+// Label: starts with uppercase, max ~40 chars, no periods. Body: the rest after " - "
+const HEADING_RE = /^\*{0,2}([A-Za-z][A-Za-z0-9 '&/,.]{0,38}?)\*{0,2} - (.+)$/;
+
 function FormattedResponse({ text }: { text: string }) {
   // Split into paragraphs and render with basic formatting
   const paragraphs = text.split("\n\n").filter((p) => p.trim());
@@ -355,6 +360,19 @@ function FormattedResponse({ text }: { text: string }) {
                   <div key={j} className="flex gap-2 pl-1">
                     <span className="text-text-muted shrink-0">-</span>
                     <span className="whitespace-pre-wrap">{formatInlineText(trimmed.slice(2))}</span>
+                  </div>
+                );
+              }
+
+              // Heading - Body pattern (e.g. "Brahman Steers - 42 head, valued at...")
+              const headingMatch = trimmed.match(HEADING_RE);
+              if (headingMatch) {
+                return (
+                  <div key={j} className={j > 0 ? "mt-2" : ""}>
+                    <p className="text-[15px] font-bold text-white">{headingMatch[1]}</p>
+                    <p className="mt-0.5 whitespace-pre-wrap">
+                      {formatInlineText(headingMatch[2])}
+                    </p>
                   </div>
                 );
               }
