@@ -156,7 +156,7 @@ export const toolDefinitions = [
   {
     name: "display_summary_cards",
     description:
-      "Displays 2-4 small summary cards below your response highlighting key figures. Call this at the END of your response (alongside your text) when you mention 2 or more specific numbers (prices, values, dates, head counts). Each card shows one key figure. Do NOT call this for greetings, how-to answers, or responses with no numeric data.",
+      "ALWAYS call this alongside your text response when you cite ANY specific numbers (prices, values, temperatures, head counts, weights, percentages, distances). Cards appear in a persistent strip the user scrolls through. Include weather readings (temp, conditions), portfolio values, prices, freight costs, head counts. Only skip this for greetings or pure text answers with zero numbers.",
     input_schema: {
       type: "object",
       properties: {
@@ -173,7 +173,7 @@ export const toolDefinitions = [
             required: ["label", "value", "sentiment"],
           },
           maxItems: 4,
-          minItems: 2,
+          minItems: 1,
         },
       },
       required: ["cards"],

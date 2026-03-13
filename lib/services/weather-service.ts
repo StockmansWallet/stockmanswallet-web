@@ -182,42 +182,56 @@ export async function fetchAllPropertyWeather(
 // Debug: Uses Open-Meteo geocoding API to resolve a place name to lat/lon
 // Debug: Filters to Australian results first, then falls back to worldwide
 
+// Debug: Geocode helper - searches Open-Meteo geocoding API and returns results
+async function geocodeSearch(query: string): Promise<GeoResult[]> {
+  const params = new URLSearchParams({
+    name: query,
+    count: "10",
+    language: "en",
+    format: "json",
+  });
+
+  const response = await fetch(
+    `https://geocoding-api.open-meteo.com/v1/search?${params}`,
+    { signal: AbortSignal.timeout(5000) }
+  );
+
+  if (!response.ok) return [];
+  const data = await response.json() as { results?: GeoResult[] };
+  return data.results ?? [];
+}
+
+interface GeoResult {
+  name: string;
+  latitude: number;
+  longitude: number;
+  country: string;
+  country_code: string;
+  admin1?: string;
+  admin2?: string;
+}
+
 export async function fetchWeatherForLocation(
   locationName: string
 ): Promise<PropertyWeatherData | null> {
   try {
-    // Geocode the location name
-    const geoParams = new URLSearchParams({
-      name: locationName,
-      count: "5",
-      language: "en",
-      format: "json",
-    });
+    // Debug: First search with location name as-is
+    let results = await geocodeSearch(locationName);
 
-    const geoResponse = await fetch(
-      `https://geocoding-api.open-meteo.com/v1/search?${geoParams}`,
-      { signal: AbortSignal.timeout(5000) }
-    );
+    // Debug: Prefer Australian results
+    let auResult = results.find((r) => r.country_code === "AU");
 
-    if (!geoResponse.ok) return null;
+    // Debug: If no AU result, retry with "Australia" appended to bias the search
+    if (!auResult && results.length > 0) {
+      const auResults = await geocodeSearch(`${locationName} Australia`);
+      auResult = auResults.find((r) => r.country_code === "AU");
+      // Debug: Merge results if AU retry found something
+      if (auResult) results = auResults;
+    }
 
-    const geoData = await geoResponse.json() as {
-      results?: Array<{
-        name: string;
-        latitude: number;
-        longitude: number;
-        country: string;
-        country_code: string;
-        admin1?: string;
-        admin2?: string;
-      }>;
-    };
+    if (results.length === 0) return null;
 
-    if (!geoData.results || geoData.results.length === 0) return null;
-
-    // Prefer Australian results
-    const auResult = geoData.results.find((r) => r.country_code === "AU");
-    const result = auResult ?? geoData.results[0];
+    const result = auResult ?? results[0];
 
     const description = [result.admin2, result.admin1, result.country]
       .filter(Boolean)
