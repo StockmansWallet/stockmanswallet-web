@@ -142,6 +142,25 @@ export async function bulkSoftDeleteConversations(
   }
 }
 
+// MARK: - Client-side message fetching (for embedded chat panel)
+
+export async function fetchMessages(
+  conversationId: string
+): Promise<BrangusMessageRow[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("brangus_messages")
+    .select("*")
+    .eq("conversation_id", conversationId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Failed to fetch messages:", error.message);
+    return [];
+  }
+  return data ?? [];
+}
+
 // MARK: - Export formatting (matches iOS share format)
 
 export function formatConversationForExport(

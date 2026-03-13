@@ -27,9 +27,11 @@ function timeAgo(dateStr: string): string {
 
 interface ConversationListProps {
   conversations: BrangusConversationRow[];
+  onSelect?: (id: string) => void;
+  activeId?: string | null;
 }
 
-export function ConversationList({ conversations }: ConversationListProps) {
+export function ConversationList({ conversations, onSelect, activeId }: ConversationListProps) {
   const router = useRouter();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [selectMode, setSelectMode] = useState(false);
@@ -160,6 +162,8 @@ export function ConversationList({ conversations }: ConversationListProps) {
               onClick={() => {
                 if (selectMode) {
                   toggleSelect(conv.id);
+                } else if (onSelect) {
+                  onSelect(conv.id);
                 } else {
                   router.push(`/dashboard/stockman-iq/chat/${conv.id}`);
                 }
@@ -167,12 +171,13 @@ export function ConversationList({ conversations }: ConversationListProps) {
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   if (selectMode) toggleSelect(conv.id);
+                  else if (onSelect) onSelect(conv.id);
                   else router.push(`/dashboard/stockman-iq/chat/${conv.id}`);
                 }
               }}
               className={`group flex w-full cursor-pointer items-start gap-3 rounded-xl p-3 text-left transition-colors hover:bg-white/[0.05] ${
                 isDeleting ? "pointer-events-none opacity-40" : ""
-              } ${isSelected ? "bg-white/[0.04]" : ""}`}
+              } ${isSelected ? "bg-white/[0.04]" : ""} ${activeId === conv.id ? "bg-brand/10" : ""}`}
             >
               {/* Checkbox in select mode, icon otherwise */}
               {selectMode ? (
