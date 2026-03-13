@@ -452,9 +452,65 @@ function lookupMarketPrices(category: string | undefined, store: ChatDataStore):
 // MARK: - Seasonal Pricing (simplified - returns current prices as proxy)
 
 function lookupSeasonalPricing(category: string | undefined, store: ChatDataStore): string {
-  // Web app doesn't have seasonal data loaded yet - return current prices as guidance
-  return lookupMarketPrices(category, store) +
-    "\n\nNote: Seasonal historical data is not yet available on the web version. These are current market prices.";
+  if (store.seasonalData.length === 0) {
+    return "SEASONAL PRICING: No seasonal data available. Market data may still be loading.";
+  }
+
+  const monthNames = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  // Filter by category if provided (case-insensitive, also checks MLA-mapped name)
+  let filtered = store.seasonalData;
+  if (category && category.trim()) {
+    const mlaCat = mapCategoryToMLACategory(category);
+    filtered = store.seasonalData.filter((s) => {
+      const cat = s.category.toLowerCase();
+      const q = category.toLowerCase();
+      const mla = mlaCat.toLowerCase();
+      return cat.includes(q) || q.includes(cat) || cat.includes(mla) || mla.includes(cat);
+    });
+  }
+
+  if (filtered.length === 0) {
+    const available = store.seasonalData.map((s) => s.category).join(", ");
+    return `No seasonal data for '${category}'. Available categories: ${available}`;
+  }
+
+  // Detect if all entries are fallback
+  const allFallback = filtered.every((s) => s.isFallback);
+  const lines: string[] = [];
+
+  if (allFallback) {
+    lines.push("SEASONAL PRICE PATTERNS (estimated monthly averages, $/kg):");
+    lines.push("Based on typical Australian cattle market patterns. Real historical data not yet available.");
+    lines.push("NOTE: These are estimates. Cite them as 'typical seasonal patterns' not 'MLA data'.");
+  } else {
+    lines.push("SEASONAL PRICE PATTERNS (historical monthly averages from 2020-2026, $/kg):");
+    lines.push("Based on 6 years of MLA saleyard data.");
+  }
+  lines.push("INSTRUCTION: When the user asks about sale timing or historical prices, you MUST quote these specific monthly $/kg figures. Never give vague answers like 'historically prices tend to be higher' without citing the actual data below.");
+
+  for (const entry of filtered) {
+    let line = `- ${entry.category}:`;
+    // Sort months and format
+    const sorted = Object.entries(entry.monthlyAvg)
+      .map(([m, v]) => ({ month: Number(m), price: v }))
+      .sort((a, b) => a.month - b.month);
+    const monthParts = sorted.map((s) => `${monthNames[s.month]}=$${s.price.toFixed(2)}`);
+    line += " " + monthParts.join(", ");
+
+    // Best and worst months with spread
+    if (entry.bestMonth !== null) {
+      const bestPrice = entry.monthlyAvg[entry.bestMonth];
+      const worst = sorted.reduce((min, s) => (s.price < min.price ? s : min), sorted[0]);
+      line += ` [BEST MONTH: ${monthNames[entry.bestMonth]} at $${bestPrice.toFixed(2)}/kg`;
+      const spread = bestPrice - worst.price;
+      line += `, WORST MONTH: ${monthNames[worst.month]} at $${worst.price.toFixed(2)}/kg`;
+      line += `, SPREAD: $${spread.toFixed(2)}/kg]`;
+    }
+    lines.push(line);
+  }
+
+  return lines.join("\n");
 }
 
 // MARK: - Sales History
@@ -543,10 +599,10 @@ function lookupYardBook(store: ChatDataStore): string {
 
   const now = new Date();
   const overdue = store.yardBookItems.filter(
-    (i) => !i.is_completed && new Date(i.date) < now
+    (i) => !i.is_completed && new Date(i.event_date) < now
   );
   const upcoming = store.yardBookItems.filter(
-    (i) => !i.is_completed && new Date(i.date) >= now
+    (i) => !i.is_completed && new Date(i.event_date) >= now
   );
   const completed = store.yardBookItems.filter((i) => i.is_completed);
 
@@ -555,19 +611,19 @@ function lookupYardBook(store: ChatDataStore): string {
   if (overdue.length > 0) {
     lines.push(`\nOVERDUE (${overdue.length}):`);
     for (const item of overdue) {
-      lines.push(`- ${item.title} (${item.date}, ${item.category})`);
+      lines.push(`- ${item.title} (${item.event_date}, ${item.category_raw})`);
     }
   }
   if (upcoming.length > 0) {
     lines.push(`\nUPCOMING (${upcoming.length}):`);
     for (const item of upcoming.slice(0, 10)) {
-      lines.push(`- ${item.title} (${item.date}, ${item.category})`);
+      lines.push(`- ${item.title} (${item.event_date}, ${item.category_raw})`);
     }
   }
   if (completed.length > 0) {
     lines.push(`\nRECENTLY COMPLETED (${Math.min(completed.length, 5)}):`);
     for (const item of completed.slice(0, 5)) {
-      lines.push(`- ${item.title} (${item.date}, ${item.category})`);
+      lines.push(`- ${item.title} (${item.event_date}, ${item.category_raw})`);
     }
   }
 

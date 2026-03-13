@@ -70,6 +70,9 @@ export interface ChatDataStore {
   killSheets: KillSheetRow[];
   processorGrids: ProcessorGridRow[];
 
+  // Seasonal monthly averages per category (month 1-12 → $/kg)
+  seasonalData: SeasonalCategoryData[];
+
   // Weather data for property_weather lookups (fetched from Open-Meteo)
   weatherData: PropertyWeatherData[];
 
@@ -142,8 +145,8 @@ export interface SalesRow {
 export interface YardBookRow {
   id: string;
   title: string;
-  date: string;
-  category: string;
+  event_date: string;
+  category_raw: string;
   is_completed: boolean;
   notes: string | null;
 }
@@ -233,6 +236,15 @@ export interface ProcessorGridRow {
   grid_date: string;
   expiry_date: string | null;
   location: string | null;
+}
+
+// MARK: - Seasonal Data
+
+export interface SeasonalCategoryData {
+  category: string;
+  monthlyAvg: Record<number, number>; // month (1-12) → $/kg
+  bestMonth: number | null;
+  isFallback: boolean;
 }
 
 // MARK: - Pending Mutations

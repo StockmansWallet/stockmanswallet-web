@@ -89,14 +89,15 @@ export function BrangusChat() {
     // Create new yard book events
     for (const event of dataStore.pendingYardBookEvents) {
       await supabase.from("yard_book_items").insert({
+        id: crypto.randomUUID(),
         user_id: user.id,
         title: event.title,
-        date: event.date,
-        category: event.category,
+        event_date: event.date,
+        category_raw: event.category,
         is_all_day: event.is_all_day,
         notes: event.notes ?? null,
         is_recurring: event.is_recurring,
-        recurrence_rule: event.recurrence_rule ?? null,
+        recurrence_rule_raw: event.recurrence_rule ?? null,
       });
     }
     dataStore.pendingYardBookEvents = [];

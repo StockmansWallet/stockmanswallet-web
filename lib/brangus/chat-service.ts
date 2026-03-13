@@ -2,7 +2,7 @@
 // Mirrors iOS StockmanIQChatService - handles API calls, tool loop, system prompt
 
 import { createClient } from "../supabase/client";
-import { calculateHerdValue, mapCategoryToMLACategory, categoryFallback, type CategoryPriceEntry } from "../engines/valuation-engine";
+import { calculateHerdValue, mapCategoryToMLACategory, categoryFallback, defaultFallbackPrice, type CategoryPriceEntry } from "../engines/valuation-engine";
 import { cattleBreedPremiums } from "../data/reference-data";
 import { toolDefinitions, executeTool, DISPLAY_ONLY_TOOLS } from "./tools";
 import { fetchAllPropertyWeather } from "../services/weather-service";
@@ -13,6 +13,7 @@ import type {
   AnthropicResponse,
   ChatDataStore,
   QuickInsight,
+  SeasonalCategoryData,
 } from "./types";
 
 const MODEL = "claude-haiku-4-5-20251001";
@@ -138,8 +139,8 @@ TOOL TIPS:
     }
   }
 
-  const overdueItems = store.yardBookItems.filter((i) => !i.is_completed && new Date(i.date) < new Date());
-  const upcomingItems = store.yardBookItems.filter((i) => !i.is_completed && new Date(i.date) >= new Date());
+  const overdueItems = store.yardBookItems.filter((i) => !i.is_completed && new Date(i.event_date) < new Date());
+  const upcomingItems = store.yardBookItems.filter((i) => !i.is_completed && new Date(i.event_date) >= new Date());
   if (overdueItems.length > 0 || upcomingItems.length > 0) {
     indexLines.push(`Yard Book: ${upcomingItems.length} upcoming, ${overdueItems.length} overdue`);
   }
@@ -615,6 +616,9 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
   // Fetch weather for properties with coordinates (non-blocking, parallel)
   const weatherData = await fetchAllPropertyWeather(properties ?? []);
 
+  // Fetch seasonal data - try historical_market_prices first, fall back to synthetic patterns
+  const seasonalData = await fetchSeasonalData(mlaCategories, supabase);
+
   return {
     herds: herds ?? [],
     properties: properties ?? [],
@@ -627,6 +631,7 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
     nationalPriceMap,
     saleyardPriceMap,
     premiumMap,
+    seasonalData,
     gridIQAnalyses: gridIQAnalyses ?? [],
     killSheets: killSheets ?? [],
     processorGrids: processorGrids ?? [],
@@ -634,4 +639,102 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
     pendingYardBookEvents: [],
     pendingYardBookActions: [],
   };
+}
+
+// MARK: - Seasonal Data (mirrors iOS StockmanIQHistoricalPricing + fallback)
+
+// Monthly seasonal multipliers - based on typical QLD cattle market patterns (matches iOS)
+const SEASONAL_MULTIPLIERS: Record<number, number> = {
+  1: 1.02,   // Jan - post-holiday recovery
+  2: 1.05,   // Feb - restocking demand building
+  3: 1.08,   // Mar - peak (autumn restocking)
+  4: 1.04,   // Apr - easing from peak
+  5: 0.99,   // May - heading into winter
+  6: 0.94,   // Jun - winter low
+  7: 0.93,   // Jul - trough (feed costs, higher turnoff)
+  8: 0.95,   // Aug - early spring recovery
+  9: 0.98,   // Sep - spring improvement
+  10: 1.01,  // Oct - good pasture
+  11: 1.00,  // Nov - steady
+  12: 1.01,  // Dec - pre-holiday
+};
+
+async function fetchSeasonalData(
+  mlaCategories: string[],
+  supabase: ReturnType<typeof createClient>
+): Promise<SeasonalCategoryData[]> {
+  if (mlaCategories.length === 0) return [];
+
+  try {
+    // Try historical_market_prices table (same as iOS StockmanIQHistoricalPricing)
+    const { data: rows, error } = await supabase
+      .from("historical_market_prices")
+      .select("category, price_per_kg, price_date")
+      .in("category", mlaCategories);
+
+    if (!error && rows && rows.length > 0) {
+      // Aggregate by category + calendar month
+      const catMap = new Map<string, Map<number, { sum: number; count: number }>>();
+
+      for (const row of rows) {
+        const month = new Date(row.price_date).getMonth() + 1; // 1-12
+        if (!catMap.has(row.category)) catMap.set(row.category, new Map());
+        const monthMap = catMap.get(row.category)!;
+        const existing = monthMap.get(month) ?? { sum: 0, count: 0 };
+        monthMap.set(month, { sum: existing.sum + row.price_per_kg, count: existing.count + 1 });
+      }
+
+      const results: SeasonalCategoryData[] = [];
+      for (const [category, monthMap] of catMap) {
+        const monthlyAvg: Record<number, number> = {};
+        let bestMonth: number | null = null;
+        let bestPrice = -1;
+
+        for (const [month, data] of monthMap) {
+          const avg = Math.round((data.sum / data.count) * 100) / 100;
+          monthlyAvg[month] = avg;
+          if (avg > bestPrice) {
+            bestPrice = avg;
+            bestMonth = month;
+          }
+        }
+
+        results.push({ category, monthlyAvg, bestMonth, isFallback: false });
+      }
+
+      if (results.length > 0) return results;
+    }
+  } catch {
+    // Fall through to synthetic fallback
+  }
+
+  // Fallback: synthetic seasonal patterns from base prices (matches iOS buildFallbackSeasonalData)
+  return buildFallbackSeasonalData(mlaCategories);
+}
+
+function buildFallbackSeasonalData(categories: string[]): SeasonalCategoryData[] {
+  const results: SeasonalCategoryData[] = [];
+
+  for (const category of categories) {
+    const basePrice = defaultFallbackPrice(category);
+    if (basePrice <= 0) continue;
+
+    const monthlyAvg: Record<number, number> = {};
+    let bestMonth: number | null = null;
+    let bestPrice = -1;
+
+    for (const [monthStr, multiplier] of Object.entries(SEASONAL_MULTIPLIERS)) {
+      const month = Number(monthStr);
+      const price = Math.round(basePrice * multiplier * 100) / 100;
+      monthlyAvg[month] = price;
+      if (price > bestPrice) {
+        bestPrice = price;
+        bestMonth = month;
+      }
+    }
+
+    results.push({ category, monthlyAvg, bestMonth, isFallback: true });
+  }
+
+  return results;
 }
