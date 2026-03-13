@@ -45,7 +45,7 @@ export function StockmanIQTabs({ conversations, insights }: StockmanIQTabsProps)
   }, []);
 
   const chatTab = (
-    <div className="flex gap-4" style={{ height: "calc(100vh - 14rem)" }}>
+    <div className="flex gap-4" style={{ height: "calc(100vh - 18rem)" }}>
       {/* Chat panel */}
       <Card className="flex flex-1 flex-col overflow-hidden rounded-3xl">
         {loadingConv ? (
