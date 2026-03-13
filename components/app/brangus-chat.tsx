@@ -4,10 +4,11 @@
 // Handles message display, input, API calls, and tool execution loop
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Brain, Loader2, AlertCircle } from "lucide-react";
 import { sendMessage, buildSystemPrompt, loadChatDataStore, fetchServerPersonality } from "@/lib/brangus/chat-service";
 import { createConversation, saveMessage, autoTitleConversation } from "@/lib/brangus/conversation-service";
-import type { ChatMessage, AnthropicMessage, ChatDataStore, QuickInsight } from "@/lib/brangus/types";
+import type { ChatMessage, AnthropicMessage, ChatDataStore, QuickInsight, CardAction } from "@/lib/brangus/types";
 import { createClient } from "@/lib/supabase/client";
 import { ChatBubble } from "@/components/app/chat/chat-bubble";
 import { ChatInput } from "@/components/app/chat/chat-input";
@@ -39,8 +40,8 @@ export function BrangusChat() {
   // Accumulated summary cards for the persistent bottom strip - grows across the session
   const [sessionCards, setSessionCards] = useState<QuickInsight[]>([]);
 
+  const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const cardStripRef = useRef<HTMLDivElement>(null);
   const postTypingIdRef = useRef<string | null>(null);
   const conversationIdRef = useRef<string | null>(null);
   const userIdRef = useRef<string | null>(null);
@@ -51,12 +52,26 @@ export function BrangusChat() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Auto-scroll card strip to newest card
-  useEffect(() => {
-    if (cardStripRef.current) {
-      cardStripRef.current.scrollLeft = cardStripRef.current.scrollWidth;
+  // Card action handler - navigates to the relevant section of the app
+  const handleCardAction = useCallback((action: CardAction) => {
+    switch (action.type) {
+      case "yardBook":
+        router.push("/dashboard/tools/yard-book");
+        break;
+      case "herdDetail":
+        router.push(`/dashboard/herds/${action.id}`);
+        break;
+      case "portfolio":
+        router.push("/dashboard");
+        break;
+      case "market":
+        router.push("/dashboard/market");
+        break;
+      case "freight":
+        router.push("/dashboard/tools/freight");
+        break;
     }
-  }, [sessionCards]);
+  }, [router]);
 
   // Load portfolio data on mount
   useEffect(() => {
@@ -183,7 +198,7 @@ export function BrangusChat() {
 
       // Append summary cards to the persistent bottom strip
       if (quickInsights && quickInsights.length > 0) {
-        setSessionCards((prev) => [...prev, ...quickInsights]);
+        setSessionCards((prev) => [...quickInsights, ...prev]);
       }
       setConversationHistory(updatedHistory);
 
@@ -267,9 +282,9 @@ export function BrangusChat() {
 
       {/* Summary card strip - persistent bottom strip that accumulates across the session */}
       {sessionCards.length > 0 && (
-        <div ref={cardStripRef} className="border-t border-white/8 px-4 py-2 overflow-x-auto scrollbar-none">
+        <div className="border-t border-white/8 py-2">
           <div className="mx-auto max-w-2xl">
-            <QuickInsightRow insights={sessionCards} />
+            <QuickInsightRow insights={sessionCards} onCardAction={handleCardAction} />
           </div>
         </div>
       )}

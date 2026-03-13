@@ -12,6 +12,15 @@ export interface ChatMessage {
   timestamp: Date;
 }
 
+// Navigation actions triggered by tapping a summary card
+// Each type maps to a specific route in the app
+export type CardAction =
+  | { type: "yardBook" }
+  | { type: "herdDetail"; id: string; name: string }
+  | { type: "portfolio" }
+  | { type: "market" }
+  | { type: "freight" };
+
 // Quick insight card extracted from display_summary_cards tool_use blocks
 export interface QuickInsight {
   id: string;
@@ -19,6 +28,7 @@ export interface QuickInsight {
   value: string;
   subtitle?: string;
   sentiment: "positive" | "negative" | "neutral";
+  action?: CardAction;
 }
 
 // MARK: - Anthropic API Types

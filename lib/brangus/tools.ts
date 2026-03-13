@@ -1159,7 +1159,8 @@ function lookupChannelComparison(herdName: string | undefined, store: ChatDataSt
 export function generateAutoCards(
   toolName: string,
   input: Record<string, unknown>,
-  resultText: string
+  resultText: string,
+  store?: ChatDataStore | null
 ): QuickInsight[] {
   const cards: QuickInsight[] = [];
 
@@ -1171,10 +1172,10 @@ export function generateAutoCards(
       const headMatch = resultText.match(/Total head: ([\d,]+)/);
       const herdsMatch = resultText.match(/Active herds: (\d+)/);
       if (valueMatch) {
-        cards.push({ id: crypto.randomUUID(), label: "Portfolio Value", value: `$${valueMatch[1]}`, subtitle: herdsMatch ? `${herdsMatch[1]} herds` : undefined, sentiment: "neutral" });
+        cards.push({ id: crypto.randomUUID(), label: "Portfolio Value", value: `$${valueMatch[1]}`, subtitle: herdsMatch ? `${herdsMatch[1]} herds` : undefined, sentiment: "neutral", action: { type: "portfolio" } });
       }
       if (headMatch) {
-        cards.push({ id: crypto.randomUUID(), label: "Total Head", value: headMatch[1], subtitle: herdsMatch ? `across ${herdsMatch[1]} herds` : undefined, sentiment: "neutral" });
+        cards.push({ id: crypto.randomUUID(), label: "Total Head", value: headMatch[1], subtitle: herdsMatch ? `across ${herdsMatch[1]} herds` : undefined, sentiment: "neutral", action: { type: "portfolio" } });
       }
     }
 
@@ -1183,7 +1184,7 @@ export function generateAutoCards(
       const headMatches = [...resultText.matchAll(/: (\d+) head/g)];
       const totalHead = headMatches.reduce((sum, m) => sum + parseInt(m[1]), 0);
       if (countMatch && totalHead > 0) {
-        cards.push({ id: crypto.randomUUID(), label: "Total Head", value: `${totalHead}`, subtitle: `${countMatch[1]} active herds`, sentiment: "neutral" });
+        cards.push({ id: crypto.randomUUID(), label: "Total Head", value: `${totalHead}`, subtitle: `${countMatch[1]} active herds`, sentiment: "neutral", action: { type: "portfolio" } });
       }
     }
 
@@ -1192,11 +1193,20 @@ export function generateAutoCards(
       const headMatch = resultText.match(/Head count: (\d+)/);
       const weightMatch = resultText.match(/Current weight: (\d+)kg/);
       const valueMatch = resultText.match(/Estimated value: \$([\d,]+)/);
+
+      // Resolve herd ID from store for navigation
+      const herdName = input.herd_name as string | undefined;
+      let herdAction: QuickInsight["action"] = undefined;
+      if (herdName && store?.herds) {
+        const herd = store.herds.find((h) => h.name.toLowerCase() === herdName.toLowerCase());
+        if (herd) herdAction = { type: "herdDetail", id: herd.id, name: herd.name };
+      }
+
       if (valueMatch && nameMatch) {
-        cards.push({ id: crypto.randomUUID(), label: nameMatch[1], value: `$${valueMatch[1]}`, subtitle: headMatch ? `${headMatch[1]} head` : undefined, sentiment: "neutral" });
+        cards.push({ id: crypto.randomUUID(), label: nameMatch[1], value: `$${valueMatch[1]}`, subtitle: headMatch ? `${headMatch[1]} head` : undefined, sentiment: "neutral", action: herdAction });
       }
       if (headMatch && weightMatch) {
-        cards.push({ id: crypto.randomUUID(), label: "Weight", value: `${weightMatch[1]}kg`, subtitle: `${headMatch[1]} head`, sentiment: "neutral" });
+        cards.push({ id: crypto.randomUUID(), label: "Weight", value: `${weightMatch[1]}kg`, subtitle: `${headMatch[1]} head`, sentiment: "neutral", action: herdAction });
       }
     }
 
@@ -1222,7 +1232,7 @@ export function generateAutoCards(
     if (queryType === "market_prices") {
       const priceMatches = [...resultText.matchAll(/- (.+?)(?:\s*\([^)]+\))?: \$([\d.]+)\/kg/g)];
       for (const m of priceMatches.slice(0, 2)) {
-        cards.push({ id: crypto.randomUUID(), label: m[1], value: `$${m[2]}/kg`, subtitle: "MLA saleyard data", sentiment: "neutral" });
+        cards.push({ id: crypto.randomUUID(), label: m[1], value: `$${m[2]}/kg`, subtitle: "MLA saleyard data", sentiment: "neutral", action: { type: "market" } });
       }
     }
 
@@ -1230,10 +1240,10 @@ export function generateAutoCards(
       const overdueMatch = resultText.match(/OVERDUE \((\d+)\)/);
       const upcomingMatch = resultText.match(/UPCOMING \((\d+)\)/);
       if (overdueMatch && parseInt(overdueMatch[1]) > 0) {
-        cards.push({ id: crypto.randomUUID(), label: "Overdue", value: overdueMatch[1], subtitle: "Yard Book items", sentiment: "negative" });
+        cards.push({ id: crypto.randomUUID(), label: "Overdue", value: overdueMatch[1], subtitle: "Yard Book items", sentiment: "negative", action: { type: "yardBook" } });
       }
       if (upcomingMatch) {
-        cards.push({ id: crypto.randomUUID(), label: "Upcoming", value: upcomingMatch[1], subtitle: "Yard Book items", sentiment: "neutral" });
+        cards.push({ id: crypto.randomUUID(), label: "Upcoming", value: upcomingMatch[1], subtitle: "Yard Book items", sentiment: "neutral", action: { type: "yardBook" } });
       }
     }
   }
@@ -1243,10 +1253,10 @@ export function generateAutoCards(
     const perHeadMatch = resultText.match(/Per head: \$([\d.]+)/);
     const decksMatch = resultText.match(/Decks: (\d+)/);
     if (totalMatch) {
-      cards.push({ id: crypto.randomUUID(), label: "Freight Cost", value: `$${totalMatch[1]}`, subtitle: `+ $${totalMatch[2]} GST`, sentiment: "neutral" });
+      cards.push({ id: crypto.randomUUID(), label: "Freight Cost", value: `$${totalMatch[1]}`, subtitle: `+ $${totalMatch[2]} GST`, sentiment: "neutral", action: { type: "freight" } });
     }
     if (perHeadMatch) {
-      cards.push({ id: crypto.randomUUID(), label: "Per Head", value: `$${perHeadMatch[1]}`, subtitle: decksMatch ? `${decksMatch[1]} deck(s)` : undefined, sentiment: "neutral" });
+      cards.push({ id: crypto.randomUUID(), label: "Per Head", value: `$${perHeadMatch[1]}`, subtitle: decksMatch ? `${decksMatch[1]} deck(s)` : undefined, sentiment: "neutral", action: { type: "freight" } });
     }
   }
 
