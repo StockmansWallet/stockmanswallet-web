@@ -4,7 +4,7 @@
 import { createClient } from "../supabase/client";
 import { calculateHerdValue, mapCategoryToMLACategory, categoryFallback, defaultFallbackPrice, type CategoryPriceEntry } from "../engines/valuation-engine";
 import { cattleBreedPremiums } from "../data/reference-data";
-import { toolDefinitions, executeTool, DISPLAY_ONLY_TOOLS } from "./tools";
+import { toolDefinitions, executeTool, DISPLAY_ONLY_TOOLS, generateAutoCards } from "./tools";
 import { fetchAllPropertyWeather } from "../services/weather-service";
 import type {
   ChatMessage,
@@ -262,6 +262,7 @@ export async function sendMessage(
   let currentHistory = history;
   let rounds = 0;
   let pendingInsights: QuickInsight[] | undefined;
+  let autoCards: QuickInsight[] = [];
 
   while (rounds < MAX_TOOL_ROUNDS) {
     rounds++;
@@ -293,7 +294,9 @@ export async function sendMessage(
         { role: "assistant", content: response.content },
       ];
 
-      return { assistantText: text, updatedHistory: currentHistory, quickInsights: pendingInsights };
+      // Haiku's cards take priority, auto-generated cards are fallback
+      const finalCards = pendingInsights ?? (autoCards.length > 0 ? autoCards.slice(0, 4) : undefined);
+      return { assistantText: text, updatedHistory: currentHistory, quickInsights: finalCards };
     }
 
     if (response.stop_reason === "tool_use") {
@@ -324,7 +327,9 @@ export async function sendMessage(
           { role: "user", content: displayResults },
         ];
 
-        return { assistantText: text, updatedHistory: currentHistory, quickInsights: pendingInsights };
+        // Haiku's cards take priority, auto-generated cards are fallback
+        const finalCards = pendingInsights ?? (autoCards.length > 0 ? autoCards.slice(0, 4) : undefined);
+        return { assistantText: text, updatedHistory: currentHistory, quickInsights: finalCards };
       }
 
       // Add assistant response with tool_use blocks to history
@@ -352,6 +357,14 @@ export async function sendMessage(
           tool_use_id: block.id!,
           content: result,
         });
+
+        // Auto-generate cards from tool results (deterministic fallback)
+        const generated = generateAutoCards(
+          block.name!,
+          block.input as Record<string, unknown>,
+          result
+        );
+        if (generated.length > 0) autoCards.push(...generated);
       }
 
       // Add tool results as user message

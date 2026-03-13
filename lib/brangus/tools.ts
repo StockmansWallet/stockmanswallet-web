@@ -5,7 +5,7 @@ import { calculateHerdValue, calculateProjectedWeight, type CategoryPriceEntry }
 import { calculateFreightEstimate } from "../engines/freight-engine";
 import { mapCategoryToMLACategory, saleyardCoordinates } from "../data/reference-data";
 import { fetchWeatherForLocation } from "../services/weather-service";
-import type { ChatDataStore } from "./types";
+import type { ChatDataStore, QuickInsight } from "./types";
 
 // MARK: - Tool Definitions (Anthropic tool_use format)
 
@@ -1151,6 +1151,120 @@ function lookupChannelComparison(herdName: string | undefined, store: ChatDataSt
   }
 
   return lines.join("\n");
+}
+
+// MARK: - Auto-Generate Summary Cards from Tool Results
+// Deterministic card extraction - does not depend on Haiku calling display_summary_cards
+
+export function generateAutoCards(
+  toolName: string,
+  input: Record<string, unknown>,
+  resultText: string
+): QuickInsight[] {
+  const cards: QuickInsight[] = [];
+
+  if (toolName === "lookup_portfolio_data") {
+    const queryType = input.query_type as string;
+
+    if (queryType === "portfolio_summary") {
+      const valueMatch = resultText.match(/Total portfolio value: \$([\d,]+)/);
+      const headMatch = resultText.match(/Total head: ([\d,]+)/);
+      const herdsMatch = resultText.match(/Active herds: (\d+)/);
+      if (valueMatch) {
+        cards.push({ id: crypto.randomUUID(), label: "Portfolio Value", value: `$${valueMatch[1]}`, subtitle: herdsMatch ? `${herdsMatch[1]} herds` : undefined, sentiment: "neutral" });
+      }
+      if (headMatch) {
+        cards.push({ id: crypto.randomUUID(), label: "Total Head", value: headMatch[1], subtitle: herdsMatch ? `across ${herdsMatch[1]} herds` : undefined, sentiment: "neutral" });
+      }
+    }
+
+    if (queryType === "all_herds_summary") {
+      const countMatch = resultText.match(/ALL ACTIVE HERDS \((\d+)\)/);
+      const headMatches = [...resultText.matchAll(/: (\d+) head/g)];
+      const totalHead = headMatches.reduce((sum, m) => sum + parseInt(m[1]), 0);
+      if (countMatch && totalHead > 0) {
+        cards.push({ id: crypto.randomUUID(), label: "Total Head", value: `${totalHead}`, subtitle: `${countMatch[1]} active herds`, sentiment: "neutral" });
+      }
+    }
+
+    if (queryType === "herd_details") {
+      const nameMatch = resultText.match(/HERD DETAILS - (.+?):/);
+      const headMatch = resultText.match(/Head count: (\d+)/);
+      const weightMatch = resultText.match(/Current weight: (\d+)kg/);
+      const valueMatch = resultText.match(/Estimated value: \$([\d,]+)/);
+      if (valueMatch && nameMatch) {
+        cards.push({ id: crypto.randomUUID(), label: nameMatch[1], value: `$${valueMatch[1]}`, subtitle: headMatch ? `${headMatch[1]} head` : undefined, sentiment: "neutral" });
+      }
+      if (headMatch && weightMatch) {
+        cards.push({ id: crypto.randomUUID(), label: "Weight", value: `${weightMatch[1]}kg`, subtitle: `${headMatch[1]} head`, sentiment: "neutral" });
+      }
+    }
+
+    if (queryType === "property_weather") {
+      const tempMatch = resultText.match(/(\d+) degrees C \(feels like (\d+) degrees C\)/);
+      const uvMatch = resultText.match(/UV Index: (\d+)/);
+      const condMatch = resultText.match(/degrees C\), (.+)/);
+      if (tempMatch) {
+        const temp = parseInt(tempMatch[1]);
+        cards.push({ id: crypto.randomUUID(), label: "Temperature", value: `${temp}°C`, subtitle: `Feels like ${tempMatch[2]}°C`, sentiment: temp >= 35 ? "negative" : "neutral" });
+      }
+      if (condMatch) {
+        const humidMatch = resultText.match(/Humidity: (\d+)%/);
+        cards.push({ id: crypto.randomUUID(), label: "Conditions", value: condMatch[1], subtitle: humidMatch ? `${humidMatch[1]}% humidity` : undefined, sentiment: "neutral" });
+      }
+      if (uvMatch) {
+        const uv = parseInt(uvMatch[1]);
+        const uvLabel = uv <= 2 ? "Low" : uv <= 5 ? "Moderate" : uv <= 7 ? "High" : uv <= 10 ? "Very High" : "Extreme";
+        cards.push({ id: crypto.randomUUID(), label: "UV Index", value: `${uv}`, subtitle: uvLabel, sentiment: uv >= 8 ? "negative" : "neutral" });
+      }
+    }
+
+    if (queryType === "market_prices") {
+      const priceMatches = [...resultText.matchAll(/- (.+?)(?:\s*\([^)]+\))?: \$([\d.]+)\/kg/g)];
+      for (const m of priceMatches.slice(0, 2)) {
+        cards.push({ id: crypto.randomUUID(), label: m[1], value: `$${m[2]}/kg`, subtitle: "MLA saleyard data", sentiment: "neutral" });
+      }
+    }
+
+    if (queryType === "yard_book") {
+      const overdueMatch = resultText.match(/OVERDUE \((\d+)\)/);
+      const upcomingMatch = resultText.match(/UPCOMING \((\d+)\)/);
+      if (overdueMatch && parseInt(overdueMatch[1]) > 0) {
+        cards.push({ id: crypto.randomUUID(), label: "Overdue", value: overdueMatch[1], subtitle: "Yard Book items", sentiment: "negative" });
+      }
+      if (upcomingMatch) {
+        cards.push({ id: crypto.randomUUID(), label: "Upcoming", value: upcomingMatch[1], subtitle: "Yard Book items", sentiment: "neutral" });
+      }
+    }
+  }
+
+  if (toolName === "calculate_freight") {
+    const totalMatch = resultText.match(/Total: \$([\d,]+) \(\+ \$([\d,]+) GST\)/);
+    const perHeadMatch = resultText.match(/Per head: \$([\d.]+)/);
+    const decksMatch = resultText.match(/Decks: (\d+)/);
+    if (totalMatch) {
+      cards.push({ id: crypto.randomUUID(), label: "Freight Cost", value: `$${totalMatch[1]}`, subtitle: `+ $${totalMatch[2]} GST`, sentiment: "neutral" });
+    }
+    if (perHeadMatch) {
+      cards.push({ id: crypto.randomUUID(), label: "Per Head", value: `$${perHeadMatch[1]}`, subtitle: decksMatch ? `${decksMatch[1]} deck(s)` : undefined, sentiment: "neutral" });
+    }
+  }
+
+  if (toolName === "lookup_grid_iq_data") {
+    const advantageMatch = resultText.match(/Grid IQ advantage: \$([\d,]+)/);
+    const killScoreMatch = resultText.match(/Kill Score: ([\d.]+)/);
+    if (advantageMatch) {
+      const val = parseInt(advantageMatch[1].replace(/,/g, ""));
+      cards.push({ id: crypto.randomUUID(), label: "Grid Advantage", value: `$${advantageMatch[1]}`, sentiment: val > 0 ? "positive" : "neutral" });
+    }
+    if (killScoreMatch) {
+      const score = parseFloat(killScoreMatch[1]);
+      const label = score >= 85 ? "Excellent" : score >= 70 ? "Good" : score >= 50 ? "Fair" : "Poor";
+      cards.push({ id: crypto.randomUUID(), label: "Kill Score", value: killScoreMatch[1], subtitle: label, sentiment: score >= 70 ? "positive" : score >= 50 ? "neutral" : "negative" });
+    }
+  }
+
+  return cards.slice(0, 4);
 }
 
 // MARK: - Helpers
