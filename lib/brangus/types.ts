@@ -10,8 +10,6 @@ export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
-  // Quick insight cards from display_summary_cards tool (display-only, no tool_result sent)
-  quickInsights?: QuickInsight[];
 }
 
 // Quick insight card extracted from display_summary_cards tool_use blocks

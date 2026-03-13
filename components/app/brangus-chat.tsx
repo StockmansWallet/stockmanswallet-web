@@ -7,7 +7,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Brain, Loader2, AlertCircle } from "lucide-react";
 import { sendMessage, buildSystemPrompt, loadChatDataStore, fetchServerPersonality } from "@/lib/brangus/chat-service";
 import { createConversation, saveMessage, autoTitleConversation } from "@/lib/brangus/conversation-service";
-import type { ChatMessage, AnthropicMessage, ChatDataStore } from "@/lib/brangus/types";
+import type { ChatMessage, AnthropicMessage, ChatDataStore, QuickInsight } from "@/lib/brangus/types";
 import { createClient } from "@/lib/supabase/client";
 import { ChatBubble } from "@/components/app/chat/chat-bubble";
 import { ChatInput } from "@/components/app/chat/chat-input";
@@ -36,8 +36,11 @@ export function BrangusChat() {
   const [error, setError] = useState<string | null>(null);
   const [store, setStore] = useState<ChatDataStore | null>(null);
   const [systemPrompt, setSystemPrompt] = useState("");
+  // Accumulated summary cards for the persistent bottom strip - grows across the session
+  const [sessionCards, setSessionCards] = useState<QuickInsight[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const cardStripRef = useRef<HTMLDivElement>(null);
   const postTypingIdRef = useRef<string | null>(null);
   const conversationIdRef = useRef<string | null>(null);
   const userIdRef = useRef<string | null>(null);
@@ -47,6 +50,13 @@ export function BrangusChat() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Auto-scroll card strip to newest card
+  useEffect(() => {
+    if (cardStripRef.current) {
+      cardStripRef.current.scrollLeft = cardStripRef.current.scrollWidth;
+    }
+  }, [sessionCards]);
 
   // Load portfolio data on mount
   useEffect(() => {
@@ -167,10 +177,14 @@ export function BrangusChat() {
         role: "assistant",
         content: assistantText,
         timestamp: new Date(),
-        quickInsights,
       };
       postTypingIdRef.current = assistantMessage.id;
       setMessages((prev) => [...prev, assistantMessage]);
+
+      // Append summary cards to the persistent bottom strip
+      if (quickInsights && quickInsights.length > 0) {
+        setSessionCards((prev) => [...prev, ...quickInsights]);
+      }
       setConversationHistory(updatedHistory);
 
       // Persist assistant message (non-blocking)
@@ -220,27 +234,21 @@ export function BrangusChat() {
               const isUser = msg.role === "user";
               const isPostTyping = msg.id === postTypingIdRef.current;
               return (
-                <div key={msg.id}>
-                  <ChatBubble
-                    side={isUser ? "right" : "left"}
-                    bgClass={isUser ? "bg-brand" : "bg-[#4D331F]"}
-                    tailColor={isUser ? USER_BG : BRANGUS_BG}
-                    textClass={isUser ? "text-white" : "text-text-primary"}
-                    animate
-                    animationType={isPostTyping ? "fade" : "bounce"}
-                  >
-                    {isUser ? (
-                      msg.content
-                    ) : (
-                      <FormattedResponse text={msg.content} />
-                    )}
-                  </ChatBubble>
-                  {msg.quickInsights && msg.quickInsights.length > 0 && (
-                    <div className="mt-2 ml-3 animate-fade-in">
-                      <QuickInsightRow insights={msg.quickInsights} />
-                    </div>
+                <ChatBubble
+                  key={msg.id}
+                  side={isUser ? "right" : "left"}
+                  bgClass={isUser ? "bg-brand" : "bg-[#4D331F]"}
+                  tailColor={isUser ? USER_BG : BRANGUS_BG}
+                  textClass={isUser ? "text-white" : "text-text-primary"}
+                  animate
+                  animationType={isPostTyping ? "fade" : "bounce"}
+                >
+                  {isUser ? (
+                    msg.content
+                  ) : (
+                    <FormattedResponse text={msg.content} />
                   )}
-                </div>
+                </ChatBubble>
               );
             })}
             {isLoading && <TypingIndicator bgColor={BRANGUS_BG} dotClass="bg-brand/60" />}
@@ -254,6 +262,15 @@ export function BrangusChat() {
         <div className="mx-4 mb-2 flex items-center gap-2 rounded-xl bg-error/10 px-4 py-2.5 text-sm text-error">
           <AlertCircle className="h-4 w-4 shrink-0" />
           <p>{error}</p>
+        </div>
+      )}
+
+      {/* Summary card strip - persistent bottom strip that accumulates across the session */}
+      {sessionCards.length > 0 && (
+        <div ref={cardStripRef} className="border-t border-white/8 px-4 py-2 overflow-x-auto scrollbar-none">
+          <div className="mx-auto max-w-2xl">
+            <QuickInsightRow insights={sessionCards} />
+          </div>
         </div>
       )}
 
