@@ -29,9 +29,35 @@ const BRANGUS_BG = "#44372D";
 // User brand color
 const USER_BG = "var(--color-brand)";
 
-export function BrangusChat() {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [conversationHistory, setConversationHistory] = useState<AnthropicMessage[]>([]);
+// Saved message row from Supabase (subset of columns needed)
+interface SavedMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  created_at: string;
+}
+
+interface BrangusChatProps {
+  conversationId?: string;
+  initialMessages?: SavedMessage[];
+}
+
+export function BrangusChat({ conversationId: existingConvId, initialMessages }: BrangusChatProps = {}) {
+  // Hydrate UI messages from saved conversation (if resuming)
+  const hydratedMessages: ChatMessage[] = (initialMessages ?? []).map((m) => ({
+    id: m.id,
+    role: m.role,
+    content: m.content,
+    timestamp: new Date(m.created_at),
+  }));
+  // Reconstruct Anthropic history from saved messages (plain text is sufficient for context)
+  const hydratedHistory: AnthropicMessage[] = (initialMessages ?? []).map((m) => ({
+    role: m.role,
+    content: m.content,
+  }));
+
+  const [messages, setMessages] = useState<ChatMessage[]>(hydratedMessages);
+  const [conversationHistory, setConversationHistory] = useState<AnthropicMessage[]>(hydratedHistory);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialising, setIsInitialising] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,9 +69,9 @@ export function BrangusChat() {
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const postTypingIdRef = useRef<string | null>(null);
-  const conversationIdRef = useRef<string | null>(null);
+  const conversationIdRef = useRef<string | null>(existingConvId ?? null);
   const userIdRef = useRef<string | null>(null);
-  const hasRequestedTitleRef = useRef(false);
+  const hasRequestedTitleRef = useRef(!!existingConvId);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {

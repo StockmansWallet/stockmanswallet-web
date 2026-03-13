@@ -2,11 +2,12 @@
 
 // Conversation list for the Stockman IQ hub page
 // Shows past Brangus conversations with title, preview, and relative time
+// Supports bulk selection and deletion
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { MessageSquare, Trash2 } from "lucide-react";
-import { softDeleteConversation } from "@/lib/brangus/conversation-service";
+import { MessageSquare, Trash2, CheckSquare, Square, X } from "lucide-react";
+import { softDeleteConversation, bulkSoftDeleteConversations } from "@/lib/brangus/conversation-service";
 import type { BrangusConversationRow } from "@/lib/brangus/conversation-service";
 
 function timeAgo(dateStr: string): string {
@@ -31,6 +32,31 @@ interface ConversationListProps {
 export function ConversationList({ conversations }: ConversationListProps) {
   const router = useRouter();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+
+  const toggleSelect = useCallback((id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const toggleAll = useCallback(() => {
+    setSelected((prev) =>
+      prev.size === conversations.length
+        ? new Set()
+        : new Set(conversations.map((c) => c.id))
+    );
+  }, [conversations]);
+
+  const exitSelectMode = useCallback(() => {
+    setSelectMode(false);
+    setSelected(new Set());
+  }, []);
 
   async function handleDelete(e: React.MouseEvent, id: string) {
     e.stopPropagation();
@@ -44,46 +70,155 @@ export function ConversationList({ conversations }: ConversationListProps) {
     }
   }
 
+  async function handleBulkDelete() {
+    if (selected.size === 0 || isBulkDeleting) return;
+    setIsBulkDeleting(true);
+    try {
+      await bulkSoftDeleteConversations([...selected]);
+    } catch (err) {
+      console.error("Failed to bulk delete:", err);
+    } finally {
+      setIsBulkDeleting(false);
+      setSelectMode(false);
+      setSelected(new Set());
+      router.refresh();
+    }
+  }
+
+  const allSelected = selected.size === conversations.length && conversations.length > 0;
+
   return (
-    <div className="space-y-2">
-      {conversations.map((conv) => (
-        <div
-          key={conv.id}
-          role="button"
-          tabIndex={0}
-          onClick={() => router.push(`/dashboard/stockman-iq/chat/${conv.id}`)}
-          onKeyDown={(e) => { if (e.key === "Enter") router.push(`/dashboard/stockman-iq/chat/${conv.id}`); }}
-          className={`group flex w-full cursor-pointer items-start gap-3 rounded-xl p-3 text-left transition-colors hover:bg-white/[0.05] ${
-            deletingId === conv.id ? "pointer-events-none opacity-40" : ""
-          }`}
-        >
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand/15">
-            <MessageSquare className="h-4 w-4 text-brand" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center justify-between gap-2">
-              <p className="truncate text-sm font-medium text-text-primary">
-                {conv.title ?? "New conversation"}
-              </p>
-              <span className="shrink-0 text-[10px] text-text-muted">
-                {timeAgo(conv.updated_at)}
-              </span>
+    <div>
+      {/* Toolbar: sticky so it stays above conversation rows during scroll */}
+      <div className="sticky top-0 z-10 flex items-center justify-between bg-card px-3 pb-2">
+        {selectMode ? (
+          <>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={toggleAll}
+                className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs text-text-secondary transition-colors hover:bg-white/[0.05] hover:text-text-primary"
+              >
+                {allSelected ? (
+                  <CheckSquare className="h-3.5 w-3.5 text-brand" />
+                ) : (
+                  <Square className="h-3.5 w-3.5" />
+                )}
+                {allSelected ? "Deselect all" : "Select all"}
+              </button>
+              {selected.size > 0 && (
+                <span className="text-[10px] text-text-muted">
+                  {selected.size} selected
+                </span>
+              )}
             </div>
-            {conv.preview_text && (
-              <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-text-muted">
-                {conv.preview_text}
-              </p>
+            <div className="flex items-center gap-1">
+              {selected.size > 0 && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleBulkDelete(); }}
+                  disabled={isBulkDeleting}
+                  className="flex items-center gap-1.5 rounded-lg bg-error/10 px-3 py-1.5 text-xs font-medium text-error transition-colors hover:bg-error/20 disabled:opacity-50"
+                >
+                  <Trash2 className="h-3 w-3" />
+                  Delete{selected.size > 1 ? ` (${selected.size})` : ""}
+                </button>
+              )}
+              <button
+                onClick={exitSelectMode}
+                className="rounded-lg p-1 text-text-muted transition-colors hover:bg-white/[0.05] hover:text-text-primary"
+                aria-label="Cancel selection"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <span />
+            {conversations.length > 1 && (
+              <button
+                onClick={() => setSelectMode(true)}
+                className="text-[11px] text-text-muted transition-colors hover:text-text-secondary"
+              >
+                Select
+              </button>
             )}
-          </div>
-          <button
-            onClick={(e) => handleDelete(e, conv.id)}
-            className="mt-0.5 shrink-0 rounded-lg p-1.5 text-text-muted opacity-0 transition-all hover:bg-error/10 hover:text-error group-hover:opacity-100"
-            aria-label="Delete conversation"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      ))}
+          </>
+        )}
+      </div>
+
+      {/* Conversation rows */}
+      <div className="space-y-2">
+        {conversations.map((conv) => {
+          const isDeleting = deletingId === conv.id || (isBulkDeleting && selected.has(conv.id));
+          const isSelected = selected.has(conv.id);
+
+          return (
+            <div
+              key={conv.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => {
+                if (selectMode) {
+                  toggleSelect(conv.id);
+                } else {
+                  router.push(`/dashboard/stockman-iq/chat/${conv.id}`);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  if (selectMode) toggleSelect(conv.id);
+                  else router.push(`/dashboard/stockman-iq/chat/${conv.id}`);
+                }
+              }}
+              className={`group flex w-full cursor-pointer items-start gap-3 rounded-xl p-3 text-left transition-colors hover:bg-white/[0.05] ${
+                isDeleting ? "pointer-events-none opacity-40" : ""
+              } ${isSelected ? "bg-white/[0.04]" : ""}`}
+            >
+              {/* Checkbox in select mode, icon otherwise */}
+              {selectMode ? (
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center">
+                  {isSelected ? (
+                    <CheckSquare className="h-5 w-5 text-brand" />
+                  ) : (
+                    <Square className="h-5 w-5 text-text-muted" />
+                  )}
+                </div>
+              ) : (
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand/15">
+                  <MessageSquare className="h-4 w-4 text-brand" />
+                </div>
+              )}
+
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="truncate text-sm font-medium text-text-primary">
+                    {conv.title ?? "New conversation"}
+                  </p>
+                  <span className="shrink-0 text-[10px] text-text-muted">
+                    {timeAgo(conv.updated_at)}
+                  </span>
+                </div>
+                {conv.preview_text && (
+                  <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-text-muted">
+                    {conv.preview_text}
+                  </p>
+                )}
+              </div>
+
+              {/* Single delete button (only in normal mode) */}
+              {!selectMode && (
+                <button
+                  onClick={(e) => handleDelete(e, conv.id)}
+                  className="mt-0.5 shrink-0 rounded-lg p-1.5 text-text-muted opacity-0 transition-all hover:bg-error/10 hover:text-error group-hover:opacity-100"
+                  aria-label="Delete conversation"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

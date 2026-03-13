@@ -127,6 +127,21 @@ export async function softDeleteConversation(
   }
 }
 
+export async function bulkSoftDeleteConversations(
+  conversationIds: string[]
+): Promise<void> {
+  if (conversationIds.length === 0) return;
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("brangus_conversations")
+    .update({ is_deleted: true, deleted_at: new Date().toISOString() })
+    .in("id", conversationIds);
+
+  if (error) {
+    throw new Error(`Failed to delete conversations: ${error.message}`);
+  }
+}
+
 // MARK: - Export formatting (matches iOS share format)
 
 export function formatConversationForExport(

@@ -35,7 +35,7 @@ function QuickInsightCard({
 
   return (
     <div
-      className={`flex min-w-[100px] max-w-[180px] shrink-0 flex-col gap-1 rounded-xl border border-white/8 bg-white/5 px-3 py-2.5 ${
+      className={`flex min-w-[100px] max-w-[180px] shrink-0 flex-col gap-1 rounded-xl bg-white/5 px-3 py-2.5 ${
         hasTap ? "cursor-pointer transition-opacity hover:opacity-80" : ""
       }`}
       onClick={hasTap ? () => onCardAction(insight.action!) : undefined}
