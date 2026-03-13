@@ -280,12 +280,10 @@ export function BrangusChat() {
         </div>
       )}
 
-      {/* Summary card strip - persistent bottom strip that accumulates across the session */}
+      {/* Summary card strip - persistent bottom strip, full width for edge-to-edge scrolling */}
       {sessionCards.length > 0 && (
         <div className="border-t border-white/8 py-2">
-          <div className="mx-auto max-w-2xl">
-            <QuickInsightRow insights={sessionCards} onCardAction={handleCardAction} />
-          </div>
+          <QuickInsightRow insights={sessionCards} onCardAction={handleCardAction} />
         </div>
       )}
 
