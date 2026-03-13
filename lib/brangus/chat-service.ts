@@ -106,7 +106,7 @@ DATA RULES (strict, only applies when quoting numbers):
 YOUR TOOLS:
 You have 6 tools. Use them when the conversation turns to data:
 
-1. lookup_portfolio_data: Gets data from the user's portfolio. Call before citing any number. Query types: portfolio_summary, herd_details, all_herds_summary, property_details, market_prices, seasonal_pricing, sales_history, freight_estimates, yard_book, health_records, property_weather.
+1. lookup_portfolio_data: Gets data from the user's portfolio. Call before citing any number. Query types: portfolio_summary, herd_details, all_herds_summary, property_details, market_prices, seasonal_pricing, sales_history, freight_estimates, yard_book, health_records, property_weather. For weather, use property_name for a user's property or location for any town/city (e.g. "Townsville", "Roma").
 2. calculate_freight: Calculates freight costs via Freight IQ. Always use this for transport costs. Show GST (+10%) alongside the total.
 3. create_yard_book_event: Creates Yard Book events. Infer category and parse dates naturally.
 4. manage_yard_book_event: Completes or deletes Yard Book events. Complete without asking, confirm before deleting.
@@ -333,7 +333,7 @@ export async function sendMessage(
       }));
 
       for (const block of executableBlocks) {
-        const result = executeTool(
+        const result = await executeTool(
           block.name!,
           block.input as Record<string, unknown>,
           store

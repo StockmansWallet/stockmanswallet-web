@@ -177,3 +177,60 @@ export async function fetchAllPropertyWeather(
 
   return results.filter((r): r is PropertyWeatherData => r !== null);
 }
+
+// MARK: - Geocode + Fetch Weather for Any Location
+// Debug: Uses Open-Meteo geocoding API to resolve a place name to lat/lon
+// Debug: Filters to Australian results first, then falls back to worldwide
+
+export async function fetchWeatherForLocation(
+  locationName: string
+): Promise<PropertyWeatherData | null> {
+  try {
+    // Geocode the location name
+    const geoParams = new URLSearchParams({
+      name: locationName,
+      count: "5",
+      language: "en",
+      format: "json",
+    });
+
+    const geoResponse = await fetch(
+      `https://geocoding-api.open-meteo.com/v1/search?${geoParams}`,
+      { signal: AbortSignal.timeout(5000) }
+    );
+
+    if (!geoResponse.ok) return null;
+
+    const geoData = await geoResponse.json() as {
+      results?: Array<{
+        name: string;
+        latitude: number;
+        longitude: number;
+        country: string;
+        country_code: string;
+        admin1?: string;
+        admin2?: string;
+      }>;
+    };
+
+    if (!geoData.results || geoData.results.length === 0) return null;
+
+    // Prefer Australian results
+    const auResult = geoData.results.find((r) => r.country_code === "AU");
+    const result = auResult ?? geoData.results[0];
+
+    const description = [result.admin2, result.admin1, result.country]
+      .filter(Boolean)
+      .join(", ");
+
+    return fetchPropertyWeather(
+      result.latitude,
+      result.longitude,
+      result.name,
+      description
+    );
+  } catch (error) {
+    console.error(`Geocode+weather failed for ${locationName}:`, error);
+    return null;
+  }
+}

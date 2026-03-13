@@ -4,6 +4,7 @@
 import { calculateHerdValue, calculateProjectedWeight, type CategoryPriceEntry } from "../engines/valuation-engine";
 import { calculateFreightEstimate } from "../engines/freight-engine";
 import { mapCategoryToMLACategory, saleyardCoordinates } from "../data/reference-data";
+import { fetchWeatherForLocation } from "../services/weather-service";
 import type { ChatDataStore } from "./types";
 
 // MARK: - Tool Definitions (Anthropic tool_use format)
@@ -44,6 +45,10 @@ export const toolDefinitions = [
         property_name: {
           type: "string",
           description: "Specific property name for property_details or property_weather",
+        },
+        location: {
+          type: "string",
+          description: "Any town, city, or place name for property_weather when not asking about a specific property (e.g. 'Townsville', 'Roma', 'Wagga Wagga')",
         },
       },
       required: ["query_type"],
@@ -181,11 +186,11 @@ export const DISPLAY_ONLY_TOOLS = new Set(["display_summary_cards"]);
 
 // MARK: - Tool Execution
 
-export function executeTool(
+export async function executeTool(
   toolName: string,
   input: Record<string, unknown>,
   store: ChatDataStore
-): string {
+): Promise<string> {
   switch (toolName) {
     case "lookup_portfolio_data":
       return executeLookup(input, store);
@@ -204,7 +209,7 @@ export function executeTool(
 
 // MARK: - Lookup Tool
 
-function executeLookup(input: Record<string, unknown>, store: ChatDataStore): string {
+async function executeLookup(input: Record<string, unknown>, store: ChatDataStore): Promise<string> {
   const queryType = input.query_type as string;
   if (!queryType) return "Error: Missing query_type parameter.";
 
@@ -230,7 +235,7 @@ function executeLookup(input: Record<string, unknown>, store: ChatDataStore): st
     case "health_records":
       return lookupHealthRecords(input.herd_name as string, store);
     case "property_weather":
-      return lookupPropertyWeather(input.property_name as string | undefined, store);
+      return await lookupPropertyWeather(input.property_name as string | undefined, input.location as string | undefined, store);
     default:
       return `Error: Unknown query_type '${queryType}'`;
   }
@@ -609,7 +614,17 @@ function lookupHealthRecords(name: string | undefined, store: ChatDataStore): st
 
 // MARK: - Property Weather
 
-function lookupPropertyWeather(propertyName: string | undefined, store: ChatDataStore): string {
+async function lookupPropertyWeather(propertyName: string | undefined, location: string | undefined, store: ChatDataStore): Promise<string> {
+  // General location lookup (e.g. "Townsville", "Roma") - geocode and fetch on the fly
+  if (location) {
+    const weather = await fetchWeatherForLocation(location);
+    if (!weather) {
+      return `Couldn't find weather for '${location}'. Try a more specific place name (e.g. town or city).`;
+    }
+    return formatWeatherData(weather);
+  }
+
+  // Property-specific or all-properties lookup
   if (!store.weatherData || store.weatherData.length === 0) {
     const allProperties = store.properties;
     const withoutCoords = allProperties.filter((p) => p.latitude == null || p.longitude == null);
