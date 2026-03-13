@@ -1345,6 +1345,29 @@ function resolveDistance(
   return null;
 }
 
+// Fuzzy saleyard coordinate lookup matching iOS three-level resolution:
+// 1. Exact match, 2. Case-insensitive match, 3. Contains match
+function findSaleyardCoords(name: string): { lat: number; lon: number } | undefined {
+  // Exact match
+  if (saleyardCoordinates[name]) return saleyardCoordinates[name];
+
+  const lower = name.toLowerCase();
+
+  // Case-insensitive match
+  const ciKey = Object.keys(saleyardCoordinates).find(
+    (k) => k.toLowerCase() === lower
+  );
+  if (ciKey) return saleyardCoordinates[ciKey];
+
+  // Contains match (e.g. "Charters Towers" matches "Charters Towers Dalrymple Saleyards")
+  const containsKey = Object.keys(saleyardCoordinates).find(
+    (k) => k.toLowerCase().includes(lower) || lower.includes(k.toLowerCase())
+  );
+  if (containsKey) return saleyardCoordinates[containsKey];
+
+  return undefined;
+}
+
 function resolveDistanceToSaleyard(
   herd: ChatDataStore["herds"][0],
   properties: ChatDataStore["properties"],
@@ -1356,7 +1379,7 @@ function resolveDistanceToSaleyard(
     : properties.find((p) => p.is_default);
 
   if (prop?.latitude && prop?.longitude) {
-    const coords = saleyardCoordinates[saleyardName];
+    const coords = findSaleyardCoords(saleyardName);
     if (coords) {
       return haversineKm(prop.latitude, prop.longitude, coords.lat, coords.lon);
     }
@@ -1374,7 +1397,7 @@ function resolveDistanceToSaleyardFromProps(
   if (!prop) return 0;
 
   if (prop.latitude && prop.longitude) {
-    const coords = saleyardCoordinates[saleyardName];
+    const coords = findSaleyardCoords(saleyardName);
     if (coords) {
       return haversineKm(prop.latitude, prop.longitude, coords.lat, coords.lon);
     }
