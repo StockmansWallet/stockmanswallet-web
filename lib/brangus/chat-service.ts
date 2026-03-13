@@ -5,6 +5,7 @@ import { createClient } from "../supabase/client";
 import { calculateHerdValue, mapCategoryToMLACategory, categoryFallback, type CategoryPriceEntry } from "../engines/valuation-engine";
 import { cattleBreedPremiums } from "../data/reference-data";
 import { toolDefinitions, executeTool, DISPLAY_ONLY_TOOLS } from "./tools";
+import { fetchAllPropertyWeather } from "../services/weather-service";
 import type {
   ChatMessage,
   AnthropicMessage,
@@ -105,7 +106,7 @@ DATA RULES (strict, only applies when quoting numbers):
 YOUR TOOLS:
 You have 6 tools. Use them when the conversation turns to data:
 
-1. lookup_portfolio_data: Gets data from the user's portfolio. Call before citing any number. Query types: portfolio_summary, herd_details, all_herds_summary, property_details, market_prices, seasonal_pricing, sales_history, freight_estimates, yard_book, health_records.
+1. lookup_portfolio_data: Gets data from the user's portfolio. Call before citing any number. Query types: portfolio_summary, herd_details, all_herds_summary, property_details, market_prices, seasonal_pricing, sales_history, freight_estimates, yard_book, health_records, property_weather.
 2. calculate_freight: Calculates freight costs via Freight IQ. Always use this for transport costs. Show GST (+10%) alongside the total.
 3. create_yard_book_event: Creates Yard Book events. Infer category and parse dates naturally.
 4. manage_yard_book_event: Completes or deletes Yard Book events. Complete without asking, confirm before deleting.
@@ -611,6 +612,9 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
     );
   }
 
+  // Fetch weather for properties with coordinates (non-blocking, parallel)
+  const weatherData = await fetchAllPropertyWeather(properties ?? []);
+
   return {
     herds: herds ?? [],
     properties: properties ?? [],
@@ -626,6 +630,7 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
     gridIQAnalyses: gridIQAnalyses ?? [],
     killSheets: killSheets ?? [],
     processorGrids: processorGrids ?? [],
+    weatherData,
     pendingYardBookEvents: [],
     pendingYardBookActions: [],
   };

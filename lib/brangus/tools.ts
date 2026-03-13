@@ -12,7 +12,7 @@ export const toolDefinitions = [
   {
     name: "lookup_portfolio_data",
     description:
-      "Retrieves specific portfolio, market, and operational data from the app. This is your PRIMARY tool - call it for ANY question about herds, properties, prices, market indices, freight, sales, or the yard book. You MUST call this tool before citing any specific numbers (prices, weights, head counts, values, dates) in your response. Always look up data first. Never rely on the portfolio index alone.",
+      "Retrieves specific portfolio, market, weather, and operational data from the app. This is your PRIMARY tool - call it for ANY question about herds, properties, prices, market indices, freight, sales, weather, or the yard book. You MUST call this tool before citing any specific numbers (prices, weights, head counts, values, dates, temperatures) in your response. If the user asks about weather, temperature, rain, forecast, or conditions at a property, use query_type 'property_weather'. Always look up data first. Never rely on the portfolio index alone.",
     input_schema: {
       type: "object",
       properties: {
@@ -29,6 +29,7 @@ export const toolDefinitions = [
             "freight_estimates",
             "yard_book",
             "health_records",
+            "property_weather",
           ],
           description: "What data to retrieve",
         },
@@ -42,7 +43,7 @@ export const toolDefinitions = [
         },
         property_name: {
           type: "string",
-          description: "Specific property name for property_details",
+          description: "Specific property name for property_details or property_weather",
         },
       },
       required: ["query_type"],
@@ -228,6 +229,8 @@ function executeLookup(input: Record<string, unknown>, store: ChatDataStore): st
       return lookupYardBook(store);
     case "health_records":
       return lookupHealthRecords(input.herd_name as string, store);
+    case "property_weather":
+      return lookupPropertyWeather(input.property_name as string | undefined, store);
     default:
       return `Error: Unknown query_type '${queryType}'`;
   }
@@ -601,6 +604,83 @@ function lookupHealthRecords(name: string | undefined, store: ChatDataStore): st
   if (herdMusters.length === 0 && herdHealth.length === 0) {
     lines.push("No records found for this herd.");
   }
+  return lines.join("\n");
+}
+
+// MARK: - Property Weather
+
+function lookupPropertyWeather(propertyName: string | undefined, store: ChatDataStore): string {
+  if (!store.weatherData || store.weatherData.length === 0) {
+    const allProperties = store.properties;
+    const withoutCoords = allProperties.filter((p) => p.latitude == null || p.longitude == null);
+    if (withoutCoords.length > 0 && withoutCoords.length === allProperties.length) {
+      return "Weather data unavailable - no properties have location coordinates set. The user needs to add latitude/longitude to their properties in Settings.";
+    }
+    return "Weather data is still loading or unavailable. Try asking again in a moment.";
+  }
+
+  // If property name given, find matching weather data
+  if (propertyName) {
+    const match = store.weatherData.find(
+      (w) =>
+        w.propertyName.toLowerCase() === propertyName.toLowerCase() ||
+        w.propertyName.toLowerCase().includes(propertyName.toLowerCase()) ||
+        propertyName.toLowerCase().includes(w.propertyName.toLowerCase())
+    );
+
+    if (!match) {
+      const available = store.weatherData.map((w) => w.propertyName).join(", ");
+      return `No weather data for property '${propertyName}'. Available: ${available}`;
+    }
+
+    return formatWeatherData(match);
+  }
+
+  // No property name - return all
+  if (store.weatherData.length === 1) {
+    return formatWeatherData(store.weatherData[0]);
+  }
+
+  return store.weatherData.map((w) => formatWeatherData(w)).join("\n\n---\n\n");
+}
+
+function formatWeatherData(data: { propertyName: string; locationDescription: string; temperature: number; feelsLike: number; humidity: number; windSpeed: number; windDirection: string; uvIndex: number; conditionDescription: string; dailyForecast: Array<{ date: Date; highTemp: number; lowTemp: number; precipitationChance: number; precipitationAmount: number; conditionDescription: string }>; alerts: Array<{ severity: string; summary: string }> }): string {
+  const lines: string[] = [];
+
+  lines.push(`PROPERTY WEATHER - ${data.propertyName} (${data.locationDescription}):`);
+  lines.push("");
+
+  // Current conditions
+  lines.push("CURRENT CONDITIONS:");
+  lines.push(`- ${data.temperature} degrees C (feels like ${data.feelsLike} degrees C), ${data.conditionDescription}`);
+  lines.push(`- Humidity: ${data.humidity}%, Wind: ${data.windDirection} ${data.windSpeed}km/h`);
+
+  const uvDesc = data.uvIndex <= 2 ? " (Low)" : data.uvIndex <= 5 ? " (Moderate)" : data.uvIndex <= 7 ? " (High)" : data.uvIndex <= 10 ? " (Very High)" : " (Extreme)";
+  lines.push(`- UV Index: ${data.uvIndex}${uvDesc}`);
+
+  // 7-day forecast
+  if (data.dailyForecast.length > 0) {
+    lines.push("");
+    lines.push("7-DAY FORECAST:");
+    for (const day of data.dailyForecast) {
+      const dateStr = day.date.toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" });
+      let line = `- ${dateStr}: ${day.highTemp} degrees C / ${day.lowTemp} degrees C, ${day.conditionDescription}, ${day.precipitationChance}% rain`;
+      if (day.precipitationAmount > 0.5) {
+        line += ` (${Math.round(day.precipitationAmount)}mm)`;
+      }
+      lines.push(line);
+    }
+  }
+
+  // Weather alerts
+  if (data.alerts.length > 0) {
+    lines.push("");
+    lines.push("WEATHER ALERTS:");
+    for (const alert of data.alerts) {
+      lines.push(`- ${alert.severity}: ${alert.summary}`);
+    }
+  }
+
   return lines.join("\n");
 }
 

@@ -1,6 +1,7 @@
 // Brangus chat types for web
 
 import type { CategoryPriceEntry } from "../engines/valuation-engine";
+import type { PropertyWeatherData } from "../services/weather-service";
 
 // MARK: - Chat Message (UI display)
 
@@ -68,6 +69,9 @@ export interface ChatDataStore {
   gridIQAnalyses: GridIQAnalysisRow[];
   killSheets: KillSheetRow[];
   processorGrids: ProcessorGridRow[];
+
+  // Weather data for property_weather lookups (fetched from Open-Meteo)
+  weatherData: PropertyWeatherData[];
 
   // Pending mutations from tool calls (persisted after response)
   pendingYardBookEvents: PendingYardBookEvent[];
