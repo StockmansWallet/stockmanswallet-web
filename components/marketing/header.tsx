@@ -65,12 +65,6 @@ export function Header() {
 
         {/* Desktop CTA */}
         <div className="hidden items-center gap-3 lg:flex">
-          <Link
-            href="/sign-in"
-            className="text-sm font-medium text-brand transition-colors hover:text-brand-light"
-          >
-            Log In
-          </Link>
           <LandingButton size="sm" href="#signup">
             Join Waitlist
           </LandingButton>
@@ -108,13 +102,7 @@ export function Header() {
                 {link.label}
               </a>
             ))}
-            <Link
-              href="/sign-in"
-              onClick={() => setMobileOpen(false)}
-              className="rounded-[10px] px-3 py-3 text-base font-medium text-brand transition-colors hover:text-brand-light"
-            >
-              Log In
-            </Link>
+
             <div className="mt-2 border-t border-white/5 pt-4">
               <LandingButton href="#signup" className="w-full" onClick={() => setMobileOpen(false)}>
                 Join Waitlist
