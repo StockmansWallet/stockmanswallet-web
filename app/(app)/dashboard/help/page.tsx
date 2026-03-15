@@ -130,7 +130,15 @@ export default function HelpCenterPage() {
       {/* Getting Started */}
       <Card className="mb-4">
         <CardHeader>
-          <CardTitle>Getting Started</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Getting Started</CardTitle>
+            <Link
+              href="/dashboard/help/getting-started"
+              className="text-xs font-medium text-brand hover:underline"
+            >
+              View full guide
+            </Link>
+          </div>
         </CardHeader>
         <CardContent className="divide-y divide-white/5 px-5 pb-5">
           {gettingStarted.map((item) => (

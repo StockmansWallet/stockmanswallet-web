@@ -21,12 +21,17 @@ export default async function AppLayout({
     redirect("/sign-in");
   }
 
-  // Fetch user role and subscription tier for default view mode
+  // Fetch user role, subscription tier, and onboarding status
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select("role, subscription_tier")
+    .select("role, subscription_tier, onboarding_completed")
     .eq("user_id", user.id)
-    .single();
+    .maybeSingle();
+
+  // Redirect new users to onboarding wizard
+  if (!profile || !profile.onboarding_completed) {
+    redirect("/onboarding");
+  }
 
   const defaultMode = profile?.role && isAdvisorRole(profile.role)
     ? "advisor" as const
