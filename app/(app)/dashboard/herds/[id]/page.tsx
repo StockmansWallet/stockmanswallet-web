@@ -10,7 +10,7 @@ import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/referenc
 import { DeleteHerdButton } from "./delete-button";
 import { MusterRecordsSection } from "@/components/app/muster-records-section";
 import { HealthRecordsSection } from "@/components/app/health-records-section";
-import { Pencil, Info, Scale, Heart, MapPin, FileText, DollarSign, AlertTriangle, BarChart3, Clock } from "lucide-react";
+import { Pencil, Info, Scale, Heart, MapPin, FileText, DollarSign, AlertTriangle, BarChart3, Clock, HandCoins } from "lucide-react";
 
 export const revalidate = 0;
 
@@ -183,6 +183,14 @@ export default async function HerdDetailPage({
         subtitle={[herd.species, herd.breed, herd.category].filter(Boolean).join(" \u00B7 ")}
         actions={
           <div className="flex items-center gap-2">
+            {!herd.is_sold && (
+              <Link href={`/dashboard/herds/${id}/sell`}>
+                <Button variant="secondary" size="sm">
+                  <HandCoins className="mr-1.5 h-3.5 w-3.5" />
+                  Sell
+                </Button>
+              </Link>
+            )}
             <Link href={`/dashboard/herds/${id}/edit`}>
               <Button variant="secondary" size="sm">
                 <Pencil className="mr-1.5 h-3.5 w-3.5" />

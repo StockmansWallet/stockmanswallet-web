@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/ui/stat-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HerdsTable } from "./herds-table";
-import { Plus, Tags, Layers, DollarSign, Scale } from "lucide-react";
+import { Plus, Tags, Layers, DollarSign, Scale, Archive } from "lucide-react";
 import { calculateHerdValuation, mapCategoryToMLACategory, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 
@@ -161,12 +161,20 @@ export default async function HerdsPage() {
         titleClassName="text-4xl font-bold text-brand"
         subtitle="Manage your livestock herds."
         actions={
-          <Link href="/dashboard/herds/new">
-            <Button size="md">
-              <Plus className="mr-1.5 h-4 w-4" />
-              Add Herd
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/dashboard/herds/sold">
+              <Button variant="secondary" size="md">
+                <Archive className="mr-1.5 h-4 w-4" />
+                Sold Herds
+              </Button>
+            </Link>
+            <Link href="/dashboard/herds/new">
+              <Button size="md">
+                <Plus className="mr-1.5 h-4 w-4" />
+                Add Herd
+              </Button>
+            </Link>
+          </div>
         }
       />
 
