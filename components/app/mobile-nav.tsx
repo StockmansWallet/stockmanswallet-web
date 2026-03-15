@@ -91,7 +91,7 @@ export function MobileNav({ userEmail, subscriptionTier = "stockman" }: { userEm
 
             <div className="border-t border-white/5 pt-3">
               <Link
-                href="/dashboard/settings"
+                href="/dashboard/settings/account"
                 onClick={() => setOpen(false)}
                 className="mb-1 flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-all hover:bg-white/5"
               >

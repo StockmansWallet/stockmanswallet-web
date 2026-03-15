@@ -117,7 +117,7 @@ export function Sidebar({ userEmail, subscriptionTier = "stockman" }: { userEmai
       {/* Zone 3: Plan & Log Out */}
       <div className="shrink-0 border-t border-white/5 px-4 pt-4 pb-2">
         <Link
-          href="/dashboard/settings"
+          href="/dashboard/settings/account"
           className="mb-1 flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-all hover:bg-white/5"
         >
           <Crown className="h-4 w-4 text-brand" />

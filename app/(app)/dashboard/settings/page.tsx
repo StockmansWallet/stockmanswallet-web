@@ -7,9 +7,9 @@ import {
   Bell,
   MapPinned,
   Database,
-  Shield,
   ChevronRight,
   FlaskConical,
+  CreditCard,
 } from "lucide-react";
 import { isAdminEmail } from "@/lib/data/admin";
 
@@ -63,12 +63,20 @@ export default async function SettingsPage() {
         <Card>
           <CardContent className="divide-y divide-white/[0.04] p-0">
             <NavItem
-              href="/dashboard/settings/account"
+              href="/dashboard/settings/profile"
               icon={User}
               iconBg="bg-brand/15"
               iconColor="text-brand"
+              label="Profile"
+              description="Name, contact details, bio, and visibility"
+            />
+            <NavItem
+              href="/dashboard/settings/account"
+              icon={CreditCard}
+              iconBg="bg-amber-500/15"
+              iconColor="text-amber-400"
               label="Account"
-              description="Profile, password, and role"
+              description="Subscription, password, and account management"
             />
             <NavItem
               href="/dashboard/settings/notifications"
