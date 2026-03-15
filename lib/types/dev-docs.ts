@@ -7,6 +7,7 @@ export interface DevUpdate {
   summary: string;
   detail: string | null;
   sort_order: number;
+  is_user_facing: boolean;
   created_at: string;
 }
 

@@ -13,6 +13,7 @@ import {
   MessageCircle,
   ExternalLink,
   ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
 
@@ -190,6 +191,58 @@ export default function HelpCenterPage() {
               <p className="mt-1 text-xs leading-relaxed text-text-muted">{item.answer}</p>
             </div>
           ))}
+        </CardContent>
+      </Card>
+
+      {/* Resources */}
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle>Resources</CardTitle>
+        </CardHeader>
+        <CardContent className="divide-y divide-white/5 px-5 pb-5">
+          <Link
+            href="/dashboard/whats-new"
+            className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
+          >
+            <div className="flex items-center gap-3">
+              <Sparkles className="h-5 w-5 text-brand" />
+              <div>
+                <p className="text-sm font-medium text-text-primary">What&apos;s New</p>
+                <p className="text-xs text-text-muted">Latest features and improvements</p>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-text-muted" />
+          </Link>
+          <a
+            href="https://stockmanswallet.com.au/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
+          >
+            <div className="flex items-center gap-3">
+              <ExternalLink className="h-5 w-5 text-text-muted" />
+              <div>
+                <p className="text-sm font-medium text-text-primary">Privacy Policy</p>
+                <p className="text-xs text-text-muted">How we handle your data</p>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-text-muted" />
+          </a>
+          <a
+            href="https://stockmanswallet.com.au/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
+          >
+            <div className="flex items-center gap-3">
+              <ExternalLink className="h-5 w-5 text-text-muted" />
+              <div>
+                <p className="text-sm font-medium text-text-primary">Terms of Service</p>
+                <p className="text-xs text-text-muted">Usage terms and conditions</p>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-text-muted" />
+          </a>
         </CardContent>
       </Card>
 

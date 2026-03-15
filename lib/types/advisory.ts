@@ -151,7 +151,10 @@ export type NotificationType =
   | "new_message"
   | "renewal_requested"
   | "farmer_connection_request"
-  | "farmer_request_approved";
+  | "farmer_request_approved"
+  | "yard_book_reminder"
+  | "yard_book_overdue"
+  | "price_alert";
 
 export interface AppNotification {
   id: string;

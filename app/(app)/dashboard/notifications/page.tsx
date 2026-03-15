@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { Bell, UserPlus, Check, X, Clock, MessageSquare, RefreshCw, Handshake } from "lucide-react";
+import { Bell, UserPlus, Check, X, Clock, MessageSquare, RefreshCw, Handshake, BookOpen, AlertTriangle, TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import type { AppNotification, NotificationType } from "@/lib/types/advisory";
@@ -15,6 +15,9 @@ const typeIcons: Record<NotificationType, typeof Bell> = {
   renewal_requested: RefreshCw,
   farmer_connection_request: Handshake,
   farmer_request_approved: Handshake,
+  yard_book_reminder: BookOpen,
+  yard_book_overdue: AlertTriangle,
+  price_alert: TrendingUp,
 };
 
 function formatDate(dateStr: string): string {
