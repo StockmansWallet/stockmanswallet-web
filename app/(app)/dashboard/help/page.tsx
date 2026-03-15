@@ -7,13 +7,16 @@ import {
   Grid3x3,
   Brain,
   FileText,
-  Settings,
   Users,
   Mail,
   MessageCircle,
   ExternalLink,
   ChevronRight,
   Sparkles,
+  Database,
+  Shield,
+  ScrollText,
+  Bug,
 } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
 
@@ -128,154 +131,180 @@ export default function HelpCenterPage() {
         </p>
       </div>
 
-      {/* Getting Started */}
-      <Card className="mb-4">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Getting Started</CardTitle>
-            <Link
-              href="/dashboard/help/getting-started"
-              className="text-xs font-medium text-brand hover:underline"
-            >
-              View full guide
-            </Link>
-          </div>
-        </CardHeader>
-        <CardContent className="divide-y divide-white/5 px-5 pb-5">
-          {gettingStarted.map((item) => (
-            <Link
-              key={item.title}
-              href={item.href}
-              className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
-            >
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-text-primary">{item.title}</p>
-                <p className="text-xs text-text-muted">{item.description}</p>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        {/* Left Column: Getting Started + Feature Guides + FAQs */}
+        <div className="space-y-4 lg:col-span-2">
+          {/* Getting Started */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Getting Started</CardTitle>
+                <Link
+                  href="/dashboard/help/getting-started"
+                  className="text-xs font-medium text-brand hover:underline"
+                >
+                  View full guide
+                </Link>
               </div>
-              <ChevronRight className="ml-3 h-4 w-4 flex-shrink-0 text-text-muted" />
-            </Link>
-          ))}
-        </CardContent>
-      </Card>
+            </CardHeader>
+            <CardContent className="divide-y divide-white/5 px-5 pb-5">
+              {gettingStarted.map((item) => (
+                <Link
+                  key={item.title}
+                  href={item.href}
+                  className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-text-primary">{item.title}</p>
+                    <p className="text-xs text-text-muted">{item.description}</p>
+                  </div>
+                  <ChevronRight className="ml-3 h-4 w-4 flex-shrink-0 text-text-muted" />
+                </Link>
+              ))}
+            </CardContent>
+          </Card>
 
-      {/* Feature Guides */}
-      <Card className="mb-4">
-        <CardHeader>
-          <CardTitle>Feature Guides</CardTitle>
-        </CardHeader>
-        <CardContent className="divide-y divide-white/5 px-5 pb-5">
-          {featureGuides.map((item) => (
-            <div
-              key={item.title}
-              className="-mx-2 flex items-start gap-3 rounded-lg px-2 py-3"
-            >
-              <div className="mt-0.5 flex-shrink-0 text-text-muted">{item.icon}</div>
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-text-primary">{item.title}</p>
-                <p className="text-xs text-text-muted">{item.description}</p>
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+          {/* Feature Guides */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Feature Guides</CardTitle>
+            </CardHeader>
+            <CardContent className="divide-y divide-white/5 px-5 pb-5">
+              {featureGuides.map((item) => (
+                <div
+                  key={item.title}
+                  className="-mx-2 flex items-start gap-3 rounded-lg px-2 py-3"
+                >
+                  <div className="mt-0.5 flex-shrink-0 text-text-muted">{item.icon}</div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-text-primary">{item.title}</p>
+                    <p className="text-xs text-text-muted">{item.description}</p>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
 
-      {/* FAQs */}
-      <Card className="mb-4">
-        <CardHeader>
-          <CardTitle>Frequently Asked Questions</CardTitle>
-        </CardHeader>
-        <CardContent className="divide-y divide-white/5 px-5 pb-5">
-          {faqs.map((item) => (
-            <div key={item.question} className="-mx-2 rounded-lg px-2 py-3">
-              <p className="text-sm font-medium text-text-primary">{item.question}</p>
-              <p className="mt-1 text-xs leading-relaxed text-text-muted">{item.answer}</p>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+          {/* FAQs */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Frequently Asked Questions</CardTitle>
+            </CardHeader>
+            <CardContent className="divide-y divide-white/5 px-5 pb-5">
+              {faqs.map((item) => (
+                <div key={item.question} className="-mx-2 rounded-lg px-2 py-3">
+                  <p className="text-sm font-medium text-text-primary">{item.question}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-text-muted">{item.answer}</p>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* Resources */}
-      <Card className="mb-4">
-        <CardHeader>
-          <CardTitle>Resources</CardTitle>
-        </CardHeader>
-        <CardContent className="divide-y divide-white/5 px-5 pb-5">
-          <Link
-            href="/dashboard/whats-new"
-            className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
-          >
-            <div className="flex items-center gap-3">
-              <Sparkles className="h-5 w-5 text-brand" />
-              <div>
-                <p className="text-sm font-medium text-text-primary">What&apos;s New</p>
-                <p className="text-xs text-text-muted">Latest features and improvements</p>
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-text-muted" />
-          </Link>
-          <a
-            href="https://stockmanswallet.com.au/privacy"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
-          >
-            <div className="flex items-center gap-3">
-              <ExternalLink className="h-5 w-5 text-text-muted" />
-              <div>
-                <p className="text-sm font-medium text-text-primary">Privacy Policy</p>
-                <p className="text-xs text-text-muted">How we handle your data</p>
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-text-muted" />
-          </a>
-          <a
-            href="https://stockmanswallet.com.au/terms"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
-          >
-            <div className="flex items-center gap-3">
-              <ExternalLink className="h-5 w-5 text-text-muted" />
-              <div>
-                <p className="text-sm font-medium text-text-primary">Terms of Service</p>
-                <p className="text-xs text-text-muted">Usage terms and conditions</p>
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-text-muted" />
-          </a>
-        </CardContent>
-      </Card>
+        {/* Right Column: Support + Resources + Legal */}
+        <div className="space-y-4">
+          {/* Support */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Support</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 px-5 pb-5">
+              <a
+                href="mailto:support@stockmanswallet.com.au?subject=Bug Report"
+                className="flex items-center gap-3 rounded-xl bg-white/[0.03] px-4 py-3 transition-colors hover:bg-white/[0.06]"
+              >
+                <Bug className="h-5 w-5 text-text-muted" />
+                <div>
+                  <p className="text-sm font-medium text-text-primary">Report an Issue</p>
+                  <p className="text-xs text-text-muted">Let us know about bugs or problems</p>
+                </div>
+              </a>
+              <a
+                href="mailto:support@stockmanswallet.com.au"
+                className="flex items-center gap-3 rounded-xl bg-white/[0.03] px-4 py-3 transition-colors hover:bg-white/[0.06]"
+              >
+                <Mail className="h-5 w-5 text-brand" />
+                <div>
+                  <p className="text-sm font-medium text-text-primary">Contact Us</p>
+                  <p className="text-xs text-text-muted">support@stockmanswallet.com.au</p>
+                </div>
+              </a>
+              <Link
+                href="/dashboard/stockman-iq"
+                className="flex items-center gap-3 rounded-xl bg-white/[0.03] px-4 py-3 transition-colors hover:bg-white/[0.06]"
+              >
+                <MessageCircle className="h-5 w-5 text-brand" />
+                <div>
+                  <p className="text-sm font-medium text-text-primary">Ask Stockman IQ</p>
+                  <p className="text-xs text-text-muted">AI-powered help for quick questions</p>
+                </div>
+              </Link>
+            </CardContent>
+          </Card>
 
-      {/* Contact Support */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Contact Support</CardTitle>
-        </CardHeader>
-        <CardContent className="px-5 pb-5">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <a
-              href="mailto:support@stockmanswallet.com.au"
-              className="flex items-center gap-3 rounded-xl bg-white/[0.03] px-4 py-3 transition-colors hover:bg-white/[0.06]"
-            >
-              <Mail className="h-5 w-5 text-brand" />
-              <div>
-                <p className="text-sm font-medium text-text-primary">Email Support</p>
-                <p className="text-xs text-text-muted">support@stockmanswallet.com.au</p>
-              </div>
-            </a>
-            <Link
-              href="/dashboard/stockman-iq"
-              className="flex items-center gap-3 rounded-xl bg-white/[0.03] px-4 py-3 transition-colors hover:bg-white/[0.06]"
-            >
-              <MessageCircle className="h-5 w-5 text-brand" />
-              <div>
-                <p className="text-sm font-medium text-text-primary">Ask Stockman IQ</p>
-                <p className="text-xs text-text-muted">AI-powered help for quick questions</p>
-              </div>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+          {/* Resources */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Resources</CardTitle>
+            </CardHeader>
+            <CardContent className="divide-y divide-white/5 px-5 pb-5">
+              <Link
+                href="/dashboard/whats-new"
+                className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
+              >
+                <div className="flex items-center gap-3">
+                  <Sparkles className="h-5 w-5 text-brand" />
+                  <p className="text-sm font-medium text-text-primary">What&apos;s New</p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-text-muted" />
+              </Link>
+              <Link
+                href="/dashboard/help/data-sources"
+                className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
+              >
+                <div className="flex items-center gap-3">
+                  <Database className="h-5 w-5 text-text-muted" />
+                  <p className="text-sm font-medium text-text-primary">Data Sources</p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-text-muted" />
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Legal */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Legal</CardTitle>
+            </CardHeader>
+            <CardContent className="divide-y divide-white/5 px-5 pb-5">
+              <a
+                href="https://stockmanswallet.com.au/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
+              >
+                <div className="flex items-center gap-3">
+                  <Shield className="h-5 w-5 text-text-muted" />
+                  <p className="text-sm font-medium text-text-primary">Privacy Policy</p>
+                </div>
+                <ExternalLink className="h-4 w-4 text-text-muted" />
+              </a>
+              <a
+                href="https://stockmanswallet.com.au/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
+              >
+                <div className="flex items-center gap-3">
+                  <ScrollText className="h-5 w-5 text-text-muted" />
+                  <p className="text-sm font-medium text-text-primary">Terms of Service</p>
+                </div>
+                <ExternalLink className="h-4 w-4 text-text-muted" />
+              </a>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
