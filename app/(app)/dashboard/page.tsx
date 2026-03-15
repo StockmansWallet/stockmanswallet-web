@@ -14,6 +14,10 @@ import { ComingUpCard } from "@/components/app/coming-up-card";
 import { GrowthMortalityCard } from "@/components/app/growth-mortality-card";
 import { AdvisorRedirect } from "@/components/app/advisory/advisor-redirect";
 import { DashboardSaleyardSelector } from "@/components/app/dashboard-saleyard-selector";
+import { WeatherCard } from "@/components/app/weather-card";
+import { DashboardInsights } from "@/components/app/dashboard-insights";
+import { fetchPropertyWeather } from "@/lib/services/weather-service";
+import { evaluateInsights } from "@/lib/stockman-iq/insight-engine";
 
 export const revalidate = 0;
 
@@ -48,7 +52,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       .order("name"),
     supabase
       .from("properties")
-      .select("id, property_name, state, acreage, is_simulated")
+      .select("id, property_name, state, acreage, is_simulated, latitude, longitude, is_default, suburb")
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
       .order("property_name"),
@@ -202,6 +206,28 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       ? ((chartData[1].value - chartData[0].value) / chartData[0].value) * 100
       : undefined;
 
+  // Fetch weather for primary property (or first with coordinates)
+  const sortedProps = [...(properties ?? [])].sort((a, b) => {
+    if (a.is_default && !b.is_default) return -1;
+    if (!a.is_default && b.is_default) return 1;
+    return 0;
+  });
+  const weatherProp = sortedProps.find((p) => p.latitude != null && p.longitude != null);
+  const weatherPromise = weatherProp
+    ? fetchPropertyWeather(
+        weatherProp.latitude!,
+        weatherProp.longitude!,
+        weatherProp.property_name,
+        [weatherProp.suburb, weatherProp.state].filter(Boolean).join(", ")
+      )
+    : Promise.resolve(null);
+
+  // Evaluate insights in parallel with weather
+  const [weatherData, insights] = await Promise.all([
+    weatherPromise,
+    hasData ? evaluateInsights() : Promise.resolve([]),
+  ]);
+
   return (
     <>
       <AdvisorRedirect />
@@ -237,8 +263,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle>12-Month Outlook</CardTitle>
-                    <span className="text-xs text-text-muted">projected portfolio value</span>
+                    <CardTitle>Portfolio Outlook</CardTitle>
+                    <span className="text-xs text-text-muted">projected value</span>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -335,6 +361,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
               <DashboardQuickActions />
 
+              <DashboardInsights insights={insights} />
+
               <ComingUpCard items={upcomingItems ?? []} />
 
               <Card>
@@ -395,6 +423,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 avgDailyWeightGain={avgDailyWeightGain}
                 totalHead={totalHead}
               />
+
+              {weatherData && <WeatherCard weather={weatherData} />}
             </div>
           </div>
           </div>
