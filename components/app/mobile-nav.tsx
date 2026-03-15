@@ -8,6 +8,7 @@ import { signOut } from "@/app/(auth)/actions";
 import { useViewMode } from "@/lib/hooks/use-view-mode";
 import { ViewModeToggle } from "@/components/app/view-mode-toggle";
 import { Menu, X, Crown, HelpCircle, Settings, LogOut } from "lucide-react";
+import { tierDisplayName, type SubscriptionTier } from "@/lib/subscriptions/tiers";
 import { NotificationBell } from "@/components/app/notification-bell";
 import {
   farmerMobileItems,
@@ -15,7 +16,7 @@ import {
   type NavItem,
 } from "@/lib/navigation/nav-config";
 
-export function MobileNav({ userEmail }: { userEmail?: string }) {
+export function MobileNav({ userEmail, subscriptionTier = "stockman" }: { userEmail?: string; subscriptionTier?: string }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const { viewMode } = useViewMode();
@@ -97,7 +98,7 @@ export function MobileNav({ userEmail }: { userEmail?: string }) {
                 <Crown className="h-4 w-4 text-brand" />
                 <div>
                   <p className="text-sm font-medium text-text-primary">Plan</p>
-                  <p className="text-xs text-text-muted">Head Stockman</p>
+                  <p className="text-xs text-text-muted">{tierDisplayName(subscriptionTier as SubscriptionTier)}</p>
                 </div>
               </Link>
 

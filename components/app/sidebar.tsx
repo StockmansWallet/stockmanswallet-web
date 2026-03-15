@@ -7,6 +7,7 @@ import { isAdminEmail } from "@/lib/data/admin";
 import { useViewMode } from "@/lib/hooks/use-view-mode";
 import { Bell, Crown, LogOut } from "lucide-react";
 import { NotificationBadge } from "@/components/app/notification-badge";
+import { tierDisplayName, type SubscriptionTier } from "@/lib/subscriptions/tiers";
 import {
   farmerNavItems,
   farmerToolItems,
@@ -33,7 +34,7 @@ function NavLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
   );
 }
 
-export function Sidebar({ userEmail }: { userEmail?: string }) {
+export function Sidebar({ userEmail, subscriptionTier = "stockman" }: { userEmail?: string; subscriptionTier?: string }) {
   const pathname = usePathname();
   const { viewMode } = useViewMode();
 
@@ -122,7 +123,7 @@ export function Sidebar({ userEmail }: { userEmail?: string }) {
           <Crown className="h-4 w-4 text-brand" />
           <div className="min-w-0">
             <p className="text-sm font-medium text-text-primary">Plan</p>
-            <p className="text-xs text-text-muted">Head Stockman</p>
+            <p className="text-xs text-text-muted">{tierDisplayName(subscriptionTier as SubscriptionTier)}</p>
           </div>
         </Link>
 

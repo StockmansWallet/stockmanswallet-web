@@ -21,10 +21,10 @@ export default async function AppLayout({
     redirect("/sign-in");
   }
 
-  // Fetch user role for default view mode
+  // Fetch user role and subscription tier for default view mode
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select("role")
+    .select("role, subscription_tier")
     .eq("user_id", user.id)
     .single();
 
@@ -38,7 +38,7 @@ export default async function AppLayout({
     <AppProviders defaultMode={defaultMode}>
       <div className="flex min-h-screen flex-col bg-background">
         {/* Mobile nav */}
-        <MobileNav userEmail={user.email} />
+        <MobileNav userEmail={user.email} subscriptionTier={profile?.subscription_tier || "stockman"} />
 
         {/* Desktop top header bar - full width */}
         <TopBar
@@ -52,7 +52,7 @@ export default async function AppLayout({
         <div className="flex flex-1">
           <div className="hidden lg:block">
             <div className="sticky top-20 h-[calc(100vh-5rem)] py-4 pl-6">
-              <Sidebar userEmail={user.email} />
+              <Sidebar userEmail={user.email} subscriptionTier={profile?.subscription_tier || "stockman"} />
             </div>
           </div>
 
