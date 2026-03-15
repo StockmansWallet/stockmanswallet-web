@@ -133,7 +133,7 @@ export function AdvisorLensPanel({
           </div>
 
           {isActive && (
-            <div className="mt-4 grid grid-cols-3 gap-3">
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div className="rounded-lg bg-white/[0.03] p-3 text-center">
                 <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Baseline</p>
                 <p className="mt-1 text-lg font-bold tabular-nums text-text-primary">${Math.round(baselineValue).toLocaleString()}</p>
