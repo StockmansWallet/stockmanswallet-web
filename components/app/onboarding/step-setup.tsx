@@ -29,7 +29,7 @@ function AddPropertyModal({
   const [name, setName] = useState("");
   const [pic, setPic] = useState("");
   const [size, setSize] = useState("");
-  const [sizeUnit, setSizeUnit] = useState<"ha" | "ac">("ha");
+  const [sizeUnit, setSizeUnit] = useState<"ha" | "ac">("ac");
   const [address, setAddress] = useState("");
   const [suburb, setSuburb] = useState("");
   const [state, setState] = useState("QLD");
@@ -111,28 +111,28 @@ function AddPropertyModal({
                 placeholder="0"
                 className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand"
               />
-              <div className="flex overflow-hidden rounded-lg border border-white/10">
-                <button
-                  type="button"
-                  onClick={() => setSizeUnit("ha")}
-                  className={`px-2.5 py-2 text-xs font-medium transition-colors ${
-                    sizeUnit === "ha"
-                      ? "bg-brand text-white"
-                      : "bg-white/5 text-text-muted hover:text-text-primary"
-                  }`}
-                >
-                  ha
-                </button>
+              <div className="flex flex-shrink-0 overflow-hidden rounded-lg border border-white/10">
                 <button
                   type="button"
                   onClick={() => setSizeUnit("ac")}
-                  className={`px-2.5 py-2 text-xs font-medium transition-colors ${
+                  className={`px-3 py-2 text-xs font-medium transition-colors ${
                     sizeUnit === "ac"
                       ? "bg-brand text-white"
                       : "bg-white/5 text-text-muted hover:text-text-primary"
                   }`}
                 >
                   ac
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSizeUnit("ha")}
+                  className={`px-3 py-2 text-xs font-medium transition-colors ${
+                    sizeUnit === "ha"
+                      ? "bg-brand text-white"
+                      : "bg-white/5 text-text-muted hover:text-text-primary"
+                  }`}
+                >
+                  ha
                 </button>
               </div>
             </div>
@@ -165,7 +165,7 @@ function AddPropertyModal({
             type="text"
             value={suburb}
             onChange={(e) => setSuburb(e.target.value)}
-            placeholder="e.g. Everton Hills"
+            placeholder="e.g. Longreach"
             autoCapitalize="words"
             className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand"
           />
@@ -197,7 +197,7 @@ function AddPropertyModal({
               inputMode="numeric"
               value={postcode}
               onChange={(e) => setPostcode(e.target.value.replace(/\D/g, "").slice(0, 4))}
-              placeholder="e.g. 4053"
+              placeholder="e.g. 4730"
               className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand"
             />
           </div>

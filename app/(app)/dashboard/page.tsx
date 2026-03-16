@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { LoadDemoDataButton } from "@/components/app/load-demo-data-button";
 import { HerdComposition } from "./herd-composition";
 import { PortfolioChart } from "./portfolio-chart";
 import { calculateHerdValuation, mapCategoryToMLACategory, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
@@ -233,21 +234,24 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       <AdvisorRedirect />
       <div className="max-w-6xl">
         {!hasData ? (
-          /* Empty state */
-          <div>
-            <PageHeader
-              title="Welcome to Stockman&#8217;s Wallet"
-              titleClassName="text-4xl font-bold text-brand"
-              subtitle="Add your first herd to get started."
-            />
-            <Card>
-              <EmptyState
-                title="No herds yet"
-                description="Add your first herd to see your farm at a glance, or load the demo data from Settings."
-                actionLabel="Add Herd"
-                actionHref="/dashboard/herds/new"
-              />
-            </Card>
+          /* Empty state - matches iOS EmptyDashboardView */
+          <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
+            <h2 className="text-2xl font-bold text-text-primary">
+              Welcome to Your Dashboard
+            </h2>
+            <p className="mt-3 max-w-md text-sm text-text-secondary">
+              Add your first herd to see live valuations, market trends, and portfolio insights.
+            </p>
+
+            <div className="mt-8 flex w-full max-w-xs flex-col gap-3">
+              <Link
+                href="/dashboard/herds/new"
+                className="inline-flex w-full items-center justify-center rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              >
+                Add Your First Herd
+              </Link>
+              <LoadDemoDataButton />
+            </div>
           </div>
         ) : (
           <div>
