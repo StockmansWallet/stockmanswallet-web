@@ -31,8 +31,6 @@ export default async function AppLayout({
     .eq("user_id", user.id)
     .maybeSingle();
 
-  console.log("AppLayout: user_id:", user.id, "profile:", JSON.stringify(profile), "error:", profileError?.message);
-
   // Redirect new users to onboarding wizard
   if (!profile || !profile.onboarding_completed) {
     redirect("/onboarding");
