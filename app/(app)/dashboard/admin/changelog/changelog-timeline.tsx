@@ -32,11 +32,29 @@ export function ChangelogTimeline({ days }: { days: TimelineDay[] }) {
     return has;
   };
 
-  const buildLabel = (entries: DevUpdate[]) => {
+  // Collect all distinct iOS build labels for the day header badges
+  const buildLabels = (entries: DevUpdate[]) => {
+    const labels: string[] = [];
     for (const e of entries) {
-      if (e.build_label) return e.build_label;
+      if (e.build_label && !labels.includes(e.build_label)) {
+        labels.push(e.build_label);
+      }
     }
-    return null;
+    return labels;
+  };
+
+  // Group entries by build_label within a day (null labels grouped as "Other")
+  const groupByBuild = (entries: DevUpdate[]) => {
+    const groups: { label: string | null; entries: DevUpdate[] }[] = [];
+    for (const e of entries) {
+      const existing = groups.find((g) => g.label === (e.build_label ?? null));
+      if (existing) {
+        existing.entries.push(e);
+      } else {
+        groups.push({ label: e.build_label ?? null, entries: [e] });
+      }
+    }
+    return groups;
   };
 
   return (
@@ -78,7 +96,8 @@ export function ChangelogTimeline({ days }: { days: TimelineDay[] }) {
         filteredDays.map((day) => {
           const isExpanded = expandedDay === day.dateKey;
           const p = platforms(day.entries);
-          const iosBuild = buildLabel(day.entries);
+          const iosBuilds = buildLabels(day.entries);
+          const buildGroups = groupByBuild(day.entries);
 
           return (
             <Card key={day.dateKey} className="overflow-hidden">
@@ -100,12 +119,19 @@ export function ChangelogTimeline({ days }: { days: TimelineDay[] }) {
                   {day.dateLabel}
                 </span>
                 <div className="flex items-center gap-1.5">
-                  {p.ios && (
+                  {p.ios && iosBuilds.length > 0 ? (
+                    iosBuilds.map((label) => (
+                      <Badge key={label} variant="info">
+                        <Smartphone className="mr-1 h-3 w-3" />
+                        {label}
+                      </Badge>
+                    ))
+                  ) : p.ios ? (
                     <Badge variant="info">
                       <Smartphone className="mr-1 h-3 w-3" />
-                      {iosBuild ?? "iOS"}
+                      iOS
                     </Badge>
-                  )}
+                  ) : null}
                   {p.web && (
                     <Badge variant="success">
                       <Globe className="mr-1 h-3 w-3" />
@@ -128,9 +154,24 @@ export function ChangelogTimeline({ days }: { days: TimelineDay[] }) {
               {/* Expanded content */}
               {isExpanded && (
                 <div className="border-t border-white/5 px-5 pb-4 pt-2">
-                  {day.entries.map((entry) => (
-                    <ChangelogEntry key={entry.id} entry={entry} />
-                  ))}
+                  {buildGroups.length > 1
+                    ? buildGroups.map((group) => (
+                        <div key={group.label ?? "other"}>
+                          {group.label && (
+                            <div className="mb-1 mt-3 first:mt-1">
+                              <span className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+                                {group.label}
+                              </span>
+                            </div>
+                          )}
+                          {group.entries.map((entry) => (
+                            <ChangelogEntry key={entry.id} entry={entry} />
+                          ))}
+                        </div>
+                      ))
+                    : day.entries.map((entry) => (
+                        <ChangelogEntry key={entry.id} entry={entry} />
+                      ))}
                 </div>
               )}
             </Card>
