@@ -35,6 +35,32 @@ export async function signUp(formData: FormData) {
   redirect("/dashboard");
 }
 
+export async function forgotPassword(formData: FormData) {
+  const supabase = await createClient();
+  const origin = (await headers()).get("origin");
+  const email = formData.get("email") as string;
+
+  // Always return success to avoid revealing whether the email exists
+  await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/auth/callback?type=recovery`,
+  });
+
+  return { success: true };
+}
+
+export async function updatePassword(formData: FormData) {
+  const supabase = await createClient();
+  const password = formData.get("password") as string;
+
+  const { error } = await supabase.auth.updateUser({ password });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  redirect("/dashboard");
+}
+
 export async function signInWithApple() {
   const origin = (await headers()).get("origin");
 

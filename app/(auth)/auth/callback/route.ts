@@ -4,9 +4,11 @@ import { createServerClient } from "@supabase/ssr";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
+  const type = searchParams.get("type");
 
   if (code) {
-    const response = NextResponse.redirect(`${origin}/dashboard`);
+    const redirectTo = type === "recovery" ? "/reset-password" : "/dashboard";
+    const response = NextResponse.redirect(`${origin}${redirectTo}`);
 
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
