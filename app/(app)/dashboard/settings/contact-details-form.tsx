@@ -53,7 +53,7 @@ export function ContactDetailsForm({
 
       <p className="text-xs text-text-muted leading-relaxed">
         {isAdvisor
-          ? "These details are visible to farmers in the directory when your listing is active."
+          ? "These details are visible to producers in the directory when your listing is active."
           : "These details are visible when someone views your profile in the network or directory."}
       </p>
 

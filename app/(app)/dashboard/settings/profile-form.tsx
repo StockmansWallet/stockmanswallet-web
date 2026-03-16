@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { updateProfile } from "./actions";
 
 const ROLE_OPTIONS = [
-  { value: "farmerGrazier", label: "Farmer / Grazier" },
+  { value: "farmerGrazier", label: "Producer" },
   { value: "agribusinessBanker", label: "Agribusiness Banker" },
   { value: "insurer", label: "Insurer" },
   { value: "livestockAgent", label: "Livestock Agent" },

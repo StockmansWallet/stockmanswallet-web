@@ -19,7 +19,7 @@ export function ViewModeToggle() {
         }`}
       >
         <Tractor className="h-3.5 w-3.5" />
-        Farmer
+        Producer
       </button>
       <button
         onClick={() => { setViewMode("advisor"); router.push("/dashboard/advisor"); }}

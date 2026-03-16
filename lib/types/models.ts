@@ -5,7 +5,7 @@
 export type Species = "Cattle" | "Sheep" | "Pig" | "Goat";
 
 export type UserRole =
-  | "Farmer/Grazier"
+  | "Producer"
   | "Agribusiness Banker"
   | "Insurer"
   | "Livestock Agent"

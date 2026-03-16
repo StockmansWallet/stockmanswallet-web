@@ -79,7 +79,7 @@ export default async function FarmerConnectionsPage() {
         title="My Connections"
         titleClassName="text-4xl font-bold text-orange-400"
         titleHref="/dashboard/farmer-network"
-        subtitle="Back to Farmer Network"
+        subtitle="Back to Producer Network"
         subtitleClassName="text-sm font-medium text-text-secondary"
         inline
       />
@@ -89,8 +89,8 @@ export default async function FarmerConnectionsPage() {
           <EmptyState
             icon={<Handshake className="h-6 w-6 text-orange-400" />}
             title="No connections yet"
-            description="Find other farmers in the directory and send them a connection request."
-            actionLabel="Find Farmers"
+            description="Find other producers in the directory and send them a connection request."
+            actionLabel="Find Producers"
             actionHref="/dashboard/farmer-network/directory"
             variant="amber"
           />

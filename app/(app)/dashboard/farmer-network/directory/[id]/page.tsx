@@ -6,7 +6,7 @@ import { MapPin, Building2, Handshake } from "lucide-react";
 import { FarmerConnectButton } from "@/components/app/farmer-network/farmer-connect-button";
 
 export const metadata = {
-  title: "Farmer Profile",
+  title: "Producer Profile",
 };
 
 export default async function FarmerProfilePage({
@@ -51,7 +51,7 @@ export default async function FarmerProfilePage({
   return (
     <div className="max-w-2xl">
       <PageHeader
-        title="Farmer Profile"
+        title="Producer Profile"
         titleClassName="text-4xl font-bold text-orange-400"
         titleHref="/dashboard/farmer-network/directory"
         subtitle="Back to directory"

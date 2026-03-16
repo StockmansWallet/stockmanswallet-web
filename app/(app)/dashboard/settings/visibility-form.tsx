@@ -52,7 +52,7 @@ export function VisibilityForm({
           onChange={(c) => handleToggle("is_listed_in_directory", c)}
           disabled={saving === "is_listed_in_directory"}
           label="List in Advisor Directory"
-          description="Farmers can find you when browsing or searching the directory."
+          description="Producers can find you when browsing or searching the directory."
           color="blue"
         />
       ) : (
@@ -72,8 +72,8 @@ export function VisibilityForm({
             checked={values.is_discoverable_to_farmers}
             onChange={(c) => handleToggle("is_discoverable_to_farmers", c)}
             disabled={saving === "is_discoverable_to_farmers"}
-            label="Visible to Farmers"
-            description="Other farmers on Stockman's Wallet can find you in the Farmer Network."
+            label="Visible to Producers"
+            description="Other producers on Stockman's Wallet can find you in the Producer Network."
             color="green"
           />
         </>
@@ -81,7 +81,7 @@ export function VisibilityForm({
 
       <p className="text-xs text-text-muted leading-relaxed">
         {isAdvisor
-          ? "Control whether farmers can find you in the advisor directory."
+          ? "Control whether producers can find you in the advisor directory."
           : "Control who can find you on Stockman's Wallet. You can turn these off at any time."}
       </p>
     </div>

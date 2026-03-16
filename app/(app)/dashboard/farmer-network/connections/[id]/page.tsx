@@ -6,7 +6,7 @@ import { FarmerChatClient } from "./farmer-chat-client";
 import type { ConnectionRequest, AdvisoryMessage } from "@/lib/types/advisory";
 
 export const metadata = {
-  title: "Farmer Chat",
+  title: "Producer Chat",
 };
 
 export default async function FarmerConnectionDetailPage({

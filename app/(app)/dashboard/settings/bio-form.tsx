@@ -52,8 +52,8 @@ export function BioForm({
         defaultValue={bio}
         placeholder={
           isAdvisor
-            ? "Tell farmers about your experience and services..."
-            : "Tell other farmers about your operation..."
+            ? "Tell producers about your experience and services..."
+            : "Tell other producers about your operation..."
         }
         rows={4}
       />

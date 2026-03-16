@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     template: "%s | Stockman's Wallet",
   },
   description:
-    "Track your cattle, sheep and pig herds as financial assets with real-time MLA market valuations. Built for Australian farmers, graziers and rural advisors.",
+    "Track your cattle, sheep and pig herds as financial assets with real-time MLA market valuations. Built for Australian producers and rural advisors.",
   keywords: [
     "livestock",
     "cattle",

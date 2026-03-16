@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Handshake, Search, MessageSquare, ArrowRight } from "lucide-react";
 
 export const metadata = {
-  title: "Farmer Network",
+  title: "Producer Network",
 };
 
 export default async function FarmerNetworkPage() {
@@ -33,9 +33,9 @@ export default async function FarmerNetworkPage() {
   return (
     <div className="max-w-4xl">
       <PageHeader
-        title="Farmer Network"
+        title="Producer Network"
         titleClassName="text-4xl font-bold text-orange-400"
-        subtitle="Connect and chat with other farmers"
+        subtitle="Connect and chat with other producers"
         subtitleClassName="text-sm font-medium text-text-secondary"
         inline
       />
@@ -49,10 +49,10 @@ export default async function FarmerNetworkPage() {
             </div>
             <div>
               <h2 className="text-lg font-semibold text-text-primary">
-                Your Farmer Network
+                Your Producer Network
               </h2>
               <p className="mt-1 text-sm text-text-secondary">
-                Connect with other farmers and graziers in your area.
+                Connect with other producers in your area.
                 Chat directly, share experiences, and build your network.
               </p>
             </div>
@@ -97,8 +97,8 @@ export default async function FarmerNetworkPage() {
                     <Search className="h-5 w-5 text-orange-400" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-text-primary">Find Farmers</h3>
-                    <p className="text-xs text-text-muted">Browse the farmer directory</p>
+                    <h3 className="text-sm font-semibold text-text-primary">Find Producers</h3>
+                    <p className="text-xs text-text-muted">Browse the producer directory</p>
                   </div>
                 </div>
                 <ArrowRight className="h-4 w-4 text-text-muted transition-transform group-hover:translate-x-0.5" />

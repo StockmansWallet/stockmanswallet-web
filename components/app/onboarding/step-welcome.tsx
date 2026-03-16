@@ -1,33 +1,49 @@
-import { TrendingUp, Brain, BookOpen, FileText } from "lucide-react";
-import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
+import { TrendingUp, Leaf, CircleDollarSign, FileText } from "lucide-react";
 
 const features = [
-  { icon: <IconCattleTags className="h-4 w-4" />, label: "Herd tracking and valuation" },
-  { icon: <TrendingUp className="h-4 w-4" />, label: "Live market prices from MLA" },
-  { icon: <Brain className="h-4 w-4" />, label: "AI-powered insights" },
-  { icon: <BookOpen className="h-4 w-4" />, label: "Yard Book task management" },
-  { icon: <FileText className="h-4 w-4" />, label: "Reports and analytics" },
+  {
+    icon: <TrendingUp className="h-5 w-5" />,
+    title: "Track Portfolio Value",
+    subtitle: "Real-time livestock valuations powered by live market data",
+  },
+  {
+    icon: <Leaf className="h-5 w-5" />,
+    title: "Monitor Your Herds",
+    subtitle: "Growth tracking, mortality rates and herd movements",
+  },
+  {
+    icon: <CircleDollarSign className="h-5 w-5" />,
+    title: "Market Intelligence",
+    subtitle: "Live saleyard prices across Australian markets",
+  },
+  {
+    icon: <FileText className="h-5 w-5" />,
+    title: "Reports & Insights",
+    subtitle: "Financial and operational data at your fingertips",
+  },
 ];
 
-export function StepWelcome({ userName }: { userName: string }) {
+export function StepWelcome() {
   return (
-    <div className="text-center">
-      <div className="mb-4 text-4xl">&#x1f44b;</div>
-      <h2 className="text-xl font-bold text-text-primary">
-        Welcome{userName ? `, ${userName}` : ""}!
-      </h2>
-      <p className="mt-2 text-sm text-text-muted">
-        Let&apos;s get your account set up. This will only take a minute.
-      </p>
+    <div>
+      <div className="mb-6">
+        <p className="text-sm text-text-muted">Welcome to</p>
+        <h2 className="text-2xl font-bold text-text-primary">
+          Stockman&apos;s Wallet
+        </h2>
+      </div>
 
-      <div className="mt-6 space-y-2.5">
+      <div className="space-y-3">
         {features.map((f) => (
           <div
-            key={f.label}
-            className="flex items-center gap-3 rounded-lg bg-white/[0.03] px-4 py-2.5 text-left"
+            key={f.title}
+            className="flex items-start gap-3 rounded-lg px-1 py-1.5"
           >
-            <div className="flex-shrink-0 text-brand">{f.icon}</div>
-            <span className="text-sm text-text-secondary">{f.label}</span>
+            <div className="mt-0.5 flex-shrink-0 text-brand">{f.icon}</div>
+            <div>
+              <p className="text-sm font-medium text-text-primary">{f.title}</p>
+              <p className="text-xs text-text-muted">{f.subtitle}</p>
+            </div>
           </div>
         ))}
       </div>

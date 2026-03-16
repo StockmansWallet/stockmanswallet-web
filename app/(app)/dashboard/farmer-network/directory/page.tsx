@@ -9,7 +9,7 @@ import { FarmerDirectorySearch } from "./farmer-directory-search";
 import type { DirectoryFarmer } from "@/lib/types/advisory";
 
 export const metadata = {
-  title: "Farmer Directory",
+  title: "Producer Directory",
 };
 
 export default async function FarmerDirectoryPage({
@@ -52,10 +52,10 @@ export default async function FarmerDirectoryPage({
   return (
     <div className="max-w-4xl">
       <PageHeader
-        title="Farmer Directory"
+        title="Producer Directory"
         titleClassName="text-4xl font-bold text-orange-400"
         titleHref="/dashboard/farmer-network"
-        subtitle="Back to Farmer Network"
+        subtitle="Back to Producer Network"
         subtitleClassName="text-sm font-medium text-text-secondary"
         inline
       />
@@ -66,11 +66,11 @@ export default async function FarmerDirectoryPage({
         <Card>
           <EmptyState
             icon={<Search className="h-6 w-6 text-orange-400" />}
-            title="No farmers found"
+            title="No producers found"
             description={
               searchQuery
-                ? `No farmers match "${searchQuery}". Try a different search.`
-                : "No other farmers are registered yet."
+                ? `No producers match "${searchQuery}". Try a different search.`
+                : "No other producers are registered yet."
             }
             variant="amber"
           />
