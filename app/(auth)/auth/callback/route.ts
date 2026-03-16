@@ -7,8 +7,8 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get("type");
 
   if (code) {
-    const redirectTo = type === "recovery" ? "/reset-password" : "/dashboard";
-    const response = NextResponse.redirect(`${origin}${redirectTo}`);
+    // Build a temporary response to hold cookies during code exchange
+    const tempResponse = NextResponse.next();
 
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -20,16 +20,32 @@ export async function GET(request: NextRequest) {
           },
           setAll(cookiesToSet) {
             cookiesToSet.forEach(({ name, value, options }) =>
-              response.cookies.set(name, value, options)
+              tempResponse.cookies.set(name, value, options)
             );
           },
         },
       }
     );
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
+      // Detect recovery session: check the type param or the session's AMR
+      // Supabase sets amr claim with method "recovery" for password reset flows
+      const isRecovery =
+        type === "recovery" ||
+        data.session?.user?.amr?.some(
+          (a: { method: string }) => a.method === "recovery"
+        );
+
+      const redirectTo = isRecovery ? "/reset-password" : "/dashboard";
+      const response = NextResponse.redirect(`${origin}${redirectTo}`);
+
+      // Copy cookies from the temp response to the redirect response
+      for (const cookie of tempResponse.cookies.getAll()) {
+        response.cookies.set(cookie.name, cookie.value);
+      }
+
       return response;
     }
   }
