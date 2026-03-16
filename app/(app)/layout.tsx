@@ -31,13 +31,7 @@ export default async function AppLayout({
     .eq("user_id", user.id)
     .maybeSingle();
 
-  // Debug: Log profile fetch issues (visible in Vercel function logs)
-  if (profileError) {
-    console.error("AppLayout: profile fetch error:", profileError.message, "user_id:", user.id);
-  }
-  if (!profile) {
-    console.error("AppLayout: no profile found for user_id:", user.id);
-  }
+  console.log("AppLayout: user_id:", user.id, "profile:", JSON.stringify(profile), "error:", profileError?.message);
 
   // Redirect new users to onboarding wizard
   if (!profile || !profile.onboarding_completed) {
