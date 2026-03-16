@@ -25,10 +25,12 @@ export default async function OnboardingPage() {
     redirect("/dashboard");
   }
 
+  // Google provides full_name/name, Apple provides first_name/last_name
+  const meta = user.user_metadata;
   const userName =
-    user.user_metadata?.first_name ||
-    user.user_metadata?.display_name ||
-    "";
+    meta?.first_name
+      ? [meta.first_name, meta.last_name].filter(Boolean).join(" ")
+      : meta?.full_name || meta?.name || meta?.display_name || "";
 
   return <OnboardingWizard userName={userName} />;
 }
