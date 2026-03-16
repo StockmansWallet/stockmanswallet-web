@@ -3,6 +3,17 @@
 /* Use class-based dark mode so html.dark enables all dark: variants */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* All interactive elements should show pointer cursor */
+button,
+[role="button"],
+a,
+input[type="submit"],
+input[type="button"],
+select,
+summary {
+  cursor: pointer;
+}
+
 :root {
   color-scheme: dark;
 
