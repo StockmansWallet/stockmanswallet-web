@@ -32,11 +32,11 @@ export async function GET(request: NextRequest) {
     if (!error) {
       // Detect recovery session: check the type param or the session's AMR
       // Supabase sets amr claim with method "recovery" for password reset flows
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const amr = (data.session?.user as any)?.amr as { method: string }[] | undefined;
       const isRecovery =
         type === "recovery" ||
-        data.session?.user?.amr?.some(
-          (a: { method: string }) => a.method === "recovery"
-        );
+        amr?.some((a) => a.method === "recovery") === true;
 
       const redirectTo = isRecovery ? "/reset-password" : "/dashboard";
       const response = NextResponse.redirect(`${origin}${redirectTo}`);
