@@ -7,6 +7,9 @@ import { TopBar } from "@/components/app/top-bar";
 import { isAdvisorRole } from "@/lib/types/advisory";
 import { isAdminEmail } from "@/lib/data/admin";
 
+// Prevent Next.js from caching this layout - auth state must be fresh on every request
+export const dynamic = "force-dynamic";
+
 export default async function AppLayout({
   children,
 }: {
