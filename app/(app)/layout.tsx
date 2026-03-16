@@ -22,11 +22,19 @@ export default async function AppLayout({
   }
 
   // Fetch user role, subscription tier, and onboarding status
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("user_profiles")
     .select("role, subscription_tier, onboarding_completed")
     .eq("user_id", user.id)
     .maybeSingle();
+
+  // Debug: Log profile fetch issues (visible in Vercel function logs)
+  if (profileError) {
+    console.error("AppLayout: profile fetch error:", profileError.message, "user_id:", user.id);
+  }
+  if (!profile) {
+    console.error("AppLayout: no profile found for user_id:", user.id);
+  }
 
   // Redirect new users to onboarding wizard
   if (!profile || !profile.onboarding_completed) {
