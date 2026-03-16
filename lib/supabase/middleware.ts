@@ -56,10 +56,11 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Redirect authenticated users away from auth pages
-  // Exclude /reset-password (user has a recovery session)
+  // Exclude /reset-password and /forgot-password (recovery flow)
   if (
     user &&
     !request.nextUrl.pathname.startsWith("/reset-password") &&
+    !request.nextUrl.pathname.startsWith("/forgot-password") &&
     (request.nextUrl.pathname.startsWith("/sign-in") ||
       request.nextUrl.pathname.startsWith("/sign-up"))
   ) {
