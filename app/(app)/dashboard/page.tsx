@@ -33,8 +33,15 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     data: { user },
   } = await supabase.auth.getUser();
 
-  const firstName = user?.user_metadata?.first_name || "Stockman";
-  const lastName = user?.user_metadata?.last_name || "";
+  // Fetch display name: prefer auth metadata, fall back to user_profiles
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("display_name")
+    .eq("user_id", user!.id)
+    .maybeSingle();
+
+  const authFirstName = user?.user_metadata?.first_name || "";
+  const displayName = authFirstName || profile?.display_name?.split(" ")[0] || "Stockman";
   const todayStr = new Date().toISOString().split("T")[0];
 
   const [{ data: herds }, { data: properties }, { data: breedPremiumData }, { data: upcomingItems }] = await Promise.all([
@@ -256,7 +263,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         ) : (
           <div>
             <PageHeader
-              title={`G\u2019day, ${firstName}!`}
+              title={`G\u2019day, ${displayName}!`}
               titleClassName="text-4xl font-bold text-brand"
               subtitle="Here&#8217;s your herd overview."
             />

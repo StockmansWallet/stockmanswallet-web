@@ -57,6 +57,14 @@ export async function completeOnboarding(data: OnboardingData) {
 
   if (data.displayName) {
     profileUpdate.display_name = data.displayName;
+
+    // Also update auth metadata so dashboard and profile settings can read it
+    const nameParts = data.displayName.trim().split(/\s+/);
+    const authFirstName = nameParts[0] || "";
+    const authLastName = nameParts.slice(1).join(" ") || "";
+    await supabase.auth.updateUser({
+      data: { first_name: authFirstName, last_name: authLastName },
+    });
   }
 
   if (data.contactEmail) {
