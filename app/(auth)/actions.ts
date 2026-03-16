@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
+import { headers, cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
 export async function signIn(formData: FormData) {
@@ -42,7 +42,18 @@ export async function forgotPassword(formData: FormData) {
 
   // Always return success to avoid revealing whether the email exists
   await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/callback?type=recovery`,
+    redirectTo: `${origin}/auth/callback`,
+  });
+
+  // Set a cookie so the callback route knows this is a recovery flow
+  // Supabase PKCE doesn't reliably forward query params or expose AMR after code exchange
+  const cookieStore = await cookies();
+  cookieStore.set("sw-password-recovery", "true", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    maxAge: 3600, // 1 hour - matches Supabase OTP expiry
+    path: "/",
   });
 
   return { success: true };

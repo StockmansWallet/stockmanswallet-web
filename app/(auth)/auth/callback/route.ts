@@ -4,10 +4,8 @@ import { createServerClient } from "@supabase/ssr";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const type = searchParams.get("type");
 
   if (code) {
-    // Build a temporary response to hold cookies during code exchange
     const tempResponse = NextResponse.next();
 
     const supabase = createServerClient(
@@ -27,23 +25,28 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      // Detect recovery session: check the type param or the session's AMR
-      // Supabase sets amr claim with method "recovery" for password reset flows
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const amr = (data.session?.user as any)?.amr as { method: string }[] | undefined;
+      // Detect recovery: cookie set by forgotPassword action, or type param as fallback
       const isRecovery =
-        type === "recovery" ||
-        amr?.some((a) => a.method === "recovery") === true;
+        request.cookies.get("sw-password-recovery")?.value === "true" ||
+        searchParams.get("type") === "recovery";
 
       const redirectTo = isRecovery ? "/reset-password" : "/dashboard";
       const response = NextResponse.redirect(`${origin}${redirectTo}`);
 
-      // Copy cookies from the temp response to the redirect response
+      // Copy auth cookies from the code exchange
       for (const cookie of tempResponse.cookies.getAll()) {
         response.cookies.set(cookie.name, cookie.value);
+      }
+
+      // Clear the recovery cookie after use
+      if (isRecovery) {
+        response.cookies.set("sw-password-recovery", "", {
+          maxAge: 0,
+          path: "/",
+        });
       }
 
       return response;
