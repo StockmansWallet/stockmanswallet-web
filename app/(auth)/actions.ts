@@ -37,7 +37,7 @@ export async function signUp(formData: FormData) {
 
 export async function forgotPassword(formData: FormData) {
   const supabase = await createClient();
-  const origin = (await headers()).get("origin");
+  const origin = (await headers()).get("origin") || "https://stockmanswallet.com.au";
   const email = formData.get("email") as string;
 
   // Always return success to avoid revealing whether the email exists
@@ -62,7 +62,7 @@ export async function updatePassword(formData: FormData) {
 }
 
 export async function signInWithApple() {
-  const origin = (await headers()).get("origin");
+  const origin = (await headers()).get("origin") || "https://stockmanswallet.com.au";
 
   // Generate nonce — Apple will embed the hash in the ID token,
   // and we carry the raw value back via the state parameter.
@@ -91,7 +91,7 @@ export async function signInWithApple() {
 
 export async function signInWithGoogle() {
   const supabase = await createClient();
-  const origin = (await headers()).get("origin");
+  const origin = (await headers()).get("origin") || "https://stockmanswallet.com.au";
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
