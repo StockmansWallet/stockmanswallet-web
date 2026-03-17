@@ -181,7 +181,7 @@ export default async function HerdDetailPage({
     <div className="max-w-6xl">
       <PageHeader
         title={herd.name}
-        subtitle={[herd.species, herd.breed, herd.category].filter(Boolean).join(" \u00B7 ")}
+        subtitle={[herd.species, herd.breed, herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} - ${herd.sub_category}` : herd.category].filter(Boolean).join(" \u00B7 ")}
         actions={
           <div className="flex items-center gap-2">
             {!herd.is_sold && (
@@ -326,7 +326,7 @@ export default async function HerdDetailPage({
               <InfoRow label="Herd Size" value={herd.head_count ? `${herd.head_count.toLocaleString()} head` : null} />
               <InfoRow label="Species" value={herd.species} />
               <InfoRow label="Breed" value={herd.breed} />
-              <InfoRow label="Category" value={herd.category} />
+              <InfoRow label="Category" value={herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} - ${herd.sub_category}` : herd.category} />
               <InfoRow label="Age" value={herd.age_months ? `${herd.age_months} months` : null} />
               <InfoRow label="Breed Premium" value={valuation.breedPremiumApplied !== 0 ? `${valuation.breedPremiumApplied > 0 ? "+" : ""}${valuation.breedPremiumApplied}%` : null} />
               <InfoRow label="Animal ID" value={herd.animal_id_number} />

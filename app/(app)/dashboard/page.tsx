@@ -55,7 +55,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                breeding_program_type, joining_period_start, joining_period_end,
                breed_premium_override, mortality_rate, is_sold, selected_saleyard,
                additional_info, calf_weight_recorded_date, updated_at,
-               breeder_sub_type`)
+               breeder_sub_type, sub_category`)
       .eq("user_id", user!.id)
       .eq("is_sold", false)
       .eq("is_deleted", false)
@@ -343,7 +343,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                           {herd.name}
                         </p>
                         <p className="text-xs text-text-muted">
-                          {herd.breed} &middot; {herd.category}
+                          {herd.breed} &middot; {herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} - ${herd.sub_category}` : herd.category}
                         </p>
                       </div>
                       <div className="ml-4 flex flex-shrink-0 items-center gap-3">

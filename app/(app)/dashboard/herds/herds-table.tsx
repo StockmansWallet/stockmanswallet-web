@@ -222,7 +222,7 @@ export function HerdsTable({
           <span className="font-medium text-text-primary">{herd.name}</span>
         </td>
         <td className="hidden px-5 py-3.5 text-text-secondary md:table-cell">{herd.breed}</td>
-        <td className="hidden px-5 py-3.5 text-text-secondary lg:table-cell">{herd.category}</td>
+        <td className="hidden px-5 py-3.5 text-text-secondary lg:table-cell">{herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} - ${herd.sub_category}` : herd.category}</td>
         <td className="hidden px-5 py-3.5 text-right tabular-nums text-text-secondary lg:table-cell">
           {pricePerKg > 0 ? `$${pricePerKg.toFixed(2)}` : "\u2014"}
         </td>
