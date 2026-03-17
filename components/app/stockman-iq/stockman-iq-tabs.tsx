@@ -49,7 +49,6 @@ export function StockmanIQTabs({ conversations: initialConversations, insights }
 
   const handleConversationCreated = useCallback((conv: BrangusConversationRow) => {
     setConversations((prev) => [conv, ...prev]);
-    setActiveConvId(conv.id);
   }, []);
 
   const handleConversationUpdated = useCallback((id: string, updates: Partial<BrangusConversationRow>) => {
