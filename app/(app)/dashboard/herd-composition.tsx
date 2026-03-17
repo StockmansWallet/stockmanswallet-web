@@ -1,21 +1,10 @@
-// Category → colour mapping (warm earth tones matching iOS donut chart)
+// Category → colour mapping (warm earth tones for 5 master categories)
 export const categoryColours: Record<string, string> = {
-  "Breeder Cow": "#D9762F",
-  "Breeder Heifer": "#F4A871",
-  "Wet Cow": "#BD580F",
-  "Cull Cow": "#8B5E3C",
-  "Weaner Heifer": "#7CA749",
-  "Yearling Heifer": "#5C8FAD",
-  "Feeder Heifer": "#DB9B4D",
-  "Grown Heifer (Un-Joined)": "#A78BFA",
-  "Weaner Bull": "#60A5FA",
-  "Yearling Bull": "#34D399",
-  "Grown Bull": "#6366F1",
-  "Cull Bull": "#9CA3AF",
-  "Weaner Steer": "#F87171",
-  "Yearling Steer": "#FBBF24",
-  "Feeder Steer": "#2DD4BF",
-  "Grown Steer": "#E879F9",
+  "Steer": "#F87171",
+  "Heifer": "#7CA749",
+  "Breeder": "#D9762F",
+  "Dry Cow": "#8B5E3C",
+  "Bull": "#60A5FA",
 };
 
 export const fallbackColour = "#6B7280";
