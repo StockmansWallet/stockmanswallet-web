@@ -425,18 +425,20 @@ function lookupMarketPrices(category: string | undefined, store: ChatDataStore):
     }
 
     if (filtered.length > 0) {
-      lines.push("CATEGORY PRICES:");
+      lines.push("CURRENT CATEGORY PRICES (from Supabase/MLA, relevant to user's herds):");
+      lines.push("IMPORTANT: All prices below are in DOLLARS per kg ($/kg). For example $4.84/kg means four dollars and eighty-four cents per kilogram. Do NOT convert to cents when displaying to the user.");
       // Group by category
       const grouped = new Map<string, { price: number; range: string | null }[]>();
       for (const p of filtered) {
         const entries = grouped.get(p.category) ?? [];
-        entries.push({ price: p.price_per_kg, range: p.weight_range });
+        // Debug: price_per_kg from categoryPricesRaw is in cents (raw DB value), divide by 100 for dollars
+        entries.push({ price: p.price_per_kg / 100, range: p.weight_range });
         grouped.set(p.category, entries);
       }
       for (const [cat, entries] of grouped) {
         for (const e of entries) {
           const rangeLabel = e.range ? ` (${e.range}kg)` : "";
-          lines.push(`- ${cat}${rangeLabel}: $${e.price.toFixed(2)}/kg`);
+          lines.push(`- ${cat}${rangeLabel}: AUD $${e.price.toFixed(2)} per kg liveweight`);
         }
       }
     } else {
@@ -1230,7 +1232,7 @@ export function generateAutoCards(
     }
 
     if (queryType === "market_prices") {
-      const priceMatches = [...resultText.matchAll(/- (.+?)(?:\s*\([^)]+\))?: \$([\d.]+)\/kg/g)];
+      const priceMatches = [...resultText.matchAll(/- (.+?)(?:\s*\([^)]+\))?:\s*AUD \$([\d.]+) per kg/g)];
       for (const m of priceMatches.slice(0, 2)) {
         cards.push({ id: crypto.randomUUID(), label: m[1], value: `$${m[2]}/kg`, subtitle: "MLA saleyard data", sentiment: "neutral", action: { type: "market" } });
       }
