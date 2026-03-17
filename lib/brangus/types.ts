@@ -179,6 +179,7 @@ export interface CategoryPriceRow {
   price_per_kg: number;
   weight_range: string | null;
   saleyard: string | null;
+  data_date: string;
 }
 
 // MARK: - Grid IQ Row Types (for Brangus tool lookups)

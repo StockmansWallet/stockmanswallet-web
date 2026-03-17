@@ -409,43 +409,69 @@ function formatProperty(prop: ChatDataStore["properties"][0], herds: ChatDataSto
 
 function lookupMarketPrices(category: string | undefined, store: ChatDataStore): string {
   const lines: string[] = [];
+  lines.push("IMPORTANT: All prices below are in DOLLARS per kg ($/kg). Do NOT convert to cents.");
 
-  // Category prices
+  // Determine which MLA categories to look up
+  const mlaCat = category ? mapCategoryToMLACategory(category) : null;
+  const matchesCategory = (cat: string) => {
+    if (!category) return true;
+    const cl = category.toLowerCase();
+    const catl = cat.toLowerCase();
+    const mlal = mlaCat?.toLowerCase() ?? "";
+    return catl.includes(cl) || cl.includes(catl) || catl.includes(mlal) || mlal.includes(catl);
+  };
+
+  // 1. Saleyard-specific prices (most relevant to user)
+  if (store.saleyardPriceMap.size > 0) {
+    const saleyardLines: string[] = [];
+    for (const [key, entries] of store.saleyardPriceMap) {
+      const [cat, saleyard] = key.split("|");
+      if (!matchesCategory(cat)) continue;
+      for (const e of entries) {
+        const rangeLabel = e.weight_range ? ` (${e.weight_range}kg)` : "";
+        const dateLabel = e.data_date ? ` [${e.data_date}]` : "";
+        saleyardLines.push(`- ${cat}${rangeLabel} at ${saleyard}: $${e.price_per_kg.toFixed(2)}/kg${dateLabel}`);
+      }
+    }
+    if (saleyardLines.length > 0) {
+      lines.push("");
+      lines.push("SALEYARD PRICES (specific to user's selected saleyards, MLA data):");
+      lines.push(...saleyardLines);
+    }
+  }
+
+  // 2. National averages (broader context)
   if (store.categoryPricesRaw.length > 0) {
     let filtered = store.categoryPricesRaw;
     if (category) {
-      const mlaCat = mapCategoryToMLACategory(category);
-      filtered = store.categoryPricesRaw.filter(
-        (p) =>
-          p.category.toLowerCase().includes(category.toLowerCase()) ||
-          category.toLowerCase().includes(p.category.toLowerCase()) ||
-          p.category.toLowerCase().includes(mlaCat.toLowerCase()) ||
-          mlaCat.toLowerCase().includes(p.category.toLowerCase())
-      );
+      filtered = store.categoryPricesRaw.filter((p) => matchesCategory(p.category));
     }
 
     if (filtered.length > 0) {
-      lines.push("CURRENT CATEGORY PRICES (from Supabase/MLA, relevant to user's herds):");
-      lines.push("IMPORTANT: All prices below are in DOLLARS per kg ($/kg). For example $4.84/kg means four dollars and eighty-four cents per kilogram. Do NOT convert to cents when displaying to the user.");
-      // Group by category
-      const grouped = new Map<string, { price: number; range: string | null }[]>();
+      lines.push("");
+      lines.push("NATIONAL AVERAGE PRICES (MLA national data):");
+      const grouped = new Map<string, { price: number; range: string | null; date: string }[]>();
       for (const p of filtered) {
         const entries = grouped.get(p.category) ?? [];
-        // Debug: price_per_kg from categoryPricesRaw is in cents (raw DB value), divide by 100 for dollars
-        entries.push({ price: p.price_per_kg / 100, range: p.weight_range });
+        entries.push({ price: p.price_per_kg / 100, range: p.weight_range, date: p.data_date });
         grouped.set(p.category, entries);
       }
       for (const [cat, entries] of grouped) {
         for (const e of entries) {
           const rangeLabel = e.range ? ` (${e.range}kg)` : "";
-          lines.push(`- ${cat}${rangeLabel}: AUD $${e.price.toFixed(2)} per kg liveweight`);
+          const dateLabel = e.date ? ` [${e.date}]` : "";
+          lines.push(`- ${cat}${rangeLabel}: $${e.price.toFixed(2)}/kg${dateLabel}`);
         }
       }
-    } else {
-      lines.push(`No price data found for '${category}'.`);
     }
+  }
+
+  if (lines.length <= 1) {
+    lines.push(category ? `No price data found for '${category}'.` : "CATEGORY PRICES: Market data unavailable.");
   } else {
-    lines.push("CATEGORY PRICES: Market data unavailable.");
+    // Remind Brangus to prefer saleyard prices
+    lines.push("");
+    lines.push("NOTE: Always cite saleyard-specific prices when available. National averages are broader context only.");
   }
 
   return lines.join("\n");
