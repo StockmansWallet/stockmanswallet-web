@@ -1,7 +1,7 @@
 // Brangus tool definitions and execution for web
 // Mirrors iOS StockmanIQChatService+ToolUse.swift and +DataLookup.swift
 
-import { calculateHerdValue, calculateProjectedWeight, type CategoryPriceEntry } from "../engines/valuation-engine";
+import { calculateHerdValue, calculateHerdValuation, calculateProjectedWeight, type CategoryPriceEntry } from "../engines/valuation-engine";
 import { calculateFreightEstimate } from "../engines/freight-engine";
 import { mapCategoryToMLACategory, saleyardCoordinates } from "../data/reference-data";
 import { fetchWeatherForLocation } from "../services/weather-service";
@@ -179,6 +179,25 @@ export const toolDefinitions = [
       required: ["cards"],
     },
   },
+  {
+    name: "calculate_price_scenario",
+    description:
+      "Calculates the impact of a price change on the portfolio. Use when the user asks 'what if prices drop/rise by X', 'what would happen if the market moves', or any hypothetical pricing scenario. This does the maths server-side with the exact valuation formula. price_change_per_kg is in dollars (e.g. -0.20 for a 20c/kg drop, 0.50 for a 50c/kg rise).",
+    input_schema: {
+      type: "object",
+      properties: {
+        price_change_per_kg: {
+          type: "number",
+          description: "Price change in $/kg (e.g. -0.20 for a 20c drop, 0.50 for a 50c rise).",
+        },
+        herd_name: {
+          type: "string",
+          description: "Optional. Limit scenario to a single herd by name.",
+        },
+      },
+      required: ["price_change_per_kg"],
+    },
+  },
 ];
 
 // Display-only tools (no tool_result sent back to API)
@@ -202,6 +221,8 @@ export async function executeTool(
       return executeManageYardBookEvent(input, store);
     case "lookup_grid_iq_data":
       return executeGridIQLookup(input, store);
+    case "calculate_price_scenario":
+      return executePriceScenario(input, store);
     default:
       return `Error: Unknown tool '${toolName}'`;
   }
@@ -901,6 +922,84 @@ function executeManageYardBookEvent(input: Record<string, unknown>, store: ChatD
   }
 }
 
+// MARK: - Price Scenario Tool
+
+function executePriceScenario(input: Record<string, unknown>, store: ChatDataStore): string {
+  const priceChange = input.price_change_per_kg as number;
+  if (priceChange === undefined || priceChange === null) return "Error: Missing price_change_per_kg parameter.";
+  if (priceChange === 0) return "Error: price_change_per_kg must be non-zero.";
+
+  const herdName = input.herd_name as string | undefined;
+  const activeHerds = store.herds.filter((h) => !h.is_sold);
+
+  // Filter to specific herd if requested
+  let targetHerds = activeHerds;
+  if (herdName) {
+    const match = findHerd(herdName, store.herds);
+    if (!match) {
+      const available = activeHerds.map((h) => h.name).join(", ");
+      return `No herd found matching '${herdName}'. Available herds: ${available}`;
+    }
+    targetHerds = [match];
+  }
+
+  if (targetHerds.length === 0) return "No active herds in portfolio.";
+
+  const changeDirection = priceChange > 0 ? "increase" : "decrease";
+  const changeLabel = priceChange > 0 ? `+$${priceChange.toFixed(2)}` : `-$${Math.abs(priceChange).toFixed(2)}`;
+  const lines = [`PRICE SCENARIO: ${changeLabel}/kg ${changeDirection}`];
+  lines.push("");
+
+  let totalCurrentValue = 0;
+  let totalNewValue = 0;
+
+  for (const herd of targetHerds) {
+    // Get current valuation using the same engine as portfolio
+    const currentResult = calculateHerdValuation(
+      herd as Parameters<typeof calculateHerdValuation>[0],
+      store.nationalPriceMap,
+      store.premiumMap,
+      undefined,
+      store.saleyardPriceMap
+    );
+
+    const currentPricePerKg = currentResult.pricePerKg;
+    const newPricePerKg = currentPricePerKg + priceChange;
+    const projectedWeight = currentResult.projectedWeight;
+    const headCount = herd.head_count ?? 0;
+
+    // Calculate new value: head_count x projected_weight x new_price_per_kg
+    // This is the physical value component with the adjusted price
+    const currentPhysical = headCount * projectedWeight * currentPricePerKg;
+    const newPhysical = headCount * projectedWeight * newPricePerKg;
+    const difference = newPhysical - currentPhysical;
+
+    totalCurrentValue += currentPhysical;
+    totalNewValue += newPhysical;
+
+    lines.push(`${herd.name}:`);
+    lines.push(`  Head: ${headCount}, Weight: ${Math.round(projectedWeight)}kg`);
+    lines.push(`  Current: $${currentPricePerKg.toFixed(2)}/kg = $${Math.round(currentPhysical).toLocaleString()}`);
+    lines.push(`  Scenario: $${newPricePerKg.toFixed(2)}/kg = $${Math.round(newPhysical).toLocaleString()}`);
+    lines.push(`  Difference: ${difference >= 0 ? "+" : ""}$${Math.round(difference).toLocaleString()}`);
+    lines.push("");
+  }
+
+  // Portfolio total impact
+  const totalDifference = totalNewValue - totalCurrentValue;
+  lines.push("PORTFOLIO IMPACT:");
+  lines.push(`Current total: $${Math.round(totalCurrentValue).toLocaleString()}`);
+  lines.push(`Scenario total: $${Math.round(totalNewValue).toLocaleString()}`);
+  lines.push(`Total ${changeDirection}: ${totalDifference >= 0 ? "+" : ""}$${Math.round(totalDifference).toLocaleString()}`);
+
+  if (targetHerds.length > 1) {
+    const pctChange = totalCurrentValue > 0 ? ((totalDifference / totalCurrentValue) * 100).toFixed(1) : "0.0";
+    lines.push(`Percentage change: ${totalDifference >= 0 ? "+" : ""}${pctChange}%`);
+  }
+
+  return lines.join("\n");
+}
+
 // MARK: - Grid IQ Lookup Tool
 
 function executeGridIQLookup(input: Record<string, unknown>, store: ChatDataStore): string {
@@ -1285,6 +1384,20 @@ export function generateAutoCards(
     }
     if (perHeadMatch) {
       cards.push({ id: crypto.randomUUID(), label: "Per Head", value: `$${perHeadMatch[1]}`, subtitle: decksMatch ? `${decksMatch[1]} deck(s)` : undefined, sentiment: "neutral", action: { type: "freight" } });
+    }
+  }
+
+  if (toolName === "calculate_price_scenario") {
+    const totalMatch = resultText.match(/Total (?:increase|decrease): ([+-]?\$[\d,]+)/);
+    const pctMatch = resultText.match(/Percentage change: ([+-]?[\d.]+)%/);
+    const changeInput = input.price_change_per_kg as number;
+    const sentiment = changeInput > 0 ? "positive" as const : "negative" as const;
+    if (totalMatch) {
+      cards.push({ id: crypto.randomUUID(), label: "Portfolio Impact", value: totalMatch[1], subtitle: pctMatch ? `${pctMatch[1]}% change` : undefined, sentiment, action: { type: "portfolio" } });
+    }
+    const scenarioMatch = resultText.match(/Scenario total: \$([\d,]+)/);
+    if (scenarioMatch) {
+      cards.push({ id: crypto.randomUUID(), label: "Scenario Value", value: `$${scenarioMatch[1]}`, subtitle: `at ${changeInput > 0 ? "+" : ""}$${changeInput.toFixed(2)}/kg`, sentiment: "neutral", action: { type: "portfolio" } });
     }
   }
 
