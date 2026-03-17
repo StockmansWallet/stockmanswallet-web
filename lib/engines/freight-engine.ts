@@ -118,48 +118,40 @@ export function resolveFreightCategory(
   sex: string,
   weightKg: number
 ): CategoryMapping {
-  // Check breeder auto-detect first
-  const breederCategories = ["Breeder Cow", "Breeder Heifer", "Wet Cow"];
-  if (breederCategories.includes(appCategory)) {
-    const cowCalf = findFreightCategory("cow_calf_units")!;
-    const notice = `${appCategory} has been loaded at Cow & Calf density (${cowCalf.headsPerDeck} head/deck) as calves at foot are assumed. Override to Cows if calves haven't dropped yet.`;
-    return { category: cowCalf, breederNotice: notice };
-  }
-
-  // Route through category-specific mapping logic
+  // Debug: Uses master category (Steer, Heifer, Breeder, Dry Cow, Bull) + weight
+  // to determine the correct freight tier. Weight drives escalation between tiers.
   switch (appCategory) {
-    // Steers
-    case "Weaner Steer":
-      return mapWithEscalation("weaner_steers", weightKg, 320, "yearling_steers", appCategory);
-    case "Feeder Steer":
-    case "Yearling Steer":
-      return mapWithEscalation("yearling_steers", weightKg, 475, "grown_steers", appCategory);
-    case "Grown Steer":
-      return mapWithEscalation("grown_steers", weightKg, 600, "heavy_grown_steers", appCategory);
+    // Steers - weight determines weaner/yearling/grown/heavy freight tier
+    case "Steer":
+      if (weightKg < 320) return mapWithEscalation("weaner_steers", weightKg, 320, "yearling_steers", appCategory);
+      if (weightKg < 475) return mapWithEscalation("yearling_steers", weightKg, 475, "grown_steers", appCategory);
+      if (weightKg < 600) return mapWithEscalation("grown_steers", weightKg, 600, "heavy_grown_steers", appCategory);
+      return { category: findFreightCategory("heavy_grown_steers")! };
 
-    // Bulls (Weaner Bull follows steer path)
-    case "Weaner Bull":
-      return mapWithEscalation("weaner_steers", weightKg, 320, "yearling_steers", appCategory);
-    case "Yearling Bull":
-      return mapWithEscalation("yearling_bulls", weightKg, 600, "grown_bulls", appCategory);
-    case "Grown Bull":
-    case "Cull Bull":
-      return { category: findFreightCategory("grown_bulls")! };
-
-    // Heifers
-    case "Weaner Heifer":
-      return mapWithEscalation("weaner_heifers", weightKg, 310, "yearling_heifers", appCategory);
-    case "Feeder Heifer":
-    case "Yearling Heifer":
-      return mapWithEscalation("yearling_heifers", weightKg, 450, "grown_heifers", appCategory);
-    case "Grown Heifer (Un-Joined)":
+    // Heifers - weight determines weaner/yearling/grown freight tier
+    case "Heifer":
+      if (weightKg < 310) return mapWithEscalation("weaner_heifers", weightKg, 310, "yearling_heifers", appCategory);
+      if (weightKg < 450) return mapWithEscalation("yearling_heifers", weightKg, 450, "grown_heifers", appCategory);
       return { category: findFreightCategory("grown_heifers")! };
 
-    // Cows
-    case "Cull Cow":
+    // Breeder - cow & calf density assumed (calves at foot)
+    case "Breeder": {
+      const cowCalf = findFreightCategory("cow_calf_units")!;
+      const notice = `Breeder loaded at Cow & Calf density (${cowCalf.headsPerDeck} head/deck) as calves at foot are assumed. Override to Cows if calves have not dropped yet.`;
+      return { category: cowCalf, breederNotice: notice };
+    }
+
+    // Dry Cow - standard cow density
+    case "Dry Cow":
       return { category: findFreightCategory("cows")! };
 
-    // Fallback — sex-based weight matching
+    // Bulls - weight determines weaner/yearling/grown freight tier
+    case "Bull":
+      if (weightKg < 320) return mapWithEscalation("weaner_steers", weightKg, 320, "yearling_steers", appCategory);
+      if (weightKg < 600) return mapWithEscalation("yearling_bulls", weightKg, 600, "grown_bulls", appCategory);
+      return { category: findFreightCategory("grown_bulls")! };
+
+    // Fallback - sex-based weight matching (legacy categories or unknown)
     default:
       return fallbackWeightMatch(sex, weightKg);
   }

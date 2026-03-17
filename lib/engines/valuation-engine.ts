@@ -286,25 +286,23 @@ export function defaultFallbackPrice(category: string): number {
   } else if (category.includes("Chevon")) {
     return 4.13;
   }
-  // Cattle categories
-  else if (category.includes("Weaner") && (category.includes("Steer") || category.includes("Bull") || category.includes("Heifer"))) {
+  // Cattle categories (receives resolved MLA category names from DB)
+  // DB canonical names: Weaner Steer, Yearling Steer, Grown Steer, Heifer, Yearling Heifer, Grown Heifer, Cows, Grown Bull
+  else if (category === "Weaner Steer") {
     return 3.89;
-  } else if (category.includes("Yearling") && (category.includes("Steer") || category.includes("Bull") || category.includes("Heifer"))) {
+  } else if (category === "Yearling Steer") {
     return 4.10;
-  } else if (
-    category.includes("Breeding") ||
-    (category.includes("Breeder") && !category.includes("Doe") && !category.includes("Buck")) ||
-    category.includes("Heifer") ||
-    category.includes("Wet Cow")
-  ) {
-    return 3.80;
-  } else if (category.includes("Cull Cow")) {
-    return 3.14;
-  } else if (category.includes("Cull Bull")) {
-    return 3.14;
-  } else if (category.includes("Feeder") && (category.includes("Steer") || category.includes("Heifer"))) {
+  } else if (category === "Grown Steer") {
+    return 3.30;
+  } else if (category === "Heifer") {
     return 3.89;
-  } else if (category.includes("Grown") && (category.includes("Steer") || category.includes("Bull"))) {
+  } else if (category === "Yearling Heifer") {
+    return 4.10;
+  } else if (category === "Grown Heifer") {
+    return 3.30;
+  } else if (category === "Cows") {
+    return 3.80;
+  } else if (category === "Grown Bull") {
     return 3.30;
   }
 
