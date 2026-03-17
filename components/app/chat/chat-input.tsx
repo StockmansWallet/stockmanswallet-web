@@ -48,9 +48,9 @@ export function ChatInput({
   }, [value, disabled, loading, onSend, resetHeight]);
 
   return (
-    <div className="flex items-end gap-2">
+    <div className="flex items-center gap-2">
       {/* Input field with send button inside */}
-      <div className="flex flex-1 items-end rounded-[22px] border border-white/10 bg-white/5 px-4 py-2 transition-colors focus-within:border-white/20 focus-within:bg-white/[0.08]">
+      <div className="flex min-h-[44px] flex-1 items-center rounded-[22px] border border-white/10 bg-white/5 px-4 transition-colors focus-within:border-white/20 focus-within:bg-white/[0.08]">
         <textarea
           ref={textareaRef}
           value={value}
@@ -70,18 +70,17 @@ export function ChatInput({
           placeholder={placeholder}
           disabled={disabled || loading}
           rows={1}
-          className="max-h-[120px] flex-1 resize-none bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none disabled:opacity-50"
+          className="max-h-[120px] flex-1 resize-none bg-transparent py-2.5 text-sm leading-5 text-text-primary placeholder:text-text-muted outline-none disabled:opacity-50"
         />
 
-        {/* Send button - short pill, only visible when there is text */}
+        {/* Send button - only visible when there is text */}
         <button
           type="button"
           onClick={handleSubmit}
           disabled={disabled || loading || !hasText}
-          className={`ml-2 flex h-[30px] shrink-0 items-center justify-center rounded-full px-3 text-white transition-all ${accentClass} ${
+          className={`ml-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white transition-all ${accentClass} ${
             hasText ? "opacity-100 scale-100" : "opacity-0 scale-75 pointer-events-none"
           }`}
-          style={{ minWidth: "36px" }}
           aria-label="Send message"
         >
           {loading ? (
@@ -97,12 +96,11 @@ export function ChatInput({
         <button
           type="button"
           onClick={onVoiceToggle}
-          className={`flex h-[30px] shrink-0 items-center justify-center rounded-full px-3 transition-all ${
+          className={`flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-full transition-all ${
             voiceEnabled
               ? `${accentClass} text-white`
               : "bg-white/5 text-text-muted hover:bg-white/10 hover:text-text-secondary border border-white/10"
           }`}
-          style={{ minWidth: "36px" }}
           aria-label={voiceEnabled ? "Disable voice" : "Enable voice"}
         >
           {voiceEnabled ? (
