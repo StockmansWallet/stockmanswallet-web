@@ -6,7 +6,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Brain, Loader2, AlertCircle } from "lucide-react";
-import { sendMessage, buildSystemPrompt, loadChatDataStore, fetchServerPersonality } from "@/lib/brangus/chat-service";
+import { sendMessage, buildSystemPrompt, loadChatDataStore, fetchServerConfig } from "@/lib/brangus/chat-service";
 import { createConversation, saveMessage, autoTitleConversation } from "@/lib/brangus/conversation-service";
 import type { ChatMessage, AnthropicMessage, ChatDataStore, QuickInsight, CardAction } from "@/lib/brangus/types";
 import { createClient } from "@/lib/supabase/client";
@@ -109,13 +109,13 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages }:
         const { data: { user } } = await supabase.auth.getUser();
         if (user) userIdRef.current = user.id;
 
-        // Debug: Fetch personality from server (mirrors iOS ServerConfig pattern)
-        const [dataStore, serverPersonality] = await Promise.all([
+        // Debug: Fetch all config from server (mirrors iOS ServerConfig pattern)
+        const [dataStore, serverConfig] = await Promise.all([
           loadChatDataStore(),
-          fetchServerPersonality(),
+          fetchServerConfig(),
         ]);
         if (cancelled) return;
-        const prompt = buildSystemPrompt(dataStore, serverPersonality);
+        const prompt = buildSystemPrompt(dataStore, serverConfig);
         setStore(dataStore);
         setSystemPrompt(prompt);
       } catch (err) {
