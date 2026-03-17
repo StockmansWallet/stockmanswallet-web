@@ -65,11 +65,11 @@ export function categoriesForSpecies(species: string): string[] {
 
 export const defaultMappingRules: CategoryMappingRule[] = [
   // Steer
-  { species: "Cattle", master_category: "Steer", weight_min: 0, weight_max: 330, sub_category: "Weaner", mla_preferred: "Vealer or Weaner Steer", mla_fallback: "Yearling Steer", lookback_weeks: 8, sort_order: 1 },
+  { species: "Cattle", master_category: "Steer", weight_min: 0, weight_max: 330, sub_category: "Weaner", mla_preferred: "Weaner Steer", mla_fallback: "Yearling Steer", lookback_weeks: 8, sort_order: 1 },
   { species: "Cattle", master_category: "Steer", weight_min: 330, weight_max: 500, sub_category: "Yearling", mla_preferred: "Yearling Steer", mla_fallback: "Grown Steer", lookback_weeks: 8, sort_order: 2 },
   { species: "Cattle", master_category: "Steer", weight_min: 500, weight_max: null, sub_category: "Grown", mla_preferred: "Grown Steer", mla_fallback: null, lookback_weeks: 8, sort_order: 3 },
   // Heifer
-  { species: "Cattle", master_category: "Heifer", weight_min: 0, weight_max: 300, sub_category: "Weaner", mla_preferred: "Vealer Heifer", mla_fallback: "Yearling Heifer", lookback_weeks: 8, sort_order: 4 },
+  { species: "Cattle", master_category: "Heifer", weight_min: 0, weight_max: 300, sub_category: "Weaner", mla_preferred: "Heifer", mla_fallback: "Yearling Heifer", lookback_weeks: 8, sort_order: 4 },
   { species: "Cattle", master_category: "Heifer", weight_min: 300, weight_max: 450, sub_category: "Yearling", mla_preferred: "Yearling Heifer", mla_fallback: "Grown Heifer", lookback_weeks: 8, sort_order: 5 },
   { species: "Cattle", master_category: "Heifer", weight_min: 450, weight_max: null, sub_category: "Grown", mla_preferred: "Grown Heifer", mla_fallback: "Grown Heifer", lookback_weeks: 8, sort_order: 6 },
   // Breeder (user-selected sub-type, any weight)
@@ -201,14 +201,14 @@ export function validateWeight(
 export const mlaCsvCategoryMapping: Record<string, string> = {
   "Yearling Steer": "Yearling Steer",
   "Yearling Heifer": "Yearling Heifer",
-  "Vealer Steer": "Vealer or Weaner Steer",
-  "Vealer Heifer": "Vealer Heifer",
+  "Vealer Steer": "Weaner Steer",
+  "Vealer Heifer": "Heifer",
   "Grown Steer": "Grown Steer",
   "Grown Heifer": "Grown Heifer",
   Cows: "Cows",
   Bulls: "Bulls",
   "Manufacturing Steer": "Grown Steer",
-  Calves: "Vealer or Weaner Steer",
+  Calves: "Weaner Steer",
 };
 
 export function resolveMLACsvCategory(csvCategory: string): string {
