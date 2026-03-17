@@ -18,6 +18,7 @@ import {
   Info,
   Navigation,
 } from "lucide-react";
+import { getRoadDistanceKm } from "@/lib/services/distance-service";
 
 // --- Types ---
 
@@ -66,23 +67,6 @@ const categoryOverrideOptions = [
 ];
 
 // --- Helpers ---
-
-function haversineKm(
-  lat1: number, lon1: number,
-  lat2: number, lon2: number,
-): number {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) ** 2;
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  // Road distance is roughly 1.3x straight-line
-  return Math.round(R * c * 1.3);
-}
 
 // --- Sub-components ---
 
@@ -196,13 +180,13 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     recalcDistance(propId, selectedSaleyard);
   }
 
-  function recalcDistance(propId: string, saleyard: string) {
+  async function recalcDistance(propId: string, saleyard: string) {
     if (!propId || !saleyard) return;
     const prop = properties.find((p) => p.id === propId);
     const coords = saleyardCoordinates[saleyard];
     if (prop?.latitude && prop?.longitude && coords) {
-      const km = haversineKm(prop.latitude, prop.longitude, coords.lat, coords.lon);
-      setDistance(km.toString());
+      const { distanceKm } = await getRoadDistanceKm(prop.latitude, prop.longitude, coords.lat, coords.lon);
+      setDistance(distanceKm.toString());
     }
   }
 

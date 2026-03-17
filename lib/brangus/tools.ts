@@ -5,6 +5,7 @@ import { calculateHerdValue, calculateHerdValuation, calculateProjectedWeight, t
 import { calculateFreightEstimate } from "../engines/freight-engine";
 import { mapCategoryToMLACategory, saleyardCoordinates } from "../data/reference-data";
 import { fetchWeatherForLocation } from "../services/weather-service";
+import { getRoadDistanceKm } from "../services/distance-service";
 import type { ChatDataStore, QuickInsight } from "./types";
 
 // MARK: - Tool Definitions (Anthropic tool_use format)
@@ -806,7 +807,7 @@ function formatWeatherData(data: { propertyName: string; locationDescription: st
 
 // MARK: - Calculate Freight Tool
 
-function executeFreight(input: Record<string, unknown>, store: ChatDataStore): string {
+async function executeFreight(input: Record<string, unknown>, store: ChatDataStore): Promise<string> {
   let headCount: number;
   let weightKg: number;
   let category: string;
@@ -828,7 +829,7 @@ function executeFreight(input: Record<string, unknown>, store: ChatDataStore): s
     if (manualDist && manualDist > 0) {
       distanceKm = manualDist;
     } else if (destSaleyard) {
-      distanceKm = resolveDistanceToSaleyard(herd, store.properties, destSaleyard);
+      distanceKm = await resolveDistanceToSaleyard(herd, store.properties, destSaleyard);
     } else {
       const d = resolveDistance(herd, store.properties);
       if (!d || d <= 0) return `No distance available for ${herd.name}. Provide a destination_saleyard or distance_km.`;
@@ -845,7 +846,7 @@ function executeFreight(input: Record<string, unknown>, store: ChatDataStore): s
       distanceKm = manualDist;
     } else if (destSaleyard) {
       // Use first property coords or fallback
-      distanceKm = resolveDistanceToSaleyardFromProps(store.properties, destSaleyard);
+      distanceKm = await resolveDistanceToSaleyardFromProps(store.properties, destSaleyard);
     } else {
       return "Error: Provide either distance_km or destination_saleyard.";
     }
@@ -1509,12 +1510,12 @@ function findSaleyardCoords(name: string): { lat: number; lon: number } | undefi
   return undefined;
 }
 
-function resolveDistanceToSaleyard(
+async function resolveDistanceToSaleyard(
   herd: ChatDataStore["herds"][0],
   properties: ChatDataStore["properties"],
   saleyardName: string
-): number {
-  // Try to calculate from property coords to saleyard coords
+): Promise<number> {
+  // Try to calculate from property coords to saleyard coords via OSRM
   const prop = herd.property_id
     ? properties.find((p) => p.id === herd.property_id)
     : properties.find((p) => p.is_default);
@@ -1522,7 +1523,8 @@ function resolveDistanceToSaleyard(
   if (prop?.latitude && prop?.longitude) {
     const coords = findSaleyardCoords(saleyardName);
     if (coords) {
-      return haversineKm(prop.latitude, prop.longitude, coords.lat, coords.lon);
+      const { distanceKm } = await getRoadDistanceKm(prop.latitude, prop.longitude, coords.lat, coords.lon);
+      return distanceKm;
     }
   }
 
@@ -1530,30 +1532,19 @@ function resolveDistanceToSaleyard(
   return prop?.default_saleyard_distance ?? 0;
 }
 
-function resolveDistanceToSaleyardFromProps(
+async function resolveDistanceToSaleyardFromProps(
   properties: ChatDataStore["properties"],
   saleyardName: string
-): number {
+): Promise<number> {
   const prop = properties.find((p) => p.is_default) ?? properties[0];
   if (!prop) return 0;
 
   if (prop.latitude && prop.longitude) {
     const coords = findSaleyardCoords(saleyardName);
     if (coords) {
-      return haversineKm(prop.latitude, prop.longitude, coords.lat, coords.lon);
+      const { distanceKm } = await getRoadDistanceKm(prop.latitude, prop.longitude, coords.lat, coords.lon);
+      return distanceKm;
     }
   }
   return prop.default_saleyard_distance ?? 0;
-}
-
-function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * (Math.PI / 180);
-  const dLon = (lon2 - lon1) * (Math.PI / 180);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) ** 2;
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  // Road distance is roughly 1.3x straight-line (matches Freight IQ calculator)
-  return Math.round(R * c * 1.3);
 }
