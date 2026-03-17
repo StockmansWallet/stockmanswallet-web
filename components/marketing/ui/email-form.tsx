@@ -48,7 +48,7 @@ export default function EmailForm({ size = 'default', className }: EmailFormProp
   const buttonHeight = size === 'large' ? 'h-12' : 'h-10'
 
   return (
-    <form onSubmit={handleSubmit} className={`flex w-full max-w-md gap-2 ${className ?? ''}`}>
+    <form onSubmit={handleSubmit} className={`relative flex w-full max-w-md gap-2 ${className ?? ''}`}>
       <input
         type="email"
         value={email}
