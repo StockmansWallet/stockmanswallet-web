@@ -68,7 +68,7 @@ export async function autoTitleConversation(
   const supabase = createClient();
 
   const { data: { session } } = await supabase.auth.getSession();
-  if (!session?.access_token) return;
+  if (!session?.access_token) return null;
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
