@@ -5,9 +5,10 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Brain, Loader2, AlertCircle } from "lucide-react";
+import { Brain, Loader2, AlertCircle, ClipboardCopy, Download, Check } from "lucide-react";
 import { sendMessage, buildSystemPrompt, loadChatDataStore, fetchServerConfig } from "@/lib/brangus/chat-service";
-import { createConversation, saveMessage, autoTitleConversation } from "@/lib/brangus/conversation-service";
+import { createConversation, saveMessage, autoTitleConversation, formatConversationForExport } from "@/lib/brangus/conversation-service";
+import type { BrangusConversationRow } from "@/lib/brangus/conversation-service";
 import type { ChatMessage, AnthropicMessage, ChatDataStore, QuickInsight, CardAction } from "@/lib/brangus/types";
 import { createClient } from "@/lib/supabase/client";
 import { ChatBubble } from "@/components/app/chat/chat-bubble";
@@ -40,9 +41,11 @@ interface SavedMessage {
 interface BrangusChatProps {
   conversationId?: string;
   initialMessages?: SavedMessage[];
+  onConversationCreated?: (conv: BrangusConversationRow) => void;
+  onConversationUpdated?: (id: string, updates: Partial<BrangusConversationRow>) => void;
 }
 
-export function BrangusChat({ conversationId: existingConvId, initialMessages }: BrangusChatProps = {}) {
+export function BrangusChat({ conversationId: existingConvId, initialMessages, onConversationCreated, onConversationUpdated }: BrangusChatProps = {}) {
   // Hydrate UI messages from saved conversation (if resuming)
   const hydratedMessages: ChatMessage[] = (initialMessages ?? []).map((m) => ({
     id: m.id,
@@ -65,6 +68,7 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages }:
   const [systemPrompt, setSystemPrompt] = useState("");
   // Accumulated summary cards for the persistent bottom strip - grows across the session
   const [sessionCards, setSessionCards] = useState<QuickInsight[]>([]);
+  const [copied, setCopied] = useState(false);
 
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -181,6 +185,7 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages }:
       try {
         const conv = await createConversation(userId);
         conversationIdRef.current = conv.id;
+        onConversationCreated?.(conv);
       } catch (err) {
         console.error("Failed to create conversation:", err);
       }
@@ -230,7 +235,10 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages }:
 
       // Persist assistant message (non-blocking)
       if (convId && userId) {
-        saveMessage(convId, userId, "assistant", assistantText).catch((err) =>
+        saveMessage(convId, userId, "assistant", assistantText).then(() => {
+          const preview = assistantText.length > 100 ? assistantText.slice(0, 97) + "..." : assistantText;
+          onConversationUpdated?.(convId, { preview_text: preview, updated_at: new Date().toISOString() });
+        }).catch((err) =>
           console.error("Failed to persist assistant message:", err)
         );
       }
@@ -238,7 +246,11 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages }:
       // Auto-title after first exchange
       if (convId && !hasRequestedTitleRef.current) {
         hasRequestedTitleRef.current = true;
-        autoTitleConversation(convId, text, assistantText).catch((err) =>
+        autoTitleConversation(convId, text, assistantText).then((title) => {
+          if (title && convId) {
+            onConversationUpdated?.(convId, { title });
+          }
+        }).catch((err) =>
           console.error("Auto-title failed:", err)
         );
       }
@@ -251,7 +263,35 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages }:
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, store, conversationHistory, systemPrompt, persistMutations]);
+  }, [isLoading, store, conversationHistory, systemPrompt, persistMutations, onConversationCreated, onConversationUpdated]);
+
+  const handleCopy = useCallback(() => {
+    const exportMessages = messages.map((m) => ({
+      role: m.role,
+      content: m.content,
+      created_at: m.timestamp.toISOString(),
+    }));
+    const text = formatConversationForExport(null, new Date().toISOString(), exportMessages);
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }, [messages]);
+
+  const handleDownload = useCallback(() => {
+    const exportMessages = messages.map((m) => ({
+      role: m.role,
+      content: m.content,
+      created_at: m.timestamp.toISOString(),
+    }));
+    const text = formatConversationForExport(null, new Date().toISOString(), exportMessages);
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `brangus-chat-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [messages]);
 
   // Loading state
   if (isInitialising) {
@@ -265,6 +305,28 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages }:
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
+      {/* Export toolbar - shown when conversation has 2+ messages */}
+      {messages.length >= 2 && (
+        <div className="flex items-center justify-end gap-1 border-b border-white/6 px-4 py-1.5">
+          <button
+            onClick={handleCopy}
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] text-text-muted transition-colors hover:bg-white/[0.05] hover:text-text-secondary"
+            aria-label="Copy conversation"
+          >
+            {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <ClipboardCopy className="h-3.5 w-3.5" />}
+            {copied ? "Copied" : "Copy"}
+          </button>
+          <button
+            onClick={handleDownload}
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] text-text-muted transition-colors hover:bg-white/[0.05] hover:text-text-secondary"
+            aria-label="Download conversation"
+          >
+            <Download className="h-3.5 w-3.5" />
+            Save
+          </button>
+        </div>
+      )}
+
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto px-4 pt-4 pb-2">
         {messages.length === 0 ? (
@@ -400,6 +462,15 @@ function FormattedResponse({ text }: { text: string }) {
                       {formatInlineText(headingMatch[2])}
                     </p>
                   </div>
+                );
+              }
+
+              // Section header ending with colon (e.g. "A few things jumping out:")
+              if (/^[A-Z].{5,50}:$/.test(trimmed)) {
+                return (
+                  <p key={j} className={`text-[15px] font-bold text-white ${j > 0 ? "mt-2" : ""}`}>
+                    {trimmed.slice(0, -1)}
+                  </p>
                 );
               }
 

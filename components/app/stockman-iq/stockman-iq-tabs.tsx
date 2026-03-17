@@ -20,10 +20,12 @@ interface StockmanIQTabsProps {
   insights: StockmanIQInsight[];
 }
 
-export function StockmanIQTabs({ conversations, insights }: StockmanIQTabsProps) {
+export function StockmanIQTabs({ conversations: initialConversations, insights }: StockmanIQTabsProps) {
+  const [conversations, setConversations] = useState(initialConversations);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [activeMessages, setActiveMessages] = useState<BrangusMessageRow[] | null>(null);
   const [loadingConv, setLoadingConv] = useState(false);
+  const [chatResetKey, setChatResetKey] = useState(0);
 
   const handleSelectConversation = useCallback(async (id: string) => {
     if (id === activeConvId) return;
@@ -42,7 +44,28 @@ export function StockmanIQTabs({ conversations, insights }: StockmanIQTabsProps)
   const handleNewChat = useCallback(() => {
     setActiveConvId(null);
     setActiveMessages(null);
+    setChatResetKey((k) => k + 1);
   }, []);
+
+  const handleConversationCreated = useCallback((conv: BrangusConversationRow) => {
+    setConversations((prev) => [conv, ...prev]);
+    setActiveConvId(conv.id);
+  }, []);
+
+  const handleConversationUpdated = useCallback((id: string, updates: Partial<BrangusConversationRow>) => {
+    setConversations((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, ...updates } : c))
+    );
+  }, []);
+
+  const handleConversationDeleted = useCallback((deletedIds: string[]) => {
+    setConversations((prev) => prev.filter((c) => !deletedIds.includes(c.id)));
+    if (activeConvId && deletedIds.includes(activeConvId)) {
+      setActiveConvId(null);
+      setActiveMessages(null);
+      setChatResetKey((k) => k + 1);
+    }
+  }, [activeConvId]);
 
   const chatTab = (
     <div className="flex gap-4" style={{ height: "calc(100vh - 18rem)" }}>
@@ -54,15 +77,17 @@ export function StockmanIQTabs({ conversations, insights }: StockmanIQTabsProps)
           </div>
         ) : (
           <BrangusChat
-            key={activeConvId ?? "new"}
+            key={activeConvId ?? `new-${chatResetKey}`}
             conversationId={activeConvId ?? undefined}
             initialMessages={activeMessages ?? undefined}
+            onConversationCreated={handleConversationCreated}
+            onConversationUpdated={handleConversationUpdated}
           />
         )}
       </Card>
 
       {/* Saved conversations sidebar */}
-      <div className="flex w-80 shrink-0 flex-col gap-3">
+      <div className="flex w-96 shrink-0 flex-col gap-3">
         <button
           onClick={handleNewChat}
           className="flex items-center justify-center gap-2 rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
@@ -77,6 +102,7 @@ export function StockmanIQTabs({ conversations, insights }: StockmanIQTabsProps)
               <ConversationList
                 conversations={conversations}
                 onSelect={handleSelectConversation}
+                onDeleted={handleConversationDeleted}
                 activeId={activeConvId}
               />
             </CardContent>

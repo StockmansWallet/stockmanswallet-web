@@ -64,7 +64,7 @@ export async function autoTitleConversation(
   conversationId: string,
   userText: string,
   assistantText: string
-): Promise<void> {
+): Promise<string | null> {
   const supabase = createClient();
 
   const { data: { session } } = await supabase.auth.getSession();
@@ -96,11 +96,11 @@ export async function autoTitleConversation(
       body: JSON.stringify(body),
     });
 
-    if (!res.ok) return;
+    if (!res.ok) return null;
 
     const json = await res.json();
     const text = json?.content?.[0]?.text;
-    if (!text) return;
+    if (!text) return null;
 
     const title = sanitiseResponse(text.trim());
 
@@ -108,8 +108,11 @@ export async function autoTitleConversation(
       .from("brangus_conversations")
       .update({ title })
       .eq("id", conversationId);
+
+    return title;
   } catch (err) {
     console.error("Auto-title failed:", err);
+    return null;
   }
 }
 
@@ -166,7 +169,7 @@ export async function fetchMessages(
 export function formatConversationForExport(
   title: string | null,
   createdAt: string,
-  messages: BrangusMessageRow[]
+  messages: Pick<BrangusMessageRow, "role" | "content">[]
 ): string {
   const date = new Date(createdAt).toLocaleDateString("en-AU", {
     day: "numeric",

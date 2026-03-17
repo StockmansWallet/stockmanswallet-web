@@ -28,10 +28,11 @@ function timeAgo(dateStr: string): string {
 interface ConversationListProps {
   conversations: BrangusConversationRow[];
   onSelect?: (id: string) => void;
+  onDeleted?: (ids: string[]) => void;
   activeId?: string | null;
 }
 
-export function ConversationList({ conversations, onSelect, activeId }: ConversationListProps) {
+export function ConversationList({ conversations, onSelect, onDeleted, activeId }: ConversationListProps) {
   const router = useRouter();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [selectMode, setSelectMode] = useState(false);
@@ -65,6 +66,7 @@ export function ConversationList({ conversations, onSelect, activeId }: Conversa
     setDeletingId(id);
     try {
       await softDeleteConversation(id);
+      onDeleted?.([id]);
       router.refresh();
     } catch (err) {
       console.error("Failed to delete conversation:", err);
@@ -74,9 +76,11 @@ export function ConversationList({ conversations, onSelect, activeId }: Conversa
 
   async function handleBulkDelete() {
     if (selected.size === 0 || isBulkDeleting) return;
+    const ids = [...selected];
     setIsBulkDeleting(true);
     try {
-      await bulkSoftDeleteConversations([...selected]);
+      await bulkSoftDeleteConversations(ids);
+      onDeleted?.(ids);
     } catch (err) {
       console.error("Failed to bulk delete:", err);
     } finally {
