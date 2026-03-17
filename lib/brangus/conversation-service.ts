@@ -30,14 +30,19 @@ export async function saveMessage(
   conversationId: string,
   userId: string,
   role: "user" | "assistant",
-  content: string
+  content: string,
+  cardsJson?: unknown[] | null
 ): Promise<void> {
   const supabase = createClient();
 
-  // Insert message
+  // Insert message (include cards_json for assistant messages with summary cards)
+  const row: Record<string, unknown> = { conversation_id: conversationId, user_id: userId, role, content };
+  if (cardsJson && cardsJson.length > 0) {
+    row.cards_json = cardsJson;
+  }
   const { error: msgError } = await supabase
     .from("brangus_messages")
-    .insert({ conversation_id: conversationId, user_id: userId, role, content });
+    .insert(row);
 
   if (msgError) {
     console.error("Failed to save message:", msgError.message);

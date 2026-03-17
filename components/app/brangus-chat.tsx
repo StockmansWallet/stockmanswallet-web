@@ -36,6 +36,7 @@ interface SavedMessage {
   role: "user" | "assistant";
   content: string;
   created_at: string;
+  cards_json?: unknown[] | null;
 }
 
 interface BrangusChatProps {
@@ -43,6 +44,28 @@ interface BrangusChatProps {
   initialMessages?: SavedMessage[];
   onConversationCreated?: (conv: BrangusConversationRow) => void;
   onConversationUpdated?: (id: string, updates: Partial<BrangusConversationRow>) => void;
+}
+
+// Restore QuickInsight cards from saved cards_json
+function hydrateCards(messages: SavedMessage[]): QuickInsight[] {
+  const cards: QuickInsight[] = [];
+  for (const m of messages) {
+    if (m.cards_json && Array.isArray(m.cards_json)) {
+      for (const c of m.cards_json) {
+        const card = c as Record<string, unknown>;
+        if (card.label && card.value && card.sentiment) {
+          cards.push({
+            id: (card.id as string) || crypto.randomUUID(),
+            label: card.label as string,
+            value: card.value as string,
+            subtitle: (card.subtitle as string) || undefined,
+            sentiment: card.sentiment as "positive" | "negative" | "neutral",
+          });
+        }
+      }
+    }
+  }
+  return cards;
 }
 
 export function BrangusChat({ conversationId: existingConvId, initialMessages, onConversationCreated, onConversationUpdated }: BrangusChatProps = {}) {
@@ -67,7 +90,8 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, o
   const [store, setStore] = useState<ChatDataStore | null>(null);
   const [systemPrompt, setSystemPrompt] = useState("");
   // Accumulated summary cards for the persistent bottom strip - grows across the session
-  const [sessionCards, setSessionCards] = useState<QuickInsight[]>([]);
+  // Hydrate from saved messages when loading a saved conversation
+  const [sessionCards, setSessionCards] = useState<QuickInsight[]>(() => hydrateCards(initialMessages ?? []));
   const [copied, setCopied] = useState(false);
 
   const router = useRouter();
@@ -233,9 +257,10 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, o
       }
       setConversationHistory(updatedHistory);
 
-      // Persist assistant message (non-blocking)
+      // Persist assistant message (non-blocking) - include summary cards if present
+      const cardsToSave = quickInsights && quickInsights.length > 0 ? quickInsights : null;
       if (convId && userId) {
-        saveMessage(convId, userId, "assistant", assistantText).then(() => {
+        saveMessage(convId, userId, "assistant", assistantText, cardsToSave).then(() => {
           const preview = assistantText.length > 100 ? assistantText.slice(0, 97) + "..." : assistantText;
           onConversationUpdated?.(convId, { preview_text: preview, updated_at: new Date().toISOString() });
         }).catch((err) =>

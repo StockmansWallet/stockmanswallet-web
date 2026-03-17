@@ -823,6 +823,7 @@ export type Database = {
           role: "user" | "assistant";
           content: string;
           created_at: string;
+          cards_json: unknown[] | null;
         };
         Insert: {
           id?: string;
@@ -831,9 +832,11 @@ export type Database = {
           role: "user" | "assistant";
           content: string;
           created_at?: string;
+          cards_json?: unknown[] | null;
         };
         Update: {
           content?: string;
+          cards_json?: unknown[] | null;
         };
       };
     };
