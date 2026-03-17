@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
   // Fetch client's herds (read-only)
   const { data: herds, error: herdsError } = await serviceClient
-    .from("herd_groups")
+    .from("herds")
     .select("*")
     .eq("user_id", clientUserId)
     .eq("is_deleted", false)

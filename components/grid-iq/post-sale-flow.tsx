@@ -25,7 +25,7 @@ interface KillSheetOption {
 
 interface AllocationInfo {
   id: string;
-  herd_group_id: string;
+  herd_id: string;
   head_count: number;
   category: string | null;
   herdName: string;
@@ -75,7 +75,7 @@ export function PostSaleFlow({
 
   // Step 3: Allocation confirmation
   const [adjustedAllocations, setAdjustedAllocations] = useState(
-    allocations.map((a) => ({ herdGroupId: a.herd_group_id, headCount: a.head_count, herdName: a.herdName, category: a.category }))
+    allocations.map((a) => ({ herdGroupId: a.herd_id, headCount: a.head_count, herdName: a.herdName, category: a.category }))
   );
 
   // Sorted: suggested first

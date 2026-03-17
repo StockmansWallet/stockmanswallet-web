@@ -140,7 +140,7 @@ After a kill sheet is uploaded, the user allocates animals back to herd groups. 
 |--------|------|-------|
 | id | UUID (PK) | |
 | consignment_id | UUID (FK) | Links to processor_consignments |
-| herd_group_id | UUID (FK) | Links to herd_groups |
+| herd_id | UUID (FK) | Links to herds |
 | head_count | INTEGER | How many head from this herd |
 | category | TEXT | e.g. 'Steer', 'Cow', 'Bull' |
 | notes | TEXT | Nullable |
@@ -165,7 +165,7 @@ After a kill sheet is uploaded, the user allocates animals back to herd groups. 
 ### 2C. Sale Recording (Complete Sale Action)
 
 When a consignment is completed (single atomic server action):
-1. Deduct `head_count` from each allocated `herd_groups` row
+1. Deduct `head_count` from each allocated `herds` row
 2. Create `sales_records` entry per herd group involved:
    - `sale_type` = 'Over-the-Hooks'
    - `sale_location` = processor plant location

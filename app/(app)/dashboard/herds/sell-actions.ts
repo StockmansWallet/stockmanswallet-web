@@ -32,7 +32,7 @@ export async function sellHerd(data: SellHerdData) {
 
   // Verify herd belongs to user and is not already sold
   const { data: herd, error: fetchError } = await supabase
-    .from("herd_groups")
+    .from("herds")
     .select("id, head_count, is_sold, is_demo_data")
     .eq("id", data.herdId)
     .eq("user_id", user.id)
@@ -51,7 +51,7 @@ export async function sellHerd(data: SellHerdData) {
   const { error: salesError } = await supabase.from("sales_records").insert({
     id: crypto.randomUUID(),
     user_id: user.id,
-    herd_group_id: data.herdId,
+    herd_id: data.herdId,
     sale_date: data.saleDate,
     head_count: data.headCount,
     average_weight: data.averageWeight,
@@ -73,7 +73,7 @@ export async function sellHerd(data: SellHerdData) {
   // Update herd: full sale marks as sold, partial reduces head count
   if (data.isFullSale) {
     const { error: updateError } = await supabase
-      .from("herd_groups")
+      .from("herds")
       .update({
         is_sold: true,
         sold_date: data.saleDate,
@@ -87,7 +87,7 @@ export async function sellHerd(data: SellHerdData) {
   } else {
     const newHeadCount = herd.head_count - data.headCount;
     const { error: updateError } = await supabase
-      .from("herd_groups")
+      .from("herds")
       .update({
         head_count: newHeadCount,
         updated_at: now,

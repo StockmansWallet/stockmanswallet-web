@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -8,14 +8,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   breedsForSpecies,
-  categoriesForSpecies,
   saleyards,
   cattleBreedPremiums,
 } from "@/lib/data/reference-data";
+import {
+  categoriesForSpecies,
+  validateWeight,
+  resolveMLACategory,
+  type BreederSubType,
+} from "@/lib/data/weight-mapping";
 import type { Database } from "@/lib/types/database";
-import { Info, Scale, Heart, MapPin, FileText } from "lucide-react";
+import { Info, Scale, Heart, MapPin, FileText, AlertTriangle, AlertCircle } from "lucide-react";
 
-type HerdRow = Database["public"]["Tables"]["herd_groups"]["Row"];
+type HerdRow = Database["public"]["Tables"]["herds"]["Row"];
 
 const SPECIES_OPTIONS = [
   { value: "Cattle", label: "Cattle" },
@@ -29,6 +34,11 @@ const BREEDING_PROGRAM_OPTIONS = [
   { value: "ai", label: "AI" },
   { value: "controlled", label: "Controlled" },
   { value: "uncontrolled", label: "Uncontrolled" },
+];
+
+const BREEDER_SUB_TYPE_OPTIONS = [
+  { value: "Cow", label: "Cow" },
+  { value: "Heifer", label: "Heifer" },
 ];
 
 const saleyardOptions = saleyards.map((s) => ({ value: s, label: s }));
@@ -54,7 +64,28 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
   const [submitting, setSubmitting] = useState(false);
   const [species, setSpecies] = useState<string>(herd?.species ?? "Cattle");
   const [breed, setBreed] = useState<string>(herd?.breed ?? "");
+  const [category, setCategory] = useState<string>(herd?.category ?? "");
+  const [breederSubType, setBreederSubType] = useState<BreederSubType | "">((herd as Record<string, unknown>)?.breeder_sub_type as BreederSubType ?? "");
   const [isBreeder, setIsBreeder] = useState(herd?.is_breeder ?? false);
+  const [currentWeight, setCurrentWeight] = useState<string>(String(herd?.current_weight ?? herd?.initial_weight ?? ""));
+
+  const needsBreederSubType = category === "Breeder";
+
+  // Weight validation
+  const weightValidation = useMemo(() => {
+    const w = Number(currentWeight);
+    if (!category || !w) return null;
+    return validateWeight(category, w);
+  }, [category, currentWeight]);
+
+  // Derived sub-category label
+  const derivedSubCategory = useMemo(() => {
+    const w = Number(currentWeight);
+    if (!category || !w) return null;
+    if (category === "Breeder" && !breederSubType) return null;
+    const resolution = resolveMLACategory(category, w, breederSubType || undefined);
+    return `${resolution.subCategory} ${category}`;
+  }, [category, currentWeight, breederSubType]);
 
   const autoPremium = species === "Cattle" ? cattleBreedPremiums[breed] ?? null : null;
 
@@ -146,8 +177,26 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
               required
               options={categoryOptions}
               placeholder="Select category"
-              defaultValue={herd?.category ?? ""}
+              value={category}
+              onChange={(e) => {
+                const v = e.target.value;
+                setCategory(v);
+                setBreederSubType("");
+                setIsBreeder(v === "Breeder" || v === "Dry Cow");
+              }}
             />
+            {needsBreederSubType && (
+              <Select
+                id="breeder_sub_type"
+                name="breeder_sub_type"
+                label="Breeder Type"
+                required
+                options={BREEDER_SUB_TYPE_OPTIONS}
+                placeholder="Cow or Heifer?"
+                value={breederSubType}
+                onChange={(e) => setBreederSubType(e.target.value as BreederSubType)}
+              />
+            )}
             <Input
               id="head_count"
               name="head_count"
@@ -195,9 +244,37 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
               type="number"
               step="0.1"
               min={0}
-              defaultValue={herd?.current_weight ?? herd?.initial_weight ?? 0}
+              value={currentWeight}
+              onChange={(e) => setCurrentWeight(e.target.value)}
               helperText="Leave same as initial if unknown"
             />
+          </div>
+
+          {/* Weight validation feedback */}
+          {weightValidation && weightValidation.status === "error" && (
+            <div className="flex items-start gap-2 rounded-lg border border-red-800 bg-red-900/20 px-3 py-2 text-xs text-red-400 mt-2">
+              <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <span>{weightValidation.message}</span>
+            </div>
+          )}
+          {weightValidation && weightValidation.status === "warning" && (
+            <div className="flex items-start gap-2 rounded-lg border border-amber-800 bg-amber-900/20 px-3 py-2 text-xs text-amber-400 mt-2">
+              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <span>{weightValidation.message}</span>
+            </div>
+          )}
+
+          {/* Derived sub-category label */}
+          {derivedSubCategory && weightValidation?.status !== "error" && (
+            <p className="flex items-center gap-2 text-xs text-text-muted mt-2">
+              <Info className="h-3.5 w-3.5 shrink-0" />
+              <span>
+                MLA category: <span className="font-medium text-text-primary">{derivedSubCategory}</span>
+              </span>
+            </p>
+          )}
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mt-4">
             <Input
               id="daily_weight_gain"
               name="daily_weight_gain"
@@ -239,18 +316,9 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
           </div>
         </CardHeader>
         <CardContent className="px-5 pb-5">
-          <div className="mb-4 flex items-center gap-6">
-            <label className="flex items-center gap-2 text-sm text-text-primary">
-              <input
-                type="checkbox"
-                name="is_breeder"
-                checked={isBreeder}
-                onChange={(e) => setIsBreeder(e.target.checked)}
-                className="h-4 w-4 rounded border-black/20 text-brand accent-brand"
-              />
-              Breeder
-            </label>
-            {isBreeder && (
+          {isBreeder && (
+            <div className="mb-4 flex items-center gap-6">
+              <input type="hidden" name="is_breeder" value="on" />
               <label className="flex items-center gap-2 text-sm text-text-primary">
                 <input
                   type="checkbox"
@@ -260,8 +328,8 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
                 />
                 Pregnant
               </label>
-            )}
-          </div>
+            </div>
+          )}
           {isBreeder && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Input
@@ -294,6 +362,11 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
                 defaultValue={herd?.breeding_program_type ?? ""}
               />
             </div>
+          )}
+          {!isBreeder && (
+            <p className="text-xs text-text-muted">
+              Select Breeder or Dry Cow as the category to enable breeding fields.
+            </p>
           )}
         </CardContent>
       </Card>

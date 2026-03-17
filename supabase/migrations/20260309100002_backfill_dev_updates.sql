@@ -182,7 +182,7 @@ INSERT INTO dev_updates (platform, date, build_label, title, summary, detail, so
 VALUES
 
 ('ios', '2026-03-07', 'Build 0.5 (2)', 'Demo Data Independence',
- 'Added is_demo_data=false filter to sync pull queries for herd_groups, muster_records, health_records, sales_records, yard_book_items
+ 'Added is_demo_data=false filter to sync pull queries for herds, muster_records, health_records, sales_records, yard_book_items
 Added is_simulated=false filter to properties pull query
 Prevents web-created demo data from syncing down to iOS (push guards already existed)',
  NULL, 0),
@@ -623,8 +623,8 @@ Projected weight, live MLA prices, breed premiums, mortality deduction, pre-birt
 National queries filtered with .is("breed", null)',
  NULL, 14),
 
-('web', '2026-03-05', NULL, 'Sync Fix - herds to herd_groups',
- 'Web was querying non-existent herds table (iOS writes to herd_groups)
+('web', '2026-03-05', NULL, 'Sync Fix - herds to herds',
+ 'Web was querying non-existent herds table (iOS writes to herds)
 Updated 7 files, added .eq("is_deleted", false) filters
 Updated TypeScript types with sync metadata fields',
  NULL, 15),

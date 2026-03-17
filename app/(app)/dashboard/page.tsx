@@ -7,7 +7,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { LoadDemoDataButton } from "@/components/app/load-demo-data-button";
 import { HerdComposition } from "./herd-composition";
 import { PortfolioChart } from "./portfolio-chart";
-import { calculateHerdValuation, mapCategoryToMLACategory, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import { calculateHerdValuation, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 import { PortfolioValueCard } from "@/components/app/portfolio-value-card";
 import { DashboardQuickActions } from "@/components/app/dashboard-quick-actions";
@@ -46,14 +47,15 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
   const [{ data: herds }, { data: properties }, { data: breedPremiumData }, { data: upcomingItems }] = await Promise.all([
     supabase
-      .from("herd_groups")
+      .from("herds")
       .select(`id, name, species, breed, category, head_count,
                initial_weight, current_weight, daily_weight_gain,
                dwg_change_date, previous_dwg, created_at,
                is_breeder, is_pregnant, joined_date, calving_rate,
                breeding_program_type, joining_period_start, joining_period_end,
                breed_premium_override, mortality_rate, is_sold, selected_saleyard,
-               additional_info, calf_weight_recorded_date, updated_at`)
+               additional_info, calf_weight_recorded_date, updated_at,
+               breeder_sub_type`)
       .eq("user_id", user!.id)
       .eq("is_sold", false)
       .eq("is_deleted", false)
@@ -89,7 +91,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const saleyards = resolvedOverride
     ? [resolvedOverride]
     : [...new Set((herds ?? []).map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
-  const primaryCategories = [...new Set((herds ?? []).map((h) => mapCategoryToMLACategory(h.category)))];
+  const primaryCategories = [...new Set((herds ?? []).map((h) => resolveMLACategory(h.category, h.initial_weight, h.breeder_sub_type ?? undefined).primaryMLACategory))];
   const mlaCategories = [...new Set([...primaryCategories, ...primaryCategories.map(c => categoryFallback(c)).filter((c): c is string => c !== null)])];
 
   type PriceRow = { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string };

@@ -6,12 +6,12 @@ import { createClient } from "@/lib/supabase/server";
 import {
   calculateHerdValuation,
   calculateProjectedWeight,
-  mapCategoryToMLACategory,
   categoryFallback,
   daysBetween,
   type CategoryPriceEntry,
   type HerdForValuation,
 } from "@/lib/engines/valuation-engine";
+import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 
 // MARK: - Types
@@ -56,6 +56,7 @@ interface HerdRow {
   mortality_rate: number | null;
   additional_info: string | null;
   calf_weight_recorded_date: string | null;
+  breeder_sub_type: string | null;
 }
 
 interface YardBookRow {
@@ -91,14 +92,15 @@ export async function evaluateInsights(): Promise<StockmanIQInsight[]> {
   // Parallel data fetch
   const [{ data: herds }, { data: breedPremiumData }, { data: yardBookItems }] = await Promise.all([
     supabase
-      .from("herd_groups")
+      .from("herds")
       .select(`id, name, species, breed, category, head_count,
                initial_weight, current_weight, daily_weight_gain,
                dwg_change_date, previous_dwg, created_at,
                is_breeder, is_pregnant, joined_date, calving_rate,
                breeding_program_type, joining_period_start, joining_period_end,
                breed_premium_override, mortality_rate, selected_saleyard,
-               additional_info, calf_weight_recorded_date, updated_at`)
+               additional_info, calf_weight_recorded_date, updated_at,
+               breeder_sub_type`)
       .eq("user_id", user.id)
       .eq("is_sold", false)
       .eq("is_deleted", false)
@@ -116,7 +118,7 @@ export async function evaluateInsights(): Promise<StockmanIQInsight[]> {
 
   // Fetch prices (same pattern as dashboard)
   const saleyards = [...new Set(activeHerds.map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
-  const primaryCategories = [...new Set(activeHerds.map((h) => mapCategoryToMLACategory(h.category)))];
+  const primaryCategories = [...new Set(activeHerds.map((h) => resolveMLACategory(h.category, h.initial_weight, h.breeder_sub_type ?? undefined).primaryMLACategory))];
   const mlaCategories = [...new Set([...primaryCategories, ...primaryCategories.map(c => categoryFallback(c)).filter((c): c is string => c !== null)])];
 
   type PriceRow = { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string };
@@ -312,7 +314,7 @@ function evaluateBestMonth(
     .slice(0, 2);
 
   for (const { herd, result } of candidates) {
-    const mlaCategory = mapCategoryToMLACategory(herd.category);
+    const mlaCategory = resolveMLACategory(herd.category, herd.initial_weight, herd.breeder_sub_type ?? undefined).primaryMLACategory;
     const seasonal = seasonalMap.get(mlaCategory);
     if (!seasonal || !seasonal.bestMonth) continue;
 

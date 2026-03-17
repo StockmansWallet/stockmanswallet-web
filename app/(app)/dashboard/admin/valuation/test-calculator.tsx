@@ -11,10 +11,11 @@ import {
 } from "@/lib/engines/valuation-engine";
 import {
   cattleBreeds, sheepBreeds, pigBreeds, goatBreeds,
-  cattleCategories, sheepCategories, pigCategories, goatCategories,
   saleyards, cattleBreedPremiums,
 } from "@/lib/data/reference-data";
-import { mapCategoryToMLACategory, categoryFallback } from "@/lib/engines/valuation-engine";
+import { cattleMasterCategories } from "@/lib/data/weight-mapping";
+import { categoryFallback } from "@/lib/engines/valuation-engine";
+import { resolveMLACategory } from "@/lib/data/weight-mapping";
 
 interface Props {
   priceMaps: SerializedPriceMaps;
@@ -35,10 +36,10 @@ const breedsBySpecies: Record<string, readonly string[]> = {
 };
 
 const categoriesBySpecies: Record<string, readonly string[]> = {
-  Cattle: cattleCategories,
-  Sheep: sheepCategories,
-  Pig: pigCategories,
-  Goat: goatCategories,
+  Cattle: cattleMasterCategories,
+  Sheep: [],
+  Pig: [],
+  Goat: [],
 };
 
 function fmtDollar(n: number): string {
@@ -186,7 +187,7 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
   }, [breed, premiumMap]);
 
   // MLA category + saleyard coverage check (uses full DB coverage, not just user's herds)
-  const mlaCategory = useMemo(() => mapCategoryToMLACategory(category), [category]);
+  const mlaCategory = useMemo(() => resolveMLACategory(category, initialWeight).primaryMLACategory, [category, initialWeight]);
 
   const saleyardHasData = useMemo(() => {
     const result: Record<string, boolean> = {};

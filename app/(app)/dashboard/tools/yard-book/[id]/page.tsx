@@ -144,7 +144,7 @@ export default async function YardBookItemPage({
   let linkedHerds: { id: string; name: string; head_count: number }[] = [];
   if (item.linked_herd_ids && item.linked_herd_ids.length > 0) {
     const { data } = await supabase
-      .from("herd_groups")
+      .from("herds")
       .select("id, name, head_count")
       .in("id", item.linked_herd_ids)
       .eq("is_deleted", false);

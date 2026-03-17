@@ -217,8 +217,8 @@
 * 4-tier price resolution: saleyard general + premium, saleyard breed-specific (no premium), national + premium, fallback + premium
 * National queries filtered with `.is("breed", null)`
 
-### Sync Fix - herds to herd_groups
-* Web was querying non-existent `herds` table (iOS writes to `herd_groups`)
+### Sync Fix - herds to herds
+* Web was querying non-existent `herds` table (iOS writes to `herds`)
 * Updated 7 files, added `.eq("is_deleted", false)` filters
 * Updated TypeScript types with sync metadata fields
 

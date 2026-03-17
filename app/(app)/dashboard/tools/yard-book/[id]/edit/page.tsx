@@ -29,7 +29,7 @@ export default async function EditYardBookItemPage({
         .eq("is_deleted", false)
         .single(),
       supabase
-        .from("herd_groups")
+        .from("herds")
         .select("id, name, head_count")
         .eq("user_id", user.id)
         .eq("is_deleted", false)

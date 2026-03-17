@@ -23,7 +23,7 @@ export default async function EditHerdPage({
 
   const [{ data: herd }, { data: properties }, { data: musterRecords }, { data: healthRecords }] = await Promise.all([
     supabase
-      .from("herd_groups")
+      .from("herds")
       .select("*")
       .eq("id", id)
       .eq("user_id", user!.id)

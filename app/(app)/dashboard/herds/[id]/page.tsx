@@ -5,7 +5,8 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { calculateProjectedWeight, calculateHerdValuation, mapCategoryToMLACategory, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import { calculateProjectedWeight, calculateHerdValuation, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 import { DeleteHerdButton } from "./delete-button";
 import { MusterRecordsSection } from "@/components/app/muster-records-section";
@@ -50,7 +51,7 @@ export default async function HerdDetailPage({
   // Fetch herd + breed premiums + records in parallel
   const [herdResult, { data: breedPremiumData }, { data: musterRecords }, { data: healthRecords }] = await Promise.all([
     supabase
-      .from("herd_groups")
+      .from("herds")
       .select("*, properties(property_name)")
       .eq("id", id)
       .eq("user_id", user!.id)
@@ -80,7 +81,7 @@ export default async function HerdDetailPage({
 
   if (error && !herd) {
     const fallback = await supabase
-      .from("herd_groups")
+      .from("herds")
       .select("*")
       .eq("id", id)
       .eq("user_id", user!.id)
@@ -95,7 +96,7 @@ export default async function HerdDetailPage({
   // - Saleyard + "National" combined, filtered by MLA category, all breeds
   // - Ordered by data_date DESC - no tight limit since a single saleyard can have 10k+ rows
   // - Expiry filter: only include non-expired entries (matches iOS expiryFilter)
-  const mlaCategory = mapCategoryToMLACategory(herd.category);
+  const mlaCategory = resolveMLACategory(herd.category, herd.initial_weight, herd.breeder_sub_type ?? undefined).primaryMLACategory;
   const fallbackCat = categoryFallback(mlaCategory);
   const categoriesToFetch = fallbackCat ? [mlaCategory, fallbackCat] : [mlaCategory];
   const resolvedSaleyard = herd.selected_saleyard

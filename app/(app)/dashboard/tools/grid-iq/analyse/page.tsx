@@ -22,7 +22,7 @@ export default async function NewAnalysisPage() {
       .eq("is_deleted", false)
       .order("created_at", { ascending: false }),
     supabase
-      .from("herd_groups")
+      .from("herds")
       .select("id, name, species, breed, sex, category, head_count")
       .eq("user_id", user!.id)
       .eq("is_sold", false)

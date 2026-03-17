@@ -11,7 +11,8 @@ import { AdvisorLensPanel } from "@/components/app/advisory/advisor-lens-panel";
 import { Lock, Wrench } from "lucide-react";
 import type { ConnectionRequest, AdvisoryMessage } from "@/lib/types/advisory";
 import type { AdvisorLens, AdvisorScenario } from "@/lib/types/advisor-lens";
-import { calculateHerdValuation, mapCategoryToMLACategory, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import { calculateHerdValuation, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 
 export const metadata = {
@@ -86,7 +87,7 @@ export default async function ClientDetailPage({
       .eq("is_deleted", false)
       .order("created_at", { ascending: false }),
     supabase
-      .from("herd_groups")
+      .from("herds")
       .select("*")
       .eq("user_id", conn.target_user_id)
       .eq("is_sold", false)
@@ -99,7 +100,7 @@ export default async function ClientDetailPage({
   // Calculate baseline portfolio value for the client's herds
   const herds = clientHerds ?? [];
   const saleyards = [...new Set(herds.map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
-  const primaryCategories = [...new Set(herds.map((h) => mapCategoryToMLACategory(h.category)))];
+  const primaryCategories = [...new Set(herds.map((h) => resolveMLACategory(h.category, h.initial_weight, h.breeder_sub_type ?? undefined).primaryMLACategory))];
   const mlaCategories = [...new Set([...primaryCategories, ...primaryCategories.map((c) => categoryFallback(c)).filter((c): c is string => c !== null)])];
 
   type PriceRow = { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string };

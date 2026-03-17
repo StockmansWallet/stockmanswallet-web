@@ -8,7 +8,7 @@ import {
   categoryFallback,
   type CategoryPriceEntry,
 } from "@/lib/engines/valuation-engine";
-import { mapCategoryToMLACategory } from "@/lib/data/reference-data";
+import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName, saleyardCoordinates } from "@/lib/data/reference-data";
 import { calculateFreightEstimate } from "@/lib/engines/freight-engine";
 import {
@@ -143,9 +143,9 @@ export async function runPostSaleAnalysis(consignmentId: string, killSheetId: st
   }
 
   // Fetch all herds for allocations
-  const herdIds = [...new Set(allocations.map((a) => a.herd_group_id))];
+  const herdIds = [...new Set(allocations.map((a) => a.herd_id))];
   const { data: herds } = await supabase
-    .from("herd_groups")
+    .from("herds")
     .select(
       `id, name, species, breed, sex, category, head_count,
        initial_weight, current_weight, daily_weight_gain,
@@ -153,7 +153,8 @@ export async function runPostSaleAnalysis(consignmentId: string, killSheetId: st
        is_breeder, is_pregnant, joined_date, calving_rate,
        breeding_program_type, joining_period_start, joining_period_end,
        breed_premium_override, mortality_rate, selected_saleyard,
-       additional_info, calf_weight_recorded_date, updated_at, property_id`
+       additional_info, calf_weight_recorded_date, updated_at, property_id,
+       breeder_sub_type`
     )
     .eq("user_id", user.id)
     .in("id", herdIds);
@@ -172,7 +173,7 @@ export async function runPostSaleAnalysis(consignmentId: string, killSheetId: st
   }
 
   // Use the first allocation's herd for the primary analysis (post-sale uses kill sheet data)
-  const primaryHerd = herdMap.get(allocations[0].herd_group_id)!;
+  const primaryHerd = herdMap.get(allocations[0].herd_id)!;
   const property = primaryHerd.property_id ? propertyMap.get(primaryHerd.property_id) : null;
 
   // MLA market value (aggregate across allocations)
@@ -181,10 +182,10 @@ export async function runPostSaleAnalysis(consignmentId: string, killSheetId: st
   let aggFreightToProcessor = 0;
 
   for (const alloc of allocations) {
-    const herd = herdMap.get(alloc.herd_group_id)!;
+    const herd = herdMap.get(alloc.herd_id)!;
     const prop = herd.property_id ? propertyMap.get(herd.property_id) : null;
 
-    const mlaCategory = mapCategoryToMLACategory(herd.category);
+    const mlaCategory = resolveMLACategory(herd.category, herd.initial_weight, herd.breeder_sub_type ?? undefined).primaryMLACategory;
     const fallbackCat = categoryFallback(mlaCategory);
     const mlaCategories = fallbackCat ? [mlaCategory, fallbackCat] : [mlaCategory];
     const resolvedSaleyard = herd.selected_saleyard ? resolveMLASaleyardName(herd.selected_saleyard) : null;
@@ -246,7 +247,7 @@ export async function runPostSaleAnalysis(consignmentId: string, killSheetId: st
 
   const totalHead = allocations.reduce((s, a) => s + a.head_count, 0);
   const herdNames = allocations.map((a) => {
-    const h = herdMap.get(a.herd_group_id);
+    const h = herdMap.get(a.herd_id);
     return h ? `${h.name} (${a.head_count})` : `${a.head_count} head`;
   }).join(", ");
 
@@ -279,7 +280,7 @@ export async function runPostSaleAnalysis(consignmentId: string, killSheetId: st
   const { error: analysisError } = await supabase.from("grid_iq_analyses").insert({
     id: analysisId,
     user_id: user.id,
-    herd_group_id: null,
+    herd_id: null,
     consignment_id: consignmentId,
     processor_grid_id: grid.id,
     kill_sheet_record_id: killSheetId,
@@ -372,7 +373,7 @@ export async function confirmSale(
     await supabase.from("consignment_allocations").delete().eq("consignment_id", consignmentId);
     const newAllocRows = adjustedAllocations.map((a) => ({
       consignment_id: consignmentId,
-      herd_group_id: a.herdGroupId,
+      herd_id: a.herdGroupId,
       head_count: a.headCount,
     }));
     await supabase.from("consignment_allocations").insert(newAllocRows);
@@ -405,9 +406,9 @@ export async function confirmSale(
   // Process each allocation
   for (const alloc of allocations) {
     const { data: herd } = await supabase
-      .from("herd_groups")
+      .from("herds")
       .select("id, head_count, current_weight, name")
-      .eq("id", alloc.herd_group_id)
+      .eq("id", alloc.herd_id)
       .eq("user_id", user.id)
       .single();
     if (!herd) continue;
@@ -418,14 +419,14 @@ export async function confirmSale(
       herdUpdate.is_sold = true;
       herdUpdate.sold_date = consignment.kill_date || new Date().toISOString();
     }
-    await supabase.from("herd_groups").update(herdUpdate).eq("id", alloc.herd_group_id);
+    await supabase.from("herds").update(herdUpdate).eq("id", alloc.herd_id);
 
     const headRatio = totalHead > 0 ? alloc.head_count / totalHead : 0;
     const proratedRevenue = Math.round(totalRevenue * headRatio);
     await supabase.from("sales_records").insert({
       id: crypto.randomUUID(),
       user_id: user.id,
-      herd_group_id: alloc.herd_group_id,
+      herd_id: alloc.herd_id,
       sale_date: consignment.kill_date || new Date().toISOString(),
       head_count: alloc.head_count,
       average_weight: alloc.average_weight ?? herd.current_weight ?? 0,

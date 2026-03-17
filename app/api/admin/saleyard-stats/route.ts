@@ -36,7 +36,7 @@ export async function GET(request: Request) {
 
   // Count herds per saleyard
   const { data: herds } = await supabase
-    .from("herd_groups")
+    .from("herds")
     .select("selected_saleyard")
     .eq("user_id", user.id)
     .eq("is_sold", false)

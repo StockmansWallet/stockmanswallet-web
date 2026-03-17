@@ -90,7 +90,7 @@ export type Database = {
           last_synced_at?: string | null;
         };
       };
-      herd_groups: {
+      herds: {
         Row: {
           id: string;
           user_id: string;
@@ -120,7 +120,9 @@ export type Database = {
           joining_period_start: string | null;
           joining_period_end: string | null;
           selected_saleyard: string | null;
-          market_category: string | null;
+          sub_category: string | null;
+          breeder_sub_type: string | null;
+          validation_status: string | null;
           is_sold: boolean;
           sold_date: string | null;
           sold_price: number | null;
@@ -167,7 +169,9 @@ export type Database = {
           joining_period_start?: string | null;
           joining_period_end?: string | null;
           selected_saleyard?: string | null;
-          market_category?: string | null;
+          sub_category?: string | null;
+          breeder_sub_type?: string | null;
+          validation_status?: string | null;
           is_sold?: boolean;
           sold_date?: string | null;
           sold_price?: number | null;
@@ -214,7 +218,9 @@ export type Database = {
           joining_period_start?: string | null;
           joining_period_end?: string | null;
           selected_saleyard?: string | null;
-          market_category?: string | null;
+          sub_category?: string | null;
+          breeder_sub_type?: string | null;
+          validation_status?: string | null;
           is_sold?: boolean;
           sold_date?: string | null;
           sold_price?: number | null;
@@ -316,7 +322,7 @@ export type Database = {
         Row: {
           id: string;
           user_id: string;
-          herd_group_id: string;
+          herd_id: string;
           created_at: string;
           sale_date: string;
           head_count: number;
@@ -337,7 +343,7 @@ export type Database = {
         Insert: {
           id?: string;
           user_id: string;
-          herd_group_id: string;
+          herd_id: string;
           created_at?: string;
           sale_date: string;
           head_count: number;
@@ -358,7 +364,7 @@ export type Database = {
         Update: {
           id?: string;
           user_id?: string;
-          herd_group_id?: string;
+          herd_id?: string;
           created_at?: string;
           sale_date?: string;
           head_count?: number;
@@ -476,7 +482,7 @@ export type Database = {
           property_name: string | null;
           booking_reference: string | null;
           booking_type: string | null;
-          herd_group_id: string | null;
+          herd_id: string | null;
           total_head_count: number;
           total_body_weight: number;
           total_gross_value: number;
@@ -506,7 +512,7 @@ export type Database = {
           property_name?: string | null;
           booking_reference?: string | null;
           booking_type?: string | null;
-          herd_group_id?: string | null;
+          herd_id?: string | null;
           total_head_count: number;
           total_body_weight: number;
           total_gross_value: number;
@@ -536,7 +542,7 @@ export type Database = {
           property_name?: string | null;
           booking_reference?: string | null;
           booking_type?: string | null;
-          herd_group_id?: string | null;
+          herd_id?: string | null;
           total_head_count?: number;
           total_body_weight?: number;
           total_gross_value?: number;
@@ -621,7 +627,7 @@ export type Database = {
           id: string;
           user_id: string;
           created_at: string;
-          herd_group_id: string | null;
+          herd_id: string | null;
           app_category: string;
           sex: string;
           average_weight_kg: number;
@@ -649,7 +655,7 @@ export type Database = {
           id?: string;
           user_id: string;
           created_at?: string;
-          herd_group_id?: string | null;
+          herd_id?: string | null;
           app_category: string;
           sex: string;
           average_weight_kg: number;
@@ -677,7 +683,7 @@ export type Database = {
           id?: string;
           user_id?: string;
           created_at?: string;
-          herd_group_id?: string | null;
+          herd_id?: string | null;
           app_category?: string;
           sex?: string;
           average_weight_kg?: number;
@@ -762,7 +768,7 @@ export type Database = {
         Row: {
           id: string;
           consignment_id: string;
-          herd_group_id: string;
+          herd_id: string;
           head_count: number;
           category: string | null;
           average_weight: number | null;
@@ -773,7 +779,7 @@ export type Database = {
         Insert: {
           id?: string;
           consignment_id: string;
-          herd_group_id: string;
+          herd_id: string;
           head_count: number;
           category?: string | null;
           average_weight?: number | null;

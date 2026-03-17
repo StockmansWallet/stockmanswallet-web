@@ -16,7 +16,7 @@ Two-way connection system allowing advisors to request access to farmer portfoli
 | `user_profiles` | Directory listings, roles, display info |
 | `notifications` | In-app notifications for connection events |
 | `advisory_messages` | Thread-based notes/chat on connections |
-| `herd_groups` | Client portfolio data (advisor read-only access) |
+| `herds` | Client portfolio data (advisor read-only access) |
 | `properties` | Client property data (advisor read-only access) |
 
 ### connection_requests columns

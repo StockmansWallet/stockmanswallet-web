@@ -8,7 +8,7 @@ import {
   categoryFallback,
   type CategoryPriceEntry,
 } from "@/lib/engines/valuation-engine";
-import { mapCategoryToMLACategory } from "@/lib/data/reference-data";
+import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName, saleyardCoordinates } from "@/lib/data/reference-data";
 import { calculateFreightEstimate } from "@/lib/engines/freight-engine";
 import {
@@ -133,7 +133,7 @@ export async function createPreSaleAnalysis(formData: FormData) {
   // 3. Fetch all herds in parallel
   const herdIds = [...new Set(allocations.map((a) => a.herdGroupId))];
   const { data: herds } = await supabase
-    .from("herd_groups")
+    .from("herds")
     .select(
       `id, name, species, breed, sex, category, head_count,
        initial_weight, current_weight, daily_weight_gain,
@@ -141,7 +141,8 @@ export async function createPreSaleAnalysis(formData: FormData) {
        is_breeder, is_pregnant, joined_date, calving_rate,
        breeding_program_type, joining_period_start, joining_period_end,
        breed_premium_override, mortality_rate, selected_saleyard,
-       additional_info, calf_weight_recorded_date, updated_at, property_id`
+       additional_info, calf_weight_recorded_date, updated_at, property_id,
+       breeder_sub_type`
     )
     .eq("user_id", user.id)
     .in("id", herdIds);
@@ -182,7 +183,7 @@ export async function createPreSaleAnalysis(formData: FormData) {
     const property = herd.property_id ? propertyMap.get(herd.property_id) : null;
 
     // MLA market value for this herd
-    const mlaCategory = mapCategoryToMLACategory(herd.category);
+    const mlaCategory = resolveMLACategory(herd.category, herd.initial_weight, herd.breeder_sub_type ?? undefined).primaryMLACategory;
     const fallbackCat = categoryFallback(mlaCategory);
     const mlaCategories = fallbackCat ? [mlaCategory, fallbackCat] : [mlaCategory];
     const resolvedSaleyard = herd.selected_saleyard
@@ -394,7 +395,7 @@ export async function createPreSaleAnalysis(formData: FormData) {
   // Insert allocations
   const allocationRows = allocations.map((a) => ({
     consignment_id: consignmentId,
-    herd_group_id: a.herdGroupId,
+    herd_id: a.herdGroupId,
     head_count: a.headCount,
     category: a.category || null,
   }));
@@ -408,7 +409,7 @@ export async function createPreSaleAnalysis(formData: FormData) {
   const { error: analysisError } = await supabase.from("grid_iq_analyses").insert({
     id: analysisId,
     user_id: user.id,
-    herd_group_id: null,
+    herd_id: null,
     consignment_id: consignmentId,
     processor_grid_id: grid.id,
     kill_sheet_record_id: null,

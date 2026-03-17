@@ -4,11 +4,11 @@ import { PageHeader } from "@/components/ui/page-header";
 import { isAdminEmail } from "@/lib/data/admin";
 import {
   calculateHerdValuation,
-  mapCategoryToMLACategory,
   categoryFallback,
   type CategoryPriceEntry,
   type HerdValuationResult,
 } from "@/lib/engines/valuation-engine";
+import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 import { ValuationValidator } from "./valuation-validator";
 
@@ -76,14 +76,15 @@ export default async function ValuationPage() {
 
   // Fetch herds (same query as dashboard)
   const { data: herds } = await supabase
-    .from("herd_groups")
+    .from("herds")
     .select(`id, name, species, breed, category, head_count,
              initial_weight, current_weight, daily_weight_gain,
              dwg_change_date, previous_dwg, created_at,
              is_breeder, is_pregnant, joined_date, calving_rate,
              breeding_program_type, joining_period_start, joining_period_end,
              breed_premium_override, mortality_rate, is_sold, selected_saleyard,
-             additional_info, calf_weight_recorded_date, updated_at`)
+             additional_info, calf_weight_recorded_date, updated_at,
+             breeder_sub_type`)
     .eq("user_id", user.id)
     .eq("is_sold", false)
     .eq("is_deleted", false)
@@ -97,7 +98,7 @@ export default async function ValuationPage() {
       .map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null)
       .filter(Boolean),
   )] as string[];
-  const primaryCategories = [...new Set(activeHerds.map((h) => mapCategoryToMLACategory(h.category)))];
+  const primaryCategories = [...new Set(activeHerds.map((h) => resolveMLACategory(h.category, h.initial_weight, h.breeder_sub_type ?? undefined).primaryMLACategory))];
   const mlaCategories = [...new Set([...primaryCategories, ...primaryCategories.map(c => categoryFallback(c)).filter((c): c is string => c !== null)])];
 
   type PriceRow = { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string };

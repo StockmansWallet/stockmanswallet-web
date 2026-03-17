@@ -22,7 +22,7 @@ export default async function SoldHerdsPage() {
 
   // Fetch sold herds with their sales records
   const { data: soldHerds } = await supabase
-    .from("herd_groups")
+    .from("herds")
     .select("id, name, breed, category, species, head_count, is_sold, sold_date, sold_price")
     .eq("user_id", user!.id)
     .eq("is_sold", true)
@@ -34,17 +34,17 @@ export default async function SoldHerdsPage() {
   const { data: salesRecords } = soldIds.length > 0
     ? await supabase
         .from("sales_records")
-        .select("herd_group_id, sale_date, head_count, price_per_kg, pricing_type, price_per_head, total_gross_value, freight_cost, net_value, sale_type, sale_location")
+        .select("herd_id, sale_date, head_count, price_per_kg, pricing_type, price_per_head, total_gross_value, freight_cost, net_value, sale_type, sale_location")
         .eq("user_id", user!.id)
-        .in("herd_group_id", soldIds)
+        .in("herd_id", soldIds)
         .order("sale_date", { ascending: false })
     : { data: [] as never[] };
 
   // Build a map of herd_id -> latest sales record
   const salesMap = new Map<string, typeof salesRecords extends (infer T)[] | null ? T : never>();
   for (const record of salesRecords ?? []) {
-    if (!salesMap.has(record.herd_group_id)) {
-      salesMap.set(record.herd_group_id, record);
+    if (!salesMap.has(record.herd_id)) {
+      salesMap.set(record.herd_id, record);
     }
   }
 

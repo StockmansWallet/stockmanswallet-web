@@ -161,14 +161,14 @@ export interface YardBookRow {
 
 export interface MusterRow {
   id: string;
-  herd_group_id: string;
+  herd_id: string;
   date: string;
   head_count_observed: number | null;
 }
 
 export interface HealthRow {
   id: string;
-  herd_group_id: string;
+  herd_id: string;
   date: string;
   treatment_type: string | null;
   notes: string | null;
@@ -186,7 +186,7 @@ export interface CategoryPriceRow {
 
 export interface GridIQAnalysisRow {
   id: string;
-  herd_group_id: string;
+  herd_id: string;
   processor_grid_id: string;
   kill_sheet_record_id: string | null;
   analysis_date: string;
@@ -233,7 +233,7 @@ export interface KillSheetRow {
   average_value_per_head: number;
   condemns: number;
   realisation_factor: number | null;
-  herd_group_id: string | null;
+  herd_id: string | null;
   property_name: string | null;
   notes: string | null;
 }

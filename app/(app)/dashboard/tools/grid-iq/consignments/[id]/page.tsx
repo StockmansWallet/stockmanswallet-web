@@ -53,13 +53,13 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
   // Fetch allocations with herd names
   const { data: allocations } = await supabase
     .from("consignment_allocations")
-    .select("id, herd_group_id, head_count, category, average_weight, total_value")
+    .select("id, herd_id, head_count, category, average_weight, total_value")
     .eq("consignment_id", id);
 
   // Get herd names for each allocation
-  const herdIds = (allocations ?? []).map((a) => a.herd_group_id);
+  const herdIds = (allocations ?? []).map((a) => a.herd_id);
   const { data: herds } = await supabase
-    .from("herd_groups")
+    .from("herds")
     .select("id, name, head_count, category, species")
     .in("id", herdIds.length > 0 ? herdIds : ["__none__"]);
 
@@ -175,7 +175,7 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
           {(allocations ?? []).length > 0 ? (
             <div className="divide-y divide-white/[0.04]">
               {(allocations ?? []).map((alloc) => {
-                const herd = herdMap.get(alloc.herd_group_id);
+                const herd = herdMap.get(alloc.herd_id);
                 return (
                   <div key={alloc.id} className="flex items-center gap-4 px-4 py-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-500/10">

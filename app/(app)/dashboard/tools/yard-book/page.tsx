@@ -43,7 +43,7 @@ export default async function YardBookPage() {
       .eq("is_deleted", false)
       .order("event_date"),
     supabase
-      .from("herd_groups")
+      .from("herds")
       .select("id, name, head_count")
       .eq("user_id", user.id)
       .eq("is_deleted", false)

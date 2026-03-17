@@ -227,7 +227,7 @@ create index idx_health_records_date on health_records(herd_id, date desc);
 create table sales_records (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  herd_group_id uuid not null references herds(id) on delete cascade,
+  herd_id uuid not null references herds(id) on delete cascade,
   created_at timestamptz not null default now(),
 
   sale_date timestamptz not null,
@@ -260,7 +260,7 @@ create policy "Users can delete own sales records"
   on sales_records for delete using (auth.uid() = user_id);
 
 create index idx_sales_records_user_id on sales_records(user_id);
-create index idx_sales_records_herd_group_id on sales_records(herd_group_id);
+create index idx_sales_records_herd_id on sales_records(herd_id);
 create index idx_sales_records_sale_date on sales_records(user_id, sale_date desc);
 
 -- ============================================================================
@@ -338,7 +338,7 @@ create table kill_sheet_records (
   property_name text,
   booking_reference text,
   booking_type text,
-  herd_group_id uuid references herds(id) on delete set null,
+  herd_id uuid references herds(id) on delete set null,
 
   total_head_count integer not null,
   total_body_weight double precision not null,
@@ -374,7 +374,7 @@ create policy "Users can delete own kill sheet records"
 
 create index idx_kill_sheet_records_user_id on kill_sheet_records(user_id);
 create index idx_kill_sheet_records_kill_date on kill_sheet_records(user_id, kill_date desc);
-create index idx_kill_sheet_records_herd_group_id on kill_sheet_records(herd_group_id);
+create index idx_kill_sheet_records_herd_id on kill_sheet_records(herd_id);
 
 -- ============================================================================
 -- 8. SAVED FREIGHT ESTIMATES
@@ -385,7 +385,7 @@ create table saved_freight_estimates (
   created_at timestamptz not null default now(),
 
   -- Link to herd (optional — manual estimates have no herd)
-  herd_group_id uuid references herds(id) on delete set null,
+  herd_id uuid references herds(id) on delete set null,
 
   -- Estimate inputs
   app_category text not null,
@@ -431,4 +431,4 @@ create policy "Users can delete own freight estimates"
   on saved_freight_estimates for delete using (auth.uid() = user_id);
 
 create index idx_saved_freight_estimates_user_id on saved_freight_estimates(user_id);
-create index idx_saved_freight_estimates_herd_group_id on saved_freight_estimates(herd_group_id);
+create index idx_saved_freight_estimates_herd_id on saved_freight_estimates(herd_id);

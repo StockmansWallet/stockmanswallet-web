@@ -8,7 +8,7 @@ import {
   categoryFallback,
   type CategoryPriceEntry,
 } from "@/lib/engines/valuation-engine";
-import { mapCategoryToMLACategory } from "@/lib/data/reference-data";
+import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName, saleyardCoordinates } from "@/lib/data/reference-data";
 import { calculateFreightEstimate } from "@/lib/engines/freight-engine";
 import {
@@ -56,7 +56,7 @@ export async function createAnalysis(formData: FormData) {
       .eq("user_id", user.id)
       .single(),
     supabase
-      .from("herd_groups")
+      .from("herds")
       .select(
         `id, name, species, breed, sex, category, head_count,
          initial_weight, current_weight, daily_weight_gain,
@@ -64,7 +64,8 @@ export async function createAnalysis(formData: FormData) {
          is_breeder, is_pregnant, joined_date, calving_rate,
          breeding_program_type, joining_period_start, joining_period_end,
          breed_premium_override, mortality_rate, selected_saleyard,
-         additional_info, calf_weight_recorded_date, updated_at, property_id`
+         additional_info, calf_weight_recorded_date, updated_at, property_id,
+         breeder_sub_type`
       )
       .eq("id", herdId)
       .eq("user_id", user.id)
@@ -103,7 +104,7 @@ export async function createAnalysis(formData: FormData) {
   }
 
   // 3. Fetch market prices (same pattern as dashboard page.tsx)
-  const mlaCategory = mapCategoryToMLACategory(herd.category);
+  const mlaCategory = resolveMLACategory(herd.category, herd.initial_weight, herd.breeder_sub_type ?? undefined).primaryMLACategory;
   const fallbackCat = categoryFallback(mlaCategory);
   const mlaCategories = fallbackCat ? [mlaCategory, fallbackCat] : [mlaCategory];
   const resolvedSaleyard = herd.selected_saleyard
@@ -328,7 +329,7 @@ export async function createAnalysis(formData: FormData) {
   const { error } = await supabase.from("grid_iq_analyses").insert({
     id: newId,
     user_id: user.id,
-    herd_group_id: result.herdGroupId,
+    herd_id: result.herdGroupId,
     processor_grid_id: result.processorGridId,
     kill_sheet_record_id: result.killSheetRecordId,
     analysis_date: now,

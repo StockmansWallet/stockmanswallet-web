@@ -7,7 +7,8 @@ import { StatCard } from "@/components/ui/stat-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HerdsTable } from "./herds-table";
 import { Plus, Tags, Layers, DollarSign, Scale, Archive } from "lucide-react";
-import { calculateHerdValuation, mapCategoryToMLACategory, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import { calculateHerdValuation, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 
 export const revalidate = 0;
@@ -24,7 +25,7 @@ export default async function HerdsPage() {
 
   const [herdsResult, { data: breedPremiumData }, { data: propertiesData }] = await Promise.all([
     supabase
-      .from("herd_groups")
+      .from("herds")
       .select("*, properties(property_name)")
       .eq("user_id", user!.id)
       .eq("is_sold", false)
@@ -47,7 +48,7 @@ export default async function HerdsPage() {
   // Fallback: if the join fails, query without it so herds still display
   if (error && !herds) {
     const fallback = await supabase
-      .from("herd_groups")
+      .from("herds")
       .select("*")
       .eq("user_id", user!.id)
       .eq("is_sold", false)
@@ -59,7 +60,7 @@ export default async function HerdsPage() {
   // Fetch pricing data in two parallel queries to avoid 50k limit truncating national prices
   // when multiple saleyards have large datasets.
   const saleyards = [...new Set((herds ?? []).map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
-  const primaryCategories = [...new Set((herds ?? []).map((h) => mapCategoryToMLACategory(h.category)))];
+  const primaryCategories = [...new Set((herds ?? []).map((h) => resolveMLACategory(h.category, h.initial_weight, h.breeder_sub_type ?? undefined).primaryMLACategory))];
   const mlaCategories = [...new Set([...primaryCategories, ...primaryCategories.map(c => categoryFallback(c)).filter((c): c is string => c !== null)])];
 
   type PriceRow = { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string };

@@ -16,7 +16,7 @@ export default async function NewYardBookItemPage() {
 
   const [{ data: herds }, { data: properties }] = await Promise.all([
     supabase
-      .from("herd_groups")
+      .from("herds")
       .select("id, name, head_count")
       .eq("user_id", user.id)
       .eq("is_deleted", false)

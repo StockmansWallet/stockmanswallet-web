@@ -2,17 +2,12 @@
 
 import { useMemo, useState } from "react";
 import {
-  mapCategoryToMLACategory,
-  mlaCsvCategoryMapping,
-  cattleCategoryGroups,
-  cattleCategories,
-  sheepCategories,
-  pigCategories,
-  goatCategories,
   cattleBreedPremiums,
   mlaSaleyardNameMapping,
   saleyardToState,
 } from "@/lib/data/reference-data";
+import { cattleMasterCategories, mlaCsvCategoryMapping } from "@/lib/data/weight-mapping";
+import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { categoryFallback, defaultFallbackPrice } from "@/lib/engines/valuation-engine";
 
 // Build reverse CSV mapping: stored category -> CSV source entries
@@ -39,10 +34,10 @@ const speciesTabs: { key: SpeciesKey; label: string }[] = [
 
 function categoriesFor(species: SpeciesKey): string[] {
   switch (species) {
-    case "Cattle": return cattleCategories;
-    case "Sheep": return sheepCategories;
-    case "Pig": return pigCategories;
-    case "Goat": return goatCategories;
+    case "Cattle": return [...cattleMasterCategories];
+    case "Sheep": return [];
+    case "Pig": return [];
+    case "Goat": return [];
   }
 }
 
@@ -54,7 +49,7 @@ export function MappingPanel() {
 
   const rows = useMemo(() => {
     return categories.map((cat) => {
-      const mla = mapCategoryToMLACategory(cat);
+      const mla = resolveMLACategory(cat, 0).primaryMLACategory;
       const fallback = categoryFallback(mla);
       const csvSources = csvSourceMap.get(mla) ?? [];
       const defPrice = defaultFallbackPrice(cat);

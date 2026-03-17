@@ -463,28 +463,9 @@ export const saleyardLocality: Record<string, string> = {
 };
 
 // MARK: - MLA Category Mapping
-
-export function mapCategoryToMLACategory(appCategory: string): string {
-  switch (appCategory) {
-    case "Breeder Cow":
-    case "Breeder Heifer":
-    case "Wet Cow":
-    case "Cull Cow":
-      // MLA CSV only has "Cows" - no Breeding/Wet/Cull distinction
-      return "Cows";
-    case "Weaner Heifer":
-    case "Feeder Heifer":
-    case "Grown Heifer (Un-Joined)":
-      return "Heifer";
-    // "Yearling Heifer" falls through to default - maps to itself for distinct MLA pricing
-    case "Feeder Steer":
-      return "Yearling Steer";
-    case "Cull Bull":
-      return "Grown Bull";
-    default:
-      return appCategory;
-  }
-}
+// Old mapCategoryToMLACategory() DELETED - replaced by
+// resolveMLACategory() in lib/data/weight-mapping.ts
+// which uses weight-first lookup with master categories.
 
 // MARK: - Resolve MLA CSV Saleyard Name
 
@@ -530,70 +511,19 @@ export function getPhysicalSaleyardShortNames(): string[] {
 }
 
 // MARK: - MLA CSV Category Mapping
-
-export const mlaCsvCategoryMapping: Record<string, string> = {
-  "Yearling Steer|*": "Yearling Steer",
-  "Yearling Heifer|*": "Yearling Heifer",
-  "Vealer Steer|*": "Weaner Steer",
-  "Vealer Heifer|*": "Heifer",
-  "Grown Steer|*": "Grown Steer",
-  "Grown Heifer|*": "Heifer",
-  // Cows - all sale prefixes map to single "Cows" category (MLA doesn't distinguish)
-  "Cows|*": "Cows",
-  "Bulls|*": "Grown Bull",
-  "Manufacturing Steer|*": "Grown Steer",
-  "Calves|*": "Weaner Steer",
-};
-
-export function resolveMLACsvCategory(csvCategory: string, salePrefix: string): string {
-  const exactKey = `${csvCategory}|${salePrefix}`;
-  if (mlaCsvCategoryMapping[exactKey]) return mlaCsvCategoryMapping[exactKey];
-  const wildcardKey = `${csvCategory}|*`;
-  if (mlaCsvCategoryMapping[wildcardKey]) return mlaCsvCategoryMapping[wildcardKey];
-  return csvCategory;
-}
+// Old mlaCsvCategoryMapping and resolveMLACsvCategory() DELETED - replaced by
+// simplified version in lib/data/weight-mapping.ts (no longer uses sale prefix keying)
 
 // MARK: - States
 
 export const states = ["NSW", "VIC", "QLD", "SA", "WA", "TAS", "NT", "ACT"] as const;
 
 // MARK: - Livestock Categories
+// Old 16-category cattleCategoryGroups/cattleCategories DELETED.
+// Replaced by cattleMasterCategories in lib/data/weight-mapping.ts.
+// Sheep/pig/goat categories DELETED - not in the app currently.
 
-export const cattleCategoryGroups: { header: string; options: string[] }[] = [
-  { header: "Cows", options: ["Breeder Cow", "Breeder Heifer", "Wet Cow", "Cull Cow"] },
-  { header: "Heifers", options: ["Weaner Heifer", "Yearling Heifer", "Feeder Heifer", "Grown Heifer (Un-Joined)"] },
-  { header: "Bulls", options: ["Weaner Bull", "Yearling Bull", "Grown Bull", "Cull Bull"] },
-  { header: "Steers", options: ["Weaner Steer", "Yearling Steer", "Feeder Steer", "Grown Steer"] },
-];
-
-export const cattleCategories: string[] = cattleCategoryGroups.flatMap((g) => g.options);
-
-export const sheepCategories = [
-  "Breeder", "Maiden Ewe (Joined)", "Maiden Ewe (Unjoined)",
-  "Dry Ewe", "Cull Ewe", "Weaner Ewe", "Feeder Ewe", "Slaughter Ewe",
-  "Lambs", "Weaner Lamb", "Feeder Lamb", "Slaughter Lamb",
-];
-
-export const pigCategories = [
-  "Grower Pig", "Finisher Pig", "Breeder", "Dry Sow", "Cull Sow",
-  "Weaner Pig", "Feeder Pig", "Porker", "Baconer",
-  "Grower Barrow", "Finisher Barrow",
-];
-
-export const goatCategories = [
-  "Breeder Doe", "Dry Doe", "Cull Doe", "Breeder Buck", "Sale Buck",
-  "Mature Wether", "Rangeland Goat", "Capretto", "Chevon",
-];
-
-export function categoriesForSpecies(species: string): string[] {
-  switch (species) {
-    case "Cattle": return cattleCategories;
-    case "Sheep": return sheepCategories;
-    case "Pig": return pigCategories;
-    case "Goat": return goatCategories;
-    default: return [];
-  }
-}
+export { cattleMasterCategories, categoriesForSpecies } from "./weight-mapping";
 
 // MARK: - Price Sources
 

@@ -453,7 +453,7 @@ The web app's valuation engine has been updated to match the iOS formula exactly
 
 ### Sync Fix - Herds Not Appearing in Web Dashboard
 
-The web app was querying a table called `herds` which does not exist in Supabase. The iOS sync system writes all herd data to `herd_groups`. Updated all queries from `"herds"` to `"herd_groups"` across 7 files. Added `.eq("is_deleted", false)` filter so soft-deleted records never appear.
+The web app was querying a table called `herds` which does not exist in Supabase. The iOS sync system writes all herd data to `herds`. Updated all queries from `"herds"` to `"herds"` across 7 files. Added `.eq("is_deleted", false)` filter so soft-deleted records never appear.
 
 **Files changed:**
 - `app/(app)/dashboard/herds/page.tsx` - Table name + is_deleted filter
@@ -463,7 +463,7 @@ The web app was querying a table called `herds` which does not exist in Supabase
 - `app/(app)/dashboard/page.tsx` - Table name + is_deleted filters
 - `app/(app)/dashboard/properties/page.tsx` - is_deleted filter
 - `app/(app)/dashboard/settings/demo-actions.ts` - Table name
-- `lib/types/database.ts` - Renamed `herds` type to `herd_groups`, added sync metadata fields
+- `lib/types/database.ts` - Renamed `herds` type to `herds`, added sync metadata fields
 
 ### Saleyard-Specific Pricing
 
@@ -584,7 +584,7 @@ Hard `.delete()` calls were blocked by Supabase RLS policies. Changed all delete
 
 ### Herd Creation Fix - Client-Generated UUIDs
 
-Both `herd_groups` and `properties` tables require client-generated UUIDs for offline-first sync compatibility. Added `id: crypto.randomUUID()` to insert operations.
+Both `herds` and `properties` tables require client-generated UUIDs for offline-first sync compatibility. Added `id: crypto.randomUUID()` to insert operations.
 
 **Files changed:**
 - `app/(app)/dashboard/herds/actions.ts` - UUID on herd insert

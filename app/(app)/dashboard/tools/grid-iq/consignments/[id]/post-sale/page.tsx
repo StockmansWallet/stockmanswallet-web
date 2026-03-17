@@ -28,7 +28,7 @@ export default async function PostSalePage({ params }: PageProps) {
       .single(),
     supabase
       .from("consignment_allocations")
-      .select("id, herd_group_id, head_count, category")
+      .select("id, herd_id, head_count, category")
       .eq("consignment_id", id),
     supabase
       .from("kill_sheet_records")
@@ -44,9 +44,9 @@ export default async function PostSalePage({ params }: PageProps) {
   if (consignment.status === "completed") notFound();
 
   // Get herd names
-  const herdIds = (allocations ?? []).map((a) => a.herd_group_id);
+  const herdIds = (allocations ?? []).map((a) => a.herd_id);
   const { data: herds } = await supabase
-    .from("herd_groups")
+    .from("herds")
     .select("id, name, category, head_count")
     .in("id", herdIds.length > 0 ? herdIds : ["__none__"]);
   const herdMap = new Map((herds ?? []).map((h) => [h.id, h]));
@@ -62,7 +62,7 @@ export default async function PostSalePage({ params }: PageProps) {
 
   const enrichedAllocations = (allocations ?? []).map((a) => ({
     ...a,
-    herdName: herdMap.get(a.herd_group_id)?.name ?? "Unknown herd",
+    herdName: herdMap.get(a.herd_id)?.name ?? "Unknown herd",
   }));
 
   return (

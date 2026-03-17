@@ -344,7 +344,7 @@ grid_code           TEXT (nullable)
 kill_date           TIMESTAMPTZ
 vendor_code/pic/property_name  TEXT (nullable)
 booking_reference/type  TEXT (nullable)
-herd_group_id       UUID (nullable, links to herd_groups)
+herd_id       UUID (nullable, links to herds)
 total_head_count    INTEGER
 total_body_weight   DOUBLE PRECISION
 total_gross_value   DOUBLE PRECISION
@@ -367,7 +367,7 @@ deleted_at/last_synced_at/created_at/updated_at  TIMESTAMPTZ
 ```
 id                  UUID (PK)
 user_id             UUID (FK -> auth.users)
-herd_group_id       UUID
+herd_id       UUID
 processor_grid_id   UUID
 kill_sheet_record_id UUID (nullable)
 analysis_date       TIMESTAMPTZ

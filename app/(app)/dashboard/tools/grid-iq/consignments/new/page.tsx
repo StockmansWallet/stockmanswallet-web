@@ -15,7 +15,7 @@ export default async function NewConsignmentPage() {
 
   // Fetch user's active herds for allocation selector
   const { data: herds } = await supabase
-    .from("herd_groups")
+    .from("herds")
     .select("id, name, head_count, category, species")
     .eq("user_id", user!.id)
     .eq("is_deleted", false)

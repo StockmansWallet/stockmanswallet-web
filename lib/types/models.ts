@@ -72,7 +72,11 @@ export interface HerdGroup {
 
   // Market
   selected_saleyard?: string;
-  market_category?: string;
+
+  // Weight-first category mapping
+  sub_category?: string;
+  breeder_sub_type?: string;
+  validation_status?: string;
 
   // Status
   is_sold: boolean;
@@ -200,7 +204,7 @@ export interface HealthRecord {
 export interface SalesRecord {
   id: string;
   user_id: string;
-  herd_group_id: string;
+  herd_id: string;
   sale_date: string;
   head_count: number;
   average_weight: number;
@@ -229,7 +233,7 @@ export interface KillSheetRecord {
   property_name?: string;
   booking_reference?: string;
   booking_type?: string;
-  herd_group_id?: string;
+  herd_id?: string;
   total_head_count: number;
   total_body_weight: number;
   total_gross_value: number;

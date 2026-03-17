@@ -40,7 +40,7 @@ export async function seedDemoData() {
     supabase.from("muster_records").update(del).eq("user_id", user.id).eq("is_demo_data", true),
     supabase.from("health_records").update(del).eq("user_id", user.id).eq("is_demo_data", true),
     supabase.from("sales_records").update(del).eq("user_id", user.id).eq("is_demo_data", true),
-    supabase.from("herd_groups").update(del).eq("user_id", user.id).eq("is_demo_data", true),
+    supabase.from("herds").update(del).eq("user_id", user.id).eq("is_demo_data", true),
     supabase.from("properties").update({ ...del }).eq("user_id", user.id).eq("is_simulated", true),
   ]);
 
@@ -81,12 +81,12 @@ export async function seedDemoData() {
     selected_saleyard: defaultSaleyard,
   });
 
-  // All 20 herds flagged with is_demo_data: true
-  const { error: herdsError } = await supabase.from("herd_groups").insert([
-    // COWS
+  // All 20 herds using 5 master categories: Steer, Heifer, Breeder, Dry Cow, Bull
+  const { error: herdsError } = await supabase.from("herds").insert([
+    // BREEDERS (Breeder master category)
     {
       ...base(0), name: "Main Breeders", species: "Cattle", breed: "Droughtmaster",
-      sex: "Female", category: "Breeder Cow",
+      sex: "Female", category: "Breeder", sub_category: "Cow", breeder_sub_type: "Cow",
       age_months: 48, head_count: 185, initial_weight: 540, current_weight: 540,
       daily_weight_gain: 0, is_breeder: true, is_pregnant: true,
       calving_rate: 88, breeding_program_type: "ai",
@@ -95,7 +95,7 @@ export async function seedDemoData() {
     },
     {
       ...base(1), name: "First-Calf Heifers", species: "Cattle", breed: "Brangus",
-      sex: "Female", category: "Breeder Heifer",
+      sex: "Female", category: "Breeder", sub_category: "Heifer", breeder_sub_type: "Heifer",
       age_months: 26, head_count: 45, initial_weight: 380, current_weight: 420,
       daily_weight_gain: 0, is_breeder: true, is_pregnant: true,
       calving_rate: 82, breeding_program_type: "controlled",
@@ -104,25 +104,26 @@ export async function seedDemoData() {
     },
     {
       ...base(2), name: "Wet Cows", species: "Cattle", breed: "Droughtmaster",
-      sex: "Female", category: "Wet Cow",
+      sex: "Female", category: "Breeder", sub_category: "Cow", breeder_sub_type: "Cow",
       age_months: 54, head_count: 60, initial_weight: 510, current_weight: 510,
       daily_weight_gain: 0, is_breeder: true, is_pregnant: false,
       calving_rate: 90, lactation_status: "Lactating",
       paddock_name: "Creek Paddock",
       notes: "Calves at foot, good condition",
     },
+    // DRY COW
     {
       ...base(3), name: "Cull Cows", species: "Cattle", breed: "Mixed Breed",
-      sex: "Female", category: "Cull Cow",
+      sex: "Female", category: "Dry Cow", sub_category: "Cows",
       age_months: 84, head_count: 22, initial_weight: 480, current_weight: 480,
       daily_weight_gain: 0, is_sold: true,
       paddock_name: "Back Paddock",
       notes: "Drafted for Gracemere sale",
     },
-    // HEIFERS
+    // HEIFERS (Heifer master category, weight determines sub_category)
     {
       ...base(4), name: "Weaner Heifers", species: "Cattle", breed: "Droughtmaster",
-      sex: "Female", category: "Weaner Heifer",
+      sex: "Female", category: "Heifer", sub_category: "Weaner",
       age_months: 7, head_count: 65, initial_weight: 160, current_weight: 220,
       daily_weight_gain: 0.85,
       paddock_name: "East Paddock",
@@ -130,7 +131,7 @@ export async function seedDemoData() {
     },
     {
       ...base(5), name: "Yearling Heifers", species: "Cattle", breed: "Brangus",
-      sex: "Female", category: "Yearling Heifer",
+      sex: "Female", category: "Heifer", sub_category: "Yearling",
       age_months: 14, head_count: 50, initial_weight: 200, current_weight: 310,
       daily_weight_gain: 0.75,
       paddock_name: "North Paddock",
@@ -138,23 +139,23 @@ export async function seedDemoData() {
     },
     {
       ...base(6), name: "Feeder Heifers", species: "Cattle", breed: "Charolais",
-      sex: "Female", category: "Feeder Heifer",
+      sex: "Female", category: "Heifer", sub_category: "Yearling",
       age_months: 18, head_count: 35, initial_weight: 250, current_weight: 380,
       daily_weight_gain: 0.65,
       paddock_name: "South Paddock",
     },
     {
-      ...base(7), name: "Grown Heifers (Un-Joined)", species: "Cattle", breed: "Angus",
-      sex: "Female", category: "Grown Heifer (Un-Joined)",
+      ...base(7), name: "Grown Heifers", species: "Cattle", breed: "Angus",
+      sex: "Female", category: "Heifer", sub_category: "Yearling",
       age_months: 24, head_count: 28, initial_weight: 380, current_weight: 440,
       daily_weight_gain: 0.3,
       paddock_name: "West Paddock",
       notes: "Ready to join next season",
     },
-    // BULLS
+    // BULLS (Bull master category, weight determines sub_category)
     {
       ...base(8), name: "Weaner Bulls", species: "Cattle", breed: "Brahman",
-      sex: "Male", category: "Weaner Bull",
+      sex: "Male", category: "Bull", sub_category: "Weaner",
       age_months: 7, head_count: 30, initial_weight: 170, current_weight: 240,
       daily_weight_gain: 1.0,
       paddock_name: "Rocky Paddock",
@@ -162,7 +163,7 @@ export async function seedDemoData() {
     },
     {
       ...base(9), name: "Yearling Bulls", species: "Cattle", breed: "Droughtmaster",
-      sex: "Male", category: "Yearling Bull",
+      sex: "Male", category: "Bull", sub_category: "Yearling",
       age_months: 15, head_count: 18, initial_weight: 230, current_weight: 360,
       daily_weight_gain: 0.9,
       paddock_name: "Bore Paddock",
@@ -170,7 +171,7 @@ export async function seedDemoData() {
     },
     {
       ...base(10), name: "Herd Bulls", species: "Cattle", breed: "Brahman",
-      sex: "Male", category: "Grown Bull",
+      sex: "Male", category: "Bull", sub_category: "Grown",
       age_months: 48, head_count: 8, initial_weight: 850, current_weight: 850,
       daily_weight_gain: 0,
       paddock_name: "Home Paddock",
@@ -178,16 +179,16 @@ export async function seedDemoData() {
     },
     {
       ...base(11), name: "Cull Bulls", species: "Cattle", breed: "Mixed Breed",
-      sex: "Male", category: "Cull Bull",
+      sex: "Male", category: "Bull", sub_category: "Grown",
       age_months: 72, head_count: 5, initial_weight: 780, current_weight: 780,
       daily_weight_gain: 0, is_sold: true,
       paddock_name: "Back Paddock",
       notes: "Past working age",
     },
-    // STEERS
+    // STEERS (Steer master category, weight determines sub_category)
     {
       ...base(12), name: "Weaner Steers", species: "Cattle", breed: "Droughtmaster",
-      sex: "Male", category: "Weaner Steer",
+      sex: "Male", category: "Steer", sub_category: "Weaner",
       age_months: 7, head_count: 70, initial_weight: 160, current_weight: 230,
       daily_weight_gain: 1.1,
       paddock_name: "East Paddock",
@@ -195,7 +196,7 @@ export async function seedDemoData() {
     },
     {
       ...base(13), name: "Yearling Steers", species: "Cattle", breed: "Brangus",
-      sex: "Male", category: "Yearling Steer",
+      sex: "Male", category: "Steer", sub_category: "Yearling",
       age_months: 14, head_count: 55, initial_weight: 210, current_weight: 340,
       daily_weight_gain: 0.85,
       paddock_name: "Top Paddock",
@@ -203,7 +204,7 @@ export async function seedDemoData() {
     },
     {
       ...base(14), name: "Feeder Steers", species: "Cattle", breed: "Angus",
-      sex: "Male", category: "Feeder Steer",
+      sex: "Male", category: "Steer", sub_category: "Yearling",
       age_months: 18, head_count: 40, initial_weight: 260, current_weight: 400,
       daily_weight_gain: 0.7,
       paddock_name: "Hill Paddock",
@@ -211,7 +212,7 @@ export async function seedDemoData() {
     },
     {
       ...base(15), name: "Grown Steers", species: "Cattle", breed: "Charolais",
-      sex: "Male", category: "Grown Steer",
+      sex: "Male", category: "Steer", sub_category: "Grown",
       age_months: 26, head_count: 32, initial_weight: 340, current_weight: 520,
       daily_weight_gain: 0.5, is_sold: true,
       paddock_name: "South Paddock",
@@ -220,7 +221,7 @@ export async function seedDemoData() {
     // ADDITIONAL
     {
       ...base(16), name: "Premium Angus Weaners", species: "Cattle", breed: "Angus",
-      sex: "Male", category: "Weaner Steer",
+      sex: "Male", category: "Steer", sub_category: "Weaner",
       age_months: 8, head_count: 45, initial_weight: 180, current_weight: 250,
       daily_weight_gain: 1.05,
       paddock_name: "North Paddock",
@@ -228,7 +229,7 @@ export async function seedDemoData() {
     },
     {
       ...base(17), name: "Hereford Breeders", species: "Cattle", breed: "Hereford",
-      sex: "Female", category: "Breeder Cow",
+      sex: "Female", category: "Breeder", sub_category: "Cow", breeder_sub_type: "Cow",
       age_months: 42, head_count: 90, initial_weight: 560, current_weight: 560,
       daily_weight_gain: 0, is_breeder: true, is_pregnant: true,
       calving_rate: 85, breeding_program_type: "uncontrolled",
@@ -237,7 +238,7 @@ export async function seedDemoData() {
     },
     {
       ...base(18), name: "Droughtmaster Yearlings", species: "Cattle", breed: "Droughtmaster",
-      sex: "Male", category: "Yearling Steer",
+      sex: "Male", category: "Steer", sub_category: "Yearling",
       age_months: 15, head_count: 60, initial_weight: 220, current_weight: 350,
       daily_weight_gain: 0.9,
       paddock_name: "West Paddock",
@@ -245,7 +246,7 @@ export async function seedDemoData() {
     },
     {
       ...base(19), name: "Brahman Feeder Heifers", species: "Cattle", breed: "Brahman",
-      sex: "Female", category: "Feeder Heifer",
+      sex: "Female", category: "Heifer", sub_category: "Yearling",
       age_months: 17, head_count: 25, initial_weight: 240, current_weight: 370,
       daily_weight_gain: 0.6, is_sold: true,
       paddock_name: "Bore Paddock",
@@ -284,7 +285,7 @@ export async function seedDemoData() {
   ]);
 
   // Health records (10 records, matching iOS)
-  const hr = (herdIdx: number) => ({ id: randomUUID(), user_id: uid, herd_group_id: herdIds[herdIdx], is_demo_data: true });
+  const hr = (herdIdx: number) => ({ id: randomUUID(), user_id: uid, herd_id: herdIds[herdIdx], is_demo_data: true });
   await supabase.from("health_records").insert([
     { ...hr(0), date: daysAgo(60), treatment_type_raw: "Vaccination", notes: "5-in-1 Ultravac, 2ml subcutaneous. All 185 head processed through Home Yards." },
     { ...hr(12), date: daysAgo(42), treatment_type_raw: "Vaccination", notes: "7-in-1 Websters, weaner dose 1ml. 70 head processed." },
@@ -299,7 +300,7 @@ export async function seedDemoData() {
   ]);
 
   // Muster records (6 records, matching iOS)
-  const mr = (herdIdx: number) => ({ id: randomUUID(), user_id: uid, herd_group_id: herdIds[herdIdx], is_demo_data: true });
+  const mr = (herdIdx: number) => ({ id: randomUUID(), user_id: uid, herd_id: herdIds[herdIdx], is_demo_data: true });
   await supabase.from("muster_records").insert([
     { ...mr(0), date: daysAgo(30), total_head_count: 185, cattle_yard: "Home Yards", notes: "Annual muster, all head accounted for. Good condition scores across the board." },
     { ...mr(12), date: daysAgo(42), total_head_count: 70, weaners_count: 70, branders_count: 70, cattle_yard: "East Yards", notes: "Weaner draft completed. All branded and tagged. NLIS devices applied." },
@@ -314,17 +315,17 @@ export async function seedDemoData() {
   const saleyardDist = 135; // Emerald to Gracemere km
   await supabase.from("sales_records").insert([
     // Cull Cows (22 head, 480kg, $3.20/kg)
-    { id: randomUUID(), user_id: uid, herd_group_id: herdIds[3], is_demo_data: true, sale_date: daysAgo(30), head_count: 22, average_weight: 480, price_per_kg: 3.20, total_gross_value: 22 * 480 * 3.20, freight_cost: 1890, freight_distance: saleyardDist, net_value: (22 * 480 * 3.20) - 1890, sale_type: "Saleyard", sale_location: saleyard, notes: "Sold at CQLX weekly sale. 22 head, avg 480kg." },
+    { id: randomUUID(), user_id: uid, herd_id: herdIds[3], is_demo_data: true, sale_date: daysAgo(30), head_count: 22, average_weight: 480, price_per_kg: 3.20, total_gross_value: 22 * 480 * 3.20, freight_cost: 1890, freight_distance: saleyardDist, net_value: (22 * 480 * 3.20) - 1890, sale_type: "Saleyard", sale_location: saleyard, notes: "Sold at CQLX weekly sale. 22 head, avg 480kg." },
     // Cull Bulls (5 head, 780kg, $2.90/kg)
-    { id: randomUUID(), user_id: uid, herd_group_id: herdIds[11], is_demo_data: true, sale_date: daysAgo(60), head_count: 5, average_weight: 780, price_per_kg: 2.90, total_gross_value: 5 * 780 * 2.90, freight_cost: 945, freight_distance: saleyardDist, net_value: (5 * 780 * 2.90) - 945, sale_type: "Saleyard", sale_location: saleyard, notes: "Sold at CQLX weekly sale. 5 head, avg 780kg." },
+    { id: randomUUID(), user_id: uid, herd_id: herdIds[11], is_demo_data: true, sale_date: daysAgo(60), head_count: 5, average_weight: 780, price_per_kg: 2.90, total_gross_value: 5 * 780 * 2.90, freight_cost: 945, freight_distance: saleyardDist, net_value: (5 * 780 * 2.90) - 945, sale_type: "Saleyard", sale_location: saleyard, notes: "Sold at CQLX weekly sale. 5 head, avg 780kg." },
     // Grown Steers (32 head, 520kg, $3.85/kg)
-    { id: randomUUID(), user_id: uid, herd_group_id: herdIds[15], is_demo_data: true, sale_date: daysAgo(240), head_count: 32, average_weight: 520, price_per_kg: 3.85, total_gross_value: 32 * 520 * 3.85, freight_cost: 1890, freight_distance: saleyardDist, net_value: (32 * 520 * 3.85) - 1890, sale_type: "Saleyard", sale_location: saleyard, notes: "Sold at CQLX weekly sale. 32 head, avg 520kg." },
+    { id: randomUUID(), user_id: uid, herd_id: herdIds[15], is_demo_data: true, sale_date: daysAgo(240), head_count: 32, average_weight: 520, price_per_kg: 3.85, total_gross_value: 32 * 520 * 3.85, freight_cost: 1890, freight_distance: saleyardDist, net_value: (32 * 520 * 3.85) - 1890, sale_type: "Saleyard", sale_location: saleyard, notes: "Sold at CQLX weekly sale. 32 head, avg 520kg." },
     // Brahman Feeder Heifers (25 head, 370kg, $3.65/kg)
-    { id: randomUUID(), user_id: uid, herd_group_id: herdIds[19], is_demo_data: true, sale_date: daysAgo(130), head_count: 25, average_weight: 370, price_per_kg: 3.65, total_gross_value: 25 * 370 * 3.65, freight_cost: 0, freight_distance: 0, net_value: 25 * 370 * 3.65, sale_type: "Private Sale", sale_location: "Direct to feedlot buyer", notes: "Private sale, direct delivery. 25 head at $3.65/kg." },
+    { id: randomUUID(), user_id: uid, herd_id: herdIds[19], is_demo_data: true, sale_date: daysAgo(130), head_count: 25, average_weight: 370, price_per_kg: 3.65, total_gross_value: 25 * 370 * 3.65, freight_cost: 0, freight_distance: 0, net_value: 25 * 370 * 3.65, sale_type: "Private Sale", sale_location: "Direct to feedlot buyer", notes: "Private sale, direct delivery. 25 head at $3.65/kg." },
     // Historical sale 1 (no matching herd)
-    { id: randomUUID(), user_id: uid, herd_group_id: randomUUID(), is_demo_data: true, sale_date: monthsAgo(4), head_count: 35, average_weight: 480, price_per_kg: 3.70, total_gross_value: 35 * 480 * 3.70, freight_cost: 1890, freight_distance: saleyardDist, net_value: (35 * 480 * 3.70) - 1890, sale_type: "Saleyard", sale_location: saleyard, notes: "Grown steers sold at CQLX autumn sale. Good clearance." },
+    { id: randomUUID(), user_id: uid, herd_id: randomUUID(), is_demo_data: true, sale_date: monthsAgo(4), head_count: 35, average_weight: 480, price_per_kg: 3.70, total_gross_value: 35 * 480 * 3.70, freight_cost: 1890, freight_distance: saleyardDist, net_value: (35 * 480 * 3.70) - 1890, sale_type: "Saleyard", sale_location: saleyard, notes: "Grown steers sold at CQLX autumn sale. Good clearance." },
     // Historical sale 2 (no matching herd)
-    { id: randomUUID(), user_id: uid, herd_group_id: randomUUID(), is_demo_data: true, sale_date: monthsAgo(6), head_count: 80, average_weight: 350, price_per_kg: 4.15, total_gross_value: 80 * 350 * 4.15, freight_cost: 0, freight_distance: 0, net_value: 80 * 350 * 4.15, sale_type: "Private Sale", sale_location: "Doongara Station - paddock sale", notes: "Yearling steers, buyer collected. Repeat buyer from last year." },
+    { id: randomUUID(), user_id: uid, herd_id: randomUUID(), is_demo_data: true, sale_date: monthsAgo(6), head_count: 80, average_weight: 350, price_per_kg: 4.15, total_gross_value: 80 * 350 * 4.15, freight_cost: 0, freight_distance: 0, net_value: 80 * 350 * 4.15, sale_type: "Private Sale", sale_location: "Doongara Station - paddock sale", notes: "Yearling steers, buyer collected. Repeat buyer from last year." },
   ]);
 
   revalidatePath("/dashboard");
@@ -352,7 +353,7 @@ export async function clearDemoData() {
     supabase.from("health_records").update(del).eq("user_id", user.id).eq("is_demo_data", true),
     supabase.from("sales_records").update(del).eq("user_id", user.id).eq("is_demo_data", true),
   ]);
-  await supabase.from("herd_groups").update(del).eq("user_id", user.id).eq("is_demo_data", true);
+  await supabase.from("herds").update(del).eq("user_id", user.id).eq("is_demo_data", true);
   await supabase.from("properties").update({ ...del }).eq("user_id", user.id).eq("is_simulated", true);
 
   revalidatePath("/dashboard");

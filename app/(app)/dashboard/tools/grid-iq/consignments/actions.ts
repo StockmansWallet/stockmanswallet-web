@@ -35,7 +35,7 @@ export async function createConsignment(formData: FormData) {
   // Validate head counts don't exceed herd availability
   for (const alloc of allocations) {
     const { data: herd } = await supabase
-      .from("herd_groups")
+      .from("herds")
       .select("head_count, name")
       .eq("id", alloc.herdGroupId)
       .eq("user_id", user.id)
@@ -68,7 +68,7 @@ export async function createConsignment(formData: FormData) {
   // Insert allocations
   const allocationRows = allocations.map((a) => ({
     consignment_id: consignmentId,
-    herd_group_id: a.herdGroupId,
+    herd_id: a.herdGroupId,
     head_count: a.headCount,
     category: a.category || null,
   }));
@@ -153,9 +153,9 @@ export async function completeSale(consignmentId: string) {
   for (const alloc of allocations) {
     // Fetch current herd
     const { data: herd } = await supabase
-      .from("herd_groups")
+      .from("herds")
       .select("id, head_count, current_weight, name")
-      .eq("id", alloc.herd_group_id)
+      .eq("id", alloc.herd_id)
       .eq("user_id", user.id)
       .single();
 
@@ -174,9 +174,9 @@ export async function completeSale(consignmentId: string) {
     }
 
     await supabase
-      .from("herd_groups")
+      .from("herds")
       .update(herdUpdate)
-      .eq("id", alloc.herd_group_id);
+      .eq("id", alloc.herd_id);
 
     // Create sale record with prorated values
     const headRatio = totalHeadInConsignment > 0 ? alloc.head_count / totalHeadInConsignment : 0;
@@ -185,7 +185,7 @@ export async function completeSale(consignmentId: string) {
     await supabase.from("sales_records").insert({
       id: crypto.randomUUID(),
       user_id: user.id,
-      herd_group_id: alloc.herd_group_id,
+      herd_id: alloc.herd_id,
       sale_date: consignment.kill_date || new Date().toISOString(),
       head_count: alloc.head_count,
       average_weight: alloc.average_weight ?? herd.current_weight ?? 0,
@@ -259,7 +259,7 @@ export async function updateConsignment(formData: FormData) {
   // Validate head counts
   for (const alloc of allocations) {
     const { data: herd } = await supabase
-      .from("herd_groups")
+      .from("herds")
       .select("head_count, name")
       .eq("id", alloc.herdGroupId)
       .eq("user_id", user.id)
@@ -288,7 +288,7 @@ export async function updateConsignment(formData: FormData) {
   await supabase.from("consignment_allocations").delete().eq("consignment_id", consignmentId);
   const allocationRows = allocations.map((a) => ({
     consignment_id: consignmentId,
-    herd_group_id: a.herdGroupId,
+    herd_id: a.herdGroupId,
     head_count: a.headCount,
     category: a.category || null,
   }));

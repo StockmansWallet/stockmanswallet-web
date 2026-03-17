@@ -2,7 +2,8 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { SellStockForm } from "@/components/app/sell-stock-form";
-import { calculateProjectedWeight, calculateHerdValuation, mapCategoryToMLACategory, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import { calculateProjectedWeight, calculateHerdValuation, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 
 export const revalidate = 0;
@@ -26,7 +27,7 @@ export default async function SellStockPage({
 
   const [herdResult, { data: breedPremiumData }] = await Promise.all([
     supabase
-      .from("herd_groups")
+      .from("herds")
       .select("id, name, breed, category, species, head_count, current_weight, initial_weight, daily_weight_gain, dwg_change_date, previous_dwg, selected_saleyard, additional_info, age_months, is_sold, is_deleted, created_at, updated_at, breed_premium_override, mortality_rate, is_breeder, is_pregnant, joined_date, calving_rate, breeding_program_type, joining_period_start, joining_period_end, calf_weight_recorded_date")
       .eq("id", id)
       .eq("user_id", user.id)
@@ -57,7 +58,7 @@ export default async function SellStockPage({
   }
 
   // Fetch pricing for suggested price pre-fill
-  const mlaCategory = mapCategoryToMLACategory(herd.category);
+  const mlaCategory = resolveMLACategory(herd.category, herd.initial_weight, herd.breeder_sub_type ?? undefined).primaryMLACategory;
   const fallbackCat = categoryFallback(mlaCategory);
   const categoriesToFetch = fallbackCat ? [mlaCategory, fallbackCat] : [mlaCategory];
   const resolvedSaleyard = herd.selected_saleyard

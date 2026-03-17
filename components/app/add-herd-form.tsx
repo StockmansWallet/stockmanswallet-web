@@ -9,25 +9,34 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { Info } from "lucide-react";
 import {
   breedsForSpecies,
-  categoriesForSpecies,
   cattleBreedPremiums,
-  cattleCategoryGroups,
   breedPremiumDescription,
   saleyards,
   saleyardToState,
   saleyardCoordinates,
 } from "@/lib/data/reference-data";
+import {
+  categoriesForSpecies,
+  validateWeight,
+  resolveMLACategory,
+  type BreederSubType,
+} from "@/lib/data/weight-mapping";
+import { AlertTriangle, AlertCircle } from "lucide-react";
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-const BREEDER_KEYWORDS = ["breeder", "wet cow"];
+const BREEDER_CATEGORIES = new Set(["Breeder", "Dry Cow"]);
 
 function isBreederCategory(category: string): boolean {
-  const lower = category.toLowerCase();
-  return BREEDER_KEYWORDS.some((kw) => lower.includes(kw));
+  return BREEDER_CATEGORIES.has(category);
 }
+
+const BREEDER_SUB_TYPE_OPTIONS = [
+  { value: "Cow", label: "Cow" },
+  { value: "Heifer", label: "Heifer" },
+];
 
 const SPECIES_OPTIONS = [
   { value: "Cattle", label: "Cattle" },
@@ -166,7 +175,8 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
   const [category, setCategory] = useState("");
   const [breedPremiumOverride, setBreedPremiumOverride] = useState("");
 
-  // Section 1 - Breed premium confirmation
+  // Section 1 - Breeder sub-type and breed premium confirmation
+  const [breederSubType, setBreederSubType] = useState<BreederSubType | "">("");
   const [breedPremiumConfirmed, setBreedPremiumConfirmed] = useState(false);
 
   // Section 2 - Herd Size
@@ -200,26 +210,30 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
 
   // Derived
   const isBreeder = isBreederCategory(category);
+  const needsBreederSubType = category === "Breeder";
+
+  // Weight validation
+  const weightValidation = useMemo(() => {
+    const w = Number(initialWeight);
+    if (!category || !w) return null;
+    return validateWeight(category, w);
+  }, [category, initialWeight]);
+
+  // Derived sub-category label (e.g. "Weaner Steer", "Yearling Heifer")
+  const derivedSubCategory = useMemo(() => {
+    const w = Number(initialWeight);
+    if (!category || !w) return null;
+    if (category === "Breeder" && !breederSubType) return null;
+    const resolution = resolveMLACategory(category, w, breederSubType || undefined);
+    return `${resolution.subCategory} ${category}`;
+  }, [category, initialWeight, breederSubType]);
 
   const breedOptions = useMemo(
     () => breedsForSpecies(species).map((b) => ({ value: b, label: b })),
     [species],
   );
   const categoryOptions = useMemo(
-    () =>
-      species === "Cattle"
-        ? cattleCategoryGroups.flatMap((g) => g.options).map((c) => ({ value: c, label: c }))
-        : categoriesForSpecies(species).map((c) => ({ value: c, label: c })),
-    [species],
-  );
-  const categoryGroups = useMemo(
-    () =>
-      species === "Cattle"
-        ? cattleCategoryGroups.map((g) => ({
-            header: g.header,
-            options: g.options.map((c) => ({ value: c, label: c })),
-          }))
-        : undefined,
+    () => categoriesForSpecies(species).map((c) => ({ value: c, label: c })),
     [species],
   );
   const autoPremium = species === "Cattle" ? cattleBreedPremiums[breed] ?? null : null;
@@ -243,7 +257,7 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
   );
 
   // Section unlock checks
-  const section1Done = name.trim().length > 0 && species !== "" && breed !== "" && category !== "" && breedPremiumConfirmed;
+  const section1Done = name.trim().length > 0 && species !== "" && breed !== "" && category !== "" && breedPremiumConfirmed && (!needsBreederSubType || breederSubType !== "");
   const section2Done = Number(headCount) > 0 && ageMonths !== "" && Number(initialWeight) > 0;
   const section3Done = dailyWeightGain !== "" && mortalityRate !== "" && (!isBreeder || calvingRate !== "");
   // Calves at Foot: if yes, detail fields must be filled before advancing
@@ -263,7 +277,7 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
   const showSection7 = showSection6;
 
   // Save enabled - saleyard required, rest validated
-  const canSave = section1Done && section2Done && saleyard !== "" && !submitting;
+  const canSave = section1Done && section2Done && saleyard !== "" && !submitting && weightValidation?.status !== "error";
 
   // Handlers
   function handleSpeciesChange(newSpecies: string) {
@@ -276,6 +290,7 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
 
   function handleCategoryChange(v: string) {
     setCategory(v);
+    setBreederSubType("");
     if (!isBreederCategory(v)) {
       setBreedingProgram("");
       setJoiningStart("");
@@ -307,6 +322,8 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
     formData.set("property_id", propertyId);
     formData.set("selected_saleyard", saleyard);
     if (breedPremiumOverride) formData.set("breed_premium_override", breedPremiumOverride);
+    if (breederSubType) formData.set("breeder_sub_type", breederSubType);
+    if (derivedSubCategory) formData.set("sub_category", derivedSubCategory);
 
     if (isBreeder) {
       formData.set("is_breeder", "on");
@@ -369,12 +386,25 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
               required
               hint={!category}
               options={categoryOptions}
-              groups={categoryGroups}
               placeholder="Select category"
               value={category}
               onChange={(e) => handleCategoryChange(e.target.value)}
             />
           </div>
+
+          {/* Breeder sub-type: Cow or Heifer */}
+          {needsBreederSubType && (
+            <Select
+              id="breeder_sub_type"
+              label="Breeder Type"
+              required
+              hint={!breederSubType}
+              options={BREEDER_SUB_TYPE_OPTIONS}
+              placeholder="Cow or Heifer?"
+              value={breederSubType}
+              onChange={(e) => setBreederSubType(e.target.value as BreederSubType)}
+            />
+          )}
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Input
@@ -536,6 +566,30 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                 placeholder="Average weight"
               />
             </div>
+
+            {/* Weight validation feedback */}
+            {weightValidation && weightValidation.status === "error" && (
+              <div className="flex items-start gap-2 rounded-lg border border-red-800 bg-red-900/20 px-3 py-2 text-xs text-red-400">
+                <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                <span>{weightValidation.message}</span>
+              </div>
+            )}
+            {weightValidation && weightValidation.status === "warning" && (
+              <div className="flex items-start gap-2 rounded-lg border border-amber-800 bg-amber-900/20 px-3 py-2 text-xs text-amber-400">
+                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                <span>{weightValidation.message}</span>
+              </div>
+            )}
+
+            {/* Derived sub-category label */}
+            {derivedSubCategory && weightValidation?.status !== "error" && (
+              <p className="flex items-center gap-2 text-xs text-text-muted">
+                <Info className="h-3.5 w-3.5 shrink-0" />
+                <span>
+                  MLA category: <span className="font-medium text-text-primary">{derivedSubCategory}</span>
+                </span>
+              </p>
+            )}
           </CardContent>
         </Card>
       </Section>

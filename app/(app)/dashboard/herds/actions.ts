@@ -25,7 +25,7 @@ export async function createHerd(formData: FormData) {
 
   const isBreeder = formData.get("is_breeder") === "on";
 
-  const { error } = await supabase.from("herd_groups").insert({
+  const { error } = await supabase.from("herds").insert({
     id: crypto.randomUUID(),
     user_id: user.id,
     name: formData.get("name") as string,
@@ -74,7 +74,7 @@ export async function updateHerd(id: string, formData: FormData) {
   const updatePremiumOverride = updatePremiumRaw ? parseFloat(updatePremiumRaw) : null;
 
   const { error } = await supabase
-    .from("herd_groups")
+    .from("herds")
     .update({
       name: formData.get("name") as string,
       species: formData.get("species") as
@@ -131,7 +131,7 @@ export async function deleteHerd(id: string) {
   if (!user) return { error: "Not authenticated" };
 
   const { error } = await supabase
-    .from("herd_groups")
+    .from("herds")
     .update({ is_deleted: true, deleted_at: new Date().toISOString(), updated_at: new Date().toISOString() })
     .eq("id", id)
     .eq("user_id", user.id);

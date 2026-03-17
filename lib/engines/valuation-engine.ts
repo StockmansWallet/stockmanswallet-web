@@ -2,16 +2,20 @@
 // Ported from iOS ValuationEngine.swift + extensions
 // Pure functions — pricing/caching will be added when Supabase data layer is wired up
 
-import { mapCategoryToMLACategory, resolveMLASaleyardName } from "../data/reference-data";
+import { resolveMLASaleyardName } from "../data/reference-data";
+import { resolveMLACategory } from "../data/weight-mapping";
+import { nearestSaleyards as nearestSaleyardsFn } from "../data/saleyard-proximity";
 
 // MARK: - Category Fallback
 // Debug: Returns an alternate MLA category when the primary has no price data.
-// "Yearling Heifer" falls back to "Heifer" if no distinct pricing exists.
+// Uses the fallback from the weight-first mapping rules.
 export function categoryFallback(mlaCategory: string): string | null {
-  switch (mlaCategory) {
-    case "Yearling Heifer": return "Heifer";
-    default: return null;
-  }
+  const { defaultMappingRules } = require("../data/weight-mapping");
+  const rule = defaultMappingRules.find(
+    (r: { mla_preferred: string; mla_fallback: string | null }) =>
+      r.mla_preferred === mlaCategory && r.mla_fallback && r.mla_fallback !== mlaCategory
+  );
+  return rule?.mla_fallback ?? null;
 }
 
 // MARK: - Constants
@@ -340,6 +344,7 @@ export interface HerdForValuation {
   additional_info: string | null;
   calf_weight_recorded_date: string | null;
   updated_at: string;
+  breeder_sub_type?: string | null;
 }
 
 // Price entry with optional weight range (matches category_prices table structure)
@@ -475,7 +480,7 @@ export function calculateHerdValuation(
   );
 
   // 2. Live price - map app category to MLA category, then resolve via hierarchy
-  const mlaCategory = mapCategoryToMLACategory(herd.category);
+  const mlaCategory = resolveMLACategory(herd.category, herd.initial_weight ?? herd.current_weight ?? 0, herd.breeder_sub_type ?? undefined).primaryMLACategory;
   let resolved: PriceResolution | null = null;
   let priceSource: PriceSource = "fallback";
   let skipBreedPremium = false;
@@ -501,6 +506,18 @@ export function calculateHerdValuation(
       priceSource = "saleyard";
       skipBreedPremium = true;
       matchedWeightRange = resolved.matchedRange;
+    }
+  }
+
+  // 2b2. Try nearest saleyards in same state (proximity fallback)
+  if (!resolved && saleyardPriceMap && resolvedSaleyard && herd.selected_saleyard) {
+    const state = resolvedSaleyard.split(",").pop()?.trim() ?? "";
+    const nearYards = nearestSaleyardsFn(resolvedSaleyard, state, 3);
+    for (const nearYard of nearYards) {
+      const nearKey = `${mlaCategory}|${nearYard}`;
+      const nearEntries = saleyardPriceMap.get(nearKey) ?? [];
+      resolved = resolvePriceFromEntries(nearEntries, projectedWeight);
+      if (resolved) { priceSource = "saleyard"; matchedWeightRange = resolved.matchedRange; break; }
     }
   }
 
@@ -653,4 +670,4 @@ export function calculateHerdValue(
 }
 
 // Re-export for convenience
-export { mapCategoryToMLACategory };
+export { resolveMLACategory };

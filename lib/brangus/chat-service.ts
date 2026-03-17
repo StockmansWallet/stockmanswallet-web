@@ -3,7 +3,8 @@
 // Debug: Prompt sections fetched from brangus_config table (shared with iOS)
 
 import { createClient } from "../supabase/client";
-import { calculateHerdValue, mapCategoryToMLACategory, categoryFallback, defaultFallbackPrice, type CategoryPriceEntry } from "../engines/valuation-engine";
+import { calculateHerdValue, categoryFallback, defaultFallbackPrice, type CategoryPriceEntry } from "../engines/valuation-engine";
+import { resolveMLACategory } from "../data/weight-mapping";
 import { cattleBreedPremiums } from "../data/reference-data";
 import { toolDefinitions, executeTool, DISPLAY_ONLY_TOOLS, generateAutoCards } from "./tools";
 import { fetchAllPropertyWeather } from "../services/weather-service";
@@ -498,7 +499,7 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
     { data: processorGrids },
   ] = await Promise.all([
     supabase
-      .from("herd_groups")
+      .from("herds")
       .select("*")
       .eq("user_id", userId)
       .eq("is_deleted", false)
@@ -549,14 +550,14 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
     // Debug: Grid IQ data for Brangus tool lookups
     supabase
       .from("grid_iq_analyses")
-      .select("id, herd_group_id, processor_grid_id, kill_sheet_record_id, analysis_date, herd_name, processor_name, mla_market_value, headline_grid_value, realisation_factor, realistic_grid_outcome, freight_to_saleyard, freight_to_processor, net_saleyard_value, net_processor_value, grid_iq_advantage, sell_window_status_raw, sell_window_detail, days_to_target, head_count, estimated_carcase_weight, dressing_percentage, is_using_personalised_data, analysis_mode, gcr, grid_risk, kill_score, grid_compliance_score, fat_compliance_score, dentition_compliance_score, processor_fit_score, processor_fit_label_raw, opportunity_value, opportunity_driver")
+      .select("id, herd_id, processor_grid_id, kill_sheet_record_id, analysis_date, herd_name, processor_name, mla_market_value, headline_grid_value, realisation_factor, realistic_grid_outcome, freight_to_saleyard, freight_to_processor, net_saleyard_value, net_processor_value, grid_iq_advantage, sell_window_status_raw, sell_window_detail, days_to_target, head_count, estimated_carcase_weight, dressing_percentage, is_using_personalised_data, analysis_mode, gcr, grid_risk, kill_score, grid_compliance_score, fat_compliance_score, dentition_compliance_score, processor_fit_score, processor_fit_label_raw, opportunity_value, opportunity_driver")
       .eq("user_id", userId)
       .eq("is_deleted", false)
       .order("analysis_date", { ascending: false })
       .limit(50),
     supabase
       .from("kill_sheet_records")
-      .select("id, processor_name, kill_date, total_head_count, total_body_weight, total_gross_value, average_body_weight, average_price_per_kg, average_value_per_head, condemns, realisation_factor, herd_group_id, property_name, notes")
+      .select("id, processor_name, kill_date, total_head_count, total_body_weight, total_gross_value, average_body_weight, average_price_per_kg, average_value_per_head, condemns, realisation_factor, herd_id, property_name, notes")
       .eq("user_id", userId)
       .eq("is_deleted", false)
       .order("kill_date", { ascending: false })
@@ -586,7 +587,7 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
   // Filter by user's saleyards + MLA categories to stay under PostgREST 1000-row limit
   const activeHerdsList = (herds ?? []).filter((h: { is_sold: boolean }) => !h.is_sold);
   const saleyards = [...new Set(activeHerdsList.map((h: { selected_saleyard: string | null }) => h.selected_saleyard).filter(Boolean))] as string[];
-  const primaryCategories = [...new Set(activeHerdsList.map((h: { category: string }) => mapCategoryToMLACategory(h.category)))];
+  const primaryCategories = [...new Set(activeHerdsList.map((h: { category: string; initial_weight?: number; breeder_sub_type?: string }) => resolveMLACategory(h.category, h.initial_weight ?? 0, h.breeder_sub_type ?? undefined).primaryMLACategory))];
   const mlaCategories = [...new Set([...primaryCategories, ...primaryCategories.map(c => categoryFallback(c)).filter((c): c is string => c !== null)])];
   if (saleyards.length > 0 && mlaCategories.length > 0) {
     const { data: saleyardPricesData } = await supabase

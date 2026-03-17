@@ -3,7 +3,8 @@
 
 import { calculateHerdValue, calculateHerdValuation, calculateProjectedWeight, type CategoryPriceEntry } from "../engines/valuation-engine";
 import { calculateFreightEstimate } from "../engines/freight-engine";
-import { mapCategoryToMLACategory, saleyardCoordinates } from "../data/reference-data";
+import { saleyardCoordinates } from "../data/reference-data";
+import { resolveMLACategory } from "../data/weight-mapping";
 import { fetchWeatherForLocation } from "../services/weather-service";
 import { getRoadDistanceKm } from "../services/distance-service";
 import type { ChatDataStore, QuickInsight } from "./types";
@@ -434,7 +435,7 @@ function lookupMarketPrices(category: string | undefined, store: ChatDataStore):
   lines.push("IMPORTANT: All prices below are in DOLLARS per kg ($/kg). Do NOT convert to cents.");
 
   // Determine which MLA categories to look up
-  const mlaCat = category ? mapCategoryToMLACategory(category) : null;
+  const mlaCat = category ? resolveMLACategory(category, 0).primaryMLACategory : null;
   const matchesCategory = (cat: string) => {
     if (!category) return true;
     const cl = category.toLowerCase();
@@ -511,7 +512,7 @@ function lookupSeasonalPricing(category: string | undefined, store: ChatDataStor
   // Filter by category if provided (case-insensitive, also checks MLA-mapped name)
   let filtered = store.seasonalData;
   if (category && category.trim()) {
-    const mlaCat = mapCategoryToMLACategory(category);
+    const mlaCat = resolveMLACategory(category, 0).primaryMLACategory;
     filtered = store.seasonalData.filter((s) => {
       const cat = s.category.toLowerCase();
       const q = category.toLowerCase();
@@ -696,8 +697,8 @@ function lookupHealthRecords(name: string | undefined, store: ChatDataStore): st
   const herd = findHerd(name, store.herds);
   if (!herd) return `No herd found matching '${name}'.`;
 
-  const herdMusters = store.musterRecords.filter((r) => r.herd_group_id === herd.id);
-  const herdHealth = store.healthRecords.filter((r) => r.herd_group_id === herd.id);
+  const herdMusters = store.musterRecords.filter((r) => r.herd_id === herd.id);
+  const herdHealth = store.healthRecords.filter((r) => r.herd_id === herd.id);
 
   const lines = [`RECORDS - ${herd.name}:`];
   if (herdMusters.length > 0) {
@@ -1169,7 +1170,7 @@ function lookupKillHistory(
     // Debug: Filter by linked herd if available
     const herd = findHerd(herdName, store.herds);
     if (herd) {
-      const herdFiltered = filtered.filter((k) => k.herd_group_id === herd.id);
+      const herdFiltered = filtered.filter((k) => k.herd_id === herd.id);
       if (herdFiltered.length > 0) filtered = herdFiltered;
     }
   }
