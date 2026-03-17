@@ -5,7 +5,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Brain, Loader2, AlertCircle, ClipboardCopy, Download, Check, FileText } from "lucide-react";
+import { Brain, Loader2, AlertCircle, ClipboardCopy, Download, Check, FileText, Share2, Mail, MessageCircle } from "lucide-react";
 import { sendMessage, buildSystemPrompt, loadChatDataStore, fetchServerConfig } from "@/lib/brangus/chat-service";
 import { createConversation, saveMessage, autoTitleConversation, formatConversationForExport } from "@/lib/brangus/conversation-service";
 import type { BrangusConversationRow } from "@/lib/brangus/conversation-service";
@@ -93,6 +93,7 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, o
   // Hydrate from saved messages when loading a saved conversation
   const [sessionCards, setSessionCards] = useState<QuickInsight[]>(() => hydrateCards(initialMessages ?? []));
   const [copied, setCopied] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
 
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -322,6 +323,44 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, o
     window.print();
   }, []);
 
+  const getShareText = useCallback(() => {
+    const exportMessages = messages.map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
+    return formatConversationForExport(null, new Date().toISOString(), exportMessages);
+  }, [messages]);
+
+  const handleShare = useCallback(async () => {
+    const text = getShareText();
+    // Use native Web Share API if available (mobile + modern desktop)
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "Stockman IQ Chat", text });
+        return;
+      } catch {
+        // User cancelled or share failed - fall through to menu
+      }
+    }
+    // Fallback: toggle share menu dropdown
+    setShowShareMenu((prev) => !prev);
+  }, [getShareText]);
+
+  const handleShareEmail = useCallback(() => {
+    const text = getShareText();
+    const subject = encodeURIComponent("Stockman IQ Chat");
+    const body = encodeURIComponent(text);
+    window.open(`mailto:?subject=${subject}&body=${body}`, "_self");
+    setShowShareMenu(false);
+  }, [getShareText]);
+
+  const handleShareWhatsApp = useCallback(() => {
+    const text = getShareText();
+    const encoded = encodeURIComponent(text);
+    window.open(`https://wa.me/?text=${encoded}`, "_blank");
+    setShowShareMenu(false);
+  }, [getShareText]);
+
   // Loading state
   if (isInitialising) {
     return (
@@ -374,6 +413,38 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, o
             <FileText className="h-3.5 w-3.5" />
             PDF
           </button>
+          <div className="relative">
+            <button
+              onClick={handleShare}
+              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] text-text-muted transition-colors hover:bg-white/[0.05] hover:text-text-secondary"
+              aria-label="Share conversation"
+            >
+              <Share2 className="h-3.5 w-3.5" />
+              Share
+            </button>
+            {/* Fallback share menu (shown when Web Share API not available) */}
+            {showShareMenu && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowShareMenu(false)} />
+                <div className="absolute right-0 top-full z-50 mt-1 w-40 rounded-xl border border-white/10 bg-[#2a2420] py-1 shadow-lg">
+                  <button
+                    onClick={handleShareEmail}
+                    className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-white/[0.05] hover:text-text-primary"
+                  >
+                    <Mail className="h-3.5 w-3.5" />
+                    Email
+                  </button>
+                  <button
+                    onClick={handleShareWhatsApp}
+                    className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-white/[0.05] hover:text-text-primary"
+                  >
+                    <MessageCircle className="h-3.5 w-3.5" />
+                    WhatsApp
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       )}
 
