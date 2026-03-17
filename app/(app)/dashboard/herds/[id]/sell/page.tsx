@@ -28,7 +28,7 @@ export default async function SellStockPage({
   const [herdResult, { data: breedPremiumData }] = await Promise.all([
     supabase
       .from("herds")
-      .select("id, name, breed, category, species, head_count, current_weight, initial_weight, daily_weight_gain, dwg_change_date, previous_dwg, selected_saleyard, additional_info, age_months, is_sold, is_deleted, created_at, updated_at, breed_premium_override, mortality_rate, is_breeder, is_pregnant, joined_date, calving_rate, breeding_program_type, joining_period_start, joining_period_end, calf_weight_recorded_date")
+      .select("id, name, breed, category, species, head_count, current_weight, initial_weight, daily_weight_gain, dwg_change_date, previous_dwg, selected_saleyard, additional_info, age_months, is_sold, is_deleted, created_at, updated_at, breed_premium_override, mortality_rate, is_breeder, is_pregnant, joined_date, calving_rate, breeding_program_type, joining_period_start, joining_period_end, calf_weight_recorded_date, breeder_sub_type, sub_category")
       .eq("id", id)
       .eq("user_id", user.id)
       .eq("is_deleted", false)
