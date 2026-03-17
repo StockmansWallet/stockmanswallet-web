@@ -5,7 +5,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Brain, Loader2, AlertCircle, ClipboardCopy, Download, Check } from "lucide-react";
+import { Brain, Loader2, AlertCircle, ClipboardCopy, Download, Check, FileText } from "lucide-react";
 import { sendMessage, buildSystemPrompt, loadChatDataStore, fetchServerConfig } from "@/lib/brangus/chat-service";
 import { createConversation, saveMessage, autoTitleConversation, formatConversationForExport } from "@/lib/brangus/conversation-service";
 import type { BrangusConversationRow } from "@/lib/brangus/conversation-service";
@@ -293,6 +293,10 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, o
     URL.revokeObjectURL(url);
   }, [messages]);
 
+  const handlePrint = useCallback(() => {
+    window.print();
+  }, []);
+
   // Loading state
   if (isInitialising) {
     return (
@@ -304,10 +308,23 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, o
   }
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
+    <div data-print-chat className="flex flex-1 flex-col overflow-hidden">
+      {/* Print header - hidden on screen, shown in print */}
+      <div data-print-header className="hidden items-center gap-3 px-6 py-4">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#D9762F]">
+          <Brain className="h-5 w-5 text-white" />
+        </div>
+        <div>
+          <p className="text-lg font-bold text-[#1a1a1a]">Stockman IQ</p>
+          <p className="text-xs text-[#666]">
+            {new Date().toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}
+          </p>
+        </div>
+      </div>
+
       {/* Export toolbar - shown when conversation has 2+ messages */}
       {messages.length >= 2 && (
-        <div className="flex items-center justify-end gap-1 border-b border-white/6 px-4 py-1.5">
+        <div data-print-hide className="flex items-center justify-end gap-1 border-b border-white/6 px-4 py-1.5">
           <button
             onClick={handleCopy}
             className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] text-text-muted transition-colors hover:bg-white/[0.05] hover:text-text-secondary"
@@ -323,6 +340,14 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, o
           >
             <Download className="h-3.5 w-3.5" />
             Save
+          </button>
+          <button
+            onClick={handlePrint}
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] text-text-muted transition-colors hover:bg-white/[0.05] hover:text-text-secondary"
+            aria-label="Save as PDF"
+          >
+            <FileText className="h-3.5 w-3.5" />
+            PDF
           </button>
         </div>
       )}
@@ -370,13 +395,13 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, o
 
       {/* Summary card strip - persistent bottom strip, full width for edge-to-edge scrolling */}
       {sessionCards.length > 0 && (
-        <div className="border-t border-white/8 py-2">
+        <div data-print-cards className="border-t border-white/8 py-2">
           <QuickInsightRow insights={sessionCards} onCardAction={handleCardAction} />
         </div>
       )}
 
       {/* Input area */}
-      <div className="border-t border-white/6 p-4">
+      <div data-print-hide className="border-t border-white/6 p-4">
         <div className="mx-auto max-w-2xl">
           <ChatInput
             onSend={handleSend}

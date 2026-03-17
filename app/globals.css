@@ -206,6 +206,106 @@ select option {
   display: none;
 }
 
+/* Print styles for Brangus chat PDF export */
+@media print {
+  /* Hide app chrome */
+  nav,
+  header,
+  [data-print-hide] {
+    display: none !important;
+  }
+
+  /* Hide sidebar, mobile nav, top bar */
+  .lg\:block:has(> .sticky) {
+    display: none !important;
+  }
+
+  /* Reset layout to full width */
+  body {
+    background: white !important;
+    color: #1a1a1a !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  main {
+    padding: 0 !important;
+  }
+
+  /* Chat container - remove overflow constraints */
+  [data-print-chat] {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  [data-print-chat] > div {
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  /* Print header - only visible in print */
+  [data-print-header] {
+    display: flex !important;
+  }
+
+  /* Summary cards - make them wrap for print */
+  [data-print-cards] {
+    border-top: 2px solid #D9762F !important;
+    padding-top: 12px !important;
+  }
+
+  [data-print-cards] > div {
+    flex-wrap: wrap !important;
+    overflow: visible !important;
+    gap: 8px !important;
+  }
+
+  [data-print-cards] > div > div {
+    background: #f5f0eb !important;
+    border: 1px solid #d4c4b0 !important;
+    color: #1a1a1a !important;
+  }
+
+  [data-print-cards] > div > div span {
+    color: #1a1a1a !important;
+  }
+
+  /* Chat bubbles - preserve colours */
+  [data-print-chat] [class*="bg-brand"] {
+    background: #D9762F !important;
+    color: white !important;
+  }
+
+  [data-print-chat] [class*="bg-[#44372D]"] {
+    background: #44372D !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  /* Prevent page breaks inside bubbles */
+  [data-print-chat] [class*="rounded-2xl"] {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Hide the Stockman IQ tabs header and conversation sidebar */
+  [role="tablist"],
+  .w-96 {
+    display: none !important;
+  }
+
+  /* Make the chat card fill the page */
+  .flex.gap-4 {
+    height: auto !important;
+  }
+
+  .flex.gap-4 > .flex-1 {
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+}
+
 /* Brand-colored range slider */
 .slider-brand {
   -webkit-appearance: none;

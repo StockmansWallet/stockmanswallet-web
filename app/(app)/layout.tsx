@@ -46,15 +46,19 @@ export default async function AppLayout({
     <AppProviders defaultMode={defaultMode}>
       <div className="flex min-h-screen flex-col bg-background">
         {/* Mobile nav */}
-        <MobileNav userEmail={user.email} subscriptionTier={profile?.subscription_tier || "stockman"} />
+        <div data-print-hide>
+          <MobileNav userEmail={user.email} subscriptionTier={profile?.subscription_tier || "stockman"} />
+        </div>
 
         {/* Desktop top header bar - full width */}
-        <TopBar
-          showViewToggle={showViewToggle}
-          firstName={user.user_metadata?.first_name || ""}
-          lastName={user.user_metadata?.last_name || ""}
-          email={user.email || ""}
-        />
+        <div data-print-hide>
+          <TopBar
+            showViewToggle={showViewToggle}
+            firstName={user.user_metadata?.first_name || ""}
+            lastName={user.user_metadata?.last_name || ""}
+            email={user.email || ""}
+          />
+        </div>
 
         {/* Desktop sidebar + content */}
         <div className="flex flex-1">
