@@ -78,9 +78,9 @@ export const defaultMappingRules: CategoryMappingRule[] = [
   // Dry Cow (any weight)
   { species: "Cattle", master_category: "Dry Cow", weight_min: null, weight_max: null, sub_category: "Cows", mla_preferred: "Cows", mla_fallback: "Cows", lookback_weeks: 8, sort_order: 9 },
   // Bull
-  { species: "Cattle", master_category: "Bull", weight_min: 0, weight_max: 330, sub_category: "Weaner", mla_preferred: "Bulls", mla_fallback: "Bulls", lookback_weeks: 8, sort_order: 10 },
-  { species: "Cattle", master_category: "Bull", weight_min: 330, weight_max: 550, sub_category: "Yearling", mla_preferred: "Bulls", mla_fallback: "Bulls", lookback_weeks: 8, sort_order: 11 },
-  { species: "Cattle", master_category: "Bull", weight_min: 550, weight_max: null, sub_category: "Grown", mla_preferred: "Bulls", mla_fallback: "Bulls", lookback_weeks: 8, sort_order: 12 },
+  { species: "Cattle", master_category: "Bull", weight_min: 0, weight_max: 330, sub_category: "Weaner", mla_preferred: "Grown Bull", mla_fallback: "Grown Bull", lookback_weeks: 8, sort_order: 10 },
+  { species: "Cattle", master_category: "Bull", weight_min: 330, weight_max: 550, sub_category: "Yearling", mla_preferred: "Grown Bull", mla_fallback: "Grown Bull", lookback_weeks: 8, sort_order: 11 },
+  { species: "Cattle", master_category: "Bull", weight_min: 550, weight_max: null, sub_category: "Grown", mla_preferred: "Grown Bull", mla_fallback: "Grown Bull", lookback_weeks: 8, sort_order: 12 },
 ];
 
 // MARK: - Resolve MLA Category
@@ -206,7 +206,7 @@ export const mlaCsvCategoryMapping: Record<string, string> = {
   "Grown Steer": "Grown Steer",
   "Grown Heifer": "Grown Heifer",
   Cows: "Cows",
-  Bulls: "Bulls",
+  Bulls: "Grown Bull",
   "Manufacturing Steer": "Grown Steer",
   Calves: "Weaner Steer",
 };
