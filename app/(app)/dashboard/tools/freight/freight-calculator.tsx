@@ -6,9 +6,9 @@ import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { calculateFreightEstimate, DEFAULT_RATE_PER_DECK_PER_KM } from "@/lib/engines/freight-engine";
-import { freightCategoryLibrary, headsPerDeckForWeight } from "@/lib/data/freight-categories";
+import { headsPerDeckForWeight } from "@/lib/data/freight-categories";
 import { saleyards, saleyardLocality, saleyardCoordinates } from "@/lib/data/reference-data";
-import type { FreightEstimate, FreightCapacityCategory } from "@/lib/types/models";
+import type { FreightEstimate } from "@/lib/types/models";
 import {
   MapPin,
   Truck,
@@ -58,13 +58,6 @@ const saleyardOptions = saleyards.map((s) => ({
     : s,
 }));
 
-const categoryOverrideOptions = [
-  { value: "", label: "Auto (recommended)" },
-  ...freightCategoryLibrary.map((c) => ({
-    value: c.id,
-    label: `${c.displayName} (${c.headsPerDeck} hd/deck)`,
-  })),
-];
 
 // --- Helpers ---
 
@@ -119,8 +112,6 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
   const [distance, setDistance] = useState("");
   const [headPerDeck, setHeadPerDeck] = useState("");
   const [rate, setRate] = useState(DEFAULT_RATE_PER_DECK_PER_KM.toFixed(2));
-  const [categoryOverrideId, setCategoryOverrideId] = useState("");
-
   const [result, setResult] = useState<FreightEstimate | null>(null);
 
   const selectedHerd = herds.find((h) => h.id === selectedHerdId);
@@ -194,29 +185,21 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
   const previewHpd = useMemo(() => {
     const w = Number(weight);
     if (!w || w <= 0) return null;
-    if (categoryOverrideId) {
-      const cat = freightCategoryLibrary.find((c) => c.id === categoryOverrideId);
-      return cat?.headsPerDeck ?? null;
-    }
     return headsPerDeckForWeight(w);
-  }, [weight, categoryOverrideId]);
+  }, [weight]);
 
   // Update headPerDeck when weight changes (if no override)
   function handleWeightChange(val: string) {
     setWeight(val);
     setResult(null);
     const w = Number(val);
-    if (w > 0 && !categoryOverrideId) {
+    if (w > 0) {
       setHeadPerDeck(headsPerDeckForWeight(w).toString());
     }
   }
 
   function handleCalculate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-
-    const override: FreightCapacityCategory | undefined = categoryOverrideId
-      ? freightCategoryLibrary.find((c) => c.id === categoryOverrideId)
-      : undefined;
 
     const hpdOverride = Number(headPerDeck) || undefined;
 
@@ -228,7 +211,6 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
       headCount: Number(headCount) || 0,
       distanceKm: Number(distance) || 0,
       ratePerDeckPerKm: Number(rate) || DEFAULT_RATE_PER_DECK_PER_KM,
-      categoryOverride: override,
       headsPerDeckOverride: hpdOverride,
       isCustomJob: !selectedHerdId,
     });
@@ -245,7 +227,6 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     setDistance("");
     setHeadPerDeck("");
     setRate(DEFAULT_RATE_PER_DECK_PER_KM.toFixed(2));
-    setCategoryOverrideId("");
     setResult(null);
   }
 
@@ -411,22 +392,6 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 onChange={(e) => { setRate(e.target.value); setResult(null); }}
               />
             </div>
-            <div className="mt-4 max-w-xs">
-              <Select
-                id="category_override"
-                name="category_override"
-                label="Freight Category Override"
-                options={categoryOverrideOptions}
-                value={categoryOverrideId}
-                onChange={(e) => {
-                  setCategoryOverrideId(e.target.value);
-                  setResult(null);
-                  const cat = freightCategoryLibrary.find((c) => c.id === e.target.value);
-                  if (cat) setHeadPerDeck(cat.headsPerDeck.toString());
-                  else if (weight) setHeadPerDeck(headsPerDeckForWeight(Number(weight)).toString());
-                }}
-              />
-            </div>
             <p className="mt-4 text-xs leading-relaxed text-text-muted">
               Default rate and head per deck values are based on national averages.
               Adjust to match your local carrier's requirements.
@@ -492,9 +457,6 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
               <p className="mt-1 text-xs leading-relaxed text-text-muted">
                 {result.freightCategory.displayName} · {result.headsPerDeck} head/deck · {Math.round(result.averageWeightKg)}kg avg weight · ${result.ratePerDeckPerKm.toFixed(2)}/deck/km · {Math.round(result.distanceKm)} km
               </p>
-              {result.capacitySource === "user_override" && (
-                <p className="mt-1 text-xs text-sky-400">Category overridden by user</p>
-              )}
             </div>
 
             {/* Alerts */}
