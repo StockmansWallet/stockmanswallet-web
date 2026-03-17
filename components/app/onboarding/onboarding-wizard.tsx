@@ -204,15 +204,7 @@ export function OnboardingWizard({ userName }: { userName: string }) {
               />
             ))}
           </div>
-          {step > 0 && step < TOTAL_STEPS - 1 && (
-            <button
-              onClick={handleSkip}
-              disabled={submitting}
-              className="text-xs text-text-muted transition-colors hover:text-text-primary"
-            >
-              Skip for now
-            </button>
-          )}
+          {/* Skip button removed - users must complete onboarding */}
         </div>
 
         <Card>
