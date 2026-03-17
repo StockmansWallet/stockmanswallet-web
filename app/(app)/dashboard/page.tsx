@@ -343,7 +343,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                           {herd.name}
                         </p>
                         <p className="text-xs text-text-muted">
-                          {herd.breed} &middot; {herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} - ${herd.sub_category}` : herd.category}
+                          {herd.breed} &middot; {herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} (${herd.sub_category})` : herd.category}
                         </p>
                       </div>
                       <div className="ml-4 flex flex-shrink-0 items-center gap-3">
