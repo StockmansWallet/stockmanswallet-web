@@ -50,7 +50,7 @@ export function ChatInput({
   return (
     <div className="flex items-center gap-2">
       {/* Input field with send button inside */}
-      <div className="flex min-h-[44px] flex-1 items-center rounded-[22px] border border-white/10 bg-white/5 px-4 transition-colors focus-within:border-white/20 focus-within:bg-white/[0.08]">
+      <div className="flex min-h-[44px] flex-1 items-center rounded-[22px] border border-white/10 bg-white/5 pl-4 pr-1.5 transition-colors focus-within:border-white/20 focus-within:bg-white/[0.08]">
         <textarea
           ref={textareaRef}
           value={value}
@@ -78,7 +78,7 @@ export function ChatInput({
           type="button"
           onClick={handleSubmit}
           disabled={disabled || loading || !hasText}
-          className={`ml-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white transition-all ${accentClass} ${
+          className={`ml-2 flex h-8 shrink-0 items-center justify-center rounded-full px-4 text-white transition-all ${accentClass} ${
             hasText ? "opacity-100 scale-100" : "opacity-0 scale-75 pointer-events-none"
           }`}
           aria-label="Send message"
