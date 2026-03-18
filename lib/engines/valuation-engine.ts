@@ -553,8 +553,8 @@ export function calculateHerdValuation(
     }
   }
 
-  // 2e. Final fallback to hardcoded defaults
-  const basePrice = resolved ? resolved.price : defaultFallbackPrice(herd.category);
+  // 2e. Final fallback to hardcoded defaults (use resolved MLA category, not master category)
+  const basePrice = resolved ? resolved.price : defaultFallbackPrice(mlaCategory);
 
   // 3. Breed premium - only apply to general (breed=null) prices (mirrors iOS resolveGeneralBasePrice guard)
   const rawPremiumPct = skipBreedPremium ? 0 : (herd.breed_premium_override ?? premiumMap.get(herd.breed) ?? 0);
