@@ -32,7 +32,42 @@ const BRANGUS_BG = "#44372D";
 const USER_BG = "var(--color-brand)";
 // Profile images
 const BRANGUS_AVATAR = "/images/brangus-profile.png";
-// User avatar: use initials or a generic icon (no photo needed)
+
+// Brangus welcome greetings - random selection for variety (matches iOS)
+function buildWelcomeGreeting(): string {
+  const hour = new Date().getHours();
+  const tod = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
+
+  const pool: string[] = [];
+
+  // Time-of-day greetings
+  switch (tod) {
+    case "morning":
+      pool.push("Morning! Early start? What are we looking at today?");
+      pool.push("G'day mate. Coffee in hand? Let's get into it.");
+      pool.push("Good morning. I'm Brangus, your stock advisor. I've got your whole portfolio at my fingertips, so fire away.");
+      break;
+    case "afternoon":
+      pool.push("Good arvo. How's the day shaping up? What can I help with?");
+      pool.push("G'day. What are we working on this arvo?");
+      pool.push("Afternoon. I'm Brangus, your stock advisor. Ask me about your herds, freight, sale timing, or anything else.");
+      break;
+    case "evening":
+      pool.push("Evening. Burning the midnight oil? What's on your mind?");
+      pool.push("G'day. Quiet time to do some thinking? I'm all ears.");
+      pool.push("G'evening. I'm Brangus, your stock advisor. What can I help you with tonight?");
+      break;
+  }
+
+  // Generic greetings (always available)
+  pool.push("G'day! How ya going? What can I do for ya today? Got questions about the herd, the market, or just fancy a yarn?");
+  pool.push("Oi oi. Ready when you are.");
+  pool.push("Pull up a chair. What do you need a hand with?");
+  pool.push("Back for another yarn? Let's get into it.");
+  pool.push("G'day mate. I'm Brangus, your stock advisor. Fire away with anything about your herds, freight, or the market.");
+
+  return pool[Math.floor(Math.random() * pool.length)];
+}
 
 // Saved message row from Supabase (subset of columns needed)
 interface SavedMessage {
@@ -91,7 +126,7 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, o
     ? [{
         id: "welcome",
         role: "assistant" as const,
-        content: "G'day! I'm Brangus, your stock advisor. I've got your whole portfolio at my fingertips, so fire away. Ask me about your herds, freight, sale timing, or anything else and I'll do the heavy lifting.",
+        content: buildWelcomeGreeting(),
         timestamp: new Date(),
       }]
     : [];
