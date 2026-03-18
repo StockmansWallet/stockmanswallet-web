@@ -95,7 +95,11 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, o
   const [sessionCards, setSessionCards] = useState<QuickInsight[]>(() => hydrateCards(initialMessages ?? []));
   const [copied, setCopied] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
-  const [voiceEnabled, setVoiceEnabled] = useState(false);
+  // Persist voice toggle state across sessions via localStorage (default: muted)
+  const [voiceEnabled, setVoiceEnabled] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("brangus-voice-enabled") === "true";
+  });
   const [isSpeaking, setIsSpeaking] = useState(false);
 
   const router = useRouter();
@@ -225,7 +229,11 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, o
       stopPlayback();
       setIsSpeaking(false);
     }
-    setVoiceEnabled((prev) => !prev);
+    setVoiceEnabled((prev) => {
+      const next = !prev;
+      localStorage.setItem("brangus-voice-enabled", String(next));
+      return next;
+    });
   }, [voiceEnabled]);
 
   const handleSend = useCallback(async (text: string) => {
