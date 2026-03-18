@@ -1,8 +1,51 @@
 "use server";
 
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { ScenarioType } from "@/lib/types/advisor-lens";
+
+const connectionIdSchema = z.object({
+  connectionId: z.string().uuid(),
+});
+
+const upsertLensDataSchema = z.object({
+  is_active: z.boolean().optional(),
+  shading_percentage: z.number().min(0).max(200).optional(),
+  breed_premium_override: z.number().nullable().optional(),
+  adwg_override: z.number().nullable().optional(),
+  calving_rate_override: z.number().nullable().optional(),
+  mortality_rate_override: z.number().nullable().optional(),
+  head_count_adjustment: z.number().int().nullable().optional(),
+  advisor_notes: z.string().max(5000).nullable().optional(),
+  active_scenario_id: z.string().uuid().nullable().optional(),
+  cached_baseline_value: z.number().nullable().optional(),
+  cached_advisor_value: z.number().nullable().optional(),
+  cached_shaded_value: z.number().nullable().optional(),
+});
+
+const createScenarioSchema = z.object({
+  name: z.string().min(1).max(200),
+  scenario_type: z.enum(["conservative", "moderate", "aggressive", "custom"]),
+  notes: z.string().max(2000).optional(),
+  breed_premium_override: z.number().nullable().optional(),
+  adwg_override: z.number().nullable().optional(),
+  calving_rate_override: z.number().nullable().optional(),
+  mortality_rate_override: z.number().nullable().optional(),
+  head_count_adjustment: z.number().int().nullable().optional(),
+  shading_percentage: z.number().min(0).max(200).optional(),
+});
+
+const scenarioIdSchema = z.object({
+  connectionId: z.string().uuid(),
+  scenarioId: z.string().uuid(),
+});
+
+const lockScenarioSchema = z.object({
+  connectionId: z.string().uuid(),
+  scenarioId: z.string().uuid(),
+  advisorName: z.string().min(1).max(200),
+});
 
 export async function upsertAdvisorLens(
   connectionId: string,
@@ -27,6 +70,12 @@ export async function upsertAdvisorLens(
   } = await supabase.auth.getUser();
 
   if (!user) return { error: "Not authenticated" };
+
+  const connParsed = connectionIdSchema.safeParse({ connectionId });
+  if (!connParsed.success) return { error: "Invalid input" };
+
+  const dataParsed = upsertLensDataSchema.safeParse(data);
+  if (!dataParsed.success) return { error: "Invalid input" };
 
   // Check if lens already exists
   const { data: existing } = await supabase
@@ -88,6 +137,12 @@ export async function createScenario(
     shading_percentage?: number;
   }
 ) {
+  const connParsed = connectionIdSchema.safeParse({ connectionId });
+  if (!connParsed.success) return { error: "Invalid input" };
+
+  const scenarioParsed = createScenarioSchema.safeParse(data);
+  if (!scenarioParsed.success) return { error: "Invalid input" };
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -117,6 +172,9 @@ export async function createScenario(
 }
 
 export async function loadScenarioIntoLens(connectionId: string, scenarioId: string) {
+  const parsed = scenarioIdSchema.safeParse({ connectionId, scenarioId });
+  if (!parsed.success) return { error: "Invalid input" };
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -145,6 +203,9 @@ export async function loadScenarioIntoLens(connectionId: string, scenarioId: str
 }
 
 export async function lockScenario(connectionId: string, scenarioId: string, advisorName: string) {
+  const parsed = lockScenarioSchema.safeParse({ connectionId, scenarioId, advisorName });
+  if (!parsed.success) return { error: "Invalid input" };
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -170,6 +231,9 @@ export async function lockScenario(connectionId: string, scenarioId: string, adv
 }
 
 export async function deleteScenario(connectionId: string, scenarioId: string) {
+  const parsed = scenarioIdSchema.safeParse({ connectionId, scenarioId });
+  if (!parsed.success) return { error: "Invalid input" };
+
   const supabase = await createClient();
   const {
     data: { user },

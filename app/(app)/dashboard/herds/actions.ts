@@ -5,9 +5,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-const MALE_KEYWORDS = ["Bull", "Steer", "Barrow", "Buck", "Wether"];
-
+// Debug: Master categories (Steer, Bull = Male; Heifer, Breeder, Dry Cow = Female)
 function deriveSexFromCategory(category: string): "Male" | "Female" {
+  if (category === "Steer" || category === "Bull") return "Male";
+  if (category === "Heifer" || category === "Breeder" || category === "Dry Cow") return "Female";
+  // Legacy fallback for non-master categories
+  const MALE_KEYWORDS = ["Bull", "Steer", "Barrow", "Buck", "Wether"];
   return MALE_KEYWORDS.some((k) => category.includes(k)) ? "Male" : "Female";
 }
 
@@ -37,6 +40,8 @@ const herdFormSchema = z.object({
   animal_id_number: z.string().optional().nullable(),
   breed_premium_override: z.string().optional().nullable(),
   lactation_status: z.string().optional().nullable(),
+  sub_category: z.string().optional().nullable(),
+  breeder_sub_type: z.string().optional().nullable(),
 });
 
 const idSchema = z.string().uuid();
@@ -84,6 +89,8 @@ export async function createHerd(formData: FormData) {
     property_id: v.property_id || null,
     additional_info: v.additional_info || null,
     breed_premium_override: breedPremiumOverride,
+    sub_category: v.sub_category || null,
+    breeder_sub_type: v.breeder_sub_type || null,
     updated_at: new Date().toISOString(),
   });
 

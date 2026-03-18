@@ -225,7 +225,7 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
     if (!category || !w) return null;
     if (category === "Breeder" && !breederSubType) return null;
     const resolution = resolveMLACategory(category, w, breederSubType || undefined);
-    return `${resolution.subCategory} ${category}`;
+    return resolution.subCategory;
   }, [category, initialWeight, breederSubType]);
 
   const breedOptions = useMemo(

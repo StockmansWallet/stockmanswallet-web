@@ -107,6 +107,9 @@ export async function createYardBookItem(formData: FormData) {
 }
 
 export async function updateYardBookItem(id: string, formData: FormData) {
+  const idParsed = yardBookIdSchema.safeParse({ id });
+  if (!idParsed.success) return { error: "Invalid input" };
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -118,38 +121,50 @@ export async function updateYardBookItem(id: string, formData: FormData) {
   const linkedHerdIdsRaw = formData.get("linked_herd_ids") as string;
   const eventTime = formData.get("event_time") as string;
 
+  let reminderOffsets: number[] | null = null;
+  let linkedHerdIds: string[] | null = null;
+  try {
+    if (reminderOffsetsRaw) reminderOffsets = JSON.parse(reminderOffsetsRaw);
+  } catch { /* ignore */ }
+  try {
+    if (linkedHerdIdsRaw) linkedHerdIds = JSON.parse(linkedHerdIdsRaw);
+  } catch { /* ignore */ }
+
+  const parsed = yardBookItemSchema.safeParse({
+    title: formData.get("title"),
+    event_date: formData.get("event_date"),
+    is_all_day: formData.get("is_all_day") === "on",
+    event_time: eventTime || null,
+    category: formData.get("category") || "Livestock",
+    notes: (formData.get("notes") as string) || null,
+    is_recurring: formData.get("is_recurring") === "on",
+    recurrence_rule: (formData.get("recurrence_rule") as string) || null,
+    recurrence_interval: formData.get("recurrence_interval")
+      ? Number(formData.get("recurrence_interval"))
+      : null,
+    reminder_offsets: reminderOffsets,
+    linked_herd_ids: linkedHerdIds,
+    property_id: (formData.get("property_id") as string) || null,
+  });
+  if (!parsed.success) return { error: "Invalid input" };
+
+  const v = parsed.data;
+
   const { error } = await supabase
     .from("yard_book_items")
     .update({
-      title: formData.get("title") as string,
-      event_date: formData.get("event_date") as string,
-      is_all_day: formData.get("is_all_day") === "on",
-      event_time: parseEventTime(eventTime),
-      category_raw:
-        (formData.get("category") as
-          | "Livestock"
-          | "Operations"
-          | "Finance"
-          | "Family"
-          | "Me") || "Livestock",
-      notes: (formData.get("notes") as string) || null,
-      is_recurring: formData.get("is_recurring") === "on",
-      recurrence_rule_raw:
-        (formData.get("recurrence_rule") as
-          | "Weekly"
-          | "Fortnightly"
-          | "Monthly"
-          | "Annual") || null,
-      recurrence_interval: formData.get("recurrence_interval")
-        ? Number(formData.get("recurrence_interval"))
-        : null,
-      reminder_offsets: reminderOffsetsRaw
-        ? JSON.parse(reminderOffsetsRaw)
-        : null,
-      linked_herd_ids: linkedHerdIdsRaw
-        ? JSON.parse(linkedHerdIdsRaw)
-        : null,
-      property_id: (formData.get("property_id") as string) || null,
+      title: v.title,
+      event_date: v.event_date,
+      is_all_day: v.is_all_day,
+      event_time: parseEventTime(v.event_time),
+      category_raw: v.category,
+      notes: v.notes,
+      is_recurring: v.is_recurring,
+      recurrence_rule_raw: v.recurrence_rule,
+      recurrence_interval: v.recurrence_interval,
+      reminder_offsets: v.reminder_offsets,
+      linked_herd_ids: v.linked_herd_ids,
+      property_id: v.property_id,
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
@@ -163,6 +178,8 @@ export async function updateYardBookItem(id: string, formData: FormData) {
 }
 
 export async function deleteYardBookItem(id: string) {
+  const parsed = yardBookIdSchema.safeParse({ id });
+  if (!parsed.success) return { error: "Invalid input" };
   const supabase = await createClient();
   const {
     data: { user },
@@ -190,6 +207,8 @@ export async function toggleYardBookItemComplete(
   id: string,
   isCompleted: boolean
 ) {
+  const parsed = toggleCompleteSchema.safeParse({ id, isCompleted });
+  if (!parsed.success) return { error: "Invalid input" };
   const supabase = await createClient();
   const {
     data: { user },
