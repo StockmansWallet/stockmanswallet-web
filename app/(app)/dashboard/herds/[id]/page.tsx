@@ -92,27 +92,20 @@ export default async function HerdDetailPage({
 
   if (!herd) notFound();
 
-  // Fetch pricing data in a single combined query matching iOS prefetchPricesForHerds():
-  // - Saleyard + "National" combined, filtered by MLA category, all breeds
-  // - Ordered by data_date DESC - no tight limit since a single saleyard can have 10k+ rows
-  // - Expiry filter: only include non-expired entries (matches iOS expiryFilter)
+  // Fetch only the newest date's prices per saleyard+category via RPC
   const mlaCategory = resolveMLACategory(herd.category, herd.initial_weight, herd.breeder_sub_type ?? undefined).primaryMLACategory;
   const fallbackCat = categoryFallback(mlaCategory);
   const categoriesToFetch = fallbackCat ? [mlaCategory, fallbackCat] : [mlaCategory];
   const resolvedSaleyard = herd.selected_saleyard
     ? resolveMLASaleyardName(herd.selected_saleyard)
     : null;
-  const saleyardsToFetch = resolvedSaleyard
-    ? [resolvedSaleyard, "National"]
-    : ["National"];
+  const saleyardsToFetch = resolvedSaleyard ? [resolvedSaleyard] : [];
 
-  const { data: allPrices } = await supabase
-    .from("category_prices")
-    .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
-    .in("saleyard", saleyardsToFetch)
-    .in("category", categoriesToFetch)
-    .order("data_date", { ascending: false })
-    .limit(50000);
+  type PriceRow = { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string };
+  const { data: allPrices } = await supabase.rpc("latest_saleyard_prices", {
+    p_saleyards: saleyardsToFetch,
+    p_categories: categoriesToFetch,
+  }) as unknown as { data: PriceRow[] | null };
 
   // Build pricing lookup maps from combined result (same keys as iOS cache)
   const nationalPriceMap = new Map<string, CategoryPriceEntry[]>();

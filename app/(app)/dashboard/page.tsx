@@ -82,9 +82,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       .limit(5),
   ]);
 
-  // Fetch pricing data in two parallel queries to avoid 50k limit truncating national prices
-  // when multiple saleyards have large datasets. National prices are fetched separately to
-  // guarantee they're always complete (critical for fallback resolution).
+  // Fetch only the newest date's prices per saleyard+category via RPC.
   // When a saleyard override is active (from the dashboard selector), fetch prices for that
   // saleyard only. Otherwise fetch for each herd's individual saleyard.
   const resolvedOverride = saleyardOverride ? resolveMLASaleyardName(saleyardOverride) : null;
@@ -97,28 +95,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   type PriceRow = { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string };
   const emptyPrices: PriceRow[] = [];
 
-  const [{ data: saleyardPrices }, { data: nationalPrices }] = mlaCategories.length > 0
-    ? await Promise.all([
-        saleyards.length > 0
-          ? supabase
-              .from("category_prices")
-              .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
-              .in("saleyard", saleyards)
-              .in("category", mlaCategories)
-              .order("data_date", { ascending: false })
-              .limit(50000)
-          : Promise.resolve({ data: emptyPrices }),
-        supabase
-          .from("category_prices")
-          .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
-          .eq("saleyard", "National")
-          .in("category", mlaCategories)
-          .order("data_date", { ascending: false })
-          .limit(5000),
-      ])
-    : [{ data: emptyPrices }, { data: emptyPrices }];
+  const { data: rpcPrices } = mlaCategories.length > 0
+    ? await supabase.rpc("latest_saleyard_prices", {
+        p_saleyards: saleyards,
+        p_categories: mlaCategories,
+      }) as unknown as { data: PriceRow[] | null }
+    : { data: emptyPrices };
 
-  const allPrices = [...(saleyardPrices ?? []), ...(nationalPrices ?? [])];
+  const allPrices = rpcPrices ?? [];
 
   const activeHerds = herds ?? [];
   const totalHead = activeHerds.reduce((sum, h) => sum + (h.head_count ?? 0), 0);
