@@ -133,41 +133,59 @@ export default function Hero() {
               />
             </motion.div>
 
-            {/* Floating card: Portfolio Value */}
+            {/* Floating insight card: Sell vs Hold (green) */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7, delay: 0.8 }}
-              className="absolute -left-4 top-12 z-20 hidden w-52 rounded-2xl glass p-4 shadow-2xl lg:block xl:-left-20"
+              className="absolute left-4 top-[25%] z-20 hidden w-72 rounded-2xl p-5 shadow-2xl lg:block xl:-left-8"
+              style={{ backgroundColor: 'rgba(124, 167, 73, 0.08)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(124, 167, 73, 0.15)' }}
             >
-              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Portfolio Value</p>
-              <p className="mt-1 text-2xl font-semibold text-white">$1.52M</p>
-              <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5">
-                <svg className="h-3 w-3 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M7 17l5-5 3 3 4-4" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 11h4v4" />
-                </svg>
-                <span className="text-[11px] font-semibold text-success">+6.3%</span>
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-success/15">
+                  <svg className="h-4.5 w-4.5 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-white">Sell vs Hold</p>
+                  <p className="text-[10px] text-text-muted">Test Herd 3</p>
+                </div>
               </div>
+              <div className="mt-3 flex items-baseline gap-2">
+                <p className="text-2xl font-bold text-success">+$85,025</p>
+                <p className="text-[11px] text-text-muted">potential gain over 90 days</p>
+              </div>
+              <p className="mt-1.5 text-[11px] leading-snug text-text-secondary">
+                Test Herd 3 is worth $190,650 today. Holding 90 days projects to $275,675.
+              </p>
             </motion.div>
 
-            {/* Floating card: AI Insight */}
+            {/* Floating insight card: Freight IQ (blue) */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7, delay: 1.0 }}
-              className="absolute -right-4 bottom-28 z-20 hidden w-56 rounded-2xl glass p-4 shadow-2xl lg:block xl:-right-16"
+              className="absolute right-4 top-[45%] z-20 hidden w-72 rounded-2xl p-5 shadow-2xl lg:block xl:-right-8"
+              style={{ backgroundColor: 'rgba(19, 153, 236, 0.08)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(19, 153, 236, 0.15)' }}
             >
-              <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/20">
-                  <svg className="h-4 w-4 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#1399EC]/15">
+                  <svg className="h-4.5 w-4.5 text-[#64BBF5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0H21M3.375 14.25h3.75L8.25 9h4.5m0 0l1.125 5.25M12.75 9h4.875c.621 0 1.125.504 1.125 1.125v3.375" />
                   </svg>
                 </div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-brand-light">Stockman IQ</p>
+                <div>
+                  <p className="text-xs font-semibold text-white">Freight IQ</p>
+                  <p className="text-[10px] text-text-muted">87 Heifers to Emerald</p>
+                </div>
               </div>
-              <p className="mt-2 text-xs leading-relaxed text-text-secondary">
-                Optimal sale window: <span className="font-semibold text-white">October</span> at <span className="font-semibold text-white">520kg</span>
+              <div className="mt-3 flex items-baseline gap-2">
+                <p className="text-2xl font-bold text-[#64BBF5]">$5,958</p>
+                <p className="text-[11px] text-text-muted">+ $596 GST</p>
+              </div>
+              <p className="mt-1.5 text-[11px] leading-snug text-text-secondary">
+                $68.48 per head, 662 km from Pure Produce to Emerald.
               </p>
             </motion.div>
           </motion.div>
