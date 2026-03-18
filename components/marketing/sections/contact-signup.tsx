@@ -15,14 +15,14 @@ export default function ContactSignup() {
         >
           <span className="text-sm font-medium uppercase tracking-wider text-brand">Get Early Access</span>
           <h2 className="mt-4 text-3xl font-semibold text-white sm:text-4xl lg:text-5xl">
-            Stop guessing.
+            The future of
             <br />
             <span className="bg-gradient-to-r from-brand via-brand-light to-brand bg-clip-text text-transparent">
-              Start knowing.
+              livestock valuation.
             </span>
           </h2>
           <p className="mx-auto mt-6 max-w-lg text-base text-text-secondary">
-            Join the waitlist for Australia&apos;s first livestock portfolio management platform. Real market data, real-time valuations, AI-powered insights.
+            Join the waitlist for Australia&apos;s first livestock portfolio management platform. Launching April 2026 on the App Store, with companion web access.
           </p>
         </motion.div>
 
@@ -43,8 +43,8 @@ export default function ContactSignup() {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="mt-6 flex flex-col items-center gap-2"
         >
-          <p className="text-xs text-text-muted">
-            Currently in beta on TestFlight. Launching soon on the App Store.
+          <p className="max-w-sm text-xs leading-relaxed text-text-muted">
+            We&apos;ll send you an email before launch with early access instructions. Founding members get exclusive pricing and priority onboarding.
           </p>
           <a
             href="mailto:hello@stockmanswallet.com.au"

@@ -79,7 +79,7 @@ export default function Hero() {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="mt-6 max-w-md text-lg leading-relaxed text-text-secondary"
             >
-              Live saleyard market data. Real-time herd valuations. AI-powered capital timing intelligence for Australian producers and rural advisors.
+              Live market data. Real-time herd valuations. AI-powered capital timing intelligence for Australian producers and rural advisors.
             </motion.p>
 
             <motion.div
@@ -90,7 +90,7 @@ export default function Hero() {
             >
               <EmailForm />
               <p className="mt-3 text-xs text-text-muted">
-                Join the waitlist. Free early access for founding members.
+                Join the waitlist. We&apos;ll email you before launch with early access details.
               </p>
             </motion.div>
 
@@ -107,7 +107,7 @@ export default function Hero() {
                 height={40}
                 className="h-10 w-auto opacity-60 transition-opacity hover:opacity-100"
               />
-              <span className="text-xs text-text-muted">iPhone, iOS 18.0+</span>
+              <span className="text-xs text-text-muted">Coming April 2026</span>
             </motion.div>
           </motion.div>
 

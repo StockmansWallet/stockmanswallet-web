@@ -12,7 +12,7 @@ interface StatItem {
 
 const STATS: StatItem[] = [
   { value: 17, suffix: '+', label: 'Livestock categories tracked', prefix: '' },
-  { value: 50, suffix: '+', label: 'Australian saleyards', prefix: '' },
+  { value: 50, suffix: '+', label: 'Live market categories', prefix: '' },
   { value: 9, suffix: '', label: 'AI insight templates', prefix: '' },
   { value: 5, suffix: '', label: 'Professional report types', prefix: '' },
 ]

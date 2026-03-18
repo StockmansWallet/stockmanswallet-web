@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useInView } from 'framer-motion'
 
 interface FeatureTab {
   id: string
@@ -21,10 +21,10 @@ const FEATURE_TABS: FeatureTab[] = [
     id: 'dashboard',
     name: 'Portfolio Dashboard',
     tagline: 'Your herds at a glance',
-    description: 'See your total livestock portfolio value update in real time. Live saleyard market data, performance charts, and capital concentration, all on one screen.',
+    description: 'See your total livestock portfolio value update in real time. Live market data, performance charts, and capital concentration, all on one screen.',
     color: '#D9762F',
     colorLight: '#F4A871',
-    bullets: ['Live saleyard market pricing', 'Performance charts with time-range scrubbing', 'Capital concentration breakdown'],
+    bullets: ['Live market pricing', 'Performance charts with time-range scrubbing', 'Capital concentration breakdown'],
     mockup: '/images/mockup-dashboard.png',
     icon: (
       <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
@@ -51,7 +51,7 @@ const FEATURE_TABS: FeatureTab[] = [
     id: 'stockmaniq',
     name: 'Stockman IQ',
     tagline: 'AI capital intelligence',
-    description: 'Ask questions in plain English about your herds. Get data-driven insights on the best sale month, optimal weight, and which saleyard nets you the most after freight.',
+    description: 'Ask questions in plain English about your herds. Get data-driven insights on the best sale month, optimal weight, and which market nets you the most after freight.',
     color: '#D9762F',
     colorLight: '#F4A871',
     bullets: ['9 insight templates from sell vs hold to calving forecasts', 'Voice input and output with Australian accent', 'Creates yard book events from conversation'],
@@ -66,7 +66,7 @@ const FEATURE_TABS: FeatureTab[] = [
     id: 'freight',
     name: 'Freight IQ',
     tagline: 'Know the cost before you commit',
-    description: 'Estimate transport costs using industry-standard loading densities and real driving distances. Compare saleyards net of freight to find the best return.',
+    description: 'Estimate transport costs using industry-standard loading densities and real driving distances. Compare markets net of freight to find the best return.',
     color: '#1399EC',
     colorLight: '#64BBF5',
     bullets: ['11 transport categories with weight escalation', 'Real driving distances via Apple Maps', 'Per head, per deck, and total cost breakdown'],
@@ -80,11 +80,11 @@ const FEATURE_TABS: FeatureTab[] = [
   {
     id: 'gridiq',
     name: 'Grid IQ',
-    tagline: 'Saleyard vs processor',
-    description: 'Compare saleyard prices against processor over-the-hooks grids. Upload grids via camera and let AI extract the data. Track kill sheets and realisation factors.',
+    tagline: 'Market vs processor',
+    description: 'Compare market prices against processor over-the-hooks grids. Upload grids via camera and let AI extract the data. Track kill sheets and realisation factors.',
     color: '#00B4A0',
     colorLight: '#33D4C0',
-    bullets: ['AI grid extraction from photos and PDFs', 'Net saleyard vs net processor comparison', 'Processor fit scoring and sell window indicator'],
+    bullets: ['AI grid extraction from photos and PDFs', 'Net market vs net processor comparison', 'Processor fit scoring and sell window indicator'],
     mockup: '/images/mockup-dashboard.png',
     icon: (
       <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
@@ -94,12 +94,34 @@ const FEATURE_TABS: FeatureTab[] = [
   },
 ]
 
+const AUTO_ADVANCE_MS = 6000
+
 export default function Features() {
   const [active, setActive] = useState(0)
+  const [paused, setPaused] = useState(false)
+  const sectionRef = useRef<HTMLElement>(null)
+  const inView = useInView(sectionRef, { once: false, amount: 0.3 })
   const feature = FEATURE_TABS[active]
 
+  const advance = useCallback(() => {
+    setActive((prev) => (prev + 1) % FEATURE_TABS.length)
+  }, [])
+
+  useEffect(() => {
+    if (!inView || paused) return
+    const timer = setInterval(advance, AUTO_ADVANCE_MS)
+    return () => clearInterval(timer)
+  }, [inView, paused, advance])
+
+  function handleTabClick(i: number) {
+    setActive(i)
+    setPaused(true)
+    // Resume auto-advance after 15s of no interaction
+    setTimeout(() => setPaused(false), 15000)
+  }
+
   return (
-    <section id="features" className="relative py-24 lg:py-32">
+    <section ref={sectionRef} id="features" className="relative py-24 lg:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
@@ -129,7 +151,7 @@ export default function Features() {
             {FEATURE_TABS.map((tab, i) => (
               <button
                 key={tab.id}
-                onClick={() => setActive(i)}
+                onClick={() => handleTabClick(i)}
                 className={`relative flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-300 cursor-pointer ${
                   active === i
                     ? 'text-white'
@@ -137,12 +159,24 @@ export default function Features() {
                 }`}
               >
                 {active === i && (
-                  <motion.div
-                    layoutId="featureTab"
-                    className="absolute inset-0 rounded-xl"
-                    style={{ background: `${tab.color}15`, border: `1px solid ${tab.color}30` }}
-                    transition={{ type: 'spring', duration: 0.5, bounce: 0.15 }}
-                  />
+                  <>
+                    <motion.div
+                      layoutId="featureTab"
+                      className="absolute inset-0 rounded-xl"
+                      style={{ background: `${tab.color}15`, border: `1px solid ${tab.color}30` }}
+                      transition={{ type: 'spring', duration: 0.5, bounce: 0.15 }}
+                    />
+                    {!paused && (
+                      <motion.div
+                        key={`progress-${active}`}
+                        className="absolute bottom-0 left-0 h-[2px] rounded-full"
+                        style={{ background: tab.color }}
+                        initial={{ width: '0%' }}
+                        animate={{ width: '100%' }}
+                        transition={{ duration: AUTO_ADVANCE_MS / 1000, ease: 'linear' }}
+                      />
+                    )}
+                  </>
                 )}
                 <span className="relative z-10">{tab.icon}</span>
                 <span className="relative z-10 hidden sm:inline">{tab.name}</span>

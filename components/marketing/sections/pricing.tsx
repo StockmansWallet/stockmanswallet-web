@@ -19,11 +19,20 @@ export default function Pricing() {
             Simple, transparent pricing
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-base text-text-secondary">
-            Start free. Upgrade when you need more power. No lock-in contracts.
+            Plans for producers and advisors. Pricing details will be available closer to launch. All plans include a 30-day free trial.
           </p>
         </motion.div>
 
-        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Group labels */}
+        <div className="mt-16 grid grid-cols-2 gap-6 lg:grid-cols-4">
+          <div className="col-span-2 mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-brand">For Producers</span>
+          </div>
+          <div className="col-span-2 mb-2 hidden lg:block">
+            <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: '#CC8E9F' }}>For Advisors</span>
+          </div>
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {PRICING_TIERS.map((tier, i) => (
             <motion.div
               key={tier.id}
@@ -34,7 +43,7 @@ export default function Pricing() {
               className={`group relative flex flex-col rounded-2xl border p-6 transition-all duration-300 ${
                 tier.highlighted
                   ? 'border-brand/30 bg-brand/[0.04] shadow-[0_0_60px_rgba(217,118,47,0.08)]'
-                  : 'border-white/[0.06] bg-bg-card-1 hover:border-white/[0.1]'
+                  : 'border-white/[0.06] bg-white/[0.04] hover:border-white/[0.1]'
               }`}
             >
               {tier.badge && (
@@ -98,7 +107,7 @@ export default function Pricing() {
           viewport={{ once: true }}
           className="mt-8 text-center text-xs text-text-muted"
         >
-          30-day free trial on all plans. Need more AI queries? Purchase top-up packs anytime. They never expire.
+          Pricing information will be provided closer to launch. Need more AI queries? Purchase top-up packs anytime. They never expire.
         </motion.p>
       </div>
     </section>

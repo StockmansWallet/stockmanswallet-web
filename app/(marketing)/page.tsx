@@ -12,9 +12,9 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <Stats />
+      {/* <Stats /> */}
       <Features />
-      <HowItWorks />
+      {/* <HowItWorks /> */}
       <StockmanIQ />
       <ForAdvisors />
       <Pricing />

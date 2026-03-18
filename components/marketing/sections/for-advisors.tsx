@@ -78,7 +78,7 @@ export default function ForAdvisors() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-60px' }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className={`group relative overflow-hidden rounded-2xl border border-white/[0.06] bg-bg-card-1 p-8 transition-all duration-300 hover:border-[#B0657A]/20 ${feature.span}`}
+              className={`group relative overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.04] p-8 transition-all duration-300 hover:border-[#B0657A]/20 ${feature.span}`}
             >
               {/* Hover glow */}
               <div className="absolute inset-0 bg-gradient-to-br from-[#B0657A]/[0.04] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />

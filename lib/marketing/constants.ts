@@ -13,10 +13,10 @@ export const FEATURES: Feature[] = [
   {
     id: 'portfolio-dashboard',
     name: 'Portfolio Dashboard',
-    description: 'See your total livestock portfolio value at a glance. Live saleyard market data updates your herds automatically, so you always know what your cattle are worth.',
+    description: 'See your total livestock portfolio value at a glance. Live market data updates your herds automatically, so you always know what your cattle are worth.',
     accentColor: '#D9762F',
     accentColorLight: '#F4A871',
-    bullets: ['Live saleyard market pricing', 'Performance charts with time-range scrubbing', 'Capital concentration breakdown'],
+    bullets: ['Live market pricing', 'Performance charts with time-range scrubbing', 'Capital concentration breakdown'],
     icon: 'chart',
   },
   {
@@ -31,10 +31,10 @@ export const FEATURES: Feature[] = [
   {
     id: 'stockman-iq',
     name: 'Stockman IQ',
-    description: 'AI-powered capital timing intelligence. Get plain-English insights on the best month, weight, and saleyard to maximise returns on your herds.',
+    description: 'AI-powered capital timing intelligence. Get plain-English insights on the best month, weight, and market to maximise returns on your herds.',
     accentColor: '#D9762F',
     accentColorLight: '#F4A871',
-    bullets: ['Best sale month and weight alignment', 'Sell vs hold analysis', 'Saleyard comparison net of freight'],
+    bullets: ['Best sale month and weight alignment', 'Sell vs hold analysis', 'Market comparison net of freight'],
     icon: 'brain',
   },
   {
@@ -58,7 +58,7 @@ export const FEATURES: Feature[] = [
   {
     id: 'grid-iq',
     name: 'Grid IQ',
-    description: 'Compare saleyard prices against processor grids with freight and kill history factored in. Upload grids via camera and let AI extract the data.',
+    description: 'Compare market prices against processor grids with freight and kill history factored in. Upload grids via camera and let AI extract the data.',
     accentColor: '#00B4A0',
     accentColorLight: '#33D4C0',
     bullets: ['AI grid extraction from photos/PDF', 'Three-layer price comparison', 'Processor fit scoring'],
@@ -67,7 +67,7 @@ export const FEATURES: Feature[] = [
   {
     id: 'reports',
     name: 'Professional Reports',
-    description: 'Generate bank-ready, accountant-ready PDF reports with a tap. Asset registers, sales summaries, and saleyard comparisons, branded and professional.',
+    description: 'Generate bank-ready, accountant-ready PDF reports with a tap. Asset registers, sales summaries, and market comparisons, branded and professional.',
     accentColor: '#D4A053',
     accentColorLight: '#E8C07A',
     bullets: ['Asset Register and Sales Summary', 'Accounting Report', 'Share via email or AirDrop'],
@@ -88,12 +88,12 @@ export const HOW_IT_WORKS_STEPS: Step[] = [
   {
     number: 1,
     title: 'Add your herds',
-    description: 'Enter your livestock details: species, breed, head count, and weight. Import from CSV or add manually. Set up your properties and assign saleyards.',
+    description: 'Enter your livestock details: species, breed, head count, and weight. Import from CSV or add manually. Set up your properties and assign markets.',
   },
   {
     number: 2,
     title: 'Get real-time valuations',
-    description: 'Live saleyard market data prices your herds automatically. Watch your portfolio value update daily with breeding accruals, weight gain projections, and mortality adjustments.',
+    description: 'Live market data prices your herds automatically. Watch your portfolio value update daily with breeding accruals, weight gain projections, and mortality adjustments.',
   },
   {
     number: 3,
@@ -114,7 +114,7 @@ export const PRICING_TIERS: PricingTier[] = [
     features: [
       { name: '1 property', included: true },
       { name: 'Unlimited herds', included: true },
-      { name: 'Live saleyard market pricing', included: true },
+      { name: 'Live market pricing', included: true },
       { name: '50 Brangus AI queries/month', included: true },
       { name: '5 freight calculations/month', included: true },
       { name: 'Yard Book with reminders', included: true },
@@ -136,14 +136,14 @@ export const PRICING_TIERS: PricingTier[] = [
     features: [
       { name: 'Unlimited properties', included: true },
       { name: 'Unlimited herds', included: true },
-      { name: 'Live saleyard market pricing', included: true },
+      { name: 'Live market pricing', included: true },
       { name: '150 Brangus AI queries/month', included: true },
       { name: '15 freight calculations/month', included: true },
       { name: 'Grid IQ processor analysis', included: true },
       { name: 'ElevenLabs natural voice', included: true },
       { name: 'CSV import', included: true },
       { name: 'Herd Scenario Simulator', included: true },
-      { name: 'All reports including Saleyard Comparison', included: true },
+      { name: 'All reports including Market Comparison', included: true },
     ],
   },
   {
@@ -191,19 +191,19 @@ export const PRICING_TIERS: PricingTier[] = [
 export const TEAM_MEMBERS: TeamMember[] = [
   {
     name: 'Luke St. George',
-    role: 'CEO',
+    role: 'Chief Executive Officer',
     email: 'luke@stockmanswallet.com.au',
     bio: 'Leading the vision for capital intelligence in Australian agriculture.',
   },
   {
     name: 'Mil Jayaratne',
-    role: 'COO',
+    role: 'Chief Operating Officer',
     email: 'mil@stockmanswallet.com.au',
     bio: 'Driving operations and strategy to bring Stockman\'s Wallet to market.',
   },
   {
     name: 'Leon Ernst',
-    role: 'CTO',
+    role: 'Chief Technology Officer',
     email: 'leon@stockmanswallet.com.au',
     bio: 'Building the technology that powers intelligent livestock valuation.',
   },
