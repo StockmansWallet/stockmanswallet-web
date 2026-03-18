@@ -79,6 +79,7 @@ export function StockmanIQTabs({ conversations: initialConversations, insights }
             key={activeConvId ?? `new-${chatResetKey}`}
             conversationId={activeConvId ?? undefined}
             initialMessages={activeMessages ?? undefined}
+            pastConversationCount={conversations.length}
             onConversationCreated={handleConversationCreated}
             onConversationUpdated={handleConversationUpdated}
           />

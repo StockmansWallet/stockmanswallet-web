@@ -50,8 +50,8 @@ export default async function AppLayout({
           <MobileNav userEmail={user.email} subscriptionTier={profile?.subscription_tier || "stockman"} />
         </div>
 
-        {/* Desktop top header bar - full width */}
-        <div data-print-hide>
+        {/* Desktop top header bar - full width, sticky */}
+        <div data-print-hide className="sticky top-0 z-40">
           <TopBar
             showViewToggle={showViewToggle}
             firstName={user.user_metadata?.first_name || ""}

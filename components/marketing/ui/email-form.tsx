@@ -53,7 +53,7 @@ export default function EmailForm({ size = 'default', className }: EmailFormProp
         value={email}
         onChange={(e) => { setEmail(e.target.value); setStatus('idle') }}
         placeholder="Enter your email"
-        className={`${fieldHeight} flex-1 rounded-[16px] border-none bg-white/10 px-4 text-sm text-white placeholder:text-text-tertiary outline-none transition-colors focus:ring-1 focus:ring-brand`}
+        className={`${fieldHeight} flex-1 rounded-[16px] border border-white/10 bg-white/10 px-4 text-sm text-white placeholder:text-text-tertiary outline-none transition-colors focus:border-brand`}
         required
       />
       <button
