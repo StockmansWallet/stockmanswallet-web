@@ -13,6 +13,8 @@ interface ChatBubbleProps {
   animate?: boolean;
   /** "bounce" = spring pop-in (default), "fade" = gentle opacity fade */
   animationType?: "bounce" | "fade";
+  /** Optional profile image URL shown beside the bubble */
+  avatarUrl?: string;
   children: ReactNode;
 }
 
@@ -46,6 +48,7 @@ export function ChatBubble({
   timestamp,
   animate = false,
   animationType = "bounce",
+  avatarUrl,
   children,
 }: ChatBubbleProps) {
   const isRight = side === "right";
@@ -55,12 +58,21 @@ export function ChatBubble({
       : "animate-bubble-in"
     : "";
 
+  const avatar = avatarUrl ? (
+    <img
+      src={avatarUrl}
+      alt=""
+      className="h-9 w-9 shrink-0 rounded-full object-cover ring-2 ring-white/10"
+    />
+  ) : null;
+
   return (
     <div
-      className={`flex ${isRight ? "justify-end" : "justify-start"} ${animClass}`}
+      className={`flex items-end gap-2 ${isRight ? "justify-end" : "justify-start"} ${animClass}`}
       style={animate && animationType === "bounce" ? { transformOrigin: isRight ? "bottom right" : "bottom left" } : undefined}
     >
-      <div className="relative max-w-[85%] overflow-visible">
+      {!isRight && avatar}
+      <div className="relative max-w-[80%] overflow-visible">
         <div
           className={`rounded-3xl px-4 py-2.5 text-sm leading-relaxed ${bgClass} ${textClass}`}
         >
@@ -78,6 +90,7 @@ export function ChatBubble({
         </div>
         <BubbleTail side={side} color={tailColor} />
       </div>
+      {isRight && avatar}
     </div>
   );
 }

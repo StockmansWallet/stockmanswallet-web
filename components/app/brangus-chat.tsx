@@ -30,6 +30,9 @@ const SUGGESTED_PROMPTS = [
 const BRANGUS_BG = "#44372D";
 // User brand color
 const USER_BG = "var(--color-brand)";
+// Profile images
+const BRANGUS_AVATAR = "/images/brangus-profile.png";
+// User avatar: use initials or a generic icon (no photo needed)
 
 // Saved message row from Supabase (subset of columns needed)
 interface SavedMessage {
@@ -83,7 +86,17 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, o
     content: m.content,
   }));
 
-  const [messages, setMessages] = useState<ChatMessage[]>(hydratedMessages);
+  // Add welcome message for new conversations (not resumed)
+  const welcomeMessage: ChatMessage[] = !existingConvId && hydratedMessages.length === 0
+    ? [{
+        id: "welcome",
+        role: "assistant" as const,
+        content: "G'day! I'm Brangus, your stock advisor. I've got your whole portfolio at my fingertips, so fire away. Ask me about your herds, freight, sale timing, or anything else and I'll do the heavy lifting.",
+        timestamp: new Date(),
+      }]
+    : [];
+
+  const [messages, setMessages] = useState<ChatMessage[]>([...welcomeMessage, ...hydratedMessages]);
   const [conversationHistory, setConversationHistory] = useState<AnthropicMessage[]>(hydratedHistory);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialising, setIsInitialising] = useState(true);
@@ -490,7 +503,7 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, o
 
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto px-4 pt-4 pb-2">
-        {messages.length === 0 ? (
+        {messages.length === 0 && !isLoading ? (
           <EmptyState onPromptClick={(prompt) => handleSend(prompt)} />
         ) : (
           <div className="mx-auto max-w-2xl space-y-3">
@@ -504,6 +517,7 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, o
                   bgClass={isUser ? "bg-brand" : "bg-[#44372D]"}
                   tailColor={isUser ? USER_BG : BRANGUS_BG}
                   textClass={isUser ? "text-white" : "text-white/80"}
+                  avatarUrl={isUser ? undefined : BRANGUS_AVATAR}
                   animate
                   animationType={isPostTyping ? "fade" : "bounce"}
                 >
