@@ -104,36 +104,27 @@ export default async function ValuationPage() {
   type PriceRow = { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string };
   const emptyPrices: PriceRow[] = [];
 
-  const [{ data: saleyardPrices }, { data: nationalPrices }, { data: breedPremiumData }, { data: coverageData }] = await Promise.all([
-    mlaCategories.length > 0 && saleyards.length > 0
-      ? supabase
-          .from("category_prices")
-          .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
-          .in("saleyard", saleyards)
-          .in("category", mlaCategories)
-          .order("data_date", { ascending: false })
-          .limit(50000)
-      : Promise.resolve({ data: emptyPrices }),
+  // Fetch only the newest date's prices per saleyard+category via RPC.
+  // This avoids the 50k PostgREST row limit that silently truncates multi-saleyard queries
+  // when full history is fetched, causing inconsistent valuations across pages.
+  const [{ data: rpcPrices }, { data: breedPremiumData }, { data: coverageData }] = await Promise.all([
     mlaCategories.length > 0
-      ? supabase
-          .from("category_prices")
-          .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
-          .eq("saleyard", "National")
-          .in("category", mlaCategories)
-          .order("data_date", { ascending: false })
-          .limit(5000)
+      ? supabase.rpc("latest_saleyard_prices", {
+          p_saleyards: saleyards,
+          p_categories: mlaCategories,
+        }) as unknown as { data: PriceRow[] | null }
       : Promise.resolve({ data: emptyPrices }),
     supabase.from("breed_premiums").select("breed, premium_percent:premium_pct"),
     supabase.rpc("saleyard_coverage") as unknown as { data: SaleyardCoverage[] | null },
   ]);
 
-  const allPrices = [...(saleyardPrices ?? []), ...(nationalPrices ?? [])];
+  const allPrices = rpcPrices ?? [];
 
   // Build price maps
   const nationalPriceMap = new Map<string, CategoryPriceEntry[]>();
   const saleyardPriceMap = new Map<string, CategoryPriceEntry[]>();
   const saleyardBreedPriceMap = new Map<string, CategoryPriceEntry[]>();
-  for (const p of (allPrices ?? [])) {
+  for (const p of allPrices) {
     const priceEntry = { price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date };
     if (p.saleyard === "National" && p.breed === null) {
       const entries = nationalPriceMap.get(p.category) ?? [];

@@ -74,28 +74,43 @@ function prefilterTransactionsCsv(csvText: string): string {
   }
   if (headerIndex === -1) return csvText;
 
-  const dates = new Set<string>();
+  const today = new Date().toISOString().split("T")[0];
+
+  // Parse all data rows to find each saleyard's latest date (capped at today)
+  interface RowInfo {
+    line: string;
+    date: string;
+    saleyard: string;
+  }
+  const rows: RowInfo[] = [];
   for (let i = headerIndex + 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
-    const dateStr = line.split(",")[0].split(" ")[0];
-    if (dateStr && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-      dates.add(dateStr);
+    const cols = line.split(",");
+    const dateStr = cols[0]?.split(" ")[0];
+    const saleyard = cols[2]?.trim();
+    if (!dateStr || !saleyard || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr))
+      continue;
+    if (dateStr > today) continue; // skip future-dated entries
+    rows.push({ line, date: dateStr, saleyard });
+  }
+
+  // Find each saleyard's most recent date
+  const latestPerSaleyard: Record<string, string> = {};
+  for (const row of rows) {
+    if (
+      !latestPerSaleyard[row.saleyard] ||
+      row.date > latestPerSaleyard[row.saleyard]
+    ) {
+      latestPerSaleyard[row.saleyard] = row.date;
     }
   }
 
-  const sortedDates = Array.from(dates).sort();
-  const mostRecent = sortedDates[sortedDates.length - 1];
-
+  // Keep only rows matching each saleyard's latest date
   const headerBlock = lines.slice(0, headerIndex + 1);
-  const filteredDataLines: string[] = [];
-  for (let i = headerIndex + 1; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line) continue;
-    if (line.startsWith(mostRecent)) {
-      filteredDataLines.push(line);
-    }
-  }
+  const filteredDataLines = rows
+    .filter((r) => r.date === latestPerSaleyard[r.saleyard])
+    .map((r) => r.line);
 
   return headerBlock.join("\n") + "\n" + filteredDataLines.join("\n");
 }
@@ -292,6 +307,7 @@ export function MlaUploader({ userEmail }: { userEmail: string }) {
     let totalRows = 0;
     const totalSaleyards = new Set<string>();
     let failedChunks = 0;
+    let firstError = "";
 
     for (let i = 0; i < chunks.length; i++) {
       const chunk = chunks[i];
@@ -323,9 +339,15 @@ export function MlaUploader({ userEmail }: { userEmail: string }) {
               .forEach((s: string) => totalSaleyards.add(s));
           }
         } else {
+          const msg = result.error || `HTTP ${response.status}`;
+          console.error(`Chunk ${chunk.date} failed:`, msg);
+          if (!firstError) firstError = `${chunk.date}: ${msg}`;
           failedChunks++;
         }
-      } catch {
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error(`Chunk ${chunk.date} exception:`, msg);
+        if (!firstError) firstError = `${chunk.date}: ${msg}`;
         failedChunks++;
       }
     }
@@ -350,7 +372,7 @@ export function MlaUploader({ userEmail }: { userEmail: string }) {
       updateFile(pf.id, {
         status: "error",
         chunkProgress: null,
-        errorMessage: `All ${chunks.length} chunks failed`,
+        errorMessage: `All ${chunks.length} chunks failed${firstError ? ` — ${firstError}` : ""}`,
       });
     }
   }

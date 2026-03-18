@@ -63,8 +63,11 @@ export function SaleyardStatus() {
     const since = sinceDate(months);
     const url = since ? `/api/admin/saleyard-stats?since=${since}` : "/api/admin/saleyard-stats";
     fetch(url)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load saleyard data");
+      .then(async (res) => {
+        if (!res.ok) {
+          const body = await res.json().catch(() => null);
+          throw new Error(body?.error ?? `Failed to load saleyard data (${res.status})`);
+        }
         return res.json();
       })
       .then((data) => setStats(data))
