@@ -21,6 +21,18 @@ export default function Hero() {
       id="hero"
       className="relative flex min-h-[100dvh] items-center overflow-hidden"
     >
+      {/* Background image */}
+      <Image
+        src="/images/landing-bg.webp"
+        alt=""
+        fill
+        priority
+        className="absolute inset-0 object-cover opacity-20"
+      />
+
+      {/* Dark overlay to keep text readable - more transparent at top so image shows through */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/30 via-background/70 to-background" />
+
       {/* Subtle top-left radial gradient - centre pushed far off-screen so only the soft tail is visible */}
       <div
         className="pointer-events-none absolute inset-0"
