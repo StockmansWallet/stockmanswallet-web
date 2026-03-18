@@ -132,7 +132,6 @@ function ContextCard({ card, index }: { card: ChatExample['contextCards'][0]; in
         ...cardSpring,
         delay: index * 0.12,
         opacity: { duration: 0.3, delay: index * 0.12 },
-        exit: { type: 'tween', duration: 0.4, ease: [0.4, 0, 0.2, 1], delay: index * 0.08 },
       }}
       className="flex h-[66px] min-w-[100px] flex-col justify-center gap-0.5 rounded-xl bg-white/5 px-3"
     >
