@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus, Home, Check, X } from "lucide-react";
 import type { OnboardingProperty } from "@/app/onboarding/actions";
+import AddressAutocomplete, { type AddressResult } from "@/components/app/address-autocomplete";
 
 const australianStates = ["QLD", "NSW", "VIC", "SA", "WA", "TAS", "NT", "ACT"];
 
@@ -34,7 +35,18 @@ function AddPropertyModal({
   const [suburb, setSuburb] = useState("");
   const [state, setState] = useState("QLD");
   const [postcode, setPostcode] = useState("");
+  const [latitude, setLatitude] = useState<number | undefined>();
+  const [longitude, setLongitude] = useState<number | undefined>();
   const [isDefault, setIsDefault] = useState(isFirst);
+
+  function handleAddressSelect(result: AddressResult) {
+    setAddress(result.address);
+    if (result.suburb) setSuburb(result.suburb);
+    if (result.state) setState(result.state);
+    if (result.postcode) setPostcode(result.postcode);
+    setLatitude(result.latitude);
+    setLongitude(result.longitude);
+  }
 
   const canSave = name.trim().length > 0;
 
@@ -49,6 +61,8 @@ function AddPropertyModal({
       suburb: suburb.trim() || undefined,
       state,
       postcode: postcode.trim() || undefined,
+      latitude,
+      longitude,
       isDefault,
     });
   }
@@ -146,15 +160,17 @@ function AddPropertyModal({
 
         <div>
           <label className="mb-1 block text-xs font-medium text-text-muted">
-            Street Address
+            Property Address
           </label>
-          <input
-            type="text"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="e.g. 123 Station Road"
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand"
+          <AddressAutocomplete
+            onSelect={handleAddressSelect}
+            placeholder="Start typing a property address..."
           />
+          {latitude && longitude && (
+            <p className="mt-1 text-[10px] text-text-muted">
+              Coordinates: {latitude.toFixed(4)}, {longitude.toFixed(4)}
+            </p>
+          )}
         </div>
 
         <div>

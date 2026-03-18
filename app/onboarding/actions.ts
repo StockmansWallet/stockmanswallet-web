@@ -14,6 +14,8 @@ const onboardingPropertySchema = z.object({
   suburb: z.string().max(100).optional(),
   state: z.string().min(1).max(10),
   postcode: z.string().max(10).optional(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
   isDefault: z.boolean(),
 });
 
@@ -148,6 +150,8 @@ export async function completeOnboarding(data: OnboardingData) {
           suburb: prop.suburb || null,
           state: prop.state || "QLD",
           postcode: prop.postcode || null,
+          latitude: prop.latitude || null,
+          longitude: prop.longitude || null,
           is_default: prop.isDefault,
           default_saleyard: prop.isDefault
             ? validData.preferredSaleyard || null

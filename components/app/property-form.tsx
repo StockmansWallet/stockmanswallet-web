@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import AddressAutocomplete, { type AddressResult } from "@/components/app/address-autocomplete";
 
 import type { Database } from "@/lib/types/database";
 
@@ -31,6 +32,19 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [suburb, setSuburb] = useState(property?.suburb ?? "");
+  const [state, setState] = useState(property?.state ?? "");
+  const [postcode, setPostcode] = useState(property?.postcode ?? "");
+  const [latitude, setLatitude] = useState(property?.latitude ?? "");
+  const [longitude, setLongitude] = useState(property?.longitude ?? "");
+
+  function handleAddressSelect(result: AddressResult) {
+    if (result.suburb) setSuburb(result.suburb);
+    if (result.state) setState(result.state);
+    if (result.postcode) setPostcode(result.postcode);
+    setLatitude(result.latitude);
+    setLongitude(result.longitude);
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -76,15 +90,6 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
             placeholder="e.g. QABC1234"
             helperText="Property Identification Code"
           />
-          <Select
-            id="state"
-            name="state"
-            label="State"
-            required
-            options={AU_STATES}
-            placeholder="Select state"
-            defaultValue={property?.state ?? ""}
-          />
           <Input
             id="region"
             name="region"
@@ -118,44 +123,50 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
         </h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <Input
-              id="address"
-              name="address"
-              label="Street Address"
+            <label htmlFor="address" className="mb-1.5 block text-sm font-medium text-text-secondary">
+              Property Address
+            </label>
+            <AddressAutocomplete
               defaultValue={property?.address ?? ""}
-              placeholder="e.g. 123 Station Road"
+              onSelect={handleAddressSelect}
+              placeholder="Start typing a property address..."
             />
+            <input type="hidden" name="address" value={property?.address ?? ""} />
           </div>
           <Input
             id="suburb"
             name="suburb"
             label="Town / Suburb"
-            defaultValue={property?.suburb ?? ""}
+            value={suburb}
+            onChange={(e) => setSuburb(e.target.value)}
           />
           <Input
             id="postcode"
             name="postcode"
             label="Postcode"
-            defaultValue={property?.postcode ?? ""}
+            value={postcode}
+            onChange={(e) => setPostcode(e.target.value)}
           />
-          <Input
-            id="latitude"
-            name="latitude"
-            label="Latitude"
-            type="number"
-            step="any"
-            defaultValue={property?.latitude ?? ""}
-            placeholder="e.g. -23.7000"
+          <Select
+            id="state"
+            name="state"
+            label="State"
+            required
+            options={AU_STATES}
+            placeholder="Select state"
+            value={state}
+            onChange={(e) => setState(e.target.value)}
           />
-          <Input
-            id="longitude"
-            name="longitude"
-            label="Longitude"
-            type="number"
-            step="any"
-            defaultValue={property?.longitude ?? ""}
-            placeholder="e.g. 150.5000"
-          />
+          {/* Coordinates auto-filled from address selection */}
+          <input type="hidden" name="latitude" value={latitude} />
+          <input type="hidden" name="longitude" value={longitude} />
+          {latitude && longitude && (
+            <div className="sm:col-span-2">
+              <p className="text-xs text-text-muted">
+                Coordinates: {Number(latitude).toFixed(4)}, {Number(longitude).toFixed(4)}
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
