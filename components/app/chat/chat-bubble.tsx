@@ -65,11 +65,11 @@ export function ChatBubble({
     <img
       src={avatarUrl}
       alt=""
-      className="h-10 w-10 shrink-0 rounded-full object-cover"
+      className="mb-3 h-11 w-11 shrink-0 rounded-full object-cover"
     />
   ) : avatarInitials ? (
-    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
-      <span className="text-xs font-bold text-text-primary">{avatarInitials}</span>
+    <div className="mb-3 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/10">
+      <span className="text-sm font-bold text-text-primary">{avatarInitials}</span>
     </div>
   ) : null;
 
