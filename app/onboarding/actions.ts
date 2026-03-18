@@ -118,15 +118,17 @@ export async function completeOnboarding(data: OnboardingData) {
     .maybeSingle();
 
   if (existing) {
-    await supabase
+    const { error: updateErr } = await supabase
       .from("user_profiles")
       .update(profileUpdate)
       .eq("user_id", user.id);
+    if (updateErr) console.error("Onboarding profile update failed:", updateErr.message);
   } else {
-    await supabase.from("user_profiles").insert({
+    const { error: insertErr } = await supabase.from("user_profiles").insert({
       user_id: user.id,
       ...profileUpdate,
     });
+    if (insertErr) console.error("Onboarding profile insert failed:", insertErr.message);
   }
 
   // Create properties for producers
