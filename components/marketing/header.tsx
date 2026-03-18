@@ -29,12 +29,11 @@ export function Header() {
 
   return (
     <header
-      className="fixed top-0 z-50 w-full transition-all duration-300"
+      className="fixed top-0 z-50 w-full transition-all duration-700 ease-in-out"
       style={scrolled ? {
-        backgroundColor: 'rgba(15, 12, 8, 0.6)',
+        backgroundColor: 'rgba(15, 12, 8, 0.35)',
         backdropFilter: 'blur(24px) saturate(1.2)',
         WebkitBackdropFilter: 'blur(24px) saturate(1.2)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
       } : undefined}
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">

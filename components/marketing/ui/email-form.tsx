@@ -44,8 +44,7 @@ export default function EmailForm({ size = 'default', className }: EmailFormProp
     )
   }
 
-  const inputHeight = size === 'large' ? 'h-14' : 'h-[52px]'
-  const buttonHeight = size === 'large' ? 'h-12' : 'h-10'
+  const fieldHeight = size === 'large' ? 'h-14' : 'h-[48px]'
 
   return (
     <form onSubmit={handleSubmit} className={`relative flex w-full max-w-md gap-2 ${className ?? ''}`}>
@@ -54,13 +53,13 @@ export default function EmailForm({ size = 'default', className }: EmailFormProp
         value={email}
         onChange={(e) => { setEmail(e.target.value); setStatus('idle') }}
         placeholder="Enter your email"
-        className={`${inputHeight} flex-1 rounded-[16px] border border-white/10 bg-bg-card-1 px-4 text-sm text-white placeholder:text-text-tertiary outline-none transition-colors focus:border-brand`}
+        className={`${fieldHeight} flex-1 rounded-[16px] border-none bg-white/10 px-4 text-sm text-white placeholder:text-text-tertiary outline-none transition-colors focus:ring-1 focus:ring-brand`}
         required
       />
       <button
         type="submit"
         disabled={status === 'submitting'}
-        className={`${buttonHeight} self-center whitespace-nowrap rounded-[16px] bg-brand px-5 text-sm font-semibold text-white transition-all duration-150 hover:bg-brand-light active:scale-[0.97] disabled:opacity-50 cursor-pointer`}
+        className={`${fieldHeight} self-center whitespace-nowrap rounded-[16px] bg-brand px-5 text-sm font-semibold text-white transition-all duration-150 hover:bg-brand-light active:scale-[0.97] disabled:opacity-50 cursor-pointer`}
       >
         {status === 'submitting' ? (
           <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">

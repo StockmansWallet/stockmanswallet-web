@@ -18,7 +18,7 @@ export function TopBar({ showViewToggle, firstName, lastName, email }: TopBarPro
   const displayName = firstName && lastName ? `${firstName} ${lastName}` : email || "";
 
   return (
-    <header className="hidden h-20 shrink-0 items-center justify-between border-b border-white/[0.04] px-8 lg:flex">
+    <header className="sticky top-0 z-40 hidden h-20 shrink-0 items-center justify-between border-b border-white/[0.04] bg-background/95 backdrop-blur-sm px-8 lg:flex">
       {/* Logo */}
       <Link href="/dashboard" className="flex items-center gap-2.5">
         <Image
