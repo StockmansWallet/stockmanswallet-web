@@ -166,8 +166,8 @@ export async function updatePassword(formData: FormData) {
     return { error: "Passwords do not match." };
   }
 
-  if (newPassword.length < 6) {
-    return { error: "Password must be at least 6 characters." };
+  if (newPassword.length < 8) {
+    return { error: "Password must be at least 8 characters." };
   }
 
   const { error } = await supabase.auth.updateUser({
