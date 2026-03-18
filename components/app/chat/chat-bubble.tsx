@@ -15,6 +15,8 @@ interface ChatBubbleProps {
   animationType?: "bounce" | "fade";
   /** Optional profile image URL shown beside the bubble */
   avatarUrl?: string;
+  /** Initials to show if no avatarUrl (e.g. "LE" for Leon Ernst) */
+  avatarInitials?: string;
   children: ReactNode;
 }
 
@@ -49,6 +51,7 @@ export function ChatBubble({
   animate = false,
   animationType = "bounce",
   avatarUrl,
+  avatarInitials,
   children,
 }: ChatBubbleProps) {
   const isRight = side === "right";
@@ -62,8 +65,12 @@ export function ChatBubble({
     <img
       src={avatarUrl}
       alt=""
-      className="h-9 w-9 shrink-0 rounded-full object-cover ring-2 ring-white/10"
+      className="h-10 w-10 shrink-0 rounded-full object-cover"
     />
+  ) : avatarInitials ? (
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
+      <span className="text-xs font-bold text-text-primary">{avatarInitials}</span>
+    </div>
   ) : null;
 
   return (

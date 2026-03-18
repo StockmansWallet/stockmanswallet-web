@@ -152,10 +152,24 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, o
 
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [userInitials, setUserInitials] = useState("SW");
   const postTypingIdRef = useRef<string | null>(null);
   const conversationIdRef = useRef<string | null>(existingConvId ?? null);
   const userIdRef = useRef<string | null>(null);
   const hasRequestedTitleRef = useRef(!!existingConvId);
+
+  // Get user initials from auth metadata
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      const meta = data.user?.user_metadata;
+      if (meta) {
+        const first = (meta.first_name || meta.given_name || meta.full_name?.split(" ")[0] || "").charAt(0);
+        const last = (meta.last_name || meta.family_name || meta.full_name?.split(" ").pop() || "").charAt(0);
+        if (first || last) setUserInitials((first + last).toUpperCase());
+      }
+    });
+  }, []);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -553,6 +567,7 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, o
                   tailColor={isUser ? USER_BG : BRANGUS_BG}
                   textClass={isUser ? "text-white" : "text-white/80"}
                   avatarUrl={isUser ? undefined : BRANGUS_AVATAR}
+                  avatarInitials={isUser ? userInitials : undefined}
                   animate
                   animationType={isPostTyping ? "fade" : "bounce"}
                 >
