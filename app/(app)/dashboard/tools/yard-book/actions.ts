@@ -1,8 +1,33 @@
 "use server";
 
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+
+const yardBookItemSchema = z.object({
+  title: z.string().min(1).max(200),
+  event_date: z.string().min(1).max(30),
+  is_all_day: z.boolean(),
+  event_time: z.string().max(10).nullable(),
+  category: z.enum(["Livestock", "Operations", "Finance", "Family", "Me"]).default("Livestock"),
+  notes: z.string().max(2000).nullable(),
+  is_recurring: z.boolean(),
+  recurrence_rule: z.enum(["Weekly", "Fortnightly", "Monthly", "Annual"]).nullable(),
+  recurrence_interval: z.number().int().positive().nullable(),
+  reminder_offsets: z.array(z.number().int()).nullable(),
+  linked_herd_ids: z.array(z.string().uuid()).nullable(),
+  property_id: z.string().uuid().nullable(),
+});
+
+const yardBookIdSchema = z.object({
+  id: z.string().uuid(),
+});
+
+const toggleCompleteSchema = z.object({
+  id: z.string().uuid(),
+  isCompleted: z.boolean(),
+});
 
 // event_time column is timestamptz - convert "HH:MM" from <input type="time"> to full ISO timestamp
 function parseEventTime(time: string | null): string | null {
@@ -26,38 +51,50 @@ export async function createYardBookItem(formData: FormData) {
   const linkedHerdIdsRaw = formData.get("linked_herd_ids") as string;
   const eventTime = formData.get("event_time") as string;
 
-  const { error } = await supabase.from("yard_book_items").insert({
-    id: crypto.randomUUID(),
-    user_id: user.id,
-    title: formData.get("title") as string,
-    event_date: formData.get("event_date") as string,
+  let reminderOffsets: number[] | null = null;
+  let linkedHerdIds: string[] | null = null;
+  try {
+    if (reminderOffsetsRaw) reminderOffsets = JSON.parse(reminderOffsetsRaw);
+  } catch { /* ignore */ }
+  try {
+    if (linkedHerdIdsRaw) linkedHerdIds = JSON.parse(linkedHerdIdsRaw);
+  } catch { /* ignore */ }
+
+  const parsed = yardBookItemSchema.safeParse({
+    title: formData.get("title"),
+    event_date: formData.get("event_date"),
     is_all_day: formData.get("is_all_day") === "on",
-    event_time: parseEventTime(eventTime),
-    category_raw:
-      (formData.get("category") as
-        | "Livestock"
-        | "Operations"
-        | "Finance"
-        | "Family"
-        | "Me") || "Livestock",
+    event_time: eventTime || null,
+    category: formData.get("category") || "Livestock",
     notes: (formData.get("notes") as string) || null,
     is_recurring: formData.get("is_recurring") === "on",
-    recurrence_rule_raw:
-      (formData.get("recurrence_rule") as
-        | "Weekly"
-        | "Fortnightly"
-        | "Monthly"
-        | "Annual") || null,
+    recurrence_rule: (formData.get("recurrence_rule") as string) || null,
     recurrence_interval: formData.get("recurrence_interval")
       ? Number(formData.get("recurrence_interval"))
       : null,
-    reminder_offsets: reminderOffsetsRaw
-      ? JSON.parse(reminderOffsetsRaw)
-      : null,
-    linked_herd_ids: linkedHerdIdsRaw
-      ? JSON.parse(linkedHerdIdsRaw)
-      : null,
+    reminder_offsets: reminderOffsets,
+    linked_herd_ids: linkedHerdIds,
     property_id: (formData.get("property_id") as string) || null,
+  });
+  if (!parsed.success) return { error: "Invalid input" };
+
+  const v = parsed.data;
+
+  const { error } = await supabase.from("yard_book_items").insert({
+    id: crypto.randomUUID(),
+    user_id: user.id,
+    title: v.title,
+    event_date: v.event_date,
+    is_all_day: v.is_all_day,
+    event_time: parseEventTime(v.event_time),
+    category_raw: v.category,
+    notes: v.notes,
+    is_recurring: v.is_recurring,
+    recurrence_rule_raw: v.recurrence_rule,
+    recurrence_interval: v.recurrence_interval,
+    reminder_offsets: v.reminder_offsets,
+    linked_herd_ids: v.linked_herd_ids,
+    property_id: v.property_id,
     is_completed: false,
     notifications_scheduled: false,
     is_demo_data: false,

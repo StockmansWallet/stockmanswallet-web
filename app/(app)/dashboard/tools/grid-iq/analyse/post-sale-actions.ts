@@ -1,5 +1,6 @@
 "use server";
 
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -21,6 +22,19 @@ import { runPaymentCheck } from "@/lib/engines/grid-iq-payment-check";
 import { generateBrangusCommentary } from "@/lib/grid-iq/commentary-service";
 import { computeProducerProfile } from "@/lib/grid-iq/producer-profile";
 
+const postSaleAnalysisSchema = z.object({
+  consignmentId: z.string().uuid(),
+  killSheetId: z.string().uuid(),
+});
+
+const confirmSaleSchema = z.object({
+  consignmentId: z.string().uuid(),
+  adjustedAllocations: z.array(z.object({
+    herdGroupId: z.string().uuid(),
+    headCount: z.number().int().positive(),
+  })).optional(),
+});
+
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -36,6 +50,9 @@ function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): nu
  * Called after the user uploads the actual kill sheet and links it to the consignment.
  */
 export async function runPostSaleAnalysis(consignmentId: string, killSheetId: string) {
+  const parsed = postSaleAnalysisSchema.safeParse({ consignmentId, killSheetId });
+  if (!parsed.success) return { error: "Invalid input" };
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
@@ -354,6 +371,9 @@ export async function confirmSale(
   consignmentId: string,
   adjustedAllocations?: { herdGroupId: string; headCount: number }[],
 ) {
+  const parsed = confirmSaleSchema.safeParse({ consignmentId, adjustedAllocations });
+  if (!parsed.success) return { error: "Invalid input" };
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };

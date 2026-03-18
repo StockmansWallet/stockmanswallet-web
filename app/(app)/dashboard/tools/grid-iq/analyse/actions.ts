@@ -1,5 +1,6 @@
 "use server";
 
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -22,6 +23,12 @@ import { runPaymentCheck } from "@/lib/engines/grid-iq-payment-check";
 import { generateBrangusCommentary } from "@/lib/grid-iq/commentary-service";
 import { computeProducerProfile } from "@/lib/grid-iq/producer-profile";
 
+const createAnalysisSchema = z.object({
+  gridId: z.string().uuid(),
+  herdId: z.string().uuid(),
+  killSheetId: z.string().uuid().nullable(),
+});
+
 // Haversine distance (km) between two lat/lon points
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371;
@@ -43,9 +50,11 @@ export async function createAnalysis(formData: FormData) {
   const gridId = formData.get("gridId") as string;
   const herdId = formData.get("herdId") as string;
   const killSheetId = (formData.get("killSheetId") as string) || null;
-  const analysisMode: AnalysisMode = killSheetId ? "post_sale" : "pre_sale";
 
-  if (!gridId || !herdId) return { error: "Grid and herd are required" };
+  const parsed = createAnalysisSchema.safeParse({ gridId, herdId, killSheetId });
+  if (!parsed.success) return { error: "Invalid input" };
+
+  const analysisMode: AnalysisMode = killSheetId ? "post_sale" : "pre_sale";
 
   // 1. Fetch grid, herd, kill sheet, property in parallel
   const [{ data: grid }, { data: herd }, killSheetResult, { data: breedPremiumData }] = await Promise.all([

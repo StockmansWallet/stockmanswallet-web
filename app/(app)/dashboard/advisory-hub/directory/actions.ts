@@ -1,10 +1,17 @@
 "use server";
 
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { notifyConnectionRequest } from "@/lib/advisory/notifications";
 
+const targetUserIdSchema = z.object({
+  targetUserId: z.string().uuid(),
+});
+
 export async function sendConnectionRequest(targetUserId: string) {
+  const parsed = targetUserIdSchema.safeParse({ targetUserId });
+  if (!parsed.success) return { error: "Invalid input" };
   const supabase = await createClient();
   const {
     data: { user },

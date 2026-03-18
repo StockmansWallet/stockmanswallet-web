@@ -3,44 +3,49 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
-export type OnboardingProperty = {
-  name: string;
-  pic?: string;
-  size?: number;
-  sizeUnit?: "ha" | "ac";
-  address?: string;
-  suburb?: string;
-  state: string;
-  postcode?: string;
-  isDefault: boolean;
-};
+const onboardingPropertySchema = z.object({
+  name: z.string().min(1).max(200),
+  pic: z.string().max(20).optional(),
+  size: z.number().positive().optional(),
+  sizeUnit: z.enum(["ha", "ac"]).optional(),
+  address: z.string().max(300).optional(),
+  suburb: z.string().max(100).optional(),
+  state: z.string().min(1).max(10),
+  postcode: z.string().max(10).optional(),
+  isDefault: z.boolean(),
+});
 
-export type OnboardingData = {
-  accountType: "farmer_grazier" | "advisor";
-  displayName?: string;
-  // Producer fields
-  properties: OnboardingProperty[];
-  preferredSaleyard?: string;
-  // Advisor fields
-  companyName?: string;
-  businessType?: string;
-  advisorRole?: string;
-  businessAddress?: string;
-  // Account type role (for advisor sub-role from step 1)
-  accountTypeRole?: string;
-  // Preferences - producer
-  isDiscoverableToAdvisors?: boolean;
-  isVisibleOnFarmerNetwork?: boolean;
-  // Preferences - advisor
-  isListedInDirectory?: boolean;
-  // Public profile
-  contactEmail?: string;
-  contactPhone?: string;
-  bio?: string;
-};
+const onboardingDataSchema = z.object({
+  accountType: z.enum(["farmer_grazier", "advisor"]),
+  displayName: z.string().max(200).optional(),
+  properties: z.array(onboardingPropertySchema).default([]),
+  preferredSaleyard: z.string().max(200).optional(),
+  companyName: z.string().max(200).optional(),
+  businessType: z.string().max(100).optional(),
+  advisorRole: z.string().max(100).optional(),
+  businessAddress: z.string().max(300).optional(),
+  accountTypeRole: z.string().max(100).optional(),
+  isDiscoverableToAdvisors: z.boolean().optional(),
+  isVisibleOnFarmerNetwork: z.boolean().optional(),
+  isListedInDirectory: z.boolean().optional(),
+  contactEmail: z.string().email().or(z.literal("")).optional(),
+  contactPhone: z.string().max(30).optional(),
+  bio: z.string().max(1000).optional(),
+});
+
+export type OnboardingProperty = z.infer<typeof onboardingPropertySchema>;
+
+export type OnboardingData = z.infer<typeof onboardingDataSchema>;
 
 export async function completeOnboarding(data: OnboardingData) {
+  const parsed = onboardingDataSchema.safeParse(data);
+
+  if (!parsed.success) return { error: "Invalid input" };
+
+  // Use validated data from here on
+  const validData = parsed.data;
   const supabase = await createClient();
   const {
     data: { user },
@@ -50,16 +55,16 @@ export async function completeOnboarding(data: OnboardingData) {
 
   // Build user_profiles update
   const profileUpdate: Record<string, unknown> = {
-    role: data.accountType,
+    role: validData.accountType,
     onboarding_completed: true,
     updated_at: new Date().toISOString(),
   };
 
-  if (data.displayName) {
-    profileUpdate.display_name = data.displayName;
+  if (validData.displayName) {
+    profileUpdate.display_name = validData.displayName;
 
     // Also update auth metadata so dashboard and profile settings can read it
-    const nameParts = data.displayName.trim().split(/\s+/);
+    const nameParts = validData.displayName.trim().split(/\s+/);
     const authFirstName = nameParts[0] || "";
     const authLastName = nameParts.slice(1).join(" ") || "";
     await supabase.auth.updateUser({
@@ -67,24 +72,24 @@ export async function completeOnboarding(data: OnboardingData) {
     });
   }
 
-  if (data.contactEmail) {
-    profileUpdate.contact_email = data.contactEmail;
+  if (validData.contactEmail) {
+    profileUpdate.contact_email = validData.contactEmail;
   }
-  if (data.contactPhone) {
-    profileUpdate.contact_phone = data.contactPhone;
+  if (validData.contactPhone) {
+    profileUpdate.contact_phone = validData.contactPhone;
   }
-  if (data.bio) {
-    profileUpdate.bio = data.bio;
+  if (validData.bio) {
+    profileUpdate.bio = validData.bio;
   }
 
-  if (data.accountType === "farmer_grazier") {
+  if (validData.accountType === "farmer_grazier") {
     // Producer visibility
-    profileUpdate.is_discoverable = data.isDiscoverableToAdvisors ?? false;
+    profileUpdate.is_discoverable = validData.isDiscoverableToAdvisors ?? false;
     profileUpdate.is_discoverable_to_farmers =
-      data.isVisibleOnFarmerNetwork ?? false;
+      validData.isVisibleOnFarmerNetwork ?? false;
 
     // Store primary property info on profile for quick access
-    const primaryProp = data.properties.find((p) => p.isDefault);
+    const primaryProp = validData.properties.find((p) => p.isDefault);
     if (primaryProp) {
       profileUpdate.property_name = primaryProp.name;
       profileUpdate.property_pic = primaryProp.pic || null;
@@ -93,14 +98,14 @@ export async function completeOnboarding(data: OnboardingData) {
     }
   } else {
     // Advisor fields
-    if (data.companyName) profileUpdate.company_name = data.companyName;
-    if (data.businessType) profileUpdate.business_type = data.businessType;
-    if (data.advisorRole) profileUpdate.advisor_role = data.advisorRole;
-    if (data.businessAddress)
-      profileUpdate.business_address = data.businessAddress;
+    if (validData.companyName) profileUpdate.company_name = validData.companyName;
+    if (validData.businessType) profileUpdate.business_type = validData.businessType;
+    if (validData.advisorRole) profileUpdate.advisor_role = validData.advisorRole;
+    if (validData.businessAddress)
+      profileUpdate.business_address = validData.businessAddress;
 
-    profileUpdate.is_discoverable = data.isListedInDirectory ?? false;
-    profileUpdate.is_listed_in_directory = data.isListedInDirectory ?? false;
+    profileUpdate.is_discoverable = validData.isListedInDirectory ?? false;
+    profileUpdate.is_listed_in_directory = validData.isListedInDirectory ?? false;
   }
 
   // Upsert user_profiles
@@ -123,7 +128,7 @@ export async function completeOnboarding(data: OnboardingData) {
   }
 
   // Create properties for producers
-  if (data.accountType === "farmer_grazier" && data.properties.length > 0) {
+  if (validData.accountType === "farmer_grazier" && validData.properties.length > 0) {
     const { data: existingProps } = await supabase
       .from("properties")
       .select("id")
@@ -132,7 +137,7 @@ export async function completeOnboarding(data: OnboardingData) {
       .limit(1);
 
     if (!existingProps || existingProps.length === 0) {
-      for (const prop of data.properties) {
+      for (const prop of validData.properties) {
         await supabase.from("properties").insert({
           id: crypto.randomUUID(),
           user_id: user.id,
@@ -145,7 +150,7 @@ export async function completeOnboarding(data: OnboardingData) {
           postcode: prop.postcode || null,
           is_default: prop.isDefault,
           default_saleyard: prop.isDefault
-            ? data.preferredSaleyard || null
+            ? validData.preferredSaleyard || null
             : null,
         });
       }

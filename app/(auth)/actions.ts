@@ -3,13 +3,39 @@
 import { redirect } from "next/navigation";
 import { headers, cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { z } from "zod";
+
+const signInSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+});
+
+const signUpSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
+
+const forgotPasswordSchema = z.object({
+  email: z.string().email(),
+});
+
+const updatePasswordSchema = z.object({
+  password: z.string().min(8),
+});
 
 export async function signIn(formData: FormData) {
+  const parsed = signInSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+
+  if (!parsed.success) return { error: "Invalid input" };
+
   const supabase = await createClient();
 
   const { error } = await supabase.auth.signInWithPassword({
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
+    email: parsed.data.email,
+    password: parsed.data.password,
   });
 
   if (error) {
@@ -20,11 +46,18 @@ export async function signIn(formData: FormData) {
 }
 
 export async function signUp(formData: FormData) {
+  const parsed = signUpSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+
+  if (!parsed.success) return { error: "Invalid input" };
+
   const supabase = await createClient();
 
   const { error } = await supabase.auth.signUp({
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
+    email: parsed.data.email,
+    password: parsed.data.password,
   });
 
   if (error) {
@@ -36,12 +69,17 @@ export async function signUp(formData: FormData) {
 }
 
 export async function forgotPassword(formData: FormData) {
+  const parsed = forgotPasswordSchema.safeParse({
+    email: formData.get("email"),
+  });
+
+  if (!parsed.success) return { error: "Invalid input" };
+
   const supabase = await createClient();
   const origin = (await headers()).get("origin") || "https://stockmanswallet.com.au";
-  const email = formData.get("email") as string;
 
   // Always return success to avoid revealing whether the email exists
-  await supabase.auth.resetPasswordForEmail(email, {
+  await supabase.auth.resetPasswordForEmail(parsed.data.email, {
     redirectTo: `${origin}/auth/callback`,
   });
 
@@ -60,10 +98,17 @@ export async function forgotPassword(formData: FormData) {
 }
 
 export async function updatePassword(formData: FormData) {
-  const supabase = await createClient();
-  const password = formData.get("password") as string;
+  const parsed = updatePasswordSchema.safeParse({
+    password: formData.get("password"),
+  });
 
-  const { error } = await supabase.auth.updateUser({ password });
+  if (!parsed.success) return { error: "Invalid input" };
+
+  const supabase = await createClient();
+
+  const { error } = await supabase.auth.updateUser({
+    password: parsed.data.password,
+  });
 
   if (error) {
     return { error: error.message };

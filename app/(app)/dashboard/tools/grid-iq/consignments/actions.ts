@@ -1,7 +1,45 @@
 "use server";
 
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+
+const allocationItemSchema = z.object({
+  herdGroupId: z.string().uuid(),
+  headCount: z.number().int().positive(),
+  category: z.string().max(100).optional().default(""),
+});
+
+const createConsignmentSchema = z.object({
+  consignmentName: z.string().max(200).nullable(),
+  processorName: z.string().min(1, "Processor name is required").max(200),
+  plantLocation: z.string().max(200).nullable(),
+  bookingReference: z.string().max(100).nullable(),
+  killDate: z.string().max(30).nullable(),
+  gridId: z.string().uuid().nullable(),
+  notes: z.string().max(2000).nullable(),
+  allocations: z.array(allocationItemSchema).min(1, "At least one herd allocation is required"),
+});
+
+const consignmentIdSchema = z.object({
+  consignmentId: z.string().uuid(),
+});
+
+const linkKillSheetSchema = z.object({
+  consignmentId: z.string().uuid(),
+  killSheetId: z.string().uuid(),
+});
+
+const updateConsignmentSchema = z.object({
+  consignmentId: z.string().uuid(),
+  consignmentName: z.string().max(200).nullable(),
+  processorName: z.string().max(200).nullable(),
+  plantLocation: z.string().max(200).nullable(),
+  bookingReference: z.string().max(100).nullable(),
+  killDate: z.string().max(30).nullable(),
+  notes: z.string().max(2000).nullable(),
+  allocations: z.array(allocationItemSchema).min(1, "At least one herd allocation is required"),
+});
 
 // Create a new consignment with herd allocations
 export async function createConsignment(formData: FormData) {
@@ -18,14 +56,24 @@ export async function createConsignment(formData: FormData) {
   const notes = (formData.get("notes") as string) || null;
   const allocationsJSON = formData.get("allocations") as string;
 
-  if (!processorName) return { error: "Processor name is required" };
-
   let allocations: { herdGroupId: string; headCount: number; category: string }[];
   try {
     allocations = JSON.parse(allocationsJSON || "[]");
   } catch {
     return { error: "Invalid allocations data" };
   }
+
+  const parsed = createConsignmentSchema.safeParse({
+    consignmentName,
+    processorName,
+    plantLocation,
+    bookingReference,
+    killDate,
+    gridId,
+    notes,
+    allocations,
+  });
+  if (!parsed.success) return { error: "Invalid input" };
 
   if (allocations.length === 0) return { error: "At least one herd allocation is required" };
 
@@ -85,6 +133,8 @@ export async function createConsignment(formData: FormData) {
 
 // Link a kill sheet to a consignment
 export async function linkKillSheet(consignmentId: string, killSheetId: string) {
+  const parsed = linkKillSheetSchema.safeParse({ consignmentId, killSheetId });
+  if (!parsed.success) return { error: "Invalid input" };
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
@@ -110,6 +160,8 @@ export async function linkKillSheet(consignmentId: string, killSheetId: string) 
 
 // Complete a consignment - deduct head from herds, create sales records
 export async function completeSale(consignmentId: string) {
+  const parsed = consignmentIdSchema.safeParse({ consignmentId });
+  if (!parsed.success) return { error: "Invalid input" };
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
@@ -233,7 +285,24 @@ export async function updateConsignment(formData: FormData) {
   const notes = (formData.get("notes") as string) || null;
   const allocationsJSON = formData.get("allocations") as string;
 
-  if (!consignmentId) return { error: "Consignment ID is required" };
+  let allocations: { herdGroupId: string; headCount: number; category: string }[];
+  try {
+    allocations = JSON.parse(allocationsJSON || "[]");
+  } catch {
+    return { error: "Invalid allocations data" };
+  }
+
+  const parsed = updateConsignmentSchema.safeParse({
+    consignmentId,
+    consignmentName,
+    processorName,
+    plantLocation,
+    bookingReference,
+    killDate,
+    notes,
+    allocations,
+  });
+  if (!parsed.success) return { error: "Invalid input" };
 
   // Verify consignment exists and is editable
   const { data: existing } = await supabase
@@ -244,14 +313,6 @@ export async function updateConsignment(formData: FormData) {
     .single();
   if (!existing) return { error: "Consignment not found" };
   if (existing.status === "completed") return { error: "Cannot edit a completed consignment" };
-
-  let allocations: { herdGroupId: string; headCount: number; category: string }[];
-  try {
-    allocations = JSON.parse(allocationsJSON || "[]");
-  } catch {
-    return { error: "Invalid allocations data" };
-  }
-  if (allocations.length === 0) return { error: "At least one herd allocation is required" };
 
   const totalHead = allocations.reduce((sum, a) => sum + a.headCount, 0);
   if (totalHead <= 0) return { error: "Total head count must be greater than zero" };
@@ -300,6 +361,8 @@ export async function updateConsignment(formData: FormData) {
 
 // Delete (soft) a consignment
 export async function deleteConsignment(consignmentId: string) {
+  const parsed = consignmentIdSchema.safeParse({ consignmentId });
+  if (!parsed.success) return { error: "Invalid input" };
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };

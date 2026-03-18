@@ -1,5 +1,6 @@
 "use server";
 
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -7,7 +8,13 @@ import {
   notifyDenial,
 } from "@/lib/advisory/notifications";
 
+const requestIdSchema = z.object({
+  requestId: z.string().uuid(),
+});
+
 export async function approveFarmerRequest(requestId: string) {
+  const parsed = requestIdSchema.safeParse({ requestId });
+  if (!parsed.success) return { error: "Invalid input" };
   const supabase = await createClient();
   const {
     data: { user },
@@ -40,6 +47,8 @@ export async function approveFarmerRequest(requestId: string) {
 }
 
 export async function denyFarmerRequest(requestId: string) {
+  const parsed = requestIdSchema.safeParse({ requestId });
+  if (!parsed.success) return { error: "Invalid input" };
   const supabase = await createClient();
   const {
     data: { user },

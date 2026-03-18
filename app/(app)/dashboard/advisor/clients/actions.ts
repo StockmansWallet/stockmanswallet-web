@@ -1,11 +1,25 @@
 "use server";
 
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { notifyConnectionRequest } from "@/lib/advisory/notifications";
 
+const searchQuerySchema = z.object({
+  query: z.string().min(2).max(100),
+});
+
+const targetUserIdSchema = z.object({
+  targetUserId: z.string().uuid(),
+});
+
+const connectionIdSchema = z.object({
+  connectionId: z.string().uuid(),
+});
+
 export async function searchProducers(query: string) {
-  if (!query || query.trim().length < 2) return { producers: [] };
+  const parsed = searchQuerySchema.safeParse({ query: query?.trim() });
+  if (!parsed.success) return { producers: [] };
 
   const supabase = await createClient();
   const {
@@ -43,6 +57,8 @@ export async function searchProducers(query: string) {
 }
 
 export async function sendAdvisorConnectionRequest(targetUserId: string) {
+  const parsed = targetUserIdSchema.safeParse({ targetUserId });
+  if (!parsed.success) return { error: "Invalid input" };
   const supabase = await createClient();
   const {
     data: { user },
@@ -98,6 +114,8 @@ export async function sendAdvisorConnectionRequest(targetUserId: string) {
 }
 
 export async function requestRenewal(connectionId: string) {
+  const parsed = connectionIdSchema.safeParse({ connectionId });
+  if (!parsed.success) return { error: "Invalid input" };
   const supabase = await createClient();
   const {
     data: { user },
@@ -132,6 +150,8 @@ export async function requestRenewal(connectionId: string) {
 }
 
 export async function removeClient(connectionId: string) {
+  const parsed = connectionIdSchema.safeParse({ connectionId });
+  if (!parsed.success) return { error: "Invalid input" };
   const supabase = await createClient();
   const {
     data: { user },

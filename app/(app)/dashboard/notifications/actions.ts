@@ -1,9 +1,16 @@
 "use server";
 
+import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
+const notificationIdSchema = z.object({
+  notificationId: z.string().uuid(),
+});
+
 export async function markAsRead(notificationId: string) {
+  const parsed = notificationIdSchema.safeParse({ notificationId });
+  if (!parsed.success) return { error: "Invalid input" };
   const supabase = await createClient();
   const {
     data: { user },

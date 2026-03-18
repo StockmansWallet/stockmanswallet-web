@@ -1,11 +1,24 @@
 "use server";
 
+import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { createNotification, notifyDenial } from "@/lib/advisory/notifications";
 import type { AdvisoryMessage, MessageType } from "@/lib/types/advisory";
 
+const connectionIdSchema = z.object({
+  connectionId: z.string().uuid(),
+});
+
+const sendMessageSchema = z.object({
+  connectionId: z.string().uuid(),
+  content: z.string().min(1).max(5000),
+  messageType: z.enum(["general_note", "valuation_report", "market_update", "action_required"]),
+});
+
 export async function fetchFarmerMessages(connectionId: string) {
+  const parsed = connectionIdSchema.safeParse({ connectionId });
+  if (!parsed.success) return { error: "Invalid input", messages: [] };
   const supabase = await createClient();
   const {
     data: { user },
@@ -42,6 +55,8 @@ export async function sendFarmerMessage(
   content: string,
   messageType: MessageType
 ) {
+  const parsed = sendMessageSchema.safeParse({ connectionId, content, messageType });
+  if (!parsed.success) return { error: "Invalid input" };
   const supabase = await createClient();
   const {
     data: { user },
@@ -98,6 +113,8 @@ export async function sendFarmerMessage(
 }
 
 export async function disconnectFarmer(connectionId: string) {
+  const parsed = connectionIdSchema.safeParse({ connectionId });
+  if (!parsed.success) return { error: "Invalid input" };
   const supabase = await createClient();
   const {
     data: { user },

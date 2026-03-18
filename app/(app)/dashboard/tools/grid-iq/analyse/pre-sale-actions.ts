@@ -1,5 +1,6 @@
 "use server";
 
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -20,6 +21,24 @@ import {
 import type { GridEntry } from "@/lib/engines/kill-score-engine";
 import { generateBrangusCommentary } from "@/lib/grid-iq/commentary-service";
 import { computeProducerProfile } from "@/lib/grid-iq/producer-profile";
+
+const preSaleAllocationSchema = z.object({
+  herdGroupId: z.string().uuid(),
+  headCount: z.number().int().positive(),
+  category: z.string().max(100).optional().default(""),
+});
+
+const createPreSaleSchema = z.object({
+  gridId: z.string().uuid(),
+  consignmentName: z.string().max(200).nullable(),
+  processorName: z.string().max(200),
+  plantLocation: z.string().max(200).nullable(),
+  bookingReference: z.string().max(100).nullable(),
+  killDate: z.string().max(30).nullable(),
+  notes: z.string().max(2000).nullable(),
+  allocations: z.array(preSaleAllocationSchema).min(1),
+  killSheetIds: z.array(z.string().uuid()).optional(),
+});
 
 // Haversine distance (km) between two lat/lon points
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -77,15 +96,33 @@ export async function createPreSaleAnalysis(formData: FormData) {
   const allocationsJSON = formData.get("allocations") as string;
   const killSheetIdsJSON = formData.get("killSheetIds") as string | null;
 
-  if (!gridId) return { error: "Processor grid is required" };
-
   let allocations: AllocationInput[];
   try {
     allocations = JSON.parse(allocationsJSON || "[]");
   } catch {
     return { error: "Invalid allocations data" };
   }
-  if (allocations.length === 0) return { error: "At least one herd allocation is required" };
+
+  let selectedKillSheetIdsParsed: string[] | undefined;
+  if (killSheetIdsJSON) {
+    try {
+      const p = JSON.parse(killSheetIdsJSON);
+      if (Array.isArray(p) && p.length > 0) selectedKillSheetIdsParsed = p;
+    } catch { /* ignore parse errors */ }
+  }
+
+  const parsed = createPreSaleSchema.safeParse({
+    gridId,
+    consignmentName,
+    processorName,
+    plantLocation,
+    bookingReference,
+    killDate,
+    notes,
+    allocations,
+    killSheetIds: selectedKillSheetIdsParsed,
+  });
+  if (!parsed.success) return { error: "Invalid input" };
 
   const totalHead = allocations.reduce((sum, a) => sum + a.headCount, 0);
   if (totalHead <= 0) return { error: "Total head count must be greater than zero" };
@@ -102,19 +139,10 @@ export async function createPreSaleAnalysis(formData: FormData) {
   const gridEntries = (grid.entries ?? []) as GridEntry[];
   const resolvedProcessorName = processorName || grid.processor_name;
 
-  // Parse selected kill sheet IDs (if any)
-  let selectedKillSheetIds: string[] | undefined;
-  if (killSheetIdsJSON) {
-    try {
-      const parsed = JSON.parse(killSheetIdsJSON);
-      if (Array.isArray(parsed) && parsed.length > 0) selectedKillSheetIds = parsed;
-    } catch { /* ignore parse errors */ }
-  }
-
   // 2. Fetch breed premiums + producer profile in parallel
   const [{ data: breedPremiumData }, profile] = await Promise.all([
     supabase.from("breed_premiums").select("breed, premium_percent:premium_pct"),
-    computeProducerProfile(user.id, selectedKillSheetIds).catch(() => null),
+    computeProducerProfile(user.id, selectedKillSheetIdsParsed).catch(() => null),
   ]);
 
   const premiumMap = new Map<string, number>(Object.entries(cattleBreedPremiums));

@@ -4,6 +4,34 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { roleToSnakeCase } from "@/lib/types/advisory";
+import { z } from "zod";
+
+const updateProfileSchema = z.object({
+  first_name: z.string().min(1).max(100),
+  last_name: z.string().max(100).default(""),
+  role: z.string().min(1),
+});
+
+const updateContactDetailsSchema = z.object({
+  contact_email: z.string().email().or(z.literal("")).default(""),
+  contact_phone: z.string().max(30).default(""),
+  company_name: z.string().max(200).nullable().default(null),
+  property_name: z.string().max(200).nullable().default(null),
+});
+
+const updateBioSchema = z.object({
+  bio: z.string().max(1000).default(""),
+});
+
+const updateVisibilityToggleSchema = z.object({
+  field: z.enum(["is_discoverable", "is_discoverable_to_farmers", "is_listed_in_directory"]),
+  value: z.boolean(),
+});
+
+const updatePasswordSchema = z.object({
+  new_password: z.string().min(8),
+  confirm_password: z.string().min(8),
+});
 
 type SupabaseClient = Awaited<ReturnType<typeof createClient>>;
 
@@ -51,6 +79,14 @@ async function upsertProfile(
 }
 
 export async function updateProfile(formData: FormData) {
+  const parsed = updateProfileSchema.safeParse({
+    first_name: formData.get("first_name"),
+    last_name: formData.get("last_name"),
+    role: formData.get("role"),
+  });
+
+  if (!parsed.success) return { error: "Invalid input" };
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -58,9 +94,7 @@ export async function updateProfile(formData: FormData) {
 
   if (!user) return { error: "Not authenticated" };
 
-  const firstName = formData.get("first_name") as string;
-  const lastName = formData.get("last_name") as string;
-  const role = formData.get("role") as string;
+  const { first_name: firstName, last_name: lastName, role } = parsed.data;
 
   // Update auth metadata (name)
   const { error: authError } = await supabase.auth.updateUser({
@@ -84,6 +118,15 @@ export async function updateProfile(formData: FormData) {
 }
 
 export async function updateContactDetails(formData: FormData) {
+  const parsed = updateContactDetailsSchema.safeParse({
+    contact_email: formData.get("contact_email") ?? "",
+    contact_phone: formData.get("contact_phone") ?? "",
+    company_name: formData.get("company_name"),
+    property_name: formData.get("property_name"),
+  });
+
+  if (!parsed.success) return { error: "Invalid input" };
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -93,18 +136,13 @@ export async function updateContactDetails(formData: FormData) {
 
   const base = await getProfileBase(supabase, user.id, user.email);
 
-  const contactEmail = formData.get("contact_email") as string;
-  const contactPhone = formData.get("contact_phone") as string;
-  const companyName = formData.get("company_name") as string | null;
-  const propertyName = formData.get("property_name") as string | null;
-
   const fields: Record<string, unknown> = {
-    contact_email: contactEmail || null,
-    contact_phone: contactPhone || null,
+    contact_email: parsed.data.contact_email || null,
+    contact_phone: parsed.data.contact_phone || null,
   };
 
-  if (companyName !== null) fields.company_name = companyName || null;
-  if (propertyName !== null) fields.property_name = propertyName || null;
+  if (parsed.data.company_name !== null) fields.company_name = parsed.data.company_name || null;
+  if (parsed.data.property_name !== null) fields.property_name = parsed.data.property_name || null;
 
   const err = await upsertProfile(supabase, base, fields);
   if (err) return { error: err };
@@ -114,6 +152,12 @@ export async function updateContactDetails(formData: FormData) {
 }
 
 export async function updateBio(formData: FormData) {
+  const parsed = updateBioSchema.safeParse({
+    bio: formData.get("bio") ?? "",
+  });
+
+  if (!parsed.success) return { error: "Invalid input" };
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -122,9 +166,8 @@ export async function updateBio(formData: FormData) {
   if (!user) return { error: "Not authenticated" };
 
   const base = await getProfileBase(supabase, user.id, user.email);
-  const bio = formData.get("bio") as string;
 
-  const err = await upsertProfile(supabase, base, { bio: bio || null });
+  const err = await upsertProfile(supabase, base, { bio: parsed.data.bio || null });
   if (err) return { error: err };
 
   revalidatePath("/dashboard/settings");
@@ -132,8 +175,9 @@ export async function updateBio(formData: FormData) {
 }
 
 export async function updateVisibilityToggle(field: string, value: boolean) {
-  const allowed = ["is_discoverable", "is_discoverable_to_farmers", "is_listed_in_directory"];
-  if (!allowed.includes(field)) return { error: "Invalid field" };
+  const parsed = updateVisibilityToggleSchema.safeParse({ field, value });
+
+  if (!parsed.success) return { error: "Invalid input" };
 
   const supabase = await createClient();
   const {
@@ -144,7 +188,7 @@ export async function updateVisibilityToggle(field: string, value: boolean) {
 
   const base = await getProfileBase(supabase, user.id, user.email);
 
-  const err = await upsertProfile(supabase, base, { [field]: value });
+  const err = await upsertProfile(supabase, base, { [parsed.data.field]: parsed.data.value });
   if (err) return { error: err };
 
   revalidatePath("/dashboard/settings");
@@ -152,6 +196,17 @@ export async function updateVisibilityToggle(field: string, value: boolean) {
 }
 
 export async function updatePassword(formData: FormData) {
+  const parsed = updatePasswordSchema.safeParse({
+    new_password: formData.get("new_password"),
+    confirm_password: formData.get("confirm_password"),
+  });
+
+  if (!parsed.success) return { error: "Invalid input" };
+
+  if (parsed.data.new_password !== parsed.data.confirm_password) {
+    return { error: "Passwords do not match." };
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -159,19 +214,8 @@ export async function updatePassword(formData: FormData) {
 
   if (!user) return { error: "Not authenticated" };
 
-  const newPassword = formData.get("new_password") as string;
-  const confirmPassword = formData.get("confirm_password") as string;
-
-  if (newPassword !== confirmPassword) {
-    return { error: "Passwords do not match." };
-  }
-
-  if (newPassword.length < 8) {
-    return { error: "Password must be at least 8 characters." };
-  }
-
   const { error } = await supabase.auth.updateUser({
-    password: newPassword,
+    password: parsed.data.new_password,
   });
 
   if (error) return { error: error.message };
