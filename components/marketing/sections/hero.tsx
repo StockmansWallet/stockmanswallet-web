@@ -31,7 +31,7 @@ export default function Hero() {
       />
 
       {/* Dark overlay to keep text readable - more transparent at top so image shows through */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/30 via-background/70 to-background" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-background/70 to-background" />
 
       {/* Subtle top-left radial gradient - centre pushed far off-screen so only the soft tail is visible */}
       <div
