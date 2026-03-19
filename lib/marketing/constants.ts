@@ -2,7 +2,6 @@ import type { Feature, PricingTier, TeamMember, Step, NavLink } from '@/lib/mark
 
 export const NAV_LINKS: NavLink[] = [
   { label: 'Features', href: '#features' },
-  { label: 'How It Works', href: '#how-it-works' },
   { label: 'Stockman IQ', href: '#stockman-iq' },
   { label: 'Advisors', href: '#advisors' },
   { label: 'Pricing', href: '#pricing' },
