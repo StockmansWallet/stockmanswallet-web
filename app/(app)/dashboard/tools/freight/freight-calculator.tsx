@@ -304,15 +304,25 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
           </CardHeader>
           <CardContent className="px-5 pb-5">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Select
-                id="property"
-                name="property"
-                label="Property"
-                options={propertyOptions}
-                value={selectedPropertyId}
-                onChange={(e) => handlePropertyChange(e.target.value)}
-                hint={attempted && !selectedPropertyId}
-              />
+              <div>
+                <Select
+                  id="property"
+                  name="property"
+                  label="Property"
+                  options={propertyOptions}
+                  value={selectedPropertyId}
+                  onChange={(e) => handlePropertyChange(e.target.value)}
+                  hint={attempted && !selectedPropertyId}
+                />
+                {selectedHerd && (
+                  <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-muted">
+                    <span>{selectedHerd.breed} {selectedHerd.category}</span>
+                    <span>{selectedHerd.head_count} head</span>
+                    <span>{Math.round(selectedHerd.current_weight)}kg avg</span>
+                    <span>{selectedHerd.sex}</span>
+                  </div>
+                )}
+              </div>
               <div>
                 <Select
                   id="herd"
@@ -324,27 +334,19 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                   hint={attempted && !isCustomJob && !selectedHerdId}
                   disabled={isCustomJob}
                 />
+                <label className="mt-3 flex cursor-pointer items-center gap-2.5 rounded-xl bg-white/[0.03] px-4 py-2.5 ring-1 ring-inset ring-white/[0.06] transition-colors hover:bg-white/[0.05]">
+                  <input
+                    type="checkbox"
+                    checked={isCustomJob}
+                    onChange={(e) => handleCustomJobToggle(e.target.checked)}
+                    className="h-4 w-4 rounded border-white/20 bg-white/[0.04] text-sky-500 focus:ring-sky-500/50"
+                  />
+                  <span className="text-sm text-text-secondary">
+                    Custom Job <span className="text-text-muted">(enter weight and head count manually)</span>
+                  </span>
+                </label>
               </div>
             </div>
-            {selectedHerd && (
-              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-muted">
-                <span>{selectedHerd.breed} {selectedHerd.category}</span>
-                <span>{selectedHerd.head_count} head</span>
-                <span>{Math.round(selectedHerd.current_weight)}kg avg</span>
-                <span>{selectedHerd.sex}</span>
-              </div>
-            )}
-            <label className="mt-4 flex cursor-pointer items-center gap-2.5">
-              <input
-                type="checkbox"
-                checked={isCustomJob}
-                onChange={(e) => handleCustomJobToggle(e.target.checked)}
-                className="h-4 w-4 rounded border-white/20 bg-white/[0.04] text-sky-500 focus:ring-sky-500/50"
-              />
-              <span className="text-sm text-text-secondary">
-                Custom job (enter weight and head count manually)
-              </span>
-            </label>
           </CardContent>
         </Card>
 
