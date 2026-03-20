@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
-import { motion, useInView, AnimatePresence } from 'framer-motion'
+import { motion, useInView, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 
 interface ChatExample {
   userMessage: string
@@ -181,10 +181,40 @@ export default function StockmanIQ() {
     return () => clearTimeout(timer)
   }, [phase])
 
+  const sectionRef = useRef<HTMLElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const contentInView = useInView(contentRef, { once: true, margin: '-400px' })
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'end start'],
+  })
+  // Parallax: Brangus moves slower than content (closer to viewer feel)
+  const brangusY = useTransform(scrollYProgress, [0, 1], [700, 0])
+
   return (
-    <section id="stockman-iq" className="relative py-24 lg:py-32 overflow-hidden">
+    <section ref={sectionRef} id="stockman-iq" className="relative py-24 lg:py-32 overflow-x-clip">
+      {/* Brangus Character Image — pinned to left edge, parallax, slides in */}
+      {/* Outer wrapper handles positioning (no transform) so Framer Motion owns all transforms */}
+      <div className="hidden lg:flex absolute left-0 top-0 bottom-0 items-start pt-12 z-10 pointer-events-none">
+        <motion.div
+          animate={contentInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -500 }}
+          transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
+          style={{ y: brangusY }}
+        >
+          <Image
+            src="/images/Brangus-wave.webp"
+            alt="Brangus - your intelligent livestock adviser"
+            width={440}
+            height={674}
+            className="object-contain max-h-[650px] w-auto drop-shadow-2xl"
+            priority
+          />
+        </motion.div>
+      </div>
+
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid items-center gap-16 lg:grid-cols-[1fr_1.6fr] lg:gap-12">
+
+        <div ref={contentRef} className="grid items-center gap-16 lg:grid-cols-[1fr_1.6fr] lg:gap-12">
           {/* Text */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -196,7 +226,9 @@ export default function StockmanIQ() {
             <h2 className="mt-3 text-3xl font-semibold sm:text-4xl lg:text-5xl">
               <span className="bg-gradient-to-br from-brand-light via-brand to-brand-dark bg-clip-text text-transparent">Meet Brangus.</span>
               <br />
-              <span className="text-white">Your intelligent livestock adviser and new best mate.</span>
+              <span className="text-white">Your intelligent livestock advisor...</span>
+              <br />
+              <span className="text-white">And new best mate.</span>
             </h2>
             <p className="mt-6 max-w-md text-base leading-relaxed text-text-secondary">
               Ask him anything in plain English. Sale timing, freight costs, market trends, herd valuations. He knows your portfolio and gives you straight answers backed by live data.
