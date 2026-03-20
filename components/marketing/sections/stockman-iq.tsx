@@ -189,20 +189,20 @@ export default function StockmanIQ() {
     offset: ['start end', 'end start'],
   })
   // Parallax: Brangus moves slower than content (closer to viewer feel)
-  const brangusY = useTransform(scrollYProgress, [0, 1], [700, 0])
+  const brangusY = useTransform(scrollYProgress, [0, 1], [520, -180])
 
   return (
     <section ref={sectionRef} id="stockman-iq" className="relative py-24 lg:py-32 overflow-x-clip">
       {/* Brangus Character Image — pinned to left edge, parallax, slides in */}
       {/* Outer wrapper handles positioning (no transform) so Framer Motion owns all transforms */}
-      <div className="hidden lg:flex absolute left-0 top-0 bottom-0 items-start pt-12 z-10 pointer-events-none">
+      <div className="hidden lg:flex absolute right-0 top-0 bottom-0 items-start pt-12 z-10 pointer-events-none">
         <motion.div
-          animate={contentInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -500 }}
+          animate={contentInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 500 }}
           transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
           style={{ y: brangusY }}
         >
           <Image
-            src="/images/Brangus-wave.webp"
+            src="/images/Brangus-wave-right.webp"
             alt="Brangus - your intelligent livestock adviser"
             width={440}
             height={674}
