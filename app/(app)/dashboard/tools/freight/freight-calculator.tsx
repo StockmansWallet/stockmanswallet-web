@@ -334,16 +334,17 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                   hint={attempted && !isCustomJob && !selectedHerdId}
                   disabled={isCustomJob}
                 />
-                <label className="mt-3 flex cursor-pointer items-center gap-2.5 rounded-xl bg-white/[0.03] px-4 py-2.5 ring-1 ring-inset ring-white/[0.06] transition-colors hover:bg-white/[0.05]">
+                <label className="mt-3 flex cursor-pointer items-start gap-2.5 rounded-xl bg-white/[0.03] px-4 py-2.5 ring-1 ring-inset ring-white/[0.06] transition-colors hover:bg-white/[0.05]">
                   <input
                     type="checkbox"
                     checked={isCustomJob}
                     onChange={(e) => handleCustomJobToggle(e.target.checked)}
-                    className="h-4 w-4 rounded border-white/20 bg-white/[0.04] text-sky-500 focus:ring-sky-500/50"
+                    className="mt-1 h-4 w-4 shrink-0 rounded border-white/20 bg-white/[0.04] text-sky-500 focus:ring-sky-500/50"
                   />
-                  <span className="text-sm">
-                    <span className="font-medium text-sky-400">Custom Job</span>
-                    <span className="text-text-muted"> (enter weight and head count manually)</span>
+                  <span>
+                    <span className="text-sm font-medium text-sky-400">Custom Job</span>
+                    <br />
+                    <span className="text-xs text-text-muted">(enter weight and head count manually)</span>
                   </span>
                 </label>
               </div>
