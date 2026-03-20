@@ -6,7 +6,7 @@ import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { calculateFreightEstimate, DEFAULT_RATE_PER_DECK_PER_KM } from "@/lib/engines/freight-engine";
-import { headsPerDeckForWeight, freightCategoryLibrary } from "@/lib/data/freight-categories";
+import { headsPerDeckForWeight } from "@/lib/data/freight-categories";
 import { resolveFreightCategory } from "@/lib/engines/freight-engine";
 import { saleyards, saleyardLocality, saleyardCoordinates } from "@/lib/data/reference-data";
 import type { FreightEstimate } from "@/lib/types/models";
@@ -531,25 +531,31 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                   <table className="w-full text-xs">
                     <thead>
                       <tr className="border-b border-white/[0.06] text-left text-text-muted">
-                        <th className="px-3 py-2 font-medium">Category</th>
+                        <th className="px-3 py-2 font-medium">Weight Range</th>
                         <th className="px-3 py-2 text-right font-medium">Head/Deck</th>
-                        <th className="hidden px-3 py-2 text-right font-medium sm:table-cell">Weight Range</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {freightCategoryLibrary.map((cat) => (
-                        <tr key={cat.id} className="border-b border-white/[0.04] last:border-0">
-                          <td className="px-3 py-1.5 text-text-secondary">{cat.displayName}</td>
-                          <td className="px-3 py-1.5 text-right font-mono text-text-primary">{cat.headsPerDeck}</td>
-                          <td className="hidden px-3 py-1.5 text-right text-text-muted sm:table-cell">
-                            {cat.weightCeilingKg === Infinity
-                              ? `${cat.weightFloorKg}kg+`
-                              : cat.weightFloorKg === 0
-                                ? `Up to ${cat.weightCeilingKg}kg`
-                                : `${cat.weightFloorKg} - ${cat.weightCeilingKg}kg`}
-                          </td>
+                      {[
+                        { range: "Under 300 kg", hpd: 40 },
+                        { range: "300 - 349 kg", hpd: 36 },
+                        { range: "350 - 399 kg", hpd: 32 },
+                        { range: "400 - 449 kg", hpd: 28 },
+                        { range: "450 - 499 kg", hpd: 26 },
+                        { range: "500 - 549 kg", hpd: 24 },
+                        { range: "550 - 599 kg", hpd: 22 },
+                        { range: "600 - 649 kg", hpd: 20 },
+                        { range: "650+ kg", hpd: 18 },
+                      ].map((band) => (
+                        <tr key={band.range} className="border-b border-white/[0.04] last:border-0">
+                          <td className="px-3 py-1.5 text-text-secondary">{band.range}</td>
+                          <td className="px-3 py-1.5 text-right font-mono text-text-primary">{band.hpd}</td>
                         </tr>
                       ))}
+                      <tr className="border-t border-white/[0.08]">
+                        <td className="px-3 py-1.5 text-text-secondary">Cow & Calf Units</td>
+                        <td className="px-3 py-1.5 text-right font-mono text-text-primary">18</td>
+                      </tr>
                     </tbody>
                   </table>
                 </div>
