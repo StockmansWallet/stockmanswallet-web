@@ -367,6 +367,7 @@ export interface FreightEstimate {
   categoryWarning?: string;
   breederAutoDetectNotice?: string;
   efficiencyPrompt?: string;
+  shortCartNotice?: string;
   userOverrideCategory?: FreightCapacityCategory;
   overrideReason?: string;
   isCustomJob: boolean;

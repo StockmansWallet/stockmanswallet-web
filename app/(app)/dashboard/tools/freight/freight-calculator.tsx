@@ -318,164 +318,170 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
           </CardContent>
         </Card>
 
-        {/* Step 2: Destination */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2.5">
-              <SectionIcon icon={MapPin} />
-              <div>
-                <CardTitle>Destination</CardTitle>
-                <p className="mt-0.5 text-xs text-text-muted">
-                  Select a saleyard or custom address to auto-calculate distance, or enter manually.
-                </p>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="px-5 pb-5">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Select
-                id="saleyard"
-                name="saleyard"
-                label="Saleyard"
-                options={saleyardOptions}
-                placeholder="Select saleyard"
-                value={selectedSaleyard}
-                onChange={(e) => handleSaleyardChange(e.target.value)}
-                hint={attempted && !selectedSaleyard && !customAddress}
-              />
-              <div>
-                <label htmlFor="custom_address" className="mb-1.5 block text-sm font-medium text-text-secondary">
-                  Custom Address
-                </label>
-                <AddressAutocomplete
-                  defaultValue={customAddress}
-                  onSelect={handleAddressSelect}
-                  placeholder="Search address..."
-                  className="rounded-xl border-0 bg-surface py-3 pl-9 pr-4 ring-0 focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
-                />
-              </div>
-            </div>
-            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Input
-                id="distance"
-                name="distance"
-                label="Distance (km)"
-                type="number"
-                min={0}
-                required
-                value={distance}
-                onChange={(e) => { setDistance(e.target.value); setResult(null); }}
-                placeholder="e.g. 200"
-                hint={attempted && !distance}
-                helperText="Enter the one-way road distance"
-              />
-              {calculatedDistance !== null && (
-                <div className="flex flex-col justify-center rounded-xl bg-emerald-500/5 px-4 py-3 ring-1 ring-inset ring-emerald-500/20">
-                  <p className="text-xs font-medium text-emerald-400">Calculated Distance</p>
-                  <p className="mt-0.5 text-lg font-bold text-emerald-300">
-                    {Math.round(calculatedDistance)} km
-                  </p>
-                  <p className="mt-0.5 truncate text-xs text-text-muted">
-                    {calculatedDistanceLabel}
+        {/* Step 2: Destination - appears after property + herd selected */}
+        {selectedPropertyId && selectedHerdId && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2.5">
+                <SectionIcon icon={MapPin} />
+                <div>
+                  <CardTitle>Destination</CardTitle>
+                  <p className="mt-0.5 text-xs text-text-muted">
+                    Select a saleyard or custom address to auto-calculate distance, or enter manually.
                   </p>
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Step 3: Freight Assumptions */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2.5">
-              <SectionIcon icon={Truck} />
-              <div>
-                <CardTitle>Freight Assumptions</CardTitle>
-                <p className="mt-0.5 text-xs text-text-muted">
-                  Confirm or adjust the values below before calculating.
-                </p>
               </div>
-            </div>
-          </CardHeader>
-          <CardContent className="px-5 pb-5">
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-              <Input
-                id="weight"
-                name="weight"
-                label="Avg Weight (kg)"
-                type="number"
-                step="0.1"
-                min={0}
-                required
-                value={weight}
-                onChange={(e) => handleWeightChange(e.target.value)}
-                placeholder="450"
-                hint={attempted && !weight}
-              />
-              <Input
-                id="head_count"
-                name="head_count"
-                label="Head Count"
-                type="number"
-                min={1}
-                required
-                value={headCount}
-                onChange={(e) => { setHeadCount(e.target.value); setResult(null); }}
-                placeholder="100"
-                hint={attempted && !headCount}
-              />
-              <Input
-                id="distance_confirm"
-                name="distance_confirm"
-                label="Distance (km)"
-                type="number"
-                min={0}
-                required
-                value={distance}
-                onChange={(e) => { setDistance(e.target.value); setResult(null); }}
-                placeholder="200"
-                hint={attempted && !distance}
-              />
-              <Input
-                id="head_per_deck"
-                name="head_per_deck"
-                label="Head Per Deck"
-                type="number"
-                min={1}
-                value={headPerDeck}
-                onChange={(e) => { setHeadPerDeck(e.target.value); setResult(null); }}
-                placeholder={previewHpd?.toString() ?? "26"}
-                helperText={previewHpd ? `${previewHpd} at this weight` : undefined}
-              />
-              <Input
-                id="rate"
-                name="rate"
-                label="Rate ($/Deck/km)"
-                type="number"
-                step="0.01"
-                min={0}
-                value={rate}
-                onChange={(e) => { setRate(e.target.value); setResult(null); }}
-              />
-            </div>
-            <p className="mt-4 text-xs leading-relaxed text-text-muted">
-              Default rate and head per deck values are based on national averages.
-              Adjust to match your local carrier's requirements.
-            </p>
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent className="px-5 pb-5">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <Select
+                  id="saleyard"
+                  name="saleyard"
+                  label="Saleyard"
+                  options={saleyardOptions}
+                  placeholder="Select saleyard"
+                  value={selectedSaleyard}
+                  onChange={(e) => handleSaleyardChange(e.target.value)}
+                  hint={attempted && !selectedSaleyard && !customAddress}
+                />
+                <div>
+                  <label htmlFor="custom_address" className="mb-1.5 block text-sm font-medium text-text-secondary">
+                    Custom Address
+                  </label>
+                  <AddressAutocomplete
+                    defaultValue={customAddress}
+                    onSelect={handleAddressSelect}
+                    placeholder="Search address..."
+                    className="rounded-xl border-0 bg-surface py-3 pl-9 pr-4 ring-0 focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
+                  />
+                </div>
+              </div>
+              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <Input
+                  id="distance"
+                  name="distance"
+                  label="Distance (km)"
+                  type="number"
+                  min={0}
+                  required
+                  value={distance}
+                  onChange={(e) => { setDistance(e.target.value); setResult(null); }}
+                  placeholder="e.g. 200"
+                  hint={attempted && !distance}
+                  helperText="Enter the one-way road distance"
+                />
+                {calculatedDistance !== null && (
+                  <div className="flex flex-col justify-center rounded-xl bg-emerald-500/5 px-4 py-3 ring-1 ring-inset ring-emerald-500/20">
+                    <p className="text-xs font-medium text-emerald-400">Calculated Distance</p>
+                    <p className="mt-0.5 text-lg font-bold text-emerald-300">
+                      {Math.round(calculatedDistance)} km
+                    </p>
+                    <p className="mt-0.5 truncate text-xs text-text-muted">
+                      {calculatedDistanceLabel}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Actions */}
-        <div className="flex items-center gap-3">
-          <Button type="submit" variant="sky">
-            Calculate Freight
-          </Button>
-          {(result || selectedHerdId) && (
-            <Button type="button" variant="ghost" onClick={handleReset}>
-              Reset
+        {/* Step 3: Freight Assumptions - appears after distance entered */}
+        {selectedPropertyId && selectedHerdId && distance && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2.5">
+                <SectionIcon icon={Truck} />
+                <div>
+                  <CardTitle>Freight Assumptions</CardTitle>
+                  <p className="mt-0.5 text-xs text-text-muted">
+                    Confirm or adjust the values below before calculating.
+                  </p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="px-5 pb-5">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                <Input
+                  id="weight"
+                  name="weight"
+                  label="Avg Weight (kg)"
+                  type="number"
+                  step="0.1"
+                  min={0}
+                  required
+                  value={weight}
+                  onChange={(e) => handleWeightChange(e.target.value)}
+                  placeholder="450"
+                  hint={attempted && !weight}
+                />
+                <Input
+                  id="head_count"
+                  name="head_count"
+                  label="Head Count"
+                  type="number"
+                  min={1}
+                  required
+                  value={headCount}
+                  onChange={(e) => { setHeadCount(e.target.value); setResult(null); }}
+                  placeholder="100"
+                  hint={attempted && !headCount}
+                />
+                <Input
+                  id="distance_confirm"
+                  name="distance_confirm"
+                  label="Distance (km)"
+                  type="number"
+                  min={0}
+                  required
+                  value={distance}
+                  onChange={(e) => { setDistance(e.target.value); setResult(null); }}
+                  placeholder="200"
+                  hint={attempted && !distance}
+                />
+                <Input
+                  id="head_per_deck"
+                  name="head_per_deck"
+                  label="Head Per Deck"
+                  type="number"
+                  min={1}
+                  value={headPerDeck}
+                  onChange={(e) => { setHeadPerDeck(e.target.value); setResult(null); }}
+                  placeholder={previewHpd?.toString() ?? "26"}
+                  helperText={previewHpd ? `${previewHpd} at this weight` : undefined}
+                />
+                <Input
+                  id="rate"
+                  name="rate"
+                  label="Rate ($/Deck/km)"
+                  type="number"
+                  step="0.01"
+                  min={0}
+                  value={rate}
+                  onChange={(e) => { setRate(e.target.value); setResult(null); }}
+                />
+              </div>
+              <p className="mt-4 text-xs leading-relaxed text-text-muted">
+                Default rate and head per deck values are based on national averages.
+                Adjust to match your local carrier's requirements.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Actions - appears after distance entered */}
+        {selectedPropertyId && selectedHerdId && distance && (
+          <div className="flex items-center gap-3">
+            <Button type="submit" variant="sky">
+              Calculate Freight
             </Button>
-          )}
-        </div>
+            {(result || selectedHerdId) && (
+              <Button type="button" variant="ghost" onClick={handleReset}>
+                Reset
+              </Button>
+            )}
+          </div>
+        )}
       </form>
 
       {/* Right Column: Results */}
@@ -526,10 +532,13 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
             </div>
 
             {/* Alerts */}
-            {(result.efficiencyPrompt || result.categoryWarning || result.breederAutoDetectNotice) && (
+            {(result.efficiencyPrompt || result.shortCartNotice || result.categoryWarning || result.breederAutoDetectNotice) && (
               <div className="space-y-3">
                 {result.efficiencyPrompt && (
                   <AlertCard type="success" message={result.efficiencyPrompt} />
+                )}
+                {result.shortCartNotice && (
+                  <AlertCard type="info" message={result.shortCartNotice} />
                 )}
                 {result.categoryWarning && (
                   <AlertCard type="warning" message={result.categoryWarning} />

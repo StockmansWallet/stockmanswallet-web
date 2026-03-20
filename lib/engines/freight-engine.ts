@@ -80,6 +80,13 @@ export function calculateFreightEstimate(options: {
     efficiencyPrompt = `${spareSpotsOnLastDeck} spare spot${spareSpotsOnLastDeck === 1 ? "" : "s"} on the last deck. Consider adding ${spareSpotsOnLastDeck} more head to maximise freight efficiency.`;
   }
 
+  // Short cart notice for distances under 80km
+  const SHORT_CART_THRESHOLD_KM = 80;
+  let shortCartNotice: string | undefined;
+  if (distanceKm > 0 && distanceKm < SHORT_CART_THRESHOLD_KM) {
+    shortCartNotice = "Due to the short cart distance, your local carrier may work on a fixed fee rather than $/deck/km. Contact your carrier for a quote.";
+  }
+
   // Calculate costs
   const totalCost = decksRequired * distanceKm * ratePerDeckPerKm;
   const costPerHead = headCount > 0 ? totalCost / headCount : 0;
@@ -106,6 +113,7 @@ export function calculateFreightEstimate(options: {
     categoryWarning,
     breederAutoDetectNotice,
     efficiencyPrompt,
+    shortCartNotice,
     userOverrideCategory: categoryOverride,
     isCustomJob,
   };
