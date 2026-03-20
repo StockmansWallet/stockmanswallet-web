@@ -19,6 +19,7 @@ import {
   Navigation,
 } from "lucide-react";
 import { getRoadDistanceKm } from "@/lib/services/distance-service";
+import AddressAutocomplete, { type AddressResult } from "@/components/app/address-autocomplete";
 
 // --- Types ---
 
@@ -106,7 +107,6 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
   // Step 2: Destination
   const [selectedSaleyard, setSelectedSaleyard] = useState("");
   const [customAddress, setCustomAddress] = useState("");
-  const [isGeocodingAddress, setIsGeocodingAddress] = useState(false);
 
   // Step 3: Assumptions (auto-filled from herd, editable)
   const [weight, setWeight] = useState("");
@@ -167,33 +167,18 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     recalcDistance(selectedPropertyId, saleyard);
   }
 
-  // Geocode a custom address via Nominatim and calculate distance from property
-  async function handleCustomAddressSubmit() {
-    if (!customAddress.trim()) return;
-    setIsGeocodingAddress(true);
-    try {
-      const query = encodeURIComponent(customAddress.trim());
-      const url = `https://nominatim.openstreetmap.org/search?q=${query}&countrycodes=au&format=json&limit=1`;
-      const res = await fetch(url, {
-        headers: { "User-Agent": "StockmansWallet/1.0" },
-      });
-      const data = await res.json();
-      if (!data.length) return;
-      const { lat, lon } = data[0];
-      const destLat = parseFloat(lat);
-      const destLon = parseFloat(lon);
-      // Clear saleyard since custom address is now active
-      setSelectedSaleyard("");
-      // Calculate distance from property to custom address
-      const prop = properties.find((p) => p.id === selectedPropertyId);
-      if (prop?.latitude && prop?.longitude) {
-        const { distanceKm } = await getRoadDistanceKm(prop.latitude, prop.longitude, destLat, destLon);
-        setDistance(distanceKm.toString());
-      }
-    } catch {
-      // Geocoding failed silently - user can still enter distance manually
-    } finally {
-      setIsGeocodingAddress(false);
+  // When a custom address is selected from Google Places autocomplete
+  async function handleAddressSelect(result: AddressResult) {
+    setCustomAddress(result.address || `${result.suburb}, ${result.state}`);
+    setSelectedSaleyard("");
+    setResult(null);
+    // Calculate distance from property to custom address via OSRM
+    const prop = properties.find((p) => p.id === selectedPropertyId);
+    if (prop?.latitude && prop?.longitude) {
+      const { distanceKm } = await getRoadDistanceKm(
+        prop.latitude, prop.longitude, result.latitude, result.longitude,
+      );
+      setDistance(distanceKm.toString());
     }
   }
 
@@ -335,19 +320,17 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 value={selectedSaleyard}
                 onChange={(e) => handleSaleyardChange(e.target.value)}
               />
-              <Input
-                id="custom_address"
-                name="custom_address"
-                label="Custom Address"
-                type="text"
-                value={customAddress}
-                onChange={(e) => { setCustomAddress(e.target.value); setResult(null); }}
-                onBlur={() => { if (customAddress.trim()) handleCustomAddressSubmit(); }}
-                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleCustomAddressSubmit(); } }}
-                placeholder="Enter destination address"
-                disabled={isGeocodingAddress}
-                helperText={isGeocodingAddress ? "Looking up address..." : undefined}
-              />
+              <div>
+                <label htmlFor="custom_address" className="mb-1.5 block text-sm font-medium text-text-secondary">
+                  Custom Address
+                </label>
+                <AddressAutocomplete
+                  defaultValue={customAddress}
+                  onSelect={handleAddressSelect}
+                  placeholder="Search address..."
+                  className="rounded-xl border-0 bg-surface py-3 pl-9 pr-4 ring-0 focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
+                />
+              </div>
             </div>
             <div className="mt-4">
               <Input
