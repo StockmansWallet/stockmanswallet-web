@@ -71,7 +71,7 @@ export default function Hero() {
               <Lottie
                 animationData={tallyAnimData}
                 loop={false}
-                className="h-[200px] w-auto"
+                className="h-[150px] w-auto"
               />
             </motion.div>
 
