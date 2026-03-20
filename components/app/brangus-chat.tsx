@@ -31,7 +31,7 @@ const BRANGUS_BG = "#44372D";
 // User brand color
 const USER_BG = "var(--color-brand)";
 // Profile images
-const BRANGUS_AVATAR = "/images/brangus-profile.png";
+const BRANGUS_AVATAR = "/images/brangus-profile-2.webp";
 
 // Brangus welcome greetings - first-time users get an intro, returning users get casual greetings
 function buildWelcomeGreeting(pastConversations: number): string {

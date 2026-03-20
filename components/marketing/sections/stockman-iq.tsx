@@ -269,7 +269,7 @@ export default function StockmanIQ() {
                         className="flex items-end gap-2"
                       >
                         <Image
-                          src="/images/brangus-profile.png"
+                          src="/images/brangus-profile-2.webp"
                           alt="Brangus"
                           width={48}
                           height={48}
