@@ -115,6 +115,9 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
   const [headPerDeck, setHeadPerDeck] = useState("");
   const [rate, setRate] = useState(DEFAULT_RATE_PER_DECK_PER_KM.toFixed(2));
   const [result, setResult] = useState<FreightEstimate | null>(null);
+  const [calculatedDistance, setCalculatedDistance] = useState<number | null>(null);
+  const [calculatedDistanceLabel, setCalculatedDistanceLabel] = useState("");
+  const [attempted, setAttempted] = useState(false);
 
   const selectedHerd = herds.find((h) => h.id === selectedHerdId);
 
@@ -164,21 +167,28 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     setSelectedSaleyard(saleyard);
     setCustomAddress("");
     setResult(null);
+    if (!saleyard) {
+      setCalculatedDistance(null);
+      setCalculatedDistanceLabel("");
+    }
     recalcDistance(selectedPropertyId, saleyard);
   }
 
   // When a custom address is selected from Google Places autocomplete
-  async function handleAddressSelect(result: AddressResult) {
-    setCustomAddress(result.address || `${result.suburb}, ${result.state}`);
+  async function handleAddressSelect(addressResult: AddressResult) {
+    const label = addressResult.address || `${addressResult.suburb}, ${addressResult.state}`;
+    setCustomAddress(label);
     setSelectedSaleyard("");
     setResult(null);
     // Calculate distance from property to custom address via OSRM
     const prop = properties.find((p) => p.id === selectedPropertyId);
     if (prop?.latitude && prop?.longitude) {
       const { distanceKm } = await getRoadDistanceKm(
-        prop.latitude, prop.longitude, result.latitude, result.longitude,
+        prop.latitude, prop.longitude, addressResult.latitude, addressResult.longitude,
       );
       setDistance(distanceKm.toString());
+      setCalculatedDistance(distanceKm);
+      setCalculatedDistanceLabel(`${prop.property_name} to ${label.split(",")[0]}`);
     }
   }
 
@@ -196,6 +206,9 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     if (prop?.latitude && prop?.longitude && coords) {
       const { distanceKm } = await getRoadDistanceKm(prop.latitude, prop.longitude, coords.lat, coords.lon);
       setDistance(distanceKm.toString());
+      setCalculatedDistance(distanceKm);
+      const saleyardName = saleyard.split(",")[0].trim();
+      setCalculatedDistanceLabel(`${prop.property_name} to ${saleyardName}`);
     }
   }
 
@@ -218,6 +231,10 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
 
   function handleCalculate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setAttempted(true);
+
+    // Validate required fields before calculating
+    if (!weight || !headCount || !distance) return;
 
     const hpdOverride = Number(headPerDeck) || undefined;
 
@@ -247,6 +264,9 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     setHeadPerDeck("");
     setRate(DEFAULT_RATE_PER_DECK_PER_KM.toFixed(2));
     setResult(null);
+    setCalculatedDistance(null);
+    setCalculatedDistanceLabel("");
+    setAttempted(false);
   }
 
   return (
@@ -275,6 +295,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 options={propertyOptions}
                 value={selectedPropertyId}
                 onChange={(e) => handlePropertyChange(e.target.value)}
+                hint={attempted && !selectedPropertyId}
               />
               <Select
                 id="herd"
@@ -319,6 +340,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 placeholder="Select saleyard"
                 value={selectedSaleyard}
                 onChange={(e) => handleSaleyardChange(e.target.value)}
+                hint={attempted && !selectedSaleyard && !customAddress}
               />
               <div>
                 <label htmlFor="custom_address" className="mb-1.5 block text-sm font-medium text-text-secondary">
@@ -332,7 +354,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 />
               </div>
             </div>
-            <div className="mt-4">
+            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Input
                 id="distance"
                 name="distance"
@@ -343,12 +365,20 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 value={distance}
                 onChange={(e) => { setDistance(e.target.value); setResult(null); }}
                 placeholder="e.g. 200"
-                helperText={
-                  selectedPropertyId && (selectedSaleyard || customAddress) && distance
-                    ? `Auto-calculated from property to ${selectedSaleyard ? "saleyard" : "address"}`
-                    : "Enter the one-way road distance"
-                }
+                hint={attempted && !distance}
+                helperText="Enter the one-way road distance"
               />
+              {calculatedDistance !== null && (
+                <div className="flex flex-col justify-center rounded-xl bg-emerald-500/5 px-4 py-3 ring-1 ring-inset ring-emerald-500/20">
+                  <p className="text-xs font-medium text-emerald-400">Calculated Distance</p>
+                  <p className="mt-0.5 text-lg font-bold text-emerald-300">
+                    {Math.round(calculatedDistance)} km
+                  </p>
+                  <p className="mt-0.5 truncate text-xs text-text-muted">
+                    {calculatedDistanceLabel}
+                  </p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -379,6 +409,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 value={weight}
                 onChange={(e) => handleWeightChange(e.target.value)}
                 placeholder="450"
+                hint={attempted && !weight}
               />
               <Input
                 id="head_count"
@@ -390,6 +421,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 value={headCount}
                 onChange={(e) => { setHeadCount(e.target.value); setResult(null); }}
                 placeholder="100"
+                hint={attempted && !headCount}
               />
               <Input
                 id="distance_confirm"
@@ -401,6 +433,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 value={distance}
                 onChange={(e) => { setDistance(e.target.value); setResult(null); }}
                 placeholder="200"
+                hint={attempted && !distance}
               />
               <Input
                 id="head_per_deck"
