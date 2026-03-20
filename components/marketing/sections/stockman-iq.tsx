@@ -289,7 +289,7 @@ export default function StockmanIQ() {
                           alt="User"
                           width={48}
                           height={48}
-                          className="-mb-8 h-12 w-12 shrink-0 self-end rounded-full object-cover"
+                          className="-mb-10 h-14 w-14 shrink-0 self-end rounded-full object-cover"
                         />
                       </motion.div>
 
@@ -301,11 +301,11 @@ export default function StockmanIQ() {
                         className="flex items-end gap-2"
                       >
                         <Image
-                          src="/images/brangus-profile-2.webp"
+                          src="/images/brangus-chat-profile.webp"
                           alt="Brangus"
-                          width={48}
-                          height={48}
-                          className="-mb-8 h-12 w-12 shrink-0 self-end rounded-full object-cover"
+                          width={56}
+                          height={56}
+                          className="-mb-10 h-14 w-14 shrink-0 self-end rounded-full object-cover"
                         />
                         <div className="relative max-w-[80%] rounded-3xl bg-[#44372D] px-4 py-2.5">
                           <p className="text-sm text-white/80 leading-relaxed whitespace-pre-line">
