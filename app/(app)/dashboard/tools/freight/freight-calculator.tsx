@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { calculateFreightEstimate, DEFAULT_RATE_PER_DECK_PER_KM } from "@/lib/engines/freight-engine";
 import { headsPerDeckForWeight, freightCategoryLibrary } from "@/lib/data/freight-categories";
+import { resolveFreightCategory } from "@/lib/engines/freight-engine";
 import { saleyards, saleyardLocality, saleyardCoordinates } from "@/lib/data/reference-data";
 import type { FreightEstimate } from "@/lib/types/models";
 import {
@@ -162,7 +163,11 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     if (herd) {
       setWeight(Math.round(herd.current_weight).toString());
       setHeadCount(herd.head_count.toString());
-      const hpd = headsPerDeckForWeight(herd.current_weight);
+      // Use category-aware head per deck - breeders/cow-calf use fixed density
+      const mapping = resolveFreightCategory(herd.category, herd.sex, herd.current_weight);
+      const hpd = mapping.category.id === "cow_calf_units"
+        ? mapping.category.headsPerDeck
+        : headsPerDeckForWeight(herd.current_weight);
       setHeadPerDeck(hpd.toString());
       if (herd.property_id) {
         setSelectedPropertyId(herd.property_id);
@@ -226,12 +231,23 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     }
   }
 
+  // Category-aware heads-per-deck for the selected herd
+  function categoryAwareHpd(w: number): number {
+    if (selectedHerd) {
+      const mapping = resolveFreightCategory(selectedHerd.category, selectedHerd.sex, w);
+      if (mapping.category.id === "cow_calf_units") {
+        return mapping.category.headsPerDeck;
+      }
+    }
+    return headsPerDeckForWeight(w);
+  }
+
   // Live heads-per-deck preview
   const previewHpd = useMemo(() => {
     const w = Number(weight);
     if (!w || w <= 0) return null;
-    return headsPerDeckForWeight(w);
-  }, [weight]);
+    return categoryAwareHpd(w);
+  }, [weight, selectedHerdId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Update headPerDeck when weight changes (if no override)
   function handleWeightChange(val: string) {
@@ -239,7 +255,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     setResult(null);
     const w = Number(val);
     if (w > 0) {
-      setHeadPerDeck(headsPerDeckForWeight(w).toString());
+      setHeadPerDeck(categoryAwareHpd(w).toString());
     }
   }
 
