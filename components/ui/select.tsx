@@ -71,6 +71,7 @@ function GroupedSelect({
   onChange,
   required,
   hint,
+  disabled,
 }: SelectProps) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -175,17 +176,22 @@ function GroupedSelect({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-required={required}
-        onClick={() => setOpen(!open)}
+        disabled={disabled}
+        onClick={() => !disabled && setOpen(!open)}
         className={`relative flex w-full items-center justify-between rounded-xl bg-surface py-3 pl-4 pr-10 text-left text-sm outline-none transition-all ${
-          selectedValue ? "text-text-primary" : "text-text-muted"
+          disabled
+            ? "cursor-not-allowed opacity-50"
+            : selectedValue ? "text-text-primary" : "text-text-muted"
         } ${
-          error
-            ? "ring-1 ring-inset ring-red-500/60"
-            : open
-              ? "ring-1 ring-inset ring-brand/60 bg-surface-raised"
-              : hint
-                ? "ring-1 ring-inset ring-brand/40 shadow-[0_0_8px_#D9762F40] focus:ring-brand/60 focus:shadow-[0_0_12px_#D9762F59] focus:bg-surface-raised"
-                : "focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
+          disabled
+            ? ""
+            : error
+              ? "ring-1 ring-inset ring-red-500/60"
+              : open
+                ? "ring-1 ring-inset ring-brand/60 bg-surface-raised"
+                : hint
+                  ? "ring-1 ring-inset ring-brand/40 shadow-[0_0_8px_#D9762F40] focus:ring-brand/60 focus:shadow-[0_0_12px_#D9762F59] focus:bg-surface-raised"
+                  : "focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
         }`}
       >
         <span className="truncate">{selectedLabel || placeholder || "Select"}</span>

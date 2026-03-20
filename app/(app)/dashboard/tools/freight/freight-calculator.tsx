@@ -103,6 +103,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
   // Step 1: Origin & Herd
   const [selectedHerdId, setSelectedHerdId] = useState("");
   const [selectedPropertyId, setSelectedPropertyId] = useState("");
+  const [isCustomJob, setIsCustomJob] = useState(false);
 
   // Step 2: Destination
   const [selectedSaleyard, setSelectedSaleyard] = useState("");
@@ -139,6 +140,18 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     })),
   ];
 
+  // Toggle custom job mode
+  function handleCustomJobToggle(checked: boolean) {
+    setIsCustomJob(checked);
+    setResult(null);
+    if (checked) {
+      setSelectedHerdId("");
+      setWeight("");
+      setHeadCount("");
+      setHeadPerDeck("");
+    }
+  }
+
   // When herd selected, auto-fill weight/headCount and set property
   function handleHerdChange(herdId: string) {
     setSelectedHerdId(herdId);
@@ -155,7 +168,6 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
         recalcDistance(herd.property_id, selectedSaleyard);
       }
     } else {
-      // Custom job - clear fields
       setWeight("");
       setHeadCount("");
       setHeadPerDeck("");
@@ -234,7 +246,8 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     setAttempted(true);
 
     // Validate required fields before calculating
-    if (!selectedPropertyId || !selectedHerdId || !weight || !headCount || !distance) return;
+    const herdRequired = !isCustomJob;
+    if (!selectedPropertyId || (herdRequired && !selectedHerdId) || !weight || !headCount || !distance) return;
 
     const hpdOverride = Number(headPerDeck) || undefined;
 
@@ -247,7 +260,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
       distanceKm: Number(distance) || 0,
       ratePerDeckPerKm: Number(rate) || DEFAULT_RATE_PER_DECK_PER_KM,
       headsPerDeckOverride: hpdOverride,
-      isCustomJob: !selectedHerdId,
+      isCustomJob,
     });
 
     setResult(estimate);
@@ -256,6 +269,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
   function handleReset() {
     setSelectedHerdId("");
     setSelectedPropertyId("");
+    setIsCustomJob(false);
     setSelectedSaleyard("");
     setCustomAddress("");
     setWeight("");
@@ -297,15 +311,18 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 onChange={(e) => handlePropertyChange(e.target.value)}
                 hint={attempted && !selectedPropertyId}
               />
-              <Select
-                id="herd"
-                name="herd"
-                label="Herd"
-                options={herdOptions}
-                value={selectedHerdId}
-                onChange={(e) => handleHerdChange(e.target.value)}
-                hint={attempted && !selectedHerdId}
-              />
+              <div>
+                <Select
+                  id="herd"
+                  name="herd"
+                  label="Herd"
+                  options={herdOptions}
+                  value={selectedHerdId}
+                  onChange={(e) => handleHerdChange(e.target.value)}
+                  hint={attempted && !isCustomJob && !selectedHerdId}
+                  disabled={isCustomJob}
+                />
+              </div>
             </div>
             {selectedHerd && (
               <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-muted">
@@ -315,11 +332,22 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 <span>{selectedHerd.sex}</span>
               </div>
             )}
+            <label className="mt-4 flex cursor-pointer items-center gap-2.5">
+              <input
+                type="checkbox"
+                checked={isCustomJob}
+                onChange={(e) => handleCustomJobToggle(e.target.checked)}
+                className="h-4 w-4 rounded border-white/20 bg-white/[0.04] text-sky-500 focus:ring-sky-500/50"
+              />
+              <span className="text-sm text-text-secondary">
+                Custom job (enter weight and head count manually)
+              </span>
+            </label>
           </CardContent>
         </Card>
 
         {/* Step 2: Destination - appears after property + herd selected */}
-        {selectedPropertyId && selectedHerdId && (
+        {selectedPropertyId && (selectedHerdId || isCustomJob) && (
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2.5">
@@ -387,7 +415,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
         )}
 
         {/* Step 3: Freight Assumptions - appears after distance entered */}
-        {selectedPropertyId && selectedHerdId && distance && (
+        {selectedPropertyId && (selectedHerdId || isCustomJob) && distance && (
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2.5">
@@ -470,7 +498,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
         )}
 
         {/* Actions - appears after distance entered */}
-        {selectedPropertyId && selectedHerdId && distance && (
+        {selectedPropertyId && (selectedHerdId || isCustomJob) && distance && (
           <div className="flex items-center gap-3">
             <Button type="submit" variant="sky">
               Calculate Freight
