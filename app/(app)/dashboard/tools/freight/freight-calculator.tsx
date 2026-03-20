@@ -341,8 +341,9 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                     onChange={(e) => handleCustomJobToggle(e.target.checked)}
                     className="h-4 w-4 rounded border-white/20 bg-white/[0.04] text-sky-500 focus:ring-sky-500/50"
                   />
-                  <span className="text-sm text-text-secondary">
-                    Custom Job <span className="text-text-muted">(enter weight and head count manually)</span>
+                  <span className="text-sm">
+                    <span className="font-medium text-sky-400">Custom Job</span>
+                    <span className="text-text-muted"> (enter weight and head count manually)</span>
                   </span>
                 </label>
               </div>
