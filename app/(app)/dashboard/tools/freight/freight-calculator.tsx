@@ -123,7 +123,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
 
   // Build herd options
   const herdOptions = [
-    { value: "", label: "Custom Job" },
+    { value: "", label: "Select herd" },
     ...herds.map((h) => ({
       value: h.id,
       label: `${h.name} - ${h.head_count} head, ${Math.round(h.current_weight)}kg`,
@@ -132,7 +132,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
 
   // Build property options
   const propertyOptions = [
-    { value: "", label: "No property selected" },
+    { value: "", label: "Select property" },
     ...properties.map((p) => ({
       value: p.id,
       label: p.suburb ? `${p.property_name} (${p.suburb}, ${p.state})` : p.property_name,
@@ -234,7 +234,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     setAttempted(true);
 
     // Validate required fields before calculating
-    if (!weight || !headCount || !distance) return;
+    if (!selectedPropertyId || !selectedHerdId || !weight || !headCount || !distance) return;
 
     const hpdOverride = Number(headPerDeck) || undefined;
 
@@ -304,6 +304,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 options={herdOptions}
                 value={selectedHerdId}
                 onChange={(e) => handleHerdChange(e.target.value)}
+                hint={attempted && !selectedHerdId}
               />
             </div>
             {selectedHerd && (
