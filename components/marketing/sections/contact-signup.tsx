@@ -22,7 +22,7 @@ export default function ContactSignup() {
             </span>
           </h2>
           <p className="mx-auto mt-6 max-w-lg text-base text-text-secondary">
-            Join the waitlist for Australia&apos;s first livestock portfolio management platform. Launching April 2026 on the App Store, with companion web access.
+            Join the waitlist for Australia&apos;s first livestock portfolio management platform. Launching May 2026 on the App Store, with companion web access.
           </p>
         </motion.div>
 
