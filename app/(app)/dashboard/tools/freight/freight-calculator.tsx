@@ -105,6 +105,8 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
 
   // Step 2: Destination
   const [selectedSaleyard, setSelectedSaleyard] = useState("");
+  const [customAddress, setCustomAddress] = useState("");
+  const [isGeocodingAddress, setIsGeocodingAddress] = useState(false);
 
   // Step 3: Assumptions (auto-filled from herd, editable)
   const [weight, setWeight] = useState("");
@@ -157,11 +159,42 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     }
   }
 
-  // When saleyard selected, auto-calculate distance from property
+  // When saleyard selected, auto-calculate distance from property and clear custom address
   function handleSaleyardChange(saleyard: string) {
     setSelectedSaleyard(saleyard);
+    setCustomAddress("");
     setResult(null);
     recalcDistance(selectedPropertyId, saleyard);
+  }
+
+  // Geocode a custom address via Nominatim and calculate distance from property
+  async function handleCustomAddressSubmit() {
+    if (!customAddress.trim()) return;
+    setIsGeocodingAddress(true);
+    try {
+      const query = encodeURIComponent(customAddress.trim());
+      const url = `https://nominatim.openstreetmap.org/search?q=${query}&countrycodes=au&format=json&limit=1`;
+      const res = await fetch(url, {
+        headers: { "User-Agent": "StockmansWallet/1.0" },
+      });
+      const data = await res.json();
+      if (!data.length) return;
+      const { lat, lon } = data[0];
+      const destLat = parseFloat(lat);
+      const destLon = parseFloat(lon);
+      // Clear saleyard since custom address is now active
+      setSelectedSaleyard("");
+      // Calculate distance from property to custom address
+      const prop = properties.find((p) => p.id === selectedPropertyId);
+      if (prop?.latitude && prop?.longitude) {
+        const { distanceKm } = await getRoadDistanceKm(prop.latitude, prop.longitude, destLat, destLon);
+        setDistance(distanceKm.toString());
+      }
+    } catch {
+      // Geocoding failed silently - user can still enter distance manually
+    } finally {
+      setIsGeocodingAddress(false);
+    }
   }
 
   // When property changes, recalculate distance
@@ -222,6 +255,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     setSelectedHerdId("");
     setSelectedPropertyId("");
     setSelectedSaleyard("");
+    setCustomAddress("");
     setWeight("");
     setHeadCount("");
     setDistance("");
@@ -283,9 +317,9 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
             <div className="flex items-center gap-2.5">
               <SectionIcon icon={MapPin} />
               <div>
-                <CardTitle>Sale Destination</CardTitle>
+                <CardTitle>Destination</CardTitle>
                 <p className="mt-0.5 text-xs text-text-muted">
-                  Select a saleyard to auto-calculate distance, or enter manually.
+                  Select a saleyard or custom address to auto-calculate distance, or enter manually.
                 </p>
               </div>
             </div>
@@ -302,6 +336,21 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 onChange={(e) => handleSaleyardChange(e.target.value)}
               />
               <Input
+                id="custom_address"
+                name="custom_address"
+                label="Custom Address"
+                type="text"
+                value={customAddress}
+                onChange={(e) => { setCustomAddress(e.target.value); setResult(null); }}
+                onBlur={() => { if (customAddress.trim()) handleCustomAddressSubmit(); }}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleCustomAddressSubmit(); } }}
+                placeholder="Enter destination address"
+                disabled={isGeocodingAddress}
+                helperText={isGeocodingAddress ? "Looking up address..." : undefined}
+              />
+            </div>
+            <div className="mt-4">
+              <Input
                 id="distance"
                 name="distance"
                 label="Distance (km)"
@@ -312,8 +361,8 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 onChange={(e) => { setDistance(e.target.value); setResult(null); }}
                 placeholder="e.g. 200"
                 helperText={
-                  selectedPropertyId && selectedSaleyard && distance
-                    ? "Auto-calculated from property to saleyard"
+                  selectedPropertyId && (selectedSaleyard || customAddress) && distance
+                    ? `Auto-calculated from property to ${selectedSaleyard ? "saleyard" : "address"}`
                     : "Enter the one-way road distance"
                 }
               />
