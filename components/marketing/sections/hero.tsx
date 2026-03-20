@@ -2,8 +2,12 @@
 
 import { useRef } from 'react'
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import EmailForm from '@/components/marketing/ui/email-form'
+import tallyAnimData from '@/public/animations/tally.json'
+
+const Lottie = dynamic(() => import('lottie-react'), { ssr: false })
 
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -58,18 +62,29 @@ export default function Hero() {
             style={{ y: textY }}
             className="flex flex-col items-start"
           >
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="mb-6"
+            >
+              <Lottie
+                animationData={tallyAnimData}
+                loop={false}
+                className="h-[200px] w-auto"
+              />
+            </motion.div>
+
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
-              className="mt-5 text-[clamp(2.5rem,5vw,4.5rem)] font-semibold leading-[1.05] tracking-tight text-white"
+              className="text-[clamp(1.8rem,3.5vw,3rem)] font-semibold leading-[1.1] tracking-tight text-white"
             >
-              Know what your
-              <br />
-              livestock are worth.
+              Precision Valuation.
               <br />
               <span className="bg-gradient-to-br from-brand-light via-brand to-brand-dark bg-clip-text text-transparent">
-                Every day.
+                Driven by Intelligence.
               </span>
             </motion.h1>
 
@@ -77,9 +92,9 @@ export default function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="mt-6 max-w-md text-lg leading-relaxed text-text-secondary"
+              className="mt-6 max-w-lg text-lg leading-relaxed text-text-secondary"
             >
-              Live market data, herd valuations and practical decision intelligence for Australian producers and rural advisors.
+              Master market shifts, track biological growth, and compare sale pathways with advanced industry intelligence. Stockman&apos;s Wallet gives producers and advisors the clarity to make more informed decisions.
             </motion.p>
 
             <motion.div
