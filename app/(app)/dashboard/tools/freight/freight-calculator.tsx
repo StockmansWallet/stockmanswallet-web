@@ -6,7 +6,7 @@ import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { calculateFreightEstimate, DEFAULT_RATE_PER_DECK_PER_KM } from "@/lib/engines/freight-engine";
-import { headsPerDeckForWeight } from "@/lib/data/freight-categories";
+import { headsPerDeckForWeight, freightCategoryLibrary } from "@/lib/data/freight-categories";
 import { saleyards, saleyardLocality, saleyardCoordinates } from "@/lib/data/reference-data";
 import type { FreightEstimate } from "@/lib/types/models";
 import {
@@ -17,6 +17,7 @@ import {
   CheckCircle2,
   Info,
   Navigation,
+  ChevronDown,
 } from "lucide-react";
 import { getRoadDistanceKm } from "@/lib/services/distance-service";
 import AddressAutocomplete, { type AddressResult } from "@/components/app/address-autocomplete";
@@ -119,6 +120,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
   const [calculatedDistance, setCalculatedDistance] = useState<number | null>(null);
   const [calculatedDistanceLabel, setCalculatedDistanceLabel] = useState("");
   const [attempted, setAttempted] = useState(false);
+  const [densityOpen, setDensityOpen] = useState(false);
 
   const selectedHerd = herds.find((h) => h.id === selectedHerdId);
 
@@ -493,6 +495,44 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 Default rate and head per deck values are based on national averages.
                 Adjust to match your local carrier's requirements.
               </p>
+
+              {/* Loading Density Reference */}
+              <button
+                type="button"
+                onClick={() => setDensityOpen(!densityOpen)}
+                className="mt-3 flex items-center gap-1.5 text-xs font-medium text-sky-400 transition-colors hover:text-sky-300"
+              >
+                <ChevronDown className={`h-3.5 w-3.5 transition-transform ${densityOpen ? "rotate-180" : ""}`} />
+                Loading Density Reference
+              </button>
+              {densityOpen && (
+                <div className="mt-2 overflow-hidden rounded-xl bg-white/[0.03] ring-1 ring-inset ring-white/[0.06]">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b border-white/[0.06] text-left text-text-muted">
+                        <th className="px-3 py-2 font-medium">Category</th>
+                        <th className="px-3 py-2 text-right font-medium">Head/Deck</th>
+                        <th className="hidden px-3 py-2 text-right font-medium sm:table-cell">Weight Range</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {freightCategoryLibrary.map((cat) => (
+                        <tr key={cat.id} className="border-b border-white/[0.04] last:border-0">
+                          <td className="px-3 py-1.5 text-text-secondary">{cat.displayName}</td>
+                          <td className="px-3 py-1.5 text-right font-mono text-text-primary">{cat.headsPerDeck}</td>
+                          <td className="hidden px-3 py-1.5 text-right text-text-muted sm:table-cell">
+                            {cat.weightCeilingKg === Infinity
+                              ? `${cat.weightFloorKg}kg+`
+                              : cat.weightFloorKg === 0
+                                ? `Up to ${cat.weightCeilingKg}kg`
+                                : `${cat.weightFloorKg} - ${cat.weightCeilingKg}kg`}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
