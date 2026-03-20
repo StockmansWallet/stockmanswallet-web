@@ -261,7 +261,7 @@ export default function StockmanIQ() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative"
           >
-            <div className="flex h-[600px] flex-col rounded-3xl border border-white/[0.06] bg-[#231f1d] shadow-2xl">
+            <div className="flex h-[600px] flex-col rounded-3xl border border-white/[0.06] bg-[#231f1d]">
               {/* Scrollable messages area */}
               <div ref={scrollRef} className="flex-1 overflow-y-auto overflow-x-hidden px-4 pt-5 pb-3">
                 <AnimatePresence mode="wait">
