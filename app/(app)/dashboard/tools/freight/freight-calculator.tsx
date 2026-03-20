@@ -232,12 +232,13 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
   }
 
   // Category-aware heads-per-deck for the selected herd
-  // Use the resolved category's headsPerDeck when a herd is selected,
-  // fall back to generic weight-band lookup for custom jobs
+  // Weight-based head per deck, with cow-calf fixed density exception
   function categoryAwareHpd(w: number): number {
     if (selectedHerd) {
       const mapping = resolveFreightCategory(selectedHerd.category, selectedHerd.sex, w);
-      return mapping.category.headsPerDeck;
+      if (mapping.category.id === "cow_calf_units") {
+        return mapping.category.headsPerDeck;
+      }
     }
     return headsPerDeckForWeight(w);
   }

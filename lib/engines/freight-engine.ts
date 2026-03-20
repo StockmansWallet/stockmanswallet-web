@@ -60,12 +60,14 @@ export function calculateFreightEstimate(options: {
     breederAutoDetectNotice = mapping.breederNotice;
   }
 
-  // Calculate deck requirements — priority: user override > category density > weight-band fallback
+  // Calculate deck requirements — priority: user override > cow-calf fixed > weight-band lookup
   let headsPerDeck: number;
   if (headsPerDeckOverride !== undefined) {
     headsPerDeck = headsPerDeckOverride;
-  } else {
+  } else if (resolvedCategory.id === "cow_calf_units") {
     headsPerDeck = resolvedCategory.headsPerDeck;
+  } else {
+    headsPerDeck = headsPerDeckForWeight(averageWeightKg);
   }
 
   const decksRequired = Math.max(1, Math.ceil(headCount / headsPerDeck));
