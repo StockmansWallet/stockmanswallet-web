@@ -32,8 +32,33 @@ export default async function AppLayout({
     .maybeSingle();
 
   // Redirect new users to onboarding wizard
+  // Fallback: if profile exists but onboarding_completed is false, check for existing herds.
+  // iOS app completes onboarding locally and may not have set the flag on Supabase yet.
   if (!profile || !profile.onboarding_completed) {
-    redirect("/onboarding");
+    let hasExistingData = false;
+
+    if (profile) {
+      // Check if user has herds (they onboarded on iOS but the flag was not synced)
+      const { data: herds } = await supabase
+        .from("herds")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("is_deleted", false)
+        .limit(1);
+
+      if (herds && herds.length > 0) {
+        hasExistingData = true;
+        // Backfill the flag so this check does not run again
+        await supabase
+          .from("user_profiles")
+          .update({ onboarding_completed: true, updated_at: new Date().toISOString() })
+          .eq("user_id", user.id);
+      }
+    }
+
+    if (!hasExistingData) {
+      redirect("/onboarding");
+    }
   }
 
   const defaultMode = profile?.role && isAdvisorRole(profile.role)
