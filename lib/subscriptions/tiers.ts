@@ -74,7 +74,6 @@ export const TIER_LIMITS: Record<
 export type GatedFeature =
   | "gridIQ"
   | "csvImport"
-  | "elevenLabsVoice"
   | "herdScenarioSimulator"
   | "saleyardComparisonReport"
   | "unlimitedProperties"
@@ -84,7 +83,6 @@ export type GatedFeature =
 const FEATURE_TIERS: Record<GatedFeature, SubscriptionTier[]> = {
   gridIQ: ["head_stockman", "head_advisor"],
   csvImport: ["head_stockman", "head_advisor"],
-  elevenLabsVoice: ["head_stockman", "head_advisor"],
   herdScenarioSimulator: ["head_stockman"],
   saleyardComparisonReport: ["head_stockman", "head_advisor"],
   unlimitedProperties: ["head_stockman"],

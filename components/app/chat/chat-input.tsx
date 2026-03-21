@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { ArrowUp, Loader2, Volume2, VolumeX } from "lucide-react";
+import { ArrowUp, Loader2, Mic } from "lucide-react";
 
 interface ChatInputProps {
   onSend: (text: string) => void | Promise<void>;
@@ -11,10 +11,14 @@ interface ChatInputProps {
   accentClass?: string;
   /** Called on each keystroke - use for typing indicator broadcast */
   onTyping?: () => void;
-  /** Voice toggle state */
-  voiceEnabled?: boolean;
-  /** Called when the voice button is toggled */
-  onVoiceToggle?: () => void;
+  /** Whether voice input is currently active */
+  isListening?: boolean;
+  /** Called when mic button is tapped */
+  onMicTap?: () => void;
+  /** Whether the browser supports speech recognition */
+  micSupported?: boolean;
+  /** Live transcript to display while listening */
+  liveTranscript?: string;
 }
 
 export function ChatInput({
@@ -24,8 +28,10 @@ export function ChatInput({
   loading = false,
   accentClass = "bg-purple-500 hover:bg-purple-600",
   onTyping,
-  voiceEnabled = false,
-  onVoiceToggle,
+  isListening = false,
+  onMicTap,
+  micSupported = false,
+  liveTranscript,
 }: ChatInputProps) {
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -47,13 +53,16 @@ export function ChatInput({
     await onSend(trimmed);
   }, [value, disabled, loading, onSend, resetHeight]);
 
+  // Display live transcript in the textarea while listening
+  const displayValue = isListening && liveTranscript ? liveTranscript : value;
+
   return (
     <div className="flex items-center gap-2">
       {/* Input field with send button inside */}
       <div className="flex min-h-[44px] flex-1 items-center rounded-[22px] border border-white/10 bg-white/5 pl-4 pr-1.5 transition-colors focus-within:border-white/20 focus-within:bg-white/[0.08]">
         <textarea
           ref={textareaRef}
-          value={value}
+          value={displayValue}
           onChange={(e) => {
             setValue(e.target.value);
             onTyping?.();
@@ -67,8 +76,8 @@ export function ChatInput({
               handleSubmit();
             }
           }}
-          placeholder={placeholder}
-          disabled={disabled || loading}
+          placeholder={isListening ? "Listening..." : placeholder}
+          disabled={disabled || loading || isListening}
           rows={1}
           className="max-h-[120px] flex-1 resize-none bg-transparent py-2.5 text-sm leading-5 text-text-primary placeholder:text-text-muted outline-none disabled:opacity-50"
         />
@@ -91,23 +100,20 @@ export function ChatInput({
         </button>
       </div>
 
-      {/* Voice toggle button */}
-      {onVoiceToggle && (
+      {/* Mic button - only shown when browser supports Web Speech API */}
+      {micSupported && onMicTap && (
         <button
           type="button"
-          onClick={onVoiceToggle}
+          onClick={onMicTap}
+          disabled={disabled || loading}
           className={`flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-full transition-all ${
-            voiceEnabled
-              ? `${accentClass} text-white`
+            isListening
+              ? `${accentClass} text-white animate-pulse`
               : "bg-white/5 text-text-muted hover:bg-white/10 hover:text-text-secondary border border-white/10"
           }`}
-          aria-label={voiceEnabled ? "Disable voice" : "Enable voice"}
+          aria-label={isListening ? "Stop listening" : "Voice input"}
         >
-          {voiceEnabled ? (
-            <Volume2 className="h-4 w-4" />
-          ) : (
-            <VolumeX className="h-4 w-4" />
-          )}
+          <Mic className="h-4 w-4" />
         </button>
       )}
     </div>

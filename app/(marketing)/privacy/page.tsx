@@ -65,7 +65,6 @@ export default function PrivacyPolicy() {
             <ul className="ml-4 mt-2 list-disc space-y-1">
               <li><strong className="text-white">Supabase</strong> (backend infrastructure, authentication, database) - stores your account and livestock data</li>
               <li><strong className="text-white">Anthropic / Claude</strong> (AI processing) - processes your Stockman IQ chat messages. Messages are not retained by Anthropic after processing.</li>
-              <li><strong className="text-white">ElevenLabs</strong> (text-to-speech) - converts AI responses to audio when voice mode is used. No personal data is sent.</li>
               <li><strong className="text-white">Apple WeatherKit</strong> (weather data) - retrieves weather information for your property locations</li>
               <li><strong className="text-white">MLA (Meat &amp; Livestock Australia)</strong> (market data) - provides livestock market prices. No personal data is sent.</li>
             </ul>

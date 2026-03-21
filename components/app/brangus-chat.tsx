@@ -6,10 +6,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Brain, Loader2, AlertCircle, ClipboardCopy, Download, Check, FileText, Share2, Mail, MessageCircle } from "lucide-react";
-import { fetchTTSAudio, playAudioBlob, stopPlayback } from "@/lib/brangus/tts-service";
 import { sendMessage, buildSystemPrompt, loadChatDataStore, fetchServerConfig } from "@/lib/brangus/chat-service";
 import { createConversation, saveMessage, autoTitleConversation, formatConversationForExport } from "@/lib/brangus/conversation-service";
 import type { BrangusConversationRow } from "@/lib/brangus/conversation-service";
+import { useSpeechRecognition } from "@/lib/brangus/use-speech-recognition";
 import type { ChatMessage, AnthropicMessage, ChatDataStore, QuickInsight, CardAction } from "@/lib/brangus/types";
 import { createClient } from "@/lib/supabase/client";
 import { ChatBubble } from "@/components/app/chat/chat-bubble";
@@ -153,13 +153,6 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
   const [sessionCards, setSessionCards] = useState<QuickInsight[]>(() => hydrateCards(initialMessages ?? []));
   const [copied, setCopied] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
-  // Persist voice toggle state across sessions via localStorage (default: muted)
-  const [voiceEnabled, setVoiceEnabled] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return localStorage.getItem("brangus-voice-enabled") === "true";
-  });
-  const [isSpeaking, setIsSpeaking] = useState(false);
-
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [userInitials, setUserInitials] = useState("SW");
@@ -167,6 +160,20 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
   const conversationIdRef = useRef<string | null>(existingConvId ?? null);
   const userIdRef = useRef<string | null>(null);
   const hasRequestedTitleRef = useRef(!!existingConvId);
+
+  // Voice input via Web Speech API (en-AU, livestock term corrections)
+  const { isListening, transcript, finalTranscript, startListening, stopListening, isSupported: micSupported } = useSpeechRecognition();
+
+  const handleMicTap = useCallback(() => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  }, [isListening, startListening, stopListening]);
+
+  // Auto-send when speech recognition produces a final transcript
+  const handleSendRef = useRef<((text: string) => void | Promise<void>) | null>(null);
 
   // Get user initials from auth metadata
   useEffect(() => {
@@ -278,36 +285,6 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
     dataStore.pendingYardBookActions = [];
   }, []);
 
-  // Speak assistant response via TTS (non-blocking)
-  const speakResponse = useCallback(async (text: string) => {
-    if (!voiceEnabled) return;
-    setIsSpeaking(true);
-    try {
-      const blob = await fetchTTSAudio(text);
-      if (blob) {
-        const audio = playAudioBlob(blob);
-        audio.addEventListener("ended", () => setIsSpeaking(false));
-        audio.addEventListener("error", () => setIsSpeaking(false));
-      } else {
-        setIsSpeaking(false);
-      }
-    } catch {
-      setIsSpeaking(false);
-    }
-  }, [voiceEnabled]);
-
-  const handleVoiceToggle = useCallback(() => {
-    if (voiceEnabled) {
-      stopPlayback();
-      setIsSpeaking(false);
-    }
-    setVoiceEnabled((prev) => {
-      const next = !prev;
-      localStorage.setItem("brangus-voice-enabled", String(next));
-      return next;
-    });
-  }, [voiceEnabled]);
-
   const handleSend = useCallback(async (text: string) => {
     if (!text || isLoading || !store) return;
 
@@ -367,9 +344,6 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
       }
       setConversationHistory(updatedHistory);
 
-      // Speak the response if voice is enabled (non-blocking)
-      speakResponse(assistantText);
-
       // Persist assistant message (non-blocking) - include summary cards if present
       const cardsToSave = quickInsights && quickInsights.length > 0 ? quickInsights : null;
       if (convId && userId) {
@@ -401,7 +375,17 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, store, conversationHistory, systemPrompt, persistMutations, speakResponse, onConversationCreated, onConversationUpdated]);
+  }, [isLoading, store, conversationHistory, systemPrompt, persistMutations, onConversationCreated, onConversationUpdated]);
+
+  // Keep handleSendRef current so the speech effect can call it without stale closure
+  handleSendRef.current = handleSend;
+
+  // Auto-send when speech recognition commits a final transcript
+  useEffect(() => {
+    if (finalTranscript && handleSendRef.current) {
+      handleSendRef.current(finalTranscript);
+    }
+  }, [finalTranscript]);
 
   const handleCopy = useCallback(() => {
     const exportMessages = messages.map((m) => ({
@@ -619,8 +603,10 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
             disabled={!store}
             loading={isLoading}
             accentClass="bg-brand hover:bg-brand-dark"
-            voiceEnabled={voiceEnabled}
-            onVoiceToggle={handleVoiceToggle}
+            isListening={isListening}
+            onMicTap={handleMicTap}
+            micSupported={micSupported}
+            liveTranscript={transcript}
           />
         </div>
       </div>
