@@ -25,13 +25,13 @@ interface StatCardProps {
 function StatCard({ label, value, change, icon, accent = "brand" }: StatCardProps) {
   return (
     <div className="rounded-2xl bg-surface-lowest p-5">
-      <div className="flex items-start justify-between">
-        <p className="text-xs font-medium text-text-muted uppercase tracking-wide">{label}</p>
+      <div className="flex items-center gap-2">
         {icon && (
-          <div className={`flex h-8 w-8 items-center justify-center rounded-xl ${accentClasses[accent]}`}>
+          <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg ${accentClasses[accent]}`}>
             {icon}
           </div>
         )}
+        <p className="text-xs font-medium text-text-muted uppercase tracking-wide">{label}</p>
       </div>
       <p className="mt-2 text-2xl font-bold text-text-primary">{value}</p>
       {change && (
