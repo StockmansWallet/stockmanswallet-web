@@ -323,7 +323,7 @@ export function HerdsTable({
   return (
     <div>
       {/* Toolbar: species pills + manage + search */}
-      <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-border-subtle bg-surface-lowest px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-4 flex flex-col gap-3 rounded-2xl bg-surface-lowest px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex gap-1.5 overflow-x-auto">
           {SPECIES_TABS.map((tab) => {
             const count = tab === "All" ? herds.length : speciesCounts[tab] || 0;
@@ -352,14 +352,14 @@ export function HerdsTable({
           {herds.length > 0 && (
             <button
               onClick={isEditing ? exitEditMode : () => setIsEditing(true)}
-              className={`inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-1.5 text-xs font-semibold transition-all ${
+              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
                 isEditing
-                  ? "border-brand/30 bg-brand/15 text-brand"
-                  : "border-border bg-surface text-text-secondary hover:bg-surface-raised hover:text-text-primary"
+                  ? "bg-brand/15 text-brand"
+                  : "bg-surface text-text-muted hover:bg-surface-raised hover:text-text-secondary"
               }`}
             >
               <CheckSquare className="h-3.5 w-3.5" />
-              {isEditing ? "Done" : "Manage"}
+              {isEditing ? "Done" : "Select"}
             </button>
           )}
 
