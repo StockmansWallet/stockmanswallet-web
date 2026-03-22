@@ -261,3 +261,35 @@ export async function deleteAccount() {
   await supabase.auth.signOut();
   redirect("/login");
 }
+
+export async function updateAvatarUrl(avatarUrl: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { error } = await supabase.auth.updateUser({
+    data: { avatar_url: avatarUrl },
+  });
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/settings/profile");
+  revalidatePath("/dashboard", "layout");
+  return { success: true };
+}
+
+export async function removeAvatar() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { error } = await supabase.auth.updateUser({
+    data: { avatar_url: null },
+  });
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/settings/profile");
+  revalidatePath("/dashboard", "layout");
+  return { success: true };
+}

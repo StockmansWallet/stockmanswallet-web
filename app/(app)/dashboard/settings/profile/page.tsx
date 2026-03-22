@@ -8,6 +8,7 @@ import { ContactDetailsForm } from "../contact-details-form";
 import { BioForm } from "../bio-form";
 import { VisibilityForm } from "../visibility-form";
 import { isAdvisorRole } from "@/lib/types/advisory";
+import { ProfileAvatar } from "../profile-avatar";
 
 export const revalidate = 0;
 
@@ -51,6 +52,14 @@ export default async function ProfileSettingsPage() {
       <div className="flex flex-col gap-6 lg:flex-row">
         {/* Left column - Profile info */}
         <div className="flex-1 space-y-6">
+          {/* Avatar */}
+          <ProfileAvatar
+            avatarUrl={user?.user_metadata?.avatar_url ?? ""}
+            firstName={user?.user_metadata?.first_name ?? ""}
+            lastName={user?.user_metadata?.last_name ?? ""}
+            email={user?.email ?? ""}
+          />
+
           {/* Profile */}
           <Card>
             <CardHeader>
