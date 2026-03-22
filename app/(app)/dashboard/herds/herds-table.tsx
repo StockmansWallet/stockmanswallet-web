@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import { Search, ChevronUp, ChevronRight, MapPinned } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui/modal";
+import { Search, ChevronUp, ChevronRight, MapPinned, Trash2, CheckSquare } from "lucide-react";
+import { deleteHerds } from "./actions";
 
 type HerdWithProperty = {
   id: string;
@@ -48,6 +51,12 @@ export function HerdsTable({
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+
+  // Edit mode state
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const speciesCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -146,6 +155,43 @@ export function HerdsTable({
     }
   }
 
+  // Selection helpers
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const visibleIds = useMemo(() => sorted.map((h) => h.id), [sorted]);
+
+  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id));
+
+  function toggleSelectAll() {
+    if (allVisibleSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(visibleIds));
+    }
+  }
+
+  function exitEditMode() {
+    setIsEditing(false);
+    setSelectedIds(new Set());
+  }
+
+  async function handleBulkDelete() {
+    setIsDeleting(true);
+    const result = await deleteHerds(Array.from(selectedIds));
+    if (result?.error) {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+    // On success the page revalidates and re-renders with updated data
+  }
+
   function SortIcon({ column }: { column: SortKey }) {
     if (sortKey !== column) return null;
     return (
@@ -158,6 +204,16 @@ export function HerdsTable({
   function TableHeaders() {
     return (
       <>
+        {isEditing && (
+          <th className="w-10 px-3 py-3.5">
+            <input
+              type="checkbox"
+              checked={allVisibleSelected}
+              onChange={toggleSelectAll}
+              className="h-4 w-4 rounded border-white/20 bg-transparent accent-brand cursor-pointer"
+            />
+          </th>
+        )}
         <th
           onClick={() => handleSort("head_count")}
           className="cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary"
@@ -200,7 +256,7 @@ export function HerdsTable({
         >
           Value <SortIcon column="value" />
         </th>
-        <th className="w-10 px-3 py-3.5" />
+        {!isEditing && <th className="w-10 px-3 py-3.5" />}
       </>
     );
   }
@@ -210,11 +266,33 @@ export function HerdsTable({
     const source = herdSources?.[herd.id];
     const isFallback = source !== undefined && source !== "saleyard";
     const pricePerKg = herdPricePerKg?.[herd.id] ?? 0;
+    const isSelected = selectedIds.has(herd.id);
+
+    function handleRowClick() {
+      if (isEditing) {
+        toggleSelect(herd.id);
+      } else {
+        router.push(`/dashboard/herds/${herd.id}`);
+      }
+    }
+
     return (
       <tr
-        onClick={() => router.push(`/dashboard/herds/${herd.id}`)}
-        className="group cursor-pointer transition-colors hover:bg-surface-hover"
+        onClick={handleRowClick}
+        className={`group cursor-pointer transition-colors ${
+          isSelected ? "bg-brand/10" : "hover:bg-surface-hover"
+        }`}
       >
+        {isEditing && (
+          <td className="px-3 py-3.5" onClick={(e) => e.stopPropagation()}>
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={() => toggleSelect(herd.id)}
+              className="h-4 w-4 rounded border-white/20 bg-transparent accent-brand cursor-pointer"
+            />
+          </td>
+        )}
         <td className="px-5 py-3.5 text-right tabular-nums font-medium text-text-primary">
           {herd.head_count?.toLocaleString() ?? "\u2014"}
         </td>
@@ -232,16 +310,18 @@ export function HerdsTable({
         <td className={`px-5 py-3.5 text-right tabular-nums ${isFallback ? "text-red-400" : "text-text-secondary"}`}>
           {value > 0 ? `$${Math.round(value).toLocaleString()}` : "\u2014"}
         </td>
-        <td className="px-3 py-3.5">
-          <ChevronRight className="h-4 w-4 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
-        </td>
+        {!isEditing && (
+          <td className="px-3 py-3.5">
+            <ChevronRight className="h-4 w-4 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
+          </td>
+        )}
       </tr>
     );
   }
 
   return (
     <div>
-      {/* Toolbar: species pills + search */}
+      {/* Toolbar: species pills + manage + search */}
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex gap-1.5 overflow-x-auto">
           {SPECIES_TABS.map((tab) => {
@@ -267,15 +347,31 @@ export function HerdsTable({
           })}
         </div>
 
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search herds..."
-            className="w-full rounded-xl border border-border bg-surface py-2 pl-9 pr-4 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand/50 focus:ring-2 focus:ring-brand/20 sm:w-64"
-          />
+        <div className="flex items-center gap-2">
+          {herds.length > 0 && (
+            <button
+              onClick={isEditing ? exitEditMode : () => setIsEditing(true)}
+              className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${
+                isEditing
+                  ? "bg-brand/15 text-brand"
+                  : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+              }`}
+            >
+              <CheckSquare className="h-3.5 w-3.5" />
+              {isEditing ? "Done" : "Manage"}
+            </button>
+          )}
+
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search herds..."
+              className="w-full rounded-xl border border-border bg-surface py-2 pl-9 pr-4 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand/50 focus:ring-2 focus:ring-brand/20 sm:w-64"
+            />
+          </div>
         </div>
       </div>
 
@@ -361,6 +457,59 @@ export function HerdsTable({
           </div>
         </div>
       )}
+
+      {/* Floating action bar when items selected */}
+      {isEditing && selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
+          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-bg-alt px-5 py-3 shadow-2xl">
+            <span className="text-sm font-medium text-text-primary tabular-nums">
+              {selectedIds.size} selected
+            </span>
+            <div className="h-4 w-px bg-white/10" />
+            <button
+              onClick={toggleSelectAll}
+              className="text-sm font-medium text-brand hover:text-brand/80 transition-colors"
+            >
+              {allVisibleSelected ? "Deselect All" : "Select All"}
+            </button>
+            <div className="h-4 w-px bg-white/10" />
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setShowDeleteConfirm(true)}
+            >
+              <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+              Delete
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirmation modal */}
+      <Modal
+        open={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        title="Delete Herds"
+        size="sm"
+      >
+        <p className="mb-6 text-sm text-text-secondary">
+          Are you sure you want to delete <strong>{selectedIds.size}</strong>{" "}
+          {selectedIds.size === 1 ? "herd" : "herds"}? This will also remove
+          all associated muster, health, and sales records.
+        </p>
+        <div className="flex items-center justify-end gap-3">
+          <Button variant="ghost" onClick={() => setShowDeleteConfirm(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={handleBulkDelete}
+            disabled={isDeleting}
+          >
+            {isDeleting ? "Deleting..." : `Delete ${selectedIds.size} ${selectedIds.size === 1 ? "Herd" : "Herds"}`}
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }

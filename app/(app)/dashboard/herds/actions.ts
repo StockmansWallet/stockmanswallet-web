@@ -181,3 +181,31 @@ export async function deleteHerd(id: string) {
   revalidatePath("/dashboard/herds");
   redirect("/dashboard/herds");
 }
+
+export async function deleteHerds(ids: string[]) {
+  if (!ids.length || ids.length > 200) return { error: "Invalid input" };
+
+  for (const id of ids) {
+    if (!idSchema.safeParse(id).success) return { error: "Invalid input" };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Not authenticated" };
+
+  const now = new Date().toISOString();
+  const { error } = await supabase
+    .from("herds")
+    .update({ is_deleted: true, deleted_at: now, updated_at: now })
+    .in("id", ids)
+    .eq("user_id", user.id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/herds");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
