@@ -4,8 +4,7 @@ import { useState } from "react";
 import { Users } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
 
-// UI shows "Producer" but DB stores "farmer_grazier" for backward compatibility
-export type AccountType = "farmer_grazier" | "advisor";
+export type AccountType = "producer" | "advisor";
 
 const advisorRoles = [
   "Agribusiness Banker",
@@ -22,7 +21,7 @@ const options: {
   icon: React.ReactNode;
 }[] = [
   {
-    value: "farmer_grazier",
+    value: "producer",
     label: "Producer",
     description: "Manage your livestock and track property performance",
     icon: <IconCattleTags className="h-5 w-5" />,

@@ -9,7 +9,7 @@ interface UserProfileCardProps {
 }
 
 const roleLabels: Record<string, string> = {
-  farmer_grazier: "Producer",
+  producer: "Producer",
   agribusiness_banker: "Agribusiness Banker",
   insurer: "Insurer",
   livestock_agent: "Livestock Agent",

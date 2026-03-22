@@ -115,7 +115,7 @@ export function OnboardingWizard({ userName }: { userName: string }) {
       }
       case 2:
         // Setup
-        if (accountType === "farmer_grazier") return properties.length > 0;
+        if (accountType === "producer") return properties.length > 0;
         if (accountType === "advisor")
           return !!(
             companyName &&

@@ -20,7 +20,7 @@ const onboardingPropertySchema = z.object({
 });
 
 const onboardingDataSchema = z.object({
-  accountType: z.enum(["farmer_grazier", "advisor"]),
+  accountType: z.enum(["producer", "advisor"]),
   displayName: z.string().max(200).optional(),
   properties: z.array(onboardingPropertySchema).default([]),
   preferredSaleyard: z.string().max(200).optional(),
@@ -84,7 +84,7 @@ export async function completeOnboarding(data: OnboardingData) {
     profileUpdate.bio = validData.bio;
   }
 
-  if (validData.accountType === "farmer_grazier") {
+  if (validData.accountType === "producer") {
     // Producer visibility
     profileUpdate.is_discoverable = validData.isDiscoverableToAdvisors ?? false;
     profileUpdate.is_discoverable_to_farmers =
@@ -132,7 +132,7 @@ export async function completeOnboarding(data: OnboardingData) {
   }
 
   // Create properties for producers
-  if (validData.accountType === "farmer_grazier" && validData.properties.length > 0) {
+  if (validData.accountType === "producer" && validData.properties.length > 0) {
     const { data: existingProps } = await supabase
       .from("properties")
       .select("id")

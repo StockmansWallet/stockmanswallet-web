@@ -28,11 +28,11 @@ export default async function FarmerDirectoryPage({
   const searchQuery = params.q || "";
   const stateFilter = params.state || "";
 
-  // Fetch farmers (role = farmer_grazier), exclude self
+  // Fetch farmers (role = producer), exclude self
   let query = supabase
     .from("user_profiles")
     .select("user_id, display_name, company_name, role, state, region, bio")
-    .eq("role", "farmer_grazier")
+    .eq("role", "producer")
     .neq("user_id", user.id);
 
   if (stateFilter) {

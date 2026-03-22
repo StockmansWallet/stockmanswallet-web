@@ -60,11 +60,11 @@ export default async function AccountSettingsPage() {
 
   const tier = (profile?.subscription_tier ?? "stockman") as SubscriptionTier;
   const tierInfo = TIER_DISPLAY[tier];
-  const userRole = profile?.role ?? "farmer_grazier";
+  const userRole = profile?.role ?? "producer";
   const isAdvisor = isAdvisorRole(userRole);
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-5xl">
       <PageHeader
         title="Account"
         subtitle="Subscription, security, and account management."
@@ -78,7 +78,7 @@ export default async function AccountSettingsPage() {
         }
       />
 
-      <div className="space-y-6">
+      <div className="grid gap-6 lg:grid-cols-2">
         {/* Account Type */}
         <Card>
           <CardHeader>

@@ -56,7 +56,7 @@ async function getProfileBase(supabase: SupabaseClient, userId: string, email?: 
   return {
     user_id: userId,
     display_name: displayName || existing?.display_name || email || "",
-    role: existing?.role || "farmer_grazier",
+    role: existing?.role || "producer",
   };
 }
 

@@ -69,11 +69,11 @@ export default async function FarmerConnectionDetailPage({
   const participants: Record<string, { name: string; role: string }> = {
     [otherUserId]: {
       name: otherName,
-      role: "farmer_grazier",
+      role: "producer",
     },
     [user.id]: {
       name: myProfile?.display_name ?? "You",
-      role: "farmer_grazier",
+      role: "producer",
     },
   };
 

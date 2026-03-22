@@ -74,7 +74,7 @@ export default async function AppLayout({
           firstName={user.user_metadata?.first_name || ""}
           lastName={user.user_metadata?.last_name || ""}
           email={user.email || ""}
-          roleLabel={roleDisplayName(profile?.role || "farmer_grazier")}
+          roleLabel={roleDisplayName(profile?.role || "producer")}
         />
       </div>
 

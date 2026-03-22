@@ -45,7 +45,7 @@ export async function searchProducers(query: string) {
   const { data: producers } = await supabase
     .from("user_profiles")
     .select("user_id, display_name, company_name, state, region")
-    .eq("role", "farmer_grazier")
+    .eq("role", "producer")
     .not("user_id", "in", `(${excludeIds.join(",")})`)
     .or(
       `display_name.ilike.%${sanitised}%,company_name.ilike.%${sanitised}%`

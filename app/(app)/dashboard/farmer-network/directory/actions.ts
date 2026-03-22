@@ -41,7 +41,7 @@ export async function sendFarmerConnectionRequest(targetUserId: string) {
     .single();
 
   const requesterName = profile?.display_name || user.email || "Unknown";
-  const requesterRole = profile?.role || "farmer_grazier";
+  const requesterRole = profile?.role || "producer";
   const requesterCompany = profile?.company_name || "";
 
   const { data: conn, error } = await supabase

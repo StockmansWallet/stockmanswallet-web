@@ -31,7 +31,7 @@ export default async function AdvisorProducerDirectoryPage({
   let query = supabase
     .from("user_profiles")
     .select("user_id, display_name, company_name, role, state, region, bio")
-    .eq("role", "farmer_grazier")
+    .eq("role", "producer")
     .neq("user_id", user.id);
 
   if (stateFilter) {

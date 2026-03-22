@@ -105,7 +105,7 @@ export const ADVISOR_CATEGORIES: AdvisorCategoryConfig[] = [
 
 // Role mapping: profile form camelCase to Supabase snake_case
 const ROLE_MAP: Record<string, string> = {
-  farmerGrazier: "farmer_grazier",
+  producer: "producer",
   agribusinessBanker: "agribusiness_banker",
   livestockAgent: "livestock_agent",
   accountant: "accountant",
@@ -118,7 +118,7 @@ export function roleToSnakeCase(role: string): string {
 }
 
 const ROLE_DISPLAY_NAMES: Record<string, string> = {
-  farmer_grazier: "Producer",
+  producer: "Producer",
   agribusiness_banker: "Agribusiness Banker",
   livestock_agent: "Livestock Agent",
   accountant: "Accountant",
@@ -133,7 +133,7 @@ export function roleDisplayName(role: string): string {
 
 export function isAdvisorRole(role: string): boolean {
   const normalized = roleToSnakeCase(role);
-  return normalized !== "farmer_grazier" && normalized !== "";
+  return normalized !== "producer" && normalized !== "";
 }
 
 export function getCategoryConfig(role: string): AdvisorCategoryConfig | undefined {
