@@ -195,6 +195,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       : 0;
 
   // Change ticker: compare month 0 vs month 1 projection
+  const changeDollar =
+    chartData.length >= 2
+      ? chartData[1].value - chartData[0].value
+      : undefined;
   const changePercent =
     chartData.length >= 2 && chartData[0].value > 0
       ? ((chartData[1].value - chartData[0].value) / chartData[0].value) * 100
@@ -350,6 +354,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             <div className="flex w-full flex-col gap-3 lg:w-[340px] lg:gap-4">
               <PortfolioValueCard
                 value={portfolioValue}
+                changeDollar={changeDollar}
                 changePercent={changePercent}
                 fallbackCount={fallbackCount}
               />

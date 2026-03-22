@@ -3,11 +3,12 @@ import { TrendingUp, TrendingDown } from "lucide-react";
 
 interface PortfolioValueCardProps {
   value: number;
+  changeDollar?: number;
   changePercent?: number;
   fallbackCount: number;
 }
 
-export function PortfolioValueCard({ value, changePercent, fallbackCount }: PortfolioValueCardProps) {
+export function PortfolioValueCard({ value, changeDollar, changePercent, fallbackCount }: PortfolioValueCardProps) {
   const isPositive = changePercent !== undefined && changePercent >= 0;
 
   return (
@@ -34,6 +35,12 @@ export function PortfolioValueCard({ value, changePercent, fallbackCount }: Port
                 <TrendingUp className="h-3.5 w-3.5" />
               ) : (
                 <TrendingDown className="h-3.5 w-3.5" />
+              )}
+              {changeDollar !== undefined && (
+                <>
+                  ${Math.round(Math.abs(changeDollar)).toLocaleString()}
+                  <span className="opacity-50">|</span>
+                </>
               )}
               {isPositive ? "+" : ""}
               {changePercent.toFixed(1)}%
