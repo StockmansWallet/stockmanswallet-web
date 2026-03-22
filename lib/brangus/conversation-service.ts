@@ -80,7 +80,7 @@ export async function autoTitleConversation(
 
   // Lightweight single-shot call matching iOS generateTitle() pattern
   const body = {
-    model: "claude-sonnet-4-6-20250514",
+    model: "claude-sonnet-4-6",
     max_tokens: 20,
     system: "Generate a 3-5 word title for this Australian livestock conversation. No quotes, no punctuation, no full stop. Title only.",
     messages: [

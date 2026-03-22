@@ -18,7 +18,7 @@ import type {
   SeasonalCategoryData,
 } from "./types";
 
-const MODEL = "claude-sonnet-4-6-20250514";
+const MODEL = "claude-sonnet-4-6";
 const MAX_TOKENS = 2048;
 const MAX_TOOL_ROUNDS = 5;
 
