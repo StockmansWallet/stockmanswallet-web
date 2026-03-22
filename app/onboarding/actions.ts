@@ -57,7 +57,7 @@ export async function completeOnboarding(data: OnboardingData) {
 
   // Determine the actual DB role value
   // For advisors, use the specific role they selected (e.g. "Agribusiness Banker" -> "agribusiness_banker")
-  let dbRole = validData.accountType;
+  let dbRole: string = validData.accountType;
   if (validData.accountType === "advisor" && validData.accountTypeRole) {
     dbRole = validData.accountTypeRole
       .toLowerCase()
