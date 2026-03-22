@@ -8,9 +8,10 @@ interface TopBarProps {
   lastName?: string;
   email?: string;
   roleLabel?: string;
+  avatarUrl?: string;
 }
 
-export function TopBar({ firstName, lastName, email, roleLabel }: TopBarProps) {
+export function TopBar({ firstName, lastName, email, roleLabel, avatarUrl }: TopBarProps) {
   const initials = firstName && lastName
     ? `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
     : "SW";
@@ -33,9 +34,19 @@ export function TopBar({ firstName, lastName, email, roleLabel }: TopBarProps) {
       {/* Right section: user profile */}
       <div className="flex items-center gap-4">
         <Link href="/dashboard/settings/account" className="flex items-center gap-2.5 rounded-xl px-3 py-2 transition-colors hover:bg-white/[0.04]">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/15 text-brand">
-            <span className="text-xs font-bold">{initials}</span>
-          </div>
+          {avatarUrl ? (
+            <Image
+              src={avatarUrl}
+              alt={displayName}
+              width={32}
+              height={32}
+              className="h-8 w-8 shrink-0 rounded-full object-cover"
+            />
+          ) : (
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/15 text-brand">
+              <span className="text-xs font-bold">{initials}</span>
+            </div>
+          )}
           <div className="min-w-0">
             <p className="text-sm font-medium text-text-secondary">{displayName}</p>
             {roleLabel && (

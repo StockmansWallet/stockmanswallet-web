@@ -34,10 +34,32 @@ export async function GET(request: NextRequest) {
     }
   );
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  const { data: sessionData, error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
     return NextResponse.redirect(`${origin}/sign-in`);
+  }
+
+  // Fetch Google avatar via provider token if not already in user metadata
+  if (
+    sessionData?.session?.provider_token &&
+    !sessionData.session.user.user_metadata?.avatar_url
+  ) {
+    try {
+      const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+        headers: { Authorization: `Bearer ${sessionData.session.provider_token}` },
+      });
+      if (res.ok) {
+        const userInfo = await res.json();
+        if (userInfo.picture) {
+          await supabase.auth.updateUser({
+            data: { avatar_url: userInfo.picture },
+          });
+        }
+      }
+    } catch {
+      // Non-critical - continue without avatar
+    }
   }
 
   // Clear the recovery cookie after use
