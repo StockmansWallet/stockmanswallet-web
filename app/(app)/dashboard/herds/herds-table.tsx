@@ -185,11 +185,12 @@ export function HerdsTable({
   async function handleBulkDelete() {
     setIsDeleting(true);
     const result = await deleteHerds(Array.from(selectedIds));
-    if (result?.error) {
-      setIsDeleting(false);
-      setShowDeleteConfirm(false);
+    setIsDeleting(false);
+    setShowDeleteConfirm(false);
+    if (!result?.error) {
+      setSelectedIds(new Set());
+      setIsEditing(false);
     }
-    // On success the page revalidates and re-renders with updated data
   }
 
   function SortIcon({ column }: { column: SortKey }) {
