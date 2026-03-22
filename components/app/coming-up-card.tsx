@@ -12,9 +12,10 @@ interface YardBookItem {
 }
 
 function formatDate(dateStr: string): string {
-  // event_date is timestamptz - extract date portion for local comparison
+  // Extract date portion and parse as local time
   const datePart = dateStr.includes("T") ? dateStr.split("T")[0] : dateStr.split(" ")[0];
-  const d = new Date(datePart + "T00:00:00");
+  const [y, m, day] = datePart.split("-").map(Number);
+  const d = new Date(y, m - 1, day);
   const now = new Date();
   const diffMs = d.getTime() - now.getTime();
   const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));

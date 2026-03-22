@@ -80,7 +80,8 @@ function daysUntilEvent(eventDateStr: string): number {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const dateOnly = eventDateStr.split("T")[0];
-  const event = new Date(dateOnly + "T00:00:00");
+  const [y, m, d] = dateOnly.split("-").map(Number);
+  const event = new Date(y, m - 1, d);
   return Math.floor((event.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
@@ -112,11 +113,9 @@ function countdownColor(days: number): string {
 
 function formatDateAU(dateStr: string): string {
   const dateOnly = dateStr.split("T")[0];
-  const d = new Date(dateOnly + "T00:00:00");
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
+  const [y, m, d] = dateOnly.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
 }
 
 function formatTime(timeStr: string): string {

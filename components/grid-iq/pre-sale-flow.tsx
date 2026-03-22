@@ -62,14 +62,22 @@ interface PreSaleFlowProps {
 
 // MARK: - Helpers
 
+function parseLocal(dateStr: string): Date {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const [y, m, d] = dateStr.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  }
+  return new Date(dateStr);
+}
+
 function isExpired(expiryDate: string | null): boolean {
   if (!expiryDate) return false;
-  return new Date(expiryDate) < new Date();
+  return parseLocal(expiryDate) < new Date();
 }
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return "No date";
-  return new Date(dateStr).toLocaleDateString("en-AU", { day: "2-digit", month: "short", year: "numeric" });
+  return parseLocal(dateStr).toLocaleDateString("en-AU", { day: "2-digit", month: "short", year: "numeric" });
 }
 
 function formatCurrency(value: number | null): string {

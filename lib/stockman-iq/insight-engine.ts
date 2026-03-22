@@ -407,8 +407,9 @@ function evaluateBreeding(
 function evaluateYardBook(items: YardBookRow[]): StockmanIQInsight[] {
   const insights: StockmanIQInsight[] = [];
   const now = new Date();
-  const todayStr = now.toISOString().split("T")[0];
-  const weekFromNow = new Date(now.getTime() + 7 * 86400000).toISOString().split("T")[0];
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const week = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7);
+  const weekFromNow = `${week.getFullYear()}-${String(week.getMonth() + 1).padStart(2, "0")}-${String(week.getDate()).padStart(2, "0")}`;
 
   const overdue = items.filter((i) => !i.is_completed && i.event_date < todayStr);
   const upcoming = items.filter((i) => !i.is_completed && i.event_date >= todayStr && i.event_date <= weekFromNow);

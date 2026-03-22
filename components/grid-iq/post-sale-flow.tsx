@@ -41,7 +41,10 @@ interface PostSaleFlowProps {
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return "No date";
-  return new Date(dateStr).toLocaleDateString("en-AU", { day: "2-digit", month: "short", year: "numeric" });
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(dateStr)
+    ? (() => { const [y, m, d] = dateStr.split("-").map(Number); return new Date(y, m - 1, d); })()
+    : new Date(dateStr);
+  return date.toLocaleDateString("en-AU", { day: "2-digit", month: "short", year: "numeric" });
 }
 
 function formatCurrency(value: number): string {

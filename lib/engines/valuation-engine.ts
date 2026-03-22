@@ -3,6 +3,7 @@
 // Pure functions — pricing/caching will be added when Supabase data layer is wired up
 
 import { resolveMLASaleyardName } from "../data/reference-data";
+import { parseLocalDate as parseLocal } from "../dates";
 import { resolveMLACategory } from "../data/weight-mapping";
 import { nearestSaleyards as nearestSaleyardsFn } from "../data/saleyard-proximity";
 
@@ -471,7 +472,7 @@ export function calculateHerdValuation(
   const projectedWeight = calculateProjectedWeight(
     herd.initial_weight ?? herd.current_weight ?? 0,
     createdAt,
-    herd.dwg_change_date ? new Date(herd.dwg_change_date) : null,
+    herd.dwg_change_date ? parseLocal(herd.dwg_change_date) : null,
     now,
     herd.previous_dwg ?? null,
     herd.daily_weight_gain ?? 0
@@ -582,12 +583,12 @@ export function calculateHerdValuation(
       herd.joining_period_start &&
       herd.joining_period_end
     ) {
-      const pStart = new Date(herd.joining_period_start).getTime();
-      const pEnd = new Date(herd.joining_period_end).getTime();
+      const pStart = parseLocal(herd.joining_period_start).getTime();
+      const pEnd = parseLocal(herd.joining_period_end).getTime();
       accrualStart = new Date((pStart + pEnd) / 2);
     } else {
       // Fallback: use joinedDate if period dates not available
-      accrualStart = new Date(herd.joined_date);
+      accrualStart = parseLocal(herd.joined_date);
     }
     const calvingDays = daysBetween(accrualStart, now);
     // calving_rate may be stored as decimal (0.85) or integer percent (85)
@@ -611,7 +612,7 @@ export function calculateHerdValuation(
   const calvesData = parseCalvesAtFoot(herd.additional_info);
   if (calvesData) {
     const weightRecordDate = herd.calf_weight_recorded_date
-      ? new Date(herd.calf_weight_recorded_date)
+      ? parseLocal(herd.calf_weight_recorded_date)
       : new Date(herd.updated_at);
     calvesAtFootValue = calculateCalfAtFootValue(
       calvesData,

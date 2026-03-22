@@ -693,7 +693,12 @@ async function fetchSeasonalData(
       const catMap = new Map<string, Map<number, { sum: number; count: number }>>();
 
       for (const row of rows) {
-        const month = new Date(row.price_date).getMonth() + 1; // 1-12
+        // Parse date-only string as local time to get correct month
+        const priceDateStr = row.price_date as string;
+        const priceDate = /^\d{4}-\d{2}-\d{2}$/.test(priceDateStr)
+          ? (() => { const [y, m, d] = priceDateStr.split("-").map(Number); return new Date(y, m - 1, d); })()
+          : new Date(priceDateStr);
+        const month = priceDate.getMonth() + 1; // 1-12
         if (!catMap.has(row.category)) catMap.set(row.category, new Map());
         const monthMap = catMap.get(row.category)!;
         const existing = monthMap.get(month) ?? { sum: 0, count: 0 };

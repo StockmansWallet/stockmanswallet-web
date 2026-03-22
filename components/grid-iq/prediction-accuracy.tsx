@@ -132,8 +132,8 @@ export function PredictionAccuracy({
 
         {/* Date context */}
         <div className="mt-3 flex items-center justify-center gap-4 text-[10px] text-text-muted">
-          <span>Estimated {new Date(preSaleDate).toLocaleDateString("en-AU")}</span>
-          <span>Actual {new Date(postSaleDate).toLocaleDateString("en-AU")}</span>
+          <span>Estimated {(() => { const [y,m,d] = preSaleDate.split("-").map(Number); return new Date(y,m-1,d).toLocaleDateString("en-AU"); })()}</span>
+          <span>Actual {(() => { const [y,m,d] = postSaleDate.split("-").map(Number); return new Date(y,m-1,d).toLocaleDateString("en-AU"); })()}</span>
         </div>
       </CardContent>
     </Card>

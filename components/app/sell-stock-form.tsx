@@ -33,7 +33,10 @@ export function SellStockForm({ herd, suggestedPricePerKg, projectedWeight, pric
   const [headCount, setHeadCount] = useState(String(herd.head_count));
   const [saleType, setSaleType] = useState("");
   const [saleLocation, setSaleLocation] = useState(herd.selected_saleyard ?? "");
-  const [saleDate, setSaleDate] = useState(new Date().toISOString().split("T")[0]);
+  const [saleDate, setSaleDate] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  });
   const [freightCost, setFreightCost] = useState("");
   const [notes, setNotes] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
