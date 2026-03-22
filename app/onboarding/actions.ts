@@ -55,9 +55,19 @@ export async function completeOnboarding(data: OnboardingData) {
 
   if (!user) redirect("/sign-in");
 
+  // Determine the actual DB role value
+  // For advisors, use the specific role they selected (e.g. "Agribusiness Banker" -> "agribusiness_banker")
+  let dbRole = validData.accountType;
+  if (validData.accountType === "advisor" && validData.accountTypeRole) {
+    dbRole = validData.accountTypeRole
+      .toLowerCase()
+      .replace(/\//g, "_")
+      .replace(/\s+/g, "_");
+  }
+
   // Build user_profiles update
   const profileUpdate: Record<string, unknown> = {
-    role: validData.accountType,
+    role: dbRole,
     onboarding_completed: true,
     updated_at: new Date().toISOString(),
   };
