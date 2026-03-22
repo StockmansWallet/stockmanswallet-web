@@ -14,7 +14,6 @@ import { PortfolioValueCard } from "@/components/app/portfolio-value-card";
 import { DashboardQuickActions } from "@/components/app/dashboard-quick-actions";
 import { ComingUpCard } from "@/components/app/coming-up-card";
 import { GrowthMortalityCard } from "@/components/app/growth-mortality-card";
-import { AdvisorRedirect } from "@/components/app/advisory/advisor-redirect";
 import { DashboardSaleyardSelector } from "@/components/app/dashboard-saleyard-selector";
 import { WeatherCard } from "@/components/app/weather-card";
 import { DashboardInsights } from "@/components/app/dashboard-insights";
@@ -228,7 +227,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
   return (
     <>
-      <AdvisorRedirect />
       <div className="max-w-6xl">
         {!hasData ? (
           /* Empty state - matches iOS EmptyDashboardView */

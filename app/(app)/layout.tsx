@@ -2,10 +2,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/app/sidebar";
 import { MobileNav } from "@/components/app/mobile-nav";
-import { AppProviders } from "@/components/app/app-providers";
 import { TopBar } from "@/components/app/top-bar";
 import { isAdvisorRole } from "@/lib/types/advisory";
-import { isAdminEmail } from "@/lib/data/admin";
 
 // Prevent Next.js from caching this layout - auth state must be fresh on every request
 export const dynamic = "force-dynamic";
@@ -61,43 +59,36 @@ export default async function AppLayout({
     }
   }
 
-  const defaultMode = profile?.role && isAdvisorRole(profile.role)
-    ? "advisor" as const
-    : "farmer" as const;
-
-  const showViewToggle = isAdminEmail(user.email);
+  const isAdvisor = !!(profile?.role && isAdvisorRole(profile.role));
 
   return (
-    <AppProviders defaultMode={defaultMode}>
-      <div className="flex min-h-screen flex-col bg-background">
-        {/* Mobile nav */}
-        <div data-print-hide>
-          <MobileNav userEmail={user.email} subscriptionTier={profile?.subscription_tier || "stockman"} />
-        </div>
-
-        {/* Desktop top header bar - full width, sticky */}
-        <div data-print-hide className="sticky top-0 z-40">
-          <TopBar
-            showViewToggle={showViewToggle}
-            firstName={user.user_metadata?.first_name || ""}
-            lastName={user.user_metadata?.last_name || ""}
-            email={user.email || ""}
-          />
-        </div>
-
-        {/* Desktop sidebar + content */}
-        <div className="flex flex-1">
-          <div className="hidden lg:block">
-            <div className="sticky top-20 h-[calc(100vh-5rem)] py-4 pl-6">
-              <Sidebar userEmail={user.email} subscriptionTier={profile?.subscription_tier || "stockman"} />
-            </div>
-          </div>
-
-          <main className="flex-1 overflow-y-auto px-6 pb-6 lg:px-8 lg:pb-8">
-            {children}
-          </main>
-        </div>
+    <div className="flex min-h-screen flex-col bg-background">
+      {/* Mobile nav */}
+      <div data-print-hide>
+        <MobileNav userEmail={user.email} subscriptionTier={profile?.subscription_tier || "stockman"} isAdvisor={isAdvisor} />
       </div>
-    </AppProviders>
+
+      {/* Desktop top header bar - full width, sticky */}
+      <div data-print-hide className="sticky top-0 z-40">
+        <TopBar
+          firstName={user.user_metadata?.first_name || ""}
+          lastName={user.user_metadata?.last_name || ""}
+          email={user.email || ""}
+        />
+      </div>
+
+      {/* Desktop sidebar + content */}
+      <div className="flex flex-1">
+        <div className="hidden lg:block">
+          <div className="sticky top-20 h-[calc(100vh-5rem)] py-4 pl-6">
+            <Sidebar userEmail={user.email} subscriptionTier={profile?.subscription_tier || "stockman"} isAdvisor={isAdvisor} />
+          </div>
+        </div>
+
+        <main className="flex-1 overflow-y-auto px-6 pb-6 lg:px-8 lg:pb-8">
+          {children}
+        </main>
+      </div>
+    </div>
   );
 }

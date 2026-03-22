@@ -5,8 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/app/(auth)/actions";
-import { useViewMode } from "@/lib/hooks/use-view-mode";
-import { ViewModeToggle } from "@/components/app/view-mode-toggle";
 import { Menu, X, Crown, HelpCircle, Settings, LogOut } from "lucide-react";
 import { tierDisplayName, type SubscriptionTier } from "@/lib/subscriptions/tiers";
 import { NotificationBell } from "@/components/app/notification-bell";
@@ -16,16 +14,15 @@ import {
   type NavItem,
 } from "@/lib/navigation/nav-config";
 
-export function MobileNav({ userEmail, subscriptionTier = "stockman" }: { userEmail?: string; subscriptionTier?: string }) {
+export function MobileNav({ userEmail, subscriptionTier = "stockman", isAdvisor = false }: { userEmail?: string; subscriptionTier?: string; isAdvisor?: boolean }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const { viewMode } = useViewMode();
 
   const checkActive = (href: string) =>
     pathname === href ||
     (href !== "/dashboard" && pathname.startsWith(href));
 
-  const navItems: NavItem[] = viewMode === "farmer" ? farmerMobileItems : advisorMobileItems;
+  const navItems: NavItem[] = isAdvisor ? advisorMobileItems : farmerMobileItems;
 
   return (
     <>
@@ -67,9 +64,6 @@ export function MobileNav({ userEmail, subscriptionTier = "stockman" }: { userEm
                 <X className="h-5 w-5" />
               </button>
             </div>
-
-            {/* View mode toggle */}
-            <ViewModeToggle />
 
             <div className="flex-1 space-y-0.5 overflow-y-auto">
               {navItems.map((item) => (

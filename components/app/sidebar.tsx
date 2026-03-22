@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/app/(auth)/actions";
 import { isAdminEmail } from "@/lib/data/admin";
-import { useViewMode } from "@/lib/hooks/use-view-mode";
 import { Bell, Crown, LogOut } from "lucide-react";
 import { NotificationBadge } from "@/components/app/notification-badge";
 import { tierDisplayName, type SubscriptionTier } from "@/lib/subscriptions/tiers";
@@ -34,9 +33,8 @@ function NavLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
   );
 }
 
-export function Sidebar({ userEmail, subscriptionTier = "stockman" }: { userEmail?: string; subscriptionTier?: string }) {
+export function Sidebar({ userEmail, subscriptionTier = "stockman", isAdvisor = false }: { userEmail?: string; subscriptionTier?: string; isAdvisor?: boolean }) {
   const pathname = usePathname();
-  const { viewMode } = useViewMode();
 
   const checkActive = (href: string) => {
     if (pathname === href) return true;
@@ -45,8 +43,8 @@ export function Sidebar({ userEmail, subscriptionTier = "stockman" }: { userEmai
     return pathname.startsWith(href);
   };
 
-  const mainItems = viewMode === "farmer" ? farmerNavItems : advisorNavItems;
-  const toolItems = viewMode === "farmer" ? farmerToolItems : advisorToolItems;
+  const mainItems = isAdvisor ? advisorNavItems : farmerNavItems;
+  const toolItems = isAdvisor ? advisorToolItems : farmerToolItems;
 
   return (
     <aside className="flex h-full w-64 flex-col">

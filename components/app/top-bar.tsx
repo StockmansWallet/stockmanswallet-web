@@ -2,16 +2,14 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ViewModeToggle } from "@/components/app/view-mode-toggle";
 
 interface TopBarProps {
-  showViewToggle?: boolean;
   firstName?: string;
   lastName?: string;
   email?: string;
 }
 
-export function TopBar({ showViewToggle, firstName, lastName, email }: TopBarProps) {
+export function TopBar({ firstName, lastName, email }: TopBarProps) {
   const initials = firstName && lastName
     ? `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
     : "SW";
@@ -31,10 +29,8 @@ export function TopBar({ showViewToggle, firstName, lastName, email }: TopBarPro
         <span className="text-xl font-bold text-white">Stockman&apos;s Wallet</span>
       </Link>
 
-      {/* Right section: toggle + user profile */}
+      {/* Right section: user profile */}
       <div className="flex items-center gap-4">
-        {showViewToggle && <ViewModeToggle />}
-
         <Link href="/dashboard/settings/account" className="flex items-center gap-2.5 rounded-xl px-3 py-2 transition-colors hover:bg-white/[0.04]">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/15 text-brand">
             <span className="text-xs font-bold">{initials}</span>

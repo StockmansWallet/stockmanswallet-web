@@ -10,9 +10,6 @@ import {
   ScrollText,
 } from "lucide-react";
 
-// View mode for sidebar toggle (dev convenience, production uses user role)
-export type ViewMode = "farmer" | "advisor";
-
 // Connection request lifecycle
 export type ConnectionStatus = "pending" | "approved" | "denied" | "expired";
 
