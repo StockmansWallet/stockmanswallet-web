@@ -18,7 +18,7 @@ import {
   killSheetLineItemPrompt,
 } from "./pdf-chunker";
 
-const CLAUDE_MODEL = "claude-haiku-4-5-20251001";
+const CLAUDE_MODEL = "claude-sonnet-4-6-20250514";
 
 // Text file extensions that can be read as plain text for AI extraction
 const TEXT_EXTENSIONS = new Set(["csv", "txt", "tsv"]);

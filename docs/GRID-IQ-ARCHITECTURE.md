@@ -65,7 +65,7 @@ Grid IQ helps livestock producers decide whether to sell cattle at saleyard or d
                                |
                   +------------v--------------+
                   | Anthropic API              |
-                  | claude-haiku-4-5-20251001  |
+                  | claude-sonnet-4-6-20250514  |
                   +------------+--------------+
                                |
                      Structured JSON
@@ -177,7 +177,7 @@ PDFKit: extractTextFromPDF()
 
 ### 5.1 Model and Routing
 
-- **Model:** `claude-haiku-4-5-20251001` (only model in whitelist)
+- **Model:** `claude-sonnet-4-6-20250514` (only model in whitelist)
 - **Routing:** iOS app -> `claude-proxy` Edge Function -> Anthropic API
 - **Auth:** Supabase JWT (ES256), verified server-side via `auth.getUser(jwt)`
 - **Beta header:** `anthropic-beta: pdfs-2024-09-25` (for PDF document type support)

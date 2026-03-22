@@ -20,7 +20,7 @@ interface BrangusCommentary {
   narrative: string;
 }
 
-const CLAUDE_MODEL = "claude-haiku-4-5-20251001";
+const CLAUDE_MODEL = "claude-sonnet-4-6-20250514";
 
 const COMMENTARY_SYSTEM_PROMPT = `You are Brangus, the AI analysis companion in Stockman's Wallet - an Australian \
 livestock management app. Write commentary interpreting a Grid IQ analysis for a \
