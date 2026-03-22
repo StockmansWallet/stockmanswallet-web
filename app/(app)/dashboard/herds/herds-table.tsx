@@ -323,7 +323,7 @@ export function HerdsTable({
   return (
     <div>
       {/* Toolbar: species pills + manage + search */}
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-border-subtle bg-surface-lowest px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex gap-1.5 overflow-x-auto">
           {SPECIES_TABS.map((tab) => {
             const count = tab === "All" ? herds.length : speciesCounts[tab] || 0;
@@ -352,10 +352,10 @@ export function HerdsTable({
           {herds.length > 0 && (
             <button
               onClick={isEditing ? exitEditMode : () => setIsEditing(true)}
-              className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all ${
+              className={`inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-1.5 text-xs font-semibold transition-all ${
                 isEditing
-                  ? "bg-brand/15 text-brand"
-                  : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+                  ? "border-brand/30 bg-brand/15 text-brand"
+                  : "border-border bg-surface text-text-secondary hover:bg-surface-raised hover:text-text-primary"
               }`}
             >
               <CheckSquare className="h-3.5 w-3.5" />
