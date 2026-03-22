@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Crown, Lock, Trash2 } from "lucide-react";
+import { Crown, Lock, Trash2, UserCircle } from "lucide-react";
 import { PasswordForm } from "../password-form";
 import { DeleteAccountButton } from "../delete-account-button";
 import {
@@ -10,6 +10,7 @@ import {
   TIER_DISPLAY,
   type SubscriptionTier,
 } from "@/lib/subscriptions/tiers";
+import { isAdvisorRole, roleDisplayName } from "@/lib/types/advisory";
 
 export const revalidate = 0;
 
@@ -50,15 +51,17 @@ export default async function AccountSettingsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Fetch subscription tier from user_profiles
+  // Fetch subscription tier and role from user_profiles
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select("subscription_tier")
+    .select("subscription_tier, role")
     .eq("user_id", user!.id)
     .single();
 
   const tier = (profile?.subscription_tier ?? "stockman") as SubscriptionTier;
   const tierInfo = TIER_DISPLAY[tier];
+  const userRole = profile?.role ?? "farmer_grazier";
+  const isAdvisor = isAdvisorRole(userRole);
 
   return (
     <div className="max-w-3xl">
@@ -76,6 +79,33 @@ export default async function AccountSettingsPage() {
       />
 
       <div className="space-y-6">
+        {/* Account Type */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2.5">
+              <SectionIcon icon={UserCircle} />
+              <CardTitle>Account Type</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-text-primary">
+                  {roleDisplayName(userRole)}
+                </p>
+                <p className="text-xs text-text-muted">
+                  {isAdvisor ? "Advisor account" : "Producer account"}
+                </p>
+              </div>
+              <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+                isAdvisor ? "bg-purple-500/10 text-purple-400" : "bg-brand/10 text-brand"
+              }`}>
+                {isAdvisor ? "Advisor" : "Producer"}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Subscription */}
         <Card>
           <CardHeader>

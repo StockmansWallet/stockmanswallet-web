@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/app/sidebar";
 import { MobileNav } from "@/components/app/mobile-nav";
 import { TopBar } from "@/components/app/top-bar";
-import { isAdvisorRole } from "@/lib/types/advisory";
+import { isAdvisorRole, roleDisplayName } from "@/lib/types/advisory";
 
 // Prevent Next.js from caching this layout - auth state must be fresh on every request
 export const dynamic = "force-dynamic";
@@ -74,6 +74,7 @@ export default async function AppLayout({
           firstName={user.user_metadata?.first_name || ""}
           lastName={user.user_metadata?.last_name || ""}
           email={user.email || ""}
+          roleLabel={roleDisplayName(profile?.role || "farmer_grazier")}
         />
       </div>
 

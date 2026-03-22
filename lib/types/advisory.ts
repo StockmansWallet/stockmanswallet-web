@@ -117,6 +117,20 @@ export function roleToSnakeCase(role: string): string {
   return ROLE_MAP[role] ?? role;
 }
 
+const ROLE_DISPLAY_NAMES: Record<string, string> = {
+  farmer_grazier: "Producer",
+  agribusiness_banker: "Agribusiness Banker",
+  livestock_agent: "Livestock Agent",
+  accountant: "Accountant",
+  insurer: "Insurer",
+  succession_planner: "Succession Planner",
+};
+
+export function roleDisplayName(role: string): string {
+  const normalized = roleToSnakeCase(role);
+  return ROLE_DISPLAY_NAMES[normalized] ?? role;
+}
+
 export function isAdvisorRole(role: string): boolean {
   const normalized = roleToSnakeCase(role);
   return normalized !== "farmer_grazier" && normalized !== "";

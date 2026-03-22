@@ -7,9 +7,10 @@ interface TopBarProps {
   firstName?: string;
   lastName?: string;
   email?: string;
+  roleLabel?: string;
 }
 
-export function TopBar({ firstName, lastName, email }: TopBarProps) {
+export function TopBar({ firstName, lastName, email, roleLabel }: TopBarProps) {
   const initials = firstName && lastName
     ? `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
     : "SW";
@@ -35,7 +36,12 @@ export function TopBar({ firstName, lastName, email }: TopBarProps) {
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/15 text-brand">
             <span className="text-xs font-bold">{initials}</span>
           </div>
-          <span className="text-sm font-medium text-text-secondary">{displayName}</span>
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-text-secondary">{displayName}</p>
+            {roleLabel && (
+              <p className="text-xs text-text-muted">{roleLabel}</p>
+            )}
+          </div>
         </Link>
       </div>
     </header>
