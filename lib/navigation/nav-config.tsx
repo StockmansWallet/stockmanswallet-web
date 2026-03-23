@@ -6,7 +6,7 @@ import {
   Truck,
   Grid3x3,
   Users,
-  Brain,
+  MessageCircle,
   Lightbulb,
   HelpCircle,
   Settings,
@@ -30,7 +30,7 @@ export const farmerNavItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: <Wallet className="h-5 w-5" /> },
   { label: "Herds", href: "/dashboard/herds", icon: <IconCattleTags className="h-5 w-5" /> },
   { label: "Properties", href: "/dashboard/properties", icon: <MapPinned className="h-5 w-5" /> },
-  { label: "Brangus", href: "/dashboard/brangus", icon: <Brain className="h-5 w-5" /> },
+  { label: "Brangus", href: "/dashboard/brangus", icon: <MessageCircle className="h-5 w-5" /> },
   { label: "Insights", href: "/dashboard/insights", icon: <Lightbulb className="h-5 w-5" /> },
   { label: "Markets", href: "/dashboard/market", icon: <TrendingUp className="h-5 w-5" /> },
 ];
@@ -50,7 +50,7 @@ export const advisorNavItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard/advisor", icon: <Wallet className="h-5 w-5" />, activeClass: "bg-purple-500/15 text-purple-400" },
   { label: "Clients", href: "/dashboard/advisor/clients", icon: <Users className="h-5 w-5" />, activeClass: "bg-purple-500/15 text-purple-400" },
   { label: "Markets", href: "/dashboard/market", icon: <TrendingUp className="h-5 w-5" /> },
-  { label: "Brangus", href: "/dashboard/brangus", icon: <Brain className="h-5 w-5" /> },
+  { label: "Brangus", href: "/dashboard/brangus", icon: <MessageCircle className="h-5 w-5" /> },
   { label: "Insights", href: "/dashboard/insights", icon: <Lightbulb className="h-5 w-5" /> },
 ];
 
