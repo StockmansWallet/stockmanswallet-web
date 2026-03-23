@@ -156,6 +156,7 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [userInitials, setUserInitials] = useState("SW");
+  const [userAvatarUrl, setUserAvatarUrl] = useState<string | undefined>(undefined);
   const postTypingIdRef = useRef<string | null>(null);
   const conversationIdRef = useRef<string | null>(existingConvId ?? null);
   const userIdRef = useRef<string | null>(null);
@@ -175,7 +176,7 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
   // Auto-send when speech recognition produces a final transcript
   const handleSendRef = useRef<((text: string) => void | Promise<void>) | null>(null);
 
-  // Get user initials from auth metadata
+  // Get user initials and avatar from auth metadata
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => {
@@ -184,6 +185,22 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
         const first = (meta.first_name || meta.given_name || meta.full_name?.split(" ")[0] || "").charAt(0);
         const last = (meta.last_name || meta.family_name || meta.full_name?.split(" ").pop() || "").charAt(0);
         if (first || last) setUserInitials((first + last).toUpperCase());
+
+        // Use custom avatar, Google avatar, or fall back to initials
+        const avatarUrl = meta.avatar_url || meta.google_avatar_url || meta.picture;
+        if (avatarUrl) setUserAvatarUrl(avatarUrl);
+      }
+
+      // Also check user_profiles for a custom avatar
+      if (data.user?.id) {
+        supabase
+          .from("user_profiles")
+          .select("avatar_url")
+          .eq("id", data.user.id)
+          .single()
+          .then(({ data: profile }) => {
+            if (profile?.avatar_url) setUserAvatarUrl(profile.avatar_url);
+          });
       }
     });
   }, []);
@@ -560,7 +577,7 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
                   bgClass={isUser ? "bg-brand" : "bg-[#44372D]"}
                   tailColor={isUser ? USER_BG : BRANGUS_BG}
                   textClass={isUser ? "text-white" : "text-white/80"}
-                  avatarUrl={isUser ? undefined : BRANGUS_AVATAR}
+                  avatarUrl={isUser ? userAvatarUrl : BRANGUS_AVATAR}
                   avatarInitials={isUser ? userInitials : undefined}
                   animate
                   animationType={isPostTyping ? "fade" : "bounce"}
