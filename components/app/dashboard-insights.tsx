@@ -20,7 +20,7 @@ export function DashboardInsights({ insights }: { insights: StockmanIQInsight[] 
             <CardTitle>Insights</CardTitle>
           </div>
           <Link
-            href="/dashboard/stockman-iq"
+            href="/dashboard/insights"
             className="text-xs font-medium text-brand hover:underline"
           >
             View all

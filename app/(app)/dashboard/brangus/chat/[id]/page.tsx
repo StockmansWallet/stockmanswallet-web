@@ -6,7 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { fetchConversationsServer, fetchMessagesServer } from "@/lib/brangus/conversation-service-server";
 import { BrangusChat } from "@/components/app/brangus-chat";
 
-export const metadata = { title: "Chat - Stockman IQ" };
+export const metadata = { title: "Chat - Brangus" };
 
 export default async function StockmanIQConversationPage({
   params,
@@ -29,7 +29,7 @@ export default async function StockmanIQConversationPage({
         subtitle="Your AI livestock advisor"
         actions={
           <Link
-            href="/dashboard/stockman-iq"
+            href="/dashboard/brangus"
             className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-text-secondary transition-colors hover:bg-white/[0.05] hover:text-text-primary"
           >
             <ArrowLeft className="h-4 w-4" />

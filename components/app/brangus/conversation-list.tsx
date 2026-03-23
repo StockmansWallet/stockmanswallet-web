@@ -169,14 +169,14 @@ export function ConversationList({ conversations, onSelect, onDeleted, activeId 
                 } else if (onSelect) {
                   onSelect(conv.id);
                 } else {
-                  router.push(`/dashboard/stockman-iq/chat/${conv.id}`);
+                  router.push(`/dashboard/brangus/chat/${conv.id}`);
                 }
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   if (selectMode) toggleSelect(conv.id);
                   else if (onSelect) onSelect(conv.id);
-                  else router.push(`/dashboard/stockman-iq/chat/${conv.id}`);
+                  else router.push(`/dashboard/brangus/chat/${conv.id}`);
                 }
               }}
               className={`group flex w-full cursor-pointer items-start gap-3 rounded-xl p-3 text-left transition-colors hover:bg-white/[0.05] ${

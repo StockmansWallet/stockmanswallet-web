@@ -230,12 +230,12 @@ export default function HelpCenterPage() {
                 </div>
               </a>
               <Link
-                href="/dashboard/stockman-iq"
+                href="/dashboard/brangus"
                 className="flex items-center gap-3 rounded-xl bg-white/[0.03] px-4 py-3 transition-colors hover:bg-white/[0.06]"
               >
                 <MessageCircle className="h-5 w-5 text-brand" />
                 <div>
-                  <p className="text-sm font-medium text-text-primary">Ask Stockman IQ</p>
+                  <p className="text-sm font-medium text-text-primary">Ask Brangus</p>
                   <p className="text-xs text-text-muted">AI-powered help for quick questions</p>
                 </div>
               </Link>

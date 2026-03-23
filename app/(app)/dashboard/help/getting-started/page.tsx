@@ -133,8 +133,8 @@ export default function GettingStartedPage() {
                   Help Center
                 </Link>{" "}
                 for feature guides, FAQs, and support options. You can also ask{" "}
-                <Link href="/dashboard/stockman-iq" className="text-brand hover:underline">
-                  Stockman IQ
+                <Link href="/dashboard/brangus" className="text-brand hover:underline">
+                  Brangus
                 </Link>{" "}
                 for quick answers.
               </p>

@@ -121,7 +121,8 @@ NAVIGATION (Web):
 - Dashboard: /dashboard - overview of total herd value, 12-month outlook
 - Herds: /dashboard/herds - view all herds, click "Add Herd" to create one
 - Properties: /dashboard/properties - view and manage properties
-- Stockman IQ: /dashboard/stockman-iq - that's me, Brangus
+- Brangus: /dashboard/brangus - that's me, Brangus, your AI livestock advisor
+- Insights: /dashboard/insights - AI-powered intelligence for your operation
 - Markets: /dashboard/market - live MLA saleyard prices
 - Yard Book: /dashboard/tools/yard-book - schedule and track tasks
 - Reports: /dashboard/tools/reports - generate reports
