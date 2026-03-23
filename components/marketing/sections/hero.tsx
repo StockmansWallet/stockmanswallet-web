@@ -81,11 +81,13 @@ export default function Hero() {
               transition={{ duration: 0.7, delay: 0.2 }}
               className="text-[clamp(1.8rem,3.5vw,3rem)] font-semibold leading-[1.1] tracking-tight text-white"
             >
-              Precision Valuation.
-              <br />
               <span className="bg-gradient-to-br from-brand-light via-brand to-brand-dark bg-clip-text text-transparent">
-                Driven by Intelligence.
+                Live. Stock. Market.
               </span>
+              <br />
+              Paddock to Portfolio
+              <br />
+              Intelligence.
             </motion.h1>
 
             <motion.p
@@ -94,7 +96,7 @@ export default function Hero() {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="mt-6 max-w-lg text-lg leading-relaxed text-text-secondary"
             >
-              Master market shifts, track biological growth, and compare sale pathways with advanced industry intelligence. Stockman&apos;s Wallet gives producers and advisors the clarity to make more informed decisions.
+              Measure biological and market movements, compare sale options, and drive better decisions with advanced industry capabilities. Built for Australian producers and rural advisors.
             </motion.p>
 
             <motion.div
