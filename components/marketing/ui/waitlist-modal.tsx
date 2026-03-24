@@ -100,12 +100,12 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
 
   function handleClose() {
     onClose()
-    // Reset after animation
+    // Reset after exit animation completes
     setTimeout(() => {
       setForm({ name: '', email: '', role: '', postcode: '', herd_size: '', property_count: '' })
       setStatus('idle')
       setErrorMsg('')
-    }, 200)
+    }, 350)
   }
 
   if (status === 'success') {
