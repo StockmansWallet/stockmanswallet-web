@@ -22,6 +22,8 @@ export function categoryFallback(mlaCategory: string): string | null {
 // MARK: - Constants
 
 export const BREEDING_ACCRUAL_CYCLE_DAYS = 365;
+const STALE_DATA_THRESHOLD_DAYS = 56;   // 8 weeks — auto-switch to nearest saleyard
+export const STALE_WARNING_THRESHOLD_DAYS = 42; // 6 weeks — amber UI warning
 
 // MARK: - Valuation Result
 
@@ -407,6 +409,16 @@ function resolvePriceFromEntries(
   return null;
 }
 
+// MARK: - Staleness Check
+
+/** Returns true if dataDate is older than thresholdDays from today */
+function isDataStale(dataDate: string | null | undefined, thresholdDays: number): boolean {
+  if (!dataDate) return false;
+  const date = new Date(dataDate);
+  const daysSince = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
+  return daysSince > thresholdDays;
+}
+
 // MARK: - Detailed Valuation Result
 
 export type PriceSource = "saleyard" | "national" | "fallback";
@@ -497,6 +509,10 @@ export function calculateHerdValuation(
     const saleyardKey = `${mlaCategory}|${resolvedSaleyard}`;
     const saleyardEntries = saleyardPriceMap.get(saleyardKey) ?? [];
     resolved = resolvePriceFromEntries(saleyardEntries, projectedWeight);
+    // Debug: Skip stale saleyard data (>8 weeks) — fall through to nearest saleyard
+    if (resolved && isDataStale(resolved.dataDate, STALE_DATA_THRESHOLD_DAYS)) {
+      resolved = null;
+    }
     if (resolved) { priceSource = "saleyard"; matchedWeightRange = resolved.matchedRange; }
   }
 
@@ -505,6 +521,10 @@ export function calculateHerdValuation(
     const breedKey = `${mlaCategory}|${herd.breed}|${resolvedSaleyard}`;
     const breedEntries = saleyardBreedPriceMap.get(breedKey) ?? [];
     resolved = resolvePriceFromEntries(breedEntries, projectedWeight);
+    // Debug: Skip stale saleyard breed data (>8 weeks)
+    if (resolved && isDataStale(resolved.dataDate, STALE_DATA_THRESHOLD_DAYS)) {
+      resolved = null;
+    }
     if (resolved) {
       priceSource = "saleyard";
       skipBreedPremium = true;
@@ -520,6 +540,11 @@ export function calculateHerdValuation(
       const nearKey = `${mlaCategory}|${nearYard}`;
       const nearEntries = saleyardPriceMap.get(nearKey) ?? [];
       resolved = resolvePriceFromEntries(nearEntries, projectedWeight);
+      // Debug: Skip stale nearest saleyard data too
+      if (resolved && isDataStale(resolved.dataDate, STALE_DATA_THRESHOLD_DAYS)) {
+        resolved = null;
+        continue;
+      }
       if (resolved) { priceSource = "saleyard"; matchedWeightRange = resolved.matchedRange; break; }
     }
   }

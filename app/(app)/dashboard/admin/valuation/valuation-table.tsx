@@ -19,7 +19,7 @@ function fmt(n: number, decimals = 0): string {
 }
 
 function fmtDollar(n: number): string {
-  return `$${fmt(Math.round(n))}`;
+  return `$${fmt(n, 2)}`;
 }
 
 function fmtCents(n: number): string {

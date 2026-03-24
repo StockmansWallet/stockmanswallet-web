@@ -39,6 +39,7 @@ export function HerdsTable({
   herdSources,
   herdPricePerKg,
   herdBreedingAccrual,
+  herdDataDates,
   propertyGroups,
 }: {
   herds: HerdWithProperty[];
@@ -46,6 +47,7 @@ export function HerdsTable({
   herdSources?: Record<string, string>;
   herdPricePerKg?: Record<string, number>;
   herdBreedingAccrual?: Record<string, number>;
+  herdDataDates?: Record<string, string | null>;
   propertyGroups: PropertyGroup[];
 }) {
   const router = useRouter();
@@ -270,6 +272,10 @@ export function HerdsTable({
     const isFallback = source !== undefined && source !== "saleyard";
     const pricePerKg = herdPricePerKg?.[herd.id] ?? 0;
     const accrual = herdBreedingAccrual?.[herd.id] ?? 0;
+    // Debug: Stale data amber warning (6-8 weeks old)
+    const dataDate = herdDataDates?.[herd.id];
+    const dataAgeDays = dataDate ? Math.floor((Date.now() - new Date(dataDate).getTime()) / 86400000) : 0;
+    const isStale = dataAgeDays > 42 && !isFallback;
     const isSelected = selectedIds.has(herd.id);
 
     function handleRowClick() {
@@ -305,7 +311,7 @@ export function HerdsTable({
         </td>
         <td className="hidden px-5 py-3.5 text-text-secondary md:table-cell">{herd.breed}</td>
         <td className="hidden px-5 py-3.5 text-text-secondary lg:table-cell">{herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} (${herd.sub_category})` : herd.category}</td>
-        <td className="hidden px-5 py-3.5 text-right tabular-nums text-text-secondary lg:table-cell">
+        <td className={`hidden px-5 py-3.5 text-right tabular-nums lg:table-cell ${isFallback ? "text-red-400" : isStale ? "text-amber-400" : "text-text-secondary"}`}>
           {pricePerKg > 0 ? `$${pricePerKg.toFixed(2)}` : "\u2014"}
         </td>
         <td className="hidden px-5 py-3.5 text-right tabular-nums text-text-secondary xl:table-cell">

@@ -58,6 +58,7 @@ export interface HerdReportData {
   propertyName: string | null;
   breedPremiumOverride: number | null;
   priceSource: string;
+  dataDate: string | null;
 }
 
 // MARK: - Sale Report Data

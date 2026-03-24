@@ -201,6 +201,7 @@ export async function generateAssetRegisterData(
       propertyName,
       breedPremiumOverride: herd.breed_premium_override ?? null,
       priceSource: valuation.priceSource,
+      dataDate: valuation.dataDate,
     });
 
     totalValue += valuation.netValue;

@@ -43,7 +43,7 @@ const categoriesBySpecies: Record<string, readonly string[]> = {
 };
 
 function fmtDollar(n: number): string {
-  return `$${Math.round(n).toLocaleString()}`;
+  return `$${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function fmtCents(n: number, decimals = 4): string {

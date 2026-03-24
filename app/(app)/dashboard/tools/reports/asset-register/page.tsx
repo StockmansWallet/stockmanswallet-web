@@ -150,9 +150,17 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
                           <td className="px-3 py-2.5 text-right tabular-nums text-text-secondary">{fmtPrice(h.pricePerKg)}</td>
                           <td className="px-3 py-2.5 text-right tabular-nums font-medium text-text-primary">{fmt(h.netValue)}</td>
                           <td className="px-5 py-2.5 text-right">
-                            <Badge variant={h.priceSource === "saleyard" ? "success" : h.priceSource === "national" ? "info" : "warning"} className="text-[10px]">
-                              {h.priceSource}
-                            </Badge>
+                            {(() => {
+                              const ageDays = h.dataDate ? Math.floor((Date.now() - new Date(h.dataDate).getTime()) / 86400000) : 0;
+                              const isStale = ageDays > 42 && h.priceSource === "saleyard";
+                              return (
+                                <div className="flex items-center justify-end gap-1">
+                                  <Badge variant={h.priceSource === "saleyard" ? (isStale ? "warning" : "success") : h.priceSource === "national" ? "info" : "warning"} className="text-[10px]">
+                                    {isStale ? `Stale - ${Math.floor(ageDays / 7)}w` : h.priceSource}
+                                  </Badge>
+                                </div>
+                              );
+                            })()}
                           </td>
                         </tr>
                       ))}

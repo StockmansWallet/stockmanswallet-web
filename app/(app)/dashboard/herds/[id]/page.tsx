@@ -19,12 +19,12 @@ export const metadata = {
   title: "Herd Details",
 };
 
-function InfoRow({ label, value }: { label: string; value: string | number | null | undefined }) {
+function InfoRow({ label, value, valueClassName }: { label: string; value: string | number | null | undefined; valueClassName?: string }) {
   if (value == null || value === "") return null;
   return (
     <div className="flex items-center justify-between py-3 text-sm">
       <span className="text-text-muted">{label}</span>
-      <span className="font-medium tabular-nums text-text-primary">{String(value)}</span>
+      <span className={`font-medium tabular-nums ${valueClassName ?? "text-text-primary"}`}>{String(value)}</span>
     </div>
   );
 }
@@ -154,6 +154,13 @@ export default async function HerdDetailPage({
   const herdValue = valuation.netValue;
   const isFallback = valuation.priceSource !== "saleyard";
 
+  // Debug: Stale data warning (6-8 weeks old) — amber indicators
+  const dataAgeDays = valuation.dataDate
+    ? Math.floor((Date.now() - new Date(valuation.dataDate).getTime()) / (1000 * 60 * 60 * 24))
+    : 0;
+  const isStale = dataAgeDays > 42 && !isFallback; // 6 weeks warning threshold
+  const staleWeeks = Math.floor(dataAgeDays / 7);
+
   let projectedWeight: number | null = null;
   if (herd.initial_weight > 0 && herd.daily_weight_gain > 0) {
     const created = new Date(herd.created_at);
@@ -212,26 +219,33 @@ export default async function HerdDetailPage({
           {herdValue > 0 && (
             <div className="rounded-2xl bg-white/5 p-5">
               <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isFallback ? "bg-red-500/15" : "bg-brand/15"}`}>
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isFallback ? "bg-red-500/15" : isStale ? "bg-amber-500/15" : "bg-brand/15"}`}>
                   {isFallback
                     ? <AlertTriangle className="h-5 w-5 text-red-400" />
-                    : <DollarSign className="h-5 w-5 text-brand" />
+                    : isStale
+                      ? <Clock className="h-5 w-5 text-amber-400" />
+                      : <DollarSign className="h-5 w-5 text-brand" />
                   }
                 </div>
                 <div>
                   <p className="text-xs font-medium text-text-muted">Estimated Herd Value</p>
-                  <p className={`mt-0.5 text-2xl font-bold tabular-nums ${isFallback ? "text-red-400" : "text-text-primary"}`}>
+                  <p className={`mt-0.5 text-2xl font-bold tabular-nums ${isFallback ? "text-red-400" : isStale ? "text-amber-400" : "text-text-primary"}`}>
                     ${Math.round(herdValue).toLocaleString()}
                   </p>
                   <div className="flex items-center gap-2">
                     {(herd.head_count ?? 0) > 0 && (
-                      <p className={`text-xs ${isFallback ? "text-red-400/70" : "text-text-muted"}`}>
+                      <p className={`text-xs ${isFallback ? "text-red-400/70" : isStale ? "text-amber-400/70" : "text-text-muted"}`}>
                         ${Math.round(herdValue / herd.head_count).toLocaleString()} per head
                       </p>
                     )}
                     {isFallback && (
                       <span className="inline-flex items-center rounded-md bg-red-500/15 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
                         {valuation.priceSource === "national" ? "National Avg" : "Est. Fallback"}
+                      </span>
+                    )}
+                    {isStale && (
+                      <span className="inline-flex items-center rounded-md bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-400">
+                        Stale - {staleWeeks}w
                       </span>
                     )}
                   </div>
@@ -250,7 +264,7 @@ export default async function HerdDetailPage({
                 </div>
               </CardHeader>
               <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
-                <InfoRow label="Price (Per Kilogram)" value={`$${valuation.pricePerKg.toFixed(2)}/kg`} />
+                <InfoRow label="Price (Per Kilogram)" value={`$${valuation.pricePerKg.toFixed(2)}/kg`} valueClassName={isFallback ? "text-red-400" : isStale ? "text-amber-400" : undefined} />
                 <InfoRow label="Average Weight" value={`${Math.round(projectedWeight ?? herd.current_weight ?? herd.initial_weight ?? 0)} kg`} />
                 <InfoRow label="Value Per Head" value={`$${Math.round(herdValue / (herd.head_count || 1)).toLocaleString()}`} />
               </CardContent>
