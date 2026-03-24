@@ -350,11 +350,16 @@ export async function sendMessage(
           { role: "user", content: displayResults },
         ];
 
+        // Debug: If Claude returned empty/short text with only display cards, continue
+        // the loop to force another API call. The dummy tool_results are in history,
+        // so Claude has no tools left and must write a proper text response.
+        if (text.length < 30) {
+          continue;
+        }
+
         // Haiku's cards take priority, auto-generated cards are fallback
         const finalCards = pendingInsights ?? (autoCards.length > 0 ? autoCards.slice(0, 4) : undefined);
-        // Debug: Fallback if Claude returned empty text but has summary cards
-        const finalText = text || (finalCards && finalCards.length > 0 ? "Here's what I found." : "");
-        return { assistantText: finalText, updatedHistory: currentHistory, quickInsights: finalCards };
+        return { assistantText: text, updatedHistory: currentHistory, quickInsights: finalCards };
       }
 
       // Add assistant response with tool_use blocks to history
