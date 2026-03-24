@@ -313,7 +313,6 @@ export function HerdsTable({
         <td className="hidden px-5 py-3.5 text-text-secondary lg:table-cell">{herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} (${herd.sub_category})` : herd.category}</td>
         <td className={`hidden px-5 py-3.5 text-right tabular-nums lg:table-cell ${isFallback ? "text-red-400" : isStale ? "text-amber-400" : "text-text-secondary"}`}>
           <div className="flex items-center justify-end gap-1.5">
-            {pricePerKg > 0 ? `$${pricePerKg.toFixed(2)}` : "\u2014"}
             {isStale && (
               <span className="inline-flex items-center rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
                 Stale - {Math.floor(dataAgeDays / 7)}w
@@ -324,6 +323,7 @@ export function HerdsTable({
                 {source === "national" ? "National Avg" : "Est. Fallback"}
               </span>
             )}
+            {pricePerKg > 0 ? `$${pricePerKg.toFixed(2)}` : "\u2014"}
           </div>
         </td>
         <td className="hidden px-5 py-3.5 text-right tabular-nums text-text-secondary xl:table-cell">
