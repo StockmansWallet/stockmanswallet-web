@@ -76,6 +76,8 @@ export function ValuationTable({ herds, onTestHerd }: Props) {
     baseMarketValue: filtered.reduce((s, h) => s + h.valuation.baseMarketValue, 0),
     weightGainAccrual: filtered.reduce((s, h) => s + h.valuation.weightGainAccrual, 0),
     breedingAccrual: filtered.reduce((s, h) => s + h.valuation.breedingAccrual, 0),
+    preBirthAccrual: filtered.reduce((s, h) => s + h.valuation.preBirthAccrual, 0),
+    calvesAtFootValue: filtered.reduce((s, h) => s + h.valuation.calvesAtFootValue, 0),
     grossValue: filtered.reduce((s, h) => s + h.valuation.grossValue, 0),
     mortalityDeduction: filtered.reduce((s, h) => s + h.valuation.mortalityDeduction, 0),
     netValue: filtered.reduce((s, h) => s + h.valuation.netValue, 0),
@@ -88,7 +90,7 @@ export function ValuationTable({ herds, onTestHerd }: Props) {
       "Mortality Rate (%)", "Is Breeder", "Breeding Program", "Calving Rate (%)",
       "Price Source", "Base Price ($/kg)", "Breed Premium (%)", "Adjusted Price ($/kg)", "Weight Range",
       "Base Market Value ($)", "Weight Gain Accrual ($)", "Physical Value ($)",
-      "Breeding Accrual ($)", "Gross Value ($)", "Mortality Deduction ($)", "Net Value ($)",
+      "Pre-Birth Accrual ($)", "Calves at Foot ($)", "Breeding Accrual Total ($)", "Gross Value ($)", "Mortality Deduction ($)", "Net Value ($)",
     ];
     const rows = filtered.map((h) => {
       const v = h.valuation;
@@ -98,7 +100,7 @@ export function ValuationTable({ herds, onTestHerd }: Props) {
         ((v.mortalityRate ?? 0) * 100).toFixed(1), h.is_breeder, h.breeding_program_type ?? "", ((h.calving_rate ?? 0) * 100).toFixed(0),
         v.priceSource, v.basePrice.toFixed(4), v.breedPremiumApplied.toFixed(1), v.pricePerKg.toFixed(4), v.matchedWeightRange ?? "",
         v.baseMarketValue.toFixed(2), v.weightGainAccrual.toFixed(2), v.physicalValue.toFixed(2),
-        v.breedingAccrual.toFixed(2), v.grossValue.toFixed(2), v.mortalityDeduction.toFixed(2), v.netValue.toFixed(2),
+        v.preBirthAccrual.toFixed(2), v.calvesAtFootValue.toFixed(2), v.breedingAccrual.toFixed(2), v.grossValue.toFixed(2), v.mortalityDeduction.toFixed(2), v.netValue.toFixed(2),
       ].join(",");
     });
     const csv = [headers.join(","), ...rows].join("\n");
@@ -179,7 +181,8 @@ export function ValuationTable({ herds, onTestHerd }: Props) {
               <Th>Base Market Val</Th>
               <Th>WG Accrual</Th>
               <SortTh sortKey="physicalValue" currentKey={sortKey} dir={sortDir} onSort={toggleSort}>Physical</SortTh>
-              <Th>Breeding</Th>
+              <Th>Pre-Birth</Th>
+              <Th>Calves@Foot</Th>
               <Th>Gross</Th>
               <Th>Mortality</Th>
               <SortTh sortKey="netValue" currentKey={sortKey} dir={sortDir} onSort={toggleSort}>Net Value</SortTh>
@@ -224,7 +227,8 @@ export function ValuationTable({ herds, onTestHerd }: Props) {
                     <Td right>{fmtDollar(v.baseMarketValue)}</Td>
                     <Td right className={v.weightGainAccrual > 0 ? "text-emerald-400" : ""}>{fmtDollar(v.weightGainAccrual)}</Td>
                     <Td right>{fmtDollar(v.physicalValue)}</Td>
-                    <Td right className={v.breedingAccrual > 0 ? "text-sky-400" : ""}>{v.breedingAccrual > 0 ? fmtDollar(v.breedingAccrual) : "-"}</Td>
+                    <Td right className={v.preBirthAccrual > 0 ? "text-sky-400" : ""}>{v.preBirthAccrual > 0 ? fmtDollar(v.preBirthAccrual) : "-"}</Td>
+                    <Td right className={v.calvesAtFootValue > 0 ? "text-sky-400" : ""}>{v.calvesAtFootValue > 0 ? fmtDollar(v.calvesAtFootValue) : "-"}</Td>
                     <Td right>{fmtDollar(v.grossValue)}</Td>
                     <Td right className={v.mortalityDeduction > 0 ? "text-red-400" : ""}>{v.mortalityDeduction > 0 ? `-${fmtDollar(v.mortalityDeduction)}` : "-"}</Td>
                     <Td right className="font-semibold text-text-primary">{fmtDollar(v.netValue)}</Td>
@@ -268,7 +272,8 @@ export function ValuationTable({ herds, onTestHerd }: Props) {
               <Td right>{fmtDollar(totals.baseMarketValue)}</Td>
               <Td right className="text-emerald-400">{fmtDollar(totals.weightGainAccrual)}</Td>
               <Td right>{fmtDollar(totals.physicalValue)}</Td>
-              <Td right className="text-sky-400">{totals.breedingAccrual > 0 ? fmtDollar(totals.breedingAccrual) : "-"}</Td>
+              <Td right className="text-sky-400">{totals.preBirthAccrual > 0 ? fmtDollar(totals.preBirthAccrual) : "-"}</Td>
+              <Td right className="text-sky-400">{totals.calvesAtFootValue > 0 ? fmtDollar(totals.calvesAtFootValue) : "-"}</Td>
               <Td right>{fmtDollar(totals.grossValue)}</Td>
               <Td right className="text-red-400">{totals.mortalityDeduction > 0 ? `-${fmtDollar(totals.mortalityDeduction)}` : "-"}</Td>
               <Td right className="text-brand">{fmtDollar(totals.netValue)}</Td>
@@ -309,8 +314,14 @@ function ExpandedDetail({ herd }: { herd: HerdWithValuation }) {
     ...(v.mortalityDeduction > 0
       ? [`MortalityDeduction = ${fmtDollar(v.physicalValue)} x (${v.daysHeld}/365) x ${((v.mortalityRate ?? 0) * 100).toFixed(1)}% = ${fmtDollar(v.mortalityDeduction)}`]
       : []),
-    ...(v.breedingAccrual > 0
-      ? [`BreedingAccrual = ${fmtDollar(v.breedingAccrual)}`]
+    ...(v.preBirthAccrual > 0
+      ? [`PreBirthAccrual = ${fmtDollar(v.preBirthAccrual)}`]
+      : []),
+    ...(v.calvesAtFootValue > 0
+      ? [`CalvesAtFootValue = ${fmtDollar(v.calvesAtFootValue)}`]
+      : []),
+    ...(v.breedingAccrual > 0 && v.preBirthAccrual > 0 && v.calvesAtFootValue > 0
+      ? [`BreedingAccrual (total) = ${fmtDollar(v.preBirthAccrual)} + ${fmtDollar(v.calvesAtFootValue)} = ${fmtDollar(v.breedingAccrual)}`]
       : []),
     `NetValue = ${fmtDollar(v.physicalValue)} - ${fmtDollar(v.mortalityDeduction)} + ${fmtDollar(v.breedingAccrual)} = ${fmtDollar(v.netValue)}`,
   ];
