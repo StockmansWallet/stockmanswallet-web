@@ -1,32 +1,30 @@
-export interface DevUpdate {
+export interface WhatsNewEntry {
   id: string;
-  platform: "ios" | "web" | "supabase";
+  platform: "ios" | "web";
   date: string;
   build_label: string | null;
   title: string;
   summary: string;
-  detail: string | null;
   sort_order: number;
-  is_user_facing: boolean;
   created_at: string;
 }
 
-export interface TimelineDay {
+export interface WhatsNewDay {
   dateKey: string;
   dateLabel: string;
-  entries: DevUpdate[];
+  entries: WhatsNewEntry[];
 }
 
-/** Group flat DevUpdate rows into TimelineDay[] sorted by date descending. */
-export function groupByDate(updates: DevUpdate[]): TimelineDay[] {
-  const map = new Map<string, DevUpdate[]>();
+/** Group flat WhatsNewEntry rows into WhatsNewDay[] sorted by date descending. */
+export function groupByDate(entries: WhatsNewEntry[]): WhatsNewDay[] {
+  const map = new Map<string, WhatsNewEntry[]>();
 
-  for (const u of updates) {
-    const existing = map.get(u.date);
+  for (const e of entries) {
+    const existing = map.get(e.date);
     if (existing) {
-      existing.push(u);
+      existing.push(e);
     } else {
-      map.set(u.date, [u]);
+      map.set(e.date, [e]);
     }
   }
 

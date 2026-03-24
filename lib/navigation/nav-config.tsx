@@ -13,7 +13,6 @@ import {
   MapPinned,
   FlaskConical,
   Upload,
-  BookMarked,
   Handshake,
 } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
@@ -23,6 +22,7 @@ export interface NavItem {
   href: string;
   icon: React.ReactNode;
   activeClass?: string;
+  inactiveClass?: string; // Override default inactive styling (e.g. Brangus amber glow)
 }
 
 // Farmer mode - portfolio (core navigation)
@@ -34,7 +34,7 @@ export const farmerNavItems: NavItem[] = [
 
 // Farmer mode - intelligence section
 export const farmerIntelItems: NavItem[] = [
-  { label: "Brangus", href: "/dashboard/brangus", icon: <MessageCircle className="h-5 w-5" /> },
+  { label: "Brangus", href: "/dashboard/brangus", icon: <MessageCircle className="h-5 w-5" />, activeClass: "bg-amber-500/15 text-amber-400", inactiveClass: "text-amber-400/70 hover:bg-amber-500/10 hover:text-amber-400" },
   { label: "Insights", href: "/dashboard/insights", icon: <Lightbulb className="h-5 w-5" /> },
   { label: "Markets", href: "/dashboard/market", icon: <TrendingUp className="h-5 w-5" /> },
 ];
@@ -57,7 +57,7 @@ export const advisorNavItems: NavItem[] = [
 
 // Advisor mode - intelligence section
 export const advisorIntelItems: NavItem[] = [
-  { label: "Brangus", href: "/dashboard/brangus", icon: <MessageCircle className="h-5 w-5" /> },
+  { label: "Brangus", href: "/dashboard/brangus", icon: <MessageCircle className="h-5 w-5" />, activeClass: "bg-amber-500/15 text-amber-400", inactiveClass: "text-amber-400/70 hover:bg-amber-500/10 hover:text-amber-400" },
   { label: "Insights", href: "/dashboard/insights", icon: <Lightbulb className="h-5 w-5" /> },
   { label: "Markets", href: "/dashboard/market", icon: <TrendingUp className="h-5 w-5" /> },
 ];
@@ -72,7 +72,6 @@ export const advisorToolItems: NavItem[] = [
 export const adminItems: NavItem[] = [
   { label: "Valuation Lab", href: "/dashboard/admin/valuation", icon: <FlaskConical className="h-5 w-5" />, activeClass: "bg-rose-500/15 text-rose-400" },
   { label: "MLA Data Upload", href: "/dashboard/admin/mla-upload", icon: <Upload className="h-5 w-5" />, activeClass: "bg-emerald-500/15 text-emerald-400" },
-  { label: "Changelog", href: "/dashboard/admin/changelog", icon: <BookMarked className="h-5 w-5" />, activeClass: "bg-blue-500/15 text-blue-400" },
 ];
 
 // Bottom navigation (always visible)

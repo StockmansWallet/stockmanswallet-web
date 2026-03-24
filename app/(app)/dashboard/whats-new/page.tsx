@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles } from "lucide-react";
-import { groupByDate, type DevUpdate } from "@/lib/types/dev-docs";
+import { groupByDate, type WhatsNewEntry } from "@/lib/types/whats-new";
 
 export const revalidate = 0;
 
@@ -21,14 +21,13 @@ export default async function WhatsNewPage() {
   if (!user) redirect("/sign-in");
 
   const { data: updates } = await supabase
-    .from("dev_updates")
+    .from("whats_new")
     .select("*")
-    .eq("is_user_facing", true)
     .order("date", { ascending: false })
     .order("sort_order", { ascending: false })
     .limit(100);
 
-  const groups = groupByDate((updates ?? []) as DevUpdate[]);
+  const groups = groupByDate((updates ?? []) as WhatsNewEntry[]);
 
   return (
     <div className="max-w-3xl">
@@ -57,7 +56,7 @@ export default async function WhatsNewPage() {
                 </p>
                 <div className="space-y-4">
                   {group.entries.map((entry) => (
-                    <WhatsNewEntry key={entry.id} entry={entry} />
+                    <WhatsNewItem key={entry.id} entry={entry} />
                   ))}
                 </div>
               </CardContent>
@@ -69,13 +68,13 @@ export default async function WhatsNewPage() {
   );
 }
 
-function WhatsNewEntry({ entry }: { entry: DevUpdate }) {
+function WhatsNewItem({ entry }: { entry: WhatsNewEntry }) {
   const bullets = entry.summary
     .split("\n")
     .map((l) => l.trim())
     .filter(Boolean);
 
-  const platformLabel = entry.platform === "ios" ? "iOS" : entry.platform === "web" ? "Web" : "Backend";
+  const platformLabel = entry.platform === "ios" ? "iOS" : "Web";
 
   return (
     <div>
