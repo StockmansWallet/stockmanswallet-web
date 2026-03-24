@@ -156,7 +156,7 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
                           <p className="text-base font-bold tabular-nums text-text-primary">{fmtFull(h.netValue)}</p>
                           <div className="mt-0.5 flex items-center justify-end gap-1">
                             <Badge variant={h.priceSource === "saleyard" ? (isStale ? "warning" : "success") : h.priceSource === "national" ? "info" : "warning"} className="text-[10px]">
-                              {isStale ? `Stale - ${Math.floor(ageDays / 7)}w` : h.priceSource}
+                              {isStale ? `Stale - ${Math.floor(ageDays / 7)}w` : h.priceSource === "fallback" ? "National Avg" : h.priceSource}
                             </Badge>
                           </div>
                         </div>
