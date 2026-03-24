@@ -8,6 +8,7 @@ import { parseReportConfig } from "@/lib/utils/report-config";
 import { ReportExportButton } from "@/components/app/report-export-button";
 import { ReportCompositionChart } from "@/components/app/report-composition-chart";
 import { generateAssetRegisterData } from "@/lib/services/report-service";
+import { STALE_WARNING_THRESHOLD_DAYS } from "@/lib/engines/valuation-engine";
 
 export const revalidate = 0;
 export const metadata = { title: "Asset Register" };
@@ -16,12 +17,16 @@ function fmt(v: number) {
   return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 }).format(v);
 }
 
-function fmtKg(v: number) {
-  return `${v.toFixed(0)} kg`;
+function fmtFull(v: number) {
+  return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
 }
 
-function fmtPrice(v: number) {
-  return `$${v.toFixed(2)}/kg`;
+function fmtPct(v: number) {
+  return `${(v * 100).toFixed(1)}%`;
+}
+
+function fmtDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-AU", { day: "2-digit", month: "short", year: "numeric" });
 }
 
 export default async function AssetRegisterPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
@@ -30,7 +35,6 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Fetch properties for filter component
   const { data: properties } = await supabase
     .from("properties")
     .select("id, property_name")
@@ -79,28 +83,34 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
         </Card>
       ) : (
         <div className="flex flex-col gap-4">
-          {/* Executive Summary */}
+          {/* Executive Summary — 2x3 grid matching iOS */}
           {executiveSummary && (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <Card>
-                <CardContent className="px-5 py-4">
-                  <p className="text-xs text-text-muted">Total Portfolio Value</p>
-                  <p className="mt-1 text-2xl font-bold tabular-nums text-amber-400">{fmt(executiveSummary.totalPortfolioValue)}</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="px-5 py-4">
-                  <p className="text-xs text-text-muted">Total Head Count</p>
-                  <p className="mt-1 text-2xl font-bold tabular-nums text-text-primary">{executiveSummary.totalHeadCount.toLocaleString()}</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="px-5 py-4">
-                  <p className="text-xs text-text-muted">Avg Value Per Head</p>
-                  <p className="mt-1 text-2xl font-bold tabular-nums text-text-primary">{fmt(executiveSummary.averageValuePerHead)}</p>
-                </CardContent>
-              </Card>
-            </div>
+            <Card className="border-amber-500/10">
+              <CardContent className="p-5">
+                <div className="grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-3">
+                  <div>
+                    <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Total Portfolio Value</p>
+                    <p className="mt-1 text-2xl font-bold tabular-nums text-amber-400">{fmt(executiveSummary.totalPortfolioValue)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Total Head Count</p>
+                    <p className="mt-1 text-2xl font-bold tabular-nums text-text-primary">{executiveSummary.totalHeadCount.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Avg Value Per Head</p>
+                    <p className="mt-1 text-2xl font-bold tabular-nums text-text-primary">{fmt(executiveSummary.averageValuePerHead)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Valuation Date</p>
+                    <p className="mt-1 text-sm font-medium text-text-secondary">{fmtDate(executiveSummary.valuationDate)}</p>
+                  </div>
+                  <div className="col-span-2 sm:col-span-2">
+                    <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Report Period</p>
+                    <p className="mt-1 text-sm font-medium text-text-secondary">{fmtDate(config.startDate)} &mdash; {fmtDate(config.endDate)}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* Herd Composition Chart */}
@@ -115,60 +125,105 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
             </Card>
           )}
 
-          {/* Herd Table — grouped by property */}
+          {/* Herd Cards — grouped by property, iOS-style layout */}
           {[...grouped.entries()].map(([propertyName, herds]) => (
-            <Card key={propertyName}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm">{propertyName}</CardTitle>
-                  <span className="text-xs tabular-nums text-text-muted">
-                    {herds.reduce((s, h) => s + h.headCount, 0).toLocaleString()} head &middot; {fmt(herds.reduce((s, h) => s + h.netValue, 0))}
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent className="px-0 pb-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="border-b border-white/5 text-left text-text-muted">
-                        <th className="px-5 pb-2 font-medium">Herd</th>
-                        <th className="px-3 pb-2 font-medium">Category</th>
-                        <th className="px-3 pb-2 text-right font-medium">Head</th>
-                        <th className="px-3 pb-2 text-right font-medium">Weight</th>
-                        <th className="px-3 pb-2 text-right font-medium">Price/kg</th>
-                        <th className="px-3 pb-2 text-right font-medium">Net Value</th>
-                        <th className="px-5 pb-2 text-right font-medium">Source</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {herds.map((h) => (
-                        <tr key={h.id} className="transition-colors hover:bg-white/[0.02]">
-                          <td className="px-5 py-2.5 font-medium text-text-primary">{h.name}</td>
-                          <td className="px-3 py-2.5 text-text-secondary">{h.category}</td>
-                          <td className="px-3 py-2.5 text-right tabular-nums text-text-primary">{h.headCount.toLocaleString()}</td>
-                          <td className="px-3 py-2.5 text-right tabular-nums text-text-secondary">{fmtKg(h.weight)}</td>
-                          <td className="px-3 py-2.5 text-right tabular-nums text-text-secondary">{fmtPrice(h.pricePerKg)}</td>
-                          <td className="px-3 py-2.5 text-right tabular-nums font-medium text-text-primary">{fmt(h.netValue)}</td>
-                          <td className="px-5 py-2.5 text-right">
-                            {(() => {
-                              const ageDays = h.dataDate ? Math.floor((Date.now() - new Date(h.dataDate).getTime()) / 86400000) : 0;
-                              const isStale = ageDays > 42 && h.priceSource === "saleyard";
-                              return (
-                                <div className="flex items-center justify-end gap-1">
-                                  <Badge variant={h.priceSource === "saleyard" ? (isStale ? "warning" : "success") : h.priceSource === "national" ? "info" : "warning"} className="text-[10px]">
-                                    {isStale ? `Stale - ${Math.floor(ageDays / 7)}w` : h.priceSource}
-                                  </Badge>
-                                </div>
-                              );
-                            })()}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
+            <div key={propertyName} className="flex flex-col gap-3">
+              <div className="flex items-center justify-between px-1">
+                <h3 className="text-sm font-semibold text-text-primary">{propertyName}</h3>
+                <span className="text-xs tabular-nums text-text-muted">
+                  {herds.reduce((s, h) => s + h.headCount, 0).toLocaleString()} head &middot; {fmt(herds.reduce((s, h) => s + h.netValue, 0))}
+                </span>
+              </div>
+
+              {herds.map((h) => {
+                const ageDays = h.dataDate ? Math.floor((Date.now() - new Date(h.dataDate).getTime()) / 86400000) : 0;
+                const isStale = ageDays > STALE_WARNING_THRESHOLD_DAYS && h.priceSource === "saleyard";
+                // Normalize calving rate: stored as decimal (0.85) or whole number (85)
+                const calvingPct = h.calvingRate > 1 ? h.calvingRate : h.calvingRate * 100;
+                const mortalityPct = h.mortalityRate > 1 ? h.mortalityRate : h.mortalityRate * 100;
+                const hasBreedingRisk = h.breedPremiumOverride != null || h.breedingAccrual != null || h.dailyWeightGain > 0 || (h.isBreeder && h.calvingRate > 0) || h.mortalityRate > 0;
+
+                return (
+                  <Card key={h.id}>
+                    <CardContent className="p-4">
+                      {/* Card Header — name + value */}
+                      <div className="flex items-start justify-between">
+                        <div className="min-w-0">
+                          <h4 className="text-sm font-semibold text-text-primary">{h.name}</h4>
+                          <p className="text-xs text-text-muted">{h.category}</p>
+                        </div>
+                        <div className="ml-4 shrink-0 text-right">
+                          <p className="text-base font-bold tabular-nums text-text-primary">{fmtFull(h.netValue)}</p>
+                          <div className="mt-0.5 flex items-center justify-end gap-1">
+                            <Badge variant={h.priceSource === "saleyard" ? (isStale ? "warning" : "success") : h.priceSource === "national" ? "info" : "warning"} className="text-[10px]">
+                              {isStale ? `Stale - ${Math.floor(ageDays / 7)}w` : h.priceSource}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Main stats grid — matches iOS 4-column layout */}
+                      <div className="mt-3 grid grid-cols-4 gap-3 border-t border-white/5 pt-3">
+                        <div>
+                          <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Head Count</p>
+                          <p className="mt-0.5 text-sm font-semibold tabular-nums text-text-primary">{h.headCount} head</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Age</p>
+                          <p className="mt-0.5 text-sm font-semibold tabular-nums text-text-primary">{h.ageMonths} months</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Weight</p>
+                          <p className="mt-0.5 text-sm font-semibold tabular-nums text-text-primary">{h.weight.toFixed(0)} kg</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Price</p>
+                          <p className="mt-0.5 text-sm font-semibold tabular-nums text-text-primary">${h.pricePerKg.toFixed(2)}/kg</p>
+                        </div>
+                      </div>
+
+                      {/* Breeding & Risk allocations — matches iOS sub-section */}
+                      {hasBreedingRisk && (
+                        <div className="mt-3 grid grid-cols-4 gap-3 border-t border-white/5 pt-3">
+                          {h.breedPremiumOverride != null && (
+                            <div>
+                              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Breed Adj.</p>
+                              <p className="mt-0.5 text-sm font-semibold tabular-nums text-text-primary">
+                                {h.breedPremiumOverride >= 0 ? "+" : ""}{h.breedPremiumOverride}% vs. avg
+                              </p>
+                            </div>
+                          )}
+                          {h.dailyWeightGain > 0 && (
+                            <div>
+                              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">DWG Allocation</p>
+                              <p className="mt-0.5 text-sm font-semibold tabular-nums text-text-primary">{h.dailyWeightGain.toFixed(2)} kg/day</p>
+                            </div>
+                          )}
+                          {h.isBreeder && calvingPct > 0 && (
+                            <div>
+                              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Calving %</p>
+                              <p className="mt-0.5 text-sm font-semibold tabular-nums text-text-primary">{calvingPct.toFixed(0)}%</p>
+                            </div>
+                          )}
+                          {mortalityPct > 0 && (
+                            <div>
+                              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Mortality</p>
+                              <p className="mt-0.5 text-sm font-semibold tabular-nums text-text-primary">{mortalityPct.toFixed(1)}% p.a.</p>
+                            </div>
+                          )}
+                          {h.breedingAccrual != null && h.breedingAccrual > 0 && (
+                            <div>
+                              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Calf Accrual</p>
+                              <p className="mt-0.5 text-sm font-semibold tabular-nums text-text-primary">{fmtFull(h.breedingAccrual)}</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
           ))}
         </div>
       )}

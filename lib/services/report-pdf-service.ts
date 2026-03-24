@@ -169,41 +169,79 @@ function drawAssetRegister(ctx: DrawContext, data: ReportData) {
     drawTableRow(ctx, [
       { text: "Total Portfolio Value:", width: 180 },
       { text: fmt(es.totalPortfolioValue), width: 120, align: "right", bold: true },
-    ]);
-    drawTableRow(ctx, [
-      { text: "Total Head Count:", width: 180 },
-      { text: es.totalHeadCount.toLocaleString(), width: 120, align: "right", bold: true },
+      { text: "Total Head Count:", width: 100 },
+      { text: es.totalHeadCount.toLocaleString(), width: 95, align: "right", bold: true },
     ]);
     drawTableRow(ctx, [
       { text: "Average Value Per Head:", width: 180 },
       { text: fmt(es.averageValuePerHead), width: 120, align: "right", bold: true },
+      { text: "Valuation Date:", width: 100 },
+      { text: fmtDate(es.valuationDate), width: 95, align: "right", bold: true },
     ]);
     ctx.y -= 10;
   }
 
-  // Herd table
+  // Herd cards (matching iOS layout)
   drawSectionTitle(ctx, "Livestock Assets");
-  const cols = [
-    { text: "Herd", width: 110 },
-    { text: "Category", width: 100 },
-    { text: "Head", width: 50, align: "right" as const },
-    { text: "Weight", width: 60, align: "right" as const },
-    { text: "$/kg", width: 55, align: "right" as const },
-    { text: "Net Value", width: 80, align: "right" as const },
-    { text: "Source", width: 40, align: "right" as const },
-  ];
-  drawTableHeader(ctx, cols);
 
   for (const h of data.herdData) {
-    drawTableRow(ctx, [
-      { text: h.name, width: 110, bold: true },
-      { text: h.category.substring(0, 20), width: 100 },
-      { text: h.headCount.toString(), width: 50, align: "right" },
-      { text: `${h.weight.toFixed(0)} kg`, width: 60, align: "right" },
-      { text: `$${h.pricePerKg.toFixed(2)}`, width: 55, align: "right" },
-      { text: fmt(h.netValue), width: 80, align: "right", bold: true },
-      { text: h.priceSource, width: 40, align: "right" },
-    ]);
+    // Each herd card needs ~60-80px
+    ensureSpace(ctx, 80);
+
+    // Card header: name + value
+    const nameWidth = ctx.fontBold.widthOfTextAtSize(h.name, 10);
+    ctx.page.drawText(h.name, { x: MARGIN, y: ctx.y, size: 10, font: ctx.fontBold, color: BLACK });
+    const valStr = fmt(h.netValue);
+    const valWidth = ctx.fontBold.widthOfTextAtSize(valStr, 10);
+    ctx.page.drawText(valStr, { x: PAGE_WIDTH - MARGIN - valWidth, y: ctx.y, size: 10, font: ctx.fontBold, color: BLACK });
+    ctx.y -= 12;
+    ctx.page.drawText(h.category, { x: MARGIN, y: ctx.y, size: 8, font: ctx.font, color: GRAY });
+    ctx.y -= 14;
+
+    // Main stats row: Head, Age, Weight, Price
+    const statW = CONTENT_WIDTH / 4;
+    const statLabels = ["HEAD COUNT", "AGE", "WEIGHT", "PRICE"];
+    const statValues = [`${h.headCount} head`, `${h.ageMonths} months`, `${h.weight.toFixed(0)} kg`, `$${h.pricePerKg.toFixed(2)}/kg`];
+    for (let i = 0; i < 4; i++) {
+      const sx = MARGIN + i * statW;
+      ctx.page.drawText(statLabels[i], { x: sx, y: ctx.y, size: 6, font: ctx.fontBold, color: GRAY });
+      ctx.page.drawText(statValues[i], { x: sx, y: ctx.y - 10, size: 8, font: ctx.fontBold, color: DARK_GRAY });
+    }
+    ctx.y -= 24;
+
+    // Breeding & risk row (conditional)
+    const riskFields: { label: string; value: string }[] = [];
+    if (h.breedPremiumOverride != null) {
+      riskFields.push({ label: "BREED ADJ.", value: `${h.breedPremiumOverride >= 0 ? "+" : ""}${h.breedPremiumOverride}% vs. avg` });
+    }
+    if (h.dailyWeightGain > 0) {
+      riskFields.push({ label: "DWG ALLOCATION", value: `${h.dailyWeightGain.toFixed(2)} kg/day` });
+    }
+    if (h.isBreeder && h.calvingRate > 0) {
+      const calvPct = h.calvingRate > 1 ? h.calvingRate : h.calvingRate * 100;
+      riskFields.push({ label: "CALVING %", value: `${calvPct.toFixed(0)}%` });
+    }
+    if (h.mortalityRate > 0) {
+      const mortPct = h.mortalityRate > 1 ? h.mortalityRate : h.mortalityRate * 100;
+      riskFields.push({ label: "MORTALITY", value: `${mortPct.toFixed(1)}% p.a.` });
+    }
+    if (h.breedingAccrual != null && h.breedingAccrual > 0) {
+      riskFields.push({ label: "CALF ACCRUAL", value: fmt(h.breedingAccrual) });
+    }
+
+    if (riskFields.length > 0) {
+      const riskW = CONTENT_WIDTH / Math.min(riskFields.length, 4);
+      for (let i = 0; i < riskFields.length; i++) {
+        const rx = MARGIN + (i % 4) * riskW;
+        ctx.page.drawText(riskFields[i].label, { x: rx, y: ctx.y, size: 6, font: ctx.fontBold, color: GRAY });
+        ctx.page.drawText(riskFields[i].value, { x: rx, y: ctx.y - 10, size: 8, font: ctx.font, color: DARK_GRAY });
+      }
+      ctx.y -= 24;
+    }
+
+    // Divider between cards
+    ctx.page.drawLine({ start: { x: MARGIN, y: ctx.y }, end: { x: PAGE_WIDTH - MARGIN, y: ctx.y }, thickness: 0.3, color: LIGHT_GRAY });
+    ctx.y -= 12;
   }
 
   // Total row
