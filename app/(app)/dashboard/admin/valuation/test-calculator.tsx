@@ -128,12 +128,12 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
     setPriceLoading(true);
     fetch(`/api/admin/saleyard-prices?saleyard=${encodeURIComponent(sy)}`)
       .then((res) => res.json())
-      .then((rows: { category: string; final_price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string }[]) => {
+      .then((rows: { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string }[]) => {
         const national = new Map<string, CategoryPriceEntry[]>();
         const syMap = new Map<string, CategoryPriceEntry[]>();
         const syBreed = new Map<string, CategoryPriceEntry[]>();
         for (const p of rows) {
-          const entry: CategoryPriceEntry = { price_per_kg: p.final_price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date };
+          const entry: CategoryPriceEntry = { price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date };
           if (p.saleyard === "National" && !p.breed) {
             const arr = national.get(p.category) ?? [];
             arr.push(entry);

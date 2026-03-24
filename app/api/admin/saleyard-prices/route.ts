@@ -16,12 +16,18 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "saleyard parameter required" }, { status: 400 });
   }
 
-  // Fetch prices for this saleyard + National (for fallback)
-  const { data: prices, error } = await supabase
-    .from("category_prices")
-    .select("category, final_price_per_kg, weight_range, saleyard, breed, data_date")
-    .in("saleyard", [sy, "National"])
-    .order("data_date", { ascending: false });
+  // Use the same RPC as the main valuation page — returns only newest-date rows
+  // per saleyard+category, avoiding PostgREST row limits and stale data.
+  const allCategories = [
+    "Weaner Steer", "Yearling Steer", "Grown Steer",
+    "Heifer", "Yearling Heifer", "Grown Heifer",
+    "Cows", "Grown Bull",
+  ];
+
+  const { data: prices, error } = await supabase.rpc("latest_saleyard_prices", {
+    p_saleyards: [sy],
+    p_categories: allCategories,
+  });
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
