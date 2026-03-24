@@ -34,9 +34,9 @@ export default function AboutHero() {
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-text-secondary">
-            Stockman&apos;s Wallet was founded on a simple observation: livestock producers
-            manage millions of dollars in biological assets, yet lack the financial tools
-            that equity investors take for granted. Stockman&apos;s Wallet changes that.
+            Founded on a simple observation: livestock producers manage millions of
+            dollars in biological assets, yet lack the financial tools that equity
+            investors take for granted. Stockman&apos;s Wallet changes that.
           </p>
         </motion.div>
       </div>
