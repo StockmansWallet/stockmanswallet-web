@@ -298,7 +298,7 @@ export async function syncBreedingMilestonesForHerd(
   const completedPrefixes = new Set(
     (completedItems ?? []).map((item) => {
       const dashIdx = item.title.indexOf(" - ");
-      return dashIdx >= 0 ? item.title.substring(0, dashIdx) : item.title;
+      return dashIdx >= 0 ? item.title.substring(dashIdx + 3) : item.title;
     })
   );
 
@@ -313,7 +313,7 @@ export async function syncBreedingMilestonesForHerd(
     items.push({
       id: crypto.randomUUID(),
       user_id: user.id,
-      title: `Expected Calving - ${herd.name}`,
+      title: `${herd.name} - Expected Calving`,
       event_date: calvingDate,
       is_all_day: true,
       category_raw: "Livestock",
@@ -335,7 +335,7 @@ export async function syncBreedingMilestonesForHerd(
     items.push({
       id: crypto.randomUUID(),
       user_id: user.id,
-      title: `Pregnancy Testing - ${herd.name}`,
+      title: `${herd.name} - Pregnancy Testing`,
       event_date: pregTestDate,
       is_all_day: true,
       category_raw: "Operations",
@@ -360,7 +360,7 @@ export async function syncBreedingMilestonesForHerd(
     items.push({
       id: crypto.randomUUID(),
       user_id: user.id,
-      title: `Joining Period Start - ${herd.name}`,
+      title: `${herd.name} - Joining Period Start`,
       event_date: herd.joining_period_start.split("T")[0],
       is_all_day: true,
       category_raw: "Livestock",
@@ -385,7 +385,7 @@ export async function syncBreedingMilestonesForHerd(
     items.push({
       id: crypto.randomUUID(),
       user_id: user.id,
-      title: `Joining Period End - ${herd.name}`,
+      title: `${herd.name} - Joining Period End`,
       event_date: herd.joining_period_end.split("T")[0],
       is_all_day: true,
       category_raw: "Livestock",
