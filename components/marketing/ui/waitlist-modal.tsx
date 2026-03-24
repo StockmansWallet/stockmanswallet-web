@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { X } from 'lucide-react'
 import { Modal } from '@/components/ui/modal'
 
 type Role = 'producer' | 'advisor' | 'other'
@@ -133,10 +134,24 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
   }
 
   return (
-    <Modal open={open} onClose={handleClose} title="Join the Waitlist" size="md">
-      <p className="mb-5 text-sm text-text-secondary">
-        Tell us a bit about yourself so we can tailor your experience when we launch.
-      </p>
+    <Modal open={open} onClose={handleClose} size="md">
+      <button
+        onClick={handleClose}
+        className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-raised hover:text-text-primary"
+      >
+        <X className="h-5 w-5" />
+      </button>
+      <div className="mb-6 text-center">
+        <h2 className="text-3xl font-semibold text-white sm:text-4xl">
+          Join the{' '}
+          <span className="bg-gradient-to-r from-brand via-brand-light to-brand bg-clip-text text-transparent">
+            Waitlist
+          </span>
+        </h2>
+        <p className="mx-auto mt-3 max-w-sm text-base text-text-secondary">
+          Be the first to know when we launch. Founding members get early access and exclusive pricing.
+        </p>
+      </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         {/* Name + Email row */}

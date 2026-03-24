@@ -14,7 +14,7 @@ interface ModalProps {
 
 const sizeClasses = {
   sm: "max-w-md",
-  md: "max-w-lg",
+  md: "max-w-xl",
   lg: "max-w-2xl",
 };
 
@@ -53,7 +53,7 @@ function Modal({ open, onClose, title, children, size = "md" }: ModalProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/50 backdrop-blur-[2px]"
           />
 
           {/* Panel */}
@@ -62,7 +62,7 @@ function Modal({ open, onClose, title, children, size = "md" }: ModalProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: "spring", duration: 0.35, bounce: 0.15 }}
-            className={`relative w-full ${sizeClasses[size]} rounded-2xl bg-bg-alt p-6 shadow-2xl ring-1 ring-inset ring-ring-subtle`}
+            className={`relative w-full ${sizeClasses[size]} rounded-3xl bg-white/5 backdrop-blur-3xl p-6 shadow-2xl`}
           >
             {/* Header */}
             {title && (
