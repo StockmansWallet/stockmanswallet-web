@@ -14,13 +14,6 @@ export function PortfolioValueCard({ value, changeDollar, changePercent, fallbac
   return (
     <Card>
       <CardContent className="p-5">
-        {fallbackCount > 0 && (
-          <div className="mb-2 flex justify-end">
-            <span className="inline-flex items-center rounded-md bg-red-500/15 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
-              {fallbackCount} {fallbackCount === 1 ? "herd" : "herds"} using national avg
-            </span>
-          </div>
-        )}
         <div className="flex flex-col items-center py-2">
           <h2 className="text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
             ${Math.round(value).toLocaleString()}
@@ -44,6 +37,11 @@ export function PortfolioValueCard({ value, changeDollar, changePercent, fallbac
               )}
               {isPositive ? "+" : ""}
               {changePercent.toFixed(1)}%
+            </span>
+          )}
+          {fallbackCount > 0 && (
+            <span className="mt-2 inline-flex items-center rounded-md bg-red-500/15 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
+              {fallbackCount} {fallbackCount === 1 ? "herd" : "herds"} using national avg
             </span>
           )}
         </div>

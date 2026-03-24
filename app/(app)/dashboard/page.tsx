@@ -258,7 +258,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
             <div className="flex flex-col gap-3 lg:flex-row lg:gap-4">
               {/* Left column – narrow sidebar */}
-              <div className="flex w-full flex-col gap-3 lg:w-[340px] lg:gap-4">
+              <div className="flex w-full flex-col gap-3 lg:w-[400px] lg:gap-4">
               <PortfolioValueCard
                 value={portfolioValue}
                 changeDollar={changeDollar}
