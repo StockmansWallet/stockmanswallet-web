@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
-import { motion, useInView, useScroll, useTransform, AnimatePresence } from 'framer-motion'
+import { motion, useInView, AnimatePresence } from 'framer-motion'
 
 interface ChatExample {
   userMessage: string
@@ -181,40 +181,10 @@ export default function StockmanIQ() {
     return () => clearTimeout(timer)
   }, [phase])
 
-  const sectionRef = useRef<HTMLElement>(null)
-  const contentRef = useRef<HTMLDivElement>(null)
-  const contentInView = useInView(contentRef, { once: true, margin: '-400px' })
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start end', 'end start'],
-  })
-  // Parallax: Brangus moves slower than content (closer to viewer feel)
-  const brangusY = useTransform(scrollYProgress, [0, 1], [520, -180])
-
   return (
-    <section ref={sectionRef} id="stockman-iq" className="relative py-24 lg:py-32 overflow-x-clip">
-      {/* Brangus Character Image - pinned to left edge, parallax, slides in */}
-      {/* Outer wrapper handles positioning (no transform) so Framer Motion owns all transforms */}
-      <div className="hidden lg:flex absolute right-0 top-0 bottom-0 items-start pt-12 z-10 pointer-events-none">
-        <motion.div
-          animate={contentInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 500 }}
-          transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
-          style={{ y: brangusY }}
-        >
-          <Image
-            src="/images/Brangus-wave-right.webp"
-            alt="Brangus - your intelligent livestock adviser"
-            width={440}
-            height={674}
-            className="object-contain max-h-[650px] w-auto drop-shadow-2xl"
-            priority
-          />
-        </motion.div>
-      </div>
-
+    <section id="stockman-iq" className="relative py-24 lg:py-32 overflow-x-clip">
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-
-        <div ref={contentRef} className="grid items-center gap-16 lg:grid-cols-[1fr_1.6fr] lg:gap-12">
+        <div className="grid items-center gap-16 lg:grid-cols-[1.2fr_2fr] lg:gap-12">
           {/* Text */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -222,7 +192,7 @@ export default function StockmanIQ() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <span className="text-sm font-medium uppercase tracking-wider text-brand">Stockman IQ</span>
+            <span className="text-sm font-medium uppercase tracking-wider text-brand">Portfolio Intelligence</span>
             <h2 className="mt-3 text-3xl font-semibold sm:text-4xl lg:text-5xl">
               <span className="bg-gradient-to-br from-brand-light via-brand to-brand-dark bg-clip-text text-transparent">Meet Brangus.</span>
               <br />
@@ -261,7 +231,17 @@ export default function StockmanIQ() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative"
           >
-            <div className="flex h-[600px] flex-col rounded-3xl border border-white/[0.06] bg-[#231f1d]">
+            {/* Brangus leaning on the chat */}
+            <div className="absolute right-[-40px] bottom-[-45px] z-10 h-[680px] w-[340px] pointer-events-none">
+              <Image
+                src="/images/brangus-lean-2.webp"
+                alt="Brangus leaning on a post beside the chat panel"
+                fill
+                className="object-contain object-right-bottom"
+              />
+            </div>
+
+            <div className="mr-[280px] flex h-[460px] flex-col rounded-3xl border border-white/[0.06] bg-[#231f1d]">
               {/* Scrollable messages area */}
               <div ref={scrollRef} className="flex-1 overflow-y-auto overflow-x-hidden px-4 pt-5 pb-3">
                 <AnimatePresence mode="wait">
@@ -280,16 +260,16 @@ export default function StockmanIQ() {
                         transition={{ duration: 0.4, delay: 0.2 }}
                         className="flex items-end justify-end gap-2"
                       >
-                        <div className="relative max-w-[80%] rounded-3xl bg-brand px-4 py-2.5">
-                          <p className="text-sm text-white leading-relaxed">{current.userMessage}</p>
+                        <div className="relative max-w-[72%] rounded-3xl bg-brand px-4 py-2.5">
+                          <p className="text-xs text-white leading-relaxed">{current.userMessage}</p>
                           <BubbleTail side="right" color="#D9762F" />
                         </div>
                         <Image
                           src="/images/demo-user-profile.webp"
                           alt="User"
-                          width={48}
-                          height={48}
-                          className="-mb-10 h-14 w-14 shrink-0 self-end rounded-full object-cover"
+                          width={40}
+                          height={40}
+                          className="-mb-7 h-10 w-10 shrink-0 self-end rounded-full object-cover"
                         />
                       </motion.div>
 
@@ -303,12 +283,12 @@ export default function StockmanIQ() {
                         <Image
                           src="/images/brangus-chat-profile.webp"
                           alt="Brangus"
-                          width={56}
-                          height={56}
-                          className="-mb-10 h-14 w-14 shrink-0 self-end rounded-full object-cover"
+                          width={40}
+                          height={40}
+                          className="-mb-7 h-10 w-10 shrink-0 self-end rounded-full object-cover"
                         />
-                        <div className="relative max-w-[80%] rounded-3xl bg-[#44372D] px-4 py-2.5">
-                          <p className="text-sm text-white/80 leading-relaxed whitespace-pre-line">
+                        <div className="relative max-w-[72%] rounded-3xl bg-[#44372D] px-4 py-2.5">
+                          <p className="text-xs text-white/80 leading-relaxed whitespace-pre-line">
                             <TypingText
                               text={current.assistantMessage}
                               delay={1200}
