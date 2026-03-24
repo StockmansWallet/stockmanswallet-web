@@ -25,11 +25,15 @@ export interface NavItem {
   activeClass?: string;
 }
 
-// Farmer mode - main navigation
+// Farmer mode - portfolio (core navigation)
 export const farmerNavItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: <Wallet className="h-5 w-5" /> },
   { label: "Herds", href: "/dashboard/herds", icon: <IconCattleTags className="h-5 w-5" /> },
   { label: "Properties", href: "/dashboard/properties", icon: <MapPinned className="h-5 w-5" /> },
+];
+
+// Farmer mode - intelligence section
+export const farmerIntelItems: NavItem[] = [
   { label: "Brangus", href: "/dashboard/brangus", icon: <MessageCircle className="h-5 w-5" /> },
   { label: "Insights", href: "/dashboard/insights", icon: <Lightbulb className="h-5 w-5" /> },
   { label: "Markets", href: "/dashboard/market", icon: <TrendingUp className="h-5 w-5" /> },
@@ -45,13 +49,17 @@ export const farmerToolItems: NavItem[] = [
   { label: "Producer Network", href: "/dashboard/farmer-network", icon: <Handshake className="h-5 w-5" />, activeClass: "bg-orange-500/15 text-orange-400" },
 ];
 
-// Advisor mode - main navigation
+// Advisor mode - portfolio (core navigation)
 export const advisorNavItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard/advisor", icon: <Wallet className="h-5 w-5" />, activeClass: "bg-purple-500/15 text-purple-400" },
   { label: "Clients", href: "/dashboard/advisor/clients", icon: <Users className="h-5 w-5" />, activeClass: "bg-purple-500/15 text-purple-400" },
-  { label: "Markets", href: "/dashboard/market", icon: <TrendingUp className="h-5 w-5" /> },
+];
+
+// Advisor mode - intelligence section
+export const advisorIntelItems: NavItem[] = [
   { label: "Brangus", href: "/dashboard/brangus", icon: <MessageCircle className="h-5 w-5" /> },
   { label: "Insights", href: "/dashboard/insights", icon: <Lightbulb className="h-5 w-5" /> },
+  { label: "Markets", href: "/dashboard/market", icon: <TrendingUp className="h-5 w-5" /> },
 ];
 
 // Advisor mode - tools section
@@ -73,6 +81,6 @@ export const bottomNavItems: NavItem[] = [
   { label: "Settings", href: "/dashboard/settings", icon: <Settings className="h-4 w-4" /> },
 ];
 
-// Mobile flat list per mode (combined main + tools for simpler rendering)
-export const farmerMobileItems: NavItem[] = [...farmerNavItems, ...farmerToolItems];
-export const advisorMobileItems: NavItem[] = [...advisorNavItems, ...advisorToolItems];
+// Mobile flat list per mode (combined main + intel + tools for simpler rendering)
+export const farmerMobileItems: NavItem[] = [...farmerNavItems, ...farmerIntelItems, ...farmerToolItems];
+export const advisorMobileItems: NavItem[] = [...advisorNavItems, ...advisorIntelItems, ...advisorToolItems];

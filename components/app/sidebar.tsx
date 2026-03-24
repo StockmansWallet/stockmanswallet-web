@@ -9,8 +9,10 @@ import { NotificationBadge } from "@/components/app/notification-badge";
 import { tierDisplayName, type SubscriptionTier } from "@/lib/subscriptions/tiers";
 import {
   farmerNavItems,
+  farmerIntelItems,
   farmerToolItems,
   advisorNavItems,
+  advisorIntelItems,
   advisorToolItems,
   adminItems,
   bottomNavItems,
@@ -44,21 +46,35 @@ export function Sidebar({ userEmail, subscriptionTier = "stockman", isAdvisor = 
   };
 
   const mainItems = isAdvisor ? advisorNavItems : farmerNavItems;
+  const intelItems = isAdvisor ? advisorIntelItems : farmerIntelItems;
   const toolItems = isAdvisor ? advisorToolItems : farmerToolItems;
 
   return (
     <aside className="flex h-full w-64 flex-col">
       {/* Scrollable navigation */}
       <nav className="min-h-0 flex-1 overflow-y-auto scrollbar-none px-4 pt-4">
+        {/* Portfolio */}
+        <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-text-muted/60">Portfolio</p>
         <div className="space-y-0.5">
           {mainItems.map((item) => (
             <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
           ))}
         </div>
 
+        {/* Intelligence */}
+        <div className="mx-0 mt-4 border-t border-white/5 pt-4">
+          <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-text-muted/60">Intelligence</p>
+          <div className="space-y-0.5">
+            {intelItems.map((item) => (
+              <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
+            ))}
+          </div>
+        </div>
+
         {/* Tools */}
         {toolItems.length > 0 && (
           <div className="mx-0 mt-4 border-t border-white/5 pt-4">
+            <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-text-muted/60">Tools</p>
             <div className="space-y-0.5">
               {toolItems.map((item) => (
                 <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
@@ -70,12 +86,12 @@ export function Sidebar({ userEmail, subscriptionTier = "stockman", isAdvisor = 
         {/* Admin */}
         {isAdminEmail(userEmail) && (
           <div className="mx-0 mt-4 border-t border-white/5 pt-4">
+            <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-text-muted/60">Admin</p>
             <div className="space-y-0.5">
               {adminItems.map((item) => (
                 <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
               ))}
             </div>
-
           </div>
         )}
 
