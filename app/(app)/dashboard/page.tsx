@@ -2,8 +2,6 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { EmptyState } from "@/components/ui/empty-state";
 import { LoadDemoDataButton } from "@/components/app/load-demo-data-button";
 import { HerdComposition } from "./herd-composition";
 import { PortfolioChart } from "./portfolio-chart";
@@ -16,7 +14,7 @@ import { GrowthMortalityCard } from "@/components/app/growth-mortality-card";
 import { DashboardSaleyardSelector } from "@/components/app/dashboard-saleyard-selector";
 import { DashboardInsights } from "@/components/app/dashboard-insights";
 import { CalvingAccrualCard } from "@/components/app/calving-accrual-card";
-import { Wallet, MapPinned, TrendingUp } from "lucide-react";
+import { Wallet } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
 import { evaluateInsights } from "@/lib/stockman-iq/insight-engine";
 
@@ -251,69 +249,31 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 fallbackCount={fallbackCount}
               />
 
+              {/* Stats row */}
+              <div className="grid grid-cols-3 gap-3">
+                <Card>
+                  <CardContent className="px-4 py-3 text-center">
+                    <p className="text-xs text-text-muted">Head</p>
+                    <p className="text-xl font-bold text-text-primary">{totalHead.toLocaleString()}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="px-4 py-3 text-center">
+                    <p className="text-xs text-text-muted">Herds</p>
+                    <p className="text-xl font-bold text-text-primary">{herdCount}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="px-4 py-3 text-center">
+                    <p className="text-xs text-text-muted">Properties</p>
+                    <p className="text-xl font-bold text-text-primary">{propertyCount}</p>
+                  </CardContent>
+                </Card>
+              </div>
+
               <DashboardSaleyardSelector currentSaleyard={saleyardOverride ?? null} />
 
               <ComingUpCard items={upcomingItems ?? []} />
-
-              <DashboardInsights insights={insights} />
-
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
-                        <MapPinned className="h-3.5 w-3.5 text-brand" />
-                      </div>
-                      <CardTitle>Properties</CardTitle>
-                    </div>
-                    <Link
-                      href="/dashboard/properties"
-                      className="text-xs font-medium text-brand hover:underline"
-                    >
-                      View all
-                    </Link>
-                  </div>
-                </CardHeader>
-                {!properties || properties.length === 0 ? (
-                  <EmptyState
-                    title="No properties yet"
-                    description="Add properties to organise your herds by location."
-                    actionLabel="Add Property"
-                    actionHref="/dashboard/properties/new"
-                  />
-                ) : (
-                  <CardContent className="divide-y divide-white/5 px-5 pb-5">
-                    {[...properties]
-                      .sort((a, b) => {
-                        if (a.is_simulated !== b.is_simulated) return a.is_simulated ? 1 : -1;
-                        return 0;
-                      })
-                      .map((prop, idx) => {
-                        const isFirstReal = !prop.is_simulated && idx === 0;
-                        return (
-                          <Link
-                            key={prop.id}
-                            href={`/dashboard/properties/${prop.id}`}
-                            className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
-                          >
-                            <div>
-                              <p className="text-sm font-medium text-text-primary">
-                                {prop.property_name}
-                              </p>
-                              {(isFirstReal || prop.is_simulated || prop.acreage) && (
-                                <p className="text-xs text-text-muted">
-                                  {isFirstReal ? "Primary Property" : prop.is_simulated ? "Demo" : ""}
-                                  {prop.acreage ? `${isFirstReal || prop.is_simulated ? " · " : ""}${prop.acreage.toLocaleString()} acres` : ""}
-                                </p>
-                              )}
-                            </div>
-                            <Badge variant="default">{prop.state}</Badge>
-                          </Link>
-                        );
-                      })}
-                  </CardContent>
-                )}
-              </Card>
 
               <GrowthMortalityCard
                 avgMortalityRate={avgMortalityRate}
@@ -349,27 +309,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 </CardContent>
               </Card>
 
-              {/* Stats row */}
-              <div className="grid grid-cols-3 gap-3">
-                <Card>
-                  <CardContent className="px-4 py-3 text-center">
-                    <p className="text-xs text-text-muted">Head</p>
-                    <p className="text-xl font-bold text-text-primary">{totalHead.toLocaleString()}</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="px-4 py-3 text-center">
-                    <p className="text-xs text-text-muted">Herds</p>
-                    <p className="text-xl font-bold text-text-primary">{herdCount}</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="px-4 py-3 text-center">
-                    <p className="text-xs text-text-muted">Properties</p>
-                    <p className="text-xl font-bold text-text-primary">{propertyCount}</p>
-                  </CardContent>
-                </Card>
-              </div>
+              <DashboardInsights insights={insights} />
 
               <Card>
                 <CardHeader>
