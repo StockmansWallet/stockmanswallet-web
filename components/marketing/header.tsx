@@ -5,8 +5,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { NAV_LINKS } from '@/lib/marketing/constants'
 import LandingButton from '@/components/marketing/ui/landing-button'
+import { useWaitlist } from '@/components/marketing/ui/waitlist-provider'
 
 export function Header() {
+  const { openWaitlist } = useWaitlist()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -64,7 +66,7 @@ export function Header() {
 
         {/* Desktop CTA */}
         <div className="hidden items-center gap-3 lg:flex">
-          <LandingButton size="sm" href="#signup">
+          <LandingButton size="sm" onClick={openWaitlist}>
             Join Waitlist
           </LandingButton>
         </div>
@@ -103,7 +105,7 @@ export function Header() {
             ))}
 
             <div className="mt-2 border-t border-white/5 pt-4">
-              <LandingButton href="#signup" className="w-full" onClick={() => setMobileOpen(false)}>
+              <LandingButton className="w-full" onClick={() => { setMobileOpen(false); openWaitlist() }}>
                 Join Waitlist
               </LandingButton>
             </div>

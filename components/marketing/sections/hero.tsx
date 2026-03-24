@@ -4,12 +4,14 @@ import { useRef } from 'react'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
 import { motion, useScroll, useTransform } from 'framer-motion'
-import EmailForm from '@/components/marketing/ui/email-form'
+import LandingButton from '@/components/marketing/ui/landing-button'
+import { useWaitlist } from '@/components/marketing/ui/waitlist-provider'
 import tallyAnimData from '@/public/animations/tally.json'
 
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false })
 
 export default function Hero() {
+  const { openWaitlist } = useWaitlist()
   const sectionRef = useRef<HTMLElement>(null)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -103,9 +105,11 @@ export default function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
-              className="mt-10 w-full max-w-md"
+              className="mt-10"
             >
-              <EmailForm />
+              <LandingButton size="lg" onClick={openWaitlist}>
+                Join Waitlist
+              </LandingButton>
               <p className="mt-3 text-xs text-text-muted">
                 Join the waitlist. We&apos;ll email you before launch with early access details.
               </p>

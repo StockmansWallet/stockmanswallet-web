@@ -1,9 +1,12 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import EmailForm from '@/components/marketing/ui/email-form'
+import LandingButton from '@/components/marketing/ui/landing-button'
+import { useWaitlist } from '@/components/marketing/ui/waitlist-provider'
 
 export default function ContactSignup() {
+  const { openWaitlist } = useWaitlist()
+
   return (
     <section id="signup" className="relative overflow-hidden py-24 lg:py-32">
       <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
@@ -31,9 +34,11 @@ export default function ContactSignup() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="mx-auto mt-10 flex max-w-md justify-center"
+          className="mx-auto mt-10 flex justify-center"
         >
-          <EmailForm size="large" />
+          <LandingButton size="lg" onClick={openWaitlist}>
+            Join Waitlist
+          </LandingButton>
         </motion.div>
 
         <motion.div
