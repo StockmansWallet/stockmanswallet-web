@@ -26,7 +26,7 @@ function NavLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
       className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
         isActive
           ? (item.activeClass ?? "bg-brand/15 text-brand")
-          : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+          : (item.inactiveClass ?? "text-text-secondary hover:bg-white/5 hover:text-text-primary")
       }`}
     >
       {item.icon}
