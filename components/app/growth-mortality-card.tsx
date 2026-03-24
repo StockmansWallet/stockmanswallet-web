@@ -1,4 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { TrendingUp } from "lucide-react";
 
 interface GrowthMortalityCardProps {
   avgMortalityRate: number;
@@ -16,7 +17,12 @@ export function GrowthMortalityCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Growth & Mortality</CardTitle>
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
+            <TrendingUp className="h-3.5 w-3.5 text-brand" />
+          </div>
+          <CardTitle>Growth & Mortality</CardTitle>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4 px-5 pb-5">
         <div className="grid grid-cols-2 gap-4">

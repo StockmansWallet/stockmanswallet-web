@@ -32,7 +32,12 @@ export function ComingUpCard({ items }: { items: YardBookItem[] }) {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Coming Up</CardTitle>
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-lime-500/15">
+              <BookOpen className="h-3.5 w-3.5 text-lime-400" />
+            </div>
+            <CardTitle>Coming Up</CardTitle>
+          </div>
           <Link
             href="/dashboard/tools/yard-book"
             className="text-xs font-medium text-brand hover:underline"

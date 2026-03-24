@@ -16,6 +16,8 @@ import { GrowthMortalityCard } from "@/components/app/growth-mortality-card";
 import { DashboardSaleyardSelector } from "@/components/app/dashboard-saleyard-selector";
 import { DashboardInsights } from "@/components/app/dashboard-insights";
 import { CalvingAccrualCard } from "@/components/app/calving-accrual-card";
+import { Wallet, MapPinned, TrendingUp } from "lucide-react";
+import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
 import { evaluateInsights } from "@/lib/stockman-iq/insight-engine";
 
 export const revalidate = 0;
@@ -258,7 +260,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle>Properties</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
+                        <MapPinned className="h-3.5 w-3.5 text-brand" />
+                      </div>
+                      <CardTitle>Properties</CardTitle>
+                    </div>
                     <Link
                       href="/dashboard/properties"
                       className="text-xs font-medium text-brand hover:underline"
@@ -326,7 +333,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle>Portfolio Outlook</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
+                        <Wallet className="h-3.5 w-3.5 text-brand" />
+                      </div>
+                      <CardTitle>Portfolio Outlook</CardTitle>
+                    </div>
                     <span className="text-xs text-text-muted">projected value</span>
                   </div>
                 </CardHeader>
@@ -360,7 +372,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle>Herd Composition</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
+                        <IconCattleTags className="h-3.5 w-3.5 text-brand" />
+                      </div>
+                      <CardTitle>Herd Composition</CardTitle>
+                    </div>
                     <Link
                       href="/dashboard/herds"
                       className="text-xs font-medium text-brand hover:underline"
@@ -377,7 +394,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle>Largest Herds</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
+                        <IconCattleTags className="h-3.5 w-3.5 text-brand" />
+                      </div>
+                      <CardTitle>Largest Herds</CardTitle>
+                    </div>
                     <span className="text-xs text-text-muted">by head count</span>
                   </div>
                 </CardHeader>

@@ -1,4 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Leaf } from "lucide-react";
 
 interface CalvingAccrualCardProps {
   totalAccrual: number;
@@ -14,7 +15,12 @@ export function CalvingAccrualCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Calving Accrual</CardTitle>
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15">
+            <Leaf className="h-3.5 w-3.5 text-emerald-400" />
+          </div>
+          <CardTitle>Calving Accrual</CardTitle>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4 px-5 pb-5">
         <div className="rounded-xl bg-white/[0.03] p-3 text-center">

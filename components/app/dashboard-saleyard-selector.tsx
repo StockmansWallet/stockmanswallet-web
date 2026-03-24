@@ -94,7 +94,7 @@ export function DashboardSaleyardSelector({ currentSaleyard }: DashboardSaleyard
       >
         <MapPin className="h-4 w-4 shrink-0 text-brand" />
         <span className={`flex-1 truncate ${displayName ? "text-text-primary font-medium" : "text-text-muted"}`}>
-          {displayName ?? "All Saleyards"}
+          {displayName ?? "Your Herd\u2019s Combined Saleyards"}
         </span>
         {currentSaleyard ? (
           <button
@@ -141,7 +141,7 @@ export function DashboardSaleyardSelector({ currentSaleyard }: DashboardSaleyard
                   : "text-text-primary hover:bg-surface-raised"
               }`}
             >
-              All Saleyards (per-herd default)
+              Your Herd&#8217;s Combined Saleyards
             </button>
 
             {filteredGroups.map((g) => (
