@@ -231,3 +231,180 @@ export async function toggleYardBookItemComplete(
   revalidatePath("/dashboard/tools/yard-book");
   revalidatePath(`/dashboard/tools/yard-book/${id}`);
 }
+
+// MARK: - Breeding Milestone Auto-Creation
+// Debug: Cattle gestation and pregnancy testing constants
+const GESTATION_DAYS = 283;
+const PREG_TEST_DAYS = 60;
+
+// Debug: Adds days to a date string and returns ISO date string (yyyy-MM-dd)
+function addDays(dateStr: string, days: number): string {
+  const d = new Date(dateStr);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split("T")[0];
+}
+
+// Debug: Auto-create Yard Book breeding milestone items when herd joining dates are set.
+// Uses packId "breeding-milestones-{herdId}" for grouping and deduplication.
+// Delete-and-recreate strategy: soft-deletes uncompleted items, preserves completed ones.
+export async function syncBreedingMilestonesForHerd(
+  herdId: string,
+  herd: {
+    name: string;
+    species: string;
+    joined_date: string | null;
+    joining_period_start: string | null;
+    joining_period_end: string | null;
+    is_breeder: boolean;
+    property_id: string | null;
+  }
+) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const packId = `breeding-milestones-${herdId}`;
+
+  // Step 1: Soft-delete existing uncompleted milestone items
+  await supabase
+    .from("yard_book_items")
+    .update({
+      is_deleted: true,
+      deleted_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("user_id", user.id)
+    .eq("pack_id", packId)
+    .eq("is_deleted", false)
+    .eq("is_completed", false);
+
+  // Step 2: Guard - only create milestones for breeders with joining data
+  if (!herd.is_breeder || !herd.joined_date) {
+    revalidatePath("/dashboard/tools/yard-book");
+    return;
+  }
+
+  // Step 3: Check which milestones are already completed (don't recreate those)
+  const { data: completedItems } = await supabase
+    .from("yard_book_items")
+    .select("title")
+    .eq("user_id", user.id)
+    .eq("pack_id", packId)
+    .eq("is_completed", true)
+    .eq("is_deleted", false);
+
+  const completedPrefixes = new Set(
+    (completedItems ?? []).map((item) => {
+      const dashIdx = item.title.indexOf(" - ");
+      return dashIdx >= 0 ? item.title.substring(0, dashIdx) : item.title;
+    })
+  );
+
+  // Step 4: Build milestone items
+  const now = new Date().toISOString();
+  const today = now.split("T")[0];
+  const items: Array<Record<string, unknown>> = [];
+
+  // Milestone 1: Expected Calving (joinedDate + 283 days)
+  if (!completedPrefixes.has("Expected Calving")) {
+    const calvingDate = addDays(herd.joined_date, GESTATION_DAYS);
+    items.push({
+      id: crypto.randomUUID(),
+      user_id: user.id,
+      title: `Expected Calving - ${herd.name}`,
+      event_date: calvingDate,
+      is_all_day: true,
+      category_raw: "Livestock",
+      notes: `Auto-created from breeding data. Schedule calving preparations for ${herd.name}.`,
+      reminder_offsets: [21, 7, 1, 0],
+      linked_herd_ids: [herdId],
+      property_id: herd.property_id,
+      pack_id: packId,
+      pack_item_index: 0,
+      is_completed: false,
+      notifications_scheduled: false,
+      is_demo_data: false,
+    });
+  }
+
+  // Milestone 2: Pregnancy Testing (joinedDate + 60 days)
+  if (!completedPrefixes.has("Pregnancy Testing")) {
+    const pregTestDate = addDays(herd.joined_date, PREG_TEST_DAYS);
+    items.push({
+      id: crypto.randomUUID(),
+      user_id: user.id,
+      title: `Pregnancy Testing - ${herd.name}`,
+      event_date: pregTestDate,
+      is_all_day: true,
+      category_raw: "Operations",
+      notes: `Auto-created from breeding data. Schedule pregnancy scanning for ${herd.name}.`,
+      reminder_offsets: [7, 1],
+      linked_herd_ids: [herdId],
+      property_id: herd.property_id,
+      pack_id: packId,
+      pack_item_index: 1,
+      is_completed: false,
+      notifications_scheduled: false,
+      is_demo_data: false,
+    });
+  }
+
+  // Milestone 3: Joining Period Start (only if set and in the future)
+  if (
+    herd.joining_period_start &&
+    herd.joining_period_start.split("T")[0] > today &&
+    !completedPrefixes.has("Joining Period Start")
+  ) {
+    items.push({
+      id: crypto.randomUUID(),
+      user_id: user.id,
+      title: `Joining Period Start - ${herd.name}`,
+      event_date: herd.joining_period_start.split("T")[0],
+      is_all_day: true,
+      category_raw: "Livestock",
+      notes: `Auto-created from breeding data. Breeding program begins.`,
+      reminder_offsets: [7, 1],
+      linked_herd_ids: [herdId],
+      property_id: herd.property_id,
+      pack_id: packId,
+      pack_item_index: 2,
+      is_completed: false,
+      notifications_scheduled: false,
+      is_demo_data: false,
+    });
+  }
+
+  // Milestone 4: Joining Period End (only if set and in the future)
+  if (
+    herd.joining_period_end &&
+    herd.joining_period_end.split("T")[0] > today &&
+    !completedPrefixes.has("Joining Period End")
+  ) {
+    items.push({
+      id: crypto.randomUUID(),
+      user_id: user.id,
+      title: `Joining Period End - ${herd.name}`,
+      event_date: herd.joining_period_end.split("T")[0],
+      is_all_day: true,
+      category_raw: "Livestock",
+      notes: `Auto-created from breeding data. Breeding program ends.`,
+      reminder_offsets: [7, 1],
+      linked_herd_ids: [herdId],
+      property_id: herd.property_id,
+      pack_id: packId,
+      pack_item_index: 3,
+      is_completed: false,
+      notifications_scheduled: false,
+      is_demo_data: false,
+    });
+  }
+
+  // Step 5: Batch insert
+  if (items.length > 0) {
+    await supabase.from("yard_book_items").insert(items);
+  }
+
+  revalidatePath("/dashboard/tools/yard-book");
+}

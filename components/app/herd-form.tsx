@@ -67,6 +67,7 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
   const [category, setCategory] = useState<string>(herd?.category ?? "");
   const [breederSubType, setBreederSubType] = useState<BreederSubType | "">((herd as Record<string, unknown>)?.breeder_sub_type as BreederSubType ?? "");
   const [isBreeder, setIsBreeder] = useState(herd?.is_breeder ?? false);
+  const [breedingProgramType, setBreedingProgramType] = useState(herd?.breeding_program_type ?? "");
   const [currentWeight, setCurrentWeight] = useState<string>(String(herd?.current_weight ?? herd?.initial_weight ?? ""));
 
   const needsBreederSubType = category === "Breeder";
@@ -360,7 +361,26 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
                 label="Breeding Program"
                 options={BREEDING_PROGRAM_OPTIONS}
                 defaultValue={herd?.breeding_program_type ?? ""}
+                onChange={(e) => setBreedingProgramType(e.target.value)}
               />
+              {(breedingProgramType === "ai" || breedingProgramType === "controlled") && (
+                <>
+                  <Input
+                    id="joining_period_start"
+                    name="joining_period_start"
+                    label={breedingProgramType === "ai" ? "Insemination Period Start" : "Joining Period Start"}
+                    type="date"
+                    defaultValue={herd?.joining_period_start ? herd.joining_period_start.split("T")[0] : ""}
+                  />
+                  <Input
+                    id="joining_period_end"
+                    name="joining_period_end"
+                    label={breedingProgramType === "ai" ? "Insemination Period End" : "Joining Period End"}
+                    type="date"
+                    defaultValue={herd?.joining_period_end ? herd.joining_period_end.split("T")[0] : ""}
+                  />
+                </>
+              )}
             </div>
           )}
           {!isBreeder && (

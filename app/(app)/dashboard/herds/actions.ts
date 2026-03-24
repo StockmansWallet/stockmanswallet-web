@@ -4,6 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { syncBreedingMilestonesForHerd } from "@/app/(app)/dashboard/tools/yard-book/actions";
 
 // Debug: Master categories (Steer, Bull = Male; Heifer, Breeder, Dry Cow = Female)
 function deriveSexFromCategory(category: string): "Male" | "Female" {
@@ -65,8 +66,9 @@ export async function createHerd(formData: FormData) {
     : null;
   const isBreeder = v.is_breeder === "on";
 
+  const herdId = crypto.randomUUID();
   const { error } = await supabase.from("herds").insert({
-    id: crypto.randomUUID(),
+    id: herdId,
     user_id: user.id,
     name: v.name,
     species: v.species,
@@ -95,6 +97,19 @@ export async function createHerd(formData: FormData) {
   });
 
   if (error) return { error: error.message };
+
+  // Debug: Auto-create Yard Book breeding milestones for breeder herds with joining data
+  if (isBreeder && (v.joining_period_start || v.joined_date)) {
+    await syncBreedingMilestonesForHerd(herdId, {
+      name: v.name,
+      species: v.species,
+      joined_date: v.joined_date || null,
+      joining_period_start: v.joining_period_start || null,
+      joining_period_end: v.joining_period_end || null,
+      is_breeder: true,
+      property_id: v.property_id || null,
+    });
+  }
 
   revalidatePath("/dashboard/herds");
   redirect("/dashboard/herds");
@@ -141,6 +156,8 @@ export async function updateHerd(id: string, formData: FormData) {
       calving_rate: v.calving_rate ?? 85,
       lactation_status: v.lactation_status || null,
       breeding_program_type: v.breeding_program_type || null,
+      joining_period_start: v.joining_period_start || null,
+      joining_period_end: v.joining_period_end || null,
       selected_saleyard: v.selected_saleyard || null,
       paddock_name: v.paddock_name || null,
       property_id: v.property_id || null,
@@ -153,6 +170,17 @@ export async function updateHerd(id: string, formData: FormData) {
     .eq("user_id", user.id);
 
   if (error) return { error: error.message };
+
+  // Debug: Sync breeding milestones (handles create, update, and removal when breeder status changes)
+  await syncBreedingMilestonesForHerd(idResult.data, {
+    name: v.name,
+    species: v.species,
+    joined_date: v.joined_date || null,
+    joining_period_start: v.joining_period_start || null,
+    joining_period_end: v.joining_period_end || null,
+    is_breeder: v.is_breeder === "on",
+    property_id: v.property_id || null,
+  });
 
   revalidatePath("/dashboard/herds");
   revalidatePath(`/dashboard/herds/${idResult.data}`);
