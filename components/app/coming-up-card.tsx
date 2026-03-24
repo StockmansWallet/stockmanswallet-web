@@ -36,7 +36,7 @@ export function ComingUpCard({ items }: { items: YardBookItem[] }) {
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-lime-500/15">
               <BookOpen className="h-3.5 w-3.5 text-lime-400" />
             </div>
-            <CardTitle>Coming Up</CardTitle>
+            <CardTitle>Yard Book – Coming Up</CardTitle>
           </div>
           <Link
             href="/dashboard/tools/yard-book"

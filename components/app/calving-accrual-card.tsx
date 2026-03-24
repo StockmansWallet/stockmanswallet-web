@@ -33,7 +33,7 @@ export function CalvingAccrualCard({
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="rounded-xl bg-white/[0.03] p-3">
-            <p className="text-xs text-text-muted">Breeders</p>
+            <p className="text-xs text-text-muted">Breeder Herds</p>
             <p className="mt-1 text-lg font-bold text-text-primary">
               {breederCount}
             </p>
