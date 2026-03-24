@@ -305,7 +305,9 @@ export async function sendMessage(
 
       // Haiku's cards take priority, auto-generated cards are fallback
       const finalCards = pendingInsights ?? (autoCards.length > 0 ? autoCards.slice(0, 4) : undefined);
-      return { assistantText: text, updatedHistory: currentHistory, quickInsights: finalCards };
+      // Debug: Fallback if Claude returned empty text but has summary cards
+      const finalText = text || (finalCards && finalCards.length > 0 ? "Here's what I found." : "");
+      return { assistantText: finalText, updatedHistory: currentHistory, quickInsights: finalCards };
     }
 
     if (response.stop_reason === "tool_use") {
@@ -338,7 +340,9 @@ export async function sendMessage(
 
         // Haiku's cards take priority, auto-generated cards are fallback
         const finalCards = pendingInsights ?? (autoCards.length > 0 ? autoCards.slice(0, 4) : undefined);
-        return { assistantText: text, updatedHistory: currentHistory, quickInsights: finalCards };
+        // Debug: Fallback if Claude returned empty text but has summary cards
+        const finalText = text || (finalCards && finalCards.length > 0 ? "Here's what I found." : "");
+        return { assistantText: finalText, updatedHistory: currentHistory, quickInsights: finalCards };
       }
 
       // Add assistant response with tool_use blocks to history
