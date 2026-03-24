@@ -14,9 +14,8 @@ import { PortfolioValueCard } from "@/components/app/portfolio-value-card";
 import { ComingUpCard } from "@/components/app/coming-up-card";
 import { GrowthMortalityCard } from "@/components/app/growth-mortality-card";
 import { DashboardSaleyardSelector } from "@/components/app/dashboard-saleyard-selector";
-import { WeatherCard } from "@/components/app/weather-card";
 import { DashboardInsights } from "@/components/app/dashboard-insights";
-import { fetchPropertyWeather } from "@/lib/services/weather-service";
+import { CalvingAccrualCard } from "@/components/app/calving-accrual-card";
 import { evaluateInsights } from "@/lib/stockman-iq/insight-engine";
 
 export const revalidate = 0;
@@ -142,6 +141,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   // uses the override saleyard for price resolution (matches iOS DashboardView behaviour).
   let portfolioValue = 0;
   let fallbackCount = 0;
+  let totalPreBirthAccrual = 0;
   for (const h of activeHerds) {
     const herdWithOverride = saleyardOverride
       ? { ...h, selected_saleyard: saleyardOverride }
@@ -151,8 +151,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       nationalPriceMap, premiumMap, undefined, saleyardPriceMap, saleyardBreedPriceMap
     );
     portfolioValue += result.netValue;
+    totalPreBirthAccrual += result.preBirthAccrual;
     if (result.priceSource !== "saleyard") fallbackCount++;
   }
+  const breederCount = activeHerds.filter((h) => h.is_breeder).length;
+  const pregnantCount = activeHerds.filter((h) => h.is_pregnant).length;
 
   // 12-month portfolio projection: advance the valuation date by i×30 days
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -202,27 +205,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       ? ((chartData[1].value - chartData[0].value) / chartData[0].value) * 100
       : undefined;
 
-  // Fetch weather for primary property (or first with coordinates)
-  const sortedProps = [...(properties ?? [])].sort((a, b) => {
-    if (a.is_default && !b.is_default) return -1;
-    if (!a.is_default && b.is_default) return 1;
-    return 0;
-  });
-  const weatherProp = sortedProps.find((p) => p.latitude != null && p.longitude != null);
-  const weatherPromise = weatherProp
-    ? fetchPropertyWeather(
-        weatherProp.latitude!,
-        weatherProp.longitude!,
-        weatherProp.property_name,
-        [weatherProp.suburb, weatherProp.state].filter(Boolean).join(", ")
-      )
-    : Promise.resolve(null);
-
-  // Evaluate insights in parallel with weather
-  const [weatherData, insights] = await Promise.all([
-    weatherPromise,
-    hasData ? evaluateInsights() : Promise.resolve([]),
-  ]);
+  // Evaluate insights
+  const insights = hasData ? await evaluateInsights() : [];
 
   return (
     <>
@@ -267,9 +251,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
               <DashboardSaleyardSelector currentSaleyard={saleyardOverride ?? null} />
 
-              <DashboardInsights insights={insights} />
-
               <ComingUpCard items={upcomingItems ?? []} />
+
+              <DashboardInsights insights={insights} />
 
               <Card>
                 <CardHeader>
@@ -330,7 +314,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 totalHead={totalHead}
               />
 
-              {weatherData && <WeatherCard weather={weatherData} />}
+              <CalvingAccrualCard
+                totalAccrual={totalPreBirthAccrual}
+                breederCount={breederCount}
+                pregnantCount={pregnantCount}
+              />
             </div>
 
               {/* Right column – main content */}
