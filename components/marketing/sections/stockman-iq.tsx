@@ -182,7 +182,7 @@ export default function StockmanIQ() {
   }, [phase])
 
   return (
-    <section id="stockman-iq" className="relative py-24 lg:py-32 overflow-x-clip">
+    <section id="brangus" className="relative py-24 lg:py-32 overflow-x-clip">
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid items-center gap-16 lg:grid-cols-[1.2fr_2fr] lg:gap-12">
           {/* Text */}
