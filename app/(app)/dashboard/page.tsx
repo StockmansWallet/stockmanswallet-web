@@ -257,7 +257,86 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             />
 
             <div className="flex flex-col gap-3 lg:flex-row lg:gap-4">
-              {/* Left column */}
+              {/* Left column – narrow sidebar */}
+              <div className="flex w-full flex-col gap-3 lg:w-[340px] lg:gap-4">
+              <PortfolioValueCard
+                value={portfolioValue}
+                changeDollar={changeDollar}
+                changePercent={changePercent}
+                fallbackCount={fallbackCount}
+              />
+
+              <DashboardSaleyardSelector currentSaleyard={saleyardOverride ?? null} />
+
+              <DashboardQuickActions />
+
+              <DashboardInsights insights={insights} />
+
+              <ComingUpCard items={upcomingItems ?? []} />
+
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Properties</CardTitle>
+                    <Link
+                      href="/dashboard/properties"
+                      className="text-xs font-medium text-brand hover:underline"
+                    >
+                      View all
+                    </Link>
+                  </div>
+                </CardHeader>
+                {!properties || properties.length === 0 ? (
+                  <EmptyState
+                    title="No properties yet"
+                    description="Add properties to organise your herds by location."
+                    actionLabel="Add Property"
+                    actionHref="/dashboard/properties/new"
+                  />
+                ) : (
+                  <CardContent className="divide-y divide-white/5 px-5 pb-5">
+                    {[...properties]
+                      .sort((a, b) => {
+                        if (a.is_simulated !== b.is_simulated) return a.is_simulated ? 1 : -1;
+                        return 0;
+                      })
+                      .map((prop, idx) => {
+                        const isFirstReal = !prop.is_simulated && idx === 0;
+                        return (
+                          <Link
+                            key={prop.id}
+                            href={`/dashboard/properties/${prop.id}`}
+                            className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
+                          >
+                            <div>
+                              <p className="text-sm font-medium text-text-primary">
+                                {prop.property_name}
+                              </p>
+                              {(isFirstReal || prop.is_simulated || prop.acreage) && (
+                                <p className="text-xs text-text-muted">
+                                  {isFirstReal ? "Primary Property" : prop.is_simulated ? "Demo" : ""}
+                                  {prop.acreage ? `${isFirstReal || prop.is_simulated ? " · " : ""}${prop.acreage.toLocaleString()} acres` : ""}
+                                </p>
+                              )}
+                            </div>
+                            <Badge variant="default">{prop.state}</Badge>
+                          </Link>
+                        );
+                      })}
+                  </CardContent>
+                )}
+              </Card>
+
+              <GrowthMortalityCard
+                avgMortalityRate={avgMortalityRate}
+                avgDailyWeightGain={avgDailyWeightGain}
+                totalHead={totalHead}
+              />
+
+              {weatherData && <WeatherCard weather={weatherData} />}
+            </div>
+
+              {/* Right column – main content */}
               <div className="flex min-w-0 flex-1 flex-col gap-3 lg:gap-4">
               <Card>
                 <CardHeader>
@@ -348,84 +427,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               </Card>
             </div>
 
-            {/* Right column */}
-            <div className="flex w-full flex-col gap-3 lg:w-[340px] lg:gap-4">
-              <PortfolioValueCard
-                value={portfolioValue}
-                changeDollar={changeDollar}
-                changePercent={changePercent}
-                fallbackCount={fallbackCount}
-              />
-
-              <DashboardSaleyardSelector currentSaleyard={saleyardOverride ?? null} />
-
-              <DashboardQuickActions />
-
-              <DashboardInsights insights={insights} />
-
-              <ComingUpCard items={upcomingItems ?? []} />
-
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle>Properties</CardTitle>
-                    <Link
-                      href="/dashboard/properties"
-                      className="text-xs font-medium text-brand hover:underline"
-                    >
-                      View all
-                    </Link>
-                  </div>
-                </CardHeader>
-                {!properties || properties.length === 0 ? (
-                  <EmptyState
-                    title="No properties yet"
-                    description="Add properties to organise your herds by location."
-                    actionLabel="Add Property"
-                    actionHref="/dashboard/properties/new"
-                  />
-                ) : (
-                  <CardContent className="divide-y divide-white/5 px-5 pb-5">
-                    {[...properties]
-                      .sort((a, b) => {
-                        if (a.is_simulated !== b.is_simulated) return a.is_simulated ? 1 : -1;
-                        return 0;
-                      })
-                      .map((prop, idx) => {
-                        const isFirstReal = !prop.is_simulated && idx === 0;
-                        return (
-                          <Link
-                            key={prop.id}
-                            href={`/dashboard/properties/${prop.id}`}
-                            className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
-                          >
-                            <div>
-                              <p className="text-sm font-medium text-text-primary">
-                                {prop.property_name}
-                              </p>
-                              {(isFirstReal || prop.is_simulated || prop.acreage) && (
-                                <p className="text-xs text-text-muted">
-                                  {isFirstReal ? "Primary Property" : prop.is_simulated ? "Demo" : ""}
-                                  {prop.acreage ? `${isFirstReal || prop.is_simulated ? " · " : ""}${prop.acreage.toLocaleString()} acres` : ""}
-                                </p>
-                              )}
-                            </div>
-                            <Badge variant="default">{prop.state}</Badge>
-                          </Link>
-                        );
-                      })}
-                  </CardContent>
-                )}
-              </Card>
-
-              <GrowthMortalityCard
-                avgMortalityRate={avgMortalityRate}
-                avgDailyWeightGain={avgDailyWeightGain}
-                totalHead={totalHead}
-              />
-
-              {weatherData && <WeatherCard weather={weatherData} />}
-            </div>
           </div>
           </div>
         )}
