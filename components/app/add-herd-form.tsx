@@ -338,6 +338,9 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
         if (calvesAgeMonths) parts.push(`${calvesAgeMonths} months`);
         if (calvesWeight) parts.push(`${calvesWeight} kg`);
         formData.set("additional_info", parts.join(", "));
+        if (calvesWeight && Number(calvesWeight) > 0) {
+          formData.set("calf_weight_recorded_date", new Date().toISOString());
+        }
       }
     }
 
@@ -804,19 +807,23 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                 value={breedingProgram}
                 onChange={(e) => setBreedingProgram(e.target.value as BreedingProgram)}
               />
-              <DatePicker
-                id="joining_start"
-                label={`${periodLabel} Start`}
-                value={joiningStart}
-                onChange={(v) => setJoiningStart(v)}
-              />
-              <DatePicker
-                id="joining_end"
-                label={`${periodLabel} End`}
-                value={joiningEnd}
-                onChange={(v) => setJoiningEnd(v)}
-                min={joiningStart || undefined}
-              />
+              {breedingProgram && breedingProgram !== "uncontrolled" && (
+                <>
+                  <DatePicker
+                    id="joining_start"
+                    label={`${periodLabel} Start`}
+                    value={joiningStart}
+                    onChange={(v) => setJoiningStart(v)}
+                  />
+                  <DatePicker
+                    id="joining_end"
+                    label={`${periodLabel} End`}
+                    value={joiningEnd}
+                    onChange={(v) => setJoiningEnd(v)}
+                    min={joiningStart || undefined}
+                  />
+                </>
+              )}
             </div>
           </CardContent>
         </Card>

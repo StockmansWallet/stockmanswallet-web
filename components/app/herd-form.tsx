@@ -18,7 +18,8 @@ import {
   type BreederSubType,
 } from "@/lib/data/weight-mapping";
 import type { Database } from "@/lib/types/database";
-import { Info, Scale, Heart, MapPin, FileText, AlertTriangle, AlertCircle } from "lucide-react";
+import { parseCalvesAtFoot } from "@/lib/engines/valuation-engine";
+import { Info, Scale, Heart, MapPin, FileText, AlertTriangle, AlertCircle, Baby } from "lucide-react";
 
 type HerdRow = Database["public"]["Tables"]["herds"]["Row"];
 
@@ -67,6 +68,12 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
   const [breedingProgramType, setBreedingProgramType] = useState(herd?.breeding_program_type ?? "");
   const [currentWeight, setCurrentWeight] = useState<string>(String(herd?.current_weight ?? herd?.initial_weight ?? ""));
 
+  // Calves at foot — parse existing data from additional_info
+  const parsedCalves = useMemo(() => parseCalvesAtFoot(herd?.additional_info ?? null), [herd?.additional_info]);
+  const [calvesHeadCount, setCalvesHeadCount] = useState(parsedCalves?.headCount?.toString() ?? "");
+  const [calvesAgeMonths, setCalvesAgeMonths] = useState(parsedCalves?.ageMonths?.toString() ?? "");
+  const [calvesWeight, setCalvesWeight] = useState(parsedCalves?.averageWeight?.toString() ?? "");
+
   const needsBreederSubType = category === "Breeder";
 
   // Weight validation
@@ -84,6 +91,39 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
     const resolution = resolveMLACategory(category, w, breederSubType || undefined);
     return `${resolution.subCategory} ${category}`;
   }, [category, currentWeight, breederSubType]);
+
+  // Serialize calves at foot into additional_info format (matches iOS)
+  const serializedAdditionalInfo = useMemo(() => {
+    // Preserve non-calves content from existing additional_info
+    const existing = herd?.additional_info ?? "";
+    const otherParts = existing
+      .split("|")
+      .map((s) => s.trim())
+      .filter((s) => s && !s.startsWith("Calves at Foot:"));
+
+    const count = Number(calvesHeadCount);
+    const age = Number(calvesAgeMonths);
+    if (count > 0 && age > 0) {
+      let calvesInfo = `Calves at Foot: ${count} head, ${age} months`;
+      if (calvesWeight && Number(calvesWeight) > 0) {
+        calvesInfo += `, ${calvesWeight} kg`;
+      }
+      otherParts.push(calvesInfo);
+    }
+
+    return otherParts.length > 0 ? otherParts.join(" | ") : "";
+  }, [calvesHeadCount, calvesAgeMonths, calvesWeight, herd?.additional_info]);
+
+  // Track if calf weight changed (for DWG tracking)
+  const calfWeightRecordedDate = useMemo(() => {
+    const newWeight = Number(calvesWeight);
+    if (!newWeight || newWeight <= 0) return null;
+    const originalWeight = parsedCalves?.averageWeight;
+    if (originalWeight == null || originalWeight !== newWeight) {
+      return new Date().toISOString();
+    }
+    return (herd as Record<string, unknown>)?.calf_weight_recorded_date as string ?? null;
+  }, [calvesWeight, parsedCalves?.averageWeight, herd]);
 
   const autoPremium = species === "Cattle" ? cattleBreedPremiums[breed] ?? null : null;
 
@@ -380,6 +420,57 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
               )}
             </div>
           )}
+          {isBreeder && (
+            <>
+              <div className="border-t border-white/[0.04] mt-4 pt-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Baby className="h-4 w-4 text-brand" />
+                  <span className="text-sm font-medium text-text-primary">Calves at Foot</span>
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <Input
+                    id="calves_head_count"
+                    label="Head Count"
+                    type="number"
+                    min={0}
+                    value={calvesHeadCount}
+                    onChange={(e) => setCalvesHeadCount(e.target.value)}
+                    placeholder="Number of calves"
+                  />
+                  <Input
+                    id="calves_age_months"
+                    label="Avg Age (months)"
+                    type="number"
+                    min={0}
+                    value={calvesAgeMonths}
+                    onChange={(e) => setCalvesAgeMonths(e.target.value)}
+                    placeholder="Months"
+                  />
+                  <Input
+                    id="calves_weight"
+                    label="Avg Weight (kg)"
+                    type="number"
+                    step="0.1"
+                    min={0}
+                    value={calvesWeight}
+                    onChange={(e) => setCalvesWeight(e.target.value)}
+                    placeholder="Weight in kg"
+                  />
+                </div>
+                <p className="flex items-start gap-2 text-xs text-text-muted mt-2">
+                  <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  <span>Record the calves currently with this breeder herd for accurate valuation.</span>
+                </p>
+              </div>
+              {/* Hidden inputs for serialized calves at foot data */}
+              <input type="hidden" name="additional_info" value={serializedAdditionalInfo} />
+              {calfWeightRecordedDate && (
+                <input type="hidden" name="calf_weight_recorded_date" value={calfWeightRecordedDate} />
+              )}
+            </>
+          )}
+          {/* Hidden input for derived sub_category */}
+          {derivedSubCategory && <input type="hidden" name="sub_category" value={derivedSubCategory} />}
           {!isBreeder && (
             <p className="text-xs text-text-muted">
               Select Breeder or Dry Cow as the category to enable breeding fields.

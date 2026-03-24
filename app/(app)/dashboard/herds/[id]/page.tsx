@@ -5,7 +5,8 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { calculateProjectedWeight, calculateHerdValuation, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import { calculateProjectedWeight, calculateHerdValuation, categoryFallback, parseCalvesAtFoot, calculateCalfAtFootValue, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import { parseLocalDate as parseLocal } from "@/lib/dates";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 import { DeleteHerdButton } from "./delete-button";
@@ -167,6 +168,27 @@ export default async function HerdDetailPage({
       herd.daily_weight_gain
     );
   }
+
+  // Calves at foot breakdown (for Breeding card display)
+  const calvesData = parseCalvesAtFoot(herd.additional_info);
+  let calvesAtFootValue = 0;
+  if (calvesData) {
+    const weightRecordDate = herd.calf_weight_recorded_date
+      ? parseLocal(herd.calf_weight_recorded_date)
+      : new Date(herd.updated_at);
+    calvesAtFootValue = calculateCalfAtFootValue(
+      calvesData,
+      weightRecordDate,
+      herd.species,
+      valuation.pricePerKg,
+      new Date()
+    );
+  }
+  const unbornProgenyValue = Math.max(0, valuation.breedingAccrual - calvesAtFootValue);
+  const birthWeightRatio = herd.species === "Cattle" ? 0.07 : 0.08;
+  const estimatedCalfBirthValue = valuation.pricePerKg > 0
+    ? (projectedWeight ?? herd.current_weight ?? herd.initial_weight ?? 0) * birthWeightRatio * valuation.pricePerKg
+    : null;
 
   const property = herd.properties as { property_name: string } | null;
 
@@ -350,7 +372,45 @@ export default async function HerdDetailPage({
                 <InfoRow label="Calving Rate" value={herd.calving_rate ? `${herd.calving_rate}%` : null} />
                 <InfoRow label="Lactation Status" value={herd.lactation_status} />
                 <InfoRow label="Breeding Program" value={herd.breeding_program_type} />
+                {calvesData && (
+                  <InfoRow
+                    label="Calves at Foot"
+                    value={`${calvesData.headCount} head, ${calvesData.ageMonths} months${calvesData.averageWeight ? `, ${Math.round(calvesData.averageWeight)} kg` : ""}`}
+                  />
+                )}
               </CardContent>
+
+              {/* Calf Value Breakdown */}
+              {valuation.breedingAccrual > 0 && (
+                <CardContent className="px-5 pb-5 pt-0">
+                  <div className="border-t border-white/[0.04] pt-3">
+                    <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-text-muted">
+                      Calf Value Breakdown
+                    </p>
+                    <div className="divide-y divide-white/[0.04]">
+                      {estimatedCalfBirthValue != null && estimatedCalfBirthValue > 0 && (
+                        <InfoRow label="Est. Value Per Calf" value={`$${Math.round(estimatedCalfBirthValue).toLocaleString()}`} />
+                      )}
+                      {unbornProgenyValue > 0 && (
+                        <InfoRow label="Unborn Progeny (Accruing)" value={`$${Math.round(unbornProgenyValue).toLocaleString()}`} />
+                      )}
+                      {calvesData && calvesAtFootValue > 0 && (
+                        <InfoRow label={`Calves at Foot (${calvesData.headCount} head)`} value={`$${Math.round(calvesAtFootValue).toLocaleString()}`} />
+                      )}
+                      {unbornProgenyValue > 0 && calvesData && calvesAtFootValue > 0 && (
+                        <>
+                          <div className="flex items-center justify-between py-3 text-sm">
+                            <span className="font-semibold text-text-primary">Total Calf Value</span>
+                            <span className="font-semibold tabular-nums text-emerald-400">
+                              ${Math.round(valuation.breedingAccrual).toLocaleString()}
+                            </span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              )}
             </Card>
           )}
 

@@ -43,6 +43,7 @@ const herdFormSchema = z.object({
   lactation_status: z.string().optional().nullable(),
   sub_category: z.string().optional().nullable(),
   breeder_sub_type: z.string().optional().nullable(),
+  calf_weight_recorded_date: z.string().optional().nullable(),
 });
 
 const idSchema = z.string().uuid();
@@ -91,6 +92,7 @@ export async function createHerd(formData: FormData) {
     paddock_name: v.paddock_name || null,
     property_id: v.property_id || null,
     additional_info: v.additional_info || null,
+    calf_weight_recorded_date: v.calf_weight_recorded_date || null,
     breed_premium_override: breedPremiumOverride,
     sub_category: v.sub_category || null,
     breeder_sub_type: v.breeder_sub_type || null,
@@ -162,9 +164,13 @@ export async function updateHerd(id: string, formData: FormData) {
       selected_saleyard: v.selected_saleyard || null,
       paddock_name: v.paddock_name || null,
       property_id: v.property_id || null,
+      additional_info: v.additional_info || null,
+      calf_weight_recorded_date: v.calf_weight_recorded_date || null,
       notes: v.notes || null,
       animal_id_number: v.animal_id_number || null,
       breed_premium_override: updatePremiumOverride,
+      sub_category: v.sub_category || null,
+      breeder_sub_type: v.breeder_sub_type || null,
       updated_at: new Date().toISOString(),
     })
     .eq("id", idResult.data)
