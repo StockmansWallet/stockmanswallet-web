@@ -312,7 +312,19 @@ export function HerdsTable({
         <td className="hidden px-5 py-3.5 text-text-secondary md:table-cell">{herd.breed}</td>
         <td className="hidden px-5 py-3.5 text-text-secondary lg:table-cell">{herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} (${herd.sub_category})` : herd.category}</td>
         <td className={`hidden px-5 py-3.5 text-right tabular-nums lg:table-cell ${isFallback ? "text-red-400" : isStale ? "text-amber-400" : "text-text-secondary"}`}>
-          {pricePerKg > 0 ? `$${pricePerKg.toFixed(2)}` : "\u2014"}
+          <div className="flex items-center justify-end gap-1.5">
+            {pricePerKg > 0 ? `$${pricePerKg.toFixed(2)}` : "\u2014"}
+            {isStale && (
+              <span className="inline-flex items-center rounded bg-amber-500/15 px-1 py-0.5 text-[9px] font-medium text-amber-400">
+                Stale - {Math.floor(dataAgeDays / 7)}w
+              </span>
+            )}
+            {isFallback && (
+              <span className="inline-flex items-center rounded bg-red-500/15 px-1 py-0.5 text-[9px] font-medium text-red-400">
+                {source === "national" ? "National" : "Fallback"}
+              </span>
+            )}
+          </div>
         </td>
         <td className="hidden px-5 py-3.5 text-right tabular-nums text-text-secondary xl:table-cell">
           {herd.current_weight ? `${herd.current_weight.toLocaleString()} kg` : "\u2014"}
