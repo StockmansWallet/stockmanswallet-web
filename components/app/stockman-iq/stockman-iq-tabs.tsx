@@ -5,7 +5,7 @@
 // Tab 2: Insights (full-width insight cards grid)
 
 import { useState, useCallback } from "react";
-import { MessageSquare, Sparkles, Brain, Plus } from "lucide-react";
+import { MessageSquare, Sparkles, MessageCircle, Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs } from "@/components/ui/tabs";
 import { BrangusChat } from "@/components/app/brangus-chat";
@@ -111,7 +111,7 @@ export function StockmanIQTabs({ conversations: initialConversations, insights }
           <Card className="flex-1 rounded-2xl">
             <CardContent className="flex flex-col items-center justify-center py-12 text-center">
               <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-brand/10">
-                <Brain className="h-6 w-6 text-brand" />
+                <MessageCircle className="h-6 w-6 text-brand" />
               </div>
               <p className="text-sm font-medium text-text-primary">No conversations yet</p>
               <p className="mt-1 max-w-xs text-xs leading-relaxed text-text-muted">
