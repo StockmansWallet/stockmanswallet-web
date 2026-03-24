@@ -11,7 +11,6 @@ import { calculateHerdValuation, categoryFallback, type CategoryPriceEntry } fro
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 import { PortfolioValueCard } from "@/components/app/portfolio-value-card";
-import { DashboardQuickActions } from "@/components/app/dashboard-quick-actions";
 import { ComingUpCard } from "@/components/app/coming-up-card";
 import { GrowthMortalityCard } from "@/components/app/growth-mortality-card";
 import { DashboardSaleyardSelector } from "@/components/app/dashboard-saleyard-selector";
@@ -258,7 +257,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
             <div className="flex flex-col gap-3 lg:flex-row lg:gap-4">
               {/* Left column – narrow sidebar */}
-              <div className="flex w-full flex-col gap-3 lg:w-[400px] lg:gap-4">
+              <div className="flex w-full flex-col gap-3 lg:w-[440px] lg:gap-4">
               <PortfolioValueCard
                 value={portfolioValue}
                 changeDollar={changeDollar}
@@ -267,8 +266,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               />
 
               <DashboardSaleyardSelector currentSaleyard={saleyardOverride ?? null} />
-
-              <DashboardQuickActions />
 
               <DashboardInsights insights={insights} />
 
