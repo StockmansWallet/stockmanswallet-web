@@ -232,7 +232,7 @@ export default function StockmanIQ() {
             className="relative"
           >
             {/* Brangus leaning on the chat */}
-            <div className="absolute right-[-40px] bottom-[-45px] z-10 h-[680px] w-[340px] pointer-events-none">
+            <div className="absolute right-[-130px] bottom-[-45px] z-10 h-[820px] w-[420px] pointer-events-none">
               <Image
                 src="/images/brangus-lean-2.webp"
                 alt="Brangus leaning on a post beside the chat panel"
