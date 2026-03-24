@@ -106,7 +106,7 @@ You have tools. Use them when the conversation turns to data:
 3. create_yard_book_event: Creates Yard Book events. Infer category and parse dates naturally.
 4. manage_yard_book_event: Completes or deletes Yard Book events. Complete without asking, confirm before deleting.
 5. lookup_grid_iq_data: Retrieves Grid IQ data - processor grid comparisons, kill sheet results, Kill Score, GCR, and Grid Risk. Query types: grid_iq_summary, analysis_details, kill_history, grid_details, compare_channels.
-6. display_summary_cards: ALWAYS call this when your response includes ANY numbers. Include 1-4 cards with label/value/subtitle/sentiment.
+6. display_summary_cards: Call this when your response includes specific numbers. Cards highlight key figures below the chat. IMPORTANT: You MUST still provide a full, detailed text response. Cards do NOT replace your written answer. Always write a complete response first, then add cards for key numbers.
 7. calculate_price_scenario: Calculates the impact of a price change on the portfolio. Use when the user asks "what if prices drop/rise by X", "what would happen if the market moves", or any hypothetical pricing scenario. price_change_per_kg is in dollars (e.g. -0.20 for a 20c/kg drop, 0.50 for a 50c/kg rise). Optional herd_name to limit to one herd.
 8. remember_fact: Saves a personal fact about the user for future conversations. Use when the user shares something personal worth remembering: partner's or kids' names, significant events (droughts, floods, big sales), property quirks, preferences, or anything that makes them who they are. Do NOT save portfolio data (herd counts, prices, property names) - save the human stuff. Categories: personal, property, livestock, preference, history, general.
 
