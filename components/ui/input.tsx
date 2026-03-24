@@ -19,9 +19,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
     const nudge = useCallback(
       (direction: 1 | -1) => {
+        const el = inputRef.current;
         const s = Number(step) || 1;
-        const isEmpty = value === "" || value === undefined || value === null;
-        const current = isEmpty && nudgeDefault !== undefined ? nudgeDefault : (Number(value) || 0);
+        // Debug: Read current value from the DOM element (works for both controlled and uncontrolled inputs)
+        const rawVal = el?.value ?? String(value ?? "");
+        const isEmpty = rawVal === "" || rawVal === undefined || rawVal === null;
+        const current = isEmpty && nudgeDefault !== undefined ? nudgeDefault : (Number(rawVal) || 0);
         let next = current + s * direction;
         // Respect min/max bounds
         if (min !== undefined && next < Number(min)) next = Number(min);
@@ -29,14 +32,23 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         // Round to avoid floating point drift
         const decimals = String(s).includes(".") ? String(s).split(".")[1].length : 0;
         next = Number(next.toFixed(decimals));
-        // Synthesise a change event matching React's expected shape
-        const syntheticTarget = { value: String(next) } as HTMLInputElement;
-        onChange?.({
-          target: syntheticTarget,
-          currentTarget: syntheticTarget,
-        } as unknown as React.ChangeEvent<HTMLInputElement>);
+        // Debug: Update the DOM element directly for uncontrolled inputs
+        if (el) {
+          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
+          nativeInputValueSetter?.call(el, String(next));
+          el.dispatchEvent(new Event("input", { bubbles: true }));
+          el.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+        // Debug: Also fire the React onChange for controlled inputs
+        if (onChange) {
+          const syntheticTarget = { value: String(next) } as HTMLInputElement;
+          onChange({
+            target: syntheticTarget,
+            currentTarget: syntheticTarget,
+          } as unknown as React.ChangeEvent<HTMLInputElement>);
+        }
       },
-      [value, step, min, max, onChange, nudgeDefault],
+      [value, step, min, max, onChange, nudgeDefault, inputRef],
     );
 
     const hasTrailingIcon = isNumber;

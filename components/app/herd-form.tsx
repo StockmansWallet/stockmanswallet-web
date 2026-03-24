@@ -24,9 +24,6 @@ type HerdRow = Database["public"]["Tables"]["herds"]["Row"];
 
 const SPECIES_OPTIONS = [
   { value: "Cattle", label: "Cattle" },
-  { value: "Sheep", label: "Sheep" },
-  { value: "Pig", label: "Pig" },
-  { value: "Goat", label: "Goat" },
 ];
 
 const BREEDING_PROGRAM_OPTIONS = [
@@ -343,7 +340,7 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
               <Input
                 id="calving_rate"
                 name="calving_rate"
-                label="Calving/Lambing Rate (%)"
+                label="Calving Rate (%)"
                 type="number"
                 step="0.1"
                 defaultValue={herd?.calving_rate ?? 85}
