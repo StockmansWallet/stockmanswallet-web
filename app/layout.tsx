@@ -16,7 +16,7 @@ const nunito = Nunito({
 export const metadata: Metadata = {
   title: {
     default: "Stockman's Wallet - Intelligent Livestock Valuation",
-    template: "%s | Stockman's Wallet",
+    template: "Stockman's Wallet | %s",
   },
   description:
     "Track your cattle, sheep and pig herds as financial assets with real-time MLA market valuations. Built for Australian producers and rural advisors.",
