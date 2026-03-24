@@ -44,7 +44,7 @@ export default function AboutTally() {
               The Logomark
             </span>
             <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
-              Why the Tally
+              Why the <span className="text-brand">Tally</span>
             </h2>
 
             <div className="mt-6 space-y-4 text-base leading-relaxed text-text-secondary">

@@ -13,10 +13,12 @@ export interface PricingTier {
   name: string
   subtitle: string
   price: number | null
+  priceLabel?: string
   priceAnnual: number | null
   description: string
   highlighted: boolean
   badge?: string
+  category: 'producer' | 'advisor'
   features: PricingFeature[]
 }
 

@@ -1,7 +1,6 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import LandingCard from '@/components/marketing/ui/landing-card'
 
 const BEFORE_ITEMS = [
   'Manual tallies and handwritten records',
@@ -33,7 +32,9 @@ export default function AboutMission() {
               The Problem
             </span>
             <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
-              Billions in Livestock, Zero Financial Visibility
+              Billions in Livestock,
+              <br />
+              <span className="text-brand">Zero Financial Visibility</span>
             </h2>
 
             <div className="mt-6 space-y-4 text-base leading-relaxed text-text-secondary">
@@ -66,7 +67,7 @@ export default function AboutMission() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.15 }}
           >
-            <LandingCard level={2} className="space-y-6">
+            <div className="space-y-6 rounded-2xl bg-white/[0.04] p-6 sm:p-7">
               <h3 className="text-center text-lg font-semibold text-white">
                 From Guesswork to Intelligence
               </h3>
@@ -106,7 +107,7 @@ export default function AboutMission() {
                   </div>
                 ))}
               </div>
-            </LandingCard>
+            </div>
           </motion.div>
         </div>
       </div>

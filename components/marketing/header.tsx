@@ -52,13 +52,13 @@ export function Header() {
         {/* Desktop Nav */}
         <nav className="hidden items-center gap-1 lg:flex">
           {NAV_LINKS.map((link) => (
-            <a
+            <Link
               key={link.href}
               href={link.href}
               className="rounded-[10px] px-3 py-2 text-sm font-medium text-text-secondary transition-colors hover:text-white hover:bg-white/5"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -92,14 +92,14 @@ export function Header() {
         <div className="glass-strong absolute inset-x-0 top-16 border-t border-white/5 lg:hidden">
           <nav className="flex flex-col gap-1 px-4 py-4">
             {NAV_LINKS.map((link) => (
-              <a
+              <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
                 className="rounded-[10px] px-3 py-3 text-base font-medium text-text-secondary transition-colors hover:text-white hover:bg-white/5"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
 
             <div className="mt-2 border-t border-white/5 pt-4">

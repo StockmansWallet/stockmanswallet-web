@@ -24,11 +24,11 @@ export default function AboutAustralia() {
           </span>
 
           <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl lg:text-5xl">
-            Australian Data.
+            Australian <span className="text-brand">Data.</span>
             <br className="hidden sm:block" />
-            Australian Markets.
+            Australian <span className="text-brand">Markets.</span>
             <br className="hidden sm:block" />
-            Australian Producers.
+            Australian <span className="text-brand">Producers.</span>
           </h2>
 
           <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-text-secondary">

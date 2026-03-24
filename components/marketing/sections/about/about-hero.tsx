@@ -27,7 +27,9 @@ export default function AboutHero() {
           </span>
 
           <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-5xl">
-            Capital Intelligence for{' '}
+            Capital Intelligence
+            <br />
+            for{' '}
             <span className="bg-gradient-to-br from-brand-light via-brand to-brand-dark bg-clip-text text-transparent">
               Australian Agriculture
             </span>
