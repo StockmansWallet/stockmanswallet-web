@@ -1,7 +1,9 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { Badge, type BadgeVariant } from "@/components/ui/badge";
+import { Search } from "lucide-react";
 
 interface WaitlistSignup extends Record<string, unknown> {
   id: string;
@@ -118,17 +120,43 @@ interface WaitlistTableProps {
 }
 
 export function WaitlistTable({ signups }: WaitlistTableProps) {
+  const [search, setSearch] = useState("");
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return signups;
+    const q = search.toLowerCase();
+    return signups.filter(
+      (s) =>
+        s.name?.toLowerCase().includes(q) ||
+        s.email.toLowerCase().includes(q) ||
+        s.postcode?.toLowerCase().includes(q)
+    );
+  }, [signups, search]);
+
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-surface-lowest">
-      <DataTable
-        columns={columns}
-        data={signups as Record<string, unknown>[]}
-        keyField="id"
-        searchable
-        searchPlaceholder="Search by name, email, or postcode..."
-        searchFields={["name", "email", "postcode"]}
-        emptyMessage="No waitlist signups yet."
-      />
+    <div className="flex flex-col gap-4">
+      {/* Search above the card, aligned right */}
+      <div className="flex justify-end">
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by name, email, or postcode..."
+            className="w-72 rounded-xl bg-surface pl-9 pr-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
+          />
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-white/[0.06] bg-surface-lowest">
+        <DataTable
+          columns={columns}
+          data={filtered as Record<string, unknown>[]}
+          keyField="id"
+          emptyMessage="No waitlist signups yet."
+        />
+      </div>
     </div>
   );
 }
