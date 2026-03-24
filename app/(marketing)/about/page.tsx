@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import AboutHero from '@/components/marketing/sections/about/about-hero'
+import AboutTally from '@/components/marketing/sections/about/about-tally'
 import AboutMission from '@/components/marketing/sections/about/about-mission'
 import AboutValues from '@/components/marketing/sections/about/about-values'
 import AboutTeam from '@/components/marketing/sections/about/about-team'
@@ -16,6 +17,7 @@ export default function AboutPage() {
   return (
     <>
       <AboutHero />
+      <AboutTally />
       <AboutMission />
       <AboutValues />
       <AboutTeam />
