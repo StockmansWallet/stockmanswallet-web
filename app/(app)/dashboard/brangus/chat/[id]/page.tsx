@@ -26,7 +26,8 @@ export default async function StockmanIQConversationPage({
     <div className="flex max-w-3xl flex-col" style={{ height: "calc(100vh - 8rem)" }}>
       <PageHeader
         title="Brangus"
-        subtitle="Your AI livestock advisor"
+        subtitle="Your personal livestock advisor, and new best mate."
+        subtitleClassName="mt-1 text-base text-text-muted"
         actions={
           <Link
             href="/dashboard/brangus"

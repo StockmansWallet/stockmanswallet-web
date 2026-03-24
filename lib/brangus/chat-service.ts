@@ -418,6 +418,12 @@ async function callBrangusAPI(
 ): Promise<AnthropicResponse | null> {
   const supabase = createClient();
 
+  // Debug: Use getUser() to force a server-side token validation and refresh.
+  // getSession() reads from cache and can return expired tokens.
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
+    throw new Error("Not authenticated. Please sign in again.");
+  }
   const { data: { session } } = await supabase.auth.getSession();
   if (!session?.access_token) {
     throw new Error("Not authenticated. Please sign in again.");

@@ -72,6 +72,9 @@ export async function autoTitleConversation(
 ): Promise<string | null> {
   const supabase = createClient();
 
+  // Debug: getUser() forces token refresh; getSession() alone can return stale tokens
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
   const { data: { session } } = await supabase.auth.getSession();
   if (!session?.access_token) return null;
 
