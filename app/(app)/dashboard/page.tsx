@@ -14,7 +14,7 @@ import { GrowthMortalityCard } from "@/components/app/growth-mortality-card";
 import { DashboardSaleyardSelector } from "@/components/app/dashboard-saleyard-selector";
 import { DashboardInsights } from "@/components/app/dashboard-insights";
 import { CalvingAccrualCard } from "@/components/app/calving-accrual-card";
-import { Wallet } from "lucide-react";
+import { Wallet, MapPinned } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
 import { evaluateInsights } from "@/lib/stockman-iq/insight-engine";
 
@@ -52,7 +52,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                breeding_program_type, joining_period_start, joining_period_end,
                breed_premium_override, mortality_rate, is_sold, selected_saleyard,
                additional_info, calf_weight_recorded_date, updated_at,
-               breeder_sub_type, sub_category`)
+               breeder_sub_type, sub_category, property_id`)
       .eq("user_id", user!.id)
       .eq("is_sold", false)
       .eq("is_deleted", false)
@@ -180,6 +180,16 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const topHerds = [...activeHerds]
     .sort((a, b) => (b.head_count ?? 0) - (a.head_count ?? 0))
     .slice(0, 6);
+
+  // Group top herds by property for the Largest Herds card
+  const propertyMap = new Map((properties ?? []).map((p) => [p.id, p.property_name]));
+  const herdsByProperty = new Map<string, typeof topHerds>();
+  for (const h of topHerds) {
+    const key = h.property_id ? (propertyMap.get(h.property_id) ?? "Other") : "Unassigned";
+    const group = herdsByProperty.get(key) ?? [];
+    group.push(h);
+    herdsByProperty.set(key, group);
+  }
 
   const hasData = activeHerds.length > 0;
 
@@ -309,8 +319,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 </CardContent>
               </Card>
 
-              <DashboardInsights insights={insights} />
-
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -333,6 +341,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 </CardContent>
               </Card>
 
+              <DashboardInsights insights={insights} />
+
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -345,32 +355,42 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                     <span className="text-xs text-text-muted">by head count</span>
                   </div>
                 </CardHeader>
-                <CardContent className="divide-y divide-white/5 px-5 pb-5">
-                  {topHerds.map((herd) => (
-                    <Link
-                      key={herd.id}
-                      href={`/dashboard/herds/${herd.id}`}
-                      className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
-                    >
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-text-primary">
-                          {herd.name}
-                        </p>
-                        <p className="text-xs text-text-muted">
-                          {herd.breed} &middot; {herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} (${herd.sub_category})` : herd.category}
-                        </p>
+                <CardContent className="px-5 pb-5">
+                  {[...herdsByProperty.entries()].map(([propName, herds], groupIdx) => (
+                    <div key={propName} className={groupIdx > 0 ? "mt-4" : ""}>
+                      <div className="flex items-center gap-1.5 pb-2">
+                        <MapPinned className="h-3 w-3 text-text-muted" />
+                        <p className="text-xs font-medium text-text-muted">{propName}</p>
                       </div>
-                      <div className="ml-4 flex flex-shrink-0 items-center gap-3">
-                        <span className="text-sm font-semibold tabular-nums text-text-primary">
-                          {herd.head_count?.toLocaleString()} hd
-                        </span>
-                        {herd.current_weight > 0 && (
-                          <span className="text-xs tabular-nums text-text-muted">
-                            {herd.current_weight} kg
-                          </span>
-                        )}
+                      <div className="divide-y divide-white/5">
+                        {herds.map((herd) => (
+                          <Link
+                            key={herd.id}
+                            href={`/dashboard/herds/${herd.id}`}
+                            className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
+                          >
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-medium text-text-primary">
+                                {herd.name}
+                              </p>
+                              <p className="text-xs text-text-muted">
+                                {herd.breed} &middot; {herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} (${herd.sub_category})` : herd.category}
+                              </p>
+                            </div>
+                            <div className="ml-4 flex flex-shrink-0 items-center gap-3">
+                              <span className="text-sm font-semibold tabular-nums text-text-primary">
+                                {herd.head_count?.toLocaleString()} hd
+                              </span>
+                              {herd.current_weight > 0 && (
+                                <span className="text-xs tabular-nums text-text-muted">
+                                  {herd.current_weight} kg
+                                </span>
+                              )}
+                            </div>
+                          </Link>
+                        ))}
                       </div>
-                    </Link>
+                    </div>
                   ))}
                 </CardContent>
               </Card>
