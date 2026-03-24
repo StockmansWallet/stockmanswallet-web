@@ -10,7 +10,7 @@ const EXTENDED_BIOS: Record<string, string> = {
   'Mil Jayaratne':
     'Driving operations and strategy to bring Stockman\u2019s Wallet to market. Mil\u2019s background in business operations and strategic planning ensures the platform delivers real value from day one. He oversees go-to-market strategy, partnerships, and business development.',
   'Leon Ernst':
-    'Building the technology that powers intelligent livestock valuation. Leon architects the platform from end to end \u2014 from real-time market data pipelines and AI-powered analytics to the native iOS experience. He\u2019s driven by the belief that great software should feel invisible.',
+    'Building the technology that powers intelligent livestock valuation. Leon architects the platform from end to end, from real-time market data pipelines and AI-powered analytics to the native iOS experience. He\u2019s driven by the belief that great software should feel invisible.',
 }
 
 export default function AboutTeam() {

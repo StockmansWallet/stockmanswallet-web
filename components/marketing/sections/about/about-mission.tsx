@@ -39,8 +39,8 @@ export default function AboutMission() {
             <div className="mt-6 space-y-4 text-base leading-relaxed text-text-secondary">
               <p>
                 Australia&apos;s livestock industry is valued at over $80 billion. Producers
-                across the country manage herds worth hundreds of thousands &mdash; sometimes
-                millions &mdash; of dollars. Yet most rely on mental arithmetic, handwritten
+                across the country manage herds worth hundreds of thousands, sometimes
+                millions, of dollars. Yet most rely on mental arithmetic, handwritten
                 tallies, and gut instinct to track what their animals are worth.
               </p>
               <p>
@@ -53,7 +53,7 @@ export default function AboutMission() {
               <p>
                 We built Stockman&apos;s Wallet to close that gap. Live market data,
                 intelligent valuation models, AI-powered timing analysis, and
-                professional-grade reporting &mdash; all designed for the way producers
+                professional-grade reporting, all designed for the way producers
                 actually work.
               </p>
             </div>

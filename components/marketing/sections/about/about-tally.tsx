@@ -56,26 +56,26 @@ export default function AboutTally() {
               </p>
               <p>
                 In Australian pastoral life, the tally is everywhere. Scratched into
-                fenceposts during musters. Carved into drafting-gate rails as cattle are
-                sorted through the race. Pencilled into the shirt-pocket notebook that
-                every stockman carries.{' '}
+                fenceposts during musters. Carved into drafting-gate rails as cattle
+                run through the race. Pencilled into the yard book that every stockman
+                carries or even Milwaukee penned onto a pair of Wrangler jeans.{' '}
                 <span className="text-white/80">
                   &ldquo;What&apos;s the tally?&rdquo;
                 </span>{' '}
-                is the most fundamental question in stockwork &mdash; the one that tells
+                is the most fundamental question in stockwork, and the one that tells
                 you whether the job is done.
               </p>
               <p>
                 Old station yards carry decades of these marks layered into the timber.
-                Each set of five lines &mdash; four uprights crossed by a diagonal,
-                mirroring the shape of a stockyard gate itself &mdash; is a record of
+                Each set of five lines, four uprights crossed by a diagonal
+                mirroring the shape of a stockyard gate itself, is a record of
                 animals seen, counted, and accounted for. The five-bar tally is not just a
                 number. It&apos;s an act of stewardship.
               </p>
               <p>
                 We chose it as our logomark because Stockman&apos;s Wallet is doing the
                 same thing stockmen have always done: keeping count of what&apos;s in your
-                care. The tool has changed &mdash; from a fencepost to a phone &mdash; but
+                care. The tool has changed, from a fencepost to a phone, but
                 the purpose hasn&apos;t. Every valuation, every insight, every report starts
                 with the same ancient question.{' '}
                 <span className="italic text-white/80">What&apos;s the tally?</span>

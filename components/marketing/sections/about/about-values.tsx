@@ -6,7 +6,7 @@ const VALUES = [
   {
     title: 'Built for the Bush',
     description:
-      'Every feature is designed for how Australian producers actually work \u2014 from the terminology we use to the markets we track. This isn\u2019t a Silicon Valley fintech bolted onto agriculture. It\u2019s purpose-built from the paddock up.',
+      'Every feature is designed for how Australian producers actually work, from the terminology we use to the markets we track. This isn\u2019t a Silicon Valley fintech bolted onto agriculture. It\u2019s purpose-built from the paddock up.',
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -27,7 +27,7 @@ const VALUES = [
   {
     title: 'Producer-First, Always',
     description:
-      'You own your data. You control who sees it. We don\u2019t sell information, run ads, or build profiles. Stockman\u2019s Wallet exists to serve producers and the rural professionals who support them \u2014 full stop.',
+      'You own your data. You control who sees it. We don\u2019t sell information, run ads, or build profiles. Stockman\u2019s Wallet exists to serve producers and the rural professionals who support them. Full stop.',
     icon: (
       <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />

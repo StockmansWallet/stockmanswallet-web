@@ -193,7 +193,7 @@ export default function StockmanIQ() {
 
   return (
     <section ref={sectionRef} id="stockman-iq" className="relative py-24 lg:py-32 overflow-x-clip">
-      {/* Brangus Character Image — pinned to left edge, parallax, slides in */}
+      {/* Brangus Character Image - pinned to left edge, parallax, slides in */}
       {/* Outer wrapper handles positioning (no transform) so Framer Motion owns all transforms */}
       <div className="hidden lg:flex absolute right-0 top-0 bottom-0 items-start pt-12 z-10 pointer-events-none">
         <motion.div
