@@ -5,8 +5,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { calculateProjectedWeight, calculateHerdValuation, categoryFallback, parseCalvesAtFoot, calculateCalfAtFootValue, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
-import { parseLocalDate as parseLocal } from "@/lib/dates";
+import { calculateProjectedWeight, calculateHerdValuation, categoryFallback, parseCalvesAtFoot, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 import { DeleteHerdButton } from "./delete-button";
@@ -171,20 +170,8 @@ export default async function HerdDetailPage({
 
   // Calves at foot breakdown (for Breeding card display)
   const calvesData = parseCalvesAtFoot(herd.additional_info);
-  let calvesAtFootValue = 0;
-  if (calvesData) {
-    const weightRecordDate = herd.calf_weight_recorded_date
-      ? parseLocal(herd.calf_weight_recorded_date)
-      : new Date(herd.updated_at);
-    calvesAtFootValue = calculateCalfAtFootValue(
-      calvesData,
-      weightRecordDate,
-      herd.species,
-      valuation.pricePerKg,
-      new Date()
-    );
-  }
-  const unbornProgenyValue = Math.max(0, valuation.breedingAccrual - calvesAtFootValue);
+  const calvesAtFootValue = valuation.calvesAtFootValue;
+  const unbornProgenyValue = valuation.preBirthAccrual;
   const birthWeightRatio = herd.species === "Cattle" ? 0.07 : 0.08;
   const estimatedCalfBirthValue = valuation.pricePerKg > 0
     ? (projectedWeight ?? herd.current_weight ?? herd.initial_weight ?? 0) * birthWeightRatio * valuation.pricePerKg

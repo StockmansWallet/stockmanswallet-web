@@ -31,6 +31,8 @@ export interface HerdValuation {
   baseMarketValue: number;
   weightGainAccrual: number;
   breedingAccrual: number;
+  preBirthAccrual: number;
+  calvesAtFootValue: number;
   grossValue: number;
   mortalityDeduction: number;
   netValue: number;
@@ -422,6 +424,8 @@ export interface HerdValuationResult {
   baseMarketValue: number;
   weightGainAccrual: number;
   breedingAccrual: number;
+  preBirthAccrual: number;
+  calvesAtFootValue: number;
   grossValue: number;
   mortalityDeduction: number;
   daysHeld: number;
@@ -460,7 +464,7 @@ export function calculateHerdValuation(
   if (head === 0) return {
     netValue: 0, priceSource: "fallback", pricePerKg: 0, breedPremiumApplied: 0,
     projectedWeight: 0, basePrice: 0, physicalValue: 0, baseMarketValue: 0,
-    weightGainAccrual: 0, breedingAccrual: 0, grossValue: 0, mortalityDeduction: 0,
+    weightGainAccrual: 0, breedingAccrual: 0, preBirthAccrual: 0, calvesAtFootValue: 0, grossValue: 0, mortalityDeduction: 0,
     daysHeld: 0, mortalityRate: 0, matchedWeightRange: null, mlaCategory: "",
     valuationDate: new Date().toISOString(), initialWeight: 0, dataDate: null,
   };
@@ -571,7 +575,7 @@ export function calculateHerdValuation(
   const mortalityDeduction = calculateMortalityDeduction(physicalValue, mortalityRate, daysHeld);
 
   // 5. Pre-birth breeding accrual (pregnant breeders with a joining date)
-  let breedingAccrual = 0;
+  let preBirthAccrual = 0;
   if (herd.is_breeder && herd.is_pregnant && herd.joined_date) {
     let accrualStart: Date;
     const isUncontrolled = herd.breeding_program_type === "uncontrolled";
@@ -598,7 +602,7 @@ export function calculateHerdValuation(
         : (herd.calving_rate ?? 0.85);
     const calfBirthWeightFactor = herd.species === "Sheep" ? 0.08 : 0.07;
     const calfBirthWeight = (herd.initial_weight ?? herd.current_weight ?? 0) * calfBirthWeightFactor;
-    breedingAccrual = calculatePreBirthAccrual(
+    preBirthAccrual = calculatePreBirthAccrual(
       head,
       calvingRate,
       calvingDays,
@@ -624,7 +628,7 @@ export function calculateHerdValuation(
   }
 
   // Combined breeding accrual (pre-birth + calves at foot)
-  breedingAccrual = breedingAccrual + calvesAtFootValue;
+  const breedingAccrual = preBirthAccrual + calvesAtFootValue;
 
   const weightGainAccrual = physicalValue - baseMarketValue;
   const grossValue = physicalValue + breedingAccrual;
@@ -642,6 +646,8 @@ export function calculateHerdValuation(
     baseMarketValue,
     weightGainAccrual,
     breedingAccrual,
+    preBirthAccrual,
+    calvesAtFootValue,
     grossValue,
     mortalityDeduction,
     daysHeld,
