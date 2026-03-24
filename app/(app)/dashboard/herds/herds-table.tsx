@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
-import { Search, ChevronUp, ChevronRight, MapPinned, Trash2, CheckSquare } from "lucide-react";
+import { Search, ChevronUp, ChevronRight, MapPinned, Trash2, CheckSquare, Leaf } from "lucide-react";
 import { deleteHerds } from "./actions";
 
 type HerdWithProperty = {
@@ -38,12 +38,14 @@ export function HerdsTable({
   herdValues,
   herdSources,
   herdPricePerKg,
+  herdBreedingAccrual,
   propertyGroups,
 }: {
   herds: HerdWithProperty[];
   herdValues: Record<string, number>;
   herdSources?: Record<string, string>;
   herdPricePerKg?: Record<string, number>;
+  herdBreedingAccrual?: Record<string, number>;
   propertyGroups: PropertyGroup[];
 }) {
   const router = useRouter();
@@ -267,6 +269,7 @@ export function HerdsTable({
     const source = herdSources?.[herd.id];
     const isFallback = source !== undefined && source !== "saleyard";
     const pricePerKg = herdPricePerKg?.[herd.id] ?? 0;
+    const accrual = herdBreedingAccrual?.[herd.id] ?? 0;
     const isSelected = selectedIds.has(herd.id);
 
     function handleRowClick() {
@@ -309,7 +312,15 @@ export function HerdsTable({
           {herd.current_weight ? `${herd.current_weight.toLocaleString()} kg` : "\u2014"}
         </td>
         <td className={`px-5 py-3.5 text-right tabular-nums ${isFallback ? "text-red-400" : "text-text-secondary"}`}>
-          {value > 0 ? `$${Math.round(value).toLocaleString()}` : "\u2014"}
+          <div className="flex flex-col items-end">
+            <span>{value > 0 ? `$${Math.round(value).toLocaleString()}` : "\u2014"}</span>
+            {accrual > 0 && (
+              <span className="flex items-center gap-1 text-xs text-emerald-400">
+                <Leaf className="h-3 w-3" />
+                +${Math.round(accrual).toLocaleString()}
+              </span>
+            )}
+          </div>
         </td>
         {!isEditing && (
           <td className="px-3 py-3.5">
