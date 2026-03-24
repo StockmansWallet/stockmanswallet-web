@@ -37,6 +37,9 @@ export function Footer() {
                   {link.label}
                 </a>
               ))}
+              <Link href="/about" className="text-sm text-text-secondary transition-colors hover:text-white">
+                About
+              </Link>
             </nav>
           </div>
 

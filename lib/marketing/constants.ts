@@ -5,7 +5,6 @@ export const NAV_LINKS: NavLink[] = [
   { label: 'Stockman IQ', href: '#stockman-iq' },
   { label: 'Advisors', href: '#advisors' },
   { label: 'Pricing', href: '#pricing' },
-  { label: 'About', href: '#about' },
 ]
 
 export const FEATURES: Feature[] = [
