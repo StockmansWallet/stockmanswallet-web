@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState } from 'react'
 import Image from 'next/image'
-import { motion, AnimatePresence, useInView } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface FeatureTab {
   id: string
@@ -229,34 +229,20 @@ const FEATURE_TABS: FeatureTab[] = [
   },
 ]
 
-const AUTO_ADVANCE_MS = 6000
-
 export default function Features() {
   const [active, setActive] = useState(0)
-  const [paused, setPaused] = useState(false)
-  const sectionRef = useRef<HTMLElement>(null)
-  const inView = useInView(sectionRef, { once: false, amount: 0.3 })
   const feature = FEATURE_TABS[active]
 
-  const advance = useCallback(() => {
+  function goPrev() {
+    setActive((prev) => (prev - 1 + FEATURE_TABS.length) % FEATURE_TABS.length)
+  }
+
+  function goNext() {
     setActive((prev) => (prev + 1) % FEATURE_TABS.length)
-  }, [])
-
-  useEffect(() => {
-    if (!inView || paused) return
-    const timer = setInterval(advance, AUTO_ADVANCE_MS)
-    return () => clearInterval(timer)
-  }, [inView, paused, advance])
-
-  function handleTabClick(i: number) {
-    setActive(i)
-    setPaused(true)
-    // Resume auto-advance after 15s of no interaction
-    setTimeout(() => setPaused(false), 15000)
   }
 
   return (
-    <section ref={sectionRef} id="features" className="relative py-24 lg:py-32">
+    <section id="features" className="relative py-24 lg:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
@@ -286,7 +272,7 @@ export default function Features() {
             {FEATURE_TABS.map((tab, i) => (
               <button
                 key={tab.id}
-                onClick={() => handleTabClick(i)}
+                onClick={() => setActive(i)}
                 className={`relative flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-300 cursor-pointer ${
                   active === i
                     ? 'text-white'
@@ -294,24 +280,12 @@ export default function Features() {
                 }`}
               >
                 {active === i && (
-                  <>
-                    <motion.div
-                      layoutId="featureTab"
-                      className="absolute inset-0 rounded-xl"
-                      style={{ background: `${tab.color}15`, border: `1px solid ${tab.color}30` }}
-                      transition={{ type: 'spring', duration: 0.5, bounce: 0.15 }}
-                    />
-                    {!paused && (
-                      <motion.div
-                        key={`progress-${active}`}
-                        className="absolute bottom-0 left-0 h-[2px] rounded-full"
-                        style={{ background: tab.color }}
-                        initial={{ width: '0%' }}
-                        animate={{ width: '100%' }}
-                        transition={{ duration: AUTO_ADVANCE_MS / 1000, ease: 'linear' }}
-                      />
-                    )}
-                  </>
+                  <motion.div
+                    layoutId="featureTab"
+                    className="absolute inset-0 rounded-xl"
+                    style={{ background: `${tab.color}15`, border: `1px solid ${tab.color}30` }}
+                    transition={{ type: 'spring', duration: 0.5, bounce: 0.15 }}
+                  />
                 )}
                 <span className="relative z-10">{tab.icon}</span>
                 <span className="relative z-10 hidden sm:inline">{tab.name}</span>
@@ -321,68 +295,115 @@ export default function Features() {
         </motion.div>
 
         {/* Feature Content */}
-        <div className="mt-16 grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
-          {/* Text */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={feature.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ duration: 0.4 }}
-            >
-              <span
-                className="text-sm font-medium uppercase tracking-wider"
-                style={{ color: feature.colorLight }}
-              >
-                {feature.tagline}
-              </span>
-              <h3 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">
-                {feature.name}
-              </h3>
-              <p className="mt-4 text-base leading-relaxed text-text-secondary">
-                {feature.description}
-              </p>
-              <ul className="mt-6 space-y-3">
-                {feature.bullets.map((bullet) => (
-                  <li key={bullet} className="flex items-start gap-3">
-                    <svg
-                      className="mt-0.5 h-5 w-5 shrink-0"
-                      style={{ color: feature.color }}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className="text-sm text-text-secondary">{bullet}</span>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          </AnimatePresence>
+        <div className="relative mt-16">
+          {/* Prev / Next Arrows */}
+          <button
+            onClick={goPrev}
+            aria-label="Previous feature"
+            className="absolute -left-2 top-1/2 z-20 hidden -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/5 p-2.5 text-text-muted backdrop-blur-sm transition-colors hover:bg-white/10 hover:text-white lg:-left-14 lg:flex"
+          >
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+          </button>
+          <button
+            onClick={goNext}
+            aria-label="Next feature"
+            className="absolute -right-2 top-1/2 z-20 hidden -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/5 p-2.5 text-text-muted backdrop-blur-sm transition-colors hover:bg-white/10 hover:text-white lg:-right-14 lg:flex"
+          >
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+          </button>
 
-          {/* Mockup */}
-          <div className="relative flex justify-center">
+          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
+            {/* Text */}
             <AnimatePresence mode="wait">
               <motion.div
                 key={feature.id}
-                initial={{ opacity: 0, y: 20, scale: 0.97 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -20, scale: 0.97 }}
-                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="relative z-10 w-[240px] sm:w-[260px] lg:w-[280px]"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.4 }}
               >
-                <Image
-                  src={feature.mockup}
-                  alt={`${feature.name} screenshot`}
-                  width={390}
-                  height={844}
-                  className="w-full drop-shadow-[0_25px_60px_rgba(0,0,0,0.4)]"
-                />
+                <span
+                  className="text-sm font-medium uppercase tracking-wider"
+                  style={{ color: feature.colorLight }}
+                >
+                  {feature.tagline}
+                </span>
+                <h3 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">
+                  {feature.name}
+                </h3>
+                <p className="mt-4 text-base leading-relaxed text-text-secondary">
+                  {feature.description}
+                </p>
+                <ul className="mt-6 space-y-3">
+                  {feature.bullets.map((bullet) => (
+                    <li key={bullet} className="flex items-start gap-3">
+                      <svg
+                        className="mt-0.5 h-5 w-5 shrink-0"
+                        style={{ color: feature.color }}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-sm text-text-secondary">{bullet}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Mobile prev/next */}
+                <div className="mt-8 flex items-center gap-3 lg:hidden">
+                  <button
+                    onClick={goPrev}
+                    aria-label="Previous feature"
+                    className="flex cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/5 p-2 text-text-muted transition-colors hover:bg-white/10 hover:text-white"
+                  >
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg>
+                  </button>
+                  <span className="text-xs tabular-nums text-text-muted">
+                    {active + 1} / {FEATURE_TABS.length}
+                  </span>
+                  <button
+                    onClick={goNext}
+                    aria-label="Next feature"
+                    className="flex cursor-pointer items-center justify-center rounded-full border border-white/10 bg-white/5 p-2 text-text-muted transition-colors hover:bg-white/10 hover:text-white"
+                  >
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                  </button>
+                </div>
               </motion.div>
             </AnimatePresence>
+
+            {/* Mockup */}
+            <div className="relative flex justify-center">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={feature.id}
+                  initial={{ opacity: 0, y: 20, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.97 }}
+                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                  className="relative z-10 w-[240px] sm:w-[260px] lg:w-[280px]"
+                >
+                  <Image
+                    src={feature.mockup}
+                    alt={`${feature.name} screenshot`}
+                    width={390}
+                    height={844}
+                    className="w-full drop-shadow-[0_25px_60px_rgba(0,0,0,0.4)]"
+                  />
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </div>

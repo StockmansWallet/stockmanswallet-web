@@ -96,7 +96,7 @@ export default function Hero() {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="mt-6 max-w-lg text-lg leading-relaxed text-text-secondary"
             >
-              Measure biological and market movements, compare sale options, and drive better decisions with advanced industry capabilities. Built for Australian producers and rural advisors.
+              Stockman&apos;s Wallet is a livestock valuation platform built for Australian producers and rural advisors. Measure biological and market movements, compare sale options, and drive better decisions with advanced industry intelligence. Manage livestock as a portfolio.
             </motion.p>
 
             <motion.div
