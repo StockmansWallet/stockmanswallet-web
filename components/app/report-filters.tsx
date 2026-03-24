@@ -2,7 +2,6 @@
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-import { Button } from "@/components/ui/button";
 import { Calendar, ChevronDown } from "lucide-react";
 
 // MARK: - Date Presets
@@ -172,20 +171,3 @@ function PropertyDropdown({
   );
 }
 
-// MARK: - Helper to parse config from searchParams
-
-export function parseReportConfig(searchParams: { [key: string]: string | string[] | undefined }): {
-  startDate: string;
-  endDate: string;
-  selectedPropertyIds: string[];
-} {
-  const range = (searchParams.range as string) ?? "1y";
-  const preset = DATE_PRESETS.find((p) => p.value === range);
-  const defaultDates = getPresetDates(preset?.months ?? 12);
-
-  return {
-    startDate: (searchParams.start as string) ?? defaultDates.start,
-    endDate: (searchParams.end as string) ?? defaultDates.end,
-    selectedPropertyIds: ((searchParams.properties as string) ?? "").split(",").filter(Boolean),
-  };
-}
