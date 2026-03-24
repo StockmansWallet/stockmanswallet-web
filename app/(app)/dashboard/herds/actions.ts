@@ -84,6 +84,7 @@ export async function createHerd(formData: FormData) {
     is_breeder: isBreeder,
     calving_rate: isBreeder ? (v.calving_rate ?? 50) : 85,
     breeding_program_type: isBreeder ? (v.breeding_program_type ?? null) : null,
+    joined_date: v.joined_date || null,
     joining_period_start: v.joining_period_start || null,
     joining_period_end: v.joining_period_end || null,
     selected_saleyard: v.selected_saleyard || null,

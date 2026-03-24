@@ -346,7 +346,7 @@ export default async function HerdDetailPage({
                   <span className="text-text-muted">Pregnant</span>
                   <Badge variant={herd.is_pregnant ? "success" : "default"}>{herd.is_pregnant ? "Yes" : "No"}</Badge>
                 </div>
-                <InfoRow label="Joined Date" value={herd.joined_date} />
+                <InfoRow label="Joined Date" value={herd.joined_date ? new Date(herd.joined_date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" }) : null} />
                 <InfoRow label="Calving Rate" value={herd.calving_rate ? `${herd.calving_rate}%` : null} />
                 <InfoRow label="Lactation Status" value={herd.lactation_status} />
                 <InfoRow label="Breeding Program" value={herd.breeding_program_type} />
