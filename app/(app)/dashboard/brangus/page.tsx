@@ -12,7 +12,8 @@ export default async function BrangusPage() {
       <PageHeader
         title="Brangus"
         titleClassName="text-4xl font-bold text-brand"
-        subtitle="Your AI livestock advisor."
+        subtitle="Your personal livestock advisor, and new best mate."
+        subtitleClassName="mt-1 text-base text-text-muted"
       />
 
       <BrangusHub conversations={conversations} />

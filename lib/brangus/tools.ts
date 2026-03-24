@@ -7,6 +7,7 @@ import { saleyardCoordinates } from "../data/reference-data";
 import { resolveMLACategory } from "../data/weight-mapping";
 import { fetchWeatherForLocation } from "../services/weather-service";
 import { getRoadDistanceKm } from "../services/distance-service";
+import { createClient } from "../supabase/client";
 import type { ChatDataStore, QuickInsight } from "./types";
 
 // MARK: - Tool Definitions (Anthropic tool_use format)
@@ -200,6 +201,28 @@ export const toolDefinitions = [
       required: ["price_change_per_kg"],
     },
   },
+  {
+    name: "remember_fact",
+    description:
+      "Saves a personal fact about the user so you can remember it in future conversations. Use this when the user shares something personal worth remembering: their partner's or kids' names, significant events (droughts, floods, big sales), property quirks, preferences, or anything that makes them who they are. Do NOT save data that's already in their portfolio (herd counts, prices, property names). Save the human stuff - the things a good stock agent remembers about his clients.",
+    input_schema: {
+      type: "object",
+      properties: {
+        fact: {
+          type: "string",
+          description:
+            "The fact to remember, written naturally. E.g. 'Partner is Sarah, they have two kids', 'Lost 30 head in the 2022 floods at Back Creek', 'Prefers to sell at Roma over Dalby'",
+        },
+        category: {
+          type: "string",
+          enum: ["personal", "property", "livestock", "preference", "history", "general"],
+          description:
+            "personal=family/relationships. property=land/location details. livestock=breed preferences/management style. preference=how they like to do things. history=significant past events. general=anything else.",
+        },
+      },
+      required: ["fact", "category"],
+    },
+  },
 ];
 
 // Display-only tools (no tool_result sent back to API)
@@ -225,6 +248,8 @@ export async function executeTool(
       return executeGridIQLookup(input, store);
     case "calculate_price_scenario":
       return executePriceScenario(input, store);
+    case "remember_fact":
+      return executeRememberFact(input);
     default:
       return `Error: Unknown tool '${toolName}'`;
   }
@@ -1548,4 +1573,61 @@ async function resolveDistanceToSaleyardFromProps(
     }
   }
   return prop.default_saleyard_distance ?? 0;
+}
+
+// MARK: - Remember Fact Tool
+
+async function executeRememberFact(input: Record<string, unknown>): Promise<string> {
+  const fact = input.fact as string;
+  const category = input.category as string;
+
+  if (!fact || !category) return "Error: Missing fact or category parameter.";
+
+  const validCategories = ["personal", "property", "livestock", "preference", "history", "general"];
+  const safeCategory = validCategories.includes(category) ? category : "general";
+
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return "Error: No authenticated user.";
+
+    const { error } = await supabase
+      .from("brangus_user_memories")
+      .insert({ user_id: user.id, fact, category: safeCategory });
+
+    if (error) return `Error saving memory: ${error.message}`;
+
+    return "Memory saved. You'll remember this about them next time.";
+  } catch (err) {
+    return `Error saving memory: ${err}`;
+  }
+}
+
+// MARK: - Fetch User Memories (for system prompt injection)
+
+export async function fetchUserMemories(): Promise<string | null> {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const { data, error } = await supabase
+      .from("brangus_user_memories")
+      .select("fact, category")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: true });
+
+    if (error || !data || data.length === 0) return null;
+
+    const lines = ["WHAT YOU KNOW ABOUT THIS PERSON (from previous conversations):"];
+    for (const row of data) {
+      lines.push(`- ${row.fact}`);
+    }
+    lines.push("");
+    lines.push("Use these naturally in conversation. Don't list them back. Don't say \"I remember you told me...\". Just know them, like a mate would.");
+
+    return lines.join("\n");
+  } catch {
+    return null;
+  }
 }

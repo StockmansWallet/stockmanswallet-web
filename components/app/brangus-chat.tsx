@@ -7,6 +7,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Brain, Loader2, AlertCircle, ClipboardCopy, Download, Check, FileText, Share2, Mail, MessageCircle } from "lucide-react";
 import { sendMessage, buildSystemPrompt, loadChatDataStore, fetchServerConfig } from "@/lib/brangus/chat-service";
+import { fetchUserMemories } from "@/lib/brangus/tools";
 import { createConversation, saveMessage, autoTitleConversation, formatConversationForExport } from "@/lib/brangus/conversation-service";
 import type { BrangusConversationRow } from "@/lib/brangus/conversation-service";
 import { useSpeechRecognition } from "@/lib/brangus/use-speech-recognition";
@@ -242,12 +243,13 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
         if (user) userIdRef.current = user.id;
 
         // Debug: Fetch all config from server (mirrors iOS ServerConfig pattern)
-        const [dataStore, serverConfig] = await Promise.all([
+        const [dataStore, serverConfig, userMemories] = await Promise.all([
           loadChatDataStore(),
           fetchServerConfig(),
+          fetchUserMemories(),
         ]);
         if (cancelled) return;
-        const prompt = buildSystemPrompt(dataStore, serverConfig);
+        const prompt = buildSystemPrompt(dataStore, serverConfig, userMemories);
         setStore(dataStore);
         setSystemPrompt(prompt);
       } catch (err) {
