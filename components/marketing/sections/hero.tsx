@@ -145,7 +145,7 @@ export default function Hero() {
               className="relative z-10 w-[260px] sm:w-[280px] lg:w-[300px]"
             >
               <Image
-                src="/images/mockup-dashboard.png"
+                src="/images/iphone-dashboard-screen.webp"
                 alt="Stockman's Wallet app dashboard"
                 width={390}
                 height={844}
