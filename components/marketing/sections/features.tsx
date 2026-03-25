@@ -75,8 +75,8 @@ const FEATURE_TABS: FeatureTab[] = [
     name: 'Advisory Hub',
     tagline: 'Your portfolio, your terms',
     description: 'Give your banker, agent, accountant, or insurer a window into your portfolio, on your terms. Advisors request time-limited access, you approve or deny, and they get read-only tools purpose-built for professional analysis.',
-    color: '#B0657A',
-    colorLight: '#CC8E9F',
+    color: '#1E5C8C',
+    colorLight: '#2F8CD9',
     bullets: [
       'Grant time-limited, read-only portfolio access to trusted advisors',
       'Approve or deny access requests with a 3-day approval window',
@@ -218,7 +218,7 @@ export default function Features() {
           <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl lg:text-5xl">
             Everything you need to manage{' '}
             <br className="hidden sm:block" />
-            livestock as financial assets
+            <span className="text-brand">livestock as financial assets</span>
           </h2>
         </motion.div>
 

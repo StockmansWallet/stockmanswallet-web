@@ -14,6 +14,7 @@ interface WaitlistSignup {
   herd_size: string | null;
   property_count: string | null;
   interested_features: string[] | null;
+  contact_opt_in: boolean;
   created_at: string;
 }
 
@@ -199,13 +200,14 @@ export function WaitlistTable({ signups }: WaitlistTableProps) {
               <th className="px-4 py-3 text-xs font-medium text-text-muted">Herd Size</th>
               <th className="px-4 py-3 text-xs font-medium text-text-muted">Properties</th>
               <th className="px-4 py-3 text-xs font-medium text-text-muted">Interested In</th>
+              <th className="px-4 py-3 text-center text-xs font-medium text-text-muted">Contact OK</th>
               <th className="px-4 py-3 text-xs font-medium text-text-muted">Signed Up</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={9} className="px-4 py-12 text-center text-sm text-text-muted">
+                <td colSpan={10} className="px-4 py-12 text-center text-sm text-text-muted">
                   No waitlist signups yet.
                 </td>
               </tr>
@@ -258,6 +260,13 @@ export function WaitlistTable({ signups }: WaitlistTableProps) {
                       </div>
                     ) : (
                       "\u2014"
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    {signup.contact_opt_in ? (
+                      <Badge variant="success">Yes</Badge>
+                    ) : (
+                      <span className="text-text-muted">No</span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-text-muted">{formatDate(signup.created_at)}</td>

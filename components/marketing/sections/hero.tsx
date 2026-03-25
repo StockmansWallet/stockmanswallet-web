@@ -83,7 +83,7 @@ export default function Hero() {
               transition={{ duration: 0.7, delay: 0.2 }}
               className="text-[clamp(1.8rem,3.5vw,3rem)] font-semibold leading-[1.1] tracking-tight text-white"
             >
-              <span className="bg-gradient-to-br from-brand-light via-brand to-brand-dark bg-clip-text text-transparent">
+              <span className="text-brand">
                 Live. Stock. Market.
               </span>
               <br />

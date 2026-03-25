@@ -30,7 +30,7 @@ export default function AboutHero() {
             Capital Intelligence
             <br />
             for{' '}
-            <span className="bg-gradient-to-br from-brand-light via-brand to-brand-dark bg-clip-text text-transparent">
+            <span className="text-brand">
               Australian Agriculture
             </span>
           </h1>

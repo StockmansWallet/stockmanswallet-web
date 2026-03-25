@@ -20,7 +20,7 @@ export default function ContactSignup() {
           <h2 className="mt-4 text-3xl font-semibold text-white sm:text-4xl lg:text-5xl">
             The future of
             <br />
-            <span className="bg-gradient-to-r from-brand via-brand-light to-brand bg-clip-text text-transparent">
+            <span className="text-brand">
               livestock valuation.
             </span>
           </h2>

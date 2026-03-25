@@ -194,7 +194,7 @@ export default function StockmanIQ() {
           >
             <span className="text-sm font-medium uppercase tracking-wider text-brand">Portfolio Intelligence</span>
             <h2 className="mt-3 text-3xl font-semibold sm:text-4xl lg:text-5xl">
-              <span className="bg-gradient-to-br from-brand-light via-brand to-brand-dark bg-clip-text text-transparent">Meet Brangus.</span>
+              <span className="text-brand">Meet Brangus.</span>
               <br />
               <span className="text-white">Your intelligent livestock advisor...</span>
               <br />

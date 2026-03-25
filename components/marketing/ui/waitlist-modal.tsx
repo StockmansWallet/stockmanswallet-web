@@ -17,6 +17,7 @@ interface WaitlistFormData {
   herd_size: HerdSize | ''
   property_count: PropertyCount | ''
   interested_features: Feature[]
+  contact_opt_in: boolean
 }
 
 const ROLE_OPTIONS: { value: Role; label: string }[] = [
@@ -62,6 +63,7 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
     herd_size: '',
     property_count: '',
     interested_features: [],
+    contact_opt_in: false,
   })
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
@@ -108,6 +110,7 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
           herd_size: form.herd_size,
           property_count: form.property_count,
           interested_features: form.interested_features,
+          contact_opt_in: form.contact_opt_in,
         }),
       })
 
@@ -128,7 +131,7 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
     onClose()
     // Reset after exit animation completes
     setTimeout(() => {
-      setForm({ name: '', email: '', role: '', postcode: '', herd_size: '', property_count: '', interested_features: [] })
+      setForm({ name: '', email: '', role: '', postcode: '', herd_size: '', property_count: '', interested_features: [], contact_opt_in: false })
       setStatus('idle')
       setErrorMsg('')
     }, 350)
@@ -169,7 +172,7 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
       <div className="mb-6 text-center">
         <h2 className="text-3xl font-semibold text-white sm:text-4xl">
           Join the{' '}
-          <span className="bg-gradient-to-r from-brand via-brand-light to-brand bg-clip-text text-transparent">
+          <span className="text-brand">
             Waitlist
           </span>
         </h2>
@@ -321,6 +324,19 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
             ))}
           </div>
         </fieldset>
+
+        {/* Contact opt-in */}
+        <label className="flex items-start gap-3 cursor-pointer group">
+          <input
+            type="checkbox"
+            checked={form.contact_opt_in}
+            onChange={(e) => updateField('contact_opt_in', e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-white/20 bg-surface accent-brand"
+          />
+          <span className="text-sm text-text-muted group-hover:text-text-secondary transition-colors">
+            Keep me updated with product news and launch updates
+          </span>
+        </label>
 
         {/* Error */}
         {status === 'error' && (

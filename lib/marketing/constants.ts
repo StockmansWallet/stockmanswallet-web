@@ -58,8 +58,8 @@ export const FEATURES: Feature[] = [
     id: 'advisory-hub',
     name: 'Advisory Hub',
     description: 'Give your banker, agent, accountant, or insurer a window into your portfolio, on your terms. Advisors request time-limited access, you approve or deny, and they get read-only tools purpose-built for professional analysis.',
-    accentColor: '#B0657A',
-    accentColorLight: '#CC8E9F',
+    accentColor: '#1E5C8C',
+    accentColorLight: '#2F8CD9',
     bullets: [
       'Grant time-limited, read-only portfolio access to trusted advisors',
       'Approve or deny access requests with a 3-day approval window',

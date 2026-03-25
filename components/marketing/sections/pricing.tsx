@@ -9,9 +9,31 @@ const TABS = [
   { id: 'advisor' as const, label: 'Advisors' },
 ]
 
+const ACCENT = {
+  producer: {
+    text: 'text-brand',
+    bg: 'bg-brand',
+    bgHover: 'hover:bg-brand-light',
+    border: 'border-brand/30',
+    cardBg: 'bg-brand/[0.04]',
+    glow: 'shadow-[0_0_60px_rgba(217,118,47,0.08)]',
+    check: 'text-brand',
+  },
+  advisor: {
+    text: 'text-[#2F8CD9]',
+    bg: 'bg-[#2F8CD9]',
+    bgHover: 'hover:bg-[#4AA0E6]',
+    border: 'border-[#2F8CD9]/30',
+    cardBg: 'bg-[#2F8CD9]/[0.04]',
+    glow: 'shadow-[0_0_60px_rgba(47,140,217,0.08)]',
+    check: 'text-[#2F8CD9]',
+  },
+}
+
 export default function Pricing() {
   const [activeTab, setActiveTab] = useState<'producer' | 'advisor'>('producer')
   const tiers = PRICING_TIERS.filter((t) => t.category === activeTab)
+  const accent = ACCENT[activeTab]
 
   return (
     <section id="pricing" className="relative py-24 lg:py-32">
@@ -77,18 +99,18 @@ export default function Pricing() {
                 key={tier.id}
                 className={`group relative flex flex-col rounded-2xl p-6 transition-all duration-300 ${
                   tier.highlighted
-                    ? 'border border-brand/30 bg-brand/[0.04] shadow-[0_0_60px_rgba(217,118,47,0.08)]'
+                    ? `border ${accent.border} ${accent.cardBg} ${accent.glow}`
                     : 'bg-white/[0.04] hover:bg-white/[0.06]'
                 }`}
               >
                 {tier.badge && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand px-3 py-1 text-xs font-semibold text-white">
+                  <div className={`absolute -top-3 left-1/2 -translate-x-1/2 rounded-full ${accent.bg} px-3 py-1 text-xs font-semibold text-white`}>
                     {tier.badge}
                   </div>
                 )}
 
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-white">{tier.name}</h3>
+                  <h3 className={`text-lg font-semibold ${accent.text}`}>{tier.name}</h3>
                   <p className="text-xs text-text-muted">{tier.subtitle}</p>
                   <div className="mt-4">
                     {tier.price !== null ? (
@@ -112,7 +134,7 @@ export default function Pricing() {
                   {tier.features.map((f) => (
                     <li key={f.name} className="flex items-start gap-2.5">
                       {f.included ? (
-                        <svg className="mt-0.5 h-4 w-4 shrink-0 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                        <svg className={`mt-0.5 h-4 w-4 shrink-0 ${accent.check}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       ) : (
@@ -131,7 +153,7 @@ export default function Pricing() {
                   href="#signup"
                   className={`mt-6 flex h-10 items-center justify-center rounded-xl text-sm font-semibold transition-all duration-200 ${
                     tier.highlighted
-                      ? 'bg-brand text-white hover:bg-brand-light'
+                      ? `${accent.bg} text-white ${accent.bgHover}`
                       : 'border border-white/10 text-white hover:bg-white/5'
                   }`}
                 >

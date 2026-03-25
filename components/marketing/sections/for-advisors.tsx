@@ -57,13 +57,13 @@ export default function ForAdvisors() {
           transition={{ duration: 0.6 }}
           className="text-center"
         >
-          <span className="text-sm font-medium uppercase tracking-wider" style={{ color: '#CC8E9F' }}>
+          <span className="text-sm font-medium uppercase tracking-wider" style={{ color: '#2F8CD9' }}>
             For Advisors
           </span>
           <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl lg:text-5xl">
             Purpose-built for{' '}
             <br className="hidden sm:block" />
-            rural professionals
+            <span style={{ color: '#2F8CD9' }}>rural professionals</span>
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-base text-text-secondary">
             Bankers, livestock agents, accountants, and insurers get dedicated tools to manage client portfolios with professional-grade analysis.
@@ -78,13 +78,13 @@ export default function ForAdvisors() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-60px' }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className={`group relative overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.04] p-8 transition-all duration-300 hover:border-[#B0657A]/20 ${feature.span}`}
+              className={`group relative overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.04] p-8 transition-all duration-300 hover:border-[#1E5C8C]/20 ${feature.span}`}
             >
               {/* Hover glow */}
-              <div className="absolute inset-0 bg-gradient-to-br from-[#B0657A]/[0.04] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+              <div className="absolute inset-0 bg-gradient-to-br from-[#1E5C8C]/[0.04] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
               <div className="relative">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#B0657A]/20 bg-[#B0657A]/10 text-[#CC8E9F]">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#1E5C8C]/20 bg-[#1E5C8C]/10 text-[#2F8CD9]">
                   {feature.icon}
                 </div>
                 <h3 className="mt-5 text-lg font-semibold text-white">{feature.title}</h3>

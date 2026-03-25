@@ -14,7 +14,7 @@ const VALID_FEATURES = ['brangus', 'freight_iq', 'herd_valuation', 'reports', 'a
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { name, email, role, postcode, herd_size, property_count, interested_features } = body
+    const { name, email, role, postcode, herd_size, property_count, interested_features, contact_opt_in } = body
 
     // Email is always required
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     }
 
     // Build the insert payload, only including fields that are present
-    const record: Record<string, string | string[]> = {
+    const record: Record<string, string | string[] | boolean> = {
       email: email.toLowerCase().trim(),
     }
 
@@ -48,6 +48,9 @@ export async function POST(request: Request) {
       if (validFeatures.length > 0) {
         record.interested_features = validFeatures
       }
+    }
+    if (typeof contact_opt_in === 'boolean') {
+      record.contact_opt_in = contact_opt_in
     }
 
     const { error } = await supabase
