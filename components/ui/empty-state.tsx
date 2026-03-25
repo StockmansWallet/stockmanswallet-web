@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Inbox } from "lucide-react";
 import { Button, type ButtonVariant } from "@/components/ui/button";
 
-type EmptyStateVariant = "brand" | "teal" | "lime" | "sky" | "amber" | "purple";
+type EmptyStateVariant = "brand" | "teal" | "lime" | "sky" | "amber" | "purple" | "advisor";
 
 interface EmptyStateProps {
   icon?: ReactNode;
@@ -22,6 +22,7 @@ const variantStyles: Record<EmptyStateVariant, { iconBg: string; iconText: strin
   sky: { iconBg: "bg-sky-500/10", iconText: "text-sky-400" },
   amber: { iconBg: "bg-amber-500/10", iconText: "text-amber-400" },
   purple: { iconBg: "bg-purple-500/10", iconText: "text-purple-400" },
+  advisor: { iconBg: "bg-[#2F8CD9]/10", iconText: "text-[#2F8CD9]" },
 };
 
 const variantToButton: Record<EmptyStateVariant, ButtonVariant> = {
@@ -31,6 +32,7 @@ const variantToButton: Record<EmptyStateVariant, ButtonVariant> = {
   sky: "sky",
   amber: "amber",
   purple: "purple",
+  advisor: "advisor",
 };
 
 function EmptyState({ icon, title, description, actionLabel, actionHref, onAction, variant = "brand" }: EmptyStateProps) {

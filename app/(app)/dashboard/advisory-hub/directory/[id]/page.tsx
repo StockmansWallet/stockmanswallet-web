@@ -48,7 +48,7 @@ export default async function AdvisorProfilePage({
     <div className="max-w-2xl">
       <PageHeader
         title="Advisor Profile"
-        titleClassName="text-4xl font-bold text-purple-400"
+        titleClassName="text-4xl font-bold text-[#2F8CD9]"
         titleHref="/dashboard/advisory-hub/directory"
         subtitle="Back to directory"
         subtitleClassName="text-sm font-medium text-text-secondary"
@@ -56,13 +56,13 @@ export default async function AdvisorProfilePage({
       />
 
       <Card className="mb-6 overflow-hidden">
-        <div className="bg-gradient-to-br from-purple-500/10 via-transparent to-transparent p-6">
+        <div className="bg-gradient-to-br from-[#2F8CD9]/10 via-transparent to-transparent p-6">
           <div className="flex items-start gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-purple-500/15">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#2F8CD9]/15">
               {categoryConfig ? (
                 <categoryConfig.icon className={`h-7 w-7 ${categoryConfig.colorClass}`} />
               ) : (
-                <div className="h-7 w-7 rounded-full bg-purple-400" />
+                <div className="h-7 w-7 rounded-full bg-[#2F8CD9]" />
               )}
             </div>
             <div className="flex-1">

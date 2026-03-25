@@ -85,7 +85,7 @@ export default async function ProducerConnectionDetailPage({
     <div className="max-w-3xl">
       <PageHeader
         title={conn.requester_name}
-        titleClassName="text-4xl font-bold text-purple-400"
+        titleClassName="text-4xl font-bold text-[#2F8CD9]"
         titleHref="/dashboard/advisory-hub/my-advisors"
         subtitle="Back to My Advisors"
         subtitleClassName="text-sm font-medium text-text-secondary"

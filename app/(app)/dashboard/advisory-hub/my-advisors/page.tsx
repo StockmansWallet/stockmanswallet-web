@@ -41,14 +41,14 @@ export default async function MyAdvisorsPage() {
     <div className="max-w-3xl">
       <PageHeader
         title="My Advisors"
-        titleClassName="text-4xl font-bold text-purple-400"
+        titleClassName="text-4xl font-bold text-[#2F8CD9]"
         titleHref="/dashboard/advisory-hub"
         subtitle="Manage your advisory connections"
         subtitleClassName="text-sm font-medium text-text-secondary"
         inline
         actions={
           <Link href="/dashboard/advisory-hub/directory">
-            <Button variant="purple" size="sm">
+            <Button variant="advisor" size="sm">
               <Search className="mr-1.5 h-3.5 w-3.5" />
               Find Advisors
             </Button>
@@ -59,12 +59,12 @@ export default async function MyAdvisorsPage() {
       {!hasConnections && (
         <Card>
           <EmptyState
-            icon={<Users className="h-6 w-6 text-purple-400" />}
+            icon={<Users className="h-6 w-6 text-[#2F8CD9]" />}
             title="No advisors yet"
             description="Browse the advisor directory to connect with your livestock agent, accountant, banker, or other advisors."
             actionLabel="Find Advisors"
             actionHref="/dashboard/advisory-hub/directory"
-            variant="purple"
+            variant="advisor"
           />
         </Card>
       )}

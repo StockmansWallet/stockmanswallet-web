@@ -39,7 +39,7 @@ export default async function AdvisoryHubPage() {
     <div className="max-w-4xl">
       <PageHeader
         title="Advisory Hub"
-        titleClassName="text-4xl font-bold text-purple-400"
+        titleClassName="text-4xl font-bold text-[#2F8CD9]"
         subtitle="Connect with your advisory team"
         subtitleClassName="text-sm font-medium text-text-secondary"
         inline
@@ -47,10 +47,10 @@ export default async function AdvisoryHubPage() {
 
       {/* Hero section */}
       <Card className="mb-6 overflow-hidden">
-        <div className="bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent p-6">
+        <div className="bg-gradient-to-br from-[#2F8CD9]/10 via-[#2F8CD9]/5 to-transparent p-6">
           <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-purple-500/15">
-              <Users className="h-6 w-6 text-purple-400" />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#2F8CD9]/15">
+              <Users className="h-6 w-6 text-[#2F8CD9]" />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-text-primary">
@@ -73,8 +73,8 @@ export default async function AdvisoryHubPage() {
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/15">
-                    <Users className="h-5 w-5 text-purple-400" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#2F8CD9]/15">
+                    <Users className="h-5 w-5 text-[#2F8CD9]" />
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold text-text-primary">My Advisors</h3>
@@ -99,8 +99,8 @@ export default async function AdvisoryHubPage() {
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/15">
-                    <Search className="h-5 w-5 text-purple-400" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#2F8CD9]/15">
+                    <Search className="h-5 w-5 text-[#2F8CD9]" />
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold text-text-primary">Find Advisors</h3>
@@ -119,7 +119,7 @@ export default async function AdvisoryHubPage() {
       <div className="grid gap-3 sm:grid-cols-3">
         <Card>
           <CardContent className="p-4">
-            <Shield className="mb-2 h-5 w-5 text-purple-400" />
+            <Shield className="mb-2 h-5 w-5 text-[#2F8CD9]" />
             <h4 className="text-sm font-medium text-text-primary">Data Privacy</h4>
             <p className="mt-1 text-xs text-text-muted">
               Advisors can view your portfolio but never modify your data.
@@ -130,7 +130,7 @@ export default async function AdvisoryHubPage() {
 
         <Card>
           <CardContent className="p-4">
-            <Clock className="mb-2 h-5 w-5 text-purple-400" />
+            <Clock className="mb-2 h-5 w-5 text-[#2F8CD9]" />
             <h4 className="text-sm font-medium text-text-primary">3-Day Access</h4>
             <p className="mt-1 text-xs text-text-muted">
               Each permission grant lasts 3 days. Advisors must request
@@ -141,7 +141,7 @@ export default async function AdvisoryHubPage() {
 
         <Card>
           <CardContent className="p-4">
-            <Lock className="mb-2 h-5 w-5 text-purple-400" />
+            <Lock className="mb-2 h-5 w-5 text-[#2F8CD9]" />
             <h4 className="text-sm font-medium text-text-primary">You Control Access</h4>
             <p className="mt-1 text-xs text-text-muted">
               Approve or deny connection requests. Revoke access at any time
