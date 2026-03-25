@@ -2,7 +2,7 @@
 // Ported from iOS ValuationEngine.swift + extensions
 // Pure functions — pricing/caching will be added when Supabase data layer is wired up
 
-import { resolveMLASaleyardName } from "../data/reference-data";
+import { resolveMLASaleyardName, saleyardToState } from "../data/reference-data";
 import { parseLocalDate as parseLocal } from "../dates";
 import { resolveMLACategory } from "../data/weight-mapping";
 import { nearestSaleyards as nearestSaleyardsFn } from "../data/saleyard-proximity";
@@ -447,6 +447,7 @@ export interface HerdValuationResult {
   valuationDate: string;
   initialWeight: number;
   dataDate: string | null;
+  nearestSaleyardUsed: string | null;
 }
 
 /**
@@ -478,7 +479,7 @@ export function calculateHerdValuation(
     projectedWeight: 0, basePrice: 0, physicalValue: 0, baseMarketValue: 0,
     weightGainAccrual: 0, breedingAccrual: 0, preBirthAccrual: 0, calvesAtFootValue: 0, grossValue: 0, mortalityDeduction: 0,
     daysHeld: 0, mortalityRate: 0, matchedWeightRange: null, mlaCategory: "",
-    valuationDate: new Date().toISOString(), initialWeight: 0, dataDate: null,
+    valuationDate: new Date().toISOString(), initialWeight: 0, dataDate: null, nearestSaleyardUsed: null,
   };
 
   const now = asOf;
@@ -533,8 +534,9 @@ export function calculateHerdValuation(
   }
 
   // 2b2. Try nearest saleyards in same state (proximity fallback)
+  let nearestSaleyardUsed: string | null = null;
   if (!resolved && saleyardPriceMap && resolvedSaleyard && herd.selected_saleyard) {
-    const state = resolvedSaleyard.split(",").pop()?.trim() ?? "";
+    const state = saleyardToState[resolvedSaleyard] ?? "";
     const nearYards = nearestSaleyardsFn(resolvedSaleyard, state, 3);
     for (const nearYard of nearYards) {
       const nearKey = `${mlaCategory}|${nearYard}`;
@@ -545,7 +547,7 @@ export function calculateHerdValuation(
         resolved = null;
         continue;
       }
-      if (resolved) { priceSource = "saleyard"; matchedWeightRange = resolved.matchedRange; break; }
+      if (resolved) { priceSource = "saleyard"; nearestSaleyardUsed = nearYard; matchedWeightRange = resolved.matchedRange; break; }
     }
   }
 
@@ -682,6 +684,7 @@ export function calculateHerdValuation(
     valuationDate: now.toISOString(),
     initialWeight: initWeight,
     dataDate: resolved?.dataDate ?? null,
+    nearestSaleyardUsed,
   };
 }
 

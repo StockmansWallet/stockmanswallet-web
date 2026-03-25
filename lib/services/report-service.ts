@@ -10,6 +10,7 @@ import {
 } from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName, saleyards as allSaleyards } from "@/lib/data/reference-data";
+import { expandWithNearbySaleyards } from "@/lib/data/saleyard-proximity";
 import type {
   ReportConfiguration,
   ReportData,
@@ -54,7 +55,7 @@ export async function buildPriceMaps(
       saleyardSet.add(resolveMLASaleyardName(h.selected_saleyard));
     }
   }
-  const saleyardList = [...saleyardSet];
+  const saleyardList = expandWithNearbySaleyards([...saleyardSet]);
 
   const primaryCategories = [
     ...new Set(herds.map((h) => resolveMLACategory(h.category, h.initial_weight, h.breeder_sub_type ?? undefined).primaryMLACategory)),

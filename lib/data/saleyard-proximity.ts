@@ -55,3 +55,23 @@ export function nearestSaleyards(
     .slice(0, limit)
     .map((d) => d.name);
 }
+
+/**
+ * Expands a list of saleyard names to include their nearest neighbours.
+ * Used to prefetch fallback prices so the valuation engine can resolve
+ * nearby saleyards without additional Supabase calls.
+ */
+export function expandWithNearbySaleyards(
+  saleyards: string[],
+  limit: number = 3
+): string[] {
+  const expanded = new Set(saleyards);
+  for (const sy of saleyards) {
+    const state = saleyardToState[sy];
+    if (!state) continue;
+    for (const nearby of nearestSaleyards(sy, state, limit)) {
+      expanded.add(nearby);
+    }
+  }
+  return [...expanded];
+}

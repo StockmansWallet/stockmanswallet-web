@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { calculateProjectedWeight, calculateHerdValuation, categoryFallback, parseCalvesAtFoot, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
+import { expandWithNearbySaleyards } from "@/lib/data/saleyard-proximity";
 import { DeleteHerdButton } from "./delete-button";
 import { MusterRecordsSection } from "@/components/app/muster-records-section";
 import { HealthRecordsSection } from "@/components/app/health-records-section";
@@ -99,7 +100,7 @@ export default async function HerdDetailPage({
   const resolvedSaleyard = herd.selected_saleyard
     ? resolveMLASaleyardName(herd.selected_saleyard)
     : null;
-  const saleyardsToFetch = resolvedSaleyard ? [resolvedSaleyard] : [];
+  const saleyardsToFetch = resolvedSaleyard ? expandWithNearbySaleyards([resolvedSaleyard]) : [];
 
   type PriceRow = { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string };
   const { data: allPrices } = await supabase.rpc("latest_saleyard_prices", {
@@ -107,14 +108,10 @@ export default async function HerdDetailPage({
     p_categories: categoriesToFetch,
   }) as unknown as { data: PriceRow[] | null };
 
-  // Build pricing lookup maps from combined result (same keys as iOS cache)
+  // Build pricing lookup maps from combined result (includes nearby saleyards for fallback)
   const nationalPriceMap = new Map<string, CategoryPriceEntry[]>();
-  let saleyardPriceMap: Map<string, CategoryPriceEntry[]> | undefined;
-  let saleyardBreedPriceMap: Map<string, CategoryPriceEntry[]> | undefined;
-  if (resolvedSaleyard) {
-    saleyardPriceMap = new Map();
-    saleyardBreedPriceMap = new Map();
-  }
+  const saleyardPriceMap = new Map<string, CategoryPriceEntry[]>();
+  const saleyardBreedPriceMap = new Map<string, CategoryPriceEntry[]>();
 
   for (const p of (allPrices ?? [])) {
     const priceEntry = { price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date };
@@ -122,17 +119,17 @@ export default async function HerdDetailPage({
       const entries = nationalPriceMap.get(p.category) ?? [];
       entries.push(priceEntry);
       nationalPriceMap.set(p.category, entries);
-    } else if (resolvedSaleyard && p.saleyard === resolvedSaleyard) {
+    } else if (p.saleyard !== "National") {
       if (p.breed === null) {
         const key = `${p.category}|${p.saleyard}`;
-        const entries = saleyardPriceMap!.get(key) ?? [];
+        const entries = saleyardPriceMap.get(key) ?? [];
         entries.push(priceEntry);
-        saleyardPriceMap!.set(key, entries);
+        saleyardPriceMap.set(key, entries);
       } else {
         const key = `${p.category}|${p.breed}|${p.saleyard}`;
-        const entries = saleyardBreedPriceMap!.get(key) ?? [];
+        const entries = saleyardBreedPriceMap.get(key) ?? [];
         entries.push(priceEntry);
-        saleyardBreedPriceMap!.set(key, entries);
+        saleyardBreedPriceMap.set(key, entries);
       }
     }
   }

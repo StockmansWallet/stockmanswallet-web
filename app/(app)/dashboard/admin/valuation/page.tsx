@@ -10,6 +10,7 @@ import {
 } from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
+import { expandWithNearbySaleyards } from "@/lib/data/saleyard-proximity";
 import { ValuationValidator } from "./valuation-validator";
 
 export const revalidate = 0;
@@ -93,11 +94,12 @@ export default async function ValuationPage() {
   const activeHerds = herds ?? [];
 
   // Fetch pricing data in two parallel queries to avoid 50k limit truncating national prices
-  const saleyards = [...new Set(
+  const herdSaleyards = [...new Set(
     activeHerds
       .map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null)
       .filter(Boolean),
   )] as string[];
+  const saleyards = expandWithNearbySaleyards(herdSaleyards);
   const primaryCategories = [...new Set(activeHerds.map((h) => resolveMLACategory(h.category, h.initial_weight, h.breeder_sub_type ?? undefined).primaryMLACategory))];
   const mlaCategories = [...new Set([...primaryCategories, ...primaryCategories.map(c => categoryFallback(c)).filter((c): c is string => c !== null)])];
 

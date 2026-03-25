@@ -8,6 +8,7 @@ import { PortfolioChart } from "./portfolio-chart";
 import { calculateHerdValuation, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
+import { expandWithNearbySaleyards } from "@/lib/data/saleyard-proximity";
 import { PortfolioValueCard } from "@/components/app/portfolio-value-card";
 import { ComingUpCard } from "@/components/app/coming-up-card";
 import { GrowthMortalityCard } from "@/components/app/growth-mortality-card";
@@ -83,9 +84,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   // When a saleyard override is active (from the dashboard selector), fetch prices for that
   // saleyard only. Otherwise fetch for each herd's individual saleyard.
   const resolvedOverride = saleyardOverride ? resolveMLASaleyardName(saleyardOverride) : null;
-  const saleyards = resolvedOverride
+  const herdSaleyards = resolvedOverride
     ? [resolvedOverride]
     : [...new Set((herds ?? []).map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
+  const saleyards = expandWithNearbySaleyards(herdSaleyards);
   const primaryCategories = [...new Set((herds ?? []).map((h) => resolveMLACategory(h.category, h.initial_weight, h.breeder_sub_type ?? undefined).primaryMLACategory))];
   const mlaCategories = [...new Set([...primaryCategories, ...primaryCategories.map(c => categoryFallback(c)).filter((c): c is string => c !== null)])];
 

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Search, ChevronUp, ChevronRight, MapPinned, Trash2, CheckSquare, Leaf } from "lucide-react";
 import { deleteHerds } from "./actions";
+import { resolveShortSaleyardName } from "@/lib/data/reference-data";
 
 type HerdWithProperty = {
   id: string;
@@ -40,6 +41,8 @@ export function HerdsTable({
   herdPricePerKg,
   herdBreedingAccrual,
   herdDataDates,
+  herdNearestSaleyard,
+  herdProjectedWeight,
   propertyGroups,
 }: {
   herds: HerdWithProperty[];
@@ -48,6 +51,8 @@ export function HerdsTable({
   herdPricePerKg?: Record<string, number>;
   herdBreedingAccrual?: Record<string, number>;
   herdDataDates?: Record<string, string | null>;
+  herdNearestSaleyard?: Record<string, string | null>;
+  herdProjectedWeight?: Record<string, number>;
   propertyGroups: PropertyGroup[];
 }) {
   const router = useRouter();
@@ -272,6 +277,8 @@ export function HerdsTable({
     const isFallback = source !== undefined && source !== "saleyard";
     const pricePerKg = herdPricePerKg?.[herd.id] ?? 0;
     const accrual = herdBreedingAccrual?.[herd.id] ?? 0;
+    const nearestSaleyard = herdNearestSaleyard?.[herd.id] ?? null;
+    const projectedWeight = herdProjectedWeight?.[herd.id];
     // Debug: Stale data amber warning (6-8 weeks old)
     const dataDate = herdDataDates?.[herd.id];
     const dataAgeDays = dataDate ? Math.floor((Date.now() - new Date(dataDate).getTime()) / 86400000) : 0;
@@ -311,11 +318,16 @@ export function HerdsTable({
         </td>
         <td className="hidden px-5 py-3.5 text-text-secondary md:table-cell">{herd.breed}</td>
         <td className="hidden px-5 py-3.5 text-text-secondary lg:table-cell">{herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} (${herd.sub_category})` : herd.category}</td>
-        <td className={`hidden px-5 py-3.5 text-right tabular-nums lg:table-cell ${isFallback ? "text-red-400" : isStale ? "text-amber-400" : "text-text-secondary"}`}>
+        <td className={`hidden px-5 py-3.5 text-right tabular-nums lg:table-cell ${isFallback ? "text-red-400" : (isStale || nearestSaleyard) ? "text-amber-400" : "text-text-secondary"}`}>
           <div className="flex items-center justify-end gap-1.5">
-            {isStale && (
+            {isStale && !nearestSaleyard && (
               <span className="inline-flex items-center rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
                 Stale - {Math.floor(dataAgeDays / 7)}w
+              </span>
+            )}
+            {nearestSaleyard && !isFallback && (
+              <span className="inline-flex items-center rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
+                Via {resolveShortSaleyardName(nearestSaleyard) ?? nearestSaleyard}
               </span>
             )}
             {isFallback && (
@@ -327,7 +339,7 @@ export function HerdsTable({
           </div>
         </td>
         <td className="hidden px-5 py-3.5 text-right tabular-nums text-text-secondary xl:table-cell">
-          {herd.current_weight ? `${herd.current_weight.toLocaleString()} kg` : "\u2014"}
+          {projectedWeight ? `${Math.round(projectedWeight).toLocaleString()} kg` : herd.current_weight ? `${herd.current_weight.toLocaleString()} kg` : "\u2014"}
         </td>
         <td className={`px-5 py-3.5 text-right tabular-nums ${isFallback ? "text-red-400" : "text-text-secondary"}`}>
           <div className="flex flex-col items-end">

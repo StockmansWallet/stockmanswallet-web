@@ -10,6 +10,7 @@ import { Plus, Tags, Layers, DollarSign, Scale, Archive } from "lucide-react";
 import { calculateHerdValuation, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
+import { expandWithNearbySaleyards } from "@/lib/data/saleyard-proximity";
 
 export const revalidate = 0;
 
@@ -60,7 +61,8 @@ export default async function HerdsPage() {
   // Fetch only the newest date's prices per saleyard+category via RPC.
   // This avoids the 50k PostgREST row limit that silently truncates multi-saleyard queries
   // when full history is fetched, causing inconsistent valuations across pages.
-  const saleyards = [...new Set((herds ?? []).map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
+  const herdSaleyards = [...new Set((herds ?? []).map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
+  const saleyards = expandWithNearbySaleyards(herdSaleyards);
   const primaryCategories = [...new Set((herds ?? []).map((h) => resolveMLACategory(h.category, h.initial_weight, h.breeder_sub_type ?? undefined).primaryMLACategory))];
   const mlaCategories = [...new Set([...primaryCategories, ...primaryCategories.map(c => categoryFallback(c)).filter((c): c is string => c !== null)])];
 
@@ -110,6 +112,8 @@ export default async function HerdsPage() {
   const herdPricePerKgObj: Record<string, number> = {};
   const herdBreedingAccrualObj: Record<string, number> = {};
   const herdDataDatesObj: Record<string, string | null> = {};
+  const herdNearestSaleyardObj: Record<string, string | null> = {};
+  const herdProjectedWeightObj: Record<string, number> = {};
   let totalValue = 0;
   for (const h of (herds ?? [])) {
     const result = calculateHerdValuation(
@@ -121,6 +125,8 @@ export default async function HerdsPage() {
     herdPricePerKgObj[h.id] = result.pricePerKg;
     herdBreedingAccrualObj[h.id] = result.breedingAccrual;
     herdDataDatesObj[h.id] = result.dataDate;
+    herdNearestSaleyardObj[h.id] = result.nearestSaleyardUsed;
+    herdProjectedWeightObj[h.id] = result.projectedWeight;
     totalValue += result.netValue;
   }
 
@@ -195,6 +201,8 @@ export default async function HerdsPage() {
             herdPricePerKg={herdPricePerKgObj}
             herdBreedingAccrual={herdBreedingAccrualObj}
             herdDataDates={herdDataDatesObj}
+            herdNearestSaleyard={herdNearestSaleyardObj}
+            herdProjectedWeight={herdProjectedWeightObj}
             propertyGroups={propertyGroups}
           />
         </>
