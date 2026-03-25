@@ -46,14 +46,14 @@ export const farmerToolItems: NavItem[] = [
   { label: "Reports", href: "/dashboard/tools/reports", icon: <FileText className="h-5 w-5" />, activeClass: "bg-amber-500/15 text-amber-400" },
   { label: "Freight IQ", href: "/dashboard/tools/freight", icon: <Truck className="h-5 w-5" />, activeClass: "bg-sky-500/15 text-sky-400" },
   { label: "Grid IQ", href: "/dashboard/tools/grid-iq", icon: <Grid3x3 className="h-5 w-5" />, activeClass: "bg-teal-500/15 text-teal-400" },
-  { label: "Advisory Hub", href: "/dashboard/advisory-hub", icon: <Users className="h-5 w-5" />, activeClass: "bg-purple-500/15 text-purple-400" },
+  { label: "Advisory Hub", href: "/dashboard/advisory-hub", icon: <Users className="h-5 w-5" />, activeClass: "bg-[#2F8CD9]/15 text-[#2F8CD9]" },
   { label: "Producer Network", href: "/dashboard/farmer-network", icon: <Handshake className="h-5 w-5" />, activeClass: "bg-orange-500/15 text-orange-400" },
 ];
 
 // Advisor mode - portfolio (core navigation)
 export const advisorNavItems: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard/advisor", icon: <Wallet className="h-5 w-5" />, activeClass: "bg-purple-500/15 text-purple-400" },
-  { label: "Clients", href: "/dashboard/advisor/clients", icon: <Users className="h-5 w-5" />, activeClass: "bg-purple-500/15 text-purple-400" },
+  { label: "Dashboard", href: "/dashboard/advisor", icon: <Wallet className="h-5 w-5" />, activeClass: "bg-[#2F8CD9]/15 text-[#2F8CD9]" },
+  { label: "Clients", href: "/dashboard/advisor/clients", icon: <Users className="h-5 w-5" />, activeClass: "bg-[#2F8CD9]/15 text-[#2F8CD9]" },
 ];
 
 // Advisor mode - intelligence section
