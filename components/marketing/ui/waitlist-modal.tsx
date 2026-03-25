@@ -7,6 +7,7 @@ import { Modal } from '@/components/ui/modal'
 type Role = 'producer' | 'advisor' | 'other'
 type HerdSize = 'under_50' | '50_500' | '500_2000' | '2000_plus'
 type PropertyCount = '1' | '2_plus'
+type Feature = 'brangus' | 'freight_iq' | 'herd_valuation' | 'reports' | 'advisory_hub' | 'yard_book' | 'grid_iq' | 'producer_network'
 
 interface WaitlistFormData {
   name: string
@@ -15,6 +16,7 @@ interface WaitlistFormData {
   postcode: string
   herd_size: HerdSize | ''
   property_count: PropertyCount | ''
+  interested_features: Feature[]
 }
 
 const ROLE_OPTIONS: { value: Role; label: string }[] = [
@@ -24,15 +26,26 @@ const ROLE_OPTIONS: { value: Role; label: string }[] = [
 ]
 
 const HERD_SIZE_OPTIONS: { value: HerdSize; label: string }[] = [
-  { value: 'under_50', label: 'Under 50 head' },
-  { value: '50_500', label: '50\u2013500 head' },
-  { value: '500_2000', label: '500\u20132,000 head' },
-  { value: '2000_plus', label: '2,000+ head' },
+  { value: 'under_50', label: 'Under 50' },
+  { value: '50_500', label: '50\u2013500' },
+  { value: '500_2000', label: '500\u20132,000' },
+  { value: '2000_plus', label: '2,000+' },
 ]
 
 const PROPERTY_OPTIONS: { value: PropertyCount; label: string }[] = [
   { value: '1', label: '1' },
   { value: '2_plus', label: '2+' },
+]
+
+const FEATURE_OPTIONS: { value: Feature; label: string }[] = [
+  { value: 'brangus', label: 'Brangus AI' },
+  { value: 'herd_valuation', label: 'Herd Valuation' },
+  { value: 'reports', label: 'Reports' },
+  { value: 'advisory_hub', label: 'Advisory Hub' },
+  { value: 'yard_book', label: 'Yard Book' },
+  { value: 'freight_iq', label: 'Freight IQ' },
+  { value: 'grid_iq', label: 'Grid IQ' },
+  { value: 'producer_network', label: 'Producer Network' },
 ]
 
 interface WaitlistModalProps {
@@ -48,12 +61,23 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
     postcode: '',
     herd_size: '',
     property_count: '',
+    interested_features: [],
   })
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
 
   function updateField<K extends keyof WaitlistFormData>(key: K, value: WaitlistFormData[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
+    if (status === 'error') setStatus('idle')
+  }
+
+  function toggleFeature(feature: Feature) {
+    setForm((prev) => ({
+      ...prev,
+      interested_features: prev.interested_features.includes(feature)
+        ? prev.interested_features.filter((f) => f !== feature)
+        : [...prev.interested_features, feature],
+    }))
     if (status === 'error') setStatus('idle')
   }
 
@@ -83,6 +107,7 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
           postcode: form.postcode.trim(),
           herd_size: form.herd_size,
           property_count: form.property_count,
+          interested_features: form.interested_features,
         }),
       })
 
@@ -103,7 +128,7 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
     onClose()
     // Reset after exit animation completes
     setTimeout(() => {
-      setForm({ name: '', email: '', role: '', postcode: '', herd_size: '', property_count: '' })
+      setForm({ name: '', email: '', role: '', postcode: '', herd_size: '', property_count: '', interested_features: [] })
       setStatus('idle')
       setErrorMsg('')
     }, 350)
@@ -134,7 +159,7 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
   }
 
   return (
-    <Modal open={open} onClose={handleClose} size="md">
+    <Modal open={open} onClose={handleClose} size="lg">
       <button
         onClick={handleClose}
         className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-raised hover:text-text-primary"
@@ -148,13 +173,15 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
             Waitlist
           </span>
         </h2>
-        <p className="mx-auto mt-3 max-w-sm text-base text-text-secondary">
-          Be the first to know when we launch. Founding members get early access and exclusive pricing.
+        <p className="mx-auto mt-3 max-w-md text-base text-text-secondary">
+          Be the first to know when we launch.
+          <br />
+          Founding members get early access and exclusive pricing.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-        {/* Name + Email row */}
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {/* Row 1: Name + Email */}
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="wl-name" className="mb-1.5 block text-sm font-medium text-text-secondary">
@@ -186,82 +213,105 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
           </div>
         </div>
 
-        {/* Role */}
-        <fieldset>
-          <legend className="mb-2 text-sm font-medium text-text-secondary">Which best describes you?</legend>
-          <div className="flex flex-wrap gap-2">
-            {ROLE_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => updateField('role', opt.value)}
-                className={`rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-150 cursor-pointer ${
-                  form.role === opt.value
-                    ? 'bg-brand text-white shadow-sm'
-                    : 'bg-surface text-text-secondary hover:bg-surface-raised hover:text-text-primary'
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
+        {/* Row 2: Role + Postcode side-by-side */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <fieldset>
+            <legend className="mb-2 text-sm font-medium text-text-secondary">Which best describes you?</legend>
+            <div className="flex flex-wrap gap-2">
+              {ROLE_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => updateField('role', opt.value)}
+                  className={`rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-150 cursor-pointer ${
+                    form.role === opt.value
+                      ? 'bg-brand text-white shadow-sm'
+                      : 'bg-surface text-text-secondary hover:bg-surface-raised hover:text-text-primary'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+          <div>
+            <label htmlFor="wl-postcode" className="mb-1.5 block text-sm font-medium text-text-secondary">
+              Postcode
+            </label>
+            <input
+              id="wl-postcode"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={4}
+              value={form.postcode}
+              onChange={(e) => updateField('postcode', e.target.value.replace(/\D/g, ''))}
+              placeholder="e.g. 4350"
+              required
+              className="w-full max-w-[160px] rounded-xl bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
+            />
           </div>
-        </fieldset>
-
-        {/* Postcode */}
-        <div>
-          <label htmlFor="wl-postcode" className="mb-1.5 block text-sm font-medium text-text-secondary">
-            Postcode
-          </label>
-          <input
-            id="wl-postcode"
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            maxLength={4}
-            value={form.postcode}
-            onChange={(e) => updateField('postcode', e.target.value.replace(/\D/g, ''))}
-            placeholder="e.g. 4350"
-            required
-            className="w-full max-w-[160px] rounded-xl bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
-          />
         </div>
 
-        {/* Herd size */}
+        {/* Row 3: Herd size + Properties side-by-side */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <fieldset>
+            <legend className="mb-2 text-sm font-medium text-text-secondary">
+              How many cattle do you manage?
+            </legend>
+            <div className="flex flex-wrap gap-2">
+              {HERD_SIZE_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => updateField('herd_size', opt.value)}
+                  className={`rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-150 cursor-pointer ${
+                    form.herd_size === opt.value
+                      ? 'bg-brand text-white shadow-sm'
+                      : 'bg-surface text-text-secondary hover:bg-surface-raised hover:text-text-primary'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend className="mb-2 text-sm font-medium text-text-secondary">
+              How many properties?
+            </legend>
+            <div className="flex gap-2">
+              {PROPERTY_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => updateField('property_count', opt.value)}
+                  className={`rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-150 cursor-pointer ${
+                    form.property_count === opt.value
+                      ? 'bg-brand text-white shadow-sm'
+                      : 'bg-surface text-text-secondary hover:bg-surface-raised hover:text-text-primary'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+        </div>
+
+        {/* Row 4: Interested features (multi-select, full width) */}
         <fieldset>
           <legend className="mb-2 text-sm font-medium text-text-secondary">
-            How many cattle do you currently manage?
+            What features interest you most?
           </legend>
           <div className="flex flex-wrap gap-2">
-            {HERD_SIZE_OPTIONS.map((opt) => (
+            {FEATURE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
                 type="button"
-                onClick={() => updateField('herd_size', opt.value)}
+                onClick={() => toggleFeature(opt.value)}
                 className={`rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-150 cursor-pointer ${
-                  form.herd_size === opt.value
-                    ? 'bg-brand text-white shadow-sm'
-                    : 'bg-surface text-text-secondary hover:bg-surface-raised hover:text-text-primary'
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </fieldset>
-
-        {/* Property count */}
-        <fieldset>
-          <legend className="mb-2 text-sm font-medium text-text-secondary">
-            How many properties do you manage?
-          </legend>
-          <div className="flex gap-2">
-            {PROPERTY_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => updateField('property_count', opt.value)}
-                className={`rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-150 cursor-pointer ${
-                  form.property_count === opt.value
+                  form.interested_features.includes(opt.value)
                     ? 'bg-brand text-white shadow-sm'
                     : 'bg-surface text-text-secondary hover:bg-surface-raised hover:text-text-primary'
                 }`}

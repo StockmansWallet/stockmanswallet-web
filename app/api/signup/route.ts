@@ -9,11 +9,12 @@ const supabase = createClient(
 const VALID_ROLES = ['producer', 'advisor', 'other'] as const
 const VALID_HERD_SIZES = ['under_50', '50_500', '500_2000', '2000_plus'] as const
 const VALID_PROPERTY_COUNTS = ['1', '2_plus'] as const
+const VALID_FEATURES = ['brangus', 'freight_iq', 'herd_valuation', 'reports', 'advisory_hub', 'yard_book', 'grid_iq', 'producer_network'] as const
 
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { name, email, role, postcode, herd_size, property_count } = body
+    const { name, email, role, postcode, herd_size, property_count, interested_features } = body
 
     // Email is always required
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
     }
 
     // Build the insert payload, only including fields that are present
-    const record: Record<string, string> = {
+    const record: Record<string, string | string[]> = {
       email: email.toLowerCase().trim(),
     }
 
@@ -39,6 +40,14 @@ export async function POST(request: Request) {
     }
     if (property_count && VALID_PROPERTY_COUNTS.includes(property_count)) {
       record.property_count = property_count
+    }
+    if (Array.isArray(interested_features) && interested_features.length > 0) {
+      const validFeatures = interested_features.filter((f: string) =>
+        VALID_FEATURES.includes(f as typeof VALID_FEATURES[number])
+      )
+      if (validFeatures.length > 0) {
+        record.interested_features = validFeatures
+      }
     }
 
     const { error } = await supabase

@@ -13,6 +13,7 @@ interface WaitlistSignup {
   postcode: string | null;
   herd_size: string | null;
   property_count: string | null;
+  interested_features: string[] | null;
   created_at: string;
 }
 
@@ -38,6 +39,17 @@ const HERD_LABELS: Record<string, string> = {
 const PROPERTY_LABELS: Record<string, string> = {
   "1": "1",
   "2_plus": "2+",
+};
+
+const FEATURE_LABELS: Record<string, string> = {
+  brangus: "Brangus AI",
+  herd_valuation: "Herd Valuation",
+  reports: "Reports",
+  advisory_hub: "Advisory Hub",
+  yard_book: "Yard Book",
+  freight_iq: "Freight IQ",
+  grid_iq: "Grid IQ",
+  producer_network: "Producer Network",
 };
 
 function formatDate(iso: string) {
@@ -186,13 +198,14 @@ export function WaitlistTable({ signups }: WaitlistTableProps) {
               <th className="px-4 py-3 text-xs font-medium text-text-muted">Postcode</th>
               <th className="px-4 py-3 text-xs font-medium text-text-muted">Herd Size</th>
               <th className="px-4 py-3 text-xs font-medium text-text-muted">Properties</th>
+              <th className="px-4 py-3 text-xs font-medium text-text-muted">Interested In</th>
               <th className="px-4 py-3 text-xs font-medium text-text-muted">Signed Up</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-4 py-12 text-center text-sm text-text-muted">
+                <td colSpan={9} className="px-4 py-12 text-center text-sm text-text-muted">
                   No waitlist signups yet.
                 </td>
               </tr>
@@ -233,6 +246,19 @@ export function WaitlistTable({ signups }: WaitlistTableProps) {
                   </td>
                   <td className="px-4 py-3 text-text-primary">
                     {signup.property_count ? PROPERTY_LABELS[signup.property_count] ?? signup.property_count : "\u2014"}
+                  </td>
+                  <td className="px-4 py-3">
+                    {signup.interested_features && signup.interested_features.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {signup.interested_features.map((f) => (
+                          <Badge key={f} variant="default">
+                            {FEATURE_LABELS[f] ?? f}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : (
+                      "\u2014"
+                    )}
                   </td>
                   <td className="px-4 py-3 text-text-muted">{formatDate(signup.created_at)}</td>
                 </tr>
