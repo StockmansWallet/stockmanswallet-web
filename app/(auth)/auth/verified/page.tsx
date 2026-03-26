@@ -1,37 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 
 export default function VerifiedPage() {
   return (
     <>
-      <div className="flex justify-center mb-4">
-        <div className="relative">
-          <Image
-            src="/images/Brangus-wave.webp"
-            alt="Brangus"
-            width={120}
-            height={120}
-            className="rounded-2xl"
-            priority
-          />
-          <div className="absolute -bottom-1 -right-1 rounded-full bg-green-500 p-1">
-            <svg
-              className="h-4 w-4 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2.5}
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="m4.5 12.75 6 6 9-13.5"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
-
       <h1 className="mb-2 text-center text-2xl font-bold text-text-primary">
         You&apos;re all set, mate!
       </h1>

@@ -9,16 +9,20 @@ export default function AuthLayout({
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
       <div className="mb-8">
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/" className="flex flex-col items-center gap-3">
           <Image
-            src="/images/app-icon.png"
+            src="/images/sw-logo-tally.svg"
             alt="Stockman's Wallet"
-            width={48}
-            height={48}
-            className="rounded-xl"
+            width={72}
+            height={72}
+            priority
           />
-          <span className="text-xl font-bold text-text-primary">
-            Stockman&apos;s Wallet
+          <span className="text-lg font-bold tracking-widest text-text-primary uppercase">
+            Stockman&apos;s
+            <br />
+            <span className="text-xs font-semibold tracking-[0.3em]">
+              Wallet
+            </span>
           </span>
         </Link>
       </div>
