@@ -19,9 +19,9 @@ export default function SignUpPage() {
     const formData = new FormData(e.currentTarget);
     const result = await signUp(formData);
 
-    if (result && "error" in result) {
+    if (result && "error" in result && result.error) {
       setError(result.error);
-    } else if (result && "confirmationRequired" in result) {
+    } else if (result && "confirmationRequired" in result && result.email) {
       setConfirmationEmail(result.email);
     }
     setLoading(false);
