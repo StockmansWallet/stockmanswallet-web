@@ -325,7 +325,7 @@ export function HerdsTable({
         </td>
         <td className="hidden px-5 py-3.5 text-text-secondary md:table-cell">{herd.breed}</td>
         <td className="hidden px-5 py-3.5 text-text-secondary lg:table-cell">{herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} (${herd.sub_category})` : herd.category}</td>
-        <td className="hidden px-5 py-3.5 text-text-muted xl:table-cell">
+        <td className={`hidden px-5 py-3.5 xl:table-cell ${nearestSaleyard || isFallback ? "text-text-muted/50 line-through" : "text-text-muted"}`}>
           {herd.selected_saleyard ? resolveShortSaleyardName(herd.selected_saleyard) ?? herd.selected_saleyard : "\u2014"}
         </td>
         <td className={`hidden px-5 py-3.5 text-right tabular-nums lg:table-cell ${isFallback ? "text-red-400" : (isStale || nearestSaleyard) ? "text-amber-400" : "text-text-secondary"}`}>
