@@ -50,6 +50,33 @@ export default function SignUpPage() {
   if (confirmationEmail) {
     return (
       <>
+        <div className="flex justify-center mb-4">
+          <div className="relative">
+            <img
+              src="/images/brangus-chat-profile.webp"
+              alt="Brangus"
+              width={100}
+              height={100}
+              className="rounded-2xl"
+            />
+            <div className="absolute -bottom-1 -right-1 rounded-full bg-green-500 p-1">
+              <svg
+                className="h-4 w-4 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2.5}
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="m4.5 12.75 6 6 9-13.5"
+                />
+              </svg>
+            </div>
+          </div>
+        </div>
+
         <h1 className="mb-2 text-center text-2xl font-bold text-text-primary">
           You&apos;re almost there mate!
         </h1>
@@ -60,7 +87,7 @@ export default function SignUpPage() {
           {confirmationEmail}
         </p>
         <p className="mb-8 text-center text-xs text-text-muted">
-          Click the verify link in your email to get started.
+          Tap the link in your email then head back here and you&apos;ll be ready to go!
         </p>
 
         <div className="space-y-3">
