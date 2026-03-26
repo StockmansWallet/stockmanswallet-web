@@ -46,84 +46,90 @@ export default function SignUpPage() {
     setResending(false);
   }
 
-  // Verification screen after sign-up
+  // Verification screen after sign-up (covers layout header, just shows Brangus)
   if (confirmationEmail) {
     return (
-      <>
-        <div className="flex justify-center mb-4">
-          <div className="relative">
-            <img
-              src="/images/brangus-ios-landing.webp"
-              alt="Brangus"
-              width={100}
-              height={100}
-              className="rounded-2xl"
-            />
-            <div className="absolute -bottom-1 -right-1 rounded-full bg-green-500 p-1">
-              <svg
-                className="h-4 w-4 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2.5}
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m4.5 12.75 6 6 9-13.5"
-                />
-              </svg>
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background px-4">
+        <div className="w-full max-w-sm">
+          <div className="flex justify-center mb-4">
+            <div className="relative">
+              <img
+                src="/images/brangus-ios-landing.webp"
+                alt="Brangus"
+                width={120}
+                height={120}
+                className="rounded-2xl"
+              />
+              <div className="absolute -bottom-1 -right-1 rounded-full bg-green-500 p-1.5">
+                <svg
+                  className="h-4 w-4 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2.5}
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m4.5 12.75 6 6 9-13.5"
+                  />
+                </svg>
+              </div>
             </div>
           </div>
+
+          <h1 className="mb-2 text-center text-2xl font-bold text-text-primary">
+            You&apos;re almost there mate!
+          </h1>
+          <p className="mb-1 text-center text-sm font-semibold text-text-primary">
+            We&apos;ve sent a verification link to
+          </p>
+          <p className="mb-6 text-center text-sm font-semibold text-brand">
+            {confirmationEmail}
+          </p>
+          <p className="mb-8 text-center text-xs text-text-muted">
+            Tap the link in your email then head back here and you&apos;ll be ready to go!
+          </p>
+
+          <div className="space-y-3">
+            <button
+              onClick={handleResend}
+              disabled={resending || resendSuccess}
+              className="w-full rounded-xl border border-brand/20 bg-brand/5 px-4 py-3 text-sm font-semibold text-brand transition-all hover:bg-brand/10 disabled:opacity-60"
+            >
+              {resending
+                ? "Sending..."
+                : resendSuccess
+                  ? "Verification email sent"
+                  : "Resend verification email"}
+            </button>
+
+            <button
+              onClick={() => {
+                setConfirmationEmail(null);
+                setError(null);
+              }}
+              className="w-full rounded-xl border border-black/10 px-4 py-3 text-sm font-medium text-text-muted transition-all hover:bg-white/5 dark:border-white/10"
+            >
+              Use a different email
+            </button>
+          </div>
+
+          <p className="mt-6 text-center text-sm text-text-muted">
+            Already verified?{" "}
+            <Link
+              href="/sign-in"
+              className="font-medium text-brand hover:text-brand-dark"
+            >
+              Sign in
+            </Link>
+          </p>
         </div>
 
-        <h1 className="mb-2 text-center text-2xl font-bold text-text-primary">
-          You&apos;re almost there mate!
-        </h1>
-        <p className="mb-1 text-center text-sm font-semibold text-text-primary">
-          We&apos;ve sent a verification link to
+        <p className="mt-8 text-xs text-text-muted">
+          &copy; {new Date().getFullYear()} Stockman&apos;s Wallet. All rights reserved.
         </p>
-        <p className="mb-6 text-center text-sm font-semibold text-brand">
-          {confirmationEmail}
-        </p>
-        <p className="mb-8 text-center text-xs text-text-muted">
-          Tap the link in your email then head back here and you&apos;ll be ready to go!
-        </p>
-
-        <div className="space-y-3">
-          <button
-            onClick={handleResend}
-            disabled={resending || resendSuccess}
-            className="w-full rounded-xl border border-brand/20 bg-brand/5 px-4 py-3 text-sm font-semibold text-brand transition-all hover:bg-brand/10 disabled:opacity-60"
-          >
-            {resending
-              ? "Sending..."
-              : resendSuccess
-                ? "Verification email sent"
-                : "Resend verification email"}
-          </button>
-
-          <button
-            onClick={() => {
-              setConfirmationEmail(null);
-              setError(null);
-            }}
-            className="w-full rounded-xl border border-black/10 px-4 py-3 text-sm font-medium text-text-muted transition-all hover:bg-white/5 dark:border-white/10"
-          >
-            Use a different email
-          </button>
-        </div>
-
-        <p className="mt-6 text-center text-sm text-text-muted">
-          Already verified?{" "}
-          <Link
-            href="/sign-in"
-            className="font-medium text-brand hover:text-brand-dark"
-          >
-            Sign in
-          </Link>
-        </p>
-      </>
+      </div>
     );
   }
 
