@@ -2,11 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { signUp, signInWithApple, signInWithGoogle } from "../actions";
+import { signUp, resendConfirmation, signInWithApple, signInWithGoogle } from "../actions";
 
 export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [confirmationEmail, setConfirmationEmail] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -16,10 +19,95 @@ export default function SignUpPage() {
     const formData = new FormData(e.currentTarget);
     const result = await signUp(formData);
 
-    if (result?.error) {
+    if (result && "error" in result) {
       setError(result.error);
+    } else if (result && "confirmationRequired" in result) {
+      setConfirmationEmail(result.email);
     }
     setLoading(false);
+  }
+
+  async function handleResend() {
+    if (!confirmationEmail || resending) return;
+    setResending(true);
+    const result = await resendConfirmation(confirmationEmail);
+    if (!result || !("error" in result)) {
+      setResendSuccess(true);
+      setTimeout(() => setResendSuccess(false), 4000);
+    }
+    setResending(false);
+  }
+
+  // Verification screen after sign-up
+  if (confirmationEmail) {
+    return (
+      <>
+        <div className="flex justify-center mb-6">
+          <div className="rounded-full bg-brand/10 p-4">
+            <svg
+              className="h-10 w-10 text-brand"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
+              />
+            </svg>
+          </div>
+        </div>
+
+        <h1 className="mb-2 text-center text-2xl font-bold text-text-primary">
+          Check your email
+        </h1>
+        <p className="mb-1 text-center text-sm text-text-muted">
+          We sent a verification link to
+        </p>
+        <p className="mb-6 text-center text-sm font-semibold text-text-primary">
+          {confirmationEmail}
+        </p>
+        <p className="mb-8 text-center text-xs text-text-muted">
+          Click the link to verify your account and get started.
+        </p>
+
+        <div className="space-y-3">
+          <button
+            onClick={handleResend}
+            disabled={resending || resendSuccess}
+            className="w-full rounded-xl border border-brand/20 bg-brand/5 px-4 py-3 text-sm font-semibold text-brand transition-all hover:bg-brand/10 disabled:opacity-60"
+          >
+            {resending
+              ? "Sending..."
+              : resendSuccess
+                ? "Verification email sent"
+                : "Resend verification email"}
+          </button>
+
+          <button
+            onClick={() => {
+              setConfirmationEmail(null);
+              setError(null);
+            }}
+            className="w-full rounded-xl border border-black/10 px-4 py-3 text-sm font-medium text-text-muted transition-all hover:bg-white/5 dark:border-white/10"
+          >
+            Use a different email
+          </button>
+        </div>
+
+        <p className="mt-6 text-center text-sm text-text-muted">
+          Already verified?{" "}
+          <Link
+            href="/sign-in"
+            className="font-medium text-brand hover:text-brand-dark"
+          >
+            Sign in
+          </Link>
+        </p>
+      </>
+    );
   }
 
   return (
@@ -61,8 +149,8 @@ export default function SignUpPage() {
             name="password"
             type="password"
             required
-            minLength={6}
-            placeholder="At least 6 characters"
+            minLength={8}
+            placeholder="At least 8 characters"
             className="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-white/10 dark:bg-white/5"
           />
         </div>

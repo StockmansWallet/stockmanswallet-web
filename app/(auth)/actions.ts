@@ -55,16 +55,25 @@ export async function signUp(formData: FormData) {
 
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.signUp({
+  const origin = (await headers()).get("origin") || "https://stockmanswallet.com.au";
+
+  const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
+    options: {
+      emailRedirectTo: `${origin}/auth/callback`,
+    },
   });
 
   if (error) {
     return { error: error.message };
   }
 
-  // mailer_autoconfirm is enabled - account is confirmed immediately
+  // If no session returned, email confirmation is required
+  if (!data.session) {
+    return { confirmationRequired: true as const, email: parsed.data.email };
+  }
+
   redirect("/dashboard");
 }
 
@@ -115,6 +124,22 @@ export async function updatePassword(formData: FormData) {
   }
 
   redirect("/dashboard");
+}
+
+export async function resendConfirmation(email: string) {
+  const supabase = await createClient();
+  const origin = (await headers()).get("origin") || "https://stockmanswallet.com.au";
+
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email,
+    options: {
+      emailRedirectTo: `${origin}/auth/callback`,
+    },
+  });
+
+  if (error) return { error: error.message };
+  return { success: true };
 }
 
 export async function signInWithApple() {

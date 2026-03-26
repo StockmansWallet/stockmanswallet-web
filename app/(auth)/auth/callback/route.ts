@@ -12,7 +12,13 @@ export async function GET(request: NextRequest) {
   // Detect recovery flow via cookie set by forgotPassword action
   const isRecovery =
     request.cookies.get("sw-password-recovery")?.value === "true";
-  const redirectTo = isRecovery ? "/reset-password" : "/dashboard";
+  // Detect iOS email verification (custom URL schemes don't work in email clients)
+  const isIOS = searchParams.get("source") === "ios";
+  const redirectTo = isRecovery
+    ? "/reset-password"
+    : isIOS
+      ? "/auth/verified"
+      : "/dashboard";
   const response = NextResponse.redirect(`${origin}${redirectTo}`);
 
   // Create Supabase client that writes cookies directly onto the redirect response
