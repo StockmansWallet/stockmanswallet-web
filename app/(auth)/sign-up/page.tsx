@@ -51,38 +51,21 @@ export default function SignUpPage() {
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background px-4">
         <div className="w-full max-w-sm">
-          <div className="flex justify-center mb-4">
-            <div className="relative">
-              <img
-                src="/images/brangus-ios-landing.webp"
-                alt="Brangus"
-                width={120}
-                height={120}
-                className="rounded-2xl"
-              />
-              <div className="absolute -bottom-1 -right-1 rounded-full bg-green-500 p-1.5">
-                <svg
-                  className="h-4 w-4 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2.5}
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="m4.5 12.75 6 6 9-13.5"
-                  />
-                </svg>
-              </div>
-            </div>
+          <div className="flex justify-center mb-2">
+            <img
+              src="/images/brangus-post.webp"
+              alt="Brangus posting your verification"
+              width={280}
+              height={280}
+              className="object-contain"
+            />
           </div>
 
           <h1 className="mb-2 text-center text-2xl font-bold text-text-primary">
             You&apos;re almost there mate!
           </h1>
           <p className="mb-1 text-center text-sm font-semibold text-text-primary">
-            We&apos;ve sent a verification link to
+            I&apos;ve sent a verification link to
           </p>
           <p className="mb-6 text-center text-sm font-semibold text-brand">
             {confirmationEmail}
