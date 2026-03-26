@@ -102,7 +102,9 @@ export async function createHerd(formData: FormData) {
   if (error) return { error: error.message };
 
   // Debug: Auto-create Yard Book breeding milestones for breeder herds with joining data
-  if (isBreeder && (v.joining_period_start || v.joined_date)) {
+  const didCreateMilestones =
+    isBreeder && !!(v.joining_period_start || v.joined_date);
+  if (didCreateMilestones) {
     await syncBreedingMilestonesForHerd(herdId, {
       name: v.name,
       species: v.species,
@@ -115,7 +117,12 @@ export async function createHerd(formData: FormData) {
   }
 
   revalidatePath("/dashboard/herds");
-  redirect("/dashboard/herds");
+  // Debug: Add yardbook flag so the herds page can show a confirmation banner
+  redirect(
+    didCreateMilestones
+      ? "/dashboard/herds?yardbook=created"
+      : "/dashboard/herds"
+  );
 }
 
 export async function updateHerd(id: string, formData: FormData) {
@@ -179,6 +186,8 @@ export async function updateHerd(id: string, formData: FormData) {
   if (error) return { error: error.message };
 
   // Debug: Sync breeding milestones (handles create, update, and removal when breeder status changes)
+  const didSyncMilestones =
+    v.is_breeder === "on" && !!(v.joining_period_start || v.joined_date);
   await syncBreedingMilestonesForHerd(idResult.data, {
     name: v.name,
     species: v.species,
@@ -191,7 +200,12 @@ export async function updateHerd(id: string, formData: FormData) {
 
   revalidatePath("/dashboard/herds");
   revalidatePath(`/dashboard/herds/${idResult.data}`);
-  redirect(`/dashboard/herds/${idResult.data}`);
+  // Debug: Add yardbook flag so the detail page can show a confirmation banner
+  redirect(
+    didSyncMilestones
+      ? `/dashboard/herds/${idResult.data}?yardbook=updated`
+      : `/dashboard/herds/${idResult.data}`
+  );
 }
 
 export async function deleteHerd(id: string) {
