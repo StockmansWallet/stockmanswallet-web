@@ -10,10 +10,18 @@ export default function SignUpPage() {
   const [confirmationEmail, setConfirmationEmail] = useState<string | null>(null);
   const [resending, setResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+
+    if (password !== confirmPassword) {
+      setError("Passwords don't match.");
+      return;
+    }
+
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
@@ -42,26 +50,35 @@ export default function SignUpPage() {
   if (confirmationEmail) {
     return (
       <>
-        <div className="flex justify-center mb-6">
-          <div className="rounded-full bg-brand/10 p-4">
-            <svg
-              className="h-10 w-10 text-brand"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
-              />
-            </svg>
+        <div className="flex justify-center mb-4">
+          <div className="relative">
+            <img
+              src="/images/brangus-chat-profile.webp"
+              alt="Brangus"
+              width={100}
+              height={100}
+              className="rounded-2xl"
+            />
+            <div className="absolute -bottom-1 -right-1 rounded-full bg-green-500 p-1">
+              <svg
+                className="h-4 w-4 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2.5}
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="m4.5 12.75 6 6 9-13.5"
+                />
+              </svg>
+            </div>
           </div>
         </div>
 
         <h1 className="mb-2 text-center text-2xl font-bold text-text-primary">
-          Check your email
+          Almost there, mate!
         </h1>
         <p className="mb-1 text-center text-sm text-text-muted">
           We sent a verification link to
@@ -70,7 +87,7 @@ export default function SignUpPage() {
           {confirmationEmail}
         </p>
         <p className="mb-8 text-center text-xs text-text-muted">
-          Click the link to verify your account and get started.
+          Tap the link in the email, then head back here. I&apos;ll get you sorted from there.
         </p>
 
         <div className="space-y-3">
@@ -151,6 +168,28 @@ export default function SignUpPage() {
             required
             minLength={8}
             placeholder="At least 8 characters"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-white/10 dark:bg-white/5"
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="confirmPassword"
+            className="mb-1 block text-sm font-medium text-text-secondary"
+          >
+            Confirm password
+          </label>
+          <input
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            required
+            minLength={8}
+            placeholder="Re-enter your password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             className="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-white/10 dark:bg-white/5"
           />
         </div>
