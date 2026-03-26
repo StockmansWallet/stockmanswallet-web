@@ -11,19 +11,12 @@ export default function AuthLayout({
       <div className="mb-8">
         <Link href="/" className="flex flex-col items-center gap-3">
           <Image
-            src="/images/sw-logo-tally.svg"
+            src="/images/sw-logo.svg"
             alt="Stockman's Wallet"
-            width={72}
-            height={72}
+            width={200}
+            height={132}
             priority
           />
-          <span className="text-lg font-bold tracking-widest text-text-primary uppercase">
-            Stockman&apos;s
-            <br />
-            <span className="text-xs font-semibold tracking-[0.3em]">
-              Wallet
-            </span>
-          </span>
         </Link>
       </div>
       <div className="w-full max-w-sm">{children}</div>
