@@ -29,6 +29,7 @@ export function calculateFreightEstimate(options: {
   categoryOverride?: FreightCapacityCategory;
   headsPerDeckOverride?: number;
   isCustomJob?: boolean;
+  calvesAtFoot?: boolean;
 }): FreightEstimate {
   const {
     herdGroupId,
@@ -41,6 +42,7 @@ export function calculateFreightEstimate(options: {
     categoryOverride,
     headsPerDeckOverride,
     isCustomJob = false,
+    calvesAtFoot = true,
   } = options;
 
   // Resolve the freight category (or use override)
@@ -53,7 +55,7 @@ export function calculateFreightEstimate(options: {
     resolvedCategory = categoryOverride;
     capacitySource = "user_override";
   } else {
-    const mapping = resolveFreightCategory(appCategory, sex, averageWeightKg);
+    const mapping = resolveFreightCategory(appCategory, sex, averageWeightKg, calvesAtFoot);
     resolvedCategory = mapping.category;
     capacitySource = "library";
     categoryWarning = mapping.warning;
@@ -124,7 +126,8 @@ export function calculateFreightEstimate(options: {
 export function resolveFreightCategory(
   appCategory: string,
   sex: string,
-  weightKg: number
+  weightKg: number,
+  calvesAtFoot: boolean = true
 ): CategoryMapping {
   // Debug: Uses master category (Steer, Heifer, Breeder, Dry Cow, Bull) + weight
   // to determine the correct freight tier. Weight drives escalation between tiers.
@@ -142,11 +145,16 @@ export function resolveFreightCategory(
       if (weightKg < 450) return mapWithEscalation("yearling_heifers", weightKg, 450, "grown_heifers", appCategory);
       return { category: findFreightCategory("grown_heifers")! };
 
-    // Breeder - cow & calf density assumed (calves at foot)
+    // Breeder - cow & calf density when calves at foot, standard cow density otherwise
     case "Breeder": {
-      const cowCalf = findFreightCategory("cow_calf_units")!;
-      const notice = `Breeder loaded at Cow & Calf density (${cowCalf.headsPerDeck} head/deck) as calves at foot are assumed. Override to Cows if calves have not dropped yet.`;
-      return { category: cowCalf, breederNotice: notice };
+      if (calvesAtFoot) {
+        const cowCalf = findFreightCategory("cow_calf_units")!;
+        const notice = `Breeder loaded at Cow & Calf density (${cowCalf.headsPerDeck} head/deck) as calves at foot are assumed. Override loading density field if calves have not dropped. Use loading density chart as a reference if required.`;
+        return { category: cowCalf, breederNotice: notice };
+      } else {
+        // No calves at foot - use standard cow density from weight-band lookup
+        return { category: findFreightCategory("cows")! };
+      }
     }
 
     // Dry Cow - standard cow density

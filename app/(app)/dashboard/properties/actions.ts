@@ -68,7 +68,7 @@ export async function createProperty(formData: FormData) {
     default_saleyard: v.default_saleyard || null,
     default_saleyard_distance: v.default_saleyard_distance ?? null,
     mortality_rate: v.mortality_rate ?? 2,
-    calving_rate: v.calving_rate ?? 85,
+    calving_rate: (v.calving_rate ?? 85) / 100,
     freight_cost_per_km: v.freight_cost_per_km ?? 3,
     updated_at: new Date().toISOString(),
   });
@@ -113,7 +113,7 @@ export async function updateProperty(id: string, formData: FormData) {
       default_saleyard: v.default_saleyard || null,
       default_saleyard_distance: v.default_saleyard_distance ?? null,
       mortality_rate: v.mortality_rate ?? 2,
-      calving_rate: v.calving_rate ?? 85,
+      calving_rate: (v.calving_rate ?? 85) / 100,
       freight_cost_per_km: v.freight_cost_per_km ?? 3,
       updated_at: new Date().toISOString(),
     })

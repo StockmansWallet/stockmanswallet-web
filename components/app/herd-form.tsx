@@ -383,7 +383,7 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
                 label="Calving Rate (%)"
                 type="number"
                 step="0.1"
-                defaultValue={herd?.calving_rate ?? 85}
+                defaultValue={herd?.calving_rate != null ? Math.round(herd.calving_rate > 1 ? herd.calving_rate : herd.calving_rate * 100) : 85}
               />
               <Input
                 id="lactation_status"

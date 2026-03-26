@@ -122,6 +122,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
   const [calculatedDistanceLabel, setCalculatedDistanceLabel] = useState("");
   const [attempted, setAttempted] = useState(false);
   const [densityOpen, setDensityOpen] = useState(false);
+  const [calvesAtFoot, setCalvesAtFoot] = useState(true);
 
   const selectedHerd = herds.find((h) => h.id === selectedHerdId);
 
@@ -163,8 +164,10 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     if (herd) {
       setWeight(Math.round(herd.current_weight).toString());
       setHeadCount(herd.head_count.toString());
-      // Use category-aware head per deck - breeders/cow-calf use fixed density
-      const mapping = resolveFreightCategory(herd.category, herd.sex, herd.current_weight);
+      // Breeder defaults to calves at foot (cow-calf density); others use weight-band
+      const isBreeder = herd.category === "Breeder";
+      setCalvesAtFoot(true);
+      const mapping = resolveFreightCategory(herd.category, herd.sex, herd.current_weight, isBreeder);
       const hpd = mapping.category.id === "cow_calf_units"
         ? mapping.category.headsPerDeck
         : headsPerDeckForWeight(herd.current_weight);
@@ -235,7 +238,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
   // Weight-based head per deck, with cow-calf fixed density exception
   function categoryAwareHpd(w: number): number {
     if (selectedHerd) {
-      const mapping = resolveFreightCategory(selectedHerd.category, selectedHerd.sex, w);
+      const mapping = resolveFreightCategory(selectedHerd.category, selectedHerd.sex, w, calvesAtFoot);
       if (mapping.category.id === "cow_calf_units") {
         return mapping.category.headsPerDeck;
       }
@@ -248,7 +251,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     const w = Number(weight);
     if (!w || w <= 0) return null;
     return categoryAwareHpd(w);
-  }, [weight, selectedHerdId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [weight, selectedHerdId, calvesAtFoot]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Update headPerDeck when weight changes (if no override)
   function handleWeightChange(val: string) {
@@ -280,6 +283,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
       ratePerDeckPerKm: Number(rate) || DEFAULT_RATE_PER_DECK_PER_KM,
       headsPerDeckOverride: hpdOverride,
       isCustomJob,
+      calvesAtFoot,
     });
 
     setResult(estimate);
@@ -300,6 +304,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     setCalculatedDistance(null);
     setCalculatedDistanceLabel("");
     setAttempted(false);
+    setCalvesAtFoot(true);
   }
 
   return (
@@ -559,6 +564,37 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                     </tbody>
                   </table>
                 </div>
+              )}
+
+              {/* Calves at Foot toggle - only for Breeder category */}
+              {selectedHerd?.category === "Breeder" && (
+                <label className="mt-4 flex cursor-pointer items-start gap-2.5 rounded-xl bg-white/[0.03] px-4 py-3 ring-1 ring-inset ring-white/[0.06] transition-colors hover:bg-white/[0.05]">
+                  <input
+                    type="checkbox"
+                    checked={calvesAtFoot}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setCalvesAtFoot(checked);
+                      setResult(null);
+                      const w = Number(weight);
+                      if (checked) {
+                        setHeadPerDeck("18");
+                      } else if (w > 0) {
+                        setHeadPerDeck(headsPerDeckForWeight(w).toString());
+                      }
+                    }}
+                    className="mt-1 h-4 w-4 shrink-0 rounded border-white/20 bg-white/[0.04] text-sky-500 focus:ring-sky-500/50"
+                  />
+                  <span>
+                    <span className="text-sm font-medium text-text-primary">Calves at foot</span>
+                    <br />
+                    <span className="text-xs text-text-muted">
+                      {calvesAtFoot
+                        ? "Loaded at Cow & Calf density (18 head/deck). Turn off if calves have not dropped."
+                        : "Using standard weight-based loading density."}
+                    </span>
+                  </span>
+                </label>
               )}
             </CardContent>
           </Card>
