@@ -18,6 +18,7 @@ type HerdWithProperty = {
   sex: string;
   head_count: number;
   current_weight: number;
+  selected_saleyard: string | null;
   property_id: string | null;
   properties: { property_name: string } | null;
   [key: string]: unknown;
@@ -32,7 +33,7 @@ type PropertyGroup = {
 const SPECIES_TABS = ["All", "Cattle", "Sheep", "Pig", "Goat"] as const;
 
 
-type SortKey = "name" | "breed" | "category" | "head_count" | "current_weight" | "value" | "price_per_kg" | null;
+type SortKey = "name" | "breed" | "category" | "selected_saleyard" | "head_count" | "current_weight" | "value" | "price_per_kg" | null;
 
 export function HerdsTable({
   herds,
@@ -249,6 +250,12 @@ export function HerdsTable({
           Category <SortIcon column="category" />
         </th>
         <th
+          onClick={() => handleSort("selected_saleyard")}
+          className="hidden cursor-pointer select-none px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary xl:table-cell"
+        >
+          Saleyard <SortIcon column="selected_saleyard" />
+        </th>
+        <th
           onClick={() => handleSort("price_per_kg")}
           className="hidden cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary lg:table-cell"
         >
@@ -318,6 +325,9 @@ export function HerdsTable({
         </td>
         <td className="hidden px-5 py-3.5 text-text-secondary md:table-cell">{herd.breed}</td>
         <td className="hidden px-5 py-3.5 text-text-secondary lg:table-cell">{herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} (${herd.sub_category})` : herd.category}</td>
+        <td className="hidden px-5 py-3.5 text-text-muted xl:table-cell">
+          {herd.selected_saleyard ? resolveShortSaleyardName(herd.selected_saleyard) ?? herd.selected_saleyard : "\u2014"}
+        </td>
         <td className={`hidden px-5 py-3.5 text-right tabular-nums lg:table-cell ${isFallback ? "text-red-400" : (isStale || nearestSaleyard) ? "text-amber-400" : "text-text-secondary"}`}>
           <div className="flex items-center justify-end gap-1.5">
             {isStale && !nearestSaleyard && (
