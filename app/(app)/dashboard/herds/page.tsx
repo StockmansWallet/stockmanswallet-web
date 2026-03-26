@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/ui/stat-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HerdsTable } from "./herds-table";
+import { YardBookBanner } from "@/components/app/yard-book-banner";
 import { Plus, Tags, Layers, DollarSign, Scale, Archive } from "lucide-react";
 import { calculateHerdValuation, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
@@ -152,6 +154,9 @@ export default async function HerdsPage() {
 
   return (
     <div className="max-w-[1400px]">
+      <Suspense>
+        <YardBookBanner />
+      </Suspense>
       <PageHeader
         title="Herds"
         titleClassName="text-4xl font-bold text-brand"

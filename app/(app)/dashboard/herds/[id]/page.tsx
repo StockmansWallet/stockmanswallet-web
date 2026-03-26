@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
+import { YardBookBanner } from "@/components/app/yard-book-banner";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -185,6 +187,9 @@ export default async function HerdDetailPage({
 
   return (
     <div className="max-w-6xl">
+      <Suspense>
+        <YardBookBanner />
+      </Suspense>
       <PageHeader
         title={herd.name}
         subtitle={[herd.species, herd.breed, herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} (${herd.sub_category})` : herd.category].filter(Boolean).join(" \u00B7 ")}
