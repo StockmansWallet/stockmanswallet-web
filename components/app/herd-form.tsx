@@ -320,6 +320,8 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
               type="number"
               step="0.01"
               defaultValue={herd?.daily_weight_gain ?? 0}
+              placeholder="Annual average kg/day"
+              helperText="Annual average, not seasonal"
             />
             <Input
               id="mortality_rate"

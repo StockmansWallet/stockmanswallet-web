@@ -633,7 +633,8 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                 hint={!dailyWeightGain}
                 value={dailyWeightGain}
                 onChange={(e) => setDailyWeightGain(e.target.value)}
-                placeholder="kg/day"
+                placeholder="Annual average kg/day"
+                helperText="Annual average, not seasonal"
               />
               <Input
                 id="mortality_rate"
