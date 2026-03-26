@@ -15,6 +15,16 @@ function deriveSexFromCategory(category: string): "Male" | "Female" {
   return MALE_KEYWORDS.some((k) => category.includes(k)) ? "Male" : "Female";
 }
 
+// Debug: Helper to treat empty strings from form inputs as null.
+// HTML form elements always submit strings, so optional fields send "" not null.
+const emptyToNull = z.string().transform((v) => (v === "" ? null : v));
+const optionalString = emptyToNull.nullable().optional();
+const optionalEnum = <T extends [string, ...string[]]>(values: T) =>
+  emptyToNull
+    .nullable()
+    .optional()
+    .pipe(z.enum(values).nullable().optional());
+
 const herdFormSchema = z.object({
   name: z.string().min(1),
   species: z.enum(["Cattle", "Sheep", "Pig", "Goat"]),
@@ -29,21 +39,21 @@ const herdFormSchema = z.object({
   is_breeder: z.string().optional(),
   is_pregnant: z.string().optional(),
   calving_rate: z.coerce.number().min(0).max(100).optional(),
-  breeding_program_type: z.enum(["ai", "controlled", "uncontrolled"]).optional().nullable(),
-  joining_period_start: z.string().optional().nullable(),
-  joining_period_end: z.string().optional().nullable(),
-  joined_date: z.string().optional().nullable(),
-  selected_saleyard: z.string().optional().nullable(),
-  paddock_name: z.string().optional().nullable(),
-  property_id: z.string().uuid().optional().nullable(),
-  additional_info: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(),
-  animal_id_number: z.string().optional().nullable(),
-  breed_premium_override: z.string().optional().nullable(),
-  lactation_status: z.string().optional().nullable(),
-  sub_category: z.string().optional().nullable(),
-  breeder_sub_type: z.string().optional().nullable(),
-  calf_weight_recorded_date: z.string().optional().nullable(),
+  breeding_program_type: optionalEnum(["ai", "controlled", "uncontrolled"]),
+  joining_period_start: optionalString,
+  joining_period_end: optionalString,
+  joined_date: optionalString,
+  selected_saleyard: optionalString,
+  paddock_name: optionalString,
+  property_id: emptyToNull.nullable().optional().pipe(z.string().uuid().nullable().optional()),
+  additional_info: optionalString,
+  notes: optionalString,
+  animal_id_number: optionalString,
+  breed_premium_override: optionalString,
+  lactation_status: optionalString,
+  sub_category: optionalString,
+  breeder_sub_type: optionalString,
+  calf_weight_recorded_date: optionalString,
 });
 
 const idSchema = z.string().uuid();
