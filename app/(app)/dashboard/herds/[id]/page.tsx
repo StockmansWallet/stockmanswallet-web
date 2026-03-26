@@ -187,9 +187,6 @@ export default async function HerdDetailPage({
 
   return (
     <div className="max-w-6xl">
-      <Suspense>
-        <YardBookBanner />
-      </Suspense>
       <PageHeader
         title={herd.name}
         subtitle={[herd.species, herd.breed, herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} (${herd.sub_category})` : herd.category].filter(Boolean).join(" \u00B7 ")}
@@ -371,10 +368,22 @@ export default async function HerdDetailPage({
                   <span className="text-text-muted">Pregnant</span>
                   <Badge variant={herd.is_pregnant ? "success" : "default"}>{herd.is_pregnant ? "Yes" : "No"}</Badge>
                 </div>
+                <InfoRow label="Breeding Program" value={herd.breeding_program_type ? herd.breeding_program_type.charAt(0).toUpperCase() + herd.breeding_program_type.slice(1) : null} />
                 <InfoRow label="Joined Date" value={herd.joined_date ? new Date(herd.joined_date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" }) : null} />
+                {herd.joining_period_start && (
+                  <InfoRow
+                    label="Joining Period"
+                    value={`${new Date(herd.joining_period_start).toLocaleDateString("en-AU", { day: "numeric", month: "short" })} – ${herd.joining_period_end ? new Date(herd.joining_period_end).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" }) : "Ongoing"}`}
+                  />
+                )}
+                {herd.joined_date && (
+                  <InfoRow
+                    label="Expected Calving"
+                    value={new Date(new Date(herd.joined_date).getTime() + 283 * 86400000).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+                  />
+                )}
                 <InfoRow label="Calving Rate" value={herd.calving_rate ? `${Math.round(herd.calving_rate > 1 ? herd.calving_rate : herd.calving_rate * 100)}%` : null} />
                 <InfoRow label="Lactation Status" value={herd.lactation_status} />
-                <InfoRow label="Breeding Program" value={herd.breeding_program_type} />
                 {calvesData && (
                   <InfoRow
                     label="Calves at Foot"
@@ -415,6 +424,13 @@ export default async function HerdDetailPage({
                 </CardContent>
               )}
             </Card>
+          )}
+
+          {/* Debug: Yard Book confirmation banner, placed below the breeding card for visibility */}
+          {herd.is_breeder && (
+            <Suspense>
+              <YardBookBanner />
+            </Suspense>
           )}
 
           {/* Mustering Records */}
