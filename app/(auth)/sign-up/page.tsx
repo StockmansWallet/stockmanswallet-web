@@ -53,7 +53,7 @@ export default function SignUpPage() {
         <div className="flex justify-center mb-4">
           <div className="relative">
             <img
-              src="/images/brangus-chat-profile.webp"
+              src="/images/brangus-ios-landing.webp"
               alt="Brangus"
               width={100}
               height={100}
