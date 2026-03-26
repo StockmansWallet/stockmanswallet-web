@@ -58,7 +58,14 @@ export async function createHerd(formData: FormData) {
 
   const raw = Object.fromEntries(formData.entries());
   const parsed = herdFormSchema.safeParse(raw);
-  if (!parsed.success) return { error: "Invalid input" };
+  if (!parsed.success) {
+    const fieldErrors = parsed.error.flatten().fieldErrors;
+    console.error("createHerd validation failed:", JSON.stringify(fieldErrors));
+    const details = Object.entries(fieldErrors)
+      .map(([k, v]) => `${k}: ${(v as string[]).join(", ")}`)
+      .join("; ");
+    return { error: `Validation failed: ${details}` };
+  }
 
   const v = parsed.data;
   const sex = deriveSexFromCategory(v.category);
@@ -127,7 +134,7 @@ export async function createHerd(formData: FormData) {
 
 export async function updateHerd(id: string, formData: FormData) {
   const idResult = idSchema.safeParse(id);
-  if (!idResult.success) return { error: "Invalid input" };
+  if (!idResult.success) return { error: "Invalid herd ID" };
 
   const supabase = await createClient();
   const {
@@ -138,7 +145,14 @@ export async function updateHerd(id: string, formData: FormData) {
 
   const raw = Object.fromEntries(formData.entries());
   const parsed = herdFormSchema.safeParse(raw);
-  if (!parsed.success) return { error: "Invalid input" };
+  if (!parsed.success) {
+    const fieldErrors = parsed.error.flatten().fieldErrors;
+    console.error("updateHerd validation failed:", JSON.stringify(fieldErrors));
+    const details = Object.entries(fieldErrors)
+      .map(([k, v]) => `${k}: ${(v as string[]).join(", ")}`)
+      .join("; ");
+    return { error: `Validation failed: ${details}` };
+  }
 
   const v = parsed.data;
   const updateSex = deriveSexFromCategory(v.category);
