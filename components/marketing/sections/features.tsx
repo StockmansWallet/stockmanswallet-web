@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Wallet, TrendingUp, BookOpen, FileText, Truck, Grid3x3, Users, Handshake, Lightbulb } from 'lucide-react'
@@ -15,6 +15,7 @@ interface FeatureTab {
   colorLight: string
   bullets: string[]
   mockup: string
+  video?: string
   icon: React.ReactNode
 }
 
@@ -191,6 +192,33 @@ const FEATURE_TABS: FeatureTab[] = [
   },
 ]
 
+function FeatureVideo({ src, isActive }: { src: string; isActive: boolean }) {
+  const ref = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    const video = ref.current
+    if (!video) return
+    if (isActive) {
+      video.currentTime = 0
+      video.play().catch(() => {})
+    } else {
+      video.pause()
+    }
+  }, [isActive])
+
+  return (
+    <video
+      ref={ref}
+      src={src}
+      autoPlay
+      muted
+      loop
+      playsInline
+      className="w-full"
+    />
+  )
+}
+
 export default function Features() {
   const [active, setActive] = useState(0)
   const feature = FEATURE_TABS[active]
@@ -345,26 +373,35 @@ export default function Features() {
               </motion.div>
             </AnimatePresence>
 
-            {/* Mockup */}
+            {/* Mockup – frame stays fixed, only screen content crossfades */}
             <div className="relative flex justify-center">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={feature.id}
-                  initial={{ opacity: 0, y: 20, scale: 0.97 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -20, scale: 0.97 }}
-                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                  className="relative z-10 w-[240px] sm:w-[260px] lg:w-[280px]"
-                >
-                  <Image
-                    src={feature.mockup}
-                    alt={`${feature.name} screenshot`}
-                    width={390}
-                    height={844}
-                    className="w-full"
-                  />
-                </motion.div>
-              </AnimatePresence>
+              <div
+                className="relative z-10 w-[240px] sm:w-[260px] lg:w-[280px]"
+                style={{ aspectRatio: '390 / 844' }}
+              >
+                <AnimatePresence initial={false}>
+                  <motion.div
+                    key={feature.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.35, ease: 'easeInOut' }}
+                    className="absolute inset-0"
+                  >
+                    {feature.video ? (
+                      <FeatureVideo src={feature.video} isActive={feature.id === FEATURE_TABS[active].id} />
+                    ) : (
+                      <Image
+                        src={feature.mockup}
+                        alt={`${feature.name} screenshot`}
+                        width={390}
+                        height={844}
+                        className="w-full"
+                      />
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
             </div>
           </div>
         </div>
