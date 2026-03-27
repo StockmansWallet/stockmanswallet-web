@@ -144,6 +144,19 @@ export function DashboardSaleyardSelector({ currentSaleyard }: DashboardSaleyard
               Your Herd&#8217;s Combined Saleyards
             </button>
 
+            {/* National averages option */}
+            <button
+              type="button"
+              onClick={() => selectSaleyard("National")}
+              className={`mb-1 w-full cursor-pointer rounded-lg px-3 py-2 text-left text-sm transition-all ${
+                currentSaleyard === "National"
+                  ? "bg-brand/15 text-brand font-medium"
+                  : "text-text-primary hover:bg-surface-raised"
+              }`}
+            >
+              Use National Averages
+            </button>
+
             {filteredGroups.map((g) => (
               <div key={g.state} className="mt-2">
                 <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-text-muted">

@@ -39,7 +39,10 @@ const BREEDER_SUB_TYPE_OPTIONS = [
   { value: "Heifer", label: "Heifer" },
 ];
 
-const saleyardOptions = saleyards.map((s) => ({ value: s, label: s }));
+const saleyardOptions = [
+  { value: "National", label: "Use National Averages" },
+  ...saleyards.map((s) => ({ value: s, label: s })),
+];
 
 function SectionIcon({ icon: Icon }: { icon: React.ComponentType<{ className?: string }> }) {
   return (
