@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { LoadDemoDataButton } from "@/components/app/load-demo-data-button";
 import { HerdComposition } from "./herd-composition";
 import { PortfolioChart } from "./portfolio-chart";
-import { calculateHerdValuation, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import { calculateHerdValuation, categoryFallback, parseCalvesAtFoot, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 import { expandWithNearbySaleyards } from "@/lib/data/saleyard-proximity";
@@ -159,6 +159,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     if (result.priceSource !== "saleyard") fallbackCount++;
   }
   const totalBreedingAccrual = totalPreBirthAccrual + totalCalvesAtFootValue;
+  const totalCalvesAtFootHead = activeHerds.reduce((sum, h) => {
+    const parsed = parseCalvesAtFoot(h.additional_info);
+    return sum + (parsed?.headCount ?? 0);
+  }, 0);
   const breederCount = activeHerds.filter((h) => h.is_breeder).length;
   const pregnantCount = activeHerds.filter((h) => h.is_pregnant).length;
 
@@ -300,6 +304,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 <CalvingAccrualCard
                   totalAccrual={totalPreBirthAccrual}
                   calvesAtFootValue={totalCalvesAtFootValue}
+                  calvesAtFootHead={totalCalvesAtFootHead}
                   breederCount={breederCount}
                   pregnantCount={pregnantCount}
                 />

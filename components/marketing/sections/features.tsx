@@ -153,7 +153,7 @@ const FEATURE_TABS: FeatureTab[] = [
       'Post-kill analysis with Grid Capture Ratio, Realisation Factor, and Kill Score',
       'Build a kill sheet library that improves your predictions over time',
     ],
-    mockup: '/images/iphone-screen-grid.webp',
+    mockup: '/images/iphone-screen-gridiq.webp',
     icon: <Grid3x3 className="h-5 w-5" />,
   },
   {

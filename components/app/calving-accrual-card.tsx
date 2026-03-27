@@ -4,6 +4,7 @@ import { Leaf } from "lucide-react";
 interface CalvingAccrualCardProps {
   totalAccrual: number;
   calvesAtFootValue: number;
+  calvesAtFootHead: number;
   breederCount: number;
   pregnantCount: number;
 }
@@ -11,6 +12,7 @@ interface CalvingAccrualCardProps {
 export function CalvingAccrualCard({
   totalAccrual,
   calvesAtFootValue,
+  calvesAtFootHead,
   breederCount,
   pregnantCount,
 }: CalvingAccrualCardProps) {
@@ -49,9 +51,9 @@ export function CalvingAccrualCard({
             </div>
           </div>
         )}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-3">
           <div className="rounded-xl bg-white/[0.03] p-3">
-            <p className="text-xs text-text-muted">Breeder Herds</p>
+            <p className="text-xs text-text-muted">Breeders</p>
             <p className="mt-1 text-lg font-bold text-text-primary">
               {breederCount}
             </p>
@@ -60,6 +62,12 @@ export function CalvingAccrualCard({
             <p className="text-xs text-text-muted">Pregnant</p>
             <p className="mt-1 text-lg font-bold text-text-primary">
               {pregnantCount}
+            </p>
+          </div>
+          <div className="rounded-xl bg-white/[0.03] p-3">
+            <p className="text-xs text-text-muted">Calves</p>
+            <p className="mt-1 text-lg font-bold text-text-primary">
+              {calvesAtFootHead > 0 ? `${calvesAtFootHead} hd` : "-"}
             </p>
           </div>
         </div>
