@@ -69,16 +69,15 @@ const cardSpring = { type: 'spring', stiffness: 300, damping: 28 } as const
 function ContextCard({ card, index }: { card: ChatExample['contextCards'][0]; index: number }) {
   return (
     <motion.div
-      layout
-      initial={{ x: 200, opacity: 0, scale: 0.9 }}
-      animate={{ x: 0, opacity: 1, scale: 1 }}
-      exit={{ x: -200, opacity: 0, scale: 0.9 }}
+      initial={{ opacity: 0, y: 12, scale: 0.92 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -8, scale: 0.95 }}
       transition={{
         ...cardSpring,
-        delay: index * 0.12,
-        opacity: { duration: 0.3, delay: index * 0.12 },
+        delay: index * 0.1,
+        opacity: { duration: 0.25, delay: index * 0.1 },
       }}
-      className="flex h-[66px] min-w-[100px] flex-col justify-center gap-0.5 rounded-xl bg-white/5 px-3"
+      className="flex h-[66px] min-w-[120px] flex-col justify-center gap-0.5 rounded-xl bg-white/[0.06] px-3.5"
     >
       <div className="flex items-center gap-0.5">
         <span className="flex-1 truncate text-[10px] font-semibold uppercase tracking-wide text-text-muted">{card.label}</span>
@@ -92,7 +91,7 @@ function ContextCard({ card, index }: { card: ChatExample['contextCards'][0]; in
   )
 }
 
-const HOLD_DURATION = 6000
+const HOLD_DURATION = 10000
 
 export default function StockmanIQ() {
   const ref = useRef<HTMLDivElement>(null)
@@ -100,7 +99,7 @@ export default function StockmanIQ() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showCards, setShowCards] = useState(false)
   const [showResponse, setShowResponse] = useState(false)
-  const [phase, setPhase] = useState<'user' | 'response' | 'holding' | 'transitioning'>('user')
+  const [phase, setPhase] = useState<'user' | 'response' | 'holding' | 'fading'>('user')
 
   const current = CHAT_EXAMPLES[currentIndex]
 
@@ -109,39 +108,57 @@ export default function StockmanIQ() {
     if (!inView) return
 
     if (phase === 'user') {
+      // Wait so user can read the question, then show AI response
       const timer = setTimeout(() => {
         setShowResponse(true)
         setPhase('response')
-      }, 800)
+      }, 1500)
       return () => clearTimeout(timer)
     }
 
     if (phase === 'response') {
+      // Short pause then show context cards
       const timer = setTimeout(() => {
         setShowCards(true)
         setPhase('holding')
-      }, 600)
+      }, 800)
       return () => clearTimeout(timer)
     }
 
     if (phase === 'holding') {
       const timer = setTimeout(() => {
-        setPhase('transitioning')
-        setShowCards(false)
-        setShowResponse(false)
-        setTimeout(() => {
-          setCurrentIndex((prev) => (prev + 1) % CHAT_EXAMPLES.length)
-          setPhase('user')
-        }, 500)
+        // Fade everything out in place
+        setPhase('fading')
       }, HOLD_DURATION)
       return () => clearTimeout(timer)
+    }
+
+    if (phase === 'fading') {
+      // Reverse pop: cards first, then AI bubble, then user bubble, then swap
+      setShowCards(false)
+      const t1 = setTimeout(() => setShowResponse(false), 300)
+      const t2 = setTimeout(() => {
+        setCurrentIndex((prev) => (prev + 1) % CHAT_EXAMPLES.length)
+        setPhase('user')
+      }, 700)
+      return () => { clearTimeout(t1); clearTimeout(t2) }
     }
   }, [phase, inView])
 
   return (
     <section id="brangus" className="relative py-24 lg:py-32 overflow-x-clip">
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid items-center gap-16 lg:grid-cols-[1.2fr_2fr] lg:gap-12">
+        <div className="relative grid items-center gap-16 lg:grid-cols-[1.2fr_2fr] lg:gap-12">
+          {/* Brangus - anchored to grid, bottom-aligned with left column */}
+          <div className="absolute right-[-180px] bottom-[-50px] z-10 h-[820px] w-[420px] pointer-events-none">
+            <Image
+              src="/images/brangus-post-dirt2.webp"
+              alt="Brangus leaning on a post beside the chat panel"
+              fill
+              className="object-contain object-right-bottom"
+            />
+          </div>
+
           {/* Text */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -186,103 +203,85 @@ export default function StockmanIQ() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="relative"
+            className="relative pt-16"
           >
-            {/* Brangus leaning on the chat */}
-            <div className="absolute right-[-130px] bottom-[-45px] z-10 h-[820px] w-[420px] pointer-events-none">
-              <Image
-                src="/images/brangus-lean-2.webp"
-                alt="Brangus leaning on a post beside the chat panel"
-                fill
-                className="object-contain object-right-bottom"
-              />
-            </div>
-
-            <div className="mr-[280px] flex h-[460px] flex-col rounded-3xl border border-white/[0.06] bg-[#231f1d]">
-              {/* Scrollable messages area */}
-              <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 pt-5 pb-3">
-                <AnimatePresence mode="wait">
-                  {inView && (
-                    <motion.div
-                      key={currentIndex}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.4 }}
-                      className="space-y-4"
-                    >
-                      {/* User message - pops in */}
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.85, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 25, delay: 0.15 }}
-                        className="flex items-end justify-end gap-2"
-                      >
-                        <div className="relative max-w-[72%] rounded-3xl bg-brand px-4 py-2.5">
-                          <p className="text-xs text-white leading-relaxed">{current.userMessage}</p>
-                          <BubbleTail side="right" color="#D9762F" />
-                        </div>
-                        <Image
-                          src="/images/demo-user-profile.webp"
-                          alt="User"
-                          width={40}
-                          height={40}
-                          className="-mb-7 h-10 w-10 shrink-0 self-end rounded-full object-cover"
-                        />
-                      </motion.div>
-
-                      {/* AI response - pops in after delay */}
-                      <AnimatePresence>
-                        {showResponse && (
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.85, y: 10 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                            className="flex items-end gap-2"
-                          >
-                            <Image
-                              src="/images/brangus-chat-profile.webp"
-                              alt="Brangus"
-                              width={40}
-                              height={40}
-                              className="-mb-7 h-10 w-10 shrink-0 self-end rounded-full object-cover"
-                            />
-                            <div className="relative max-w-[72%] rounded-3xl bg-[#44372D] px-4 py-2.5">
-                              <p className="text-xs text-white/80 leading-relaxed whitespace-pre-line">
-                                {current.assistantMessage}
-                              </p>
-                              <BubbleTail side="left" color="#44372D" />
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Context cards */}
-              <div className="flex h-[90px] items-center gap-2 overflow-hidden border-t border-white/[0.08] px-3 py-2.5">
-                <AnimatePresence mode="popLayout">
-                  {showCards && current.contextCards.length > 0 && current.contextCards.map((card, i) => (
-                    <ContextCard key={`${currentIndex}-${card.label}`} card={card} index={i} />
-                  ))}
-                </AnimatePresence>
-              </div>
-
-              {/* Input bar */}
-              <div className="flex items-center gap-2 border-t border-white/[0.06] p-4">
-                <div className="flex min-h-[44px] flex-1 items-center rounded-[22px] border border-white/10 bg-white/5 pl-4 pr-1.5">
-                  <span className="flex-1 text-sm text-text-muted">Ask Brangus anything...</span>
+            <div className="mr-[220px]">
+              <motion.div
+                animate={{ opacity: phase === 'fading' ? 0 : 1 }}
+                transition={{ duration: 0.4 }}
+              >
+                {/* User row */}
+                <div className="flex items-end justify-end gap-2 pb-4">
+                  <motion.div
+                    key={`user-${currentIndex}`}
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: [0, 1.05, 1] }}
+                    transition={{ duration: 0.45, delay: 0.15, ease: 'easeOut' }}
+                    style={{ transformOrigin: 'bottom right' }}
+                    className="relative max-w-[75%] rounded-2xl bg-[#44372D] px-4 py-2.5"
+                  >
+                    <p className="text-sm text-white/90 leading-relaxed">{current.userMessage}</p>
+                    <BubbleTail side="right" color="#44372D" />
+                  </motion.div>
+                  <motion.div
+                    key={`user-av-${currentIndex}`}
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.2 }}
+                    className="mb-[-28px] shrink-0"
+                  >
+                    <Image
+                      src="/images/demo-user-profile.webp"
+                      alt="User"
+                      width={40}
+                      height={40}
+                      className="h-10 w-10 rounded-full object-cover"
+                    />
+                  </motion.div>
                 </div>
-                <div className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 transition-all hover:bg-white/10">
-                  <svg className="h-4 w-4 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M6.5 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h2.5l5-4.5V19.5l-5-4.5z" />
-                    <line x1="22" y1="2" x2="2" y2="22" strokeWidth={1.5} />
-                  </svg>
+
+                {/* Brangus row */}
+                <div className="flex items-end gap-2 pb-6" style={{ visibility: showResponse ? 'visible' : 'hidden' }}>
+                  <motion.div
+                    animate={{ opacity: showResponse ? 1 : 0, scale: showResponse ? 1 : 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="mb-[-28px] shrink-0"
+                  >
+                    <Image
+                      src="/images/brangus-chat-profile.webp"
+                      alt="Brangus"
+                      width={40}
+                      height={40}
+                      className="h-10 w-10 rounded-full object-cover"
+                    />
+                  </motion.div>
+                  <motion.div
+                    key={`ai-${currentIndex}`}
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={showResponse
+                      ? { opacity: 1, scale: [0, 1.05, 1] }
+                      : { opacity: 0, scale: 0 }
+                    }
+                    transition={{ duration: 0.45, delay: 0.1, ease: 'easeOut' }}
+                    style={{ transformOrigin: 'bottom left' }}
+                    className="relative max-w-[75%] rounded-2xl bg-brand px-4 py-2.5"
+                  >
+                    <p className="text-sm text-white leading-relaxed whitespace-pre-line">
+                      {current.assistantMessage}
+                    </p>
+                    <BubbleTail side="left" color="#D9762F" />
+                  </motion.div>
                 </div>
-              </div>
+
+                {/* Context cards */}
+                <div className="flex min-h-[76px] items-center gap-2.5 mt-8">
+                  <AnimatePresence>
+                    {showCards && current.contextCards.length > 0 && current.contextCards.map((card, i) => (
+                      <ContextCard key={`${currentIndex}-${card.label}`} card={card} index={i} />
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
             </div>
 
             {/* Glow */}
