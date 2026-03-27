@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { useRef, useState, useEffect } from 'react'
 
 const ADVISOR_FEATURES = [
   {
@@ -12,7 +12,6 @@ const ADVISOR_FEATURES = [
         <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg>
     ),
-    span: 'col-span-1',
   },
   {
     title: 'Client Management',
@@ -22,7 +21,6 @@ const ADVISOR_FEATURES = [
         <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
       </svg>
     ),
-    span: 'col-span-1',
   },
   {
     title: 'Simulator Sandbox',
@@ -32,7 +30,6 @@ const ADVISOR_FEATURES = [
         <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
       </svg>
     ),
-    span: 'col-span-1',
   },
   {
     title: 'Professional Reports',
@@ -42,20 +39,34 @@ const ADVISOR_FEATURES = [
         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
       </svg>
     ),
-    span: 'col-span-1',
   },
 ]
 
 export default function ForAdvisors() {
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.15 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <section id="advisors" className="relative py-24 lg:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center"
+        <div
+          className={`text-center transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'}`}
         >
           <span className="text-sm font-medium uppercase tracking-wider" style={{ color: '#2F8CD9' }}>
             For Advisors
@@ -68,24 +79,14 @@ export default function ForAdvisors() {
           <p className="mx-auto mt-4 max-w-2xl text-base text-text-secondary">
             Bankers, livestock agents, accountants, and insurers get dedicated tools to manage client portfolios with professional-grade analysis.
           </p>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
-          className="mt-16 grid gap-6 sm:grid-cols-2"
-        >
-          {ADVISOR_FEATURES.map((feature) => (
-            <motion.div
+        <div ref={sectionRef} className="mt-16 grid gap-6 sm:grid-cols-2">
+          {ADVISOR_FEATURES.map((feature, i) => (
+            <div
               key={feature.title}
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                visible: { opacity: 1, y: 0 },
-              }}
-              transition={{ duration: 0.4 }}
-              className={`group relative overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.04] p-8 transition-all duration-300 hover:border-[#1E5C8C]/20 ${feature.span}`}
+              className={`group relative overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.04] p-8 transition-all duration-500 hover:border-[#1E5C8C]/20 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'}`}
+              style={{ transitionDelay: isVisible ? `${i * 80}ms` : '0ms' }}
             >
               {/* Hover glow */}
               <div className="absolute inset-0 bg-gradient-to-br from-[#1E5C8C]/[0.04] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
@@ -97,9 +98,9 @@ export default function ForAdvisors() {
                 <h3 className="mt-5 text-lg font-semibold text-white">{feature.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-text-secondary">{feature.description}</p>
               </div>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   )

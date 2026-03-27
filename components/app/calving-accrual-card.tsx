@@ -67,7 +67,7 @@ export function CalvingAccrualCard({
           <div className="rounded-xl bg-white/[0.03] p-3">
             <p className="text-xs text-text-muted">Calves</p>
             <p className="mt-1 text-lg font-bold text-text-primary">
-              {calvesAtFootHead > 0 ? `${calvesAtFootHead} hd` : "-"}
+              {calvesAtFootHead > 0 ? calvesAtFootHead : "-"}
             </p>
           </div>
         </div>
