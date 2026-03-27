@@ -144,6 +144,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   let portfolioValue = 0;
   let fallbackCount = 0;
   let totalPreBirthAccrual = 0;
+  let totalCalvesAtFootValue = 0;
   for (const h of activeHerds) {
     const herdWithOverride = saleyardOverride
       ? { ...h, selected_saleyard: saleyardOverride }
@@ -154,8 +155,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     );
     portfolioValue += result.netValue;
     totalPreBirthAccrual += result.preBirthAccrual;
+    totalCalvesAtFootValue += result.calvesAtFootValue;
     if (result.priceSource !== "saleyard") fallbackCount++;
   }
+  const totalBreedingAccrual = totalPreBirthAccrual + totalCalvesAtFootValue;
   const breederCount = activeHerds.filter((h) => h.is_breeder).length;
   const pregnantCount = activeHerds.filter((h) => h.is_pregnant).length;
 
@@ -293,9 +296,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 totalHead={totalHead}
               />
 
-              {totalPreBirthAccrual > 0 && (
+              {totalBreedingAccrual > 0 && (
                 <CalvingAccrualCard
                   totalAccrual={totalPreBirthAccrual}
+                  calvesAtFootValue={totalCalvesAtFootValue}
                   breederCount={breederCount}
                   pregnantCount={pregnantCount}
                 />
