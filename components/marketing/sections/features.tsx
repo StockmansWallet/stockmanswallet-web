@@ -159,7 +159,7 @@ const FEATURE_TABS: FeatureTab[] = [
     id: 'markets',
     name: 'Markets',
     tagline: 'Live market intelligence',
-    description: 'Live MLA market data at your fingertips. National indicators, saleyard category prices, and trend signals, updated daily so you can time your decisions with confidence.',
+    description: 'Live market data at your fingertips. National indicators, saleyard category prices, and trend signals, updated daily so you can time your decisions with confidence.',
     color: '#E8594E',
     colorLight: '#F08070',
     bullets: [

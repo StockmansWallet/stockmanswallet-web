@@ -1,7 +1,6 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { TEAM_MEMBERS } from '@/lib/marketing/constants'
 
 export default function About() {
   return (
@@ -24,29 +23,6 @@ export default function About() {
             We believe livestock producers deserve the same quality of financial tools available to equity investors. Real data, intelligent analysis, professional-grade reporting.
           </p>
         </motion.div>
-
-        <div className="mx-auto mt-16 grid max-w-3xl gap-8 sm:grid-cols-3">
-          {TEAM_MEMBERS.map((member, i) => (
-            <motion.div
-              key={member.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="text-center"
-            >
-              {/* Avatar */}
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-brand/15 bg-brand/10">
-                <span className="text-lg font-bold text-brand">
-                  {member.name.split(' ').map(n => n[0]).join('')}
-                </span>
-              </div>
-              <h3 className="mt-4 text-base font-medium text-white">{member.name}</h3>
-              <p className="text-sm font-medium text-brand">{member.role}</p>
-              <p className="mt-2 text-xs text-text-muted">{member.bio}</p>
-            </motion.div>
-          ))}
-        </div>
       </div>
     </section>
   )

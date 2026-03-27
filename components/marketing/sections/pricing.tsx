@@ -120,8 +120,7 @@ export default function Pricing() {
                       </div>
                     ) : tier.priceLabel ? (
                       <div className="flex items-baseline gap-1">
-                        <span className="text-3xl font-bold text-white">A${tier.priceLabel}</span>
-                        <span className="text-sm text-text-muted">/month + GST</span>
+                        <span className="text-3xl font-bold text-white">{tier.priceLabel}</span>
                       </div>
                     ) : (
                       <p className="text-lg font-semibold text-brand-light">Coming Soon</p>

@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 
 const STATS = [
-  { label: 'MLA Market Categories', value: '50+' },
+  { label: 'Market Categories', value: '50+' },
   { label: 'Headquarters', value: 'Queensland' },
   { label: 'Launching', value: 'May 2026' },
 ]
@@ -33,7 +33,7 @@ export default function AboutAustralia() {
 
           <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-text-secondary">
             Stockman&apos;s Wallet is built and operated in Queensland, Australia. We source
-            our market data from Meat &amp; Livestock Australia, calculate freight on
+            our market data from Australian saleyards, calculate freight on
             Australian roads, and design every feature for the conditions and categories
             that matter to Australian producers. From the Darling Downs to the Top End,
             this platform understands your country.

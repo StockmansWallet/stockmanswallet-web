@@ -32,6 +32,7 @@ export interface TeamMember {
   role: string
   email: string
   bio: string
+  image: string
 }
 
 export interface Step {

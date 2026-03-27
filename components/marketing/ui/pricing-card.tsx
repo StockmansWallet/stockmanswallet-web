@@ -33,7 +33,7 @@ export default function PricingCard({ tier }: PricingCardProps) {
           </div>
         ) : (
           <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-bold text-brand">Coming Soon</span>
+            <span className="text-2xl font-bold text-brand">{tier.priceLabel ?? 'TBA'}</span>
           </div>
         )}
         <p className="mt-2 text-sm text-text-tertiary">{tier.description}</p>

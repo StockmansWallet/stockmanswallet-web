@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { TEAM_MEMBERS } from '@/lib/marketing/constants'
 
@@ -37,14 +38,13 @@ export default function AboutTeam() {
               className="flex flex-col items-center rounded-2xl bg-white/[0.04] p-6 text-center sm:p-7"
             >
               {/* Avatar */}
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-brand/15 bg-brand/10">
-                <span className="text-2xl font-bold text-brand">
-                  {member.name
-                    .split(' ')
-                    .map((n) => n[0])
-                    .join('')}
-                </span>
-              </div>
+              <Image
+                src={member.image}
+                alt={member.name}
+                width={80}
+                height={80}
+                className="h-20 w-20 rounded-full object-cover"
+              />
 
               <h3 className="mt-5 text-lg font-semibold text-white">{member.name}</h3>
               <p className="mt-1 text-sm font-medium text-brand">{member.role}</p>

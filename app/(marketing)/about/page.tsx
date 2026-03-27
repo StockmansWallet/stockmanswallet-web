@@ -10,7 +10,7 @@ import AboutCTA from '@/components/marketing/sections/about/about-cta'
 export const metadata: Metadata = {
   title: "About | Stockman's Wallet",
   description:
-    "Meet the team behind Stockman's Wallet \u2014 an Australian livestock valuation platform giving producers the same quality financial tools available to equity investors.",
+    "Meet the team behind Stockman's Wallet, an Australian livestock valuation platform giving producers the same quality financial tools available to equity investors.",
 }
 
 export default function AboutPage() {

@@ -11,11 +11,11 @@ export function Footer() {
           <div>
             <div className="flex items-center gap-2">
               <Image
-                src="/images/app-icon.png"
+                src="/images/sw-logo-tally.svg"
                 alt="Stockman's Wallet"
                 width={32}
                 height={32}
-                className="h-8 w-8 rounded-[8px]"
+                className="h-8 w-8"
               />
               <span className="text-lg font-bold text-white">Stockman&apos;s Wallet</span>
             </div>
@@ -37,9 +37,6 @@ export function Footer() {
                   {link.label}
                 </a>
               ))}
-              <Link href="/about" className="text-sm text-text-secondary transition-colors hover:text-white">
-                About
-              </Link>
             </nav>
           </div>
 
