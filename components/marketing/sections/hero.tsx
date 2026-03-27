@@ -206,7 +206,7 @@ export default function Hero() {
                 <p className="text-[11px] text-text-muted">+ $596 GST</p>
               </div>
               <p className="mt-1.5 text-[11px] leading-snug text-text-secondary">
-                $68.48 per head, 662 km from Pure Produce to Emerald.
+                $68.48 per head, 662 km from Stockman Downs to Emerald.
               </p>
             </motion.div>
           </motion.div>

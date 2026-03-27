@@ -17,7 +17,7 @@ const CHAT_EXAMPLES: ChatExample[] = [
     contextCards: [
       { label: 'Freight to Emerald', value: '$5,958', detail: '+ $596 GST' },
       { label: 'Per Head', value: '$68.48', detail: '87 heifers' },
-      { label: 'Distance', value: '662 km', detail: 'Pure Produce to Emerald' },
+      { label: 'Distance', value: '662 km', detail: 'Stockman Downs to Emerald' },
     ],
   },
   {
