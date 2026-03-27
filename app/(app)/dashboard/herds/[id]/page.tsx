@@ -183,6 +183,23 @@ export default async function HerdDetailPage({
     ? (projectedWeight ?? herd.current_weight ?? herd.initial_weight ?? 0) * birthWeightRatio * valuation.pricePerKg
     : null;
 
+  // Breeding countdown logic (matches iOS BreedingDetailsCard)
+  const joinedDateObj = herd.joined_date ? new Date(herd.joined_date) : null;
+  const hasJoiningStarted = joinedDateObj ? joinedDateObj <= new Date() : false;
+  const gestationDays = herd.species === "Sheep" ? 150 : 283;
+  const daysSinceJoined = hasJoiningStarted && joinedDateObj
+    ? Math.max(0, Math.round((Date.now() - joinedDateObj.getTime()) / 86400000))
+    : 0;
+  const daysUntilJoining = !hasJoiningStarted && joinedDateObj
+    ? Math.max(0, Math.round((joinedDateObj.getTime() - Date.now()) / 86400000))
+    : 0;
+  const daysUntilCalving = hasJoiningStarted
+    ? Math.max(0, gestationDays - daysSinceJoined)
+    : 0;
+  const gestationProgress = hasJoiningStarted
+    ? Math.min(100, Math.max(0, (daysSinceJoined / gestationDays) * 100))
+    : 0;
+
   const property = herd.properties as { property_name: string } | null;
 
   return (
@@ -370,6 +387,12 @@ export default async function HerdDetailPage({
                 </div>
                 <InfoRow label="Breeding Program" value={herd.breeding_program_type ? herd.breeding_program_type.charAt(0).toUpperCase() + herd.breeding_program_type.slice(1) : null} />
                 <InfoRow label="Joined Date" value={herd.joined_date ? new Date(herd.joined_date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" }) : null} />
+                {herd.joined_date && hasJoiningStarted && (
+                  <InfoRow label="Days Since Joining" value={`${daysSinceJoined} days`} />
+                )}
+                {herd.joined_date && !hasJoiningStarted && daysUntilJoining > 0 && (
+                  <InfoRow label="Days Until Joining" value={`${daysUntilJoining} days`} />
+                )}
                 {herd.joining_period_start && (
                   <InfoRow
                     label="Joining Period"
@@ -379,8 +402,14 @@ export default async function HerdDetailPage({
                 {herd.joined_date && (
                   <InfoRow
                     label="Expected Calving"
-                    value={new Date(new Date(herd.joined_date).getTime() + 283 * 86400000).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+                    value={new Date(new Date(herd.joined_date).getTime() + gestationDays * 86400000).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
                   />
+                )}
+                {herd.joined_date && hasJoiningStarted && herd.is_pregnant && daysUntilCalving > 0 && (
+                  <InfoRow label="Est. Days to Calving" value={`${daysUntilCalving} days`} />
+                )}
+                {herd.joined_date && hasJoiningStarted && gestationProgress > 5 && gestationProgress < 100 && (
+                  <InfoRow label="Gestation Progress" value={`${Math.round(gestationProgress)}%`} />
                 )}
                 <InfoRow label="Calving Rate" value={herd.calving_rate ? `${Math.round(herd.calving_rate > 1 ? herd.calving_rate : herd.calving_rate * 100)}%` : null} />
                 <InfoRow label="Lactation Status" value={herd.lactation_status} />
