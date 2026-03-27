@@ -22,11 +22,7 @@ const CHAT_EXAMPLES: ChatExample[] = [
   },
   {
     userMessage: "Brangus, if the market drops 20c/kg over the next month, what does that look like for my entire portfolio?",
-    assistantMessage: `Hmm, yeah that'd hurt. A 20c drop takes you from $1.67 million down to $1.58 million. That's an $83,649 hit across the whole portfolio.
-
-Your breeders cop the worst of it - they're your biggest chunk, so that's a $47,352 whack right there. The steers and heifers wear the rest between them.
-
-Not the end of the world if you're holding for better prices, but if the market's heading south you'd want to move quick before it gets worse.`,
+    assistantMessage: `A 20c drop takes you from $1.67 million down to $1.58 million. That's an $83,649 hit across the whole portfolio. Your breeders cop the worst of it. Not the end of the world if you're holding, but if the market's heading south you'd want to move quick.`,
     contextCards: [
       { label: 'Current Portfolio', value: '$1,665,732', detail: '' },
       { label: 'After -20c/kg Drop', value: '$1,582,083', detail: '' },
@@ -35,23 +31,12 @@ Not the end of the world if you're holding for better prices, but if the market'
   },
   {
     userMessage: "Brangus I forgot it's Hilary's birthday on the 10th June, I need to book the mustering chopper for next Thursday for the bulls and Campbells utes in for a Service this Friday.",
-    assistantMessage: `Done, mate. Got all three locked in the Yard Book
-- Hilary's birthday 10 June (gotta remember the flowers or the dog sleeps on the couch)
-- Mustering chopper for the bulls next Thursday 26 March
-- Campbells utes in for service this Friday 20 March
-
-You'll get reminders so you don't have to remember a thing. What are you doing for Hilary's do?`,
+    assistantMessage: `Done, mate. Got all three locked in the Yard Book. Hilary's birthday 10 June, mustering chopper for the bulls next Thursday 26 March, and Campbells utes in for service this Friday 20 March. You'll get reminders so you don't have to remember a thing.`,
     contextCards: [],
   },
   {
-    userMessage: "Brangus, I've just had a live export order come through for my Yearling Steers on farm at $4.95/kg. Provide a price comparison to sell them at Charters Towers sale yard, including transport.",
-    assistantMessage: `Beauty, let's run the numbers. You've got 210 head at 450kg average.
-
-Live export offer: $4.95/kg = $2,227 per head (on farm, no transport cost)
-
-Charters Towers saleyard route: Yearling Steers at 400+kg are tracking $4.84/kg through the yard. That's $2,178 per head... but you're up for $10.73/head freight ($2,254 total + $225 GST). So you're netting $2,167 per head after transport.
-
-The gap: Live export pays $60/head better than going to Charters Towers. That's a $12,600 swing on the whole herd.`,
+    userMessage: "Brangus, I've just had a live export order come through for my Yearling Steers on farm at $4.95/kg. Compare to selling at Charters Towers, including transport.",
+    assistantMessage: `Live export at $4.95/kg = $2,227 per head on farm. Charters Towers: $4.84/kg minus $10.73/head freight nets you $2,167 per head. Live export pays $60/head better. That's a $12,600 swing on 210 head.`,
     contextCards: [
       { label: 'Live Export Offer', value: '$4.95/kg', detail: '$2,227/h' },
       { label: 'Charters Towers', value: '$4.84/kg', detail: 'After $10.73 freight' },
@@ -59,46 +44,6 @@ The gap: Live export pays $60/head better than going to Charters Towers. That's 
     ],
   },
 ]
-
-function TypingText({ text, delay, onComplete, scrollRef }: { text: string; delay: number; onComplete?: () => void; scrollRef?: React.RefObject<HTMLDivElement | null> }) {
-  const [displayed, setDisplayed] = useState('')
-  const [started, setStarted] = useState(false)
-
-  useEffect(() => {
-    setDisplayed('')
-    setStarted(false)
-    const startTimer = setTimeout(() => setStarted(true), delay)
-    return () => clearTimeout(startTimer)
-  }, [delay, text])
-
-  useEffect(() => {
-    if (!started) return
-    let i = 0
-    const timer = setInterval(() => {
-      i++
-      setDisplayed(text.slice(0, i))
-      if (scrollRef?.current) {
-        scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-      }
-      if (i >= text.length) {
-        clearInterval(timer)
-        onComplete?.()
-      }
-    }, 8)
-    return () => clearInterval(timer)
-  }, [started, text, onComplete, scrollRef])
-
-  if (!started) return null
-
-  return (
-    <span>
-      {displayed}
-      {displayed.length < text.length && (
-        <span className="inline-block h-4 w-0.5 animate-pulse bg-brand ml-0.5" />
-      )}
-    </span>
-  )
-}
 
 function BubbleTail({ side, color }: { side: 'left' | 'right'; color: string }) {
   const isRight = side === 'right'
@@ -147,39 +92,51 @@ function ContextCard({ card, index }: { card: ChatExample['contextCards'][0]; in
   )
 }
 
-const HOLD_DURATION = 10000 // ms to show completed conversation before transitioning
+const HOLD_DURATION = 6000
 
 export default function StockmanIQ() {
   const ref = useRef<HTMLDivElement>(null)
-  const scrollRef = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: '-100px' })
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showCards, setShowCards] = useState(false)
-  const [phase, setPhase] = useState<'typing' | 'holding' | 'transitioning'>('typing')
+  const [showResponse, setShowResponse] = useState(false)
+  const [phase, setPhase] = useState<'user' | 'response' | 'holding' | 'transitioning'>('user')
 
   const current = CHAT_EXAMPLES[currentIndex]
 
-  const handleTypingComplete = useCallback(() => {
-    setShowCards(true)
-    setPhase('holding')
-  }, [])
-
-  // Hold then transition to next
+  // Sequence: user bubble pops in -> pause -> response pops in -> cards slide in -> hold -> transition
   useEffect(() => {
-    if (phase !== 'holding') return
-    const timer = setTimeout(() => {
-      setPhase('transitioning')
-      // Slide out cards immediately
-      setShowCards(false)
-      // After exit animation, move to next
-      setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % CHAT_EXAMPLES.length)
-        if (scrollRef.current) scrollRef.current.scrollTop = 0
-        setPhase('typing')
+    if (!inView) return
+
+    if (phase === 'user') {
+      const timer = setTimeout(() => {
+        setShowResponse(true)
+        setPhase('response')
+      }, 800)
+      return () => clearTimeout(timer)
+    }
+
+    if (phase === 'response') {
+      const timer = setTimeout(() => {
+        setShowCards(true)
+        setPhase('holding')
       }, 600)
-    }, HOLD_DURATION)
-    return () => clearTimeout(timer)
-  }, [phase])
+      return () => clearTimeout(timer)
+    }
+
+    if (phase === 'holding') {
+      const timer = setTimeout(() => {
+        setPhase('transitioning')
+        setShowCards(false)
+        setShowResponse(false)
+        setTimeout(() => {
+          setCurrentIndex((prev) => (prev + 1) % CHAT_EXAMPLES.length)
+          setPhase('user')
+        }, 500)
+      }, HOLD_DURATION)
+      return () => clearTimeout(timer)
+    }
+  }, [phase, inView])
 
   return (
     <section id="brangus" className="relative py-24 lg:py-32 overflow-x-clip">
@@ -243,21 +200,22 @@ export default function StockmanIQ() {
 
             <div className="mr-[280px] flex h-[460px] flex-col rounded-3xl border border-white/[0.06] bg-[#231f1d]">
               {/* Scrollable messages area */}
-              <div ref={scrollRef} className="flex-1 overflow-y-auto overflow-x-hidden px-4 pt-5 pb-3">
+              <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 pt-5 pb-3">
                 <AnimatePresence mode="wait">
                   {inView && (
                     <motion.div
                       key={currentIndex}
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={phase === 'transitioning' ? { opacity: 0, y: -40 } : { opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, ease: 'easeInOut' }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.4 }}
                       className="space-y-4"
                     >
-                      {/* User message */}
+                      {/* User message - pops in */}
                       <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: 0.2 }}
+                        initial={{ opacity: 0, scale: 0.85, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 25, delay: 0.15 }}
                         className="flex items-end justify-end gap-2"
                       >
                         <div className="relative max-w-[72%] rounded-3xl bg-brand px-4 py-2.5">
@@ -273,38 +231,38 @@ export default function StockmanIQ() {
                         />
                       </motion.div>
 
-                      {/* AI response */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: 0.8 }}
-                        className="flex items-end gap-2"
-                      >
-                        <Image
-                          src="/images/brangus-chat-profile.webp"
-                          alt="Brangus"
-                          width={40}
-                          height={40}
-                          className="-mb-7 h-10 w-10 shrink-0 self-end rounded-full object-cover"
-                        />
-                        <div className="relative max-w-[72%] rounded-3xl bg-[#44372D] px-4 py-2.5">
-                          <p className="text-xs text-white/80 leading-relaxed whitespace-pre-line">
-                            <TypingText
-                              text={current.assistantMessage}
-                              delay={1200}
-                              scrollRef={scrollRef}
-                              onComplete={handleTypingComplete}
+                      {/* AI response - pops in after delay */}
+                      <AnimatePresence>
+                        {showResponse && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.85, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                            className="flex items-end gap-2"
+                          >
+                            <Image
+                              src="/images/brangus-chat-profile.webp"
+                              alt="Brangus"
+                              width={40}
+                              height={40}
+                              className="-mb-7 h-10 w-10 shrink-0 self-end rounded-full object-cover"
                             />
-                          </p>
-                          <BubbleTail side="left" color="#44372D" />
-                        </div>
-                      </motion.div>
+                            <div className="relative max-w-[72%] rounded-3xl bg-[#44372D] px-4 py-2.5">
+                              <p className="text-xs text-white/80 leading-relaxed whitespace-pre-line">
+                                {current.assistantMessage}
+                              </p>
+                              <BubbleTail side="left" color="#44372D" />
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
 
-              {/* Context cards - bar always visible, tiles animate individually */}
+              {/* Context cards */}
               <div className="flex h-[90px] items-center gap-2 overflow-hidden border-t border-white/[0.08] px-3 py-2.5">
                 <AnimatePresence mode="popLayout">
                   {showCards && current.contextCards.length > 0 && current.contextCards.map((card, i) => (
@@ -313,7 +271,7 @@ export default function StockmanIQ() {
                 </AnimatePresence>
               </div>
 
-              {/* Input bar - pinned at bottom */}
+              {/* Input bar */}
               <div className="flex items-center gap-2 border-t border-white/[0.06] p-4">
                 <div className="flex min-h-[44px] flex-1 items-center rounded-[22px] border border-white/10 bg-white/5 pl-4 pr-1.5">
                   <span className="flex-1 text-sm text-text-muted">Ask Brangus anything...</span>

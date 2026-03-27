@@ -70,14 +70,21 @@ export default function ForAdvisors() {
           </p>
         </motion.div>
 
-        <div className="mt-16 grid gap-6 sm:grid-cols-2">
-          {ADVISOR_FEATURES.map((feature, i) => (
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
+          className="mt-16 grid gap-6 sm:grid-cols-2"
+        >
+          {ADVISOR_FEATURES.map((feature) => (
             <motion.div
               key={feature.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0 },
+              }}
+              transition={{ duration: 0.4 }}
               className={`group relative overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.04] p-8 transition-all duration-300 hover:border-[#1E5C8C]/20 ${feature.span}`}
             >
               {/* Hover glow */}
@@ -92,7 +99,7 @@ export default function ForAdvisors() {
               </div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   )
