@@ -44,6 +44,7 @@ export function HerdsTable({
   herdDataDates,
   herdNearestSaleyard,
   herdProjectedWeight,
+  herdBreedPremium,
   propertyGroups,
 }: {
   herds: HerdWithProperty[];
@@ -54,6 +55,7 @@ export function HerdsTable({
   herdDataDates?: Record<string, string | null>;
   herdNearestSaleyard?: Record<string, string | null>;
   herdProjectedWeight?: Record<string, number>;
+  herdBreedPremium?: Record<string, number>;
   propertyGroups: PropertyGroup[];
 }) {
   const router = useRouter();
@@ -262,6 +264,11 @@ export function HerdsTable({
           $/kg <SortIcon column="price_per_kg" />
         </th>
         <th
+          className="hidden px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted lg:table-cell"
+        >
+          Premium
+        </th>
+        <th
           onClick={() => handleSort("current_weight")}
           className="hidden cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary xl:table-cell"
         >
@@ -286,6 +293,7 @@ export function HerdsTable({
     const accrual = herdBreedingAccrual?.[herd.id] ?? 0;
     const nearestSaleyard = herdNearestSaleyard?.[herd.id] ?? null;
     const projectedWeight = herdProjectedWeight?.[herd.id];
+    const breedPremium = herdBreedPremium?.[herd.id] ?? 0;
     // Debug: Stale data amber warning (6-8 weeks old)
     const dataDate = herdDataDates?.[herd.id];
     const dataAgeDays = dataDate ? Math.floor((Date.now() - new Date(dataDate).getTime()) / 86400000) : 0;
@@ -347,6 +355,9 @@ export function HerdsTable({
             )}
             {pricePerKg > 0 ? `$${pricePerKg.toFixed(2)}` : "\u2014"}
           </div>
+        </td>
+        <td className={`hidden px-5 py-3.5 text-right tabular-nums text-xs lg:table-cell ${breedPremium > 0 ? "text-emerald-400" : breedPremium < 0 ? "text-red-400" : "text-text-muted"}`}>
+          {breedPremium !== 0 ? `${breedPremium > 0 ? "+" : ""}${breedPremium}%` : "\u2014"}
         </td>
         <td className="hidden px-5 py-3.5 text-right tabular-nums text-text-secondary xl:table-cell">
           {projectedWeight ? `${Math.round(projectedWeight).toLocaleString()} kg` : herd.current_weight ? `${herd.current_weight.toLocaleString()} kg` : "\u2014"}

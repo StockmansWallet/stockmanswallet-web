@@ -116,6 +116,7 @@ export default async function HerdsPage() {
   const herdDataDatesObj: Record<string, string | null> = {};
   const herdNearestSaleyardObj: Record<string, string | null> = {};
   const herdProjectedWeightObj: Record<string, number> = {};
+  const herdBreedPremiumObj: Record<string, number> = {};
   let totalValue = 0;
   for (const h of (herds ?? [])) {
     const result = calculateHerdValuation(
@@ -129,6 +130,7 @@ export default async function HerdsPage() {
     herdDataDatesObj[h.id] = result.dataDate;
     herdNearestSaleyardObj[h.id] = result.nearestSaleyardUsed;
     herdProjectedWeightObj[h.id] = result.projectedWeight;
+    herdBreedPremiumObj[h.id] = result.breedPremiumApplied;
     totalValue += result.netValue;
   }
 
@@ -208,6 +210,7 @@ export default async function HerdsPage() {
             herdDataDates={herdDataDatesObj}
             herdNearestSaleyard={herdNearestSaleyardObj}
             herdProjectedWeight={herdProjectedWeightObj}
+            herdBreedPremium={herdBreedPremiumObj}
             propertyGroups={propertyGroups}
           />
         </>
