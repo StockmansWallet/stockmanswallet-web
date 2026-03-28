@@ -175,14 +175,15 @@ export default function StockmanIQ() {
               <span className="text-white">And new best mate.</span>
             </h2>
             <p className="mt-6 max-w-md text-base leading-relaxed text-text-secondary">
-              Ask him anything in plain English. Sale timing, freight costs, market trends, herd valuations. He knows your portfolio and gives you straight answers backed by live data.
+              Brangus is the engine room of Stockman's Wallet. He is always on, with direct access to your data, herds, portfolio, tools, and workflows. He analyses the numbers, connects the moving parts, and helps drive better decisions across your operation. He is your portfolio manager and new best mate.
             </p>
             <ul className="mt-8 space-y-4">
               {[
-                'Natural language questions about your herds',
-                'Voice input and output with Australian accent',
-                'Portfolio-aware responses using your live data',
-                'Create yard book events from conversation',
+                'Works directly off your live herd and portfolio data',
+                'Has access to years of historical market data to support better decisions',
+                'Always on across your operation',
+                'Connected directly to the tools and workflows inside Stockman\'s Wallet',
+                'Operates your Yard Book and reminders through simple conversation',
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand/15">
