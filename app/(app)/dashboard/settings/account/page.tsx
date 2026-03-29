@@ -99,7 +99,7 @@ export default async function AccountSettingsPage() {
                 </p>
               </div>
               <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                isAdvisor ? "bg-purple-500/10 text-purple-400" : "bg-brand/10 text-brand"
+                isAdvisor ? "bg-[#2F8CD9]/10 text-[#2F8CD9]" : "bg-brand/10 text-brand"
               }`}>
                 {isAdvisor ? "Advisor" : "Producer"}
               </span>

@@ -29,8 +29,8 @@ export function ClientCard({
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-500/15">
-                <span className="text-sm font-bold text-purple-400">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#2F8CD9]/15">
+                <span className="text-sm font-bold text-[#2F8CD9]">
                   {clientName.charAt(0).toUpperCase()}
                 </span>
               </div>

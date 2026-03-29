@@ -108,8 +108,8 @@ export const ADVISOR_CATEGORIES: AdvisorCategoryConfig[] = [
     key: "agribusiness_banker",
     label: "Agribusiness Banker",
     icon: Landmark,
-    colorClass: "text-purple-400",
-    bgClass: "bg-purple-500/15",
+    colorClass: "text-[#2F8CD9]",
+    bgClass: "bg-[#2F8CD9]/15",
   },
   {
     key: "accountant",

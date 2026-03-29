@@ -26,7 +26,7 @@ const variantClasses: Record<ButtonVariant, string> = {
   amber:
     "bg-amber-500 text-white hover:bg-amber-600 active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   purple:
-    "bg-purple-500 text-white hover:bg-purple-600 active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
+    "bg-[#2F8CD9] text-white hover:bg-[#1E5C8C] active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   advisor:
     "bg-[#1E5C8C] text-white hover:bg-[#2F8CD9] active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
 };

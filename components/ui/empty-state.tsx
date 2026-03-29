@@ -21,7 +21,7 @@ const variantStyles: Record<EmptyStateVariant, { iconBg: string; iconText: strin
   lime: { iconBg: "bg-lime-500/10", iconText: "text-lime-400" },
   sky: { iconBg: "bg-sky-500/10", iconText: "text-sky-400" },
   amber: { iconBg: "bg-amber-500/10", iconText: "text-amber-400" },
-  purple: { iconBg: "bg-purple-500/10", iconText: "text-purple-400" },
+  purple: { iconBg: "bg-[#2F8CD9]/10", iconText: "text-[#2F8CD9]" },
   advisor: { iconBg: "bg-[#2F8CD9]/10", iconText: "text-[#2F8CD9]" },
 };
 

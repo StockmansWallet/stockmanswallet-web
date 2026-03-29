@@ -116,8 +116,8 @@ export function AdvisorLensPanel({
         <CardContent className="p-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-500/15">
-                {isActive ? <Eye className="h-5 w-5 text-purple-400" /> : <EyeOff className="h-5 w-5 text-text-muted" />}
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#2F8CD9]/15">
+                {isActive ? <Eye className="h-5 w-5 text-[#2F8CD9]" /> : <EyeOff className="h-5 w-5 text-text-muted" />}
               </div>
               <div>
                 <p className="font-semibold text-text-primary">Advisor Lens</p>
@@ -126,7 +126,7 @@ export function AdvisorLensPanel({
             </div>
             <button
               onClick={() => setIsActive(!isActive)}
-              className={`relative h-6 w-11 rounded-full transition-colors ${isActive ? "bg-purple-500" : "bg-white/10"}`}
+              className={`relative h-6 w-11 rounded-full transition-colors ${isActive ? "bg-[#2F8CD9]" : "bg-white/10"}`}
             >
               <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${isActive ? "left-[22px]" : "left-0.5"}`} />
             </button>
@@ -138,9 +138,9 @@ export function AdvisorLensPanel({
                 <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Baseline</p>
                 <p className="mt-1 text-lg font-bold tabular-nums text-text-primary">${Math.round(baselineValue).toLocaleString()}</p>
               </div>
-              <div className="rounded-lg bg-purple-500/10 p-3 text-center">
-                <p className="text-[10px] font-medium uppercase tracking-wider text-purple-400">Adjusted</p>
-                <p className="mt-1 text-lg font-bold tabular-nums text-purple-400">${Math.round(adjustedValue).toLocaleString()}</p>
+              <div className="rounded-lg bg-[#2F8CD9]/10 p-3 text-center">
+                <p className="text-[10px] font-medium uppercase tracking-wider text-[#2F8CD9]">Adjusted</p>
+                <p className="mt-1 text-lg font-bold tabular-nums text-[#2F8CD9]">${Math.round(adjustedValue).toLocaleString()}</p>
               </div>
               <div className="rounded-lg bg-brand/10 p-3 text-center">
                 <p className="text-[10px] font-medium uppercase tracking-wider text-brand">Shaded</p>
@@ -157,8 +157,8 @@ export function AdvisorLensPanel({
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2.5">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-purple-500/15">
-                  <SlidersHorizontal className="h-3.5 w-3.5 text-purple-400" />
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#2F8CD9]/15">
+                  <SlidersHorizontal className="h-3.5 w-3.5 text-[#2F8CD9]" />
                 </div>
                 <CardTitle>Assumptions</CardTitle>
               </div>

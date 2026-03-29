@@ -48,7 +48,7 @@ export function DirectoryFilters({ currentCategory, currentSearch }: DirectoryFi
             onClick={() => updateParams("category", cat.key)}
             className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
               currentCategory === cat.key
-                ? "bg-purple-500/20 text-purple-400"
+                ? "bg-[#2F8CD9]/20 text-[#2F8CD9]"
                 : "bg-surface text-text-muted hover:bg-surface-low hover:text-text-secondary"
             }`}
           >
@@ -66,7 +66,7 @@ export function DirectoryFilters({ currentCategory, currentSearch }: DirectoryFi
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
           onBlur={() => updateParams("q", searchValue)}
-          className="w-full rounded-xl border border-white/5 bg-surface py-2 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus:border-purple-500/30 focus:outline-none focus:ring-1 focus:ring-purple-500/20"
+          className="w-full rounded-xl border border-white/5 bg-surface py-2 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus:border-[#2F8CD9]/30 focus:outline-none focus:ring-1 focus:ring-[#2F8CD9]/20"
         />
       </form>
     </div>

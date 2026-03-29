@@ -56,7 +56,7 @@ export default async function AdvisorClientsPage() {
     <div className="max-w-4xl">
       <PageHeader
         title="Clients"
-        titleClassName="text-4xl font-bold text-purple-400"
+        titleClassName="text-4xl font-bold text-[#2F8CD9]"
         subtitle="Find and connect with producers"
         subtitleClassName="text-sm font-medium text-text-secondary"
         inline
@@ -92,7 +92,7 @@ export default async function AdvisorClientsPage() {
       {totalClients === 0 ? (
         <Card>
           <EmptyState
-            icon={<Users className="h-6 w-6 text-purple-400" />}
+            icon={<Users className="h-6 w-6 text-[#2F8CD9]" />}
             title="No clients yet"
             description="When producers approve your connection requests, they will appear here. You can also use the Simulator and Tools while waiting."
             variant="purple"

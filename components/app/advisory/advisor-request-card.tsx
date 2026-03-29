@@ -39,11 +39,11 @@ export function AdvisorRequestCard({ request }: { request: ConnectionRequest }) 
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-500/15">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#2F8CD9]/15">
               {categoryConfig ? (
                 <categoryConfig.icon className={`h-5 w-5 ${categoryConfig.colorClass}`} />
               ) : (
-                <Clock className="h-5 w-5 text-purple-400" />
+                <Clock className="h-5 w-5 text-[#2F8CD9]" />
               )}
             </div>
             <div>

@@ -49,7 +49,7 @@ export function MessageInput({ onSend, hideTypeSelector, placeholder = "Write a 
           <select
             value={messageType}
             onChange={(e) => setMessageType(e.target.value as MessageType)}
-            className="rounded-lg border border-white/10 bg-surface-raised px-2.5 py-1.5 text-xs text-text-secondary outline-none focus:border-purple-500/50"
+            className="rounded-lg border border-white/10 bg-surface-raised px-2.5 py-1.5 text-xs text-text-secondary outline-none focus:border-[#2F8CD9]/50"
           >
             {typeOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>

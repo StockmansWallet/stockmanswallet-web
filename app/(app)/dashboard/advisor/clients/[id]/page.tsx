@@ -194,7 +194,7 @@ export default async function ClientDetailPage({
     <div className="max-w-4xl">
       <PageHeader
         title={clientName}
-        titleClassName="text-4xl font-bold text-purple-400"
+        titleClassName="text-4xl font-bold text-[#2F8CD9]"
         titleHref="/dashboard/advisor/clients"
         inline
         actions={
@@ -247,7 +247,7 @@ export default async function ClientDetailPage({
             ) : (
               <Card>
                 <EmptyState
-                  icon={<Lock className="h-6 w-6 text-purple-400" />}
+                  icon={<Lock className="h-6 w-6 text-[#2F8CD9]" />}
                   title="Valuations Not Shared"
                   description="This producer has not enabled valuation sharing."
                   variant="purple"
@@ -263,7 +263,7 @@ export default async function ClientDetailPage({
             ) : (
               <Card>
                 <EmptyState
-                  icon={<Lock className="h-6 w-6 text-purple-400" />}
+                  icon={<Lock className="h-6 w-6 text-[#2F8CD9]" />}
                   title="Reports Not Shared"
                   description="This producer has not enabled report sharing."
                   variant="purple"
@@ -277,7 +277,7 @@ export default async function ClientDetailPage({
             content: (
               <Card>
                 <EmptyState
-                  icon={<Lock className="h-6 w-6 text-purple-400" />}
+                  icon={<Lock className="h-6 w-6 text-[#2F8CD9]" />}
                   title="Coming Soon"
                   description="Shared documents from this producer will appear here. Documents are read-only and cannot be modified by advisors."
                   variant="purple"

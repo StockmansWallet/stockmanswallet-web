@@ -80,8 +80,8 @@ export function SharingPreferencesCard({
               className="flex items-center justify-between gap-3"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-purple-500/10">
-                  <Icon className="h-4 w-4 text-purple-400" />
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#2F8CD9]/10">
+                  <Icon className="h-4 w-4 text-[#2F8CD9]" />
                 </div>
                 <div>
                   <label

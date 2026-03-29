@@ -44,11 +44,11 @@ export function ConnectedAdvisorCard({ connection }: { connection: ConnectionReq
           <CardContent className="p-4">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-500/15">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#2F8CD9]/15">
                   {categoryConfig ? (
                     <categoryConfig.icon className={`h-5 w-5 ${categoryConfig.colorClass}`} />
                   ) : (
-                    <div className="h-5 w-5 rounded-full bg-purple-400" />
+                    <div className="h-5 w-5 rounded-full bg-[#2F8CD9]" />
                   )}
                 </div>
                 <div>

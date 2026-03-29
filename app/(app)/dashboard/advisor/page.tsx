@@ -89,7 +89,7 @@ export default async function AdvisorDashboardPage() {
     <div className="max-w-5xl">
       <PageHeader
         title={`Welcome, ${firstName}`}
-        titleClassName="text-4xl font-bold text-purple-400"
+        titleClassName="text-4xl font-bold text-[#2F8CD9]"
         subtitle="Your advisor workspace overview."
       />
 
@@ -97,8 +97,8 @@ export default async function AdvisorDashboardPage() {
       <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3 lg:gap-4">
         <Card>
           <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-purple-500/15">
-              <Users className="h-5 w-5 text-purple-400" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#2F8CD9]/15">
+              <Users className="h-5 w-5 text-[#2F8CD9]" />
             </div>
             <div>
               <p className="text-2xl font-bold tabular-nums text-text-primary">
@@ -147,7 +147,7 @@ export default async function AdvisorDashboardPage() {
                 <CardTitle>Recent Clients</CardTitle>
                 <Link
                   href="/dashboard/advisor/clients"
-                  className="text-xs font-medium text-purple-400 hover:underline"
+                  className="text-xs font-medium text-[#2F8CD9] hover:underline"
                 >
                   View all
                 </Link>
@@ -215,7 +215,7 @@ export default async function AdvisorDashboardPage() {
                   href="/dashboard/advisor/clients"
                   className="group flex flex-col items-center gap-2 rounded-xl bg-white/[0.03] px-3 py-4 text-center transition-colors hover:bg-white/[0.06]"
                 >
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-500/15 text-purple-400 transition-transform group-hover:scale-105">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#2F8CD9]/15 text-[#2F8CD9] transition-transform group-hover:scale-105">
                     <Users className="h-4 w-4" />
                   </div>
                   <span className="text-[11px] font-medium text-text-secondary">
@@ -226,7 +226,7 @@ export default async function AdvisorDashboardPage() {
                   href="/dashboard/advisory-hub/directory"
                   className="group flex flex-col items-center gap-2 rounded-xl bg-white/[0.03] px-3 py-4 text-center transition-colors hover:bg-white/[0.06]"
                 >
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-500/15 text-purple-400 transition-transform group-hover:scale-105">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#2F8CD9]/15 text-[#2F8CD9] transition-transform group-hover:scale-105">
                     <Search className="h-4 w-4" />
                   </div>
                   <span className="text-[11px] font-medium text-text-secondary">
@@ -240,8 +240,8 @@ export default async function AdvisorDashboardPage() {
           <Card>
             <CardContent className="p-5">
               <div className="flex items-start gap-3">
-                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-purple-500/10">
-                  <ShieldCheck className="h-4 w-4 text-purple-400" />
+                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[#2F8CD9]/10">
+                  <ShieldCheck className="h-4 w-4 text-[#2F8CD9]" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-text-primary">
@@ -264,8 +264,8 @@ export default async function AdvisorDashboardPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500/15">
-                <MapPin className="h-4 w-4 text-purple-400" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#2F8CD9]/15">
+                <MapPin className="h-4 w-4 text-[#2F8CD9]" />
               </div>
               <CardTitle>Clients by Region</CardTitle>
             </div>
