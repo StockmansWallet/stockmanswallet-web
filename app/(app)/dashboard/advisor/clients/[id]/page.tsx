@@ -17,6 +17,7 @@ import type { AdvisorLens, AdvisorScenario } from "@/lib/types/advisor-lens";
 import { calculateHerdValuation, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
+import { expandWithNearbySaleyards } from "@/lib/data/saleyard-proximity";
 import { generateAccountantData } from "@/lib/services/report-service";
 import { ClientReportTab } from "@/components/app/advisory/client-report-tab";
 
@@ -117,35 +118,22 @@ export default async function ClientDetailPage({
   let baselineValue = 0;
 
   if (permissions.valuations && herds.length > 0) {
-    const saleyards = [...new Set(herds.map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
+    const herdSaleyards = [...new Set(herds.map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
+    const saleyards = expandWithNearbySaleyards(herdSaleyards);
     const primaryCategories = [...new Set(herds.map((h) => resolveMLACategory(h.category, h.initial_weight, h.breeder_sub_type ?? undefined).primaryMLACategory))];
     const mlaCategories = [...new Set([...primaryCategories, ...primaryCategories.map((c) => categoryFallback(c)).filter((c): c is string => c !== null)])];
 
     type PriceRow = { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string };
     const emptyPrices: PriceRow[] = [];
 
-    const [{ data: syPrices }, { data: natPrices }] = mlaCategories.length > 0
-      ? await Promise.all([
-          saleyards.length > 0
-            ? supabase
-                .from("category_prices")
-                .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
-                .in("saleyard", saleyards)
-                .in("category", mlaCategories)
-                .order("data_date", { ascending: false })
-                .limit(50000)
-            : Promise.resolve({ data: emptyPrices }),
-          supabase
-            .from("category_prices")
-            .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
-            .eq("saleyard", "National")
-            .in("category", mlaCategories)
-            .order("data_date", { ascending: false })
-            .limit(5000),
-        ])
-      : [{ data: emptyPrices }, { data: emptyPrices }];
+    const { data: rpcPrices } = mlaCategories.length > 0
+      ? await supabase.rpc("latest_saleyard_prices", {
+          p_saleyards: saleyards,
+          p_categories: mlaCategories,
+        }) as unknown as { data: PriceRow[] | null }
+      : { data: emptyPrices };
 
-    const allPrices = [...(syPrices ?? []), ...(natPrices ?? [])];
+    const allPrices = rpcPrices ?? [];
     const nationalPriceMap = new Map<string, CategoryPriceEntry[]>();
     const saleyardPriceMap = new Map<string, CategoryPriceEntry[]>();
     const saleyardBreedPriceMap = new Map<string, CategoryPriceEntry[]>();
