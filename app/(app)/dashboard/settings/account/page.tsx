@@ -2,9 +2,10 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Crown, Lock, Trash2, UserCircle } from "lucide-react";
+import { Crown, Lock, LogOut, Trash2, UserCircle } from "lucide-react";
 import { PasswordForm } from "../password-form";
 import { DeleteAccountButton } from "../delete-account-button";
+import { SignOutButton } from "../sign-out-button";
 import {
   tierDisplayName,
   TIER_DISPLAY,
@@ -144,6 +145,22 @@ export default async function AccountSettingsPage() {
           </CardHeader>
           <CardContent>
             <PasswordForm />
+          </CardContent>
+        </Card>
+
+        {/* Sign Out */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2.5">
+              <SectionIcon icon={LogOut} />
+              <CardTitle>Sign Out</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4 text-xs leading-relaxed text-text-muted">
+              Sign out of your account on this device.
+            </p>
+            <SignOutButton />
           </CardContent>
         </Card>
 
