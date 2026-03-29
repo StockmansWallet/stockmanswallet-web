@@ -222,7 +222,7 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
             axisLine={false}
             tickLine={false}
             tick={{ fill: "rgba(255,255,255,0.38)", fontSize: 11 }}
-            interval="preserveStartEnd"
+            interval={Math.max(Math.ceil(chartData.length / 6) - 1, 0)}
           />
           <YAxis
             tickFormatter={formatCurrency}
@@ -241,6 +241,9 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
             dot={false}
             activeDot={{ r: 4, fill: "#D9762F", strokeWidth: 0 }}
             connectNulls
+            isAnimationActive
+            animationDuration={1200}
+            animationEasing="ease-out"
           />
         </AreaChart>
       </ResponsiveContainer>
