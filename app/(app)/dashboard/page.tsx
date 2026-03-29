@@ -322,7 +322,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                       </div>
                       <CardTitle>Portfolio Outlook</CardTitle>
                     </div>
-                    <span className="text-xs text-text-muted">projected value</span>
+                    <span className="text-xs text-text-muted">12-month projection</span>
                   </div>
                 </CardHeader>
                 <CardContent>
