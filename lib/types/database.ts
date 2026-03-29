@@ -622,6 +622,35 @@ export type Database = {
           created_at?: string;
         };
       };
+      portfolio_snapshots: {
+        Row: {
+          id: string;
+          user_id: string;
+          snapshot_date: string;
+          total_value: number;
+          head_count: number;
+          herd_count: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          snapshot_date: string;
+          total_value: number;
+          head_count?: number;
+          herd_count?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          snapshot_date?: string;
+          total_value?: number;
+          head_count?: number;
+          herd_count?: number;
+          created_at?: string;
+        };
+      };
       saved_freight_estimates: {
         Row: {
           id: string;

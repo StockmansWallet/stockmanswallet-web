@@ -166,13 +166,37 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const breederCount = activeHerds.filter((h) => h.is_breeder).length;
   const pregnantCount = activeHerds.filter((h) => h.is_pregnant).length;
 
+  // Record today's portfolio snapshot (upsert so repeat visits just update)
+  const now = new Date();
+  const todayDate = now.toISOString().slice(0, 10);
+  if (activeHerds.length > 0) {
+    supabase.from("portfolio_snapshots").upsert(
+      {
+        user_id: user!.id,
+        snapshot_date: todayDate,
+        total_value: Math.round(portfolioValue),
+        head_count: totalHead,
+        herd_count: activeHerds.length,
+      },
+      { onConflict: "user_id,snapshot_date" }
+    ).then();
+  }
+
+  // Fetch historic snapshots (before today)
+  const { data: snapshots } = await supabase
+    .from("portfolio_snapshots")
+    .select("snapshot_date, total_value")
+    .eq("user_id", user!.id)
+    .lt("snapshot_date", todayDate)
+    .order("snapshot_date", { ascending: true });
+
   // 12-month portfolio projection: advance the valuation date by i×30 days
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  const now = new Date();
-  const chartData = Array.from({ length: 13 }, (_, i) => {
-    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+  const projectionData = Array.from({ length: 12 }, (_, i) => {
+    const monthOffset = i + 1;
+    const d = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
     const label = `${monthNames[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`;
-    const futureDate = new Date(now.getTime() + i * 30 * 86_400_000);
+    const futureDate = new Date(now.getTime() + monthOffset * 30 * 86_400_000);
     const value = activeHerds.reduce(
       (sum, h) => {
         const herdWithOverride = saleyardOverride ? { ...h, selected_saleyard: saleyardOverride } : h;
@@ -185,6 +209,19 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     );
     return { month: label, value: Math.round(value) };
   });
+
+  // Build combined chart: historic snapshots + today + projection
+  const formatLabel = (dateStr: string) => {
+    const d = new Date(dateStr + "T00:00:00");
+    return `${d.getDate()} ${monthNames[d.getMonth()]}`;
+  };
+  const historicPoints = (snapshots ?? []).map((s) => ({
+    month: formatLabel(s.snapshot_date),
+    value: Math.round(Number(s.total_value)),
+  }));
+  const todayPoint = { month: "Today", value: Math.round(portfolioValue) };
+  const todayIndex = historicPoints.length;
+  const chartData = [...historicPoints, todayPoint, ...projectionData];
 
   const topHerds = [...activeHerds]
     .sort((a, b) => (b.head_count ?? 0) - (a.head_count ?? 0))
@@ -214,14 +251,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       ? herdsWithDwg.reduce((sum, h) => sum + h.daily_weight_gain, 0) / herdsWithDwg.length
       : 0;
 
-  // Change ticker: compare month 0 vs month 1 projection
+  // Change ticker: compare today vs first projection month
+  const todayVal = chartData[todayIndex]?.value ?? 0;
+  const nextVal = chartData[todayIndex + 1]?.value;
   const changeDollar =
-    chartData.length >= 2
-      ? chartData[1].value - chartData[0].value
-      : undefined;
+    nextVal !== undefined ? nextVal - todayVal : undefined;
   const changePercent =
-    chartData.length >= 2 && chartData[0].value > 0
-      ? ((chartData[1].value - chartData[0].value) / chartData[0].value) * 100
+    nextVal !== undefined && todayVal > 0
+      ? ((nextVal - todayVal) / todayVal) * 100
       : undefined;
 
   // Evaluate insights
@@ -322,11 +359,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                       </div>
                       <CardTitle>Portfolio Outlook</CardTitle>
                     </div>
-                    <span className="text-xs text-text-muted">12-month projection</span>
+                    <span className="text-xs text-text-muted">history + projection</span>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <PortfolioChart data={chartData} />
+                  <PortfolioChart data={chartData} todayIndex={todayIndex} />
                 </CardContent>
               </Card>
 
