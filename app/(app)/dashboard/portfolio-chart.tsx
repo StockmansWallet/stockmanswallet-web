@@ -36,11 +36,11 @@ function formatCurrency(value: number): string {
   return `$${Math.round(value)}`;
 }
 
-/** Format YYYY-MM-DD to "29 Mar" or "29 Mar '25" when showYear is true. */
+/** Format YYYY-MM-DD to "29 Mar" or "29/03/25" when showYear is true. */
 function formatDateLabel(dateStr: string, showYear = false): string {
   const [y, m, d] = dateStr.split("-");
-  const base = `${parseInt(d)} ${MONTH_NAMES[parseInt(m) - 1]}`;
-  return showYear ? `${base} '${y.slice(2)}` : base;
+  if (showYear) return `${parseInt(d)}/${parseInt(m)}/${y.slice(2)}`;
+  return `${parseInt(d)} ${MONTH_NAMES[parseInt(m) - 1]}`;
 }
 
 /** Add N days to a YYYY-MM-DD string, returning a new YYYY-MM-DD string. */
@@ -233,9 +233,11 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
               const total = chartData.length;
               const isFirst = index === 0;
               const isLast = index === total - 1;
-              // Show ~5-6 labels max: always first + last, evenly spaced in between
+              // Show ~5-6 labels max: always first + last, evenly spaced in between.
+              // Skip the label just before "Today" if it would overlap.
               const step = Math.max(Math.ceil(total / 6), 1);
-              const isVisible = isFirst || isLast || (index % step === 0);
+              const tooCloseToLast = !isLast && (total - 1 - index) < step / 2;
+              const isVisible = isFirst || isLast || (index % step === 0 && !tooCloseToLast);
               if (!isVisible) return <g />;
               return (
                 <text
