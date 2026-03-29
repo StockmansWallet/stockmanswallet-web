@@ -29,10 +29,8 @@ export async function checkAdvisorPermission(
   }
 
   const connection = data as ConnectionRequest;
-  const expiresAt = connection.permission_expires_at
-    ? new Date(connection.permission_expires_at)
-    : null;
-  const hasPermission = expiresAt ? expiresAt > new Date() : false;
+  // Open-ended access: permission is active if granted (no expiry check)
+  const hasPermission = connection.permission_granted_at != null;
 
-  return { hasPermission, connection, expiresAt };
+  return { hasPermission, connection, expiresAt: null };
 }

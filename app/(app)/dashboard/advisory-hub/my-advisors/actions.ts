@@ -9,6 +9,8 @@ const requestIdSchema = z.object({
   requestId: z.string().uuid(),
 });
 
+// Approve connection only. Does NOT grant data access.
+// The producer must separately grant data access via grantDataAccess().
 export async function approveRequest(requestId: string) {
   const parsed = requestIdSchema.safeParse({ requestId });
   if (!parsed.success) return { error: "Invalid input" };
@@ -19,16 +21,11 @@ export async function approveRequest(requestId: string) {
 
   if (!user) return { error: "Not authenticated" };
 
-  // 3-day permission window
-  const now = new Date();
-  const expires = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
-
   const { data: conn, error } = await supabase
     .from("connection_requests")
     .update({
       status: "approved",
-      permission_granted_at: now.toISOString(),
-      permission_expires_at: expires.toISOString(),
+      updated_at: new Date().toISOString(),
     })
     .eq("id", requestId)
     .eq("target_user_id", user.id)
@@ -37,7 +34,6 @@ export async function approveRequest(requestId: string) {
 
   if (error) return { error: error.message };
 
-  // Get producer name for notification
   const { data: profile } = await supabase
     .from("user_profiles")
     .select("display_name")
@@ -46,6 +42,62 @@ export async function approveRequest(requestId: string) {
   const producerName = profile?.display_name || "A producer";
 
   await notifyApproval(supabase, conn.requester_user_id, producerName, conn.id);
+
+  revalidatePath("/dashboard/advisory-hub");
+  return { success: true };
+}
+
+// Grant data access to an approved advisor. Open-ended until producer stops sharing.
+export async function grantDataAccess(requestId: string) {
+  const parsed = requestIdSchema.safeParse({ requestId });
+  if (!parsed.success) return { error: "Invalid input" };
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Not authenticated" };
+
+  const { error } = await supabase
+    .from("connection_requests")
+    .update({
+      permission_granted_at: new Date().toISOString(),
+      permission_expires_at: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", requestId)
+    .eq("target_user_id", user.id)
+    .eq("status", "approved");
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/advisory-hub");
+  return { success: true };
+}
+
+// Stop sharing data with an advisor. Keeps the connection active.
+export async function stopSharing(requestId: string) {
+  const parsed = requestIdSchema.safeParse({ requestId });
+  if (!parsed.success) return { error: "Invalid input" };
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Not authenticated" };
+
+  const { error } = await supabase
+    .from("connection_requests")
+    .update({
+      permission_granted_at: null,
+      permission_expires_at: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", requestId)
+    .eq("target_user_id", user.id)
+    .eq("status", "approved");
+
+  if (error) return { error: error.message };
 
   revalidatePath("/dashboard/advisory-hub");
   return { success: true };
@@ -84,7 +136,8 @@ export async function denyRequest(requestId: string) {
   return { success: true };
 }
 
-export async function revokeAccess(requestId: string) {
+// Disconnect advisor entirely. Removes from client list.
+export async function disconnectAdvisor(requestId: string) {
   const parsed = requestIdSchema.safeParse({ requestId });
   if (!parsed.success) return { error: "Invalid input" };
   const supabase = await createClient();
@@ -97,8 +150,10 @@ export async function revokeAccess(requestId: string) {
   const { data: conn, error } = await supabase
     .from("connection_requests")
     .update({
-      status: "expired",
-      permission_expires_at: new Date().toISOString(),
+      status: "removed",
+      permission_granted_at: null,
+      permission_expires_at: null,
+      updated_at: new Date().toISOString(),
     })
     .eq("id", requestId)
     .eq("target_user_id", user.id)

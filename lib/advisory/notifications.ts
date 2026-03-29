@@ -52,7 +52,7 @@ export async function notifyApproval(
     userId: advisorUserId,
     type: "request_approved",
     title: `${producerName} approved your request`,
-    body: "You now have a 3-day access window to view their data.",
+    body: "You are now connected. Request data access when you need to review their portfolio.",
     link: `/dashboard/advisor/clients/${connectionId}`,
     connectionId,
   });
@@ -102,8 +102,8 @@ export async function notifyRenewalRequested(
   await createNotification(supabase, {
     userId: producerUserId,
     type: "renewal_requested",
-    title: `${advisorName} requested access renewal`,
-    body: "Review and approve to grant another 3-day window.",
+    title: `${advisorName} requested data access`,
+    body: "Review and grant access to share your portfolio data.",
     link: "/dashboard/advisory-hub/my-advisors",
     connectionId,
   });

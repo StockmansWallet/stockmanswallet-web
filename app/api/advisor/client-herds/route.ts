@@ -38,11 +38,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "No approved connection" }, { status: 403 });
   }
 
-  if (
-    !connection.permission_expires_at ||
-    new Date(connection.permission_expires_at) <= new Date()
-  ) {
-    return NextResponse.json({ error: "Permission expired" }, { status: 403 });
+  // Open-ended access: check if producer has granted data access
+  if (!connection.permission_granted_at) {
+    return NextResponse.json({ error: "Data access not granted" }, { status: 403 });
   }
 
   // Use service role to read client's data (bypasses RLS)

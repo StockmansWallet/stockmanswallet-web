@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, MapPin, Clock } from "lucide-react";
 import {
   hasActivePermission,
-  permissionTimeRemaining,
   type ConnectionRequest,
 } from "@/lib/types/advisory";
 
@@ -21,8 +20,7 @@ export function ClientCard({
   clientState,
   clientCompany,
 }: ClientCardProps) {
-  const isActive = hasActivePermission(connection);
-  const timeRemaining = permissionTimeRemaining(connection);
+  const isSharing = hasActivePermission(connection);
   const isPending = connection.status === "pending";
 
   return (
@@ -60,12 +58,9 @@ export function ClientCard({
                     Pending
                   </Badge>
                 ) : (
-                  <>
-                    <Badge variant={isActive ? "success" : "warning"}>
-                      {isActive ? "Active" : "Expired"}
-                    </Badge>
-                    <p className="mt-0.5 text-xs text-text-muted">{timeRemaining}</p>
-                  </>
+                  <Badge variant={isSharing ? "success" : "default"}>
+                    {isSharing ? "Sharing" : "Connected"}
+                  </Badge>
                 )}
               </div>
               <ArrowRight className="h-4 w-4 text-text-muted transition-transform group-hover:translate-x-0.5" />

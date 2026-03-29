@@ -5,28 +5,36 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ShieldOff } from "lucide-react";
-import { revokeAccess } from "@/app/(app)/dashboard/advisory-hub/my-advisors/actions";
+import { Eye, EyeOff, UserX } from "lucide-react";
+import { grantDataAccess, stopSharing, disconnectAdvisor } from "@/app/(app)/dashboard/advisory-hub/my-advisors/actions";
 import { ConfirmModal } from "@/components/app/advisory/confirm-modal";
 import {
   getCategoryConfig,
   hasActivePermission,
-  permissionTimeRemaining,
   type ConnectionRequest,
 } from "@/lib/types/advisory";
 
 export function ConnectedAdvisorCard({ connection }: { connection: ConnectionRequest }) {
   const [loading, setLoading] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [showDisconnect, setShowDisconnect] = useState(false);
   const categoryConfig = getCategoryConfig(connection.requester_role);
-  const isActive = hasActivePermission(connection);
-  const timeRemaining = permissionTimeRemaining(connection);
+  const isSharing = hasActivePermission(connection);
 
-  const handleRevoke = async () => {
+  const handleToggleSharing = async () => {
     setLoading(true);
-    await revokeAccess(connection.id);
+    if (isSharing) {
+      await stopSharing(connection.id);
+    } else {
+      await grantDataAccess(connection.id);
+    }
     setLoading(false);
-    setShowConfirm(false);
+  };
+
+  const handleDisconnect = async () => {
+    setLoading(true);
+    await disconnectAdvisor(connection.id);
+    setLoading(false);
+    setShowDisconnect(false);
   };
 
   return (
@@ -58,25 +66,39 @@ export function ConnectedAdvisorCard({ connection }: { connection: ConnectionReq
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <Badge variant={isActive ? "success" : "warning"}>
-                    {isActive ? "Active" : "Expired"}
-                  </Badge>
-                  <p className="mt-0.5 text-xs text-text-muted">{timeRemaining}</p>
-                </div>
+              <div className="flex items-center gap-2">
+                <Badge variant={isSharing ? "success" : "default"}>
+                  {isSharing ? "Sharing" : "Not sharing"}
+                </Badge>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    setShowConfirm(true);
+                    handleToggleSharing();
                   }}
                   disabled={loading}
-                  title="Revoke access"
+                  title={isSharing ? "Stop sharing data" : "Share data"}
                 >
-                  <ShieldOff className="h-4 w-4 text-text-muted" />
+                  {isSharing ? (
+                    <EyeOff className="h-4 w-4 text-text-muted" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-green-400" />
+                  )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowDisconnect(true);
+                  }}
+                  disabled={loading}
+                  title="Disconnect advisor"
+                >
+                  <UserX className="h-4 w-4 text-red-400/60" />
                 </Button>
               </div>
             </div>
@@ -84,12 +106,12 @@ export function ConnectedAdvisorCard({ connection }: { connection: ConnectionReq
         </Card>
       </Link>
       <ConfirmModal
-        open={showConfirm}
-        onClose={() => setShowConfirm(false)}
-        onConfirm={handleRevoke}
-        title="Revoke Access"
-        description={`This will immediately end ${connection.requester_name}'s access to your data. They will need to request access again.`}
-        confirmLabel="Revoke"
+        open={showDisconnect}
+        onClose={() => setShowDisconnect(false)}
+        onConfirm={handleDisconnect}
+        title="Disconnect Advisor"
+        description={`This will remove ${connection.requester_name} from your advisors. They will need to send a new connection request to reconnect.`}
+        confirmLabel="Disconnect"
         loading={loading}
       />
     </>

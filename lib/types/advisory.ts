@@ -179,26 +179,23 @@ export interface AppNotification {
   created_at: string;
 }
 
-// Permission window helpers
+// Permission helpers - open-ended access model.
+// Data access is granted by the producer and stays active until they stop sharing.
 export function hasActivePermission(connection: ConnectionRequest): boolean {
   if (connection.status !== "approved") return false;
-  if (!connection.permission_expires_at) return false;
-  return new Date(connection.permission_expires_at) > new Date();
+  return connection.permission_granted_at != null;
 }
 
+// Returns a short label for the sharing state
+export function permissionStatusLabel(connection: ConnectionRequest): string {
+  if (connection.status !== "approved") return "Not connected";
+  if (connection.permission_granted_at) return "Sharing";
+  return "Not sharing";
+}
+
+// Kept for backwards compatibility with components that reference it
 export function permissionTimeRemaining(connection: ConnectionRequest): string {
-  if (!connection.permission_expires_at) return "No permission";
-  const expires = new Date(connection.permission_expires_at);
-  const now = new Date();
-  if (expires <= now) return "Expired";
-
-  const diffMs = expires.getTime() - now.getTime();
-  const hours = Math.floor(diffMs / (1000 * 60 * 60));
-  const days = Math.floor(hours / 24);
-  const remainingHours = hours % 24;
-
-  if (days > 0) return `${days}d ${remainingHours}h remaining`;
-  if (hours > 0) return `${hours}h remaining`;
-  const minutes = Math.floor(diffMs / (1000 * 60));
-  return `${minutes}m remaining`;
+  if (connection.status !== "approved") return "Not connected";
+  if (connection.permission_granted_at) return "Sharing";
+  return "Not sharing";
 }

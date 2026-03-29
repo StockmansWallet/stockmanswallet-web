@@ -111,7 +111,7 @@ export default async function AdvisorDashboardPage() {
               <p className="text-2xl font-bold tabular-nums text-text-primary">
                 {activePerms}
               </p>
-              <p className="text-xs text-text-muted">Active Permissions</p>
+              <p className="text-xs text-text-muted">Sharing Data</p>
             </div>
           </CardContent>
         </Card>
