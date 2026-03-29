@@ -214,7 +214,7 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
       <ResponsiveContainer key={range} width="100%" height={240}>
         <AreaChart
           data={chartData}
-          margin={{ top: 8, right: 12, bottom: 0, left: 0 }}
+          margin={{ top: 8, right: 20, bottom: 0, left: 10 }}
         >
           <defs>
             <linearGradient id="valueGrad" x1="0" y1="0" x2="0" y2="1">
@@ -228,6 +228,7 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
             tickLine={false}
             tick={{ fill: "rgba(255,255,255,0.38)", fontSize: 11 }}
             interval={Math.max(Math.ceil(chartData.length / 6) - 1, 0)}
+            padding={{ left: 10, right: 10 }}
           />
           <YAxis
             tickFormatter={formatCurrency}
