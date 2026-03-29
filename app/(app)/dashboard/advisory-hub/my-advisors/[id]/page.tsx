@@ -3,7 +3,6 @@ import { redirect, notFound } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { PermissionBanner } from "@/components/app/advisory/permission-banner";
 import { ConnectionNotes } from "./connection-notes";
 import {
   getCategoryConfig,
@@ -102,11 +101,6 @@ export default async function ProducerConnectionDetailPage({
         }
       />
 
-      {conn.status === "approved" && (
-        <div className="mb-4">
-          <PermissionBanner connection={conn} isActive={isActive} />
-        </div>
-      )}
 
       <Card>
         <CardHeader>

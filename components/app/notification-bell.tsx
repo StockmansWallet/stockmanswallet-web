@@ -41,12 +41,11 @@ export function NotificationBell() {
 
   useEffect(() => {
     const supabase = createClient();
-    let userId: string | null = null;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
-    async function fetchNotifications() {
+    async function init() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      userId = user.id;
 
       const { data } = await supabase
         .from("notifications")
@@ -58,28 +57,31 @@ export function NotificationBell() {
       const items = (data ?? []) as AppNotification[];
       setNotifications(items);
       setUnreadCount(items.filter((n) => !n.is_read).length);
+
+      // Subscribe to realtime inserts with user_id filter
+      channel = supabase
+        .channel("notifications-bell")
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "notifications",
+            filter: `user_id=eq.${user.id}`,
+          },
+          (payload) => {
+            const row = payload.new as AppNotification;
+            setNotifications((prev) => [row, ...prev].slice(0, 10));
+            setUnreadCount((c) => c + 1);
+          }
+        )
+        .subscribe();
     }
 
-    fetchNotifications();
-
-    // Subscribe to realtime inserts for instant badge updates
-    const channel = supabase
-      .channel("notifications-bell")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "notifications" },
-        (payload) => {
-          const row = payload.new as AppNotification;
-          // RLS filters to current user, but double-check
-          if (userId && row.user_id !== userId) return;
-          setNotifications((prev) => [row, ...prev].slice(0, 10));
-          setUnreadCount((c) => c + 1);
-        }
-      )
-      .subscribe();
+    init();
 
     return () => {
-      supabase.removeChannel(channel);
+      if (channel) supabase.removeChannel(channel);
     };
   }, []);
 
