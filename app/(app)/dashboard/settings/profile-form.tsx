@@ -2,18 +2,9 @@
 
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { updateProfile } from "./actions";
-
-const ROLE_OPTIONS = [
-  { value: "producer", label: "Producer" },
-  { value: "agribusiness_banker", label: "Agribusiness Banker" },
-  { value: "insurer", label: "Insurer" },
-  { value: "livestock_agent", label: "Livestock Agent" },
-  { value: "accountant", label: "Accountant" },
-  { value: "succession_planner", label: "Succession Planner" },
-];
+import { roleDisplayName } from "@/lib/types/advisory";
 
 export function ProfileForm({
   email,
@@ -84,14 +75,14 @@ export function ProfileForm({
         helperText="Email cannot be changed"
       />
 
-      <Select
-        id="role"
-        name="role"
+      <Input
+        id="role_display"
         label="Role"
-        options={ROLE_OPTIONS}
-        defaultValue={role || "producer"}
-        helperText="Determines which features and views are available"
+        value={roleDisplayName(role) || "Producer"}
+        disabled
+        helperText="Role is set during onboarding and cannot be changed"
       />
+      <input type="hidden" name="role" value={role || "producer"} />
 
       <Button type="submit" disabled={submitting}>
         {submitting ? "Saving..." : "Save Profile"}
