@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MapPin, ChevronDown, X, Search } from "lucide-react";
-import { saleyards, saleyardToState } from "@/lib/data/reference-data";
+import { saleyards, saleyardToState, saleyardCoordinates, saleyardLocality } from "@/lib/data/reference-data";
 
 const stateOrder = ["NSW", "QLD", "VIC", "SA", "WA", "TAS", "Other"] as const;
 
@@ -28,11 +28,41 @@ function shortName(name: string): string {
     .trim();
 }
 
-interface DashboardSaleyardSelectorProps {
-  currentSaleyard: string | null;
+/** Haversine great-circle distance in km */
+function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371.0;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-export function DashboardSaleyardSelector({ currentSaleyard }: DashboardSaleyardSelectorProps) {
+/** Returns up to 3 closest saleyards to a property, using coordinates or state fallback */
+function closestSaleyards(
+  property: { latitude?: number | null; longitude?: number | null; state?: string | null } | null
+): string[] {
+  if (!property) return [];
+  if (property.latitude != null && property.longitude != null) {
+    const distances = saleyards
+      .filter((s) => saleyardCoordinates[s])
+      .map((s) => ({ name: s, dist: haversineDistance(property.latitude!, property.longitude!, saleyardCoordinates[s].lat, saleyardCoordinates[s].lon) }))
+      .sort((a, b) => a.dist - b.dist);
+    return distances.slice(0, 3).map((d) => d.name);
+  }
+  if (property.state) {
+    return saleyards.filter((s) => saleyardToState[s] === property.state).slice(0, 3);
+  }
+  return [];
+}
+
+interface DashboardSaleyardSelectorProps {
+  currentSaleyard: string | null;
+  primaryProperty?: { latitude?: number | null; longitude?: number | null; state?: string | null } | null;
+}
+
+export function DashboardSaleyardSelector({ currentSaleyard, primaryProperty }: DashboardSaleyardSelectorProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
@@ -71,12 +101,17 @@ export function DashboardSaleyardSelector({ currentSaleyard }: DashboardSaleyard
     setSearch("");
   }
 
+  const nearbyYards = closestSaleyards(primaryProperty ?? null);
+  const nearbySet = new Set(nearbyYards);
+
   const groups = groupedSaleyards();
   const lowerSearch = search.toLowerCase();
+
+  const filteredNearby = nearbyYards.filter((y) => y.toLowerCase().includes(lowerSearch));
   const filteredGroups = groups
     .map((g) => ({
       ...g,
-      yards: g.yards.filter((y) => y.toLowerCase().includes(lowerSearch)),
+      yards: g.yards.filter((y) => y.toLowerCase().includes(lowerSearch) && !nearbySet.has(y)),
     }))
     .filter((g) => g.yards.length > 0);
 
@@ -156,6 +191,32 @@ export function DashboardSaleyardSelector({ currentSaleyard }: DashboardSaleyard
             >
               Use National Averages
             </button>
+
+            {/* Close to your property */}
+            {filteredNearby.length > 0 && (
+              <div className="mt-2">
+                <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+                  Close to Your Property
+                </p>
+                {filteredNearby.map((yard) => (
+                  <button
+                    key={yard}
+                    type="button"
+                    onClick={() => selectSaleyard(yard)}
+                    className={`w-full cursor-pointer rounded-lg px-3 py-2 text-left text-sm transition-all ${
+                      currentSaleyard === yard
+                        ? "bg-brand/15 text-brand font-medium"
+                        : "text-text-primary hover:bg-surface-raised"
+                    }`}
+                  >
+                    <span>{shortName(yard)}</span>
+                    {saleyardLocality[yard] && (
+                      <span className="ml-2 text-xs text-text-muted">{saleyardLocality[yard]}</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {filteredGroups.map((g) => (
               <div key={g.state} className="mt-2">
