@@ -247,18 +247,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     .lt("snapshot_date", todayDate)
     .order("snapshot_date", { ascending: true });
 
-  // Build chart data: historic snapshots + today
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  const formatLabel = (dateStr: string) => {
-    const d = new Date(dateStr + "T00:00:00");
-    return `${d.getDate()} ${monthNames[d.getMonth()]}`;
-  };
+  // Build chart data: historic snapshots + today (pass raw dates for client-side range filtering)
   const historicPoints = (snapshots ?? []).map((s) => ({
-    month: formatLabel(s.snapshot_date),
+    date: s.snapshot_date,
     value: Math.round(Number(s.total_value)),
   }));
-  const todayPoint = { month: "Today", value: Math.round(portfolioValue) };
-  const chartData = [...historicPoints, todayPoint];
+  const chartData = [...historicPoints, { date: todayDate, value: Math.round(portfolioValue) }];
 
   const topHerds = [...activeHerds]
     .sort((a, b) => (b.head_count ?? 0) - (a.head_count ?? 0))
