@@ -61,8 +61,8 @@ export const FEATURES: Feature[] = [
     accentColor: '#1E5C8C',
     accentColorLight: '#2F8CD9',
     bullets: [
-      'Grant time-limited, read-only portfolio access to trusted advisors',
-      'Approve or deny access requests with a 3-day approval window',
+      'Grant read-only portfolio access to trusted advisors',
+      'Approve or deny access requests and revoke at any time',
       'Advisors get dedicated tools including valuation overlays and scenario modelling',
       'Browse a directory of advisors by role, company, and region',
       'Keep full control and revoke access at any time',

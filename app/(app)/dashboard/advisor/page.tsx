@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -56,20 +57,28 @@ export default async function AdvisorDashboardPage() {
     (clientProfiles ?? []).map((p) => [p.user_id, p])
   );
 
-  // Fetch default properties for all connected clients to get LGA data
+  // Fetch default properties for all connected clients to get LGA data.
+  // Must use service role to bypass RLS (properties restricted to owner).
   const allClientUserIds = allConnections.map((c) => c.target_user_id);
-  const { data: clientProperties } = allClientUserIds.length > 0
-    ? await supabase
-        .from("properties")
-        .select("user_id, lga")
-        .in("user_id", allClientUserIds)
-        .eq("is_default", true)
-        .eq("is_deleted", false)
-    : { data: [] as { user_id: string; lga: string | null }[] };
+  let clientProperties: { user_id: string; lga: string | null }[] = [];
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (allClientUserIds.length > 0 && serviceRoleKey) {
+    const serviceClient = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      serviceRoleKey
+    );
+    const { data } = await serviceClient
+      .from("properties")
+      .select("user_id, lga")
+      .in("user_id", allClientUserIds)
+      .eq("is_default", true)
+      .eq("is_deleted", false);
+    clientProperties = data ?? [];
+  }
 
   // Build region distribution from LGA data
   const lgaCounts: Record<string, number> = {};
-  for (const prop of clientProperties ?? []) {
+  for (const prop of clientProperties) {
     const lga = prop.lga || "Not specified";
     lgaCounts[lga] = (lgaCounts[lga] || 0) + 1;
   }
@@ -248,12 +257,12 @@ export default async function AdvisorDashboardPage() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-text-primary">
-                    Permission Windows
+                    Client Permissions
                   </p>
                   <p className="mt-1 text-xs leading-relaxed text-text-muted">
-                    Access to client data is granted in 3-day windows.
-                    Producers control when you can view their herds and
-                    valuations.
+                    Producers approve access to share their portfolio
+                    with you. They control which herds and valuations
+                    you can view.
                   </p>
                 </div>
               </div>
