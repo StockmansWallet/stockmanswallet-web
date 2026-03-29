@@ -176,12 +176,12 @@ const FEATURE_TABS: FeatureTab[] = [
   {
     id: 'insights',
     name: 'Insights',
-    tagline: 'AI-powered decisions',
-    description: 'Your AI stock advisor evaluates your portfolio every day against live market conditions and surfaces the calls that matter. Sell vs hold, optimal timing, weight targets, best market, price sensitivity, and calving forecasts.',
+    tagline: 'Brangus Powered Decisions',
+    description: 'Brangus evaluates your portfolio every day against live market conditions and surfaces the calls that matter. Sell vs hold, optimal timing, weight targets, best market, price sensitivity, calving forecasts and much more.',
     color: '#D9762F',
     colorLight: '#F4A871',
     bullets: [
-      'Daily AI evaluation of your portfolio against current market data',
+      'Daily evaluation of your portfolio against current market data',
       'Sell vs hold analysis with projected gains over 30, 60, and 90 days',
       'Optimal sale month identification based on historical seasonal pricing',
       'Calving forecasts tracking gestation progress and expected calf value',

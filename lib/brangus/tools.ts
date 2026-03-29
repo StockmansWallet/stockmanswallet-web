@@ -86,7 +86,7 @@ export const toolDefinitions = [
       type: "object",
       properties: {
         title: { type: "string", description: "Short event title (max 60 chars)." },
-        date: { type: "string", description: "Event date in YYYY-MM-DD format." },
+        date: { type: "string", description: "Event date in YYYY-MM-DD format. MUST be derived from TODAY'S DATE in the system prompt. If the user says a day name (e.g. 'Monday'), count forward from today to find the exact date. Verify the day-of-week matches before submitting." },
         category: {
           type: "string",
           enum: ["Livestock", "Operations", "Finance", "Family", "Me"],
@@ -673,13 +673,19 @@ function lookupFreightEstimates(herdName: string | undefined, store: ChatDataSto
 function lookupYardBook(store: ChatDataStore): string {
   if (store.yardBookItems.length === 0) return "No Yard Book events found.";
 
-  const now = new Date();
-  const overdue = store.yardBookItems.filter(
-    (i) => !i.is_completed && new Date(i.event_date) < now
-  );
-  const upcoming = store.yardBookItems.filter(
-    (i) => !i.is_completed && new Date(i.event_date) >= now
-  );
+  // Parse YYYY-MM-DD as local midnight (not UTC) to avoid date-shift in AEST
+  const todayLocal = new Date();
+  todayLocal.setHours(0, 0, 0, 0);
+  const overdue = store.yardBookItems.filter((i) => {
+    if (i.is_completed) return false;
+    const [y, m, d] = i.event_date.split("T")[0].split("-").map(Number);
+    return new Date(y, m - 1, d) < todayLocal;
+  });
+  const upcoming = store.yardBookItems.filter((i) => {
+    if (i.is_completed) return false;
+    const [y, m, d] = i.event_date.split("T")[0].split("-").map(Number);
+    return new Date(y, m - 1, d) >= todayLocal;
+  });
   const completed = store.yardBookItems.filter((i) => i.is_completed);
 
   const lines = ["YARD BOOK:"];

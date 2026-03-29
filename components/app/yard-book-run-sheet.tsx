@@ -174,9 +174,11 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
 
     // Sort each group by event_date ascending
     for (const key of Object.keys(groups) as HorizonKey[]) {
-      groups[key].sort(
-        (a, b) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime()
-      );
+      groups[key].sort((a, b) => {
+        const [ay, am, ad] = a.event_date.split("T")[0].split("-").map(Number);
+        const [by, bm, bd] = b.event_date.split("T")[0].split("-").map(Number);
+        return new Date(ay, am - 1, ad).getTime() - new Date(by, bm - 1, bd).getTime();
+      });
     }
 
     return HORIZON_CONFIG.filter((h) => groups[h.key].length > 0).map((h) => ({

@@ -103,7 +103,7 @@ You have tools. Use them when the conversation turns to data:
 
 1. lookup_portfolio_data: Gets data from the user's portfolio. Call before citing any number. Query types: portfolio_summary, herd_details, all_herds_summary, property_details, market_prices, seasonal_pricing, sales_history, freight_estimates, yard_book, health_records, property_weather.
 2. calculate_freight: Calculates freight costs via Freight IQ. Always use this for transport costs. Show GST (+10%) alongside the total.
-3. create_yard_book_event: Creates Yard Book events. Infer category and parse dates naturally.
+3. create_yard_book_event: Creates Yard Book events. Infer category and parse dates naturally. CRITICAL DATE RULE: Always derive the YYYY-MM-DD date from TODAY'S DATE above. If the user says "Monday", count forward from today's day-of-week to find the exact calendar date. Double-check the day-of-week matches before submitting. Never guess or approximate dates.
 4. manage_yard_book_event: Completes or deletes Yard Book events. Complete without asking, confirm before deleting.
 5. lookup_grid_iq_data: Retrieves Grid IQ data - processor grid comparisons, kill sheet results, Kill Score, GCR, and Grid Risk. Query types: grid_iq_summary, analysis_details, kill_history, grid_details, compare_channels.
 6. display_summary_cards: Call this when your response includes specific numbers. Cards highlight key figures below the chat. IMPORTANT: You MUST still provide a full, detailed text response. Cards do NOT replace your written answer. Always write a complete response first, then add cards for key numbers.
@@ -233,8 +233,19 @@ export function buildSystemPrompt(store: ChatDataStore, serverConfig?: BrangusCo
     }
   }
 
-  const overdueItems = store.yardBookItems.filter((i) => !i.is_completed && new Date(i.event_date) < new Date());
-  const upcomingItems = store.yardBookItems.filter((i) => !i.is_completed && new Date(i.event_date) >= new Date());
+  // Parse YYYY-MM-DD as local midnight (not UTC) to avoid date-shift in AEST
+  const todayMidnight = new Date();
+  todayMidnight.setHours(0, 0, 0, 0);
+  const overdueItems = store.yardBookItems.filter((i) => {
+    if (i.is_completed) return false;
+    const [y, m, d] = i.event_date.split("T")[0].split("-").map(Number);
+    return new Date(y, m - 1, d) < todayMidnight;
+  });
+  const upcomingItems = store.yardBookItems.filter((i) => {
+    if (i.is_completed) return false;
+    const [y, m, d] = i.event_date.split("T")[0].split("-").map(Number);
+    return new Date(y, m - 1, d) >= todayMidnight;
+  });
   if (overdueItems.length > 0 || upcomingItems.length > 0) {
     indexLines.push(`Yard Book: ${upcomingItems.length} upcoming, ${overdueItems.length} overdue`);
   }
