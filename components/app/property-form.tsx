@@ -41,14 +41,16 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
   const [latitude, setLatitude] = useState(property?.latitude ?? "");
   const [longitude, setLongitude] = useState(property?.longitude ?? "");
 
-  // Sort LGAs by proximity to property coordinates (closest first)
-  const lgaOptions = useMemo(() => {
+  // Sort LGAs by proximity and split into Suggested + All groups
+  const { lgaGroups, lgaFlat } = useMemo(() => {
     const lgas = lgasForState(state);
-    if (!latitude || !longitude) return lgas.map((c) => ({ value: c, label: c }));
+    const flat = lgas.map((c) => ({ value: c, label: c }));
 
     const lat1 = Number(latitude);
     const lon1 = Number(longitude);
-    if (Number.isNaN(lat1) || Number.isNaN(lon1)) return lgas.map((c) => ({ value: c, label: c }));
+    if (!latitude || !longitude || Number.isNaN(lat1) || Number.isNaN(lon1)) {
+      return { lgaGroups: undefined, lgaFlat: flat };
+    }
 
     const R = 6371.0;
     const sorted = lgas
@@ -64,7 +66,14 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
       })
       .sort((a, b) => a.dist - b.dist);
 
-    return sorted.map((s) => ({ value: s.name, label: s.name }));
+    const closest = sorted[0];
+    const stateLabel = AU_STATES.find((s) => s.value === state)?.label ?? state;
+    const groups = [
+      { header: "Suggested", options: [{ value: closest.name, label: closest.name }] },
+      { header: `${stateLabel} Local Government Areas`, options: lgas.map((c) => ({ value: c, label: c })) },
+    ];
+
+    return { lgaGroups: groups, lgaFlat: flat };
   }, [state, latitude, longitude]);
 
   function handleAddressSelect(result: AddressResult) {
@@ -130,7 +139,9 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
             id="lga"
             name="lga"
             label="Local Government Area"
-            options={lgaOptions}
+            options={lgaFlat}
+            groups={lgaGroups}
+            custom={!!lgaGroups}
             placeholder="Select Local Government Area"
             value={lga}
             onChange={(e) => setLga(e.target.value)}
