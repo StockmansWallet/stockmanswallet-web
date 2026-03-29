@@ -8,12 +8,11 @@ export function NotificationBadge() {
 
   useEffect(() => {
     const supabase = createClient();
-    let userId: string | null = null;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
-    async function fetchCount() {
+    async function init() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      userId = user.id;
 
       const { count } = await supabase
         .from("notifications")
@@ -22,37 +21,44 @@ export function NotificationBadge() {
         .eq("is_read", false);
 
       setUnreadCount(count ?? 0);
-    }
 
-    fetchCount();
-
-    // Realtime subscription for instant badge updates
-    const channel = supabase
-      .channel("notification-badge")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "notifications" },
-        (payload) => {
-          const row = payload.new as { user_id: string };
-          if (userId && row.user_id === userId) {
+      // Subscribe after auth with user_id filter for reliable delivery
+      channel = supabase
+        .channel("notification-badge")
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "notifications",
+            filter: `user_id=eq.${user.id}`,
+          },
+          () => {
             setUnreadCount((c) => c + 1);
           }
-        }
-      )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "notifications" },
-        (payload) => {
-          const row = payload.new as { user_id: string; is_read: boolean };
-          if (userId && row.user_id === userId && row.is_read) {
-            setUnreadCount((c) => Math.max(0, c - 1));
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "notifications",
+            filter: `user_id=eq.${user.id}`,
+          },
+          (payload) => {
+            const row = payload.new as { is_read: boolean };
+            if (row.is_read) {
+              setUnreadCount((c) => Math.max(0, c - 1));
+            }
           }
-        }
-      )
-      .subscribe();
+        )
+        .subscribe();
+    }
+
+    init();
 
     return () => {
-      supabase.removeChannel(channel);
+      if (channel) supabase.removeChannel(channel);
     };
   }, []);
 

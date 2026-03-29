@@ -51,6 +51,7 @@ export async function sendConnectionRequest(targetUserId: string) {
       requester_role: requesterRole,
       requester_company: requesterCompany,
       status: "pending",
+      connection_type: "advisory",
     })
     .select("id")
     .single();

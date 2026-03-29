@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Bell, UserPlus, Check, X, Clock, MessageSquare, RefreshCw, Handshake, BookOpen, AlertTriangle, TrendingUp } from "lucide-react";
@@ -39,8 +39,11 @@ export function NotificationBell() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  // Store supabase client in ref so click handler can reuse the same instance
+  const supabaseRef = useRef(createClient());
+
   useEffect(() => {
-    const supabase = createClient();
+    const supabase = supabaseRef.current;
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
     async function init() {
@@ -58,7 +61,7 @@ export function NotificationBell() {
       setNotifications(items);
       setUnreadCount(items.filter((n) => !n.is_read).length);
 
-      // Subscribe to realtime inserts with user_id filter
+      // Subscribe after auth with user_id filter for reliable delivery
       channel = supabase
         .channel("notifications-bell")
         .on(
@@ -96,10 +99,9 @@ export function NotificationBell() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [open]);
 
-  const handleNotificationClick = async (notification: AppNotification) => {
+  const handleNotificationClick = useCallback(async (notification: AppNotification) => {
     if (!notification.is_read) {
-      const supabase = createClient();
-      await supabase
+      await supabaseRef.current
         .from("notifications")
         .update({ is_read: true })
         .eq("id", notification.id);
@@ -112,7 +114,7 @@ export function NotificationBell() {
 
     setOpen(false);
     if (notification.link) router.push(notification.link);
-  };
+  }, [router]);
 
   return (
     <div ref={dropdownRef} className="relative">

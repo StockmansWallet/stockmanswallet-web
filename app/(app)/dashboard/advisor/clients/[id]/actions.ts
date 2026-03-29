@@ -9,7 +9,7 @@ import type { MessageType } from "@/lib/types/advisory";
 const sendMessageSchema = z.object({
   connectionId: z.string().uuid(),
   content: z.string().min(1).max(5000),
-  messageType: z.enum(["general_note", "valuation_report", "market_update", "action_required"]),
+  messageType: z.enum(["general_note", "access_request", "renewal_request", "review_request"]),
 });
 
 export async function sendAdvisorMessage(
