@@ -6,7 +6,7 @@ import type { FreightCapacityCategory, FreightEstimate, BindingConstraint, Capac
 import { freightCategoryLibrary, findFreightCategory, headsPerDeckForWeight } from "../data/freight-categories";
 
 // Default freight rate per deck per km
-export const DEFAULT_RATE_PER_DECK_PER_KM = 3.00;
+export const DEFAULT_RATE_PER_DECK_PER_KM = 3.50;
 
 // MARK: - Category Mapping Result
 
