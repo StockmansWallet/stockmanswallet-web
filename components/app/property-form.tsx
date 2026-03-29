@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import AddressAutocomplete, { type AddressResult } from "@/components/app/address-autocomplete";
 
 import type { Database } from "@/lib/types/database";
+import { lgasForState } from "@/lib/data/lga-data";
 
 type PropertyRow = Database["public"]["Tables"]["properties"]["Row"];
 
@@ -35,6 +36,7 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
   const [suburb, setSuburb] = useState(property?.suburb ?? "");
   const [state, setState] = useState(property?.state ?? "");
   const [postcode, setPostcode] = useState(property?.postcode ?? "");
+  const [lga, setLga] = useState(property?.lga ?? "");
   const [latitude, setLatitude] = useState(property?.latitude ?? "");
   const [longitude, setLongitude] = useState(property?.longitude ?? "");
 
@@ -97,6 +99,15 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
             defaultValue={property?.region ?? ""}
             placeholder="e.g. Central Queensland"
           />
+          <Select
+            id="lga"
+            name="lga"
+            label="Local Government Area"
+            options={lgasForState(state).map((c) => ({ value: c, label: c }))}
+            placeholder="Select Local Government Area"
+            value={lga}
+            onChange={(e) => setLga(e.target.value)}
+          />
           <Input
             id="acreage"
             name="acreage"
@@ -155,7 +166,10 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
             options={AU_STATES}
             placeholder="Select state"
             value={state}
-            onChange={(e) => setState(e.target.value)}
+            onChange={(e) => {
+              setState(e.target.value);
+              setLga("");
+            }}
           />
           {/* Coordinates auto-filled from address selection */}
           <input type="hidden" name="latitude" value={latitude} />

@@ -16,6 +16,7 @@ export type Database = {
           is_simulated: boolean;
           state: string;
           region: string | null;
+          lga: string | null;
           address: string | null;
           suburb: string | null;
           postcode: string | null;
@@ -44,6 +45,7 @@ export type Database = {
           is_simulated?: boolean;
           state: string;
           region?: string | null;
+          lga?: string | null;
           address?: string | null;
           suburb?: string | null;
           postcode?: string | null;
@@ -72,6 +74,7 @@ export type Database = {
           is_simulated?: boolean;
           state?: string;
           region?: string | null;
+          lga?: string | null;
           address?: string | null;
           suburb?: string | null;
           postcode?: string | null;

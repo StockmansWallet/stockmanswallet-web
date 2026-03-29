@@ -116,6 +116,7 @@ export interface Property {
   // Location
   state: string;
   region?: string;
+  lga?: string;
   address?: string;
   suburb?: string;
   postcode?: string;

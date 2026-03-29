@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus, Home, Check, X } from "lucide-react";
 import type { OnboardingProperty } from "@/app/onboarding/actions";
 import AddressAutocomplete, { type AddressResult } from "@/components/app/address-autocomplete";
+import { lgasForState } from "@/lib/data/lga-data";
 
 const australianStates = ["QLD", "NSW", "VIC", "SA", "WA", "TAS", "NT", "ACT"];
 
@@ -35,6 +36,7 @@ function AddPropertyModal({
   const [suburb, setSuburb] = useState("");
   const [state, setState] = useState("QLD");
   const [postcode, setPostcode] = useState("");
+  const [lga, setLga] = useState("");
   const [latitude, setLatitude] = useState<number | undefined>();
   const [longitude, setLongitude] = useState<number | undefined>();
   const [isDefault, setIsDefault] = useState(isFirst);
@@ -61,6 +63,7 @@ function AddPropertyModal({
       suburb: suburb.trim() || undefined,
       state,
       postcode: postcode.trim() || undefined,
+      lga: lga || undefined,
       latitude,
       longitude,
       isDefault,
@@ -194,7 +197,10 @@ function AddPropertyModal({
             </label>
             <select
               value={state}
-              onChange={(e) => setState(e.target.value)}
+              onChange={(e) => {
+                setState(e.target.value);
+                setLga("");
+              }}
               className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand"
             >
               {australianStates.map((s) => (
@@ -217,6 +223,25 @@ function AddPropertyModal({
               className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand"
             />
           </div>
+        </div>
+
+        {/* Local Government Area */}
+        <div>
+          <label className="mb-1 block text-xs font-medium text-text-muted">
+            Local Government Area
+          </label>
+          <select
+            value={lga}
+            onChange={(e) => setLga(e.target.value)}
+            className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand"
+          >
+            <option value="">Select Local Government Area</option>
+            {lgasForState(state).map((council) => (
+              <option key={council} value={council}>
+                {council}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Primary Property */}

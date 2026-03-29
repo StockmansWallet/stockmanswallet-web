@@ -6,7 +6,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { hasActivePermission, type ConnectionRequest } from "@/lib/types/advisory";
-import { Users, ShieldCheck, Clock, Search } from "lucide-react";
+import { Users, ShieldCheck, Clock, Search, MapPin } from "lucide-react";
+import { ClientsByRegionChart } from "@/components/app/advisory/clients-by-region-chart";
 
 export const metadata = {
   title: "Advisor Dashboard",
@@ -44,6 +45,32 @@ export default async function AdvisorDashboardPage() {
   const profileMap = new Map(
     (clientProfiles ?? []).map((p) => [p.user_id, p])
   );
+
+  // Fetch default properties for all connected clients to get LGA data
+  const allClientUserIds = allConnections.map((c) => c.target_user_id);
+  const { data: clientProperties } = allClientUserIds.length > 0
+    ? await supabase
+        .from("properties")
+        .select("user_id, lga")
+        .in("user_id", allClientUserIds)
+        .eq("is_default", true)
+        .eq("is_deleted", false)
+    : { data: [] as { user_id: string; lga: string | null }[] };
+
+  // Build region distribution from LGA data
+  const lgaCounts: Record<string, number> = {};
+  for (const prop of clientProperties ?? []) {
+    const lga = prop.lga || "Not specified";
+    lgaCounts[lga] = (lgaCounts[lga] || 0) + 1;
+  }
+  const totalWithRegion = Object.values(lgaCounts).reduce((a, b) => a + b, 0);
+  const regionData = Object.entries(lgaCounts)
+    .map(([name, count]) => ({
+      name,
+      count,
+      percentage: totalWithRegion > 0 ? Math.round((count / totalWithRegion) * 100) : 0,
+    }))
+    .sort((a, b) => b.count - a.count);
 
   // Stats
   const totalClients = allConnections.length;
@@ -223,6 +250,23 @@ export default async function AdvisorDashboardPage() {
             </CardContent>
           </Card>
         </div>
+      </div>
+
+      {/* Clients by Region */}
+      <div className="mt-3 lg:mt-4">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500/15">
+                <MapPin className="h-4 w-4 text-purple-400" />
+              </div>
+              <CardTitle>Clients by Region</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="px-5 pb-5">
+            <ClientsByRegionChart data={regionData} />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
