@@ -19,7 +19,32 @@ import type {
   SaleyardComparisonData,
   ExecutiveSummary,
   HerdCompositionItem,
+  UserReportDetails,
 } from "@/lib/types/reports";
+
+// MARK: - User Details for PDF Header
+
+export async function fetchUserReportDetails(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<UserReportDetails | null> {
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("display_name, property_name, property_pic, state, region")
+    .eq("user_id", userId)
+    .single();
+
+  if (!profile) return null;
+
+  const location = [profile.state, profile.region].filter(Boolean).join(", ") || null;
+
+  return {
+    preparedFor: profile.display_name ?? "Unknown",
+    propertyName: profile.property_name ?? null,
+    picCode: profile.property_pic ?? null,
+    location,
+  };
+}
 
 // MARK: - Herd columns needed for valuation (reused across reports)
 
@@ -128,8 +153,8 @@ export async function generateAssetRegisterData(
   userId: string,
   config: ReportConfiguration
 ): Promise<ReportData> {
-  // Fetch herds, properties, and premiums in parallel
-  const [{ data: herds }, { data: properties }, premiumMap] = await Promise.all([
+  // Fetch herds, properties, premiums, and user details in parallel
+  const [{ data: herds }, { data: properties }, premiumMap, userDetails] = await Promise.all([
     supabase
       .from("herds")
       .select(HERD_SELECT)
@@ -144,6 +169,7 @@ export async function generateAssetRegisterData(
       .eq("is_deleted", false)
       .order("property_name"),
     buildPremiumMap(supabase),
+    fetchUserReportDetails(supabase, userId),
   ]);
 
   const activeHerds = herds ?? [];
@@ -255,6 +281,7 @@ export async function generateAssetRegisterData(
     saleyardComparison: [],
     executiveSummary,
     herdComposition,
+    userDetails,
     generatedAt: new Date().toISOString(),
     dateRange: { start: config.startDate, end: config.endDate },
   };
@@ -267,8 +294,8 @@ export async function generateSalesSummaryData(
   userId: string,
   config: ReportConfiguration
 ): Promise<ReportData> {
-  // Fetch sales and herd names in parallel
-  const [{ data: sales }, { data: herds }, { data: properties }] = await Promise.all([
+  // Fetch sales, herd names, properties, and user details in parallel
+  const [{ data: sales }, { data: herds }, { data: properties }, userDetails] = await Promise.all([
     supabase
       .from("sales_records")
       .select("id, herd_id, sale_date, head_count, average_weight, price_per_kg, price_per_head, pricing_type, sale_type, sale_location, total_gross_value, freight_cost, net_value")
@@ -285,6 +312,7 @@ export async function generateSalesSummaryData(
       .select("id, property_name, is_default")
       .eq("user_id", userId)
       .eq("is_deleted", false),
+    fetchUserReportDetails(supabase, userId),
   ]);
 
   const herdNameMap = new Map((herds ?? []).map((h: { id: string; name: string }) => [h.id, h.name]));
@@ -332,6 +360,7 @@ export async function generateSalesSummaryData(
     saleyardComparison: [],
     executiveSummary: null,
     herdComposition: [],
+    userDetails,
     generatedAt: new Date().toISOString(),
     dateRange: { start: config.startDate, end: config.endDate },
   };
@@ -344,8 +373,8 @@ export async function generateSaleyardComparisonData(
   userId: string,
   config: ReportConfiguration
 ): Promise<ReportData> {
-  // Fetch herds and properties
-  const [{ data: herds }, { data: properties }] = await Promise.all([
+  // Fetch herds, properties, and user details
+  const [{ data: herds }, { data: properties }, userDetails] = await Promise.all([
     supabase
       .from("herds")
       .select(HERD_SELECT)
@@ -358,6 +387,7 @@ export async function generateSaleyardComparisonData(
       .select("id, property_name, is_default, default_saleyard")
       .eq("user_id", userId)
       .eq("is_deleted", false),
+    fetchUserReportDetails(supabase, userId),
   ]);
 
   let filteredHerds = (herds ?? []) as { category: string; initial_weight: number; breeder_sub_type?: string | null; head_count: number; property_id?: string | null }[];
@@ -443,6 +473,7 @@ export async function generateSaleyardComparisonData(
     saleyardComparison: comparisonData,
     executiveSummary: null,
     herdComposition: [],
+    userDetails,
     generatedAt: new Date().toISOString(),
     dateRange: { start: config.startDate, end: config.endDate },
   };
@@ -469,6 +500,7 @@ export async function generateAccountantData(
     saleyardComparison: [],
     executiveSummary: assetData.executiveSummary,
     herdComposition: assetData.herdComposition,
+    userDetails: assetData.userDetails,
     generatedAt: new Date().toISOString(),
     dateRange: { start: config.startDate, end: config.endDate },
   };

@@ -89,6 +89,15 @@ export interface SaleyardComparisonData {
   totalHeadCount: number;
 }
 
+// MARK: - User Details (for PDF header)
+
+export interface UserReportDetails {
+  preparedFor: string;
+  propertyName: string | null;
+  picCode: string | null;
+  location: string | null;
+}
+
 // MARK: - Main Report Data Container
 
 export interface ReportData {
@@ -100,6 +109,7 @@ export interface ReportData {
   saleyardComparison: SaleyardComparisonData[];
   executiveSummary: ExecutiveSummary | null;
   herdComposition: HerdCompositionItem[];
+  userDetails: UserReportDetails | null;
   generatedAt: string;
   dateRange: { start: string; end: string };
 }

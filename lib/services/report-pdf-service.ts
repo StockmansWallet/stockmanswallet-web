@@ -1,22 +1,25 @@
-// PDF export service for reports — uses pdf-lib for client-side generation
-// Port of iOS EnhancedReportExportService layout patterns
+// PDF export service for reports - matches iOS EnhancedReportExportService layout
+// Uses pdf-lib for client-side generation with card-based design
 
-import { PDFDocument, PDFFont, PDFPage, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, PDFFont, PDFImage, PDFPage, rgb } from "pdf-lib";
 import type { ReportData } from "@/lib/types/reports";
 
-// MARK: - Constants
+// MARK: - Page Constants (US Letter, matching iOS)
 
-const PAGE_WIDTH = 595; // A4
-const PAGE_HEIGHT = 842;
-const MARGIN = 50;
-const CONTENT_WIDTH = PAGE_WIDTH - MARGIN * 2;
+const PAGE_W = 612;
+const PAGE_H = 792;
+const MARGIN = 72;
+const CW = PAGE_W - MARGIN * 2; // content width = 468
 
-// Colors
+// MARK: - Colours (greyscale, print-optimised)
+
 const BLACK = rgb(0, 0, 0);
-const DARK_GRAY = rgb(0.3, 0.3, 0.3);
-const GRAY = rgb(0.5, 0.5, 0.5);
-const LIGHT_GRAY = rgb(0.85, 0.85, 0.85);
-const AMBER = rgb(0.96, 0.62, 0.04);
+const SECONDARY = rgb(0.4, 0.4, 0.4);
+const TERTIARY = rgb(0.6, 0.6, 0.6);
+const CARD_FILL = rgb(0.98, 0.98, 0.98);
+const BORDER = rgb(0.9, 0.9, 0.9);
+
+// MARK: - Formatting Helpers
 
 function fmt(v: number) {
   return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 }).format(v);
@@ -27,7 +30,485 @@ function fmtDate(dateStr: string) {
   return d.toLocaleDateString("en-AU", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-// MARK: - Main Export Function
+// MARK: - Draw Context
+
+interface Ctx {
+  doc: PDFDocument;
+  font: PDFFont;
+  bold: PDFFont;
+  page: PDFPage;
+  y: number;
+  pageNum: number;
+  logo: PDFImage | null;
+}
+
+function newPage(ctx: Ctx) {
+  ctx.page = ctx.doc.addPage([PAGE_W, PAGE_H]);
+  ctx.y = PAGE_H - MARGIN;
+  ctx.pageNum++;
+}
+
+function ensureSpace(ctx: Ctx, needed: number) {
+  if (ctx.y - needed < MARGIN + 40) {
+    newPage(ctx);
+  }
+}
+
+// MARK: - Rounded Rect
+
+function drawRoundedRect(
+  page: PDFPage,
+  x: number, y: number, w: number, h: number,
+  r: number,
+  options: { fill?: ReturnType<typeof rgb>; borderColor?: ReturnType<typeof rgb>; borderWidth?: number }
+) {
+  // pdf-lib does not have native rounded rect, draw as filled rect + border lines
+  if (options.fill) {
+    page.drawRectangle({ x, y, width: w, height: h, color: options.fill });
+  }
+  if (options.borderColor && options.borderWidth) {
+    page.drawRectangle({ x, y, width: w, height: h, borderColor: options.borderColor, borderWidth: options.borderWidth });
+  }
+}
+
+// MARK: - Report Header (title, logo, user details)
+
+function drawReportHeader(ctx: Ctx, title: string, data: ReportData) {
+  // Title left, logo right
+  ctx.page.drawText(title, { x: MARGIN, y: ctx.y, size: 28, font: ctx.bold, color: BLACK });
+
+  if (ctx.logo) {
+    const logoH = 60;
+    const aspect = ctx.logo.width / ctx.logo.height;
+    const logoW = logoH * aspect;
+    ctx.page.drawImage(ctx.logo, {
+      x: PAGE_W - MARGIN - logoW,
+      y: ctx.y - logoH + 28,
+      width: logoW,
+      height: logoH,
+    });
+  }
+
+  ctx.y -= 36;
+
+  // Period
+  const period = `${fmtDate(data.dateRange.start)} to ${fmtDate(data.dateRange.end)}`;
+  ctx.page.drawText(period, { x: MARGIN, y: ctx.y, size: 11, font: ctx.font, color: SECONDARY });
+  ctx.y -= 20;
+
+  // Divider
+  ctx.page.drawLine({ start: { x: MARGIN, y: ctx.y }, end: { x: PAGE_W - MARGIN, y: ctx.y }, thickness: 0.5, color: BORDER });
+  ctx.y -= 24;
+
+  // User details grid (2 columns, up to 2 rows)
+  const ud = data.userDetails;
+  if (ud) {
+    const colW = CW / 2;
+    const details: [string, string | null][] = [
+      ["PREPARED FOR", ud.preparedFor],
+      ["PROPERTY", ud.propertyName],
+      ["PIC CODE", ud.picCode],
+      ["LOCATION", ud.location],
+    ];
+
+    for (let row = 0; row < 2; row++) {
+      for (let col = 0; col < 2; col++) {
+        const idx = row * 2 + col;
+        const [label, value] = details[idx];
+        if (!value) continue;
+        const x = MARGIN + col * colW;
+
+        ctx.page.drawText(label, { x, y: ctx.y, size: 8, font: ctx.bold, color: TERTIARY });
+        ctx.page.drawText(value, { x, y: ctx.y - 14, size: 12, font: ctx.font, color: BLACK });
+      }
+      ctx.y -= 36;
+    }
+
+    ctx.page.drawLine({ start: { x: MARGIN, y: ctx.y }, end: { x: PAGE_W - MARGIN, y: ctx.y }, thickness: 0.5, color: BORDER });
+    ctx.y -= 24;
+  }
+}
+
+// MARK: - Hero Card
+
+function drawHeroCard(ctx: Ctx, label: string, value: string) {
+  ensureSpace(ctx, 100);
+  const cardH = 90;
+  const cardY = ctx.y - cardH;
+
+  drawRoundedRect(ctx.page, MARGIN, cardY, CW, cardH, 12, { fill: CARD_FILL, borderColor: BORDER, borderWidth: 0.5 });
+
+  // Label centred
+  const labelW = ctx.bold.widthOfTextAtSize(label, 9);
+  ctx.page.drawText(label, { x: MARGIN + (CW - labelW) / 2, y: cardY + cardH - 28, size: 9, font: ctx.bold, color: TERTIARY });
+
+  // Value centred
+  const valW = ctx.bold.widthOfTextAtSize(value, 32);
+  ctx.page.drawText(value, { x: MARGIN + (CW - valW) / 2, y: cardY + cardH - 64, size: 32, font: ctx.bold, color: BLACK });
+
+  ctx.y = cardY - 24;
+}
+
+// MARK: - Executive Summary Card
+
+function drawExecutiveSummary(ctx: Ctx, data: ReportData) {
+  if (!data.executiveSummary) return;
+  const es = data.executiveSummary;
+
+  ensureSpace(ctx, 200);
+
+  // Section label
+  ctx.page.drawText("EXECUTIVE SUMMARY", { x: MARGIN, y: ctx.y, size: 10, font: ctx.bold, color: TERTIARY });
+  ctx.y -= 20;
+
+  const rows: [string, string][][] = [
+    [["TOTAL PORTFOLIO VALUE", fmt(es.totalPortfolioValue)], ["TOTAL HEAD COUNT", es.totalHeadCount.toLocaleString()]],
+    [["AVERAGE VALUE PER HEAD", fmt(es.averageValuePerHead)], ["VALUATION DATE", fmtDate(es.valuationDate)]],
+  ];
+
+  const cardH = 24 + rows.length * 46 + 24;
+  const cardY = ctx.y - cardH;
+
+  drawRoundedRect(ctx.page, MARGIN, cardY, CW, cardH, 12, { fill: CARD_FILL, borderColor: BORDER, borderWidth: 0.5 });
+
+  let rowY = ctx.y - 24;
+  const colW = (CW - 40) / 2;
+
+  for (const row of rows) {
+    for (let col = 0; col < row.length; col++) {
+      const [label, value] = row[col];
+      const x = MARGIN + 20 + col * colW;
+
+      ctx.page.drawText(label, { x, y: rowY, size: 8, font: ctx.bold, color: TERTIARY });
+      ctx.page.drawText(value, { x, y: rowY - 16, size: 13, font: ctx.bold, color: BLACK });
+    }
+    rowY -= 46;
+  }
+
+  ctx.y = cardY - 24;
+}
+
+// MARK: - Section Header
+
+function drawSectionHeader(ctx: Ctx, title: string) {
+  ensureSpace(ctx, 40);
+  ctx.page.drawText(title, { x: MARGIN, y: ctx.y, size: 16, font: ctx.bold, color: BLACK });
+  ctx.y -= 28;
+}
+
+// MARK: - Property Group Header
+
+function drawPropertyHeader(ctx: Ctx, name: string) {
+  ensureSpace(ctx, 30);
+  ctx.page.drawText(name, { x: MARGIN, y: ctx.y, size: 13, font: ctx.bold, color: SECONDARY });
+  ctx.y -= 20;
+}
+
+// MARK: - Herd Asset Card
+
+function drawHerdCard(ctx: Ctx, h: ReportData["herdData"][0]) {
+  // Estimate card height
+  const riskFields = buildRiskFields(h);
+  const cardH = riskFields.length > 0 ? 150 : 110;
+  ensureSpace(ctx, cardH + 16);
+
+  const cardY = ctx.y - cardH;
+  drawRoundedRect(ctx.page, MARGIN, cardY, CW, cardH, 12, { fill: CARD_FILL, borderColor: BORDER, borderWidth: 0.5 });
+
+  const pad = 20;
+  const innerW = CW - pad * 2;
+  let iy = ctx.y - pad;
+
+  // Header: name left, value right
+  ctx.page.drawText(h.name, { x: MARGIN + pad, y: iy, size: 13, font: ctx.bold, color: BLACK });
+  const valStr = fmt(h.netValue);
+  const valW = ctx.bold.widthOfTextAtSize(valStr, 14);
+  ctx.page.drawText(valStr, { x: PAGE_W - MARGIN - pad - valW, y: iy, size: 14, font: ctx.bold, color: BLACK });
+  iy -= 16;
+
+  // Category
+  ctx.page.drawText(h.category, { x: MARGIN + pad, y: iy, size: 10, font: ctx.font, color: SECONDARY });
+  iy -= 22;
+
+  // Stats grid: 4 columns
+  const statW = innerW / 4;
+  const labels = ["HEAD COUNT", "AGE", "WEIGHT", "PRICE"];
+  const values = [
+    `${h.headCount} head`,
+    `${h.ageMonths} months`,
+    `${h.weight.toFixed(0)} kg`,
+    `$${h.pricePerKg.toFixed(2)}/kg`,
+  ];
+
+  for (let i = 0; i < 4; i++) {
+    const sx = MARGIN + pad + i * statW;
+    ctx.page.drawText(labels[i], { x: sx, y: iy, size: 7, font: ctx.bold, color: TERTIARY });
+    ctx.page.drawText(values[i], { x: sx, y: iy - 12, size: 11, font: ctx.font, color: BLACK });
+  }
+  iy -= 28;
+
+  // Breeding/risk row
+  if (riskFields.length > 0) {
+    // Divider inside card
+    ctx.page.drawLine({
+      start: { x: MARGIN + pad, y: iy },
+      end: { x: PAGE_W - MARGIN - pad, y: iy },
+      thickness: 0.3, color: BORDER,
+    });
+    iy -= 16;
+
+    const riskW = innerW / Math.min(riskFields.length, 4);
+    for (let i = 0; i < riskFields.length; i++) {
+      const rx = MARGIN + pad + (i % 4) * riskW;
+      ctx.page.drawText(riskFields[i].label, { x: rx, y: iy, size: 7, font: ctx.bold, color: TERTIARY });
+      ctx.page.drawText(riskFields[i].value, { x: rx, y: iy - 12, size: 10, font: ctx.font, color: SECONDARY });
+    }
+  }
+
+  ctx.y = cardY - 12;
+}
+
+function buildRiskFields(h: ReportData["herdData"][0]): { label: string; value: string }[] {
+  const fields: { label: string; value: string }[] = [];
+  if (h.breedPremiumOverride != null) {
+    fields.push({ label: "BREED ADJ.", value: `${h.breedPremiumOverride >= 0 ? "+" : ""}${h.breedPremiumOverride}% vs. avg` });
+  }
+  if (h.dailyWeightGain > 0) {
+    fields.push({ label: "DWG ALLOCATION", value: `${h.dailyWeightGain.toFixed(2)} kg/day` });
+  }
+  if (h.isBreeder && h.calvingRate > 0) {
+    const pct = h.calvingRate > 1 ? h.calvingRate : h.calvingRate * 100;
+    fields.push({ label: "CALVING %", value: `${pct.toFixed(0)}%` });
+  }
+  if (h.mortalityRate > 0) {
+    const pct = h.mortalityRate > 1 ? h.mortalityRate : h.mortalityRate * 100;
+    fields.push({ label: "MORTALITY", value: `${pct.toFixed(1)}% p.a.` });
+  }
+  if (h.breedingAccrual != null && h.breedingAccrual > 0) {
+    fields.push({ label: "CALF ACCRUAL", value: fmt(h.breedingAccrual) });
+  }
+  return fields;
+}
+
+// MARK: - Table Helpers (for sales/saleyard tables)
+
+function drawTableHeader(ctx: Ctx, cols: { text: string; width: number; align?: "left" | "right" }[]) {
+  ensureSpace(ctx, 22);
+  let x = MARGIN;
+  for (const col of cols) {
+    const tw = ctx.bold.widthOfTextAtSize(col.text, 7);
+    const dx = col.align === "right" ? x + col.width - tw : x;
+    ctx.page.drawText(col.text, { x: dx, y: ctx.y, size: 7, font: ctx.bold, color: TERTIARY });
+    x += col.width;
+  }
+  ctx.y -= 6;
+  ctx.page.drawLine({ start: { x: MARGIN, y: ctx.y }, end: { x: PAGE_W - MARGIN, y: ctx.y }, thickness: 0.3, color: BORDER });
+  ctx.y -= 12;
+}
+
+function drawTableRow(ctx: Ctx, cols: { text: string; width: number; align?: "left" | "right"; bold?: boolean }[]) {
+  ensureSpace(ctx, 16);
+  let x = MARGIN;
+  for (const col of cols) {
+    const f = col.bold ? ctx.bold : ctx.font;
+    const tw = f.widthOfTextAtSize(col.text, 9);
+    const dx = col.align === "right" ? x + col.width - tw : x;
+    ctx.page.drawText(col.text, { x: dx, y: ctx.y, size: 9, font: f, color: col.bold ? BLACK : SECONDARY });
+    x += col.width;
+  }
+  ctx.y -= 16;
+}
+
+// MARK: - Page Footer
+
+function drawAllFooters(ctx: Ctx) {
+  const pages = ctx.doc.getPages();
+  const total = pages.length;
+  const brandText = "Stockman's Wallet   |   Intelligent Livestock Valuation   |   www.stockmanswallet.com.au";
+
+  for (let i = 0; i < total; i++) {
+    const p = pages[i];
+
+    // Divider
+    p.drawLine({ start: { x: MARGIN, y: MARGIN - 14 }, end: { x: PAGE_W - MARGIN, y: MARGIN - 14 }, thickness: 0.3, color: BORDER });
+
+    // Brand text left
+    p.drawText(brandText, { x: MARGIN, y: MARGIN - 28, size: 7, font: ctx.font, color: TERTIARY });
+
+    // Page number right
+    const pageText = `Page ${i + 1} of ${total}`;
+    const pw = ctx.font.widthOfTextAtSize(pageText, 7);
+    p.drawText(pageText, { x: PAGE_W - MARGIN - pw, y: MARGIN - 28, size: 7, font: ctx.font, color: TERTIARY });
+  }
+}
+
+// MARK: - Asset Register
+
+function drawAssetRegister(ctx: Ctx, data: ReportData) {
+  drawHeroCard(ctx, "TOTAL PORTFOLIO VALUE", fmt(data.totalValue));
+  drawExecutiveSummary(ctx, data);
+
+  drawSectionHeader(ctx, "Livestock Assets");
+
+  // Group herds by property
+  const byProperty = new Map<string, typeof data.herdData>();
+  for (const h of data.herdData) {
+    const key = h.propertyName ?? "Unassigned";
+    const arr = byProperty.get(key) ?? [];
+    arr.push(h);
+    byProperty.set(key, arr);
+  }
+
+  for (const [propName, herds] of byProperty) {
+    if (byProperty.size > 1) {
+      drawPropertyHeader(ctx, propName);
+    }
+    for (const h of herds) {
+      drawHerdCard(ctx, h);
+    }
+  }
+
+  // Total row
+  ensureSpace(ctx, 30);
+  ctx.y -= 8;
+  ctx.page.drawLine({ start: { x: MARGIN, y: ctx.y }, end: { x: PAGE_W - MARGIN, y: ctx.y }, thickness: 0.5, color: BORDER });
+  ctx.y -= 16;
+
+  const totalHead = data.herdData.reduce((s, h) => s + h.headCount, 0);
+  ctx.page.drawText("TOTAL", { x: MARGIN, y: ctx.y, size: 11, font: ctx.bold, color: BLACK });
+  ctx.page.drawText(`${totalHead.toLocaleString()} head`, { x: MARGIN + 140, y: ctx.y, size: 11, font: ctx.font, color: SECONDARY });
+  const totalStr = fmt(data.totalValue);
+  const totalW = ctx.bold.widthOfTextAtSize(totalStr, 13);
+  ctx.page.drawText(totalStr, { x: PAGE_W - MARGIN - totalW, y: ctx.y, size: 13, font: ctx.bold, color: BLACK });
+  ctx.y -= 24;
+}
+
+// MARK: - Sales Summary
+
+function drawSalesSummary(ctx: Ctx, data: ReportData) {
+  drawHeroCard(ctx, "TOTAL SALES VALUE", fmt(data.totalSales));
+
+  // Sales overview stats
+  const totalGross = data.salesData.reduce((s, r) => s + r.grossValue, 0);
+  const totalFreight = data.salesData.reduce((s, r) => s + r.freightCost, 0);
+
+  drawSectionHeader(ctx, "Sales Overview");
+
+  const overviewRows: [string, string][] = [
+    ["Net Sales Revenue", fmt(data.totalSales)],
+    ["Gross Sales", fmt(totalGross)],
+    ["Total Freight", fmt(totalFreight)],
+    ["Total Records", data.salesData.length.toString()],
+  ];
+
+  for (const [label, value] of overviewRows) {
+    ensureSpace(ctx, 18);
+    ctx.page.drawText(label, { x: MARGIN, y: ctx.y, size: 11, font: ctx.font, color: SECONDARY });
+    const vw = ctx.bold.widthOfTextAtSize(value, 11);
+    ctx.page.drawText(value, { x: MARGIN + 200 - vw + 100, y: ctx.y, size: 11, font: ctx.bold, color: BLACK });
+    ctx.y -= 18;
+  }
+  ctx.y -= 12;
+
+  // Sales records table
+  drawSectionHeader(ctx, "Sales Records");
+
+  const cols = [
+    { text: "DATE", width: 70 },
+    { text: "HERD", width: 100 },
+    { text: "HEAD", width: 40, align: "right" as const },
+    { text: "AVG WT", width: 55, align: "right" as const },
+    { text: "TYPE", width: 60 },
+    { text: "LOCATION", width: 65 },
+    { text: "NET VALUE", width: 78, align: "right" as const },
+  ];
+  drawTableHeader(ctx, cols);
+
+  for (const s of data.salesData) {
+    drawTableRow(ctx, [
+      { text: fmtDate(s.date), width: 70 },
+      { text: (s.herdName ?? "-").substring(0, 18), width: 100 },
+      { text: s.headCount.toString(), width: 40, align: "right" },
+      { text: `${s.avgWeight.toFixed(0)} kg`, width: 55, align: "right" },
+      { text: (s.saleType ?? "-").substring(0, 10), width: 60 },
+      { text: (s.saleLocation ?? "-").substring(0, 12), width: 65 },
+      { text: fmt(s.netValue), width: 78, align: "right", bold: true },
+    ]);
+  }
+}
+
+// MARK: - Saleyard Comparison
+
+function drawSaleyardComparison(ctx: Ctx, data: ReportData) {
+  if (data.saleyardComparison.length > 0) {
+    drawHeroCard(ctx, "BEST AVERAGE PRICE", `$${data.saleyardComparison[0].avgPrice.toFixed(2)}/kg`);
+
+    ensureSpace(ctx, 30);
+    ctx.page.drawText(`Best Saleyard: ${data.saleyardComparison[0].saleyardName}`, {
+      x: MARGIN, y: ctx.y, size: 11, font: ctx.font, color: SECONDARY,
+    });
+    ctx.y -= 16;
+    ctx.page.drawText(`${data.saleyardComparison.length} saleyards compared`, {
+      x: MARGIN, y: ctx.y, size: 10, font: ctx.font, color: TERTIARY,
+    });
+    ctx.y -= 24;
+  }
+
+  drawSectionHeader(ctx, "Saleyard Price Comparison");
+
+  const cols = [
+    { text: "#", width: 25 },
+    { text: "SALEYARD", width: 200 },
+    { text: "AVG $/KG", width: 80, align: "right" as const },
+    { text: "MIN $/KG", width: 80, align: "right" as const },
+    { text: "MAX $/KG", width: 83, align: "right" as const },
+  ];
+  drawTableHeader(ctx, cols);
+
+  for (let i = 0; i < data.saleyardComparison.length; i++) {
+    const s = data.saleyardComparison[i];
+    drawTableRow(ctx, [
+      { text: (i + 1).toString(), width: 25 },
+      { text: s.saleyardName.substring(0, 38), width: 200 },
+      { text: `$${s.avgPrice.toFixed(2)}`, width: 80, align: "right", bold: i === 0 },
+      { text: `$${s.minPrice.toFixed(2)}`, width: 80, align: "right" },
+      { text: `$${s.maxPrice.toFixed(2)}`, width: 83, align: "right" },
+    ]);
+  }
+}
+
+// MARK: - Accountant Report
+
+function drawAccountantReport(ctx: Ctx, data: ReportData) {
+  // Portfolio summary
+  if (data.executiveSummary) {
+    drawSectionHeader(ctx, "Portfolio Summary");
+    const stats: [string, string][] = [
+      ["Total Portfolio Value", fmt(data.executiveSummary.totalPortfolioValue)],
+      ["Total Head Count", data.executiveSummary.totalHeadCount.toLocaleString()],
+      ["Sales Revenue (Period)", fmt(data.totalSales)],
+    ];
+    for (const [label, value] of stats) {
+      ensureSpace(ctx, 18);
+      ctx.page.drawText(label, { x: MARGIN, y: ctx.y, size: 11, font: ctx.font, color: SECONDARY });
+      const vw = ctx.bold.widthOfTextAtSize(value, 11);
+      ctx.page.drawText(value, { x: MARGIN + 300 - vw + 100, y: ctx.y, size: 11, font: ctx.bold, color: BLACK });
+      ctx.y -= 18;
+    }
+    ctx.y -= 16;
+  }
+
+  if (data.herdData.length > 0) {
+    drawAssetRegister(ctx, data);
+    ctx.y -= 16;
+  }
+
+  if (data.salesData.length > 0) {
+    drawSalesSummary(ctx, data);
+  }
+}
+
+// MARK: - Main Export
 
 export async function generateReportPDF(
   data: ReportData,
@@ -35,18 +516,31 @@ export async function generateReportPDF(
   title: string
 ): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
-  const font = await doc.embedFont(StandardFonts.Helvetica);
-  const fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
+
+  // Embed standard fonts (pdf-lib does not support custom fonts without embedding)
+  const font = await doc.embedFont("Helvetica");
+  const bold = await doc.embedFont("Helvetica-Bold");
 
   doc.setTitle(title);
   doc.setCreator("Stockman's Wallet");
   doc.setProducer("Stockman's Wallet Web");
 
-  const ctx: DrawContext = { doc, font, fontBold, pageNum: 0, y: 0, page: null as unknown as PDFPage };
+  // Embed logo
+  let logo: PDFImage | null = null;
+  try {
+    const logoRes = await fetch("/images/sw-logo.png");
+    if (logoRes.ok) {
+      const logoBytes = await logoRes.arrayBuffer();
+      logo = await doc.embedPng(new Uint8Array(logoBytes));
+    }
+  } catch {
+    // Logo fetch failed, continue without it
+  }
 
-  // Add title page header
+  const ctx: Ctx = { doc, font, bold, page: null as unknown as PDFPage, y: 0, pageNum: 0, logo };
+
   newPage(ctx);
-  drawHeader(ctx, title, data);
+  drawReportHeader(ctx, title, data);
 
   switch (reportType) {
     case "asset-register":
@@ -63,325 +557,7 @@ export async function generateReportPDF(
       break;
   }
 
-  // Add page numbers
-  const pages = doc.getPages();
-  for (let i = 0; i < pages.length; i++) {
-    const p = pages[i];
-    const text = `Page ${i + 1} of ${pages.length}`;
-    const tw = ctx.font.widthOfTextAtSize(text, 8);
-    p.drawText(text, { x: PAGE_WIDTH - MARGIN - tw, y: 25, size: 8, font: ctx.font, color: GRAY });
-  }
+  drawAllFooters(ctx);
 
   return doc.save();
-}
-
-// MARK: - Draw Context
-
-interface DrawContext {
-  doc: PDFDocument;
-  font: PDFFont;
-  fontBold: PDFFont;
-  page: PDFPage;
-  y: number;
-  pageNum: number;
-}
-
-function newPage(ctx: DrawContext) {
-  ctx.page = ctx.doc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
-  ctx.y = PAGE_HEIGHT - MARGIN;
-  ctx.pageNum++;
-}
-
-function ensureSpace(ctx: DrawContext, needed: number) {
-  if (ctx.y - needed < MARGIN + 30) {
-    newPage(ctx);
-  }
-}
-
-// MARK: - Header
-
-function drawHeader(ctx: DrawContext, title: string, data: ReportData) {
-  ctx.page.drawText(title, { x: MARGIN, y: ctx.y, size: 18, font: ctx.fontBold, color: BLACK });
-  ctx.y -= 18;
-
-  if (data.farmName) {
-    ctx.page.drawText(data.farmName, { x: MARGIN, y: ctx.y, size: 10, font: ctx.font, color: DARK_GRAY });
-    ctx.y -= 14;
-  }
-
-  const dateRange = `${fmtDate(data.dateRange.start)} — ${fmtDate(data.dateRange.end)}`;
-  ctx.page.drawText(dateRange, { x: MARGIN, y: ctx.y, size: 9, font: ctx.font, color: GRAY });
-  ctx.y -= 10;
-
-  const generated = `Generated ${new Date().toLocaleDateString("en-AU", { day: "2-digit", month: "long", year: "numeric" })}`;
-  ctx.page.drawText(generated, { x: MARGIN, y: ctx.y, size: 8, font: ctx.font, color: GRAY });
-  ctx.y -= 20;
-
-  // Separator line
-  ctx.page.drawLine({ start: { x: MARGIN, y: ctx.y }, end: { x: PAGE_WIDTH - MARGIN, y: ctx.y }, thickness: 0.5, color: LIGHT_GRAY });
-  ctx.y -= 20;
-}
-
-// MARK: - Section Header
-
-function drawSectionTitle(ctx: DrawContext, title: string) {
-  ensureSpace(ctx, 30);
-  ctx.page.drawText(title, { x: MARGIN, y: ctx.y, size: 12, font: ctx.fontBold, color: BLACK });
-  ctx.y -= 18;
-}
-
-// MARK: - Table Row
-
-function drawTableRow(ctx: DrawContext, cells: { text: string; width: number; align?: "left" | "right"; bold?: boolean }[], rowHeight = 16) {
-  ensureSpace(ctx, rowHeight);
-  let x = MARGIN;
-  for (const cell of cells) {
-    const f = cell.bold ? ctx.fontBold : ctx.font;
-    const textWidth = f.widthOfTextAtSize(cell.text, 8);
-    const drawX = cell.align === "right" ? x + cell.width - textWidth : x;
-    ctx.page.drawText(cell.text, { x: drawX, y: ctx.y, size: 8, font: f, color: cell.bold ? BLACK : DARK_GRAY });
-    x += cell.width;
-  }
-  ctx.y -= rowHeight;
-}
-
-function drawTableHeader(ctx: DrawContext, cells: { text: string; width: number; align?: "left" | "right" }[]) {
-  ensureSpace(ctx, 20);
-  let x = MARGIN;
-  for (const cell of cells) {
-    const textWidth = ctx.fontBold.widthOfTextAtSize(cell.text, 7);
-    const drawX = cell.align === "right" ? x + cell.width - textWidth : x;
-    ctx.page.drawText(cell.text, { x: drawX, y: ctx.y, size: 7, font: ctx.fontBold, color: GRAY });
-    x += cell.width;
-  }
-  ctx.y -= 4;
-  ctx.page.drawLine({ start: { x: MARGIN, y: ctx.y }, end: { x: PAGE_WIDTH - MARGIN, y: ctx.y }, thickness: 0.3, color: LIGHT_GRAY });
-  ctx.y -= 10;
-}
-
-// MARK: - Asset Register
-
-function drawAssetRegister(ctx: DrawContext, data: ReportData) {
-  // Executive Summary
-  if (data.executiveSummary) {
-    const es = data.executiveSummary;
-    drawSectionTitle(ctx, "Executive Summary");
-    drawTableRow(ctx, [
-      { text: "Total Portfolio Value:", width: 180 },
-      { text: fmt(es.totalPortfolioValue), width: 120, align: "right", bold: true },
-      { text: "Total Head Count:", width: 100 },
-      { text: es.totalHeadCount.toLocaleString(), width: 95, align: "right", bold: true },
-    ]);
-    drawTableRow(ctx, [
-      { text: "Average Value Per Head:", width: 180 },
-      { text: fmt(es.averageValuePerHead), width: 120, align: "right", bold: true },
-      { text: "Valuation Date:", width: 100 },
-      { text: fmtDate(es.valuationDate), width: 95, align: "right", bold: true },
-    ]);
-    ctx.y -= 10;
-  }
-
-  // Herd cards (matching iOS layout)
-  drawSectionTitle(ctx, "Livestock Assets");
-
-  for (const h of data.herdData) {
-    // Each herd card needs ~60-80px
-    ensureSpace(ctx, 80);
-
-    // Card header: name + value
-    const nameWidth = ctx.fontBold.widthOfTextAtSize(h.name, 10);
-    ctx.page.drawText(h.name, { x: MARGIN, y: ctx.y, size: 10, font: ctx.fontBold, color: BLACK });
-    const valStr = fmt(h.netValue);
-    const valWidth = ctx.fontBold.widthOfTextAtSize(valStr, 10);
-    ctx.page.drawText(valStr, { x: PAGE_WIDTH - MARGIN - valWidth, y: ctx.y, size: 10, font: ctx.fontBold, color: BLACK });
-    ctx.y -= 12;
-    ctx.page.drawText(h.category, { x: MARGIN, y: ctx.y, size: 8, font: ctx.font, color: GRAY });
-    ctx.y -= 14;
-
-    // Main stats row: Head, Age, Weight, Price
-    const statW = CONTENT_WIDTH / 4;
-    const statLabels = ["HEAD COUNT", "AGE", "WEIGHT", "PRICE"];
-    const statValues = [`${h.headCount} head`, `${h.ageMonths} months`, `${h.weight.toFixed(0)} kg`, `$${h.pricePerKg.toFixed(2)}/kg`];
-    for (let i = 0; i < 4; i++) {
-      const sx = MARGIN + i * statW;
-      ctx.page.drawText(statLabels[i], { x: sx, y: ctx.y, size: 6, font: ctx.fontBold, color: GRAY });
-      ctx.page.drawText(statValues[i], { x: sx, y: ctx.y - 10, size: 8, font: ctx.fontBold, color: DARK_GRAY });
-    }
-    ctx.y -= 24;
-
-    // Breeding & risk row (conditional)
-    const riskFields: { label: string; value: string }[] = [];
-    if (h.breedPremiumOverride != null) {
-      riskFields.push({ label: "BREED ADJ.", value: `${h.breedPremiumOverride >= 0 ? "+" : ""}${h.breedPremiumOverride}% vs. avg` });
-    }
-    if (h.dailyWeightGain > 0) {
-      riskFields.push({ label: "DWG ALLOCATION", value: `${h.dailyWeightGain.toFixed(2)} kg/day` });
-    }
-    if (h.isBreeder && h.calvingRate > 0) {
-      const calvPct = h.calvingRate > 1 ? h.calvingRate : h.calvingRate * 100;
-      riskFields.push({ label: "CALVING %", value: `${calvPct.toFixed(0)}%` });
-    }
-    if (h.mortalityRate > 0) {
-      const mortPct = h.mortalityRate > 1 ? h.mortalityRate : h.mortalityRate * 100;
-      riskFields.push({ label: "MORTALITY", value: `${mortPct.toFixed(1)}% p.a.` });
-    }
-    if (h.breedingAccrual != null && h.breedingAccrual > 0) {
-      riskFields.push({ label: "CALF ACCRUAL", value: fmt(h.breedingAccrual) });
-    }
-
-    if (riskFields.length > 0) {
-      const riskW = CONTENT_WIDTH / Math.min(riskFields.length, 4);
-      for (let i = 0; i < riskFields.length; i++) {
-        const rx = MARGIN + (i % 4) * riskW;
-        ctx.page.drawText(riskFields[i].label, { x: rx, y: ctx.y, size: 6, font: ctx.fontBold, color: GRAY });
-        ctx.page.drawText(riskFields[i].value, { x: rx, y: ctx.y - 10, size: 8, font: ctx.font, color: DARK_GRAY });
-      }
-      ctx.y -= 24;
-    }
-
-    // Divider between cards
-    ctx.page.drawLine({ start: { x: MARGIN, y: ctx.y }, end: { x: PAGE_WIDTH - MARGIN, y: ctx.y }, thickness: 0.3, color: LIGHT_GRAY });
-    ctx.y -= 12;
-  }
-
-  // Total row
-  ctx.y -= 4;
-  ctx.page.drawLine({ start: { x: MARGIN, y: ctx.y }, end: { x: PAGE_WIDTH - MARGIN, y: ctx.y }, thickness: 0.5, color: LIGHT_GRAY });
-  ctx.y -= 12;
-  const totalHead = data.herdData.reduce((s, h) => s + h.headCount, 0);
-  drawTableRow(ctx, [
-    { text: "TOTAL", width: 110, bold: true },
-    { text: "", width: 100 },
-    { text: totalHead.toString(), width: 50, align: "right", bold: true },
-    { text: "", width: 60 },
-    { text: "", width: 55 },
-    { text: fmt(data.totalValue), width: 80, align: "right", bold: true },
-    { text: "", width: 40 },
-  ]);
-}
-
-// MARK: - Sales Summary
-
-function drawSalesSummary(ctx: DrawContext, data: ReportData) {
-  drawSectionTitle(ctx, "Sales Overview");
-  const totalGross = data.salesData.reduce((s, r) => s + r.grossValue, 0);
-  const totalFreight = data.salesData.reduce((s, r) => s + r.freightCost, 0);
-
-  drawTableRow(ctx, [
-    { text: "Net Sales Revenue:", width: 180 },
-    { text: fmt(data.totalSales), width: 120, align: "right", bold: true },
-  ]);
-  drawTableRow(ctx, [
-    { text: "Gross Sales:", width: 180 },
-    { text: fmt(totalGross), width: 120, align: "right" },
-  ]);
-  drawTableRow(ctx, [
-    { text: "Total Freight:", width: 180 },
-    { text: fmt(totalFreight), width: 120, align: "right" },
-  ]);
-  drawTableRow(ctx, [
-    { text: "Total Records:", width: 180 },
-    { text: data.salesData.length.toString(), width: 120, align: "right" },
-  ]);
-  ctx.y -= 10;
-
-  // Sales table
-  drawSectionTitle(ctx, "Sales Records");
-  const cols = [
-    { text: "Date", width: 70 },
-    { text: "Herd", width: 90 },
-    { text: "Head", width: 40, align: "right" as const },
-    { text: "Avg Wt", width: 55, align: "right" as const },
-    { text: "Type", width: 65 },
-    { text: "Location", width: 75 },
-    { text: "Net Value", width: 80, align: "right" as const },
-  ];
-  drawTableHeader(ctx, cols);
-
-  for (const s of data.salesData) {
-    drawTableRow(ctx, [
-      { text: fmtDate(s.date), width: 70 },
-      { text: (s.herdName ?? "—").substring(0, 16), width: 90 },
-      { text: s.headCount.toString(), width: 40, align: "right" },
-      { text: `${s.avgWeight.toFixed(0)} kg`, width: 55, align: "right" },
-      { text: (s.saleType ?? "—").substring(0, 12), width: 65 },
-      { text: (s.saleLocation ?? "—").substring(0, 14), width: 75 },
-      { text: fmt(s.netValue), width: 80, align: "right", bold: true },
-    ]);
-  }
-}
-
-// MARK: - Saleyard Comparison
-
-function drawSaleyardComparison(ctx: DrawContext, data: ReportData) {
-  drawSectionTitle(ctx, "Saleyard Price Comparison");
-
-  if (data.saleyardComparison.length > 0) {
-    drawTableRow(ctx, [
-      { text: "Best Average Price:", width: 180 },
-      { text: `$${data.saleyardComparison[0].avgPrice.toFixed(2)}/kg`, width: 120, align: "right", bold: true },
-    ]);
-    drawTableRow(ctx, [
-      { text: "Best Saleyard:", width: 180 },
-      { text: data.saleyardComparison[0].saleyardName.substring(0, 30), width: 200 },
-    ]);
-    drawTableRow(ctx, [
-      { text: "Saleyards Compared:", width: 180 },
-      { text: data.saleyardComparison.length.toString(), width: 120, align: "right" },
-    ]);
-    ctx.y -= 10;
-  }
-
-  const cols = [
-    { text: "#", width: 25 },
-    { text: "Saleyard", width: 200 },
-    { text: "Avg $/kg", width: 70, align: "right" as const },
-    { text: "Min $/kg", width: 70, align: "right" as const },
-    { text: "Max $/kg", width: 70, align: "right" as const },
-  ];
-  drawTableHeader(ctx, cols);
-
-  for (let i = 0; i < data.saleyardComparison.length; i++) {
-    const s = data.saleyardComparison[i];
-    drawTableRow(ctx, [
-      { text: (i + 1).toString(), width: 25 },
-      { text: s.saleyardName.substring(0, 40), width: 200 },
-      { text: `$${s.avgPrice.toFixed(2)}`, width: 70, align: "right", bold: i === 0 },
-      { text: `$${s.minPrice.toFixed(2)}`, width: 70, align: "right" },
-      { text: `$${s.maxPrice.toFixed(2)}`, width: 70, align: "right" },
-    ]);
-  }
-}
-
-// MARK: - Accountant Report
-
-function drawAccountantReport(ctx: DrawContext, data: ReportData) {
-  // Executive summary
-  if (data.executiveSummary) {
-    drawSectionTitle(ctx, "Portfolio Summary");
-    drawTableRow(ctx, [
-      { text: "Total Portfolio Value:", width: 200 },
-      { text: fmt(data.executiveSummary.totalPortfolioValue), width: 120, align: "right", bold: true },
-    ]);
-    drawTableRow(ctx, [
-      { text: "Total Head Count:", width: 200 },
-      { text: data.executiveSummary.totalHeadCount.toLocaleString(), width: 120, align: "right", bold: true },
-    ]);
-    drawTableRow(ctx, [
-      { text: "Sales Revenue (Period):", width: 200 },
-      { text: fmt(data.totalSales), width: 120, align: "right", bold: true },
-    ]);
-    ctx.y -= 10;
-  }
-
-  // Asset register
-  if (data.herdData.length > 0) {
-    drawAssetRegister(ctx, data);
-    ctx.y -= 15;
-  }
-
-  // Sales summary
-  if (data.salesData.length > 0) {
-    drawSalesSummary(ctx, data);
-  }
 }
