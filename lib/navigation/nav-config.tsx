@@ -54,7 +54,6 @@ export const farmerToolItems: NavItem[] = [
 export const advisorNavItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard/advisor", icon: <Wallet className="h-5 w-5" />, activeClass: "bg-[#2F8CD9]/15 text-[#2F8CD9]" },
   { label: "Clients", href: "/dashboard/advisor/clients", icon: <Users className="h-5 w-5" />, activeClass: "bg-[#2F8CD9]/15 text-[#2F8CD9]" },
-  { label: "Simulator", href: "/dashboard/advisor/simulator", icon: <FlaskConical className="h-5 w-5" />, activeClass: "bg-[#FF5722]/15 text-[#FF5722]" },
 ];
 
 // Advisor mode - intelligence section
@@ -66,6 +65,7 @@ export const advisorIntelItems: NavItem[] = [
 
 // Advisor mode - tools section
 export const advisorToolItems: NavItem[] = [
+  { label: "Simulator", href: "/dashboard/advisor/simulator", icon: <FlaskConical className="h-5 w-5" />, activeClass: "bg-[#FF5722]/15 text-[#FF5722]" },
   { label: "Freight IQ", href: "/dashboard/tools/freight", icon: <Truck className="h-5 w-5" />, activeClass: "bg-sky-500/15 text-sky-400" },
 ];
 

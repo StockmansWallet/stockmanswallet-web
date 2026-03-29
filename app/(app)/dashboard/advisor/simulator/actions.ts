@@ -1,5 +1,6 @@
 "use server";
 
+import { randomUUID } from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -15,6 +16,7 @@ export async function createSandboxProperty(name: string) {
   if (!trimmed) return { error: "Property name is required" };
 
   const { error } = await supabase.from("properties").insert({
+    id: randomUUID(),
     user_id: user.id,
     property_name: trimmed,
     is_simulated: true,
@@ -93,9 +95,11 @@ export async function duplicateClientHerds(
   }
 
   // Create the sandbox property
+  const propertyId = randomUUID();
   const { data: newProperty, error: propError } = await supabase
     .from("properties")
     .insert({
+      id: propertyId,
       user_id: user.id,
       property_name: trimmed,
       is_simulated: true,
@@ -112,9 +116,10 @@ export async function duplicateClientHerds(
     return { error: propError?.message ?? "Failed to create sandbox property" };
   }
 
-  // Clone each herd into the sandbox property
+  // Clone each herd into the sandbox property (new UUID for each)
   const clonedHerds = clientHerds.map(
     (h: Record<string, unknown>) => ({
+      id: randomUUID(),
       user_id: user.id,
       name: h.name,
       species: h.species,
