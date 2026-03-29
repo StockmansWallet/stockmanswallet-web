@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { NotificationBell } from "@/components/app/notification-bell";
 
 interface TopBarProps {
   firstName?: string;
@@ -31,8 +32,9 @@ export function TopBar({ firstName, lastName, email, roleLabel, avatarUrl }: Top
         <span className="text-xl font-bold text-white">Stockman&apos;s Wallet</span>
       </Link>
 
-      {/* Right section: user profile */}
-      <div className="flex items-center gap-4">
+      {/* Right section: notifications + user profile */}
+      <div className="flex items-center gap-2">
+        <NotificationBell />
         <Link href="/dashboard/settings/profile" className="flex items-center gap-2.5 rounded-xl px-3 py-2 transition-colors hover:bg-white/[0.04]">
           {avatarUrl ? (
             <Image
