@@ -4,9 +4,11 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ConnectionNotes } from "./connection-notes";
+import { SharingPreferencesCard } from "@/components/app/advisory/sharing-preferences-card";
 import {
   getCategoryConfig,
   hasActivePermission,
+  parseSharingPermissions,
   permissionTimeRemaining,
   type ConnectionRequest,
   type AdvisoryMessage,
@@ -101,6 +103,14 @@ export default async function ProducerConnectionDetailPage({
         }
       />
 
+
+      <div className="mb-6">
+        <SharingPreferencesCard
+          connectionId={id}
+          permissions={parseSharingPermissions(conn.sharing_permissions)}
+          isActive={isActive}
+        />
+      </div>
 
       <Card>
         <CardHeader>

@@ -5,8 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PermissionBanner } from "@/components/app/advisory/permission-banner";
-import { hasActivePermission, type ConnectionRequest } from "@/lib/types/advisory";
-import { Users, TrendingUp, MapPin } from "lucide-react";
+import {
+  hasActivePermission,
+  parseSharingPermissions,
+  type ConnectionRequest,
+  type SharingPermissions,
+} from "@/lib/types/advisory";
+import { Users, MapPin, Lock } from "lucide-react";
 
 interface ClientOverviewProps {
   connection: ConnectionRequest;
@@ -42,6 +47,7 @@ interface ClientData {
     id: string;
     permission_expires_at: string;
   };
+  permissions: SharingPermissions;
 }
 
 export function ClientOverview({ connection }: ClientOverviewProps) {
@@ -71,6 +77,8 @@ export function ClientOverview({ connection }: ClientOverviewProps) {
         }
 
         const clientData = await res.json();
+        // Ensure permissions are parsed from the API response
+        clientData.permissions = parseSharingPermissions(clientData.permissions);
         setData(clientData);
       } catch {
         setError("Failed to connect to server");
@@ -84,7 +92,11 @@ export function ClientOverview({ connection }: ClientOverviewProps) {
 
   return (
     <div className="space-y-4">
-      <PermissionBanner connection={connection} isActive={isActive} />
+      <PermissionBanner
+        connection={connection}
+        isActive={isActive}
+        permissions={data?.permissions}
+      />
 
       {!isActive && (
         <Card>
@@ -110,16 +122,6 @@ export function ClientOverview({ connection }: ClientOverviewProps) {
               </Card>
             ))}
           </div>
-          <Card>
-            <CardContent className="p-5">
-              <Skeleton className="mb-3 h-4 w-32" />
-              <div className="space-y-2">
-                {[1, 2, 3].map((i) => (
-                  <Skeleton key={i} className="h-12 w-full" />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
         </div>
       )}
 
@@ -136,11 +138,22 @@ export function ClientOverview({ connection }: ClientOverviewProps) {
   );
 }
 
+function LockedSection({ label }: { label: string }) {
+  return (
+    <Card>
+      <CardContent className="py-6 text-center">
+        <Lock className="mx-auto mb-2 h-5 w-5 text-text-muted" />
+        <p className="text-xs text-text-muted">{label} not shared</p>
+      </CardContent>
+    </Card>
+  );
+}
+
 function ClientDataView({ data }: { data: ClientData }) {
+  const permissions = data.permissions;
   const activeHerds = data.herds.filter((h) => !h.is_sold);
   const totalHead = activeHerds.reduce((sum, h) => sum + h.head_count, 0);
 
-  // Group by species
   const speciesGroups: Record<string, { count: number; head: number }> = {};
   for (const herd of activeHerds) {
     if (!speciesGroups[herd.species]) {
@@ -154,119 +167,134 @@ function ClientDataView({ data }: { data: ClientData }) {
     <>
       {/* Summary stats */}
       <div className="grid gap-3 sm:grid-cols-3">
-        <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-text-primary">
-              {totalHead.toLocaleString()}
-            </p>
-            <p className="text-xs text-text-muted">Total Head</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-text-primary">{activeHerds.length}</p>
-            <p className="text-xs text-text-muted">Active Herds</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-text-primary">{data.properties.length}</p>
-            <p className="text-xs text-text-muted">Properties</p>
-          </CardContent>
-        </Card>
+        {permissions.herds && (
+          <>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <p className="text-2xl font-bold text-text-primary">
+                  {totalHead.toLocaleString()}
+                </p>
+                <p className="text-xs text-text-muted">Total Head</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <p className="text-2xl font-bold text-text-primary">{activeHerds.length}</p>
+                <p className="text-xs text-text-muted">Active Herds</p>
+              </CardContent>
+            </Card>
+          </>
+        )}
+        {permissions.properties && (
+          <Card>
+            <CardContent className="p-4 text-center">
+              <p className="text-2xl font-bold text-text-primary">{data.properties.length}</p>
+              <p className="text-xs text-text-muted">Properties</p>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
-      {/* Species breakdown */}
-      {Object.keys(speciesGroups).length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Herd Composition</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {Object.entries(speciesGroups).map(([species, info]) => (
-                <div
-                  key={species}
-                  className="flex items-center justify-between rounded-lg bg-surface px-3 py-2"
-                >
-                  <span className="text-sm font-medium text-text-primary">{species}</span>
-                  <div className="flex items-center gap-3">
-                    <Badge variant="default">{info.count} herds</Badge>
-                    <span className="text-sm font-semibold text-text-primary">
-                      {info.head.toLocaleString()} head
-                    </span>
-                  </div>
+      {/* Herds section */}
+      {permissions.herds ? (
+        <>
+          {Object.keys(speciesGroups).length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Herd Composition</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {Object.entries(speciesGroups).map(([species, info]) => (
+                    <div
+                      key={species}
+                      className="flex items-center justify-between rounded-lg bg-surface px-3 py-2"
+                    >
+                      <span className="text-sm font-medium text-text-primary">{species}</span>
+                      <div className="flex items-center gap-3">
+                        <Badge variant="default">{info.count} herds</Badge>
+                        <span className="text-sm font-semibold text-text-primary">
+                          {info.head.toLocaleString()} head
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          )}
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Herds (Read-only)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {activeHerds.length === 0 ? (
+                <p className="text-sm text-text-muted">No active herds.</p>
+              ) : (
+                <div className="space-y-2">
+                  {activeHerds.map((herd) => (
+                    <div
+                      key={herd.id}
+                      className="flex items-center justify-between rounded-lg bg-surface px-3 py-2.5"
+                    >
+                      <div>
+                        <p className="text-sm font-medium text-text-primary">{herd.name}</p>
+                        <p className="text-xs text-text-muted">
+                          {herd.breed} {herd.category} - {herd.sex}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-text-primary">
+                          {herd.head_count.toLocaleString()} head
+                        </p>
+                        <p className="text-xs text-text-muted">
+                          {herd.current_weight > 0
+                            ? `${Math.round(herd.current_weight)} kg avg`
+                            : "No weight data"}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </>
+      ) : (
+        <LockedSection label="Herd data" />
       )}
 
-      {/* Herd list */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Herds (Read-only)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {activeHerds.length === 0 ? (
-            <p className="text-sm text-text-muted">No active herds.</p>
-          ) : (
-            <div className="space-y-2">
-              {activeHerds.map((herd) => (
-                <div
-                  key={herd.id}
-                  className="flex items-center justify-between rounded-lg bg-surface px-3 py-2.5"
-                >
-                  <div>
-                    <p className="text-sm font-medium text-text-primary">{herd.name}</p>
-                    <p className="text-xs text-text-muted">
-                      {herd.breed} {herd.category} - {herd.sex}
-                    </p>
+      {/* Properties section */}
+      {permissions.properties ? (
+        data.properties.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Properties</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {data.properties.map((property) => (
+                  <div
+                    key={property.id}
+                    className="flex items-center gap-2 rounded-lg bg-surface px-3 py-2"
+                  >
+                    <MapPin className="h-4 w-4 text-text-muted" />
+                    <span className="text-sm text-text-primary">{property.property_name}</span>
+                    {property.state && (
+                      <span className="text-xs text-text-muted">
+                        {property.state}
+                        {property.region ? `, ${property.region}` : ""}
+                      </span>
+                    )}
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold text-text-primary">
-                      {herd.head_count.toLocaleString()} head
-                    </p>
-                    <p className="text-xs text-text-muted">
-                      {herd.current_weight > 0
-                        ? `${Math.round(herd.current_weight)} kg avg`
-                        : "No weight data"}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Properties */}
-      {data.properties.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Properties</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {data.properties.map((property) => (
-                <div
-                  key={property.id}
-                  className="flex items-center gap-2 rounded-lg bg-surface px-3 py-2"
-                >
-                  <MapPin className="h-4 w-4 text-text-muted" />
-                  <span className="text-sm text-text-primary">{property.property_name}</span>
-                  {property.state && (
-                    <span className="text-xs text-text-muted">
-                      {property.state}
-                      {property.region ? `, ${property.region}` : ""}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )
+      ) : (
+        <LockedSection label="Property data" />
       )}
     </>
   );

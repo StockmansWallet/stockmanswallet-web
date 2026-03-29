@@ -4,6 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { notifyApproval, notifyDenial } from "@/lib/advisory/notifications";
+import { DEFAULT_SHARING_PERMISSIONS, ALL_OFF_SHARING_PERMISSIONS } from "@/lib/types/advisory";
 
 const requestIdSchema = z.object({
   requestId: z.string().uuid(),
@@ -26,6 +27,7 @@ export async function approveRequest(requestId: string) {
     .update({
       status: "approved",
       permission_granted_at: new Date().toISOString(),
+      sharing_permissions: DEFAULT_SHARING_PERMISSIONS,
       updated_at: new Date().toISOString(),
     })
     .eq("id", requestId)
@@ -64,6 +66,7 @@ export async function grantDataAccess(requestId: string) {
     .update({
       permission_granted_at: new Date().toISOString(),
       permission_expires_at: null,
+      sharing_permissions: DEFAULT_SHARING_PERMISSIONS,
       updated_at: new Date().toISOString(),
     })
     .eq("id", requestId)
@@ -92,6 +95,7 @@ export async function stopSharing(requestId: string) {
     .update({
       permission_granted_at: null,
       permission_expires_at: null,
+      sharing_permissions: ALL_OFF_SHARING_PERMISSIONS,
       updated_at: new Date().toISOString(),
     })
     .eq("id", requestId)
@@ -154,6 +158,7 @@ export async function disconnectAdvisor(requestId: string) {
       status: "removed",
       permission_granted_at: null,
       permission_expires_at: null,
+      sharing_permissions: ALL_OFF_SHARING_PERMISSIONS,
       updated_at: new Date().toISOString(),
     })
     .eq("id", requestId)

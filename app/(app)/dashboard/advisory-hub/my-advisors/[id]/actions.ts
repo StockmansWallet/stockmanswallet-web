@@ -4,7 +4,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { notifyNewMessage } from "@/lib/advisory/notifications";
-import type { MessageType } from "@/lib/types/advisory";
+import { parseSharingPermissions, type MessageType, type SharingCategory } from "@/lib/types/advisory";
 
 const sendMessageSchema = z.object({
   connectionId: z.string().uuid(),
@@ -62,6 +62,61 @@ export async function sendMessage(
     connectionId,
     false
   );
+
+  revalidatePath(`/dashboard/advisory-hub/my-advisors/${connectionId}`);
+  revalidatePath(`/dashboard/advisor/clients/${connectionId}`);
+
+  return { success: true };
+}
+
+const updatePermissionSchema = z.object({
+  connectionId: z.string().uuid(),
+  category: z.enum(["herds", "properties", "reports", "valuations"]),
+  enabled: z.boolean(),
+});
+
+export async function updateSharingPermission(
+  connectionId: string,
+  category: SharingCategory,
+  enabled: boolean
+) {
+  const parsed = updatePermissionSchema.safeParse({ connectionId, category, enabled });
+  if (!parsed.success) return { error: "Invalid input" };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Not authenticated" };
+
+  const { data: connection } = await supabase
+    .from("connection_requests")
+    .select("id, target_user_id, permission_granted_at, sharing_permissions")
+    .eq("id", connectionId)
+    .single();
+
+  if (!connection || connection.target_user_id !== user.id) {
+    return { error: "Connection not found" };
+  }
+
+  if (!connection.permission_granted_at) {
+    return { error: "Data access not currently granted" };
+  }
+
+  const current = parseSharingPermissions(connection.sharing_permissions);
+  const updated = { ...current, [category]: enabled };
+
+  const { error } = await supabase
+    .from("connection_requests")
+    .update({
+      sharing_permissions: updated,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", connectionId)
+    .eq("target_user_id", user.id);
+
+  if (error) return { error: error.message };
 
   revalidatePath(`/dashboard/advisory-hub/my-advisors/${connectionId}`);
   revalidatePath(`/dashboard/advisor/clients/${connectionId}`);

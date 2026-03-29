@@ -11,6 +11,7 @@ import { AdvisorLensPanel } from "@/components/app/advisory/advisor-lens-panel";
 import { Lock } from "lucide-react";
 import { RemoveClientButton } from "./remove-client-button";
 import type { ConnectionRequest, AdvisoryMessage } from "@/lib/types/advisory";
+import { parseSharingPermissions } from "@/lib/types/advisory";
 import type { AdvisorLens, AdvisorScenario } from "@/lib/types/advisor-lens";
 import { calculateHerdValuation, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
@@ -56,6 +57,7 @@ export default async function ClientDetailPage({
     .eq("is_read", false);
 
   const conn = connection as ConnectionRequest;
+  const permissions = parseSharingPermissions(conn.sharing_permissions);
 
   // Get client display name
   const { data: clientProfile } = await supabase
@@ -98,72 +100,75 @@ export default async function ClientDetailPage({
       .select("breed, premium_percent:premium_pct"),
   ]);
 
-  // Calculate baseline portfolio value for the client's herds
+  // Calculate baseline portfolio value only if valuations are shared
   const herds = clientHerds ?? [];
-  const saleyards = [...new Set(herds.map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
-  const primaryCategories = [...new Set(herds.map((h) => resolveMLACategory(h.category, h.initial_weight, h.breeder_sub_type ?? undefined).primaryMLACategory))];
-  const mlaCategories = [...new Set([...primaryCategories, ...primaryCategories.map((c) => categoryFallback(c)).filter((c): c is string => c !== null)])];
+  let baselineValue = 0;
 
-  type PriceRow = { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string };
-  const emptyPrices: PriceRow[] = [];
+  if (permissions.valuations && herds.length > 0) {
+    const saleyards = [...new Set(herds.map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
+    const primaryCategories = [...new Set(herds.map((h) => resolveMLACategory(h.category, h.initial_weight, h.breeder_sub_type ?? undefined).primaryMLACategory))];
+    const mlaCategories = [...new Set([...primaryCategories, ...primaryCategories.map((c) => categoryFallback(c)).filter((c): c is string => c !== null)])];
 
-  const [{ data: syPrices }, { data: natPrices }] = mlaCategories.length > 0
-    ? await Promise.all([
-        saleyards.length > 0
-          ? supabase
-              .from("category_prices")
-              .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
-              .in("saleyard", saleyards)
-              .in("category", mlaCategories)
-              .order("data_date", { ascending: false })
-              .limit(50000)
-          : Promise.resolve({ data: emptyPrices }),
-        supabase
-          .from("category_prices")
-          .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
-          .eq("saleyard", "National")
-          .in("category", mlaCategories)
-          .order("data_date", { ascending: false })
-          .limit(5000),
-      ])
-    : [{ data: emptyPrices }, { data: emptyPrices }];
+    type PriceRow = { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string };
+    const emptyPrices: PriceRow[] = [];
 
-  const allPrices = [...(syPrices ?? []), ...(natPrices ?? [])];
-  const nationalPriceMap = new Map<string, CategoryPriceEntry[]>();
-  const saleyardPriceMap = new Map<string, CategoryPriceEntry[]>();
-  const saleyardBreedPriceMap = new Map<string, CategoryPriceEntry[]>();
-  for (const p of allPrices) {
-    const priceEntry = { price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date };
-    if (p.saleyard === "National" && p.breed === null) {
-      const entries = nationalPriceMap.get(p.category) ?? [];
-      entries.push(priceEntry);
-      nationalPriceMap.set(p.category, entries);
-    } else if (p.saleyard !== "National") {
-      if (p.breed === null) {
-        const key = `${p.category}|${p.saleyard}`;
-        const entries = saleyardPriceMap.get(key) ?? [];
+    const [{ data: syPrices }, { data: natPrices }] = mlaCategories.length > 0
+      ? await Promise.all([
+          saleyards.length > 0
+            ? supabase
+                .from("category_prices")
+                .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
+                .in("saleyard", saleyards)
+                .in("category", mlaCategories)
+                .order("data_date", { ascending: false })
+                .limit(50000)
+            : Promise.resolve({ data: emptyPrices }),
+          supabase
+            .from("category_prices")
+            .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
+            .eq("saleyard", "National")
+            .in("category", mlaCategories)
+            .order("data_date", { ascending: false })
+            .limit(5000),
+        ])
+      : [{ data: emptyPrices }, { data: emptyPrices }];
+
+    const allPrices = [...(syPrices ?? []), ...(natPrices ?? [])];
+    const nationalPriceMap = new Map<string, CategoryPriceEntry[]>();
+    const saleyardPriceMap = new Map<string, CategoryPriceEntry[]>();
+    const saleyardBreedPriceMap = new Map<string, CategoryPriceEntry[]>();
+    for (const p of allPrices) {
+      const priceEntry = { price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date };
+      if (p.saleyard === "National" && p.breed === null) {
+        const entries = nationalPriceMap.get(p.category) ?? [];
         entries.push(priceEntry);
-        saleyardPriceMap.set(key, entries);
-      } else {
-        const key = `${p.category}|${p.breed}|${p.saleyard}`;
-        const entries = saleyardBreedPriceMap.get(key) ?? [];
-        entries.push(priceEntry);
-        saleyardBreedPriceMap.set(key, entries);
+        nationalPriceMap.set(p.category, entries);
+      } else if (p.saleyard !== "National") {
+        if (p.breed === null) {
+          const key = `${p.category}|${p.saleyard}`;
+          const entries = saleyardPriceMap.get(key) ?? [];
+          entries.push(priceEntry);
+          saleyardPriceMap.set(key, entries);
+        } else {
+          const key = `${p.category}|${p.breed}|${p.saleyard}`;
+          const entries = saleyardBreedPriceMap.get(key) ?? [];
+          entries.push(priceEntry);
+          saleyardBreedPriceMap.set(key, entries);
+        }
       }
     }
-  }
-  const premiumMap = new Map<string, number>(Object.entries(cattleBreedPremiums));
-  for (const b of (breedPremiumData ?? [])) {
-    premiumMap.set(b.breed, b.premium_percent);
-  }
+    const premiumMap = new Map<string, number>(Object.entries(cattleBreedPremiums));
+    for (const b of (breedPremiumData ?? [])) {
+      premiumMap.set(b.breed, b.premium_percent);
+    }
 
-  let baselineValue = 0;
-  for (const h of herds) {
-    const result = calculateHerdValuation(
-      h as Parameters<typeof calculateHerdValuation>[0],
-      nationalPriceMap, premiumMap, undefined, saleyardPriceMap, saleyardBreedPriceMap
-    );
-    baselineValue += result.netValue;
+    for (const h of herds) {
+      const result = calculateHerdValuation(
+        h as Parameters<typeof calculateHerdValuation>[0],
+        nationalPriceMap, premiumMap, undefined, saleyardPriceMap, saleyardBreedPriceMap
+      );
+      baselineValue += result.netValue;
+    }
   }
 
   const advisorName = user.user_metadata?.display_name ?? user.user_metadata?.first_name ?? "Advisor";
@@ -221,7 +226,7 @@ export default async function ClientDetailPage({
           {
             id: "lens",
             label: "Advisor Lens",
-            content: (
+            content: permissions.valuations ? (
               <AdvisorLensPanel
                 connectionId={id}
                 lens={(lensData as AdvisorLens) ?? null}
@@ -229,6 +234,15 @@ export default async function ClientDetailPage({
                 baselineValue={baselineValue}
                 advisorName={advisorName}
               />
+            ) : (
+              <Card>
+                <EmptyState
+                  icon={<Lock className="h-6 w-6 text-purple-400" />}
+                  title="Valuations Not Shared"
+                  description="This producer has not enabled valuation sharing."
+                  variant="purple"
+                />
+              </Card>
             ),
           },
           {

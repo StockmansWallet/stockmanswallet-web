@@ -5,14 +5,15 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Shield, Lock, Send, Clock } from "lucide-react";
 import { requestRenewal } from "@/app/(app)/dashboard/advisor/clients/actions";
-import type { ConnectionRequest } from "@/lib/types/advisory";
+import type { ConnectionRequest, SharingPermissions } from "@/lib/types/advisory";
 
 interface PermissionBannerProps {
   connection: ConnectionRequest;
   isActive: boolean;
+  permissions?: SharingPermissions;
 }
 
-export function PermissionBanner({ connection, isActive }: PermissionBannerProps) {
+export function PermissionBanner({ connection, isActive, permissions }: PermissionBannerProps) {
   const [loading, setLoading] = useState(false);
   const [requested, setRequested] = useState(false);
   const router = useRouter();
@@ -31,11 +32,16 @@ export function PermissionBanner({ connection, isActive }: PermissionBannerProps
   };
 
   if (isActive) {
+    const count = permissions
+      ? [permissions.herds, permissions.properties, permissions.reports, permissions.valuations].filter(Boolean).length
+      : 4;
+    const accessLabel = count === 4 ? "Full access" : `${count} of 4 categories`;
+
     return (
       <div className="flex items-center gap-2 rounded-xl bg-green-500/10 px-4 py-3">
         <Shield className="h-4 w-4 text-green-400" />
         <span className="text-sm font-medium text-green-400">Data Shared</span>
-        <span className="text-xs text-green-400/70">Producer is sharing their portfolio with you</span>
+        <span className="text-xs text-green-400/70">{accessLabel}</span>
       </div>
     );
   }

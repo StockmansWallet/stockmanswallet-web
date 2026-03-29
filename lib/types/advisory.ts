@@ -16,6 +16,43 @@ export type ConnectionStatus = "pending" | "approved" | "denied" | "expired";
 // Connection type (advisory vs farmer peer)
 export type ConnectionType = "advisory" | "farmer_peer";
 
+// Granular data sharing categories
+export interface SharingPermissions {
+  herds: boolean;
+  properties: boolean;
+  reports: boolean;
+  valuations: boolean;
+}
+
+export const DEFAULT_SHARING_PERMISSIONS: SharingPermissions = {
+  herds: true,
+  properties: true,
+  reports: true,
+  valuations: true,
+};
+
+export const ALL_OFF_SHARING_PERMISSIONS: SharingPermissions = {
+  herds: false,
+  properties: false,
+  reports: false,
+  valuations: false,
+};
+
+export function parseSharingPermissions(raw: unknown): SharingPermissions {
+  if (raw && typeof raw === "object" && "herds" in raw) {
+    const obj = raw as Record<string, unknown>;
+    return {
+      herds: obj.herds === true,
+      properties: obj.properties === true,
+      reports: obj.reports === true,
+      valuations: obj.valuations === true,
+    };
+  }
+  return { ...DEFAULT_SHARING_PERMISSIONS };
+}
+
+export type SharingCategory = keyof SharingPermissions;
+
 // Matches Supabase connection_requests table
 export interface ConnectionRequest {
   id: string;
@@ -28,6 +65,7 @@ export interface ConnectionRequest {
   permission_granted_at: string | null;
   permission_expires_at: string | null;
   connection_type: ConnectionType;
+  sharing_permissions: SharingPermissions;
   created_at: string;
 }
 

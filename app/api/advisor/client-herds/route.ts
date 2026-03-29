@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { parseSharingPermissions } from "@/lib/types/advisory";
 
 /**
  * POST /api/advisor/client-herds
@@ -43,6 +44,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Data access not granted" }, { status: 403 });
   }
 
+  const permissions = parseSharingPermissions(connection.sharing_permissions);
+
   // Use service role to read client's data (bypasses RLS)
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!serviceRoleKey) {
@@ -57,25 +60,33 @@ export async function POST(request: NextRequest) {
     serviceRoleKey
   );
 
-  // Fetch client's herds (read-only)
-  const { data: herds, error: herdsError } = await serviceClient
-    .from("herds")
-    .select("*")
-    .eq("user_id", clientUserId)
-    .eq("is_deleted", false)
-    .order("name");
+  // Fetch client's herds only if sharing is enabled
+  let herds: unknown[] = [];
+  if (permissions.herds) {
+    const { data, error: herdsError } = await serviceClient
+      .from("herds")
+      .select("*")
+      .eq("user_id", clientUserId)
+      .eq("is_deleted", false)
+      .order("name");
 
-  if (herdsError) {
-    return NextResponse.json({ error: herdsError.message }, { status: 500 });
+    if (herdsError) {
+      return NextResponse.json({ error: herdsError.message }, { status: 500 });
+    }
+    herds = data ?? [];
   }
 
-  // Fetch client's properties for context
-  const { data: properties } = await serviceClient
-    .from("properties")
-    .select("id, property_name, state, region, default_saleyard")
-    .eq("user_id", clientUserId);
+  // Fetch client's properties only if sharing is enabled
+  let properties: unknown[] = [];
+  if (permissions.properties) {
+    const { data } = await serviceClient
+      .from("properties")
+      .select("id, property_name, state, region, default_saleyard")
+      .eq("user_id", clientUserId);
+    properties = data ?? [];
+  }
 
-  // Fetch client profile for display info
+  // Client profile is always fetched (basic identification, not portfolio data)
   const { data: clientProfile } = await serviceClient
     .from("user_profiles")
     .select("display_name, company_name, property_name, state, region")
@@ -83,12 +94,13 @@ export async function POST(request: NextRequest) {
     .single();
 
   return NextResponse.json({
-    herds: herds ?? [],
-    properties: properties ?? [],
+    herds,
+    properties,
     clientProfile: clientProfile ?? null,
     connection: {
       id: connection.id,
       permission_expires_at: connection.permission_expires_at,
     },
+    permissions,
   });
 }
