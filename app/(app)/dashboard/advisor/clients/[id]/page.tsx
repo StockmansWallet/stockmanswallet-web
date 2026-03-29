@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { redirect, notFound } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -75,6 +76,12 @@ export default async function ClientDetailPage({
     .eq("connection_id", id)
     .order("created_at", { ascending: true });
 
+  // Service client to read client's data (bypasses RLS)
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceClient = serviceRoleKey
+    ? createServiceClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceRoleKey)
+    : null;
+
   // Fetch lens, scenarios, and client herds for Advisor Lens tab
   const [{ data: lensData }, { data: scenariosData }, { data: clientHerds }, { data: breedPremiumData }] = await Promise.all([
     supabase
@@ -89,12 +96,15 @@ export default async function ClientDetailPage({
       .eq("client_connection_id", id)
       .eq("is_deleted", false)
       .order("created_at", { ascending: false }),
-    supabase
-      .from("herds")
-      .select("*")
-      .eq("user_id", conn.target_user_id)
-      .eq("is_sold", false)
-      .eq("is_deleted", false),
+    serviceClient
+      ? serviceClient
+          .from("herds")
+          .select("*")
+          .eq("user_id", conn.target_user_id)
+          .eq("is_sold", false)
+          .eq("is_deleted", false)
+          .neq("is_demo_data", true)
+      : Promise.resolve({ data: [] as unknown[] }),
     supabase
       .from("breed_premiums")
       .select("breed, premium_percent:premium_pct"),
@@ -184,8 +194,6 @@ export default async function ClientDetailPage({
         title={clientName}
         titleClassName="text-4xl font-bold text-purple-400"
         titleHref="/dashboard/advisor/clients"
-        subtitle="Back to clients"
-        subtitleClassName="text-sm font-medium text-text-secondary"
         inline
         actions={
           <div className="flex items-center gap-2">
@@ -202,7 +210,7 @@ export default async function ClientDetailPage({
           {
             id: "overview",
             label: "Overview",
-            content: <ClientOverview connection={conn} />,
+            content: <ClientOverview connection={conn} baselineValue={baselineValue} />,
           },
           {
             id: "notes",

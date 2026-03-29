@@ -68,6 +68,7 @@ export async function POST(request: NextRequest) {
       .select("*")
       .eq("user_id", clientUserId)
       .eq("is_deleted", false)
+      .neq("is_demo_data", true)
       .order("name");
 
     if (herdsError) {

@@ -15,6 +15,7 @@ import { Users, MapPin, Lock } from "lucide-react";
 
 interface ClientOverviewProps {
   connection: ConnectionRequest;
+  baselineValue?: number;
 }
 
 interface ClientData {
@@ -50,7 +51,7 @@ interface ClientData {
   permissions: SharingPermissions;
 }
 
-export function ClientOverview({ connection }: ClientOverviewProps) {
+export function ClientOverview({ connection, baselineValue = 0 }: ClientOverviewProps) {
   const [data, setData] = useState<ClientData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -133,7 +134,7 @@ export function ClientOverview({ connection }: ClientOverviewProps) {
         </Card>
       )}
 
-      {isActive && data && <ClientDataView data={data} />}
+      {isActive && data && <ClientDataView data={data} baselineValue={baselineValue} />}
     </div>
   );
 }
@@ -149,7 +150,7 @@ function LockedSection({ label }: { label: string }) {
   );
 }
 
-function ClientDataView({ data }: { data: ClientData }) {
+function ClientDataView({ data, baselineValue }: { data: ClientData; baselineValue: number }) {
   const permissions = data.permissions;
   const activeHerds = data.herds.filter((h) => !h.is_sold);
   const totalHead = activeHerds.reduce((sum, h) => sum + h.head_count, 0);
@@ -165,6 +166,18 @@ function ClientDataView({ data }: { data: ClientData }) {
 
   return (
     <>
+      {/* Portfolio value */}
+      {permissions.valuations && baselineValue > 0 && (
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-text-muted">Portfolio Value</p>
+            <p className="mt-1 text-3xl font-bold tabular-nums text-brand">
+              ${Math.round(baselineValue).toLocaleString()}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Summary stats */}
       <div className="grid gap-3 sm:grid-cols-3">
         {permissions.herds && (
@@ -194,6 +207,38 @@ function ClientDataView({ data }: { data: ClientData }) {
           </Card>
         )}
       </div>
+
+      {/* Properties section */}
+      {permissions.properties ? (
+        data.properties.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Properties</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {data.properties.map((property) => (
+                  <div
+                    key={property.id}
+                    className="flex items-center gap-2 rounded-lg bg-surface px-3 py-2"
+                  >
+                    <MapPin className="h-4 w-4 text-text-muted" />
+                    <span className="text-sm text-text-primary">{property.property_name}</span>
+                    {property.state && (
+                      <span className="text-xs text-text-muted">
+                        {property.state}
+                        {property.region ? `, ${property.region}` : ""}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )
+      ) : (
+        <LockedSection label="Property data" />
+      )}
 
       {/* Herds section */}
       {permissions.herds ? (
@@ -265,36 +310,18 @@ function ClientDataView({ data }: { data: ClientData }) {
         <LockedSection label="Herd data" />
       )}
 
-      {/* Properties section */}
-      {permissions.properties ? (
-        data.properties.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Properties</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {data.properties.map((property) => (
-                  <div
-                    key={property.id}
-                    className="flex items-center gap-2 rounded-lg bg-surface px-3 py-2"
-                  >
-                    <MapPin className="h-4 w-4 text-text-muted" />
-                    <span className="text-sm text-text-primary">{property.property_name}</span>
-                    {property.state && (
-                      <span className="text-xs text-text-muted">
-                        {property.state}
-                        {property.region ? `, ${property.region}` : ""}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )
+      {/* Reports section */}
+      {permissions.reports ? (
+        <Card>
+          <CardContent className="py-6 text-center">
+            <p className="text-sm font-medium text-text-primary">Reports Access Enabled</p>
+            <p className="mt-1 text-xs text-text-muted">
+              Generate reports for this client from the Reports tool.
+            </p>
+          </CardContent>
+        </Card>
       ) : (
-        <LockedSection label="Property data" />
+        <LockedSection label="Reports" />
       )}
     </>
   );
