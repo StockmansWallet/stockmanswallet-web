@@ -1,5 +1,7 @@
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { isAdvisorRole } from "@/lib/types/advisory";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { LoadDemoDataButton } from "@/components/app/load-demo-data-button";
@@ -32,12 +34,17 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Fetch display name: prefer auth metadata, fall back to user_profiles
+  // Fetch display name and role: prefer auth metadata, fall back to user_profiles
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select("display_name")
+    .select("display_name, role")
     .eq("user_id", user!.id)
     .maybeSingle();
+
+  // Redirect advisor users to their dashboard
+  if (profile?.role && isAdvisorRole(profile.role)) {
+    redirect("/dashboard/advisor");
+  }
 
   const authFirstName = user?.user_metadata?.first_name || "";
   const displayName = authFirstName || profile?.display_name?.split(" ")[0] || "Stockman";

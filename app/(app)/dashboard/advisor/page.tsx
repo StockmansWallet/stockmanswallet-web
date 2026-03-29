@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
-import { hasActivePermission, type ConnectionRequest } from "@/lib/types/advisory";
+import { hasActivePermission, isAdvisorRole, type ConnectionRequest } from "@/lib/types/advisory";
 import { Users, ShieldCheck, Clock, Search, MapPin } from "lucide-react";
 import { ClientsByRegionChart } from "@/components/app/advisory/clients-by-region-chart";
 
@@ -20,6 +20,16 @@ export default async function AdvisorDashboardPage() {
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/sign-in");
+
+  // Redirect producers away from advisor dashboard
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("role")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (!profile?.role || !isAdvisorRole(profile.role)) {
+    redirect("/dashboard");
+  }
 
   const firstName = user.user_metadata?.first_name || "Advisor";
 
