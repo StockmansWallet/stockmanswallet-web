@@ -8,7 +8,8 @@ import { ClientOverview } from "@/components/app/advisory/client-overview";
 import { AdvisorNotes } from "./advisor-notes";
 import { EmptyState } from "@/components/ui/empty-state";
 import { AdvisorLensPanel } from "@/components/app/advisory/advisor-lens-panel";
-import { Lock, Wrench } from "lucide-react";
+import { Lock } from "lucide-react";
+import { RemoveClientButton } from "./remove-client-button";
 import type { ConnectionRequest, AdvisoryMessage } from "@/lib/types/advisory";
 import type { AdvisorLens, AdvisorScenario } from "@/lib/types/advisor-lens";
 import { calculateHerdValuation, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
@@ -182,9 +183,12 @@ export default async function ClientDetailPage({
         subtitleClassName="text-sm font-medium text-text-secondary"
         inline
         actions={
-          clientProfile?.company_name ? (
-            <Badge variant="default">{clientProfile.company_name}</Badge>
-          ) : undefined
+          <div className="flex items-center gap-2">
+            {clientProfile?.company_name && (
+              <Badge variant="default">{clientProfile.company_name}</Badge>
+            )}
+            <RemoveClientButton connectionId={id} clientName={clientName} />
+          </div>
         }
       />
 

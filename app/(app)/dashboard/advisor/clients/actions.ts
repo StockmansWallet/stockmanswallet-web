@@ -159,23 +159,30 @@ export async function removeClient(connectionId: string) {
 
   if (!user) return { error: "Not authenticated" };
 
-  // Note: RLS only allows target_user_id to update, so advisor needs
-  // a different approach. For now, we set status to expired via a server action
-  // that uses the requester perspective.
+  // Soft-delete: set status to "removed" so both platforms detect it.
+  // Advisor is the requester, RLS policy "Requester can update own requests" allows this.
   const { error } = await supabase
     .from("connection_requests")
     .update({
-      status: "expired",
+      status: "removed",
       permission_expires_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     })
     .eq("id", connectionId)
-    .eq("target_user_id", user.id);
+    .eq("requester_user_id", user.id);
 
-  // If the above fails (advisor is requester, not target), try the other direction
-  if (error) {
-    // This will work if we update RLS, for now it may fail gracefully
-    return { error: "Cannot remove - contact the producer to revoke access." };
-  }
+  if (error) return { error: error.message };
+
+  // Clean up advisor lenses and scenarios for this connection
+  await supabase
+    .from("advisor_lenses")
+    .update({ is_deleted: true, updated_at: new Date().toISOString() })
+    .eq("client_connection_id", connectionId);
+
+  await supabase
+    .from("advisor_scenarios")
+    .update({ is_deleted: true, updated_at: new Date().toISOString() })
+    .eq("client_connection_id", connectionId);
 
   revalidatePath("/dashboard/advisor/clients");
   return { success: true };
