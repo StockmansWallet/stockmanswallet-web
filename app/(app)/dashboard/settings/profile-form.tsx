@@ -8,11 +8,11 @@ import { updateProfile } from "./actions";
 
 const ROLE_OPTIONS = [
   { value: "producer", label: "Producer" },
-  { value: "agribusinessBanker", label: "Agribusiness Banker" },
+  { value: "agribusiness_banker", label: "Agribusiness Banker" },
   { value: "insurer", label: "Insurer" },
-  { value: "livestockAgent", label: "Livestock Agent" },
+  { value: "livestock_agent", label: "Livestock Agent" },
   { value: "accountant", label: "Accountant" },
-  { value: "successionPlanner", label: "Succession Planner" },
+  { value: "succession_planner", label: "Succession Planner" },
 ];
 
 export function ProfileForm({
