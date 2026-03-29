@@ -36,10 +36,11 @@ function formatCurrency(value: number): string {
   return `$${Math.round(value)}`;
 }
 
-/** Format YYYY-MM-DD to "29 Mar" using local parsing (no timezone shift). */
-function formatDateLabel(dateStr: string): string {
-  const [, m, d] = dateStr.split("-");
-  return `${parseInt(d)} ${MONTH_NAMES[parseInt(m) - 1]}`;
+/** Format YYYY-MM-DD to "29 Mar" or "29 Mar '25" when showYear is true. */
+function formatDateLabel(dateStr: string, showYear = false): string {
+  const [y, m, d] = dateStr.split("-");
+  const base = `${parseInt(d)} ${MONTH_NAMES[parseInt(m) - 1]}`;
+  return showYear ? `${base} '${y.slice(2)}` : base;
 }
 
 /** Add N days to a YYYY-MM-DD string, returning a new YYYY-MM-DD string. */
@@ -112,6 +113,7 @@ function buildTimeAxis(
   startDateStr: string,
   todayStr: string,
   stepDays: number,
+  showYear: boolean,
 ): ChartPoint[] {
   // Build value lookup
   const valueMap = new Map<string, number>();
@@ -139,7 +141,7 @@ function buildTimeAxis(
     }
 
     result.push({
-      label: isToday ? "Today" : formatDateLabel(cursor),
+      label: isToday ? "Today" : formatDateLabel(cursor, showYear),
       value,
     });
 
@@ -175,14 +177,17 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
 
     // For "All", calculate step based on total span
     let actualStep = stepDays;
+    const startMs = new Date(startStr + "T12:00:00").getTime();
+    const endMs = new Date(todayStr + "T12:00:00").getTime();
+    const totalDays = Math.round((endMs - startMs) / 86_400_000);
     if (days === null) {
-      const startMs = new Date(startStr + "T12:00:00").getTime();
-      const endMs = new Date(todayStr + "T12:00:00").getTime();
-      const totalDays = Math.round((endMs - startMs) / 86_400_000);
       actualStep = Math.max(Math.round(totalDays / 12), 1);
     }
 
-    return buildTimeAxis(data, startStr, todayStr, actualStep);
+    // Show year suffix on labels when span exceeds 3 months
+    const showYear = totalDays > 90;
+
+    return buildTimeAxis(data, startStr, todayStr, actualStep, showYear);
   }, [data, range]);
 
   if (!data.length) return null;
