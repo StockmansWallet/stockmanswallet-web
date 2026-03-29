@@ -36,9 +36,25 @@ function formatCurrency(value: number): string {
   return `$${Math.round(value)}`;
 }
 
+/** Format YYYY-MM-DD to "29 Mar" using local parsing (no timezone shift). */
 function formatDateLabel(dateStr: string): string {
-  const d = new Date(dateStr + "T00:00:00");
-  return `${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`;
+  const [, m, d] = dateStr.split("-");
+  return `${parseInt(d)} ${MONTH_NAMES[parseInt(m) - 1]}`;
+}
+
+/** Add N days to a YYYY-MM-DD string, returning a new YYYY-MM-DD string. */
+function addDays(dateStr: string, days: number): string {
+  const d = new Date(dateStr + "T12:00:00"); // noon avoids DST edge cases
+  d.setDate(d.getDate() + days);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+/** Subtract N days from a YYYY-MM-DD string. */
+function subtractDays(dateStr: string, days: number): string {
+  return addDays(dateStr, -days);
 }
 
 function CustomTooltip({
@@ -73,70 +89,68 @@ function CustomTooltip({
   );
 }
 
-/** Number of days to look back for each range option. */
-function rangeToDays(range: DateRange): number | null {
+/** Range config: days to look back and step between ticks. */
+function rangeConfig(range: DateRange): { days: number | null; stepDays: number } {
   switch (range) {
-    case "1D": return 1;
-    case "1W": return 7;
-    case "1M": return 30;
-    case "3M": return 90;
-    case "6M": return 180;
-    case "1Y": return 365;
-    case "All": return null;
+    case "1D":  return { days: 1,   stepDays: 1 };
+    case "1W":  return { days: 7,   stepDays: 1 };
+    case "1M":  return { days: 30,  stepDays: 3 };
+    case "3M":  return { days: 90,  stepDays: 8 };
+    case "6M":  return { days: 180, stepDays: 15 };
+    case "1Y":  return { days: 365, stepDays: 30 };
+    case "All": return { days: null, stepDays: 7 };
   }
 }
 
 /**
- * Build a time axis from startDate to endDate, picking evenly spaced tick
- * labels, and map actual data points onto matching dates.
+ * Build a time axis by stepping through dates from start to end.
+ * Each tick gets the value from the nearest data point (if within range),
+ * otherwise null. Uses pure string date math to avoid timezone issues.
  */
 function buildTimeAxis(
   data: DataPoint[],
-  startDate: Date,
-  endDate: Date,
-  maxTicks: number,
+  startDateStr: string,
+  todayStr: string,
+  stepDays: number,
 ): ChartPoint[] {
-  const startMs = startDate.getTime();
-  const endMs = endDate.getTime();
-  const spanMs = endMs - startMs;
-
-  // Build a lookup: date string -> value
+  // Build value lookup
   const valueMap = new Map<string, number>();
   for (const d of data) {
     valueMap.set(d.date, d.value);
   }
 
-  // Filter data points within the range
-  const pointsInRange = data.filter((d) => {
-    const ms = new Date(d.date + "T00:00:00").getTime();
-    return ms >= startMs && ms <= endMs;
-  });
-
-  // Generate evenly spaced ticks across the full time span
   const result: ChartPoint[] = [];
-  const step = spanMs / (maxTicks - 1);
+  let cursor = startDateStr;
 
-  for (let i = 0; i < maxTicks; i++) {
-    const tickMs = startMs + step * i;
-    const tickDate = new Date(tickMs);
-    const tickStr = tickDate.toISOString().slice(0, 10);
-    const isLast = i === maxTicks - 1;
+  while (cursor <= todayStr) {
+    const isToday = cursor === todayStr;
 
-    // Find the closest data point within half a step
-    let closest: DataPoint | null = null;
-    let closestDist = Infinity;
-    for (const d of pointsInRange) {
-      const dMs = new Date(d.date + "T00:00:00").getTime();
-      const dist = Math.abs(dMs - tickMs);
-      if (dist < closestDist && dist <= step / 2) {
-        closest = d;
-        closestDist = dist;
+    // Look for exact match or nearest within step range
+    let value: number | null = valueMap.get(cursor) ?? null;
+    if (value === null) {
+      // Check nearby dates within half the step
+      const halfStep = Math.max(Math.floor(stepDays / 2), 1);
+      for (let offset = 1; offset <= halfStep; offset++) {
+        const before = subtractDays(cursor, offset);
+        const after = addDays(cursor, offset);
+        if (valueMap.has(before)) { value = valueMap.get(before)!; break; }
+        if (valueMap.has(after) && after <= todayStr) { value = valueMap.get(after)!; break; }
       }
     }
 
     result.push({
-      label: isLast ? "Today" : formatDateLabel(tickStr),
-      value: closest?.value ?? null,
+      label: isToday ? "Today" : formatDateLabel(cursor),
+      value,
+    });
+
+    cursor = addDays(cursor, stepDays);
+  }
+
+  // Ensure "Today" is always the last point
+  if (result.length === 0 || result[result.length - 1].label !== "Today") {
+    result.push({
+      label: "Today",
+      value: valueMap.get(todayStr) ?? null,
     });
   }
 
@@ -150,23 +164,25 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
     if (!data.length) return [];
 
     const todayStr = data[data.length - 1].date;
-    const today = new Date(todayStr + "T00:00:00");
-    const days = rangeToDays(range);
+    const { days, stepDays } = rangeConfig(range);
 
-    let startDate: Date;
+    let startStr: string;
     if (days === null) {
-      // "All": start from the earliest data point
-      startDate = new Date(data[0].date + "T00:00:00");
+      startStr = data[0].date;
     } else {
-      startDate = new Date(today.getTime() - days * 86_400_000);
+      startStr = subtractDays(todayStr, days);
     }
 
-    // Ensure start isn't after today
-    if (startDate.getTime() >= today.getTime()) {
-      startDate = new Date(today.getTime() - 86_400_000);
+    // For "All", calculate step based on total span
+    let actualStep = stepDays;
+    if (days === null) {
+      const startMs = new Date(startStr + "T12:00:00").getTime();
+      const endMs = new Date(todayStr + "T12:00:00").getTime();
+      const totalDays = Math.round((endMs - startMs) / 86_400_000);
+      actualStep = Math.max(Math.round(totalDays / 12), 1);
     }
 
-    return buildTimeAxis(data, startDate, today, 12);
+    return buildTimeAxis(data, startStr, todayStr, actualStep);
   }, [data, range]);
 
   if (!data.length) return null;
