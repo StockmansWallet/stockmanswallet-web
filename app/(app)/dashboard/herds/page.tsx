@@ -155,7 +155,7 @@ export default async function HerdsPage() {
       : 0;
 
   return (
-    <div className="max-w-[1400px]">
+    <div className="max-w-[1800px]">
       <Suspense>
         <YardBookBanner />
       </Suspense>
