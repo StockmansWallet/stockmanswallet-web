@@ -76,13 +76,15 @@ export async function POST(request: NextRequest) {
     herds = data ?? [];
   }
 
-  // Fetch client's properties only if sharing is enabled
+  // Fetch client's real properties only (exclude deleted and demo/simulated)
   let properties: unknown[] = [];
   if (permissions.properties) {
     const { data } = await serviceClient
       .from("properties")
       .select("id, property_name, state, region, default_saleyard")
-      .eq("user_id", clientUserId);
+      .eq("user_id", clientUserId)
+      .eq("is_deleted", false)
+      .eq("is_simulated", false);
     properties = data ?? [];
   }
 
