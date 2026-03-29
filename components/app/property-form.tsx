@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -9,6 +9,7 @@ import AddressAutocomplete, { type AddressResult } from "@/components/app/addres
 
 import type { Database } from "@/lib/types/database";
 import { lgasForState } from "@/lib/data/lga-data";
+import { lgaCoordinates } from "@/lib/data/lga-coordinates";
 
 type PropertyRow = Database["public"]["Tables"]["properties"]["Row"];
 
@@ -39,6 +40,32 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
   const [lga, setLga] = useState(property?.lga ?? "");
   const [latitude, setLatitude] = useState(property?.latitude ?? "");
   const [longitude, setLongitude] = useState(property?.longitude ?? "");
+
+  // Sort LGAs by proximity to property coordinates (closest first)
+  const lgaOptions = useMemo(() => {
+    const lgas = lgasForState(state);
+    if (!latitude || !longitude) return lgas.map((c) => ({ value: c, label: c }));
+
+    const lat1 = Number(latitude);
+    const lon1 = Number(longitude);
+    if (Number.isNaN(lat1) || Number.isNaN(lon1)) return lgas.map((c) => ({ value: c, label: c }));
+
+    const R = 6371.0;
+    const sorted = lgas
+      .map((name) => {
+        const coords = lgaCoordinates[name];
+        if (!coords) return { name, dist: Infinity };
+        const dLat = ((coords.lat - lat1) * Math.PI) / 180;
+        const dLon = ((coords.lng - lon1) * Math.PI) / 180;
+        const a =
+          Math.sin(dLat / 2) ** 2 +
+          Math.cos((lat1 * Math.PI) / 180) * Math.cos((coords.lat * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+        return { name, dist: R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) };
+      })
+      .sort((a, b) => a.dist - b.dist);
+
+    return sorted.map((s) => ({ value: s.name, label: s.name }));
+  }, [state, latitude, longitude]);
 
   function handleAddressSelect(result: AddressResult) {
     if (result.suburb) setSuburb(result.suburb);
@@ -103,7 +130,7 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
             id="lga"
             name="lga"
             label="Local Government Area"
-            options={lgasForState(state).map((c) => ({ value: c, label: c }))}
+            options={lgaOptions}
             placeholder="Select Local Government Area"
             value={lga}
             onChange={(e) => setLga(e.target.value)}
