@@ -65,7 +65,6 @@ export const advisorIntelItems: NavItem[] = [
 
 // Advisor mode - tools section
 export const advisorToolItems: NavItem[] = [
-  { label: "Reports", href: "/dashboard/tools/reports", icon: <FileText className="h-5 w-5" />, activeClass: "bg-amber-500/15 text-amber-400" },
   { label: "Freight IQ", href: "/dashboard/tools/freight", icon: <Truck className="h-5 w-5" />, activeClass: "bg-sky-500/15 text-sky-400" },
 ];
 

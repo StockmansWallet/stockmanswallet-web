@@ -313,10 +313,13 @@ function ClientDataView({ data, baselineValue }: { data: ClientData; baselineVal
       {/* Reports section */}
       {permissions.reports ? (
         <Card>
-          <CardContent className="py-6 text-center">
-            <p className="text-sm font-medium text-text-primary">Reports Access Enabled</p>
-            <p className="mt-1 text-xs text-text-muted">
-              Generate reports for this client from the Reports tool.
+          <CardHeader>
+            <CardTitle>Reports</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-text-secondary">
+              This producer has shared report access. Accountant reports and asset
+              register data for this client will appear here.
             </p>
           </CardContent>
         </Card>
