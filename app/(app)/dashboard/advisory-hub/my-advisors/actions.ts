@@ -25,6 +25,7 @@ export async function approveRequest(requestId: string) {
     .from("connection_requests")
     .update({
       status: "approved",
+      permission_granted_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })
     .eq("id", requestId)
