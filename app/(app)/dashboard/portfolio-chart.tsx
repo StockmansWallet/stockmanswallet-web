@@ -214,7 +214,7 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
       <ResponsiveContainer key={range} width="100%" height={240}>
         <AreaChart
           data={chartData}
-          margin={{ top: 8, right: 20, bottom: 0, left: 10 }}
+          margin={{ top: 8, right: 0, bottom: 0, left: 0 }}
         >
           <defs>
             <linearGradient id="valueGrad" x1="0" y1="0" x2="0" y2="1">
@@ -226,9 +226,24 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
             dataKey="label"
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "rgba(255,255,255,0.38)", fontSize: 11 }}
             interval={Math.max(Math.ceil(chartData.length / 6) - 1, 0)}
-            padding={{ left: 10, right: 10 }}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            tick={(props: any) => {
+              const { x, y, payload, index } = props;
+              const isFirst = index === 0;
+              const isLast = index === chartData.length - 1;
+              return (
+                <text
+                  x={x}
+                  y={y + 12}
+                  fill="rgba(255,255,255,0.38)"
+                  fontSize={11}
+                  textAnchor={isFirst ? "start" : isLast ? "end" : "middle"}
+                >
+                  {payload.value}
+                </text>
+              );
+            }}
           />
           <YAxis
             tickFormatter={formatCurrency}
