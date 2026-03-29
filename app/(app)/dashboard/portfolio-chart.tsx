@@ -211,7 +211,7 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
         ))}
       </div>
 
-      <ResponsiveContainer width="100%" height={240}>
+      <ResponsiveContainer key={range} width="100%" height={240}>
         <AreaChart
           data={chartData}
           margin={{ top: 8, right: 12, bottom: 0, left: 0 }}
