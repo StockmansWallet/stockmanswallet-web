@@ -49,9 +49,9 @@ export default async function AdvisorDashboardPage() {
   const { data: clientProfiles } = clientUserIds.length > 0
     ? await supabase
         .from("user_profiles")
-        .select("user_id, display_name, company_name")
+        .select("user_id, display_name, company_name, property_name")
         .in("user_id", clientUserIds)
-    : { data: [] as { user_id: string; display_name: string | null; company_name: string | null }[] };
+    : { data: [] as { user_id: string; display_name: string | null; company_name: string | null; property_name: string | null }[] };
 
   const profileMap = new Map(
     (clientProfiles ?? []).map((p) => [p.user_id, p])
@@ -186,9 +186,9 @@ export default async function AdvisorDashboardPage() {
                         <p className="truncate text-sm font-medium text-text-primary">
                           {profile?.display_name ?? "Unknown Producer"}
                         </p>
-                        {profile?.company_name && (
-                          <p className="text-xs text-text-muted">
-                            {profile.company_name}
+                        {profile?.property_name && (
+                          <p className="truncate text-xs text-text-muted">
+                            {profile.property_name}
                           </p>
                         )}
                       </div>
