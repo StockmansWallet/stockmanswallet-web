@@ -66,17 +66,17 @@ export async function sendAdvisorConnectionRequest(targetUserId: string) {
 
   if (!user) return { error: "Not authenticated" };
 
-  // Check for existing advisory connection (either direction)
+  // Check for existing advisory connection (any status)
   const { data: existing } = await supabase
     .from("connection_requests")
     .select("id, status")
+    .eq("requester_user_id", user.id)
+    .eq("target_user_id", targetUserId)
     .eq("connection_type", "advisory")
-    .or(
-      `and(requester_user_id.eq.${user.id},target_user_id.eq.${targetUserId}),and(requester_user_id.eq.${targetUserId},target_user_id.eq.${user.id})`
-    )
-    .in("status", ["pending", "approved"]);
+    .limit(1)
+    .maybeSingle();
 
-  if (existing && existing.length > 0) {
+  if (existing && (existing.status === "pending" || existing.status === "approved")) {
     return { error: "You already have an active or pending connection with this producer." };
   }
 
@@ -91,23 +91,48 @@ export async function sendAdvisorConnectionRequest(targetUserId: string) {
   const requesterRole = profile?.role || "accountant";
   const requesterCompany = profile?.company_name || "";
 
-  const { data: conn, error } = await supabase
-    .from("connection_requests")
-    .insert({
-      requester_user_id: user.id,
-      target_user_id: targetUserId,
-      requester_name: requesterName,
-      requester_role: requesterRole,
-      requester_company: requesterCompany,
-      status: "pending",
-      connection_type: "advisory",
-    })
-    .select("id")
-    .single();
+  let connId: string;
 
-  if (error) return { error: error.message };
+  if (existing) {
+    // Reactivate existing removed/denied/expired connection instead of creating a duplicate
+    const { data: updated, error } = await supabase
+      .from("connection_requests")
+      .update({
+        status: "pending",
+        requester_name: requesterName,
+        requester_role: requesterRole,
+        requester_company: requesterCompany,
+        permission_granted_at: null,
+        permission_expires_at: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", existing.id)
+      .select("id")
+      .single();
 
-  await notifyConnectionRequest(supabase, targetUserId, requesterName, conn.id);
+    if (error) return { error: error.message };
+    connId = updated.id;
+  } else {
+    // Create new connection request
+    const { data: conn, error } = await supabase
+      .from("connection_requests")
+      .insert({
+        requester_user_id: user.id,
+        target_user_id: targetUserId,
+        requester_name: requesterName,
+        requester_role: requesterRole,
+        requester_company: requesterCompany,
+        status: "pending",
+        connection_type: "advisory",
+      })
+      .select("id")
+      .single();
+
+    if (error) return { error: error.message };
+    connId = conn.id;
+  }
+
+  await notifyConnectionRequest(supabase, targetUserId, requesterName, connId);
 
   revalidatePath("/dashboard/advisor/clients");
   return { success: true };
