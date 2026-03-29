@@ -22,7 +22,7 @@ BEGIN
 
   RETURN QUERY
   SELECT * FROM herds
-  WHERE user_id = p_client_user_id::text
+  WHERE user_id = p_client_user_id
     AND is_deleted = false
     AND (is_demo_data IS NULL OR is_demo_data = false)
   ORDER BY name;
