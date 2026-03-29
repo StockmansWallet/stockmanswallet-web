@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -34,7 +33,7 @@ export default async function AdvisorDashboardPage() {
 
   const firstName = user.user_metadata?.first_name || "Advisor";
 
-  // Fetch connections where current user is the advisor (requester)
+  // Fetch connections + client data via RPC (SECURITY DEFINER bypasses RLS on properties)
   const { data: connections } = await supabase
     .from("connection_requests")
     .select("*")
@@ -44,42 +43,31 @@ export default async function AdvisorDashboardPage() {
 
   const allConnections = (connections ?? []) as ConnectionRequest[];
 
-  // Get client profiles for recent list
-  const clientUserIds = allConnections.slice(0, 5).map((c) => c.target_user_id);
-  const { data: clientProfiles } = clientUserIds.length > 0
-    ? await supabase
-        .from("user_profiles")
-        .select("user_id, display_name, company_name, property_name")
-        .in("user_id", clientUserIds)
-    : { data: [] as { user_id: string; display_name: string | null; company_name: string | null; property_name: string | null }[] };
+  // RPC returns client profile + default property LGA in one query
+  const { data: advisorConns } = await supabase.rpc("get_advisor_connections");
+  const connRows = (advisorConns ?? []) as {
+    connection_id: string;
+    target_user_id: string;
+    client_display_name: string | null;
+    client_company_name: string | null;
+    client_property_name: string | null;
+    client_lga: string | null;
+  }[];
 
+  // Build profile map from RPC data (for Recent Clients display)
   const profileMap = new Map(
-    (clientProfiles ?? []).map((p) => [p.user_id, p])
+    connRows.map((r) => [r.target_user_id, {
+      user_id: r.target_user_id,
+      display_name: r.client_display_name,
+      company_name: r.client_company_name,
+      property_name: r.client_property_name,
+    }])
   );
-
-  // Fetch default properties for all connected clients to get LGA data.
-  // Must use service role to bypass RLS (properties restricted to owner).
-  const allClientUserIds = allConnections.map((c) => c.target_user_id);
-  let clientProperties: { user_id: string; lga: string | null }[] = [];
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (allClientUserIds.length > 0 && serviceRoleKey) {
-    const serviceClient = createServiceClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      serviceRoleKey
-    );
-    const { data } = await serviceClient
-      .from("properties")
-      .select("user_id, lga")
-      .in("user_id", allClientUserIds)
-      .eq("is_default", true)
-      .eq("is_deleted", false);
-    clientProperties = data ?? [];
-  }
 
   // Build region distribution from LGA data
   const lgaCounts: Record<string, number> = {};
-  for (const prop of clientProperties) {
-    const lga = prop.lga || "Not specified";
+  for (const row of connRows) {
+    const lga = row.client_lga || "Not specified";
     lgaCounts[lga] = (lgaCounts[lga] || 0) + 1;
   }
   const totalWithRegion = Object.values(lgaCounts).reduce((a, b) => a + b, 0);
