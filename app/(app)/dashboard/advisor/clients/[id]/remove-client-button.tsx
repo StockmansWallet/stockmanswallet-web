@@ -16,13 +16,15 @@ export function RemoveClientButton({
   const router = useRouter();
   const [showConfirm, setShowConfirm] = useState(false);
   const [removing, setRemoving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleRemove() {
     setRemoving(true);
+    setError(null);
     const result = await removeClient(connectionId);
     if (result?.error) {
+      setError(result.error);
       setRemoving(false);
-      setShowConfirm(false);
     } else {
       router.push("/dashboard/advisor/clients");
     }
@@ -43,9 +45,9 @@ export function RemoveClientButton({
   }
 
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2">
+    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2">
       <p className="text-xs text-red-400">
-        Remove {clientName}? This cannot be undone.
+        {error || `Remove ${clientName}? This cannot be undone.`}
       </p>
       <Button
         size="sm"
