@@ -184,8 +184,8 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
       actualStep = Math.max(Math.round(totalDays / 12), 1);
     }
 
-    // Show year suffix on labels when span exceeds 3 months
-    const showYear = totalDays > 90;
+    // Show year suffix on labels when the range crosses a year boundary
+    const showYear = startStr.slice(0, 4) !== todayStr.slice(0, 4);
 
     return buildTimeAxis(data, startStr, todayStr, actualStep, showYear);
   }, [data, range]);
