@@ -190,27 +190,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     .lt("snapshot_date", todayDate)
     .order("snapshot_date", { ascending: true });
 
-  // 12-month portfolio projection: advance the valuation date by i×30 days
+  // Build chart data: historic snapshots + today
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  const projectionData = Array.from({ length: 12 }, (_, i) => {
-    const monthOffset = i + 1;
-    const d = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
-    const label = `${monthNames[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`;
-    const futureDate = new Date(now.getTime() + monthOffset * 30 * 86_400_000);
-    const value = activeHerds.reduce(
-      (sum, h) => {
-        const herdWithOverride = saleyardOverride ? { ...h, selected_saleyard: saleyardOverride } : h;
-        return sum + calculateHerdValuation(
-          herdWithOverride as Parameters<typeof calculateHerdValuation>[0],
-          nationalPriceMap, premiumMap, futureDate, saleyardPriceMap, saleyardBreedPriceMap
-        ).netValue;
-      },
-      0
-    );
-    return { month: label, value: Math.round(value) };
-  });
-
-  // Build combined chart: historic snapshots + today + projection
   const formatLabel = (dateStr: string) => {
     const d = new Date(dateStr + "T00:00:00");
     return `${d.getDate()} ${monthNames[d.getMonth()]}`;
@@ -220,8 +201,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     value: Math.round(Number(s.total_value)),
   }));
   const todayPoint = { month: "Today", value: Math.round(portfolioValue) };
-  const todayIndex = historicPoints.length;
-  const chartData = [...historicPoints, todayPoint, ...projectionData];
+  const chartData = [...historicPoints, todayPoint];
 
   const topHerds = [...activeHerds]
     .sort((a, b) => (b.head_count ?? 0) - (a.head_count ?? 0))
@@ -251,14 +231,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       ? herdsWithDwg.reduce((sum, h) => sum + h.daily_weight_gain, 0) / herdsWithDwg.length
       : 0;
 
-  // Change ticker: compare today vs first projection month
-  const todayVal = chartData[todayIndex]?.value ?? 0;
-  const nextVal = chartData[todayIndex + 1]?.value;
+  // Change ticker: compare today vs previous snapshot
+  const todayVal = Math.round(portfolioValue);
+  const prevVal = historicPoints.length > 0 ? historicPoints[historicPoints.length - 1].value : undefined;
   const changeDollar =
-    nextVal !== undefined ? nextVal - todayVal : undefined;
+    prevVal !== undefined ? todayVal - prevVal : undefined;
   const changePercent =
-    nextVal !== undefined && todayVal > 0
-      ? ((nextVal - todayVal) / todayVal) * 100
+    prevVal !== undefined && prevVal > 0
+      ? ((todayVal - prevVal) / prevVal) * 100
       : undefined;
 
   // Evaluate insights
@@ -327,7 +307,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 </Card>
               </div>
 
-              <DashboardSaleyardSelector currentSaleyard={saleyardOverride ?? null} />
+              <DashboardSaleyardSelector
+                currentSaleyard={saleyardOverride ?? null}
+                primaryProperty={(properties ?? []).find((p) => p.is_default) ?? (properties ?? [])[0] ?? null}
+              />
 
               <ComingUpCard items={upcomingItems ?? []} />
 
@@ -359,11 +342,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                       </div>
                       <CardTitle>Portfolio Outlook</CardTitle>
                     </div>
-                    <span className="text-xs text-text-muted">history + projection</span>
+                    <span className="text-xs text-text-muted">portfolio value over time</span>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <PortfolioChart data={chartData} todayIndex={todayIndex} />
+                  <PortfolioChart data={chartData} />
                 </CardContent>
               </Card>
 
