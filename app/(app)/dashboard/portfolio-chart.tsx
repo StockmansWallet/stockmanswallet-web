@@ -112,27 +112,7 @@ function buildTimeAxis(
     return ms >= startMs && ms <= endMs;
   });
 
-  if (pointsInRange.length === 0) {
-    // No data in range, show empty axis with start and end labels
-    return [
-      { label: formatDateLabel(startDate.toISOString().slice(0, 10)), value: null },
-      { label: "Today", value: null },
-    ];
-  }
-
-  // If very few points, just show them directly with proper labels
-  if (pointsInRange.length <= maxTicks) {
-    return pointsInRange.map((d, i) => {
-      const isLast = i === pointsInRange.length - 1;
-      const isToday = d.date === endDate.toISOString().slice(0, 10);
-      return {
-        label: isLast && isToday ? "Today" : formatDateLabel(d.date),
-        value: d.value,
-      };
-    });
-  }
-
-  // Generate evenly spaced ticks across the time span
+  // Generate evenly spaced ticks across the full time span
   const result: ChartPoint[] = [];
   const step = spanMs / (maxTicks - 1);
 
