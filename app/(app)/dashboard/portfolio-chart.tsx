@@ -226,12 +226,17 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
             dataKey="label"
             axisLine={false}
             tickLine={false}
-            interval={Math.max(Math.ceil(chartData.length / 6) - 1, 0)}
+            interval={0}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             tick={(props: any) => {
               const { x, y, payload, index } = props;
+              const total = chartData.length;
               const isFirst = index === 0;
-              const isLast = index === chartData.length - 1;
+              const isLast = index === total - 1;
+              // Show ~5-6 labels max: always first + last, evenly spaced in between
+              const step = Math.max(Math.ceil(total / 6), 1);
+              const isVisible = isFirst || isLast || (index % step === 0);
+              if (!isVisible) return <g />;
               return (
                 <text
                   x={x}
