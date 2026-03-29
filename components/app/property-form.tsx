@@ -9,7 +9,7 @@ import AddressAutocomplete, { type AddressResult } from "@/components/app/addres
 
 import type { Database } from "@/lib/types/database";
 import { lgasForState } from "@/lib/data/lga-data";
-import { lgaCoordinates } from "@/lib/data/lga-coordinates";
+import { lgaCoord } from "@/lib/data/lga-coordinates";
 
 type PropertyRow = Database["public"]["Tables"]["properties"]["Row"];
 
@@ -53,7 +53,7 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
     const R = 6371.0;
     const sorted = lgas
       .map((name) => {
-        const coords = lgaCoordinates[name];
+        const coords = lgaCoord(name, state);
         if (!coords) return { name, dist: Infinity };
         const dLat = ((coords.lat - lat1) * Math.PI) / 180;
         const dLon = ((coords.lng - lon1) * Math.PI) / 180;

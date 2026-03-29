@@ -2,11 +2,10 @@
 // Used for proximity sorting. Coordinates target the main town or administrative centre
 // of each LGA, rounded to 2 decimal places.
 //
-// NOTE: "Central Coast Council" exists in both NSW and Tasmania. The duplicate
-// key means only one entry survives. Since we filter by state before sorting,
-// the proximity sort is still accurate enough for either state.
+// NOTE: "Central Coast Council" exists in both NSW and Tasmania. Both are stored
+// with state-qualified keys. Use lgaCoord(name, state) for lookup.
 
-export const lgaCoordinates: Record<string, { lat: number; lng: number }> = {
+const _coords: Record<string, { lat: number; lng: number }> = {
   // ─── Queensland (77) ──────────────────────────────────────────────────────────
   "Aurukun Shire Council": { lat: -13.35, lng: 141.73 },
   "Balonne Shire Council": { lat: -28.55, lng: 148.78 },
@@ -105,7 +104,7 @@ export const lgaCoordinates: Record<string, { lat: number; lng: number }> = {
   "Campbelltown City Council": { lat: -34.07, lng: 150.81 },
   "Canterbury-Bankstown Council": { lat: -33.92, lng: 151.06 },
   "Carrathool Shire Council": { lat: -34.04, lng: 145.44 },
-  "Central Coast Council": { lat: -33.43, lng: 151.34 },
+  "Central Coast Council::NSW": { lat: -33.43, lng: 151.34 },
   "Central Darling Shire Council": { lat: -31.63, lng: 143.37 },
   "Cessnock City Council": { lat: -32.83, lng: 151.36 },
   "City of Sydney Council": { lat: -33.87, lng: 151.21 },
@@ -394,7 +393,7 @@ export const lgaCoordinates: Record<string, { lat: number; lng: number }> = {
   "Break O'Day Council": { lat: -41.36, lng: 148.25 },
   "Brighton Council": { lat: -42.72, lng: 147.24 },
   "Burnie City Council": { lat: -41.05, lng: 145.91 },
-  "Central Coast Council": { lat: -41.21, lng: 146.09 },
+  "Central Coast Council::TAS": { lat: -41.21, lng: 146.09 },
   "Central Highlands Council": { lat: -42.13, lng: 146.72 },
   "Circular Head Council": { lat: -40.77, lng: 145.33 },
   "Clarence City Council": { lat: -42.85, lng: 147.39 },
@@ -443,3 +442,8 @@ export const lgaCoordinates: Record<string, { lat: number; lng: number }> = {
   // ─── Australian Capital Territory (1) ─────────────────────────────────────────
   "ACT Government": { lat: -35.28, lng: 149.13 },
 };
+
+/** Look up LGA coordinates. Tries plain name first, then state-qualified key for duplicates. */
+export function lgaCoord(name: string, state?: string): { lat: number; lng: number } | undefined {
+  return _coords[name] ?? (state ? _coords[`${name}::${state}`] : undefined);
+}
