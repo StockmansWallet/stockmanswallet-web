@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { updateProfile } from "./actions";
 
 const ROLE_OPTIONS = [
-  { value: "farmerGrazier", label: "Producer" },
+  { value: "producer", label: "Producer" },
   { value: "agribusinessBanker", label: "Agribusiness Banker" },
   { value: "insurer", label: "Insurer" },
   { value: "livestockAgent", label: "Livestock Agent" },
@@ -89,7 +89,7 @@ export function ProfileForm({
         name="role"
         label="Role"
         options={ROLE_OPTIONS}
-        defaultValue={role || "farmerGrazier"}
+        defaultValue={role || "producer"}
         helperText="Determines which features and views are available"
       />
 
