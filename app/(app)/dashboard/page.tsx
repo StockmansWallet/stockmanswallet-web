@@ -170,7 +170,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const now = new Date();
   const todayDate = now.toISOString().slice(0, 10);
   if (activeHerds.length > 0) {
-    supabase.from("portfolio_snapshots").upsert(
+    await supabase.from("portfolio_snapshots").upsert(
       {
         user_id: user!.id,
         snapshot_date: todayDate,
@@ -179,7 +179,64 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         herd_count: activeHerds.length,
       },
       { onConflict: "user_id,snapshot_date" }
-    ).then();
+    );
+  }
+
+  // Backfill historic snapshots if none exist yet.
+  // Generates weekly snapshots from the earliest herd creation date to yesterday,
+  // using current market prices with correct weight projections for each date.
+  const { count: snapshotCount } = await supabase
+    .from("portfolio_snapshots")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user!.id);
+
+  if ((snapshotCount ?? 0) <= 1 && activeHerds.length > 0) {
+    const creationDates = activeHerds
+      .map((h) => h.created_at ? new Date(h.created_at) : null)
+      .filter((d): d is Date => d !== null);
+    const earliest = creationDates.length > 0
+      ? new Date(Math.min(...creationDates.map((d) => d.getTime())))
+      : null;
+
+    if (earliest && earliest.getTime() < now.getTime() - 86_400_000) {
+      const backfillRows: { user_id: string; snapshot_date: string; total_value: number; head_count: number; herd_count: number }[] = [];
+      const cursor = new Date(earliest);
+
+      while (cursor.getTime() < now.getTime() - 86_400_000) {
+        const asOfDate = new Date(cursor);
+        const herdsAtDate = activeHerds.filter((h) => {
+          if (!h.created_at) return false;
+          return new Date(h.created_at).getTime() <= asOfDate.getTime();
+        });
+
+        if (herdsAtDate.length > 0) {
+          const dateVal = herdsAtDate.reduce((sum, h) => {
+            const herdWithOverride = saleyardOverride ? { ...h, selected_saleyard: saleyardOverride } : h;
+            return sum + calculateHerdValuation(
+              herdWithOverride as Parameters<typeof calculateHerdValuation>[0],
+              nationalPriceMap, premiumMap, asOfDate, saleyardPriceMap, saleyardBreedPriceMap
+            ).netValue;
+          }, 0);
+          const dateHeads = herdsAtDate.reduce((sum, h) => sum + (h.head_count ?? 0), 0);
+
+          backfillRows.push({
+            user_id: user!.id,
+            snapshot_date: cursor.toISOString().slice(0, 10),
+            total_value: Math.round(dateVal),
+            head_count: dateHeads,
+            herd_count: herdsAtDate.length,
+          });
+        }
+
+        cursor.setDate(cursor.getDate() + 7);
+      }
+
+      if (backfillRows.length > 0) {
+        await supabase
+          .from("portfolio_snapshots")
+          .upsert(backfillRows, { onConflict: "user_id,snapshot_date" });
+      }
+    }
   }
 
   // Fetch historic snapshots (before today)
