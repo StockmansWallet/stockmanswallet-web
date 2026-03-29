@@ -17,6 +17,8 @@ import type { AdvisorLens, AdvisorScenario } from "@/lib/types/advisor-lens";
 import { calculateHerdValuation, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
+import { generateAccountantData } from "@/lib/services/report-service";
+import { ClientReportTab } from "@/components/app/advisory/client-report-tab";
 
 export const metadata = {
   title: "Client Detail",
@@ -181,6 +183,18 @@ export default async function ClientDetailPage({
     }
   }
 
+  // Generate accountant report for the client if reports are shared
+  const now = new Date();
+  const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+  const reportData = permissions.reports && serviceClient
+    ? await generateAccountantData(serviceClient, conn.target_user_id, {
+        reportType: "accountant",
+        startDate: oneYearAgo.toISOString().slice(0, 10),
+        endDate: now.toISOString().slice(0, 10),
+        selectedPropertyIds: [],
+      })
+    : null;
+
   const advisorName = user.user_metadata?.display_name ?? user.user_metadata?.first_name ?? "Advisor";
 
   const participants: Record<string, { name: string; role: string }> = {
@@ -248,6 +262,22 @@ export default async function ClientDetailPage({
                   icon={<Lock className="h-6 w-6 text-purple-400" />}
                   title="Valuations Not Shared"
                   description="This producer has not enabled valuation sharing."
+                  variant="purple"
+                />
+              </Card>
+            ),
+          },
+          {
+            id: "reports",
+            label: "Reports",
+            content: permissions.reports ? (
+              <ClientReportTab reportData={reportData} clientName={clientName} />
+            ) : (
+              <Card>
+                <EmptyState
+                  icon={<Lock className="h-6 w-6 text-purple-400" />}
+                  title="Reports Not Shared"
+                  description="This producer has not enabled report sharing."
                   variant="purple"
                 />
               </Card>
