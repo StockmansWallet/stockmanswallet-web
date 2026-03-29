@@ -171,6 +171,7 @@ export async function requestRenewal(connectionId: string) {
   await notifyRenewalRequested(supabase, conn.target_user_id, advisorName, conn.id);
 
   revalidatePath("/dashboard/advisor/clients");
+  revalidatePath(`/dashboard/advisor/clients/${connectionId}`);
   return { success: true };
 }
 

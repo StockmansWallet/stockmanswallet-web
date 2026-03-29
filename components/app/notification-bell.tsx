@@ -39,29 +39,39 @@ export function NotificationBell() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  // Store supabase client in ref so click handler can reuse the same instance
   const supabaseRef = useRef(createClient());
+  const userIdRef = useRef<string | null>(null);
+
+  const fetchNotifications = useCallback(async () => {
+    const supabase = supabaseRef.current;
+    if (!userIdRef.current) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      userIdRef.current = user.id;
+    }
+
+    const { data } = await supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", userIdRef.current)
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    const items = (data ?? []) as AppNotification[];
+    setNotifications(items);
+    setUnreadCount(items.filter((n) => !n.is_read).length);
+  }, []);
 
   useEffect(() => {
     const supabase = supabaseRef.current;
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
     async function init() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      await fetchNotifications();
 
-      const { data } = await supabase
-        .from("notifications")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(10);
+      if (!userIdRef.current) return;
 
-      const items = (data ?? []) as AppNotification[];
-      setNotifications(items);
-      setUnreadCount(items.filter((n) => !n.is_read).length);
-
-      // Subscribe after auth with user_id filter for reliable delivery
+      // Realtime subscription with user_id filter
       channel = supabase
         .channel("notifications-bell")
         .on(
@@ -70,7 +80,7 @@ export function NotificationBell() {
             event: "INSERT",
             schema: "public",
             table: "notifications",
-            filter: `user_id=eq.${user.id}`,
+            filter: `user_id=eq.${userIdRef.current}`,
           },
           (payload) => {
             const row = payload.new as AppNotification;
@@ -83,10 +93,23 @@ export function NotificationBell() {
 
     init();
 
+    // Refetch when tab becomes visible (catches missed realtime events)
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        fetchNotifications();
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // Periodic refetch every 30s as safety net
+    const interval = setInterval(fetchNotifications, 30000);
+
     return () => {
       if (channel) supabase.removeChannel(channel);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      clearInterval(interval);
     };
-  }, []);
+  }, [fetchNotifications]);
 
   // Close dropdown on outside click
   useEffect(() => {

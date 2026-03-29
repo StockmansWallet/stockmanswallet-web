@@ -1,28 +1,40 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 export function NotificationBadge() {
   const [unreadCount, setUnreadCount] = useState(0);
+  const supabaseRef = useRef(createClient());
+  const userIdRef = useRef<string | null>(null);
+
+  const fetchCount = useCallback(async () => {
+    const supabase = supabaseRef.current;
+    if (!userIdRef.current) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      userIdRef.current = user.id;
+    }
+
+    const { count } = await supabase
+      .from("notifications")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userIdRef.current)
+      .eq("is_read", false);
+
+    setUnreadCount(count ?? 0);
+  }, []);
 
   useEffect(() => {
-    const supabase = createClient();
+    const supabase = supabaseRef.current;
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
     async function init() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      await fetchCount();
 
-      const { count } = await supabase
-        .from("notifications")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .eq("is_read", false);
+      if (!userIdRef.current) return;
 
-      setUnreadCount(count ?? 0);
-
-      // Subscribe after auth with user_id filter for reliable delivery
+      // Realtime subscription with user_id filter
       channel = supabase
         .channel("notification-badge")
         .on(
@@ -31,7 +43,7 @@ export function NotificationBadge() {
             event: "INSERT",
             schema: "public",
             table: "notifications",
-            filter: `user_id=eq.${user.id}`,
+            filter: `user_id=eq.${userIdRef.current}`,
           },
           () => {
             setUnreadCount((c) => c + 1);
@@ -43,7 +55,7 @@ export function NotificationBadge() {
             event: "UPDATE",
             schema: "public",
             table: "notifications",
-            filter: `user_id=eq.${user.id}`,
+            filter: `user_id=eq.${userIdRef.current}`,
           },
           (payload) => {
             const row = payload.new as { is_read: boolean };
@@ -57,10 +69,23 @@ export function NotificationBadge() {
 
     init();
 
+    // Refetch when tab becomes visible (catches missed realtime events)
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        fetchCount();
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // Periodic refetch every 30s as safety net
+    const interval = setInterval(fetchCount, 30000);
+
     return () => {
       if (channel) supabase.removeChannel(channel);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      clearInterval(interval);
     };
-  }, []);
+  }, [fetchCount]);
 
   if (unreadCount === 0) return null;
 
