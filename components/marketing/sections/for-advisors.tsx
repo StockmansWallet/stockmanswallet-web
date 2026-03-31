@@ -74,14 +74,14 @@ function LensPanel() {
         </div>
       </div>
 
-      {/* Shading slider */}
+      {/* Shading slider - bar shows retained value (90% = 10% shading) */}
       <div className="flex items-center gap-3 rounded-xl bg-white/[0.04] px-4 py-3">
         <span className="text-xs text-text-secondary">Shading</span>
         <div className="relative flex-1">
           <div className="h-1.5 rounded-full bg-white/[0.06]">
-            <div className="h-full w-[10%] rounded-full bg-[#2F8CD9]" />
+            <div className="h-full w-[90%] rounded-full bg-[#2F8CD9]" />
           </div>
-          <div className="absolute left-[10%] top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#2F8CD9] bg-surface-primary" />
+          <div className="absolute left-[90%] top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#2F8CD9] bg-surface-primary" />
         </div>
         <span className="rounded-md bg-[#1E5C8C]/20 px-2 py-0.5 text-xs font-semibold tabular-nums text-[#2F8CD9]">10%</span>
       </div>
@@ -245,72 +245,75 @@ function ReportsPanel() {
       <div className="rounded-xl bg-white/[0.04] p-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-semibold text-white">Advisor Valuation Report</p>
+            <p className="text-sm font-semibold text-white">Advisor Valuation Justification</p>
             <p className="mt-0.5 text-[10px] text-text-muted">J. McAllister · Doongara Station</p>
           </div>
-          <span className="rounded-md bg-[#1E5C8C]/20 px-2 py-0.5 text-[10px] font-medium text-[#2F8CD9]">Read-only</span>
+          <span className="rounded-md bg-[#1E5C8C]/20 px-2 py-0.5 text-[10px] font-medium text-[#2F8CD9]">Bank Copy</span>
         </div>
         <div className="mt-2 flex items-center gap-3 text-[10px] text-text-muted">
-          <span>01 Jan 2026 - 31 Mar 2026</span>
+          <span>Period: 01 Jan - 31 Mar 2026</span>
           <span>·</span>
-          <span>Generated 31 Mar 2026</span>
+          <span>Prepared by R. Webb, Senior Ag Lender</span>
         </div>
       </div>
 
-      {/* Financial overview */}
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {[
-          { label: 'Portfolio Value', value: '$1,842,500' },
-          { label: 'Active Herds', value: '186 hd' },
-          { label: 'Sales Revenue', value: '$124,800' },
-          { label: 'Head Sold', value: '28' },
-        ].map((stat) => (
-          <div key={stat.label} className="rounded-xl bg-white/[0.04] p-3">
-            <p className="text-[10px] text-text-muted">{stat.label}</p>
-            <p className="mt-1 text-sm font-bold tabular-nums text-white">{stat.value}</p>
-          </div>
-        ))}
+      {/* Valuation comparison */}
+      <div className="grid grid-cols-3 gap-2">
+        <div className="rounded-xl bg-white/[0.04] p-3 text-center">
+          <p className="text-[10px] text-text-muted">Producer Value</p>
+          <p className="mt-1 text-sm font-bold tabular-nums text-white">$1,842,500</p>
+        </div>
+        <div className="rounded-xl bg-white/[0.04] p-3 text-center">
+          <p className="text-[10px] text-text-muted">Advisor Adjusted</p>
+          <p className="mt-1 text-sm font-bold tabular-nums text-[#2F8CD9]">$1,544,580</p>
+        </div>
+        <div className="rounded-xl bg-white/[0.04] p-3 text-center">
+          <p className="text-[10px] text-text-muted">Variance</p>
+          <p className="mt-1 text-sm font-bold tabular-nums text-amber-400">-16.2%</p>
+        </div>
       </div>
 
-      {/* Asset register table */}
+      {/* Advisor adjustments table */}
       <div className="overflow-hidden rounded-xl bg-white/[0.04]">
         <div className="border-b border-white/[0.06] px-4 py-2.5">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">Asset Register</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">Advisor Adjustments Applied</p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-[11px]">
             <thead>
               <tr className="border-b border-white/[0.06] text-text-muted">
-                <th className="px-4 py-2 text-left font-medium">Herd</th>
-                <th className="px-2 py-2 text-right font-medium">Head</th>
-                <th className="px-2 py-2 text-right font-medium">Wt</th>
-                <th className="px-4 py-2 text-right font-medium">Value</th>
+                <th className="px-4 py-2 text-left font-medium">Assumption</th>
+                <th className="px-2 py-2 text-right font-medium">Producer</th>
+                <th className="px-2 py-2 text-right font-medium">Advisor</th>
+                <th className="px-4 py-2 text-right font-medium">Impact</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.03]">
               {[
-                { herd: 'Angus Steers', head: 42, weight: '520 kg', value: '$189,420' },
-                { herd: 'Hereford Breeders', head: 68, weight: '480 kg', value: '$272,680' },
-                { herd: 'Angus Weaners', head: 76, weight: '220 kg', value: '$112,480' },
+                { assumption: 'Breed Premium', producer: '0%', advisor: '-2.5%', impact: '-$46,063' },
+                { assumption: 'Daily Weight Gain', producer: '1.0 kg', advisor: '0.8 kg', impact: '-$31,240' },
+                { assumption: 'Calving Rate', producer: '88%', advisor: '82%', impact: '-$22,150' },
+                { assumption: 'Mortality Rate', producer: '2.0%', advisor: '3.5%', impact: '-$14,217' },
+                { assumption: 'Shading (10%)', producer: 'N/A', advisor: '10%', impact: '-$184,250' },
               ].map((row) => (
-                <tr key={row.herd} className="text-white/80">
-                  <td className="px-4 py-2 font-medium">{row.herd}</td>
-                  <td className="px-2 py-2 text-right tabular-nums">{row.head}</td>
-                  <td className="px-2 py-2 text-right tabular-nums">{row.weight}</td>
-                  <td className="px-4 py-2 text-right font-semibold tabular-nums">{row.value}</td>
+                <tr key={row.assumption} className="text-white/80">
+                  <td className="px-4 py-2 font-medium">{row.assumption}</td>
+                  <td className="px-2 py-2 text-right tabular-nums">{row.producer}</td>
+                  <td className="px-2 py-2 text-right tabular-nums text-[#2F8CD9]">{row.advisor}</td>
+                  <td className="px-4 py-2 text-right font-semibold tabular-nums text-amber-400">{row.impact}</td>
                 </tr>
               ))}
             </tbody>
-            <tfoot>
-              <tr className="border-t border-white/[0.06] text-white">
-                <td className="px-4 py-2 font-semibold">Total</td>
-                <td className="px-2 py-2 text-right font-semibold tabular-nums">186</td>
-                <td className="px-2 py-2" />
-                <td className="px-4 py-2 text-right font-bold tabular-nums">$574,580</td>
-              </tr>
-            </tfoot>
           </table>
         </div>
+      </div>
+
+      {/* Advisor notes */}
+      <div className="rounded-xl bg-white/[0.04] p-4">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">Advisor Notes</p>
+        <p className="mt-2 text-xs leading-relaxed text-text-secondary italic">
+          &ldquo;Adjusted DWG to 0.8 kg/day based on current seasonal conditions and pasture quality. Breed premium reduced to reflect local market demand for crossbreds. Calving rate lowered due to first-calf heifers in the breeder herd. 10% shading applied per bank policy for lending security margin.&rdquo;
+        </p>
       </div>
     </div>
   )
