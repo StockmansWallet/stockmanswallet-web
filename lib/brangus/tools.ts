@@ -223,6 +223,27 @@ export const toolDefinitions = [
       required: ["fact", "category"],
     },
   },
+  {
+    name: "search_past_chats",
+    description:
+      "Searches previous conversations with this user. Use when they reference a past discussion, e.g. 'remember when we talked about...', 'what did you say about the heifers last time', 'we discussed freight costs a while back', 'last time I asked you about...'. Do NOT use this for every message. Only when the user clearly references something from a previous chat session.",
+    input_schema: {
+      type: "object",
+      properties: {
+        query: {
+          type: "string",
+          description:
+            "What to search for in past conversations. Use natural keywords, e.g. 'selling heifers', 'freight to Roma', 'drought'.",
+        },
+        max_results: {
+          type: "integer",
+          description:
+            "Maximum results to return (1-15). Default 8. Use fewer for casual references, more for thorough lookups.",
+        },
+      },
+      required: ["query"],
+    },
+  },
 ];
 
 // Display-only tools (no tool_result sent back to API)
@@ -250,6 +271,8 @@ export async function executeTool(
       return executePriceScenario(input, store);
     case "remember_fact":
       return executeRememberFact(input);
+    case "search_past_chats":
+      return executeSearchPastChats(input);
     default:
       return `Error: Unknown tool '${toolName}'`;
   }
@@ -1606,6 +1629,63 @@ async function executeRememberFact(input: Record<string, unknown>): Promise<stri
     return "Memory saved. You'll remember this about them next time.";
   } catch (err) {
     return `Error saving memory: ${err}`;
+  }
+}
+
+// MARK: - Search Past Chats Tool
+
+async function executeSearchPastChats(input: Record<string, unknown>): Promise<string> {
+  const query = input.query as string;
+  const maxResults = (input.max_results as number) || 8;
+
+  if (!query) return "Error: Missing or empty query parameter.";
+  if (query.length > 200) return "Error: Query too long (max 200 characters).";
+
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return "Error: No authenticated user.";
+
+    const { data, error } = await supabase
+      .rpc("search_past_chats", {
+        search_query: query,
+        max_results: Math.min(Math.max(maxResults, 1), 15),
+      });
+
+    if (error) return `Error searching past chats: ${error.message}`;
+    if (!data || data.length === 0) {
+      return "No matching conversations found. You haven't discussed this topic with them before.";
+    }
+
+    const lines: string[] = [];
+    lines.push(`PAST CONVERSATION RESULTS (${data.length} matches for '${query}'):`);
+    lines.push("");
+
+    for (const result of data) {
+      const title = result.conversation_title || "Untitled chat";
+      const date = formatSearchDate(result.message_date || result.conversation_date);
+      const role = result.message_role === "user" ? "Them" : "You (Brangus)";
+      const content = result.message_content;
+
+      lines.push(`[${date}] ${title}`);
+      lines.push(`  ${role}: ${content}`);
+      lines.push("");
+    }
+
+    lines.push("Reference these naturally like a mate recalling a past yarn. Don't list them back verbatim.");
+    return lines.join("\n");
+  } catch (err) {
+    return `Error searching past chats: ${err}`;
+  }
+}
+
+function formatSearchDate(isoString: string | null): string {
+  if (!isoString) return "Unknown date";
+  try {
+    const date = new Date(isoString);
+    return date.toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
+  } catch {
+    return "Unknown date";
   }
 }
 
