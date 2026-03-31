@@ -388,18 +388,26 @@ export default async function HerdDetailPage({
                   <Badge variant={herd.is_pregnant ? "success" : "default"}>{herd.is_pregnant ? "Yes" : "No"}</Badge>
                 </div>
                 <InfoRow label="Breeding Program" value={herd.breeding_program_type ? herd.breeding_program_type.charAt(0).toUpperCase() + herd.breeding_program_type.slice(1) : null} />
-                <InfoRow label="Joined Date" value={herd.joined_date ? new Date(herd.joined_date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" }) : null} />
+                {herd.joining_period_start && (
+                  <InfoRow
+                    label={herd.breeding_program_type === "ai" ? "Insemination Started" : "Put Bulls In"}
+                    value={new Date(herd.joining_period_start).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+                  />
+                )}
+                {herd.joining_period_end && (
+                  <InfoRow
+                    label={herd.breeding_program_type === "ai" ? "Insemination Complete" : "Pull Bulls Out"}
+                    value={new Date(herd.joining_period_end).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+                  />
+                )}
+                {herd.joined_date && (herd.breeding_program_type === "ai" || herd.breeding_program_type === "controlled") && (
+                  <InfoRow label="Effective Joining Date" value={new Date(herd.joined_date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })} />
+                )}
                 {effectiveJoinedDate && hasJoiningStarted && (
                   <InfoRow label="Days Since Joining" value={`${daysSinceJoined} days`} />
                 )}
                 {effectiveJoinedDate && !hasJoiningStarted && daysUntilJoining > 0 && (
                   <InfoRow label="Days Until Joining" value={`${daysUntilJoining} days`} />
-                )}
-                {herd.joining_period_start && (
-                  <InfoRow
-                    label="Joining Period"
-                    value={`${new Date(herd.joining_period_start).toLocaleDateString("en-AU", { day: "numeric", month: "short" })} – ${herd.joining_period_end ? new Date(herd.joining_period_end).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" }) : "Ongoing"}`}
-                  />
                 )}
                 {effectiveJoinedDate && (
                   <InfoRow

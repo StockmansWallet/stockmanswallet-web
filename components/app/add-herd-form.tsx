@@ -351,7 +351,8 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
     }
   }
 
-  const periodLabel = breedingProgram === "ai" ? "Insemination" : "Joining";
+  const periodStartLabel = breedingProgram === "ai" ? "Insemination Started" : "Put Bulls In";
+  const periodEndLabel = breedingProgram === "ai" ? "Insemination Complete" : "Pull Bulls Out";
 
   return (
     <div className="space-y-4 pb-4">
@@ -812,13 +813,13 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                 <>
                   <DatePicker
                     id="joining_start"
-                    label={`${periodLabel} Start`}
+                    label={periodStartLabel}
                     value={joiningStart}
                     onChange={(v) => setJoiningStart(v)}
                   />
                   <DatePicker
                     id="joining_end"
-                    label={`${periodLabel} End`}
+                    label={periodEndLabel}
                     value={joiningEnd}
                     onChange={(v) => setJoiningEnd(v)}
                     min={joiningStart || undefined}

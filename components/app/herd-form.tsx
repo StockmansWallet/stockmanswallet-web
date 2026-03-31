@@ -375,12 +375,13 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
           )}
           {isBreeder && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Input
-                id="joined_date"
-                name="joined_date"
-                label="Joined Date"
-                type="date"
-                defaultValue={herd?.joined_date ?? ""}
+              <Select
+                id="breeding_program_type"
+                name="breeding_program_type"
+                label="Breeding Program"
+                options={BREEDING_PROGRAM_OPTIONS}
+                defaultValue={herd?.breeding_program_type ?? ""}
+                onChange={(e) => setBreedingProgramType(e.target.value)}
               />
               <Input
                 id="calving_rate"
@@ -390,6 +391,33 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
                 step="0.1"
                 defaultValue={herd?.calving_rate != null ? Math.round(herd.calving_rate > 1 ? herd.calving_rate : herd.calving_rate * 100) : 85}
               />
+              {(breedingProgramType === "ai" || breedingProgramType === "controlled") && (
+                <>
+                  <Input
+                    id="joining_period_start"
+                    name="joining_period_start"
+                    label={breedingProgramType === "ai" ? "Insemination Started" : "Put Bulls In"}
+                    type="date"
+                    defaultValue={herd?.joining_period_start ? herd.joining_period_start.split("T")[0] : ""}
+                  />
+                  <Input
+                    id="joining_period_end"
+                    name="joining_period_end"
+                    label={breedingProgramType === "ai" ? "Insemination Complete" : "Pull Bulls Out"}
+                    type="date"
+                    defaultValue={herd?.joining_period_end ? herd.joining_period_end.split("T")[0] : ""}
+                  />
+                </>
+              )}
+              {/* Effective Joining Date: read-only derived midpoint (hidden input for form submission) */}
+              {herd?.joined_date && (breedingProgramType === "ai" || breedingProgramType === "controlled") && (
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-medium text-text-muted">Effective Joining Date</label>
+                  <p className="rounded-lg border border-white/[0.06] bg-surface-secondary px-3 py-2 text-sm text-text-primary">
+                    {new Date(herd.joined_date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+                  </p>
+                </div>
+              )}
               <Input
                 id="lactation_status"
                 name="lactation_status"
@@ -397,32 +425,6 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
                 defaultValue={herd?.lactation_status ?? ""}
                 placeholder="e.g. Wet, Dry"
               />
-              <Select
-                id="breeding_program_type"
-                name="breeding_program_type"
-                label="Breeding Program"
-                options={BREEDING_PROGRAM_OPTIONS}
-                defaultValue={herd?.breeding_program_type ?? ""}
-                onChange={(e) => setBreedingProgramType(e.target.value)}
-              />
-              {(breedingProgramType === "ai" || breedingProgramType === "controlled") && (
-                <>
-                  <Input
-                    id="joining_period_start"
-                    name="joining_period_start"
-                    label={breedingProgramType === "ai" ? "Insemination Period Start" : "Joining Period Start"}
-                    type="date"
-                    defaultValue={herd?.joining_period_start ? herd.joining_period_start.split("T")[0] : ""}
-                  />
-                  <Input
-                    id="joining_period_end"
-                    name="joining_period_end"
-                    label={breedingProgramType === "ai" ? "Insemination Period End" : "Joining Period End"}
-                    type="date"
-                    defaultValue={herd?.joining_period_end ? herd.joining_period_end.split("T")[0] : ""}
-                  />
-                </>
-              )}
             </div>
           )}
           {isBreeder && (

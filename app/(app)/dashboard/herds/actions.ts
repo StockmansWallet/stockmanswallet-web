@@ -102,9 +102,20 @@ export async function createHerd(formData: FormData) {
     is_breeder: isBreeder,
     calving_rate: isBreeder ? (v.calving_rate ?? 50) / 100 : 0.85,
     breeding_program_type: isBreeder ? (v.breeding_program_type ?? null) : null,
-    joined_date: v.joined_date || null,
-    joining_period_start: v.joining_period_start || null,
-    joining_period_end: v.joining_period_end || null,
+    // Derive joined_date from midpoint of period for AI/controlled, null for uncontrolled
+    joined_date: (() => {
+      if (!isBreeder) return null;
+      const prog = v.breeding_program_type;
+      if ((prog === "ai" || prog === "controlled") && v.joining_period_start && v.joining_period_end) {
+        const start = new Date(v.joining_period_start).getTime();
+        const end = new Date(v.joining_period_end).getTime();
+        return new Date((start + end) / 2).toISOString().split("T")[0];
+      }
+      return null;
+    })(),
+    // Uncontrolled breeding has no period dates (bulls in all year)
+    joining_period_start: (isBreeder && (v.breeding_program_type === "ai" || v.breeding_program_type === "controlled")) ? (v.joining_period_start || null) : null,
+    joining_period_end: (isBreeder && (v.breeding_program_type === "ai" || v.breeding_program_type === "controlled")) ? (v.joining_period_end || null) : null,
     selected_saleyard: v.selected_saleyard || null,
     paddock_name: v.paddock_name || null,
     property_id: v.property_id || null,
@@ -119,15 +130,26 @@ export async function createHerd(formData: FormData) {
   if (error) return { error: error.message };
 
   // Debug: Auto-create Yard Book breeding milestones for breeder herds with joining data
+  // Compute the derived joined_date for milestones
+  const derivedJoinedDate = (() => {
+    const prog = v.breeding_program_type;
+    if ((prog === "ai" || prog === "controlled") && v.joining_period_start && v.joining_period_end) {
+      const start = new Date(v.joining_period_start).getTime();
+      const end = new Date(v.joining_period_end).getTime();
+      return new Date((start + end) / 2).toISOString().split("T")[0];
+    }
+    return null;
+  })();
   const didCreateMilestones =
-    isBreeder && !!(v.joining_period_start || v.joined_date);
+    isBreeder && !!(v.joining_period_start || derivedJoinedDate);
   if (didCreateMilestones) {
     await syncBreedingMilestonesForHerd(herdId, {
       name: v.name,
       species: v.species,
-      joined_date: v.joined_date || null,
+      joined_date: derivedJoinedDate,
       joining_period_start: v.joining_period_start || null,
       joining_period_end: v.joining_period_end || null,
+      breeding_program_type: v.breeding_program_type || null,
       is_breeder: true,
       property_id: v.property_id || null,
     });
@@ -186,12 +208,23 @@ export async function updateHerd(id: string, formData: FormData) {
       mortality_rate: v.mortality_rate / 100,
       is_breeder: v.is_breeder === "on",
       is_pregnant: v.is_pregnant === "on",
-      joined_date: v.joined_date || null,
+      // Derive joined_date from midpoint of period for AI/controlled, null for uncontrolled
+      joined_date: (() => {
+        if (v.is_breeder !== "on") return null;
+        const prog = v.breeding_program_type;
+        if ((prog === "ai" || prog === "controlled") && v.joining_period_start && v.joining_period_end) {
+          const start = new Date(v.joining_period_start).getTime();
+          const end = new Date(v.joining_period_end).getTime();
+          return new Date((start + end) / 2).toISOString().split("T")[0];
+        }
+        return null;
+      })(),
       calving_rate: (v.calving_rate ?? 85) / 100,
       lactation_status: v.lactation_status || null,
       breeding_program_type: v.breeding_program_type || null,
-      joining_period_start: v.joining_period_start || null,
-      joining_period_end: v.joining_period_end || null,
+      // Uncontrolled breeding has no period dates (bulls in all year)
+      joining_period_start: (v.is_breeder === "on" && (v.breeding_program_type === "ai" || v.breeding_program_type === "controlled")) ? (v.joining_period_start || null) : null,
+      joining_period_end: (v.is_breeder === "on" && (v.breeding_program_type === "ai" || v.breeding_program_type === "controlled")) ? (v.joining_period_end || null) : null,
       selected_saleyard: v.selected_saleyard || null,
       paddock_name: v.paddock_name || null,
       property_id: v.property_id || null,
@@ -210,14 +243,24 @@ export async function updateHerd(id: string, formData: FormData) {
   if (error) return { error: error.message };
 
   // Debug: Sync breeding milestones (handles create, update, and removal when breeder status changes)
+  const updateDerivedJoinedDate = (() => {
+    const prog = v.breeding_program_type;
+    if ((prog === "ai" || prog === "controlled") && v.joining_period_start && v.joining_period_end) {
+      const start = new Date(v.joining_period_start).getTime();
+      const end = new Date(v.joining_period_end).getTime();
+      return new Date((start + end) / 2).toISOString().split("T")[0];
+    }
+    return null;
+  })();
   const didSyncMilestones =
-    v.is_breeder === "on" && !!(v.joining_period_start || v.joined_date);
+    v.is_breeder === "on" && !!(v.joining_period_start || updateDerivedJoinedDate);
   await syncBreedingMilestonesForHerd(idResult.data, {
     name: v.name,
     species: v.species,
-    joined_date: v.joined_date || null,
+    joined_date: updateDerivedJoinedDate,
     joining_period_start: v.joining_period_start || null,
     joining_period_end: v.joining_period_end || null,
+    breeding_program_type: v.breeding_program_type || null,
     is_breeder: v.is_breeder === "on",
     property_id: v.property_id || null,
   });

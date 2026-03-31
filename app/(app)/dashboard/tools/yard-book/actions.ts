@@ -255,6 +255,7 @@ export async function syncBreedingMilestonesForHerd(
     joined_date: string | null;
     joining_period_start: string | null;
     joining_period_end: string | null;
+    breeding_program_type?: string | null;
     is_breeder: boolean;
     property_id: string | null;
   }
@@ -351,20 +352,29 @@ export async function syncBreedingMilestonesForHerd(
     });
   }
 
-  // Milestone 3: Joining Period Start (only if set and in the future)
+  // Breeding-type-specific titles for period start/end milestones
+  const isAI = herd.breeding_program_type === "ai";
+  const startTitle = isAI ? "Insemination Started" : "Put Bulls In";
+  const endTitle = isAI ? "Insemination Complete" : "Pull Bulls Out";
+  const startNote = isAI ? "Insemination program begins." : "Bulls put in with herd.";
+  const endNote = isAI ? "Insemination program complete." : "Bulls pulled out of herd.";
+
+  // Milestone 3: Period Start (only if set and in the future)
+  // Also check legacy title "Joining Period Start" for completed items migration
   if (
     herd.joining_period_start &&
     herd.joining_period_start.split("T")[0] > today &&
+    !completedPrefixes.has(startTitle) &&
     !completedPrefixes.has("Joining Period Start")
   ) {
     items.push({
       id: crypto.randomUUID(),
       user_id: user.id,
-      title: `${herd.name} - Joining Period Start`,
+      title: `${herd.name} - ${startTitle}`,
       event_date: herd.joining_period_start.split("T")[0],
       is_all_day: true,
       category_raw: "Livestock",
-      notes: `Auto-created from breeding data. Breeding program begins.`,
+      notes: `Auto-created from breeding data. ${startNote}`,
       reminder_offsets: [7, 1],
       linked_herd_ids: [herdId],
       property_id: herd.property_id,
@@ -376,20 +386,22 @@ export async function syncBreedingMilestonesForHerd(
     });
   }
 
-  // Milestone 4: Joining Period End (only if set and in the future)
+  // Milestone 4: Period End (only if set and in the future)
+  // Also check legacy title "Joining Period End" for completed items migration
   if (
     herd.joining_period_end &&
     herd.joining_period_end.split("T")[0] > today &&
+    !completedPrefixes.has(endTitle) &&
     !completedPrefixes.has("Joining Period End")
   ) {
     items.push({
       id: crypto.randomUUID(),
       user_id: user.id,
-      title: `${herd.name} - Joining Period End`,
+      title: `${herd.name} - ${endTitle}`,
       event_date: herd.joining_period_end.split("T")[0],
       is_all_day: true,
       category_raw: "Livestock",
-      notes: `Auto-created from breeding data. Breeding program ends.`,
+      notes: `Auto-created from breeding data. ${endNote}`,
       reminder_offsets: [7, 1],
       linked_herd_ids: [herdId],
       property_id: herd.property_id,
