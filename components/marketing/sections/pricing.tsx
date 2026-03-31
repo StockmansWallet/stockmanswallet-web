@@ -36,7 +36,7 @@ export default function Pricing() {
   const accent = ACCENT[activeTab]
 
   return (
-    <section id="pricing" className="relative py-24 lg:py-32">
+    <section id="pricing" className="relative py-16 sm:py-24 lg:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -88,7 +88,7 @@ export default function Pricing() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
-            className={`mt-12 grid gap-6 ${
+            className={`mt-12 grid gap-4 sm:gap-6 ${
               activeTab === 'producer'
                 ? 'sm:grid-cols-2 lg:grid-cols-3'
                 : 'mx-auto max-w-3xl sm:grid-cols-2'
@@ -97,7 +97,7 @@ export default function Pricing() {
             {tiers.map((tier) => (
               <div
                 key={tier.id}
-                className={`group relative flex flex-col rounded-2xl p-6 transition-all duration-300 ${
+                className={`group relative flex flex-col rounded-2xl p-4 transition-all duration-300 sm:p-6 ${
                   tier.highlighted
                     ? `border ${accent.border} ${accent.cardBg} ${accent.glow}`
                     : 'bg-white/[0.04] hover:bg-white/[0.06]'
@@ -115,12 +115,12 @@ export default function Pricing() {
                   <div className="mt-4">
                     {tier.price !== null ? (
                       <div className="flex items-baseline gap-1">
-                        <span className="text-3xl font-bold text-white">A${tier.price}</span>
+                        <span className="text-2xl font-bold text-white sm:text-3xl">A${tier.price}</span>
                         <span className="text-sm text-text-muted">/month + GST</span>
                       </div>
                     ) : tier.priceLabel ? (
                       <div className="flex items-baseline gap-1">
-                        <span className="text-3xl font-bold text-white">{tier.priceLabel}</span>
+                        <span className="text-2xl font-bold text-white sm:text-3xl">{tier.priceLabel}</span>
                       </div>
                     ) : (
                       <p className="text-lg font-semibold text-brand-light">Coming Soon</p>

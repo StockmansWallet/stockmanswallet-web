@@ -77,7 +77,7 @@ function ContextCard({ card, index }: { card: ChatExample['contextCards'][0]; in
         delay: index * 0.1,
         opacity: { duration: 0.25, delay: index * 0.1 },
       }}
-      className="flex h-[66px] min-w-[120px] flex-col justify-center gap-0.5 rounded-xl bg-white/[0.06] px-3.5"
+      className="flex h-[66px] min-w-[100px] flex-col justify-center gap-0.5 rounded-xl bg-white/[0.06] px-3 sm:min-w-[120px] sm:px-3.5"
     >
       <div className="flex items-center gap-0.5">
         <span className="flex-1 truncate text-[10px] font-semibold uppercase tracking-wide text-text-muted">{card.label}</span>
@@ -146,11 +146,11 @@ export default function StockmanIQ() {
   }, [phase, inView])
 
   return (
-    <section id="brangus" className="relative py-24 lg:py-32 overflow-x-clip">
+    <section id="brangus" className="relative py-16 sm:py-24 lg:py-32 overflow-x-clip">
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="relative grid items-center gap-16 lg:grid-cols-[1.2fr_2fr] lg:gap-12">
+        <div className="relative grid items-center gap-10 sm:gap-16 lg:grid-cols-[1.2fr_2fr] lg:gap-12">
           {/* Brangus - anchored to grid, bottom-aligned with left column */}
-          <div className="absolute right-[-180px] bottom-[-50px] z-10 h-[820px] w-[420px] pointer-events-none">
+          <div className="absolute right-[-180px] bottom-[-50px] z-10 hidden h-[820px] w-[420px] pointer-events-none lg:block">
             <Image
               src="/images/brangus-post-dirt2.webp"
               alt="Brangus leaning on a post beside the chat panel"
@@ -206,7 +206,7 @@ export default function StockmanIQ() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative pt-16"
           >
-            <div className="mr-[220px]">
+            <div className="mr-0 lg:mr-[220px]">
               <motion.div
                 animate={{ opacity: phase === 'fading' ? 0 : 1 }}
                 transition={{ duration: 0.4 }}
@@ -219,9 +219,9 @@ export default function StockmanIQ() {
                     animate={{ opacity: 1, scale: [0, 1.05, 1] }}
                     transition={{ duration: 0.45, delay: 0.15, ease: 'easeOut' }}
                     style={{ transformOrigin: 'bottom right' }}
-                    className="relative max-w-[75%] rounded-2xl bg-[#44372D] px-4 py-2.5"
+                    className="relative max-w-[85%] rounded-2xl bg-[#44372D] px-4 py-2.5 sm:max-w-[75%]"
                   >
-                    <p className="text-sm text-white/90 leading-relaxed">{current.userMessage}</p>
+                    <p className="text-xs leading-relaxed text-white/90 sm:text-sm">{current.userMessage}</p>
                     <BubbleTail side="right" color="#44372D" />
                   </motion.div>
                   <motion.div
@@ -265,9 +265,9 @@ export default function StockmanIQ() {
                     }
                     transition={{ duration: 0.45, delay: 0.1, ease: 'easeOut' }}
                     style={{ transformOrigin: 'bottom left' }}
-                    className="relative max-w-[75%] rounded-2xl bg-brand px-4 py-2.5"
+                    className="relative max-w-[85%] rounded-2xl bg-brand px-4 py-2.5 sm:max-w-[75%]"
                   >
-                    <p className="text-sm text-white leading-relaxed whitespace-pre-line">
+                    <p className="text-xs leading-relaxed text-white whitespace-pre-line sm:text-sm">
                       {current.assistantMessage}
                     </p>
                     <BubbleTail side="left" color="#D9762F" />
@@ -275,7 +275,7 @@ export default function StockmanIQ() {
                 </div>
 
                 {/* Context cards */}
-                <div className="flex min-h-[76px] items-center gap-2.5 mt-8">
+                <div className="flex min-h-[76px] flex-wrap items-center gap-2 mt-8 sm:flex-nowrap sm:gap-2.5">
                   <AnimatePresence>
                     {showCards && current.contextCards.length > 0 && current.contextCards.map((card, i) => (
                       <ContextCard key={`${currentIndex}-${card.label}`} card={card} index={i} />

@@ -73,7 +73,7 @@ export default function Hero() {
               <Lottie
                 animationData={tallyAnimData}
                 loop={false}
-                className="h-[150px] w-[179px]"
+                className="h-[100px] w-[120px] sm:h-[150px] sm:w-[179px]"
               />
             </motion.div>
 
@@ -96,7 +96,7 @@ export default function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="mt-6 max-w-lg text-lg leading-relaxed text-text-secondary"
+              className="mt-6 max-w-lg text-base leading-relaxed text-text-secondary sm:text-lg"
             >
               Stockman&apos;s Wallet is a livestock valuation platform built for Australian producers and rural advisors. By linking producers&apos; herds to live market data, it measures biological and market movements, compares sale options, and supports better decisions with advanced industry intelligence.{' '}<span className="inline-block whitespace-nowrap font-semibold text-brand">Manage livestock as a portfolio.</span>
             </motion.p>

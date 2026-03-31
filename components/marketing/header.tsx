@@ -48,7 +48,7 @@ export function Header() {
             height={44}
             className="h-11 w-11"
           />
-          <span className="text-xl font-bold text-white">Stockman&apos;s Wallet</span>
+          <span className="text-lg font-bold text-white sm:text-xl">Stockman&apos;s Wallet</span>
         </Link>
 
         {/* Desktop Nav */}
@@ -73,7 +73,7 @@ export function Header() {
 
         {/* Mobile Hamburger */}
         <button
-          className="flex h-10 w-10 items-center justify-center rounded-[10px] text-text-secondary hover:bg-white/5 lg:hidden"
+          className="flex h-11 w-11 items-center justify-center rounded-[10px] text-text-secondary hover:bg-white/5 lg:hidden"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
         >

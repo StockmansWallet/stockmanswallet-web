@@ -8,7 +8,7 @@ export default function ContactSignup() {
   const { openWaitlist } = useWaitlist()
 
   return (
-    <section id="signup" className="relative overflow-hidden py-24 lg:py-32">
+    <section id="signup" className="relative overflow-hidden py-16 sm:py-24 lg:py-32">
       <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -17,7 +17,7 @@ export default function ContactSignup() {
           transition={{ duration: 0.7 }}
         >
           <span className="text-sm font-medium uppercase tracking-wider text-brand">Get Early Access</span>
-          <h2 className="mt-4 text-3xl font-semibold text-white sm:text-4xl lg:text-5xl">
+          <h2 className="mt-4 text-2xl font-semibold text-white sm:text-3xl lg:text-5xl">
             The future of
             <br />
             <span className="text-brand">

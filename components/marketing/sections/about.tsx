@@ -8,7 +8,7 @@ import LandingButton from '@/components/marketing/ui/landing-button'
 
 export default function About() {
   return (
-    <section id="about" className="relative py-24 lg:py-32">
+    <section id="about" className="relative py-16 sm:py-24 lg:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -34,7 +34,7 @@ export default function About() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="mx-auto mt-12 flex items-center justify-center gap-6 sm:gap-10"
+          className="mx-auto mt-10 flex flex-wrap items-center justify-center gap-8 sm:mt-12 sm:flex-nowrap sm:gap-10"
         >
           {TEAM_MEMBERS.map((member, i) => (
             <motion.div
@@ -50,7 +50,7 @@ export default function About() {
                 alt={member.name}
                 width={72}
                 height={72}
-                className="h-16 w-16 rounded-full object-cover ring-2 ring-white/10 sm:h-[72px] sm:w-[72px]"
+                className="h-14 w-14 rounded-full object-cover ring-2 ring-white/10 sm:h-16 sm:w-16 lg:h-[72px] lg:w-[72px]"
               />
               <p className="mt-2.5 text-sm font-medium text-white">{member.name}</p>
               <p className="text-xs text-text-muted">{member.role.replace('Chief ', '')}</p>

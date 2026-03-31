@@ -232,7 +232,7 @@ export default function Features() {
   }
 
   return (
-    <section id="features" className="relative py-24 lg:py-32">
+    <section id="features" className="relative py-16 sm:py-24 lg:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
@@ -258,7 +258,7 @@ export default function Features() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mt-12 flex justify-center"
         >
-          <div className="inline-flex max-w-3xl flex-wrap justify-center gap-1 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-1.5">
+          <div className="inline-flex max-w-full flex-nowrap justify-start gap-1 overflow-x-auto rounded-2xl border border-white/[0.08] bg-white/[0.03] p-1.5 scrollbar-none sm:max-w-3xl sm:flex-wrap sm:justify-center sm:overflow-visible">
             {FEATURE_TABS.map((tab, i) => (
               <button
                 key={tab.id}
@@ -306,7 +306,7 @@ export default function Features() {
             </svg>
           </button>
 
-          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
+          <div className="grid items-center gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-20">
             {/* Text */}
             <AnimatePresence mode="wait">
               <motion.div

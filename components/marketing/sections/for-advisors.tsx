@@ -34,7 +34,7 @@ function LensPanel() {
       </div>
 
       {/* Three value cards */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         {[
           { label: 'Baseline', value: '$1,842,500', sub: "Client's value" },
           { label: 'Adjusted', value: '$1,716,200', sub: '-6.9%' },
@@ -111,7 +111,7 @@ function ClientPanel() {
   return (
     <div className="space-y-3">
       {/* Stats row */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
         {[
           { label: 'Total Clients', value: '4', icon: '👤' },
           { label: 'Sharing Data', value: '2', icon: '🟢' },
@@ -258,7 +258,7 @@ function ReportsPanel() {
       </div>
 
       {/* Valuation comparison */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <div className="rounded-xl bg-white/[0.04] p-3 text-center">
           <p className="text-[10px] text-text-muted">Producer Value</p>
           <p className="mt-1 text-sm font-bold tabular-nums text-white">$1,842,500</p>
@@ -373,7 +373,7 @@ export default function ForAdvisors() {
   const [active, setActive] = useState(0)
 
   return (
-    <section id="advisors" className="relative py-24 lg:py-32">
+    <section id="advisors" className="relative py-16 sm:py-24 lg:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
@@ -402,11 +402,11 @@ export default function ForAdvisors() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="mt-16 grid items-start gap-10 lg:grid-cols-[1fr_340px] lg:gap-12"
+          className="mt-12 grid items-start gap-8 sm:mt-16 sm:gap-10 lg:grid-cols-[1fr_320px] lg:gap-12"
         >
           {/* Left: Animated panel */}
           <div className="order-2 lg:order-1">
-            <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4 sm:p-5">
+            <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] p-3 sm:p-4 lg:p-5">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={active}
