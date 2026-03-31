@@ -11,7 +11,176 @@ function formatAUD(v: number) {
 }
 
 /* ═══════════════════════════════════════════════════════
-   Panel 0: Advisor Lens
+   Panel 0: Dashboard
+   Based on: advisor/page.tsx
+   Shows welcome, stats, recent clients, region chart
+   ═══════════════════════════════════════════════════════ */
+function DashboardPanel() {
+  const recentClients = [
+    { name: 'J. McAllister', property: 'Doongara Station', herds: 4, status: 'active' as const },
+    { name: 'S. Thornton', property: 'Boonarga Downs', herds: 6, status: 'active' as const },
+    { name: 'R. Patterson', property: 'Willow Creek', herds: 2, status: 'pending' as const },
+    { name: 'M. Douglas', property: 'Doongara North', herds: 3, status: 'expired' as const },
+  ]
+  const statusStyles = {
+    active: { bg: 'bg-emerald-500/15', text: 'text-emerald-400', label: 'Active' },
+    pending: { bg: 'bg-[#2F8CD9]/15', text: 'text-[#2F8CD9]', label: 'Pending' },
+    expired: { bg: 'bg-amber-500/15', text: 'text-amber-400', label: 'Expired' },
+  }
+  const regions = [
+    { name: 'Charters Towers Regional Council', count: 56, pct: 40, value: '$85.6M', colour: '#34D399' },
+    { name: 'Etheridge Shire Council', count: 37, pct: 26, value: '$55.6M', colour: '#60A5FA' },
+    { name: 'Townsville City Council', count: 28, pct: 20, value: '$42.8M', colour: '#F472B6' },
+    { name: 'Hinchinbrook Shire Council', count: 20, pct: 14, value: '$30.0M', colour: '#A78BFA' },
+  ]
+
+  return (
+    <div className="space-y-3">
+      {/* Top row: Welcome + Portfolio value */}
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
+        <div className="rounded-xl bg-white/[0.04] px-4 py-3">
+          <p className="text-lg font-bold text-[#2F8CD9]">Welcome, Rebecca</p>
+          <p className="mt-0.5 text-[10px] text-text-muted">Your advisor workspace overview.</p>
+        </div>
+        <div className="rounded-xl bg-white/[0.04] px-4 py-3 text-center sm:min-w-[200px]">
+          <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Total Livestock Under Management</p>
+          <p className="mt-1 text-2xl font-bold tabular-nums text-white">$213,955,020</p>
+          <span className="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-emerald-400">
+            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+            </svg>
+            $6.2M <span className="opacity-50">|</span> +2.9%
+          </span>
+        </div>
+      </div>
+
+      {/* Stats row */}
+      <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+        {[
+          { label: 'Total Clients', value: '141', dot: 'bg-[#2F8CD9]' },
+          { label: 'Sharing Data', value: '132', dot: 'bg-emerald-400' },
+          { label: 'Pending', value: '9', dot: 'bg-amber-400' },
+        ].map((stat) => (
+          <div key={stat.label} className="rounded-xl bg-white/[0.04] p-3">
+            <div className="flex items-center gap-2">
+              <span className={`h-2 w-2 rounded-full ${stat.dot}`} />
+              <p className="text-lg font-bold tabular-nums text-white">{stat.value}</p>
+            </div>
+            <p className="mt-0.5 text-[10px] text-text-muted">{stat.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Two-column: Recent Clients + LGA + Quick Actions */}
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-[2fr_3fr]">
+        {/* Recent clients */}
+        <div className="overflow-hidden rounded-xl bg-white/[0.04]">
+          <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-2.5">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">Recent Clients</p>
+            <span className="text-[10px] font-medium text-[#2F8CD9]">View all</span>
+          </div>
+          <div className="divide-y divide-white/[0.04]">
+            {recentClients.map((client) => {
+              const style = statusStyles[client.status]
+              return (
+                <div key={client.name} className="flex items-center gap-2.5 px-3 py-2.5">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-[9px] font-semibold text-white/60">
+                    {client.name.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] font-medium text-white">{client.name}</p>
+                    <p className="text-[9px] text-text-muted">{client.property} · {client.herds} herds</p>
+                  </div>
+                  <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-medium ${style.bg} ${style.text}`}>
+                    {style.label}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Right column: LGA chart + Quick actions stacked */}
+        <div className="flex flex-col gap-2">
+          {/* Clients by LGA - donut chart */}
+          <div className="overflow-hidden rounded-xl bg-white/[0.04]">
+            <div className="border-b border-white/[0.06] px-4 py-2.5">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">Clients by Local Govt Area</p>
+            </div>
+            <div className="flex items-center gap-4 p-3">
+              {/* Donut chart SVG */}
+              <div className="relative shrink-0">
+                <svg width="100" height="100" viewBox="0 0 100 100" className="-rotate-90">
+                  {(() => {
+                    const r = 38
+                    const circ = 2 * Math.PI * r
+                    let offset = 0
+                    return regions.map((region) => {
+                      const dash = (region.pct / 100) * circ
+                      const gap = circ - dash
+                      const currentOffset = offset
+                      offset += dash
+                      return (
+                        <circle
+                          key={region.name}
+                          cx="50" cy="50" r={r}
+                          fill="none"
+                          stroke={region.colour}
+                          strokeWidth="12"
+                          strokeDasharray={`${dash} ${gap}`}
+                          strokeDashoffset={-currentOffset}
+                          strokeLinecap="butt"
+                        />
+                      )
+                    })
+                  })()}
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <p className="text-sm font-bold tabular-nums text-white">141</p>
+                  <p className="text-[8px] text-text-muted">clients</p>
+                </div>
+              </div>
+
+              {/* Legend */}
+              <div className="min-w-0 flex-1 space-y-1.5">
+                {regions.map((region) => (
+                  <div key={region.name} className="flex items-center gap-2">
+                    <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: region.colour }} />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[10px] text-text-secondary">{region.name}</p>
+                      <p className="text-[9px] tabular-nums text-text-muted">{region.count} clients · {region.value}</p>
+                    </div>
+                    <span className="shrink-0 text-[10px] font-medium tabular-nums text-white">{region.pct}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Quick actions */}
+          <div className="grid grid-cols-2 gap-1.5">
+            {[
+              { label: 'My Clients', icon: 'M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z' },
+              { label: 'Find Producers', icon: 'M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z' },
+            ].map((action) => (
+              <div key={action.label} className="flex items-center gap-2 rounded-xl bg-white/[0.04] px-3 py-2.5">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#2F8CD9]/15">
+                  <svg className="h-3.5 w-3.5 text-[#2F8CD9]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d={action.icon} />
+                  </svg>
+                </div>
+                <span className="text-[11px] font-medium text-text-secondary">{action.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════
+   Panel 1: Advisor Lens
    Based on: advisor-lens-panel.tsx
    Shows baseline/adjusted/shaded values + assumption sliders
    ═══════════════════════════════════════════════════════ */
@@ -84,70 +253,6 @@ function LensPanel() {
           <div className="absolute left-[90%] top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#2F8CD9] bg-surface-primary" />
         </div>
         <span className="rounded-md bg-[#1E5C8C]/20 px-2 py-0.5 text-xs font-semibold tabular-nums text-[#2F8CD9]">90%</span>
-      </div>
-    </div>
-  )
-}
-
-/* ═══════════════════════════════════════════════════════
-   Panel 1: Client Management
-   Based on: advisor clients page + permission-banner
-   Shows client list with status badges and stats
-   ═══════════════════════════════════════════════════════ */
-function ClientPanel() {
-  const clients = [
-    { name: 'J. McAllister', property: 'Doongara Station, QLD', herds: 4, status: 'sharing' as const },
-    { name: 'R. Patterson', property: 'Willow Creek, NSW', herds: 2, status: 'pending' as const },
-    { name: 'S. Thornton', property: 'Boonarga Downs, QLD', herds: 6, status: 'sharing' as const },
-    { name: 'M. Douglas', property: 'Doongara North, QLD', herds: 3, status: 'expired' as const },
-  ]
-
-  const statusStyles = {
-    sharing: { bg: 'bg-emerald-500/15', text: 'text-emerald-400', label: 'Data Shared' },
-    pending: { bg: 'bg-[#2F8CD9]/15', text: 'text-[#2F8CD9]', label: 'Pending' },
-    expired: { bg: 'bg-amber-500/15', text: 'text-amber-400', label: 'Expired' },
-  }
-
-  return (
-    <div className="space-y-3">
-      {/* Stats row */}
-      <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-        {[
-          { label: 'Total Clients', value: '4', icon: '👤' },
-          { label: 'Sharing Data', value: '2', icon: '🟢' },
-          { label: 'Pending', value: '1', icon: '🔵' },
-        ].map((stat) => (
-          <div key={stat.label} className="rounded-xl bg-white/[0.04] p-3 text-center">
-            <p className="text-lg font-bold text-white">{stat.value}</p>
-            <p className="mt-0.5 text-[10px] text-text-muted">{stat.label}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Client list */}
-      <div className="overflow-hidden rounded-xl bg-white/[0.04]">
-        <div className="border-b border-white/[0.06] px-4 py-2.5">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">Your Clients</p>
-        </div>
-        <div className="divide-y divide-white/[0.04]">
-          {clients.map((client) => {
-            const style = statusStyles[client.status]
-            return (
-              <div key={client.name} className="flex items-center gap-3 px-4 py-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-[10px] font-semibold text-white/60">
-                  {client.name.split(' ').map(n => n[0]).join('')}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium text-white">{client.name}</p>
-                  <p className="text-[10px] text-text-muted">{client.property} · {client.herds} herds</p>
-                </div>
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${style.bg} ${style.text}`}>
-                  {style.label}
-                </span>
-              </div>
-            )
-          })}
-        </div>
       </div>
     </div>
   )
@@ -324,6 +429,16 @@ function ReportsPanel() {
    ═══════════════════════════════════════════════════════ */
 const ADVISOR_FEATURES = [
   {
+    title: 'Dashboard',
+    description: 'Your advisory workspace at a glance. Track client connections, permission status, and regional portfolio distribution.',
+    icon: (
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+      </svg>
+    ),
+    panel: <DashboardPanel />,
+  },
+  {
     title: 'Advisor Lens',
     description: 'Apply private valuation overlays. Adjust breed premiums, weight gain, calving rates, and mortality. Add shading to stress-test portfolio values.',
     icon: (
@@ -333,16 +448,6 @@ const ADVISOR_FEATURES = [
       </svg>
     ),
     panel: <LensPanel />,
-  },
-  {
-    title: 'Client Management',
-    description: 'Grant time-limited, read-only access windows. Clients share their data on their terms, you provide professional oversight and analysis.',
-    icon: (
-      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-      </svg>
-    ),
-    panel: <ClientPanel />,
   },
   {
     title: 'Simulator Sandbox',
