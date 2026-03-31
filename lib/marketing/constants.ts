@@ -5,7 +5,7 @@ export const NAV_LINKS: NavLink[] = [
   { label: 'Brangus', href: '/#brangus' },
   { label: 'Advisors', href: '/#advisors' },
   { label: 'Pricing', href: '/#pricing' },
-  { label: 'About', href: '/about' },
+  { label: 'About Us', href: '/about' },
 ]
 
 export const FEATURES: Feature[] = [
