@@ -83,7 +83,7 @@ function LensPanel() {
           </div>
           <div className="absolute left-[90%] top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#2F8CD9] bg-surface-primary" />
         </div>
-        <span className="rounded-md bg-[#1E5C8C]/20 px-2 py-0.5 text-xs font-semibold tabular-nums text-[#2F8CD9]">10%</span>
+        <span className="rounded-md bg-[#1E5C8C]/20 px-2 py-0.5 text-xs font-semibold tabular-nums text-[#2F8CD9]">90%</span>
       </div>
     </div>
   )
