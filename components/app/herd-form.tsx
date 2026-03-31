@@ -69,6 +69,8 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
   const [breederSubType, setBreederSubType] = useState<BreederSubType | "">((herd as Record<string, unknown>)?.breeder_sub_type as BreederSubType ?? "");
   const [isBreeder, setIsBreeder] = useState(herd?.is_breeder ?? false);
   const [breedingProgramType, setBreedingProgramType] = useState(herd?.breeding_program_type ?? "");
+  const [joiningStart, setJoiningStart] = useState(herd?.joining_period_start ? herd.joining_period_start.split("T")[0] : "");
+  const [joiningEnd, setJoiningEnd] = useState(herd?.joining_period_end ? herd.joining_period_end.split("T")[0] : "");
   const [currentWeight, setCurrentWeight] = useState<string>(String(herd?.current_weight ?? herd?.initial_weight ?? ""));
 
   // Calves at foot — parse existing data from additional_info
@@ -398,25 +400,27 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
                     name="joining_period_start"
                     label={breedingProgramType === "ai" ? "Insemination Started" : "Put Bulls In"}
                     type="date"
-                    defaultValue={herd?.joining_period_start ? herd.joining_period_start.split("T")[0] : ""}
+                    value={joiningStart}
+                    onChange={(e) => setJoiningStart(e.target.value)}
                   />
                   <Input
                     id="joining_period_end"
                     name="joining_period_end"
                     label={breedingProgramType === "ai" ? "Insemination Complete" : "Pull Bulls Out"}
                     type="date"
-                    defaultValue={herd?.joining_period_end ? herd.joining_period_end.split("T")[0] : ""}
+                    value={joiningEnd}
+                    onChange={(e) => setJoiningEnd(e.target.value)}
                   />
+                  {/* Effective Joining Date: live-computed midpoint of period */}
+                  {joiningStart && joiningEnd && (
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-medium text-text-muted">Effective Joining Date</label>
+                      <p className="rounded-lg border border-white/[0.06] bg-surface-secondary px-3 py-2 text-sm text-text-primary">
+                        {new Date((new Date(joiningStart).getTime() + new Date(joiningEnd).getTime()) / 2).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+                      </p>
+                    </div>
+                  )}
                 </>
-              )}
-              {/* Effective Joining Date: read-only derived midpoint (hidden input for form submission) */}
-              {herd?.joined_date && (breedingProgramType === "ai" || breedingProgramType === "controlled") && (
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-medium text-text-muted">Effective Joining Date</label>
-                  <p className="rounded-lg border border-white/[0.06] bg-surface-secondary px-3 py-2 text-sm text-text-primary">
-                    {new Date(herd.joined_date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
-                  </p>
-                </div>
               )}
               <Input
                 id="lactation_status"
