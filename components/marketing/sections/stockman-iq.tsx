@@ -212,7 +212,7 @@ export default function StockmanIQ() {
                 transition={{ duration: 0.4 }}
               >
                 {/* User row */}
-                <div className="flex items-end justify-end gap-2 pb-4">
+                <div className="flex items-end justify-end gap-2 pb-6 sm:pb-4">
                   <motion.div
                     key={`user-${currentIndex}`}
                     initial={{ opacity: 0, scale: 0 }}
@@ -229,14 +229,14 @@ export default function StockmanIQ() {
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.2 }}
-                    className="mb-[-28px] shrink-0"
+                    className="mb-[-20px] shrink-0 sm:mb-[-28px]"
                   >
                     <Image
                       src="/images/demo-user-profile.webp"
                       alt="User"
                       width={40}
                       height={40}
-                      className="h-10 w-10 rounded-full object-cover"
+                      className="h-8 w-8 rounded-full object-cover sm:h-10 sm:w-10"
                     />
                   </motion.div>
                 </div>
@@ -246,14 +246,14 @@ export default function StockmanIQ() {
                   <motion.div
                     animate={{ opacity: showResponse ? 1 : 0, scale: showResponse ? 1 : 0 }}
                     transition={{ duration: 0.2 }}
-                    className="mb-[-28px] shrink-0"
+                    className="mb-[-20px] shrink-0 sm:mb-[-28px]"
                   >
                     <Image
                       src="/images/brangus-chat-profile.webp"
                       alt="Brangus"
                       width={40}
                       height={40}
-                      className="h-10 w-10 rounded-full object-cover"
+                      className="h-8 w-8 rounded-full object-cover sm:h-10 sm:w-10"
                     />
                   </motion.div>
                   <motion.div
