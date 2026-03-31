@@ -13,11 +13,13 @@ import {
   ChevronUp,
   Save,
   Loader2,
+  Plus,
 } from "lucide-react";
 import {
   deleteSandboxHerd,
   updateSandboxHerd,
 } from "@/app/(app)/dashboard/advisor/simulator/actions";
+import { AddSandboxHerdDialog } from "./add-sandbox-herd-dialog";
 
 interface SimulatorPropertyDetailProps {
   property: Property;
@@ -29,6 +31,7 @@ export function SimulatorPropertyDetail({
   herds,
 }: SimulatorPropertyDetailProps) {
   const totalHead = herds.reduce((sum, h) => sum + h.head_count, 0);
+  const [addHerdOpen, setAddHerdOpen] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -57,9 +60,19 @@ export function SimulatorPropertyDetail({
           </div>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-text-muted">
-            {herds.length} herd{herds.length !== 1 ? "s" : ""} · {totalHead} total head
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-text-muted">
+              {herds.length} herd{herds.length !== 1 ? "s" : ""} · {totalHead} total head
+            </p>
+            <Button
+              size="sm"
+              className="bg-[#FF5722] text-white hover:bg-[#FF5722]/90"
+              onClick={() => setAddHerdOpen(true)}
+            >
+              <Plus className="mr-1.5 h-4 w-4" />
+              Add Herd
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
@@ -70,9 +83,17 @@ export function SimulatorPropertyDetail({
             <p className="mb-1 text-sm font-semibold text-text-primary">
               No herds yet
             </p>
-            <p className="text-sm text-text-muted">
+            <p className="mb-4 text-sm text-text-muted">
               Add a herd to start modelling.
             </p>
+            <Button
+              size="sm"
+              className="bg-[#FF5722] text-white hover:bg-[#FF5722]/90"
+              onClick={() => setAddHerdOpen(true)}
+            >
+              <Plus className="mr-1.5 h-4 w-4" />
+              Add Herd
+            </Button>
           </CardContent>
         </Card>
       ) : (
@@ -82,6 +103,12 @@ export function SimulatorPropertyDetail({
           ))}
         </div>
       )}
+
+      <AddSandboxHerdDialog
+        open={addHerdOpen}
+        onOpenChange={setAddHerdOpen}
+        propertyId={property.id}
+      />
     </div>
   );
 }

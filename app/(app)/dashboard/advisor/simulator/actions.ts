@@ -214,6 +214,75 @@ export async function updateSandboxHerd(
   return { success: true };
 }
 
+// Create a single sandbox herd on a sandbox property
+export async function createSandboxHerd(
+  propertyId: string,
+  data: {
+    name: string;
+    species: string;
+    breed: string;
+    category: string;
+    sex: string;
+    head_count: number;
+    age_months: number;
+    initial_weight: number;
+    daily_weight_gain: number;
+    mortality_rate?: number;
+    calving_rate?: number;
+    breeder_sub_type?: string;
+    selected_saleyard?: string;
+  }
+) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  // Verify this is a simulated property owned by the user
+  const { data: property } = await supabase
+    .from("properties")
+    .select("id, is_simulated")
+    .eq("id", propertyId)
+    .eq("user_id", user.id)
+    .eq("is_simulated", true)
+    .single();
+
+  if (!property) return { error: "Sandbox property not found" };
+
+  const isBreeder = data.category === "Breeder";
+
+  const { error } = await supabase.from("herds").insert({
+    id: randomUUID(),
+    user_id: user.id,
+    property_id: propertyId,
+    name: data.name.trim(),
+    species: data.species,
+    breed: data.breed,
+    category: data.category,
+    sex: data.sex,
+    head_count: data.head_count,
+    age_months: data.age_months,
+    initial_weight: data.initial_weight,
+    current_weight: data.initial_weight,
+    daily_weight_gain: data.daily_weight_gain,
+    mortality_rate: data.mortality_rate ?? null,
+    calving_rate: isBreeder ? (data.calving_rate ?? 0.85) : null,
+    is_breeder: isBreeder,
+    breeder_sub_type: isBreeder ? (data.breeder_sub_type ?? "Cow") : null,
+    sub_category: data.category === "Dry Cow" ? "Cows" : null,
+    selected_saleyard: data.selected_saleyard ?? null,
+    use_creation_date_for_weight: false,
+    is_sold: false,
+    is_deleted: false,
+    is_demo_data: false,
+  });
+
+  if (error) return { error: error.message };
+  revalidatePath("/dashboard/advisor/simulator");
+  return { success: true };
+}
+
 // Fetch preview of client herds (count + total head)
 export async function fetchClientHerdPreview(clientUserId: string) {
   const supabase = await createClient();
