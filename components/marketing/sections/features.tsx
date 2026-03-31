@@ -258,7 +258,7 @@ export default function Features() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mt-12 flex justify-center"
         >
-          <div className="inline-flex max-w-3xl flex-wrap justify-center gap-1 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-1.5">
+          <div className="inline-flex max-w-3xl flex-wrap justify-center gap-1 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-1.5">
             {FEATURE_TABS.map((tab, i) => (
               <button
                 key={tab.id}
@@ -266,7 +266,7 @@ export default function Features() {
                 className={`relative flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-300 cursor-pointer ${
                   active === i
                     ? 'text-white'
-                    : 'text-text-muted hover:text-text-secondary'
+                    : 'text-white/50 hover:text-white/75'
                 }`}
               >
                 {active === i && (

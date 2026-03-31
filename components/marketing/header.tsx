@@ -57,11 +57,7 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className={`rounded-[10px] px-3 py-2 text-sm font-medium transition-colors hover:bg-white/5 ${
-                link.label === 'About Us'
-                  ? 'text-[var(--color-accent)] hover:text-[var(--color-accent-light)]'
-                  : 'text-text-secondary hover:text-white'
-              }`}
+              className="rounded-[10px] px-3 py-2 text-sm font-medium text-text-secondary transition-colors hover:text-white hover:bg-white/5"
             >
               {link.label}
             </Link>
@@ -102,11 +98,7 @@ export function Header() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className={`rounded-[10px] px-3 py-3 text-base font-medium transition-colors hover:bg-white/5 ${
-                  link.label === 'About Us'
-                    ? 'text-[var(--color-accent)] hover:text-[var(--color-accent-light)]'
-                    : 'text-text-secondary hover:text-white'
-                }`}
+                className="rounded-[10px] px-3 py-3 text-base font-medium text-text-secondary transition-colors hover:text-white hover:bg-white/5"
               >
                 {link.label}
               </Link>
