@@ -187,31 +187,40 @@ function DashboardPanel() {
 function LensPanel() {
   return (
     <div className="space-y-3">
-      {/* Header bar */}
-      <div className="flex items-center justify-between rounded-xl bg-white/[0.04] px-4 py-3">
-        <div className="flex items-center gap-2">
-          <svg className="h-4 w-4 text-[#2F8CD9]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          <span className="text-xs font-semibold text-white">Advisor Lens</span>
+      {/* Header bar with client info */}
+      <div className="rounded-xl bg-white/[0.04] px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <svg className="h-4 w-4 text-[#2F8CD9]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span className="text-xs font-semibold text-white">Advisor Lens</span>
+          </div>
+          <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2 py-0.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            <span className="text-[10px] font-medium text-emerald-400">Active</span>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2 py-0.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-          <span className="text-[10px] font-medium text-emerald-400">Active</span>
+        <div className="mt-2 flex items-center gap-3 border-t border-white/[0.06] pt-2">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-[9px] font-semibold text-white/60">JM</div>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium text-white">J. McAllister</p>
+            <p className="text-[10px] text-text-muted">Doongara Station, QLD · 4 herds · 186 head</p>
+          </div>
         </div>
       </div>
 
       {/* Three value cards */}
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         {[
-          { label: 'Baseline', value: '$1,842,500', sub: "Client's value" },
-          { label: 'Adjusted', value: '$1,716,200', sub: '-6.9%' },
-          { label: 'Shaded', value: '$1,544,580', sub: '10% shading' },
+          { label: 'Baseline', value: '$1,842,500', sub: "Client's value", colour: 'text-white' },
+          { label: 'Adjusted', value: '$1,716,200', sub: '-6.9%', colour: 'text-[#2F8CD9]' },
+          { label: 'Shaded', value: '$1,544,580', sub: '10% shading', colour: 'text-amber-400' },
         ].map((card) => (
           <div key={card.label} className="rounded-xl bg-white/[0.04] p-3 text-center">
             <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">{card.label}</p>
-            <p className="mt-1 text-sm font-bold tabular-nums text-white">{card.value}</p>
+            <p className={`mt-1 text-sm font-bold tabular-nums ${card.colour}`}>{card.value}</p>
             <p className="mt-0.5 text-[10px] text-text-muted">{card.sub}</p>
           </div>
         ))}
@@ -222,6 +231,7 @@ function LensPanel() {
         <p className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-text-muted">Assumption Overrides</p>
         <div className="space-y-3">
           {[
+            { label: 'Head Count', value: '178', baseline: '186', pct: 96 },
             { label: 'Breed Premium', value: '-2.5%', baseline: '0%', pct: 35 },
             { label: 'Daily Weight Gain', value: '0.8 kg', baseline: '1.0 kg', pct: 60 },
             { label: 'Calving Rate', value: '82%', baseline: '88%', pct: 72 },
@@ -236,7 +246,7 @@ function LensPanel() {
                 </div>
               </div>
               <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/[0.06]">
-                <div className="h-full rounded-full bg-[#2F8CD9]/50" style={{ width: `${item.pct}%` }} />
+                <div className="h-full rounded-full bg-[#2F8CD9]" style={{ width: `${item.pct}%` }} />
               </div>
             </div>
           ))}
@@ -248,11 +258,11 @@ function LensPanel() {
         <span className="text-xs text-text-secondary">Shading</span>
         <div className="relative flex-1">
           <div className="h-1.5 rounded-full bg-white/[0.06]">
-            <div className="h-full w-[90%] rounded-full bg-[#2F8CD9]" />
+            <div className="h-full w-[90%] rounded-full bg-amber-500" />
           </div>
-          <div className="absolute left-[90%] top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#2F8CD9] bg-surface-primary" />
+          <div className="absolute left-[90%] top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-amber-500 bg-surface-primary" />
         </div>
-        <span className="rounded-md bg-[#1E5C8C]/20 px-2 py-0.5 text-xs font-semibold tabular-nums text-[#2F8CD9]">90%</span>
+        <span className="rounded-md bg-amber-500/15 px-2 py-0.5 text-xs font-semibold tabular-nums text-amber-400">90%</span>
       </div>
     </div>
   )
@@ -395,6 +405,7 @@ function ReportsPanel() {
             </thead>
             <tbody className="divide-y divide-white/[0.03]">
               {[
+                { assumption: 'Head Count', producer: '186', advisor: '178', impact: '-$79,320' },
                 { assumption: 'Breed Premium', producer: '0%', advisor: '-2.5%', impact: '-$46,063' },
                 { assumption: 'Daily Weight Gain', producer: '1.0 kg', advisor: '0.8 kg', impact: '-$31,240' },
                 { assumption: 'Calving Rate', producer: '88%', advisor: '82%', impact: '-$22,150' },
@@ -417,7 +428,7 @@ function ReportsPanel() {
       <div className="rounded-xl bg-white/[0.04] p-4">
         <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">Advisor Notes</p>
         <p className="mt-2 text-xs leading-relaxed text-text-secondary italic">
-          &ldquo;Adjusted DWG to 0.8 kg/day based on current seasonal conditions and pasture quality. Breed premium reduced to reflect local market demand for crossbreds. Calving rate lowered due to first-calf heifers in the breeder herd. 10% shading applied per bank policy for lending security margin.&rdquo;
+          &ldquo;Head count reduced from 186 to 178 to exclude 8 head pending vet clearance following recent drench resistance testing. Breed premium adjusted to -2.5% as the Doongara Angus herd carries a higher proportion of crossbreds than pure Angus, reducing the premium achievable at Charters Towers. DWG lowered to 0.8 kg/day reflecting below-average pasture conditions following a dry February and limited supplementary feeding. Calving rate reduced from 88% to 82% due to 24 first-calf heifers in the breeder herd, which historically calve at a lower rate. Mortality rate increased from 2.0% to 3.5% based on the property&#39;s 3-year rolling average, which accounts for tick fever losses in 2024. 10% shading applied per standard bank lending policy to provide a security margin on the assessed portfolio value.&rdquo;
         </p>
       </div>
     </div>

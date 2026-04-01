@@ -265,9 +265,10 @@ export default function Features() {
                 onClick={() => setActive(i)}
                 className={`relative flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-300 cursor-pointer ${
                   active === i
-                    ? 'text-white'
+                    ? ''
                     : 'text-white/50 hover:text-white/75'
                 }`}
+                style={active === i ? { color: tab.color } : undefined}
               >
                 {active === i && (
                   <motion.div
@@ -290,18 +291,18 @@ export default function Features() {
           <button
             onClick={goPrev}
             aria-label="Previous feature"
-            className="absolute -left-2 top-1/2 z-20 hidden -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/10 p-3 text-white/60 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white lg:-left-14 lg:flex"
+            className="absolute -left-2 top-1/2 z-20 hidden -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-brand/30 bg-brand/15 p-4 text-brand shadow-lg shadow-brand/10 backdrop-blur-sm transition-all hover:scale-105 hover:bg-brand/25 hover:shadow-brand/20 lg:-left-24 lg:flex"
           >
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
           </button>
           <button
             onClick={goNext}
             aria-label="Next feature"
-            className="absolute -right-2 top-1/2 z-20 hidden -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/10 p-3 text-white/60 backdrop-blur-sm transition-colors hover:bg-white/20 hover:text-white lg:-right-14 lg:flex"
+            className="absolute -right-2 top-1/2 z-20 hidden -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-brand/30 bg-brand/15 p-4 text-brand shadow-lg shadow-brand/10 backdrop-blur-sm transition-all hover:scale-105 hover:bg-brand/25 hover:shadow-brand/20 lg:-right-24 lg:flex"
           >
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
             </svg>
           </button>
@@ -347,25 +348,25 @@ export default function Features() {
                 </ul>
 
                 {/* Mobile prev/next */}
-                <div className="mt-8 flex items-center gap-3 lg:hidden">
+                <div className="mt-8 flex items-center gap-4 lg:hidden">
                   <button
                     onClick={goPrev}
                     aria-label="Previous feature"
-                    className="flex cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/10 p-2.5 text-white/60 transition-colors hover:bg-white/20 hover:text-white"
+                    className="flex cursor-pointer items-center justify-center rounded-full border border-brand/30 bg-brand/15 p-3 text-brand transition-all hover:scale-105 hover:bg-brand/25"
                   >
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                     </svg>
                   </button>
-                  <span className="text-xs tabular-nums text-white/40">
+                  <span className="text-sm font-medium tabular-nums text-white/50">
                     {active + 1} / {FEATURE_TABS.length}
                   </span>
                   <button
                     onClick={goNext}
                     aria-label="Next feature"
-                    className="flex cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/10 p-2.5 text-white/60 transition-colors hover:bg-white/20 hover:text-white"
+                    className="flex cursor-pointer items-center justify-center rounded-full border border-brand/30 bg-brand/15 p-3 text-brand transition-all hover:scale-105 hover:bg-brand/25"
                   >
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                     </svg>
                   </button>
