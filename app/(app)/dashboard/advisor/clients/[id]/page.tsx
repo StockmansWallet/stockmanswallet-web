@@ -98,7 +98,8 @@ export default async function ClientDetailPage({
   ]);
 
   // Calculate per-herd valuations (same pattern as producer herds page)
-  const herds = (clientHerds ?? []) as Record<string, unknown>[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const herds = (clientHerds ?? []) as any[];
   let baselineValue = 0;
   const herdValues: Record<string, number> = {};
   const herdSources: Record<string, string> = {};
