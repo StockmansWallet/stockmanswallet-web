@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { PRICING_TIERS } from '@/lib/marketing/constants'
 
 const TABS = [
-  { id: 'producer' as const, label: 'Producers' },
-  { id: 'advisor' as const, label: 'Advisors' },
+  { id: 'producer' as const, label: 'Producers', colour: '#D9762F', icon: 'M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25' },
+  { id: 'advisor' as const, label: 'Advisors', colour: '#2F8CD9', icon: 'M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0' },
 ]
 
 const ACCENT = {
@@ -56,27 +56,41 @@ export default function Pricing() {
 
         {/* Tab Toggle */}
         <div className="mt-10 flex justify-center">
-          <div className="inline-flex rounded-2xl border border-white/[0.06] bg-white/[0.02] p-1.5">
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`relative cursor-pointer rounded-xl px-6 py-2.5 text-sm font-medium transition-all duration-300 ${
-                  activeTab === tab.id
-                    ? 'text-white'
-                    : 'text-text-muted hover:text-text-secondary'
-                }`}
-              >
-                {activeTab === tab.id && (
-                  <motion.div
-                    layoutId="pricingTab"
-                    className="absolute inset-0 rounded-xl bg-white/[0.08] border border-white/[0.1]"
-                    transition={{ type: 'spring', duration: 0.5, bounce: 0.15 }}
-                  />
-                )}
-                <span className="relative z-10">{tab.label}</span>
-              </button>
-            ))}
+          <div className="inline-flex gap-2 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-2">
+            {TABS.map((tab) => {
+              const isActive = activeTab === tab.id
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className="relative cursor-pointer rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-300"
+                  style={{
+                    color: isActive ? '#fff' : tab.colour,
+                  }}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="pricingTab"
+                      className="absolute inset-0 rounded-xl"
+                      style={{ backgroundColor: tab.colour, border: `1px solid ${tab.colour}` }}
+                      transition={{ type: 'spring', duration: 0.5, bounce: 0.15 }}
+                    />
+                  )}
+                  {!isActive && (
+                    <div
+                      className="absolute inset-0 rounded-xl"
+                      style={{ border: `1px solid ${tab.colour}40` }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-2">
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d={tab.icon} />
+                    </svg>
+                    {tab.label}
+                  </span>
+                </button>
+              )
+            })}
           </div>
         </div>
 
