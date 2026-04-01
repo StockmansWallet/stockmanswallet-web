@@ -170,15 +170,15 @@ export default function Hero() {
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-white">Sell vs Hold</p>
-                  <p className="text-[10px] text-text-muted">Test Herd 3</p>
+                  <p className="text-[10px] text-text-muted">#4 Yearling Steers</p>
                 </div>
               </div>
               <div className="mt-3 flex items-baseline gap-2">
-                <p className="text-2xl font-bold text-success">+$85,025</p>
+                <p className="text-2xl font-bold text-success">+$14,820</p>
                 <p className="text-[11px] text-text-muted">potential gain over 90 days</p>
               </div>
               <p className="mt-1.5 text-[11px] leading-snug text-text-secondary">
-                Test Herd 3 is worth $190,650 today. Holding 90 days projects to $275,675.
+                #4 Yearling Steers is worth $190,650 today. Holding 90 days projects to $205,470.
               </p>
             </motion.div>
 
