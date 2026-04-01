@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
+import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { hasActivePermission, isAdvisorRole, type ConnectionRequest } from "@/lib/types/advisory";
-import { Users, Search, TrendingUp } from "lucide-react";
+import { Users, Search, TrendingUp, TrendingDown } from "lucide-react";
 import { ClientsByLgaChart } from "@/components/app/advisory/clients-by-lga-chart";
 
 export const metadata = {
@@ -84,75 +86,145 @@ export default async function AdvisorDashboardPage() {
   const pending = allConnections.filter((c) => c.status === "pending").length;
   const recentClients = allConnections.slice(0, 5);
 
+  // Aggregate total livestock value from client portfolio snapshots
+  // Uses service client to bypass RLS on portfolio_snapshots
+  const activeClientIds = allConnections
+    .filter((c) => hasActivePermission(c))
+    .map((c) => c.target_user_id);
+
+  let totalValue: number | undefined;
+  let prevTotalValue: number | undefined;
+
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (serviceRoleKey && activeClientIds.length > 0) {
+    const svc = createServiceClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceRoleKey);
+    const today = new Date().toISOString().slice(0, 10);
+
+    // Get latest snapshot per client (today or most recent)
+    const { data: latestSnapshots } = await svc
+      .from("portfolio_snapshots")
+      .select("user_id, total_value, snapshot_date")
+      .in("user_id", activeClientIds)
+      .lte("snapshot_date", today)
+      .order("snapshot_date", { ascending: false });
+
+    if (latestSnapshots && latestSnapshots.length > 0) {
+      // Keep only the most recent per user
+      const latestByUser = new Map<string, { total_value: number; snapshot_date: string }>();
+      for (const snap of latestSnapshots) {
+        if (!latestByUser.has(snap.user_id)) {
+          latestByUser.set(snap.user_id, snap);
+        }
+      }
+      totalValue = Array.from(latestByUser.values()).reduce((sum, s) => sum + Number(s.total_value), 0);
+
+      // Get previous snapshots (one before each user's latest) for change ticker
+      const prevByUser = new Map<string, number>();
+      for (const snap of latestSnapshots) {
+        const latest = latestByUser.get(snap.user_id);
+        if (latest && snap.snapshot_date < latest.snapshot_date && !prevByUser.has(snap.user_id)) {
+          prevByUser.set(snap.user_id, Number(snap.total_value));
+        }
+      }
+      if (prevByUser.size > 0) {
+        // Sum previous values for users we have data for, plus latest for users without previous
+        prevTotalValue = 0;
+        for (const [uid, latestSnap] of latestByUser) {
+          prevTotalValue += prevByUser.get(uid) ?? Number(latestSnap.total_value);
+        }
+      }
+    }
+  }
+
+  const changeDollar = totalValue !== undefined && prevTotalValue !== undefined
+    ? totalValue - prevTotalValue
+    : undefined;
+  const changePercent = changeDollar !== undefined && prevTotalValue && prevTotalValue > 0
+    ? (changeDollar / prevTotalValue) * 100
+    : undefined;
+  const isPositive = changePercent !== undefined && changePercent >= 0;
+
   return (
     <div className="max-w-5xl">
-      {/* Top row: Welcome + Total Value */}
-      <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] lg:mb-4 lg:gap-4">
-        <Card>
-          <CardContent className="p-5">
-            <h1 className="text-2xl font-bold text-[#2F8CD9] sm:text-3xl">
-              Welcome, {firstName}
-            </h1>
-            <p className="mt-1 text-sm text-text-muted">
-              Your advisor workspace overview.
-            </p>
-          </CardContent>
-        </Card>
+      <PageHeader
+        title={`Welcome, ${firstName}`}
+        titleClassName="text-4xl font-bold text-[#2F8CD9]"
+        subtitle="Your advisor workspace overview."
+      />
 
+      {/* Top row: Total Value + Stats */}
+      <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-[auto_1fr] lg:mb-4 lg:gap-4">
+        {/* Total Livestock Under Management */}
         <Card>
-          <CardContent className="p-5 text-center sm:min-w-[240px]">
+          <CardContent className="p-5 text-center sm:min-w-[260px]">
             <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
               Total Livestock Under Management
             </p>
-            <p className="mt-1.5 text-2xl font-bold tabular-nums text-text-primary sm:text-3xl">
-              {/* TODO: aggregate portfolio value across all clients (needs cached/RPC approach) */}
-              &mdash;
-            </p>
-            <span className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-text-muted">
-              <TrendingUp className="h-3 w-3" />
-              Available soon
-            </span>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Stats row */}
-      <div className="mb-3 grid grid-cols-3 gap-3 lg:mb-4 lg:gap-4">
-        <Card>
-          <CardContent className="p-4 sm:p-5">
-            <div className="flex items-center gap-2.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-[#2F8CD9]" />
-              <p className="text-2xl font-bold tabular-nums text-text-primary">
-                {totalClients}
-              </p>
-            </div>
-            <p className="mt-1 text-xs text-text-muted">Total Clients</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4 sm:p-5">
-            <div className="flex items-center gap-2.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-              <p className="text-2xl font-bold tabular-nums text-text-primary">
-                {activePerms}
-              </p>
-            </div>
-            <p className="mt-1 text-xs text-text-muted">Sharing Data</p>
+            {totalValue !== undefined ? (
+              <>
+                <p className="mt-1.5 text-2xl font-bold tabular-nums text-text-primary sm:text-3xl">
+                  ${Math.round(totalValue).toLocaleString()}
+                </p>
+                {changePercent !== undefined && (
+                  <span className={`mt-1 inline-flex items-center gap-1 text-xs font-medium ${isPositive ? "text-success" : "text-error"}`}>
+                    {isPositive
+                      ? <TrendingUp className="h-3 w-3" />
+                      : <TrendingDown className="h-3 w-3" />
+                    }
+                    {changeDollar !== undefined && (
+                      <>
+                        ${Math.round(Math.abs(changeDollar)).toLocaleString()}
+                        <span className="opacity-50">|</span>
+                      </>
+                    )}
+                    {isPositive ? "+" : ""}{changePercent.toFixed(1)}%
+                  </span>
+                )}
+              </>
+            ) : (
+              <p className="mt-1.5 text-2xl font-bold text-text-muted">&mdash;</p>
+            )}
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-4 sm:p-5">
-            <div className="flex items-center gap-2.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-              <p className="text-2xl font-bold tabular-nums text-text-primary">
-                {pending}
-              </p>
-            </div>
-            <p className="mt-1 text-xs text-text-muted">Pending</p>
-          </CardContent>
-        </Card>
+        {/* Stats row */}
+        <div className="grid grid-cols-3 gap-3 lg:gap-4">
+          <Card>
+            <CardContent className="p-4 sm:p-5">
+              <div className="flex items-center gap-2.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-[#2F8CD9]" />
+                <p className="text-2xl font-bold tabular-nums text-text-primary">
+                  {totalClients}
+                </p>
+              </div>
+              <p className="mt-1 text-xs text-text-muted">Total Clients</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4 sm:p-5">
+              <div className="flex items-center gap-2.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+                <p className="text-2xl font-bold tabular-nums text-text-primary">
+                  {activePerms}
+                </p>
+              </div>
+              <p className="mt-1 text-xs text-text-muted">Sharing Data</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4 sm:p-5">
+              <div className="flex items-center gap-2.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+                <p className="text-2xl font-bold tabular-nums text-text-primary">
+                  {pending}
+                </p>
+              </div>
+              <p className="mt-1 text-xs text-text-muted">Pending</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Two-column: Recent Clients (narrow) + LGA chart (wider) */}
