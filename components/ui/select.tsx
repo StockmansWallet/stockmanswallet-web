@@ -178,7 +178,7 @@ function GroupedSelect({
         aria-required={required}
         disabled={disabled}
         onClick={() => !disabled && setOpen(!open)}
-        className={`relative flex w-full items-center justify-between rounded-xl bg-surface py-3 pl-4 pr-10 text-left text-sm outline-none transition-all ${
+        className={`relative flex w-full items-center justify-between rounded-lg bg-surface py-3 pl-4 pr-10 text-left text-sm outline-none transition-all ${
           disabled
             ? "cursor-not-allowed opacity-50"
             : selectedValue ? "text-text-primary" : "text-text-muted"
@@ -258,7 +258,7 @@ const NativeSelect = forwardRef<HTMLSelectElement, SelectProps>(
           <select
             ref={ref}
             id={id}
-            className={`w-full appearance-none rounded-xl bg-surface py-3 pl-4 pr-10 text-sm text-text-primary outline-none transition-all ${
+            className={`w-full appearance-none rounded-lg bg-surface py-3 pl-4 pr-10 text-sm text-text-primary outline-none transition-all ${
               error
                 ? "ring-1 ring-inset ring-red-500/60 focus:ring-red-500"
                 : hint

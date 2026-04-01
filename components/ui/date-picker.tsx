@@ -229,7 +229,7 @@ function DatePicker({
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={() => setOpen(!open)}
-        className={`flex w-full items-center justify-between rounded-xl bg-surface px-4 py-3 text-left text-sm outline-none transition-all ${
+        className={`flex w-full items-center justify-between rounded-lg bg-surface px-4 py-3 text-left text-sm outline-none transition-all ${
           value ? "text-text-primary" : "text-text-muted"
         } ${
           error

@@ -79,7 +79,7 @@ function DataTable<T extends Record<string, unknown>>({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={searchPlaceholder}
-            className="w-full max-w-xs rounded-xl border border-black/10 bg-white px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-border dark:bg-surface"
+            className="w-full max-w-xs rounded-lg border border-black/10 bg-white px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-border dark:bg-surface"
           />
         </div>
       )}

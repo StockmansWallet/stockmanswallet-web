@@ -23,7 +23,7 @@ function NavLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
   return (
     <Link
       href={item.href}
-      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
+      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
         isActive
           ? (item.activeClass ?? "bg-brand/15 text-brand")
           : (item.inactiveClass ?? "text-text-secondary hover:bg-white/5 hover:text-text-primary")
@@ -99,7 +99,7 @@ export function Sidebar({ userEmail, subscriptionTier = "stockman", isAdvisor = 
         <div className="mt-4 border-t border-white/5 pt-4">
           <Link
             href="/dashboard/notifications"
-            className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-150 ${
+            className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 ${
               checkActive("/dashboard/notifications")
                 ? "bg-brand/15 text-brand"
                 : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
@@ -115,7 +115,7 @@ export function Sidebar({ userEmail, subscriptionTier = "stockman", isAdvisor = 
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-150 ${
+              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 ${
                 checkActive(item.href)
                   ? "bg-brand/15 text-brand"
                   : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
@@ -132,7 +132,7 @@ export function Sidebar({ userEmail, subscriptionTier = "stockman", isAdvisor = 
       <div className="shrink-0 border-t border-white/5 px-4 pt-4 pb-2">
         <Link
           href="/dashboard/settings/account"
-          className="mb-1 flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-all hover:bg-white/5"
+          className="mb-1 flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-white/5"
         >
           <Crown className="h-4 w-4 text-brand" />
           <div className="min-w-0">
@@ -144,7 +144,7 @@ export function Sidebar({ userEmail, subscriptionTier = "stockman", isAdvisor = 
         <form action={signOut}>
           <button
             type="submit"
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-text-secondary transition-all hover:bg-white/5 hover:text-text-primary"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-text-secondary transition-all hover:bg-white/5 hover:text-text-primary"
           >
             <LogOut className="h-4 w-4" />
             Log Out

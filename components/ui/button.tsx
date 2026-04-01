@@ -1,6 +1,6 @@
 import { forwardRef, type ButtonHTMLAttributes } from "react";
 
-type ButtonVariant = "primary" | "secondary" | "ghost" | "destructive" | "teal" | "lime" | "sky" | "amber" | "purple" | "advisor";
+type ButtonVariant = "primary" | "secondary" | "ghost" | "destructive" | "teal" | "lime" | "sky" | "amber" | "purple" | "advisor" | "simulator";
 type ButtonSize = "sm" | "md" | "lg";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -29,12 +29,14 @@ const variantClasses: Record<ButtonVariant, string> = {
     "bg-[#2F8CD9] text-white hover:bg-[#1E5C8C] active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   advisor:
     "bg-[#1E5C8C] text-white hover:bg-[#2F8CD9] active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
+  simulator:
+    "bg-[#ff4021] text-white hover:bg-[#e6391d] active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: "h-8 rounded-xl px-3.5 text-[13px]",
-  md: "h-9 rounded-xl px-4 text-[13px]",
-  lg: "h-11 rounded-xl px-5 text-[14px]",
+  sm: "h-8 rounded-lg px-3.5 text-[13px]",
+  md: "h-9 rounded-lg px-4 text-[13px]",
+  lg: "h-11 rounded-lg px-5 text-[14px]",
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(

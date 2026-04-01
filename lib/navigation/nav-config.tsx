@@ -65,7 +65,7 @@ export const advisorIntelItems: NavItem[] = [
 
 // Advisor mode - tools section
 export const advisorToolItems: NavItem[] = [
-  { label: "Simulator", href: "/dashboard/advisor/simulator", icon: <FlaskConical className="h-5 w-5" />, activeClass: "bg-[#FF5722]/15 text-[#FF5722]" },
+  { label: "Livestock Simulator", href: "/dashboard/advisor/simulator", icon: <FlaskConical className="h-5 w-5" />, activeClass: "bg-[#ff4021]/15 text-[#ff4021]" },
   { label: "Freight IQ", href: "/dashboard/tools/freight", icon: <Truck className="h-5 w-5" />, activeClass: "bg-sky-500/15 text-sky-400" },
 ];
 

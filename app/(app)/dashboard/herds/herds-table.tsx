@@ -432,7 +432,7 @@ export function HerdsTable({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search herds..."
-              className="w-full rounded-xl border border-border bg-surface py-2 pl-9 pr-4 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand/50 focus:ring-2 focus:ring-brand/20 sm:w-64"
+              className="w-full rounded-lg border border-border bg-surface py-2 pl-9 pr-4 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand/50 focus:ring-2 focus:ring-brand/20 sm:w-64"
             />
           </div>
         </div>

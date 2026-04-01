@@ -277,12 +277,12 @@ function SimulatorPanel() {
   return (
     <div className="space-y-3">
       {/* Simulation mode banner */}
-      <div className="flex items-center gap-2 rounded-xl bg-[#FF5722]/10 border border-[#FF5722]/20 px-4 py-2.5">
-        <svg className="h-4 w-4 text-[#FF5722]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+      <div className="flex items-center gap-2 rounded-xl bg-[#ff4021]/10 border border-[#ff4021]/20 px-4 py-2.5">
+        <svg className="h-4 w-4 text-[#ff4021]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
         </svg>
-        <span className="text-xs font-bold uppercase tracking-wider text-[#FF5722]">Simulation Mode</span>
-        <span className="ml-auto text-[10px] text-[#FF5722]/70">Changes do not affect live data</span>
+        <span className="text-xs font-bold uppercase tracking-wider text-[#ff4021]">Simulation Mode</span>
+        <span className="ml-auto text-[10px] text-[#ff4021]/70">Changes do not affect live data</span>
       </div>
 
       {/* Sandbox property */}
@@ -291,7 +291,7 @@ function SimulatorPanel() {
           <div>
             <div className="flex items-center gap-2">
               <p className="text-sm font-semibold text-white">Doongara Station</p>
-              <span className="rounded bg-[#FF5722]/15 px-1.5 py-0.5 text-[9px] font-bold uppercase text-[#FF5722]">Sandbox</span>
+              <span className="rounded bg-[#ff4021]/15 px-1.5 py-0.5 text-[9px] font-bold uppercase text-[#ff4021]">Sandbox</span>
             </div>
             <p className="mt-0.5 text-[10px] text-text-muted">4 herds · 186 head</p>
           </div>

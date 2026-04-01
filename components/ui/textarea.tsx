@@ -21,7 +21,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         <textarea
           ref={ref}
           id={id}
-          className={`w-full rounded-xl bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all resize-none ${
+          className={`w-full rounded-lg bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all resize-none ${
             error
               ? "ring-1 ring-inset ring-red-500/60 focus:ring-red-500"
               : "focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"

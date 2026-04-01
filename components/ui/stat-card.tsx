@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-type StatCardAccent = "brand" | "lime" | "sky" | "teal" | "amber" | "purple";
+type StatCardAccent = "brand" | "lime" | "sky" | "teal" | "amber" | "purple" | "simulator";
 
 const accentClasses: Record<StatCardAccent, string> = {
   brand: "bg-brand/15 text-brand",
@@ -9,6 +9,7 @@ const accentClasses: Record<StatCardAccent, string> = {
   teal: "bg-teal-500/15 text-teal-400",
   amber: "bg-amber-500/15 text-amber-400",
   purple: "bg-purple-500/15 text-purple-400",
+  simulator: "bg-[#ff4021]/15 text-[#ff4021]",
 };
 
 interface StatCardProps {

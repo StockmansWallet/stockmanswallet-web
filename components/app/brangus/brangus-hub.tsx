@@ -85,7 +85,7 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
       <div className="flex w-96 shrink-0 flex-col gap-3">
         <button
           onClick={handleNewChat}
-          className="flex items-center justify-center gap-2 rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
+          className="flex items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
         >
           <Plus className="h-4 w-4" />
           New Chat

@@ -1,238 +1,256 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import type { Property, HerdGroup } from "@/lib/types/models";
-import type { ConnectionRequest } from "@/lib/types/advisory";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import type { HerdGroup } from "@/lib/types/models";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  FlaskConical,
-  Plus,
-  Copy,
-  Trash2,
-  ChevronRight,
-  SlidersHorizontal,
-  BarChart3,
-  ShieldCheck,
-} from "lucide-react";
-import { DuplicateClientDialog } from "./duplicate-client-dialog";
-import { NewSandboxDialog } from "./new-sandbox-dialog";
-import { deleteSandboxProperty } from "@/app/(app)/dashboard/advisor/simulator/actions";
+import { Search, ChevronUp, ChevronRight, Plus, Leaf } from "lucide-react";
+import { resolveShortSaleyardName } from "@/lib/data/reference-data";
+import Link from "next/link";
+
+type SortKey = "name" | "breed" | "category" | "selected_saleyard" | "head_count" | "current_weight" | "value" | "price_per_kg" | null;
 
 interface SimulatorContentProps {
-  properties: Property[];
   herds: HerdGroup[];
-  connections: ConnectionRequest[];
-  clientProfiles: { user_id: string; display_name: string; property_name: string | null }[];
+  herdValues: Record<string, number>;
+  herdPricePerKg?: Record<string, number>;
+  herdSources?: Record<string, string>;
+  herdNearestSaleyard?: Record<string, string | null>;
+  herdProjectedWeight?: Record<string, number>;
+  herdBreedPremium?: Record<string, number>;
+  herdBreedingAccrual?: Record<string, number>;
 }
 
 export function SimulatorContent({
-  properties,
   herds,
-  connections,
-  clientProfiles,
+  herdValues,
+  herdPricePerKg,
+  herdSources,
+  herdNearestSaleyard,
+  herdProjectedWeight,
+  herdBreedPremium,
+  herdBreedingAccrual,
 }: SimulatorContentProps) {
-  const [showDuplicate, setShowDuplicate] = useState(false);
-  const [showNewSandbox, setShowNewSandbox] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const router = useRouter();
+  const [search, setSearch] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>(null);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
-  function herdsForProperty(propertyId: string) {
-    return herds.filter((h) => h.property_id === propertyId);
+  const searched = useMemo(() => {
+    if (!search.trim()) return herds;
+    const q = search.toLowerCase();
+    return herds.filter(
+      (h) =>
+        h.name.toLowerCase().includes(q) ||
+        h.breed.toLowerCase().includes(q) ||
+        h.category.toLowerCase().includes(q)
+    );
+  }, [herds, search]);
+
+  const sorted = useMemo(() => {
+    if (!sortKey) return searched;
+    return [...searched].sort((a, b) => {
+      let aVal: unknown;
+      let bVal: unknown;
+      if (sortKey === "value") {
+        aVal = herdValues[a.id] ?? 0;
+        bVal = herdValues[b.id] ?? 0;
+      } else if (sortKey === "price_per_kg") {
+        aVal = herdPricePerKg?.[a.id] ?? 0;
+        bVal = herdPricePerKg?.[b.id] ?? 0;
+      } else {
+        aVal = a[sortKey as keyof HerdGroup];
+        bVal = b[sortKey as keyof HerdGroup];
+      }
+      if (aVal == null && bVal == null) return 0;
+      if (aVal == null) return 1;
+      if (bVal == null) return -1;
+      const cmp = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+  }, [searched, sortKey, sortDir, herdValues, herdPricePerKg]);
+
+  function handleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir(sortDir === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
   }
 
-  async function handleDelete(propertyId: string) {
-    if (!confirm("Delete this sandbox property and all its herds?")) return;
-    setDeletingId(propertyId);
-    await deleteSandboxProperty(propertyId);
-    setDeletingId(null);
+  function SortIcon({ column }: { column: SortKey }) {
+    if (sortKey !== column) return null;
+    return (
+      <ChevronUp
+        className={`ml-0.5 inline h-3 w-3 transition-transform ${sortDir === "desc" ? "rotate-180" : ""}`}
+      />
+    );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Simulation mode banner */}
-      <div className="flex items-center gap-3 rounded-lg border border-[#FF5722]/30 bg-[#FF5722]/10 px-4 py-3">
-        <FlaskConical className="h-5 w-5 text-[#FF5722]" />
-        <div>
-          <p className="text-sm font-semibold text-[#FF5722]">SIMULATION MODE</p>
-          <p className="text-xs text-text-muted">
-            Changes here do not affect real client data.
-          </p>
+    <div>
+      {/* Toolbar: search */}
+      <div className="mb-4 flex items-center justify-between rounded-2xl bg-surface-lowest px-4 py-3">
+        <p className="text-xs text-text-muted">
+          {sorted.length} herd{sorted.length !== 1 ? "s" : ""}
+        </p>
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
+          <input
+            type="text"
+            placeholder="Search herds..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-8 w-48 rounded-lg border border-border bg-surface pl-8 pr-3 text-xs text-text-primary placeholder:text-text-muted focus:border-brand/40 focus:outline-none"
+          />
         </div>
       </div>
 
-      {/* Action buttons */}
-      <div className="flex gap-3">
-        <Button
-          variant="secondary"
-          className="border-[#FF5722]/30 text-[#FF5722] hover:bg-[#FF5722]/10"
-          onClick={() => setShowDuplicate(true)}
-        >
-          <Copy className="mr-2 h-4 w-4" />
-          Duplicate Client Data
-        </Button>
-        <Button
-          variant="secondary"
-          className="text-text-secondary hover:bg-zinc-800"
-          onClick={() => setShowNewSandbox(true)}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          New Sandbox Property
-        </Button>
-      </div>
+      {/* Table */}
+      <div className="overflow-x-auto rounded-2xl bg-surface-lowest">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-white/[0.04]">
+              <th
+                onClick={() => handleSort("head_count")}
+                className="cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary"
+              >
+                Head <SortIcon column="head_count" />
+              </th>
+              <th
+                onClick={() => handleSort("name")}
+                className="cursor-pointer select-none px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary"
+              >
+                Name <SortIcon column="name" />
+              </th>
+              <th
+                onClick={() => handleSort("breed")}
+                className="hidden cursor-pointer select-none px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary md:table-cell"
+              >
+                Breed <SortIcon column="breed" />
+              </th>
+              <th
+                onClick={() => handleSort("category")}
+                className="hidden cursor-pointer select-none px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary lg:table-cell"
+              >
+                Category <SortIcon column="category" />
+              </th>
+              <th
+                onClick={() => handleSort("selected_saleyard")}
+                className="hidden cursor-pointer select-none px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary xl:table-cell"
+              >
+                Saleyard <SortIcon column="selected_saleyard" />
+              </th>
+              <th
+                onClick={() => handleSort("price_per_kg")}
+                className="hidden cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary lg:table-cell"
+              >
+                $/kg <SortIcon column="price_per_kg" />
+              </th>
+              <th className="hidden px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted lg:table-cell">
+                Premium
+              </th>
+              <th
+                onClick={() => handleSort("current_weight")}
+                className="hidden cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary xl:table-cell"
+              >
+                Weight <SortIcon column="current_weight" />
+              </th>
+              <th
+                onClick={() => handleSort("value")}
+                className="cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary"
+              >
+                Value <SortIcon column="value" />
+              </th>
+              <th className="w-10 px-3 py-3.5" />
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/[0.04]">
+            {sorted.map((herd) => {
+              const value = herdValues[herd.id] ?? 0;
+              const source = herdSources?.[herd.id];
+              const isFallback = source !== undefined && source !== "saleyard";
+              const pricePerKg = herdPricePerKg?.[herd.id] ?? 0;
+              const accrual = herdBreedingAccrual?.[herd.id] ?? 0;
+              const nearestSaleyard = herdNearestSaleyard?.[herd.id] ?? null;
+              const projectedWeight = herdProjectedWeight?.[herd.id];
+              const breedPremium = herdBreedPremium?.[herd.id] ?? 0;
 
-      {/* Empty state */}
-      {properties.length === 0 && (
-        <Card className="border-zinc-800 bg-zinc-900/50">
-          <CardContent className="flex flex-col items-center py-12">
-            <FlaskConical className="mb-4 h-12 w-12 text-zinc-600" />
-            <h3 className="mb-2 text-lg font-semibold text-text-primary">
-              No Sandbox Properties
-            </h3>
-            <p className="mb-6 max-w-md text-center text-sm text-text-muted">
-              Duplicate a client&apos;s herds into a sandbox property, or create one
-              from scratch to experiment with scenarios.
-            </p>
-            <Button
-              className="bg-[#FF5722] text-white hover:bg-[#FF5722]/90"
-              onClick={() => setShowDuplicate(true)}
-            >
-              <Copy className="mr-2 h-4 w-4" />
-              Duplicate Client Data
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Feature highlights (when empty) */}
-      {properties.length === 0 && (
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FeatureCard
-            icon={<ShieldCheck className="h-5 w-5" />}
-            title="Safe Sandbox"
-            description="Experiment without affecting real portfolios"
-          />
-          <FeatureCard
-            icon={<Copy className="h-5 w-5" />}
-            title="Clone Client Data"
-            description="Duplicate client herds for what-if modelling"
-          />
-          <FeatureCard
-            icon={<SlidersHorizontal className="h-5 w-5" />}
-            title="Adjust Freely"
-            description="Change any assumption without consequences"
-          />
-          <FeatureCard
-            icon={<BarChart3 className="h-5 w-5" />}
-            title="Compare Outcomes"
-            description="See how different scenarios play out"
-          />
-        </div>
-      )}
-
-      {/* Sandbox property cards */}
-      {properties.map((property) => {
-        const propHerds = herdsForProperty(property.id);
-        const totalHead = propHerds.reduce((sum, h) => sum + h.head_count, 0);
-
-        return (
-          <Card
-            key={property.id}
-            className="border-[#FF5722]/20 bg-zinc-900/50"
-          >
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <Link
-                  href={`/dashboard/advisor/simulator/${property.id}`}
-                  className="flex items-center gap-3 hover:opacity-80"
+              return (
+                <tr
+                  key={herd.id}
+                  onClick={() => router.push(`/dashboard/advisor/simulator/herd/${herd.id}`)}
+                  className="group cursor-pointer transition-colors hover:bg-surface-hover"
                 >
-                  <FlaskConical className="h-5 w-5 text-[#FF5722]" />
-                  <CardTitle className="text-lg text-text-primary">
-                    {property.property_name}
-                  </CardTitle>
-                  <Badge className="bg-[#FF5722]/15 text-[#FF5722] hover:bg-[#FF5722]/20">
-                    SANDBOX
-                  </Badge>
-                  <ChevronRight className="h-4 w-4 text-zinc-500" />
-                </Link>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-red-400 hover:bg-red-500/10 hover:text-red-300"
-                  disabled={deletingId === property.id}
-                  onClick={() => handleDelete(property.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-              <p className="text-sm text-text-muted">
-                {propHerds.length} herd{propHerds.length !== 1 ? "s" : ""} · {totalHead} total head
-              </p>
-            </CardHeader>
-
-            {propHerds.length > 0 && (
-              <CardContent className="space-y-2 pt-0">
-                {propHerds.map((herd) => (
-                  <Link
-                    key={herd.id}
-                    href={`/dashboard/advisor/simulator/${property.id}?herd=${herd.id}`}
-                    className="flex items-center justify-between rounded-md border border-zinc-800 bg-zinc-900 px-4 py-3 transition-colors hover:border-zinc-700"
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-text-primary">
-                        {herd.name}
-                      </p>
-                      <p className="text-xs text-text-muted">
-                        {herd.head_count} head · {herd.breed} {herd.category}
-                      </p>
+                  <td className="px-5 py-3.5 text-right tabular-nums font-medium text-text-primary">
+                    {herd.head_count?.toLocaleString() ?? "\u2014"}
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <span className="font-medium text-text-primary">{herd.name}</span>
+                  </td>
+                  <td className="hidden px-5 py-3.5 text-text-secondary md:table-cell">{herd.breed}</td>
+                  <td className="hidden px-5 py-3.5 text-text-secondary lg:table-cell">
+                    {herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} (${herd.sub_category})` : herd.category}
+                  </td>
+                  <td className={`hidden px-5 py-3.5 xl:table-cell ${!herd.selected_saleyard ? "text-red-400/70 italic" : nearestSaleyard || isFallback ? "text-text-muted/50 line-through" : "text-text-muted"}`}>
+                    {herd.selected_saleyard ? resolveShortSaleyardName(herd.selected_saleyard) ?? herd.selected_saleyard : "No Saleyard"}
+                  </td>
+                  <td className={`hidden px-5 py-3.5 text-right tabular-nums lg:table-cell ${isFallback ? "text-red-400" : nearestSaleyard ? "text-amber-400" : "text-text-secondary"}`}>
+                    <div className="flex items-center justify-end gap-1.5">
+                      {nearestSaleyard && !isFallback && (
+                        <span className="inline-flex items-center rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
+                          Via {resolveShortSaleyardName(nearestSaleyard) ?? nearestSaleyard}
+                        </span>
+                      )}
+                      {isFallback && (
+                        <span className="inline-flex items-center rounded-full bg-red-500/15 px-1.5 py-0.5 text-[9px] font-medium text-red-400">
+                          {source === "national" ? "National Avg" : "Est. Fallback"}
+                        </span>
+                      )}
+                      {pricePerKg > 0 ? `$${pricePerKg.toFixed(2)}` : "\u2014"}
                     </div>
-                    <ChevronRight className="h-4 w-4 text-zinc-500" />
-                  </Link>
-                ))}
+                  </td>
+                  <td className={`hidden px-5 py-3.5 text-right tabular-nums text-xs lg:table-cell ${breedPremium > 0 ? "text-emerald-400" : breedPremium < 0 ? "text-red-400" : "text-text-muted"}`}>
+                    {breedPremium !== 0 ? `${breedPremium > 0 ? "+" : ""}${breedPremium}%` : "\u2014"}
+                  </td>
+                  <td className="hidden px-5 py-3.5 text-right tabular-nums text-text-secondary xl:table-cell">
+                    {projectedWeight ? `${Math.round(projectedWeight).toLocaleString()} kg` : herd.current_weight ? `${herd.current_weight.toLocaleString()} kg` : "\u2014"}
+                  </td>
+                  <td className={`px-5 py-3.5 text-right tabular-nums ${isFallback ? "text-red-400" : "text-text-secondary"}`}>
+                    <div className="flex flex-col items-end">
+                      <span>{value > 0 ? `$${Math.round(value).toLocaleString()}` : "\u2014"}</span>
+                      {accrual > 0 && (
+                        <span className="flex items-center gap-1 text-xs text-emerald-400">
+                          <Leaf className="h-3 w-3" />
+                          +${Math.round(accrual).toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-3 py-3.5">
+                    <ChevronRight className="h-4 w-4 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
 
-                {propHerds.length === 0 && (
-                  <p className="py-4 text-center text-sm text-text-muted">
-                    No herds in this sandbox yet. Tap to add herds.
-                  </p>
-                )}
-              </CardContent>
-            )}
-          </Card>
-        );
-      })}
-
-      {/* Dialogs */}
-      <DuplicateClientDialog
-        open={showDuplicate}
-        onOpenChange={setShowDuplicate}
-        connections={connections}
-        clientProfiles={clientProfiles}
-      />
-      <NewSandboxDialog
-        open={showNewSandbox}
-        onOpenChange={setShowNewSandbox}
-      />
-    </div>
-  );
-}
-
-function FeatureCard({
-  icon,
-  title,
-  description,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="flex items-start gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 px-4 py-3">
-      <div className="mt-0.5 text-[#FF5722]">{icon}</div>
-      <div>
-        <p className="text-sm font-semibold text-text-primary">{title}</p>
-        <p className="text-xs text-text-muted">{description}</p>
+        {sorted.length === 0 && search && (
+          <div className="py-8 text-center text-sm text-text-muted">
+            No herds matching &quot;{search}&quot;
+          </div>
+        )}
       </div>
+
+      {/* Add another herd */}
+      <Link href="/dashboard/advisor/simulator/new" className="mt-3 block">
+        <div className="flex items-center justify-center gap-2 rounded-2xl border border-dashed border-border py-3 text-sm text-text-muted transition-colors hover:border-white/[0.12] hover:text-text-secondary">
+          <Plus className="h-4 w-4" />
+          Add another herd
+        </div>
+      </Link>
     </div>
   );
 }

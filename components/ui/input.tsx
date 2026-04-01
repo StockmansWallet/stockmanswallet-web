@@ -73,7 +73,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             max={max}
             value={value}
             onChange={onChange}
-            className={`w-full rounded-xl bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${
+            className={`w-full rounded-lg bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${
               hasTrailingIcon ? "pr-10" : ""
             } ${
               error
