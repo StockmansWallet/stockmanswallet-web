@@ -123,6 +123,88 @@ export async function resetLensOverrides(connectionId: string) {
   });
 }
 
+// Per-herd lens: upsert overrides for a specific herd
+export async function upsertHerdLens(
+  connectionId: string,
+  herdId: string,
+  data: {
+    is_active?: boolean;
+    shading_percentage?: number;
+    breed_premium_override?: number | null;
+    adwg_override?: number | null;
+    calving_rate_override?: number | null;
+    mortality_rate_override?: number | null;
+    head_count_adjustment?: number | null;
+    advisor_notes?: string | null;
+    cached_baseline_value?: number | null;
+    cached_advisor_value?: number | null;
+    cached_shaded_value?: number | null;
+  }
+) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Not authenticated" };
+
+  const connParsed = connectionIdSchema.safeParse({ connectionId });
+  if (!connParsed.success) return { error: "Invalid connection ID" };
+
+  const dataParsed = upsertLensDataSchema.safeParse(data);
+  if (!dataParsed.success) return { error: "Invalid input" };
+
+  // Check if per-herd lens already exists
+  const { data: existing } = await supabase
+    .from("advisor_lenses")
+    .select("id")
+    .eq("client_connection_id", connectionId)
+    .eq("herd_id", herdId)
+    .eq("is_deleted", false)
+    .maybeSingle();
+
+  const now = new Date().toISOString();
+
+  if (existing) {
+    const { error } = await supabase
+      .from("advisor_lenses")
+      .update({ ...data, updated_at: now, last_calculated_date: now })
+      .eq("id", existing.id);
+
+    if (error) return { error: error.message };
+  } else {
+    const { error } = await supabase.from("advisor_lenses").insert({
+      id: crypto.randomUUID(),
+      client_connection_id: connectionId,
+      herd_id: herdId,
+      is_active: true,
+      ...data,
+      updated_at: now,
+      last_calculated_date: now,
+    });
+
+    if (error) return { error: error.message };
+  }
+
+  revalidatePath(`/dashboard/advisor/clients/${connectionId}`);
+  revalidatePath(`/dashboard/advisor/clients/${connectionId}/herds/${herdId}`);
+  return { success: true };
+}
+
+// Per-herd lens: reset all overrides for a specific herd
+export async function resetHerdOverrides(connectionId: string, herdId: string) {
+  return upsertHerdLens(connectionId, herdId, {
+    breed_premium_override: null,
+    adwg_override: null,
+    calving_rate_override: null,
+    mortality_rate_override: null,
+    head_count_adjustment: null,
+    shading_percentage: 100,
+    cached_advisor_value: null,
+    cached_shaded_value: null,
+  });
+}
+
 export async function createScenario(
   connectionId: string,
   data: {

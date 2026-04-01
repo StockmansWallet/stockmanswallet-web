@@ -240,91 +240,31 @@ function ClientDataView({ data, baselineValue }: { data: ClientData; baselineVal
         <LockedSection label="Property data" />
       )}
 
-      {/* Herds section */}
-      {permissions.herds ? (
-        <>
-          {Object.keys(speciesGroups).length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Herd Composition</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {Object.entries(speciesGroups).map(([species, info]) => (
-                    <div
-                      key={species}
-                      className="flex items-center justify-between rounded-lg bg-surface px-3 py-2"
-                    >
-                      <span className="text-sm font-medium text-text-primary">{species}</span>
-                      <div className="flex items-center gap-3">
-                        <Badge variant="default">{info.count} herds</Badge>
-                        <span className="text-sm font-semibold text-text-primary">
-                          {info.head.toLocaleString()} head
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Herds (Read-only)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {activeHerds.length === 0 ? (
-                <p className="text-sm text-text-muted">No active herds.</p>
-              ) : (
-                <div className="space-y-2">
-                  {activeHerds.map((herd) => (
-                    <div
-                      key={herd.id}
-                      className="flex items-center justify-between rounded-lg bg-surface px-3 py-2.5"
-                    >
-                      <div>
-                        <p className="text-sm font-medium text-text-primary">{herd.name}</p>
-                        <p className="text-xs text-text-muted">
-                          {herd.breed} {herd.category} - {herd.sex}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-semibold text-text-primary">
-                          {herd.head_count.toLocaleString()} head
-                        </p>
-                        <p className="text-xs text-text-muted">
-                          {herd.current_weight > 0
-                            ? `${Math.round(herd.current_weight)} kg avg`
-                            : "No weight data"}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </>
-      ) : (
-        <LockedSection label="Herd data" />
-      )}
-
-      {/* Reports section */}
-      {permissions.reports ? (
+      {/* Herd Composition */}
+      {permissions.herds && Object.keys(speciesGroups).length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Reports</CardTitle>
+            <CardTitle>Herd Composition</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-text-secondary">
-              This producer has shared report access. Accountant reports and asset
-              register data for this client will appear here.
-            </p>
+            <div className="space-y-2">
+              {Object.entries(speciesGroups).map(([species, info]) => (
+                <div
+                  key={species}
+                  className="flex items-center justify-between rounded-lg bg-surface px-3 py-2"
+                >
+                  <span className="text-sm font-medium text-text-primary">{species}</span>
+                  <div className="flex items-center gap-3">
+                    <Badge variant="default">{info.count} herds</Badge>
+                    <span className="text-sm font-semibold text-text-primary">
+                      {info.head.toLocaleString()} head
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
-      ) : (
-        <LockedSection label="Reports" />
       )}
     </>
   );

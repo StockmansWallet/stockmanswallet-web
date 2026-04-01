@@ -20,6 +20,7 @@ export const SCENARIO_TYPE_CONFIG: Record<ScenarioType, { label: string; icon: s
 export interface AdvisorLens {
   id: string;
   client_connection_id: string;
+  herd_id: string | null;
   is_active: boolean;
   shading_percentage: number;
   breed_premium_override: number | null;
