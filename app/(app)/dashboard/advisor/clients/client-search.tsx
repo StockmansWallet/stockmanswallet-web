@@ -9,9 +9,11 @@ import { searchProducers, sendAdvisorConnectionRequest } from "./actions";
 interface SearchResult {
   user_id: string;
   display_name: string;
-  company_name: string;
-  state: string;
-  region: string;
+  company_name: string | null;
+  state: string | null;
+  region: string | null;
+  property_name: string | null;
+  bio: string | null;
 }
 
 export function ClientSearch() {
@@ -81,9 +83,12 @@ export function ClientSearch() {
                   <p className="text-sm font-medium text-text-primary">
                     {producer.display_name}
                   </p>
-                  <div className="flex items-center gap-2 text-xs text-text-muted">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-text-muted">
                     {producer.company_name && (
                       <span>{producer.company_name}</span>
+                    )}
+                    {producer.property_name && (
+                      <span className="text-text-muted/70">{producer.property_name}</span>
                     )}
                     {producer.state && (
                       <span className="flex items-center gap-0.5">
@@ -93,6 +98,9 @@ export function ClientSearch() {
                       </span>
                     )}
                   </div>
+                  {producer.bio && (
+                    <p className="mt-0.5 text-[11px] text-text-muted/60 line-clamp-1">{producer.bio}</p>
+                  )}
                 </div>
                 {sentTo.has(producer.user_id) ? (
                   <span className="flex items-center gap-1 text-xs font-medium text-green-400">

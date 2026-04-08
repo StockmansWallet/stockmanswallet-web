@@ -8,6 +8,8 @@ import { ClientCard } from "@/components/app/advisory/client-card";
 import { ClientSearch } from "./client-search";
 import { hasActivePermission, type ConnectionRequest } from "@/lib/types/advisory";
 
+export const revalidate = 0;
+
 export const metadata = {
   title: "Clients",
 };

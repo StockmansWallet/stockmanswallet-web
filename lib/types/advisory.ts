@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 // Connection request lifecycle
-export type ConnectionStatus = "pending" | "approved" | "denied" | "expired";
+export type ConnectionStatus = "pending" | "approved" | "denied" | "expired" | "removed";
 
 // Connection type (advisory vs farmer peer)
 export type ConnectionType = "advisory" | "farmer_peer";

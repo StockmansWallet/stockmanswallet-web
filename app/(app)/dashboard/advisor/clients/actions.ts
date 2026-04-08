@@ -44,11 +44,11 @@ export async function searchProducers(query: string) {
 
   const { data: producers } = await supabase
     .from("user_profiles")
-    .select("user_id, display_name, company_name, state, region")
+    .select("user_id, display_name, company_name, state, region, property_name, bio")
     .eq("role", "producer")
     .not("user_id", "in", `(${excludeIds.join(",")})`)
     .or(
-      `display_name.ilike.%${sanitised}%,company_name.ilike.%${sanitised}%`
+      `display_name.ilike.%${sanitised}%,company_name.ilike.%${sanitised}%,property_name.ilike.%${sanitised}%`
     )
     .order("display_name")
     .limit(10);

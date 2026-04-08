@@ -16,7 +16,7 @@ export async function createNotification(
 ) {
   // Dedup for new_message is handled inside the create_notification SQL function
   // (SECURITY DEFINER context can see all rows regardless of RLS).
-  await supabase.rpc("create_notification", {
+  const { error: rpcError } = await supabase.rpc("create_notification", {
     p_user_id: params.userId,
     p_type: params.type,
     p_title: params.title,
@@ -24,6 +24,46 @@ export async function createNotification(
     p_link: params.link ?? null,
     p_related_connection_id: params.connectionId ?? null,
   });
+
+  if (rpcError) {
+    console.error("create_notification RPC failed:", rpcError.message);
+  }
+
+  // Fire APNs push notification (best-effort, don't block on failure)
+  sendPushNotification(params).catch((err) => {
+    console.error("Push notification failed:", err);
+  });
+}
+
+// Debug: Call the send-push-notification Edge Function to deliver APNs push.
+// Uses service role key for server-to-server auth (the recipient is a different user).
+async function sendPushNotification(params: NotificationParams) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceRoleKey) return;
+
+  const res = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${serviceRoleKey}`,
+    },
+    body: JSON.stringify({
+      user_id: params.userId,
+      title: params.title,
+      body: params.body ?? undefined,
+      data: {
+        type: params.type,
+        link: params.link ?? undefined,
+        connection_id: params.connectionId ?? undefined,
+      },
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    console.error(`send-push-notification returned ${res.status}: ${body}`);
+  }
 }
 
 export async function notifyConnectionRequest(
