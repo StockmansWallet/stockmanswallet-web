@@ -43,7 +43,7 @@ const nextConfig: NextConfig = {
             value: [
               "default-src 'self'",
               "media-src 'self' blob:",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com",
+              "script-src 'self' 'unsafe-inline' https://maps.googleapis.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https://*.supabase.co https://maps.googleapis.com https://maps.gstatic.com https://lh3.googleusercontent.com",
               "font-src 'self' data: https://fonts.gstatic.com",

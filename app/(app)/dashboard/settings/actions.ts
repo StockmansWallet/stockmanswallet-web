@@ -263,6 +263,14 @@ export async function deleteAccount() {
 }
 
 export async function updateAvatarUrl(avatarUrl: string) {
+  // Only allow Supabase storage URLs and Google profile pictures
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const isSupabaseStorage = supabaseUrl && avatarUrl.startsWith(`${supabaseUrl}/storage/`);
+  const isGoogleAvatar = avatarUrl.startsWith("https://lh3.googleusercontent.com/");
+  if (!isSupabaseStorage && !isGoogleAvatar) {
+    return { error: "Invalid avatar URL" };
+  }
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };

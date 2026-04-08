@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { parseSharingPermissions } from "@/lib/types/advisory";
+import { z } from "zod";
 
 /**
  * POST /api/advisor/client-herds
@@ -20,11 +21,13 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { clientUserId } = body;
+  const parsed = z.string().uuid().safeParse(body.clientUserId);
 
-  if (!clientUserId) {
-    return NextResponse.json({ error: "clientUserId required" }, { status: 400 });
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Valid clientUserId required" }, { status: 400 });
   }
+
+  const clientUserId = parsed.data;
 
   // Verify active permission window via user's own supabase client (RLS allows this)
   const { data: connection } = await supabase
@@ -72,7 +75,8 @@ export async function POST(request: NextRequest) {
       .order("name");
 
     if (herdsError) {
-      return NextResponse.json({ error: herdsError.message }, { status: 500 });
+      console.error("Advisor client-herds fetch error:", herdsError.message);
+      return NextResponse.json({ error: "Failed to fetch client data" }, { status: 500 });
     }
     herds = data ?? [];
   }

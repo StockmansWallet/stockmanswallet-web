@@ -34,11 +34,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     data: { user },
   } = await supabase.auth.getUser();
 
+  if (!user) redirect("/sign-in");
+
   // Fetch display name and role: prefer auth metadata, fall back to user_profiles
   const { data: profile } = await supabase
     .from("user_profiles")
     .select("display_name, role")
-    .eq("user_id", user!.id)
+    .eq("user_id", user.id)
     .maybeSingle();
 
   // Redirect advisor users to their dashboard
@@ -61,14 +63,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                breed_premium_override, mortality_rate, is_sold, selected_saleyard,
                additional_info, calf_weight_recorded_date, updated_at,
                breeder_sub_type, sub_category, property_id`)
-      .eq("user_id", user!.id)
+      .eq("user_id", user.id)
       .eq("is_sold", false)
       .eq("is_deleted", false)
       .order("name"),
     supabase
       .from("properties")
       .select("id, property_name, state, acreage, is_simulated, latitude, longitude, is_default, suburb")
-      .eq("user_id", user!.id)
+      .eq("user_id", user.id)
       .eq("is_deleted", false)
       .order("property_name"),
     // Breed premiums (matches iOS BreedPremiumService)
@@ -79,7 +81,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     supabase
       .from("yard_book_items")
       .select("id, title, event_date, category_raw")
-      .eq("user_id", user!.id)
+      .eq("user_id", user.id)
       .eq("is_deleted", false)
       .eq("is_completed", false)
       .gte("event_date", todayStr)
@@ -179,7 +181,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   if (activeHerds.length > 0) {
     await supabase.from("portfolio_snapshots").upsert(
       {
-        user_id: user!.id,
+        user_id: user.id,
         snapshot_date: todayDate,
         total_value: Math.round(portfolioValue),
         head_count: totalHead,
@@ -195,7 +197,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const { count: snapshotCount } = await supabase
     .from("portfolio_snapshots")
     .select("id", { count: "exact", head: true })
-    .eq("user_id", user!.id);
+    .eq("user_id", user.id);
 
   if ((snapshotCount ?? 0) <= 1 && activeHerds.length > 0) {
     const creationDates = activeHerds
@@ -227,7 +229,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           const dateHeads = herdsAtDate.reduce((sum, h) => sum + (h.head_count ?? 0), 0);
 
           backfillRows.push({
-            user_id: user!.id,
+            user_id: user.id,
             snapshot_date: cursor.toISOString().slice(0, 10),
             total_value: Math.round(dateVal),
             head_count: dateHeads,
@@ -250,7 +252,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const { data: snapshots } = await supabase
     .from("portfolio_snapshots")
     .select("snapshot_date, total_value")
-    .eq("user_id", user!.id)
+    .eq("user_id", user.id)
     .lt("snapshot_date", todayDate)
     .order("snapshot_date", { ascending: true });
 

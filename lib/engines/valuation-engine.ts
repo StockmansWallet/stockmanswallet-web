@@ -4,17 +4,15 @@
 
 import { resolveMLASaleyardName, saleyardToState } from "../data/reference-data";
 import { parseLocalDate as parseLocal } from "../dates";
-import { resolveMLACategory } from "../data/weight-mapping";
+import { resolveMLACategory, defaultMappingRules } from "../data/weight-mapping";
 import { nearestSaleyards as nearestSaleyardsFn } from "../data/saleyard-proximity";
 
 // MARK: - Category Fallback
 // Debug: Returns an alternate MLA category when the primary has no price data.
 // Uses the fallback from the weight-first mapping rules.
 export function categoryFallback(mlaCategory: string): string | null {
-  const { defaultMappingRules } = require("../data/weight-mapping");
   const rule = defaultMappingRules.find(
-    (r: { mla_preferred: string; mla_fallback: string | null }) =>
-      r.mla_preferred === mlaCategory && r.mla_fallback && r.mla_fallback !== mlaCategory
+    (r) => r.mla_preferred === mlaCategory && r.mla_fallback && r.mla_fallback !== mlaCategory
   );
   return rule?.mla_fallback ?? null;
 }

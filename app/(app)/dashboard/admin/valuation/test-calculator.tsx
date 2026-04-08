@@ -5,6 +5,7 @@ import { Calculator, Loader2 } from "lucide-react";
 import type { SerializedPriceMaps, SaleyardCoverage, HerdWithValuation } from "./page";
 import {
   calculateHerdValuation,
+  parseCalvesAtFoot,
   type HerdForValuation,
   type CategoryPriceEntry,
   type HerdValuationResult,
@@ -71,6 +72,11 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
   // Exact timestamps from pre-filled herd (for precise fractional-day calculation matching the live engine)
   const [exactCreatedAt, setExactCreatedAt] = useState<string | null>(null);
   const [exactJoinedDate, setExactJoinedDate] = useState<string | null>(null);
+  // Calves at foot
+  const [calvesHeadCount, setCalvesHeadCount] = useState(0);
+  const [calvesAgeMonths, setCalvesAgeMonths] = useState(0);
+  const [calvesWeight, setCalvesWeight] = useState<string>("");
+  const [calvesWeightRecordedDate, setCalvesWeightRecordedDate] = useState<string | null>(null);
 
   // Helper to apply a herd's values to the form
   const applyHerd = useCallback((h: HerdWithValuation) => {
@@ -96,6 +102,19 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
     // Store exact timestamps so the calculation uses fractional days (matching the live engine)
     setExactCreatedAt(h.created_at);
     setExactJoinedDate(h.joined_date);
+    // Calves at foot
+    const calvesData = parseCalvesAtFoot(h.additional_info);
+    if (calvesData) {
+      setCalvesHeadCount(calvesData.headCount);
+      setCalvesAgeMonths(calvesData.ageMonths);
+      setCalvesWeight(calvesData.averageWeight != null ? String(calvesData.averageWeight) : "");
+      setCalvesWeightRecordedDate(h.calf_weight_recorded_date);
+    } else {
+      setCalvesHeadCount(0);
+      setCalvesAgeMonths(0);
+      setCalvesWeight("");
+      setCalvesWeightRecordedDate(null);
+    }
     setPrefillName(h.name);
   }, []);
 
@@ -249,15 +268,17 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
       joining_period_start: null,
       joining_period_end: null,
       selected_saleyard: saleyard || null,
-      additional_info: null,
-      calf_weight_recorded_date: null,
+      additional_info: calvesHeadCount > 0 && calvesAgeMonths > 0
+        ? `Calves at Foot: ${calvesHeadCount} head, ${calvesAgeMonths} months${calvesWeight ? `, ${calvesWeight} kg` : ""}`
+        : null,
+      calf_weight_recorded_date: calvesHeadCount > 0 ? calvesWeightRecordedDate : null,
       updated_at: new Date().toISOString(),
     };
 
     return calculateHerdValuation(
       herd, maps.national, maps.premium, undefined, maps.saleyard, maps.saleyardBreed,
     );
-  }, [species, breed, category, headCount, initialWeight, dwg, mortalityRate, daysAgo, saleyard, breedPremiumOverride, isBreeder, isPregnant, breedingProgram, calvingRate, joinedDaysAgo, maps, exactCreatedAt, exactJoinedDate]);
+  }, [species, breed, category, headCount, initialWeight, dwg, mortalityRate, daysAgo, saleyard, breedPremiumOverride, isBreeder, isPregnant, breedingProgram, calvingRate, joinedDaysAgo, maps, exactCreatedAt, exactJoinedDate, calvesHeadCount, calvesAgeMonths, calvesWeight, calvesWeightRecordedDate]);
 
   return (
     <div className="grid gap-4 lg:grid-cols-[480px_1fr]">
@@ -377,6 +398,25 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
               </Field>
             </div>
           )}
+          {isBreeder && (
+            <div className="mt-3">
+              <p className="text-[10px] font-medium text-text-muted mb-2">Calves at Foot</p>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Calf Head Count">
+                  <input type="number" min={0} value={calvesHeadCount} onChange={(e) => setCalvesHeadCount(+e.target.value)} className="input-field" />
+                </Field>
+                <Field label="Calf Age (months)">
+                  <input type="number" min={0} value={calvesAgeMonths} onChange={(e) => setCalvesAgeMonths(+e.target.value)} className="input-field" />
+                </Field>
+                <Field label="Avg Calf Weight (kg)">
+                  <input type="number" step="0.1" value={calvesWeight} onChange={(e) => setCalvesWeight(e.target.value)} placeholder="Auto from age" className="input-field" />
+                </Field>
+                <Field label="Weight Recorded Date">
+                  <input type="date" value={calvesWeightRecordedDate?.split("T")[0] ?? ""} onChange={(e) => setCalvesWeightRecordedDate(e.target.value ? new Date(e.target.value).toISOString() : null)} className="input-field" />
+                </Field>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -407,6 +447,12 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
             <MiniCard label="WG Accrual" value={fmtDollar(result.weightGainAccrual)} color="emerald" />
             <MiniCard label="Mortality" value={result.mortalityDeduction > 0 ? `-${fmtDollar(result.mortalityDeduction)}` : "-"} color="red" />
             <MiniCard label="Breeding Accrual" value={result.breedingAccrual > 0 ? fmtDollar(result.breedingAccrual) : "-"} color="sky" />
+            {result.preBirthAccrual > 0 && (
+              <MiniCard label="└ Pre-Birth" value={fmtDollar(result.preBirthAccrual)} color="sky" />
+            )}
+            {result.calvesAtFootValue > 0 && (
+              <MiniCard label="└ Calves at Foot" value={fmtDollar(result.calvesAtFootValue)} color="sky" />
+            )}
           </div>
 
           {/* Formula walkthrough */}
@@ -426,8 +472,14 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
               {result.mortalityDeduction > 0 && (
                 <p>Mortality = {fmtDollar(result.physicalValue)} x ({result.daysHeld}/365) x {mortalityRate}% = <strong>-{fmtDollar(result.mortalityDeduction)}</strong></p>
               )}
-              {result.breedingAccrual > 0 && (
-                <p>BreedingAccrual = <strong>{fmtDollar(result.breedingAccrual)}</strong></p>
+              {result.preBirthAccrual > 0 && (
+                <p>PreBirthAccrual = {headCount} x {calvingRate}% x ({result.daysHeld}/365) x {(initialWeight * (species === "Sheep" ? 0.08 : 0.07)).toFixed(1)}kg x {fmtCents(result.pricePerKg, 2)} = <strong>{fmtDollar(result.preBirthAccrual)}</strong></p>
+              )}
+              {result.calvesAtFootValue > 0 && (
+                <p>CalvesAtFootValue = <strong>{fmtDollar(result.calvesAtFootValue)}</strong></p>
+              )}
+              {result.preBirthAccrual > 0 && result.calvesAtFootValue > 0 && (
+                <p>BreedingAccrual = {fmtDollar(result.preBirthAccrual)} + {fmtDollar(result.calvesAtFootValue)} = <strong>{fmtDollar(result.breedingAccrual)}</strong></p>
               )}
               <p className="pt-1 border-t border-amber-500/10">
                 NetValue = {fmtDollar(result.physicalValue)} - {fmtDollar(result.mortalityDeduction)} + {fmtDollar(result.breedingAccrual)} = <strong className="text-amber-300">{fmtDollar(result.netValue)}</strong>

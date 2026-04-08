@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { headers, cookies } from "next/headers";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 
@@ -39,7 +39,7 @@ export async function signIn(formData: FormData) {
   });
 
   if (error) {
-    return { error: error.message };
+    return { error: "Invalid email or password" };
   }
 
   redirect("/dashboard");
@@ -55,7 +55,7 @@ export async function signUp(formData: FormData) {
 
   const supabase = await createClient();
 
-  const origin = (await headers()).get("origin") || "https://stockmanswallet.com.au";
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || "https://stockmanswallet.com.au";
 
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
@@ -85,7 +85,7 @@ export async function forgotPassword(formData: FormData) {
   if (!parsed.success) return { error: "Invalid input" };
 
   const supabase = await createClient();
-  const origin = (await headers()).get("origin") || "https://stockmanswallet.com.au";
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || "https://stockmanswallet.com.au";
 
   // Always return success to avoid revealing whether the email exists
   await supabase.auth.resetPasswordForEmail(parsed.data.email, {
@@ -127,23 +127,26 @@ export async function updatePassword(formData: FormData) {
 }
 
 export async function resendConfirmation(email: string) {
+  const parsed = forgotPasswordSchema.safeParse({ email });
+  if (!parsed.success) return { error: "Invalid email" };
+
   const supabase = await createClient();
-  const origin = (await headers()).get("origin") || "https://stockmanswallet.com.au";
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || "https://stockmanswallet.com.au";
 
   const { error } = await supabase.auth.resend({
     type: "signup",
-    email,
+    email: parsed.data.email,
     options: {
       emailRedirectTo: `${origin}/auth/callback`,
     },
   });
 
-  if (error) return { error: error.message };
+  if (error) return { error: "Could not resend confirmation email. Please try again." };
   return { success: true };
 }
 
 export async function signInWithApple() {
-  const origin = (await headers()).get("origin") || "https://stockmanswallet.com.au";
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || "https://stockmanswallet.com.au";
 
   // Generate nonce — Apple will embed the hash in the ID token,
   // and we carry the raw value back via the state parameter.
@@ -158,7 +161,7 @@ export async function signInWithApple() {
     .join("");
 
   const params = new URLSearchParams({
-    client_id: "com.leonernst.StockmansWallet.web",
+    client_id: process.env.APPLE_CLIENT_ID || "com.leonernst.StockmansWallet.web",
     redirect_uri: `${origin}/auth/apple-callback`,
     response_type: "code id_token",
     response_mode: "form_post",
@@ -172,7 +175,7 @@ export async function signInWithApple() {
 
 export async function signInWithGoogle() {
   const supabase = await createClient();
-  const origin = (await headers()).get("origin") || "https://stockmanswallet.com.au";
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || "https://stockmanswallet.com.au";
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",

@@ -302,7 +302,21 @@ function ExpandedDetail({ herd }: { herd: HerdWithValuation }) {
     ...(herd.is_breeder ? [
       { label: "Breeding Program", value: herd.breeding_program_type ?? "none" },
       { label: "Calving Rate", value: `${((herd.calving_rate ?? 0) * 100).toFixed(0)}%` },
-      { label: "Joined Date", value: herd.joined_date ? new Date(herd.joined_date).toLocaleDateString("en-AU") : "not set" },
+      ...((herd.breeding_program_type === "ai" || herd.breeding_program_type === "controlled") && (herd.joining_period_start || herd.joining_period_end)
+        ? [
+            {
+              label: herd.breeding_program_type === "ai" ? "Insemination Period" : "Joining Period",
+              value: `${herd.joining_period_start ? new Date(herd.joining_period_start).toLocaleDateString("en-AU") : "?"} – ${herd.joining_period_end ? new Date(herd.joining_period_end).toLocaleDateString("en-AU") : "?"}`,
+            },
+            {
+              label: "Effective Joined Date",
+              value: herd.joined_date ? new Date(herd.joined_date).toLocaleDateString("en-AU") : "not derived",
+            },
+          ]
+        : herd.breeding_program_type === "uncontrolled"
+          ? [{ label: "Accrual Start", value: `Creation date (${new Date(herd.created_at).toLocaleDateString("en-AU")})` }]
+          : [{ label: "Joined Date", value: herd.joined_date ? new Date(herd.joined_date).toLocaleDateString("en-AU") : "not set" }]
+      ),
     ] : []),
   ];
 
