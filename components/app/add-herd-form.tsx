@@ -27,7 +27,7 @@ import { AlertTriangle, AlertCircle } from "lucide-react";
 // Helpers
 // ---------------------------------------------------------------------------
 
-const BREEDER_CATEGORIES = new Set(["Breeder", "Dry Cow"]);
+const BREEDER_CATEGORIES = new Set(["Breeder"]);
 
 function isBreederCategory(category: string): boolean {
   return BREEDER_CATEGORIES.has(category);

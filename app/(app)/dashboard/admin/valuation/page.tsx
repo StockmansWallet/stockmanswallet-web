@@ -40,6 +40,7 @@ export interface HerdWithValuation {
   breed_premium_override: number | null;
   mortality_rate: number | null;
   selected_saleyard: string | null;
+  breeder_sub_type: string | null;
   additional_info: string | null;
   calf_weight_recorded_date: string | null;
   updated_at: string;

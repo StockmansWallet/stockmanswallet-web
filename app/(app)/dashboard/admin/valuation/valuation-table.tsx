@@ -95,7 +95,7 @@ export function ValuationTable({ herds, onTestHerd }: Props) {
     const rows = filtered.map((h) => {
       const v = h.valuation;
       return [
-        h.name, h.species, h.breed, h.category, v.mlaCategory, h.selected_saleyard ?? "",
+        h.name, h.species, h.breed, h.category === "Breeder" && h.breeder_sub_type ? `Breeder (${h.breeder_sub_type})` : h.category, v.mlaCategory, h.selected_saleyard ?? "",
         h.head_count, h.initial_weight, v.projectedWeight.toFixed(1), h.daily_weight_gain, v.daysHeld,
         ((v.mortalityRate ?? 0) * 100).toFixed(1), h.is_breeder, h.breeding_program_type ?? "", ((h.calving_rate ?? 0) * 100).toFixed(0),
         v.priceSource, v.basePrice.toFixed(4), v.breedPremiumApplied.toFixed(1), v.pricePerKg.toFixed(4), v.matchedWeightRange ?? "",
@@ -207,7 +207,7 @@ export function ValuationTable({ herds, onTestHerd }: Props) {
                       </span>
                     </Td>
                     <Td>{h.breed}</Td>
-                    <Td>{h.category}</Td>
+                    <Td>{h.category === "Breeder" && h.breeder_sub_type ? `Breeder (${h.breeder_sub_type})` : h.category}</Td>
                     <Td className="max-w-[120px] truncate">{h.selected_saleyard ?? "-"}</Td>
 
                     <Td right>{fmt(h.head_count)}</Td>

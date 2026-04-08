@@ -225,7 +225,7 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
                 const v = e.target.value;
                 setCategory(v);
                 setBreederSubType("");
-                setIsBreeder(v === "Breeder" || v === "Dry Cow");
+                setIsBreeder(v === "Breeder");
               }}
             />
             {needsBreederSubType && (
