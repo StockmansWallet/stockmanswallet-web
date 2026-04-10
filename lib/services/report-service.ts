@@ -436,9 +436,8 @@ export async function generateSaleyardComparisonData(
     // Only keep latest date
     const latestDate = prices
       .map((p) => p.data_date)
-      .filter(Boolean)
-      .sort()
-      .pop();
+      .filter((d): d is string => Boolean(d))
+      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] ?? null;
 
     const latestPrices = latestDate
       ? prices.filter((p) => p.data_date === latestDate).map((p) => p.price_per_kg / 100)

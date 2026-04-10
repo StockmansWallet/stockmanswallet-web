@@ -375,10 +375,10 @@ function resolvePriceFromEntries(
 ): PriceResolution | null {
   if (entries.length === 0) return null;
 
-  // Find the newest date with data
+  // Find the newest date with data (parse as Date objects for correct ordering)
   const dates = [...new Set(
     entries.filter((e) => e.data_date).map((e) => e.data_date as string)
-  )].sort((a, b) => b.localeCompare(a));
+  )].sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
 
   const newestDate = dates[0] ?? null;
 
@@ -463,6 +463,22 @@ export interface HerdValuationResult {
  * NO general base exists at any level does iOS fall through to the raw price from
  * getMarketPrice() (which may be breed-specific) without breed premium.
  */
+// Debug: Derives the effective joined date per breeding program type (mirrors iOS Herd.effectiveJoinedDate).
+//   AI/Controlled: midpoint of joining period
+//   Uncontrolled: herd creation date
+//   Fallback: explicit joined_date or joining_period_start
+function getEffectiveJoinedDate(herd: HerdForValuation): Date | null {
+  if (herd.joined_date) return parseLocal(herd.joined_date);
+  if (herd.joining_period_start && herd.joining_period_end) {
+    const pStart = parseLocal(herd.joining_period_start).getTime();
+    const pEnd = parseLocal(herd.joining_period_end).getTime();
+    return new Date((pStart + pEnd) / 2);
+  }
+  if (herd.breeding_program_type === "uncontrolled" || (herd.breeding_program_type as string) === "uncontrolled_breeding") return new Date(herd.created_at);
+  if (herd.joining_period_start) return parseLocal(herd.joining_period_start);
+  return null;
+}
+
 export function calculateHerdValuation(
   herd: HerdForValuation,
   nationalPriceMap: Map<string, CategoryPriceEntry[]>,
@@ -484,8 +500,12 @@ export function calculateHerdValuation(
   const createdAt = herd.created_at ? new Date(herd.created_at) : now;
 
   // 1. Projected weight (split DWG)
+  // Debug: initialWeight used for bracket selection per spec Section 1.1/1.3.
+  // Weight gain accrual is a separate additive component (Section 4), so the
+  // price bracket must reflect the original input weight, not the projected weight.
+  const initialWeight = herd.initial_weight ?? herd.current_weight ?? 0;
   const projectedWeight = calculateProjectedWeight(
-    herd.initial_weight ?? herd.current_weight ?? 0,
+    initialWeight,
     createdAt,
     herd.dwg_change_date ? parseLocal(herd.dwg_change_date) : null,
     now,
@@ -507,7 +527,7 @@ export function calculateHerdValuation(
   if (saleyardPriceMap && resolvedSaleyard) {
     const saleyardKey = `${mlaCategory}|${resolvedSaleyard}`;
     const saleyardEntries = saleyardPriceMap.get(saleyardKey) ?? [];
-    resolved = resolvePriceFromEntries(saleyardEntries, projectedWeight);
+    resolved = resolvePriceFromEntries(saleyardEntries, initialWeight);
     // Debug: Skip stale saleyard data (>8 weeks) — fall through to nearest saleyard
     if (resolved && isDataStale(resolved.dataDate, STALE_DATA_THRESHOLD_DAYS)) {
       resolved = null;
@@ -519,7 +539,7 @@ export function calculateHerdValuation(
   if (!resolved && saleyardBreedPriceMap && resolvedSaleyard) {
     const breedKey = `${mlaCategory}|${herd.breed}|${resolvedSaleyard}`;
     const breedEntries = saleyardBreedPriceMap.get(breedKey) ?? [];
-    resolved = resolvePriceFromEntries(breedEntries, projectedWeight);
+    resolved = resolvePriceFromEntries(breedEntries, initialWeight);
     // Debug: Skip stale saleyard breed data (>8 weeks)
     if (resolved && isDataStale(resolved.dataDate, STALE_DATA_THRESHOLD_DAYS)) {
       resolved = null;
@@ -531,6 +551,29 @@ export function calculateHerdValuation(
     }
   }
 
+  // 2b3. When the bracket match was a clamp (weight outside all primary category brackets),
+  // check if the fallback MLA category has an exact bracket match at the same saleyard.
+  // e.g., 499 kg Yearling Steer at Charters Towers (only 330-400) -> Grown Steer (400-500)
+  if (resolved && resolved.matchedRange && resolvedSaleyard && saleyardPriceMap) {
+    const exactMatch = findCandidateBrackets(initialWeight, [resolved.matchedRange]);
+    if (exactMatch.length === 0) {
+      const fallbackCat = categoryFallback(mlaCategory);
+      if (fallbackCat) {
+        const fbKey = `${fallbackCat}|${resolvedSaleyard}`;
+        const fbEntries = saleyardPriceMap.get(fbKey) ?? [];
+        const fbResolved = resolvePriceFromEntries(fbEntries, initialWeight);
+        if (fbResolved && fbResolved.matchedRange) {
+          const fbExact = findCandidateBrackets(initialWeight, [fbResolved.matchedRange]);
+          if (fbExact.length > 0) {
+            resolved = fbResolved;
+            priceSource = "saleyard";
+            matchedWeightRange = fbResolved.matchedRange;
+          }
+        }
+      }
+    }
+  }
+
   // 2b2. Try nearest saleyards in same state (proximity fallback)
   let nearestSaleyardUsed: string | null = null;
   if (!resolved && saleyardPriceMap && resolvedSaleyard && herd.selected_saleyard) {
@@ -539,7 +582,7 @@ export function calculateHerdValuation(
     for (const nearYard of nearYards) {
       const nearKey = `${mlaCategory}|${nearYard}`;
       const nearEntries = saleyardPriceMap.get(nearKey) ?? [];
-      resolved = resolvePriceFromEntries(nearEntries, projectedWeight);
+      resolved = resolvePriceFromEntries(nearEntries, initialWeight);
       // Debug: Skip stale nearest saleyard data too
       if (resolved && isDataStale(resolved.dataDate, STALE_DATA_THRESHOLD_DAYS)) {
         resolved = null;
@@ -552,7 +595,7 @@ export function calculateHerdValuation(
   // 2c. Try national general (breed=null) price - breed premium safe
   if (!resolved) {
     const nationalEntries = nationalPriceMap.get(mlaCategory) ?? [];
-    resolved = resolvePriceFromEntries(nationalEntries, projectedWeight);
+    resolved = resolvePriceFromEntries(nationalEntries, initialWeight);
     if (resolved) { priceSource = "national"; matchedWeightRange = resolved.matchedRange; }
   }
 
@@ -564,20 +607,20 @@ export function calculateHerdValuation(
       if (saleyardPriceMap && resolvedSaleyard) {
         const fbSyKey = `${fallbackCat}|${resolvedSaleyard}`;
         const fbSyEntries = saleyardPriceMap.get(fbSyKey) ?? [];
-        resolved = resolvePriceFromEntries(fbSyEntries, projectedWeight);
+        resolved = resolvePriceFromEntries(fbSyEntries, initialWeight);
         if (resolved) { priceSource = "saleyard"; matchedWeightRange = resolved.matchedRange; }
       }
       // Try saleyard breed-specific for fallback
       if (!resolved && saleyardBreedPriceMap && resolvedSaleyard) {
         const fbBreedKey = `${fallbackCat}|${herd.breed}|${resolvedSaleyard}`;
         const fbBreedEntries = saleyardBreedPriceMap.get(fbBreedKey) ?? [];
-        resolved = resolvePriceFromEntries(fbBreedEntries, projectedWeight);
+        resolved = resolvePriceFromEntries(fbBreedEntries, initialWeight);
         if (resolved) { priceSource = "saleyard"; skipBreedPremium = true; matchedWeightRange = resolved.matchedRange; }
       }
       // Try national for fallback
       if (!resolved) {
         const fbNatEntries = nationalPriceMap.get(fallbackCat) ?? [];
-        resolved = resolvePriceFromEntries(fbNatEntries, projectedWeight);
+        resolved = resolvePriceFromEntries(fbNatEntries, initialWeight);
         if (resolved) { priceSource = "national"; matchedWeightRange = resolved.matchedRange; }
       }
     }
@@ -599,26 +642,15 @@ export function calculateHerdValuation(
   const mortalityRate = herd.mortality_rate ?? 0.05;
   const mortalityDeduction = calculateMortalityDeduction(physicalValue, mortalityRate, daysHeld);
 
-  // 5. Pre-birth breeding accrual (pregnant breeders with a joining date)
+  // 5. Pre-birth breeding accrual (pregnant breeders)
+  // Debug: Derives effective joined date per breeding program type:
+  //   AI/Controlled: midpoint of joining period
+  //   Uncontrolled: herd creation date (accrual commences 1 day after creation)
+  //   Fallback: explicit joined_date or joining_period_start
   let preBirthAccrual = 0;
-  if (herd.is_breeder && herd.is_pregnant && herd.joined_date) {
-    let accrualStart: Date;
-    const isUncontrolled = herd.breeding_program_type === "uncontrolled";
-    if (isUncontrolled) {
-      // Uncontrolled: start from herd entry date (matches iOS spec Section 2.3)
-      accrualStart = new Date(herd.created_at);
-    } else if (
-      (herd.breeding_program_type === "ai" || herd.breeding_program_type === "controlled") &&
-      herd.joining_period_start &&
-      herd.joining_period_end
-    ) {
-      const pStart = parseLocal(herd.joining_period_start).getTime();
-      const pEnd = parseLocal(herd.joining_period_end).getTime();
-      accrualStart = new Date((pStart + pEnd) / 2);
-    } else {
-      // Fallback: use joinedDate if period dates not available
-      accrualStart = parseLocal(herd.joined_date);
-    }
+  const effectiveJoinedDate = getEffectiveJoinedDate(herd);
+  if (herd.is_breeder && herd.is_pregnant && effectiveJoinedDate && effectiveJoinedDate <= now) {
+    const accrualStart = effectiveJoinedDate;
     const calvingDays = daysBetween(accrualStart, now);
     // calving_rate may be stored as decimal (0.85) or integer percent (85)
     const calvingRate =

@@ -97,8 +97,21 @@ export function resolveMLACategory(
 ): MLACategoryResolution {
   const activeRules = rules ?? defaultMappingRules;
 
-  // For Breeder, match on sub-type (Cow/Heifer) rather than weight
+  // For Breeder, match on sub-type (Cow/Heifer)
   if (masterCategory === "Breeder" && breederSubType) {
+    if (breederSubType === "Heifer") {
+      // Breeder Heifer resolves via Heifer weight rules per mapping spec.
+      // A breeder heifer is still a heifer at market and should be valued against
+      // heifer price brackets, not cow prices.
+      const heiferResolution = resolveMLACategory("Heifer", inputWeight, undefined, rules);
+      return {
+        masterCategory: "Breeder",
+        subCategory: "Heifer",
+        primaryMLACategory: heiferResolution.primaryMLACategory,
+        fallbackMLACategory: heiferResolution.fallbackMLACategory,
+      };
+    }
+    // Breeder Cow maps to "Cows" (no weight matching needed)
     const rule = activeRules.find(
       (r) => r.master_category === masterCategory && r.sub_category === breederSubType
     );
