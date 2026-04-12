@@ -15,7 +15,7 @@ export default async function FreightPage() {
   const [{ data: herds }, { data: properties }] = await Promise.all([
     supabase
       .from("herds")
-      .select("id, name, species, breed, sex, category, head_count, current_weight, is_breeder, property_id")
+      .select("id, name, species, breed, sex, category, head_count, current_weight, is_breeder, property_id, additional_info")
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
       .eq("is_sold", false)

@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { calculateFreightEstimate, DEFAULT_RATE_PER_DECK_PER_KM } from "@/lib/engines/freight-engine";
 import { headsPerDeckForWeight } from "@/lib/data/freight-categories";
 import { resolveFreightCategory } from "@/lib/engines/freight-engine";
+import { parseCalvesAtFoot } from "@/lib/engines/valuation-engine";
 import { saleyards, saleyardLocality, saleyardCoordinates } from "@/lib/data/reference-data";
 import type { FreightEstimate } from "@/lib/types/models";
 import {
@@ -36,6 +37,7 @@ interface HerdOption {
   current_weight: number;
   is_breeder: boolean;
   property_id: string | null;
+  additional_info: string | null;
 }
 
 interface PropertyOption {
@@ -163,10 +165,18 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     const herd = herds.find((h) => h.id === herdId);
     if (herd) {
       setWeight(Math.round(herd.current_weight).toString());
-      setHeadCount(herd.head_count.toString());
-      // Breeder defaults to calves at foot (cow-calf density); others use weight-band
+      // Breeder defaults to calves at foot (cow-calf density); others use weight-band.
+      // For breeders with calves at foot, pre-fill with cow count only (each
+      // cow-calf pair is one loading unit, 18 HPD already accounts for the calf).
       const isBreeder = herd.category === "Breeder";
       setCalvesAtFoot(true);
+      if (isBreeder) {
+        const calfData = parseCalvesAtFoot(herd.additional_info);
+        const loadingUnits = calfData ? Math.max(1, herd.head_count - calfData.headCount) : herd.head_count;
+        setHeadCount(loadingUnits.toString());
+      } else {
+        setHeadCount(herd.head_count.toString());
+      }
       const mapping = resolveFreightCategory(herd.category, herd.sex, herd.current_weight, isBreeder);
       const hpd = mapping.category.id === "cow_calf_units"
         ? mapping.category.headsPerDeck

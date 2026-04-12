@@ -1,7 +1,7 @@
 // Brangus tool definitions and execution for web
 // Mirrors iOS StockmanIQChatService+ToolUse.swift and +DataLookup.swift
 
-import { calculateHerdValue, calculateHerdValuation, calculateProjectedWeight, type CategoryPriceEntry } from "../engines/valuation-engine";
+import { calculateHerdValue, calculateHerdValuation, calculateProjectedWeight, parseCalvesAtFoot, type CategoryPriceEntry } from "../engines/valuation-engine";
 import { calculateFreightEstimate } from "../engines/freight-engine";
 import { saleyardCoordinates } from "../data/reference-data";
 import { resolveMLACategory } from "../data/weight-mapping";
@@ -642,11 +642,15 @@ function lookupFreightEstimates(herdName: string | undefined, store: ChatDataSto
       return `FREIGHT for ${herd.name}: No distance available. Set a saleyard distance on the property to enable freight estimates.`;
     }
 
+    // For breeders with calves at foot, use cow count only (each pair is one loading unit)
+    const calfData = herd.category === "Breeder" ? parseCalvesAtFoot(herd.additional_info) : null;
+    const freightHeadCount = calfData ? Math.max(1, herd.head_count - calfData.headCount) : herd.head_count;
+
     const estimate = calculateFreightEstimate({
       appCategory: herd.category,
       sex: herd.sex,
       averageWeightKg: herd.current_weight || herd.initial_weight,
-      headCount: herd.head_count,
+      headCount: freightHeadCount,
       distanceKm,
     });
 
@@ -678,11 +682,14 @@ function lookupFreightEstimates(herdName: string | undefined, store: ChatDataSto
       lines.push(`- ${herd.name}: No distance available`);
       continue;
     }
+    // For breeders with calves at foot, use cow count only (each pair is one loading unit)
+    const cd = herd.category === "Breeder" ? parseCalvesAtFoot(herd.additional_info) : null;
+    const fhc = cd ? Math.max(1, herd.head_count - cd.headCount) : herd.head_count;
     const est = calculateFreightEstimate({
       appCategory: herd.category,
       sex: herd.sex,
       averageWeightKg: herd.current_weight || herd.initial_weight,
-      headCount: herd.head_count,
+      headCount: fhc,
       distanceKm: dist,
     });
     const gst = est.totalCost * 0.1;
@@ -873,7 +880,15 @@ async function executeFreight(input: Record<string, unknown>, store: ChatDataSto
   if (herdName) {
     const herd = findHerd(herdName, store.herds);
     if (!herd) return `No herd found matching '${herdName}'.`;
-    headCount = herd.head_count;
+    // For breeders with calves at foot, each cow-calf pair is one loading unit.
+    // The 18 HPD cow_calf_units density already accounts for the calf, so count
+    // pairs (cows only), not total head.
+    if (herd.category === "Breeder") {
+      const calfData = parseCalvesAtFoot(herd.additional_info);
+      headCount = calfData ? Math.max(1, herd.head_count - calfData.headCount) : herd.head_count;
+    } else {
+      headCount = herd.head_count;
+    }
     weightKg = herd.current_weight || herd.initial_weight;
     category = herd.category;
     sex = herd.sex;
