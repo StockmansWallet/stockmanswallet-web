@@ -96,7 +96,7 @@ export function ConnectedAdvisorCard({ connection }: { connection: ConnectionReq
                     setShowDisconnect(true);
                   }}
                   disabled={loading}
-                  title="Disconnect advisor"
+                  title="Remove advisor"
                 >
                   <UserX className="h-4 w-4 text-red-400/60" />
                 </Button>
@@ -109,9 +109,9 @@ export function ConnectedAdvisorCard({ connection }: { connection: ConnectionReq
         open={showDisconnect}
         onClose={() => setShowDisconnect(false)}
         onConfirm={handleDisconnect}
-        title="Disconnect Advisor"
-        description={`This will remove ${connection.requester_name} from your advisors. They will need to send a new connection request to reconnect.`}
-        confirmLabel="Disconnect"
+        title="Remove Advisor"
+        description={`This will remove ${connection.requester_name} from your advisors. They will need to send a new request to reconnect.`}
+        confirmLabel="Remove"
         loading={loading}
       />
     </>

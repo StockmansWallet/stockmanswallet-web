@@ -8,7 +8,6 @@ import {
   Users,
   Search,
   Shield,
-  Clock,
   Lock,
   ArrowRight,
 } from "lucide-react";
@@ -130,11 +129,11 @@ export default async function AdvisoryHubPage() {
 
         <Card>
           <CardContent className="p-4">
-            <Clock className="mb-2 h-5 w-5 text-[#2F8CD9]" />
-            <h4 className="text-sm font-medium text-text-primary">3-Day Access</h4>
+            <Shield className="mb-2 h-5 w-5 text-[#2F8CD9]" />
+            <h4 className="text-sm font-medium text-text-primary">Open-Ended Access</h4>
             <p className="mt-1 text-xs text-text-muted">
-              Each permission grant lasts 3 days. Advisors must request
-              renewal for continued access.
+              When you approve access, your advisor can view your data
+              until you stop sharing. You stay in control.
             </p>
           </CardContent>
         </Card>

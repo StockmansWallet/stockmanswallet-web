@@ -9,7 +9,7 @@ import {
   getCategoryConfig,
   hasActivePermission,
   parseSharingPermissions,
-  permissionTimeRemaining,
+  permissionStatusLabel,
   type ConnectionRequest,
   type AdvisoryMessage,
 } from "@/lib/types/advisory";
@@ -97,7 +97,7 @@ export default async function ProducerConnectionDetailPage({
               <Badge variant="default">{categoryConfig.label}</Badge>
             )}
             <Badge variant={isActive ? "success" : "warning"}>
-              {isActive ? permissionTimeRemaining(conn) : "Expired"}
+              {permissionStatusLabel(conn)}
             </Badge>
           </div>
         }

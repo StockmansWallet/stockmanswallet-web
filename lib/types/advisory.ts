@@ -231,9 +231,3 @@ export function permissionStatusLabel(connection: ConnectionRequest): string {
   return "Not sharing";
 }
 
-// Kept for backwards compatibility with components that reference it
-export function permissionTimeRemaining(connection: ConnectionRequest): string {
-  if (connection.status !== "approved") return "Not connected";
-  if (connection.permission_granted_at) return "Sharing";
-  return "Not sharing";
-}

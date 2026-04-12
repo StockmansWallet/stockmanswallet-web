@@ -266,20 +266,6 @@ export default async function ClientDetailPage({
               </Card>
             ),
           },
-          {
-            id: "documents",
-            label: "Documents",
-            content: (
-              <Card>
-                <EmptyState
-                  icon={<Lock className="h-6 w-6 text-[#2F8CD9]" />}
-                  title="Coming Soon"
-                  description="Shared documents from this producer will appear here."
-                  variant="advisor"
-                />
-              </Card>
-            ),
-          },
         ]}
       />
     </div>
