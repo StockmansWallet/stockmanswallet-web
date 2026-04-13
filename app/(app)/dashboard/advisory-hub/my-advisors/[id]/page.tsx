@@ -98,7 +98,7 @@ export default async function ProducerConnectionDetailPage({
       {/* Back link */}
       <Link
         href="/dashboard/advisory-hub/my-advisors"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-text-muted transition-colors hover:text-text-secondary"
+        className="mb-5 mt-1 inline-flex items-center gap-1.5 text-sm text-text-muted transition-colors hover:text-text-secondary"
       >
         <ArrowLeft className="h-4 w-4" />
         My Advisors
@@ -151,7 +151,7 @@ export default async function ProducerConnectionDetailPage({
             <CardTitle className="text-base">Chat with {advisorName}</CardTitle>
           </div>
         </CardHeader>
-        <CardContent className="min-h-[400px] p-0">
+        <CardContent className="p-0">
           <div className="px-5 py-4">
             <ConnectionChatClient
               connectionId={id}

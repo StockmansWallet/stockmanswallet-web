@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-// Card wrapper handled by parent (My Advisors page)
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EyeOff, Eye, Trash2, Layers, Map, FileText, DollarSign, ArrowRight } from "lucide-react";
@@ -52,7 +52,7 @@ export function ConnectedAdvisorCard({ connection }: { connection: ConnectionReq
   return (
     <>
       <Link href={`/dashboard/advisory-hub/my-advisors/${connection.id}`} className="block">
-        <div className="group transition-colors hover:bg-white/[0.02]">
+        <Card className="group border border-white/5 transition-all hover:border-white/10 hover:bg-white/[0.02]">
           <div className="p-0">
             {/* Main row */}
             <div className="flex items-center gap-4 p-4">
@@ -141,7 +141,7 @@ export function ConnectedAdvisorCard({ connection }: { connection: ConnectionReq
               </div>
             </div>
           </div>
-        </div>
+        </Card>
       </Link>
       <ConfirmModal
         open={showDisconnect}
