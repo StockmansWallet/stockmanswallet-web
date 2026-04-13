@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Users } from "lucide-react";
+import { Users, Shield, Clock } from "lucide-react";
 import { ClientCard } from "@/components/app/advisory/client-card";
 import { PendingRequestCard } from "@/components/app/advisory/pending-request-card";
 import { ClientSearch } from "./client-search";
@@ -85,22 +85,37 @@ export default async function AdvisorClientsPage() {
       {/* Stats row */}
       {totalClients > 0 && (
         <div className="mb-6 grid grid-cols-3 gap-3">
-          <Card>
-            <CardContent className="p-4 text-center">
-              <p className="text-2xl font-bold text-text-primary">{totalClients}</p>
-              <p className="text-xs text-text-muted">Total Clients</p>
+          <Card className="border border-white/5">
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#2F8CD9]/10">
+                <Users className="h-4 w-4 text-[#2F8CD9]" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-text-primary">{totalClients}</p>
+                <p className="text-[11px] text-text-muted">Total Clients</p>
+              </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <p className="text-2xl font-bold text-green-400">{activePermissions}</p>
-              <p className="text-xs text-text-muted">Active Permissions</p>
+          <Card className="border border-white/5">
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
+                <Shield className="h-4 w-4 text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-emerald-400">{activePermissions}</p>
+                <p className="text-[11px] text-text-muted">Sharing</p>
+              </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <p className="text-2xl font-bold text-amber-400">{pendingRequests}</p>
-              <p className="text-xs text-text-muted">Pending</p>
+          <Card className="border border-white/5">
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10">
+                <Clock className="h-4 w-4 text-amber-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-amber-400">{pendingRequests}</p>
+                <p className="text-[11px] text-text-muted">Pending</p>
+              </div>
             </CardContent>
           </Card>
         </div>

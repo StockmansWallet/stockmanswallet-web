@@ -98,7 +98,7 @@ export default async function AdvisorProfilePage({
           {/* Bio */}
           {advisor.bio && (
             <div>
-              <h3 className="mb-1.5 text-xs font-semibold uppercase text-text-muted">About</h3>
+              <h3 className="mb-1.5 text-xs font-semibold text-text-muted">About</h3>
               <p className="text-sm leading-relaxed text-text-secondary">{advisor.bio}</p>
             </div>
           )}
@@ -106,19 +106,19 @@ export default async function AdvisorProfilePage({
           {/* Contact info */}
           {(advisor.contact_email || advisor.contact_phone) && (
             <div>
-              <h3 className="mb-2 text-xs font-semibold uppercase text-text-muted">Contact</h3>
+              <h3 className="mb-2 text-xs font-semibold text-text-muted">Contact</h3>
               <div className="space-y-2">
                 {advisor.contact_email && (
-                  <div className="flex items-center gap-2 text-sm text-text-secondary">
-                    <Mail className="h-4 w-4 text-text-muted" />
+                  <a href={`mailto:${advisor.contact_email}`} className="flex items-center gap-2 text-sm text-[#2F8CD9] transition-colors hover:text-[#2F8CD9]/80">
+                    <Mail className="h-4 w-4" />
                     {advisor.contact_email}
-                  </div>
+                  </a>
                 )}
                 {advisor.contact_phone && (
-                  <div className="flex items-center gap-2 text-sm text-text-secondary">
-                    <Phone className="h-4 w-4 text-text-muted" />
+                  <a href={`tel:${advisor.contact_phone.replace(/\s/g, "")}`} className="flex items-center gap-2 text-sm text-[#2F8CD9] transition-colors hover:text-[#2F8CD9]/80">
+                    <Phone className="h-4 w-4" />
                     {advisor.contact_phone}
-                  </div>
+                  </a>
                 )}
               </div>
             </div>
