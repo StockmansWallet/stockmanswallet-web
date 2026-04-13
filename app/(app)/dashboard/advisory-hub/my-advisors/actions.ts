@@ -32,7 +32,7 @@ export async function approveRequest(requestId: string) {
     })
     .eq("id", requestId)
     /* RLS enforces ownership */
-    .select("id, requester_user_id")
+    .select("id, requester_user_id, target_user_id")
     .single();
 
   if (error) return { error: error.message };
@@ -42,9 +42,10 @@ export async function approveRequest(requestId: string) {
     .select("display_name")
     .eq("user_id", user.id)
     .single();
-  const producerName = profile?.display_name || "A producer";
+  const myName = profile?.display_name || "A user";
+  const advisorUserId = conn.requester_user_id === user.id ? conn.target_user_id : conn.requester_user_id;
 
-  await notifyApproval(supabase, conn.requester_user_id, producerName, conn.id);
+  await notifyApproval(supabase, advisorUserId, myName, conn.id, "advisor");
 
   revalidatePath("/dashboard/advisory-hub");
   return { success: true };
@@ -123,7 +124,7 @@ export async function denyRequest(requestId: string) {
     .update({ status: "denied" })
     .eq("id", requestId)
     /* RLS enforces ownership */
-    .select("id, requester_user_id")
+    .select("id, requester_user_id, target_user_id")
     .single();
 
   if (error) return { error: error.message };
@@ -133,9 +134,10 @@ export async function denyRequest(requestId: string) {
     .select("display_name")
     .eq("user_id", user.id)
     .single();
-  const producerName = profile?.display_name || "A producer";
+  const myName = profile?.display_name || "A user";
+  const otherUserId = conn.requester_user_id === user.id ? conn.target_user_id : conn.requester_user_id;
 
-  await notifyDenial(supabase, conn.requester_user_id, producerName, conn.id);
+  await notifyDenial(supabase, otherUserId, myName, conn.id, "advisor");
 
   revalidatePath("/dashboard/advisory-hub");
   return { success: true };
@@ -163,7 +165,7 @@ export async function disconnectAdvisor(requestId: string) {
     })
     .eq("id", requestId)
     /* RLS enforces ownership */
-    .select("id, requester_user_id")
+    .select("id, requester_user_id, target_user_id")
     .single();
 
   if (error) return { error: error.message };
@@ -173,9 +175,10 @@ export async function disconnectAdvisor(requestId: string) {
     .select("display_name")
     .eq("user_id", user.id)
     .single();
-  const producerName = profile?.display_name || "A producer";
+  const myName = profile?.display_name || "A user";
+  const otherUserId = conn.requester_user_id === user.id ? conn.target_user_id : conn.requester_user_id;
 
-  await notifyDenial(supabase, conn.requester_user_id, producerName, conn.id);
+  await notifyDenial(supabase, otherUserId, myName, conn.id, "advisor");
 
   revalidatePath("/dashboard/advisory-hub");
   return { success: true };

@@ -318,7 +318,7 @@ export default async function AdvisorDashboardPage() {
                 </CardContent>
               </Card>
             </Link>
-            <Link href="/dashboard/advisory-hub/directory">
+            <Link href="/dashboard/advisor/directory">
               <Card className="transition-colors hover:bg-white/[0.03]">
                 <CardContent className="flex items-center gap-3 p-4">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#2F8CD9]/15">

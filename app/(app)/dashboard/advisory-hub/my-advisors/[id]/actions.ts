@@ -63,7 +63,7 @@ export async function sendMessage(
     recipientId,
     senderName,
     connectionId,
-    false
+    "advisor"
   );
 
   revalidatePath(`/dashboard/advisory-hub/my-advisors/${connectionId}`);

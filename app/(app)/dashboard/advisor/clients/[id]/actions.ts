@@ -64,7 +64,7 @@ export async function sendAdvisorMessage(
     recipientId,
     senderName,
     connectionId,
-    true
+    "producer"
   );
 
   revalidatePath(`/dashboard/advisor/clients/${connectionId}`);

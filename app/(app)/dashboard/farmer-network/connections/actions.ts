@@ -74,7 +74,7 @@ export async function denyFarmerRequest(requestId: string) {
     .single();
   const name = profile?.display_name || "A farmer";
 
-  await notifyDenial(supabase, conn.requester_user_id, name, conn.id);
+  await notifyDenial(supabase, conn.requester_user_id, name, conn.id, "producer");
 
   revalidatePath("/dashboard/farmer-network");
   return { success: true };

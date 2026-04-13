@@ -154,7 +154,7 @@ export async function disconnectFarmer(connectionId: string) {
     .single();
   const name = profile?.display_name ?? "A farmer";
 
-  await notifyDenial(supabase, recipientId, name, connectionId);
+  await notifyDenial(supabase, recipientId, name, connectionId, "producer");
 
   revalidatePath("/dashboard/farmer-network");
   return { success: true };

@@ -137,7 +137,7 @@ export async function sendAdvisorConnectionRequest(targetUserId: string) {
     type: "new_connection_request",
     title: `${requesterName} wants to connect`,
     body: "Review and approve or deny this connection request.",
-    link: "/dashboard/advisory-hub/my-advisors",
+    link: `/dashboard/advisory-hub/my-advisors/${connId}`,
     connectionId: connId,
   });
 
@@ -189,7 +189,7 @@ export async function requestRenewal(connectionId: string) {
   const advisorName = profile?.display_name || "An advisor";
 
   const { notifyRenewalRequested } = await import("@/lib/advisory/notifications");
-  await notifyRenewalRequested(supabase, producerUserId, advisorName, conn.id);
+  await notifyRenewalRequested(supabase, producerUserId, advisorName, conn.id, "producer");
 
   revalidatePath("/dashboard/advisor/clients");
   revalidatePath(`/dashboard/advisor/clients/${connectionId}`);
@@ -329,10 +329,11 @@ export async function declineClientRequest(connectionId: string) {
     userId: producerUserId,
     type: "request_denied",
     title: `${profile?.display_name || "An advisor"} declined your request`,
-    link: "/dashboard/advisory-hub/my-advisors",
+    link: `/dashboard/advisory-hub/my-advisors`,
     connectionId,
   });
 
   revalidatePath("/dashboard/advisor/clients");
+  revalidatePath("/dashboard/advisory-hub/my-advisors");
   return { success: true };
 }

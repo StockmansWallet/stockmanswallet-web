@@ -2,14 +2,17 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
-import { Users, Search } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Users, Search, ArrowRight, MapPin, Clock, Check, Shield } from "lucide-react";
 import { AdvisorRequestCard } from "@/components/app/advisory/advisor-request-card";
 import { ConnectedAdvisorCard } from "@/components/app/advisory/connected-advisor-card";
 import { ConnectionRealtime } from "@/components/app/advisory/connection-realtime";
-import type { ConnectionRequest } from "@/lib/types/advisory";
+import { getCategoryConfig, hasActivePermission, type ConnectionRequest } from "@/lib/types/advisory";
+
+export const revalidate = 0;
 
 export const metadata = {
   title: "My Advisors",
@@ -23,7 +26,7 @@ export default async function MyAdvisorsPage() {
 
   if (!user) redirect("/sign-in");
 
-  // Fetch connections in both directions (advisor-initiated and producer-initiated)
+  // Fetch all connections in both directions
   const { data: rawConnections } = await supabase
     .from("connection_requests")
     .select("*")
@@ -31,46 +34,52 @@ export default async function MyAdvisorsPage() {
     .in("status", ["pending", "approved"])
     .order("created_at", { ascending: false });
 
-  // For producer-initiated connections, resolve the advisor's profile so cards
-  // display the advisor's name/role/company instead of the producer's own info.
   const allConns = (rawConnections ?? []) as ConnectionRequest[];
-  const producerInitiatedIds = allConns
-    .filter((c) => c.requester_user_id === user.id)
-    .map((c) => c.target_user_id);
 
-  let advisorProfiles: Record<string, { display_name: string; role: string; company_name: string }> = {};
-  if (producerInitiatedIds.length > 0) {
-    const { data: profiles } = await supabase
+  // Resolve advisor profiles for producer-initiated connections
+  // (so cards show the advisor's name, not the producer's own name)
+  const otherPartyIds = allConns.map((c) =>
+    c.requester_user_id === user.id ? c.target_user_id : c.requester_user_id
+  );
+
+  let profiles: Record<string, { display_name: string; role: string; company_name: string; state: string }> = {};
+  if (otherPartyIds.length > 0) {
+    const { data } = await supabase
       .from("user_profiles")
-      .select("user_id, display_name, role, company_name")
-      .in("user_id", producerInitiatedIds);
-    for (const p of profiles ?? []) {
-      advisorProfiles[p.user_id] = p;
+      .select("user_id, display_name, role, company_name, state")
+      .in("user_id", [...new Set(otherPartyIds)]);
+    for (const p of data ?? []) {
+      profiles[p.user_id] = p;
     }
   }
 
-  // Normalise: swap requester fields to the advisor's info for producer-initiated
+  // Normalise all connections: resolve the advisor (other party) info
   const connections = allConns.map((c) => {
-    if (c.requester_user_id === user.id) {
-      const profile = advisorProfiles[c.target_user_id];
-      return {
-        ...c,
-        requester_name: profile?.display_name ?? "Unknown Advisor",
-        requester_role: profile?.role ?? "advisor",
-        requester_company: profile?.company_name ?? null,
-      };
-    }
-    return c;
+    const otherPartyId = c.requester_user_id === user.id ? c.target_user_id : c.requester_user_id;
+    const profile = profiles[otherPartyId];
+    return {
+      ...c,
+      // Override requester fields with the advisor's actual info for display
+      requester_name: profile?.display_name ?? c.requester_name,
+      requester_role: profile?.role ?? c.requester_role,
+      requester_company: profile?.company_name ?? c.requester_company,
+      _isProducerInitiated: c.requester_user_id === user.id,
+    };
   });
 
-  const pending = connections.filter(
-    (c: ConnectionRequest) => c.status === "pending"
+  // Split into sections
+  // Incoming: advisor sent request TO this producer (user is target, status pending)
+  const incomingRequests = connections.filter(
+    (c) => c.status === "pending" && c.target_user_id === user.id
   );
-  const approved = connections.filter(
-    (c: ConnectionRequest) => c.status === "approved"
+  // Awaiting: producer sent request, waiting for advisor to accept (user is requester, status pending)
+  const awaitingResponse = connections.filter(
+    (c) => c.status === "pending" && c.requester_user_id === user.id
   );
+  // Connected: approved in either direction
+  const connected = connections.filter((c) => c.status === "approved");
 
-  const hasConnections = pending.length > 0 || approved.length > 0;
+  const hasAnything = incomingRequests.length > 0 || awaitingResponse.length > 0 || connected.length > 0;
 
   return (
     <div className="max-w-3xl">
@@ -92,7 +101,7 @@ export default async function MyAdvisorsPage() {
         }
       />
 
-      {!hasConnections && (
+      {!hasAnything && (
         <Card>
           <EmptyState
             icon={<Users className="h-6 w-6 text-[#2F8CD9]" />}
@@ -105,28 +114,76 @@ export default async function MyAdvisorsPage() {
         </Card>
       )}
 
-      {/* Pending requests */}
-      {pending.length > 0 && (
-        <div className="mb-8">
-          <h3 className="mb-3 text-sm font-semibold text-text-secondary">
-            Pending Requests ({pending.length})
+      {/* Incoming requests from advisors (user needs to approve/deny) */}
+      {incomingRequests.length > 0 && (
+        <div className="mb-6">
+          <h3 className="mb-3 text-sm font-semibold text-amber-400">
+            Incoming Requests ({incomingRequests.length})
           </h3>
           <div className="space-y-3">
-            {pending.map((request: ConnectionRequest) => (
+            {incomingRequests.map((request) => (
               <AdvisorRequestCard key={request.id} request={request} />
             ))}
           </div>
         </div>
       )}
 
-      {/* Active connections */}
-      {approved.length > 0 && (
-        <div>
+      {/* Requests sent by producer, awaiting advisor response */}
+      {awaitingResponse.length > 0 && (
+        <div className="mb-6">
           <h3 className="mb-3 text-sm font-semibold text-text-secondary">
-            Connected Advisors ({approved.length})
+            Awaiting Response ({awaitingResponse.length})
           </h3>
           <div className="space-y-3">
-            {approved.map((connection: ConnectionRequest) => (
+            {awaitingResponse.map((conn) => {
+              const categoryConfig = getCategoryConfig(conn.requester_role);
+              return (
+                <Card key={conn.id} className="border border-white/5">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#2F8CD9]/15">
+                          {categoryConfig ? (
+                            <categoryConfig.icon className={`h-5 w-5 ${categoryConfig.colorClass}`} />
+                          ) : (
+                            <div className="h-5 w-5 rounded-full bg-[#2F8CD9]" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-text-primary">{conn.requester_name}</p>
+                          <div className="mt-0.5 flex items-center gap-2">
+                            {categoryConfig && (
+                              <span className="text-xs text-text-muted">{categoryConfig.label}</span>
+                            )}
+                            {conn.requester_company && (
+                              <span className="text-xs text-text-muted">{conn.requester_company}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <Badge variant="warning">
+                        <Clock className="mr-1 h-3 w-3" />
+                        Pending
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Connected advisors */}
+      {connected.length > 0 && (
+        <div>
+          {(incomingRequests.length > 0 || awaitingResponse.length > 0) && (
+            <h3 className="mb-3 text-sm font-semibold text-text-secondary">
+              Connected Advisors ({connected.length})
+            </h3>
+          )}
+          <div className="space-y-3">
+            {connected.map((connection) => (
               <ConnectedAdvisorCard key={connection.id} connection={connection} />
             ))}
           </div>

@@ -66,49 +66,62 @@ async function sendPushNotification(params: NotificationParams) {
   }
 }
 
+// Direction-aware notification helpers.
+// recipientRole determines which dashboard the link goes to:
+// "producer" -> /dashboard/advisory-hub/my-advisors/{id}
+// "advisor"  -> /dashboard/advisor/clients/{id}
+function linkForRole(role: "producer" | "advisor", connectionId: string): string {
+  return role === "producer"
+    ? `/dashboard/advisory-hub/my-advisors/${connectionId}`
+    : `/dashboard/advisor/clients/${connectionId}`;
+}
+
 export async function notifyConnectionRequest(
   supabase: SupabaseClient,
-  producerUserId: string,
-  advisorName: string,
-  connectionId: string
+  recipientUserId: string,
+  senderName: string,
+  connectionId: string,
+  recipientRole: "producer" | "advisor" = "producer"
 ) {
   await createNotification(supabase, {
-    userId: producerUserId,
+    userId: recipientUserId,
     type: "new_connection_request",
-    title: `${advisorName} requested access`,
-    body: "Review and approve or deny this connection request.",
-    link: "/dashboard/advisory-hub/my-advisors",
+    title: `${senderName} wants to connect`,
+    body: "Review and accept or decline this connection request.",
+    link: linkForRole(recipientRole, connectionId),
     connectionId,
   });
 }
 
 export async function notifyApproval(
   supabase: SupabaseClient,
-  advisorUserId: string,
-  producerName: string,
-  connectionId: string
+  recipientUserId: string,
+  approverName: string,
+  connectionId: string,
+  recipientRole: "producer" | "advisor" = "advisor"
 ) {
   await createNotification(supabase, {
-    userId: advisorUserId,
+    userId: recipientUserId,
     type: "request_approved",
-    title: `${producerName} approved your request`,
-    body: "You are now connected. Request data access when you need to review their portfolio.",
-    link: `/dashboard/advisor/clients/${connectionId}`,
+    title: `${approverName} accepted your connection`,
+    body: "You are now connected and can view shared data.",
+    link: linkForRole(recipientRole, connectionId),
     connectionId,
   });
 }
 
 export async function notifyDenial(
   supabase: SupabaseClient,
-  advisorUserId: string,
-  producerName: string,
-  connectionId: string
+  recipientUserId: string,
+  declinerName: string,
+  connectionId: string,
+  recipientRole: "producer" | "advisor" = "advisor"
 ) {
   await createNotification(supabase, {
-    userId: advisorUserId,
+    userId: recipientUserId,
     type: "request_denied",
-    title: `${producerName} denied your request`,
-    link: "/dashboard/advisor/clients",
+    title: `${declinerName} declined your request`,
+    link: linkForRole(recipientRole, connectionId),
     connectionId,
   });
 }
@@ -118,33 +131,30 @@ export async function notifyNewMessage(
   recipientUserId: string,
   senderName: string,
   connectionId: string,
-  isAdvisorSender: boolean
+  recipientRole: "producer" | "advisor"
 ) {
-  const link = isAdvisorSender
-    ? `/dashboard/advisory-hub/my-advisors/${connectionId}`
-    : `/dashboard/advisor/clients/${connectionId}`;
-
   await createNotification(supabase, {
     userId: recipientUserId,
     type: "new_message",
     title: `New message from ${senderName}`,
-    link,
+    link: linkForRole(recipientRole, connectionId),
     connectionId,
   });
 }
 
 export async function notifyRenewalRequested(
   supabase: SupabaseClient,
-  producerUserId: string,
-  advisorName: string,
-  connectionId: string
+  recipientUserId: string,
+  requesterName: string,
+  connectionId: string,
+  recipientRole: "producer" | "advisor" = "producer"
 ) {
   await createNotification(supabase, {
-    userId: producerUserId,
+    userId: recipientUserId,
     type: "renewal_requested",
-    title: `${advisorName} requested data access`,
+    title: `${requesterName} requested data access`,
     body: "Review and grant access to share your portfolio data.",
-    link: "/dashboard/advisory-hub/my-advisors",
+    link: linkForRole(recipientRole, connectionId),
     connectionId,
   });
 }
