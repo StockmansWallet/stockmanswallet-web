@@ -80,7 +80,7 @@ export default async function AdvisorDirectoryPage({
           />
         </Card>
       ) : (
-        <div className="space-y-3">
+        <div className="overflow-hidden rounded-xl border border-white/5 divide-y divide-white/5">
           {filteredAdvisors.map((advisor: DirectoryAdvisor) => (
             <DirectoryAdvisorCard key={advisor.user_id} advisor={advisor} />
           ))}

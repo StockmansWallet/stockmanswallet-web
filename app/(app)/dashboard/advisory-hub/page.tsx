@@ -9,9 +9,9 @@ import {
   Users,
   Search,
   Shield,
-  Handshake,
-  Lock,
   ArrowRight,
+  UserCheck,
+  Clock,
 } from "lucide-react";
 
 export const revalidate = 0;
@@ -34,36 +34,9 @@ export default async function AdvisoryHubPage() {
     .or(`target_user_id.eq.${user.id},requester_user_id.eq.${user.id}`)
     .in("status", ["pending", "approved"]);
 
-  // Only count incoming pending (from advisors, where user is target)
   const pendingCount = connections?.filter((c) => c.status === "pending" && c.target_user_id === user.id).length ?? 0;
   const activeCount = connections?.filter((c) => c.status === "approved").length ?? 0;
-
-  const steps = [
-    {
-      num: 1,
-      icon: Shield,
-      title: "Data Privacy",
-      desc: "Advisors can view your portfolio but never modify your data. Your records remain yours.",
-      colour: "text-emerald-400",
-      bg: "bg-emerald-400/10",
-    },
-    {
-      num: 2,
-      icon: Handshake,
-      title: "Two-Way Consent",
-      desc: "Both you and your advisor must accept the connection before any data is shared.",
-      colour: "text-[#2F8CD9]",
-      bg: "bg-[#2F8CD9]/10",
-    },
-    {
-      num: 3,
-      icon: Lock,
-      title: "You Control Access",
-      desc: "Choose what to share. Revoke access at any time with a single click.",
-      colour: "text-amber-400",
-      bg: "bg-amber-400/10",
-    },
-  ];
+  const awaitingCount = connections?.filter((c) => c.status === "pending" && c.target_user_id !== user.id).length ?? 0;
 
   return (
     <div className="max-w-4xl">
@@ -76,31 +49,47 @@ export default async function AdvisoryHubPage() {
         inline
       />
 
-      {/* Hero card */}
-      <Card className="mb-6 overflow-hidden border border-[#2F8CD9]/20">
-        <div className="bg-gradient-to-br from-[#2F8CD9]/12 via-[#2F8CD9]/5 to-transparent p-6">
-          <div className="flex items-start gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#2F8CD9]/15 shadow-lg shadow-[#2F8CD9]/10">
-              <Users className="h-7 w-7 text-[#2F8CD9]" />
+      {/* Stats row */}
+      <div className="mb-6 grid grid-cols-3 gap-3">
+        <Card className="border border-white/5">
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
+              <UserCheck className="h-5 w-5 text-emerald-400" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-text-primary">
-                Your Advisory Team
-              </h2>
-              <p className="mt-1 text-sm leading-relaxed text-text-secondary">
-                Securely share your portfolio data with trusted advisors.
-                They can view your holdings and provide professional guidance
-                without ever modifying your data.
-              </p>
+              <p className="text-2xl font-bold text-text-primary">{activeCount}</p>
+              <p className="text-[11px] text-text-muted">Connected</p>
             </div>
-          </div>
-        </div>
-      </Card>
+          </CardContent>
+        </Card>
+        <Card className="border border-white/5">
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
+              <Clock className="h-5 w-5 text-amber-400" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-amber-400">{pendingCount}</p>
+              <p className="text-[11px] text-text-muted">Pending</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border border-white/5">
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#2F8CD9]/10">
+              <Users className="h-5 w-5 text-[#2F8CD9]" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-text-primary">{awaitingCount}</p>
+              <p className="text-[11px] text-text-muted">Awaiting</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Action cards */}
-      <div className="mb-8 grid gap-4 sm:grid-cols-2">
+      <div className="mb-6 grid gap-4 sm:grid-cols-2">
         <Link href="/dashboard/advisory-hub/my-advisors">
-          <Card className="group cursor-pointer border border-white/5 transition-all hover:border-[#2F8CD9]/30 hover:bg-surface-low">
+          <Card className="group h-full cursor-pointer border border-white/5 transition-all hover:border-[#2F8CD9]/30 hover:bg-surface-low">
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -128,7 +117,7 @@ export default async function AdvisoryHubPage() {
         </Link>
 
         <Link href="/dashboard/advisory-hub/directory">
-          <Card className="group cursor-pointer border border-white/5 transition-all hover:border-[#2F8CD9]/30 hover:bg-surface-low">
+          <Card className="group h-full cursor-pointer border border-white/5 transition-all hover:border-[#2F8CD9]/30 hover:bg-surface-low">
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -147,27 +136,16 @@ export default async function AdvisoryHubPage() {
         </Link>
       </div>
 
-      {/* How it works - numbered steps */}
-      <h3 className="mb-4 text-sm font-semibold text-text-secondary">How it works</h3>
-      <div className="grid gap-3 sm:grid-cols-3">
-        {steps.map((step) => (
-          <Card key={step.num} className="overflow-hidden border border-white/5">
-            <CardContent className="relative p-5">
-              {/* Step number */}
-              <div className="absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-full bg-white/5 text-xs font-bold text-text-muted">
-                {step.num}
-              </div>
-              <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl ${step.bg}`}>
-                <step.icon className={`h-5 w-5 ${step.colour}`} />
-              </div>
-              <h4 className="text-sm font-semibold text-text-primary">{step.title}</h4>
-              <p className="mt-1.5 text-xs leading-relaxed text-text-muted">
-                {step.desc}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* Privacy note */}
+      <Card className="border border-white/5 bg-emerald-500/[0.03]">
+        <CardContent className="flex items-start gap-3 p-4">
+          <Shield className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" />
+          <p className="text-xs leading-relaxed text-text-muted">
+            Advisors can view your portfolio but never modify your data. You control all access.
+            Both you and your advisor must accept the connection before any data is shared.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }
