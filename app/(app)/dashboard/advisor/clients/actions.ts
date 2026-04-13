@@ -107,7 +107,7 @@ export async function sendAdvisorConnectionRequest(targetUserId: string) {
         requester_company: requesterCompany,
         permission_granted_at: null,
         permission_expires_at: null,
-        sharing_permissions: null,
+        sharing_permissions: { herds: false, properties: false, reports: false, valuations: false },
         updated_at: new Date().toISOString(),
       })
       .eq("id", existing.id)
