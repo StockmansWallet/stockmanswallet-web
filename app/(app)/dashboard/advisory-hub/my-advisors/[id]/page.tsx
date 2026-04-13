@@ -4,7 +4,7 @@ import { redirect, notFound } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs } from "@/components/ui/tabs";
-import { ArrowLeft, Mail, Phone, MapPin, Shield, Calendar } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { ConnectionChatClient } from "./connection-chat-client";
 import { SharingPreferencesCard } from "@/components/app/advisory/sharing-preferences-card";
 import { ConnectionRealtime } from "@/components/app/advisory/connection-realtime";
@@ -163,8 +163,8 @@ export default async function ProducerConnectionDetailPage({
             id: "chat",
             label: "Chat",
             content: (
-              <Card className="border border-white/5">
-                <CardContent className="p-5">
+              <Card>
+                <CardContent className="p-0 min-h-[500px]">
                   <ConnectionChatClient
                     connectionId={id}
                     currentUserId={user.id}

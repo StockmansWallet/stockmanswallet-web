@@ -95,7 +95,7 @@ export function AdvisorChatClient({
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto px-1 pt-2 pb-2">
+      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-2">
         <div className="space-y-3">
           <MessageThread
             messages={messages}
@@ -109,7 +109,7 @@ export function AdvisorChatClient({
       </div>
 
       {/* Input area */}
-      <div className="shrink-0 border-t border-white/6 pt-3">
+      <div className="shrink-0 p-4">
         <ChatInput
           onSend={handleSend}
           onTyping={notifyTyping}

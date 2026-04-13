@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { redirect, notFound } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs } from "@/components/ui/tabs";
 import { ClientOverview } from "@/components/app/advisory/client-overview";
@@ -243,8 +243,7 @@ export default async function ClientDetailPage({
             label: "Chat",
             content: (
               <Card>
-                <CardHeader><CardTitle>Chat</CardTitle></CardHeader>
-                <CardContent className="px-5 pb-5 min-h-[500px]">
+                <CardContent className="p-0 min-h-[500px]">
                   <AdvisorChatClient
                     connectionId={id}
                     currentUserId={user.id}
