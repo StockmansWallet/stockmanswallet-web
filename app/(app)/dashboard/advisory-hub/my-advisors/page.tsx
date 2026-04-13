@@ -101,9 +101,6 @@ export default async function MyAdvisorsPage() {
         }
       />
 
-      {/* TODO: Remove this debug line after confirming deployment */}
-      <p className="mb-4 text-xs text-red-400">Build: {new Date().toISOString()}</p>
-
       {!hasAnything && (
         <Card>
           <EmptyState
