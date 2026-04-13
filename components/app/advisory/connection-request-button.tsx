@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, Check, Clock, Layers, Map, FileText, DollarSign } from "lucide-react";
@@ -19,6 +19,9 @@ export function ConnectionRequestButton({
   const [status, setStatus] = useState(existingStatus);
   const [error, setError] = useState<string | null>(null);
   const [showToggles, setShowToggles] = useState(false);
+
+  // Sync server-refreshed prop to local state (router.refresh updates the prop)
+  useEffect(() => { setStatus(existingStatus); }, [existingStatus]);
 
   // Sharing toggles
   const [shareHerds, setShareHerds] = useState(true);
