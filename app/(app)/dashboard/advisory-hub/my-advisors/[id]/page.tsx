@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ConnectionChatClient } from "./connection-chat-client";
 import { SharingPreferencesCard } from "@/components/app/advisory/sharing-preferences-card";
+import { ConnectionRealtime } from "@/components/app/advisory/connection-realtime";
 import {
   getCategoryConfig,
   hasActivePermission,
@@ -94,6 +95,7 @@ export default async function ProducerConnectionDetailPage({
 
   return (
     <div className="max-w-3xl">
+      <ConnectionRealtime userId={user.id} />
       <PageHeader
         title={advisorName}
         titleClassName="text-4xl font-bold text-[#2F8CD9]"

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ConnectionRealtime } from "@/components/app/advisory/connection-realtime";
 import {
   Users,
   Search,
@@ -36,6 +37,7 @@ export default async function AdvisoryHubPage() {
 
   return (
     <div className="max-w-4xl">
+      <ConnectionRealtime userId={user.id} />
       <PageHeader
         title="Advisory Hub"
         titleClassName="text-4xl font-bold text-[#2F8CD9]"

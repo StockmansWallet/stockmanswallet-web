@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
+import { ConnectionRealtime } from "@/components/app/advisory/connection-realtime";
 import { hasActivePermission, isAdvisorRole, type ConnectionRequest } from "@/lib/types/advisory";
 import { Users, Search, TrendingUp, TrendingDown } from "lucide-react";
 import { ClientsByLgaChart } from "@/components/app/advisory/clients-by-lga-chart";
@@ -147,6 +148,7 @@ export default async function AdvisorDashboardPage() {
 
   return (
     <div className="max-w-5xl">
+      <ConnectionRealtime userId={user.id} />
       <PageHeader
         title={`Welcome, ${firstName}`}
         titleClassName="text-4xl font-bold text-[#2F8CD9]"
