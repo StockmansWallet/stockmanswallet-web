@@ -614,7 +614,7 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
       )}
 
       {/* Input area */}
-      <div data-print-hide className="border-t border-white/6 p-4">
+      <div data-print-hide className="p-4">
         <div className="mx-auto max-w-2xl">
           <ChatInput
             onSend={handleSend}

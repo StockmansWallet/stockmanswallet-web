@@ -85,7 +85,7 @@ export default async function AdvisorClientsPage() {
       {/* Stats row */}
       {totalClients > 0 && (
         <div className="mb-6 grid grid-cols-3 gap-3">
-          <Card className="border border-white/5">
+          <Card>
             <CardContent className="flex items-center gap-3 p-4">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#2F8CD9]/10">
                 <Users className="h-4 w-4 text-[#2F8CD9]" />
@@ -96,7 +96,7 @@ export default async function AdvisorClientsPage() {
               </div>
             </CardContent>
           </Card>
-          <Card className="border border-white/5">
+          <Card>
             <CardContent className="flex items-center gap-3 p-4">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
                 <Shield className="h-4 w-4 text-emerald-400" />
@@ -107,7 +107,7 @@ export default async function AdvisorClientsPage() {
               </div>
             </CardContent>
           </Card>
-          <Card className="border border-white/5">
+          <Card>
             <CardContent className="flex items-center gap-3 p-4">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10">
                 <Clock className="h-4 w-4 text-amber-400" />

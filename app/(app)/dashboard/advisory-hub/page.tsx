@@ -51,7 +51,7 @@ export default async function AdvisoryHubPage() {
 
       {/* Stats row */}
       <div className="mb-6 grid grid-cols-3 gap-3">
-        <Card className="border border-white/5">
+        <Card>
           <CardContent className="flex items-center gap-3 p-4">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
               <UserCheck className="h-5 w-5 text-emerald-400" />
@@ -62,7 +62,7 @@ export default async function AdvisoryHubPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="border border-white/5">
+        <Card>
           <CardContent className="flex items-center gap-3 p-4">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
               <Clock className="h-5 w-5 text-amber-400" />
@@ -73,7 +73,7 @@ export default async function AdvisoryHubPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="border border-white/5">
+        <Card>
           <CardContent className="flex items-center gap-3 p-4">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#2F8CD9]/10">
               <Users className="h-5 w-5 text-[#2F8CD9]" />

@@ -61,7 +61,7 @@ export default async function SettingsPage() {
       <div className="space-y-6">
         {/* Main settings navigation */}
         <Card>
-          <CardContent className="divide-y divide-white/[0.04] p-0">
+          <CardContent className="divide-y divide-white/[0.06] p-0">
             <NavItem
               href="/dashboard/settings/profile"
               icon={User}

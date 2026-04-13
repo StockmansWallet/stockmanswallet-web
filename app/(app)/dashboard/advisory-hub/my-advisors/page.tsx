@@ -87,7 +87,6 @@ export default async function MyAdvisorsPage() {
       <PageHeader
         title="My Advisors"
         titleClassName="text-4xl font-bold text-[#2F8CD9]"
-        titleHref="/dashboard/advisory-hub"
         subtitle="Manage your advisory connections"
         subtitleClassName="text-sm font-medium text-text-secondary"
         inline
@@ -138,7 +137,7 @@ export default async function MyAdvisorsPage() {
             {awaitingResponse.map((conn) => {
               const categoryConfig = getCategoryConfig(conn.requester_role);
               return (
-                <Card key={conn.id} className="border border-white/5">
+                <Card key={conn.id}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3">

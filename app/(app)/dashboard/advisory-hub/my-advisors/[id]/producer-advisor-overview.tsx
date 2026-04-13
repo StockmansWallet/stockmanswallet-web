@@ -58,7 +58,7 @@ export function ProducerAdvisorOverview({
   return (
     <div className="space-y-4">
       {/* Connection status */}
-      <Card className="border border-white/5">
+      <Card>
         <CardContent className="p-5">
           <div className="flex items-center gap-3 mb-4">
             <Shield className={`h-5 w-5 ${isActive ? "text-emerald-400" : "text-text-muted"}`} />
@@ -81,7 +81,7 @@ export function ProducerAdvisorOverview({
       </Card>
 
       {/* Advisor details */}
-      <Card className="border border-white/5">
+      <Card>
         <CardContent className="space-y-4 p-5">
           {advisorCompany && (
             <div className="flex items-center gap-2.5 text-sm text-text-secondary">
@@ -98,29 +98,33 @@ export function ProducerAdvisorOverview({
           {advisorBio && (
             <p className="text-sm leading-relaxed text-text-secondary">{advisorBio}</p>
           )}
-          {advisorEmail && (
-            <a
-              href={`mailto:${advisorEmail}`}
-              className="flex items-center gap-2.5 rounded-lg bg-white/[0.03] px-3.5 py-2.5 text-sm text-[#2F8CD9] transition-colors hover:bg-white/[0.06]"
-            >
-              <Mail className="h-4 w-4" />
-              {advisorEmail}
-            </a>
-          )}
-          {advisorPhone && (
-            <a
-              href={`tel:${advisorPhone.replace(/\s/g, "")}`}
-              className="flex items-center gap-2.5 rounded-lg bg-white/[0.03] px-3.5 py-2.5 text-sm text-[#2F8CD9] transition-colors hover:bg-white/[0.06]"
-            >
-              <Phone className="h-4 w-4" />
-              {advisorPhone}
-            </a>
+          {(advisorEmail || advisorPhone) && (
+            <div className="flex flex-wrap items-center gap-3">
+              {advisorEmail && (
+                <a
+                  href={`mailto:${advisorEmail}`}
+                  className="flex items-center gap-2 rounded-lg bg-white/[0.03] px-3 py-2 text-sm text-[#2F8CD9] transition-colors hover:bg-white/[0.06]"
+                >
+                  <Mail className="h-4 w-4" />
+                  {advisorEmail}
+                </a>
+              )}
+              {advisorPhone && (
+                <a
+                  href={`tel:${advisorPhone.replace(/\s/g, "")}`}
+                  className="flex items-center gap-2 rounded-lg bg-white/[0.03] px-3 py-2 text-sm text-[#2F8CD9] transition-colors hover:bg-white/[0.06]"
+                >
+                  <Phone className="h-4 w-4" />
+                  {advisorPhone}
+                </a>
+              )}
+            </div>
           )}
         </CardContent>
       </Card>
 
       {/* Actions */}
-      <Card className="border border-white/5">
+      <Card>
         <CardContent className="flex items-center gap-3 p-4">
           <Button
             variant={isActive ? "ghost" : "teal"}
