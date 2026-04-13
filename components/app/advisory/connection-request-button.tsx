@@ -96,7 +96,7 @@ export function ConnectionRequestButton({
         <p className="text-xs text-text-muted">You can change these settings after connecting.</p>
       </div>
 
-      <div className="divide-y divide-white/5 rounded-xl bg-white/[0.03] border border-white/5">
+      <div className="divide-y divide-white/5 rounded-xl bg-white/[0.03]">
         <SharingToggle
           icon={<Layers className="h-4 w-4" />}
           title="Herds"

@@ -72,7 +72,7 @@ export default async function AdvisorProducerDirectoryPage({
           />
         </Card>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-white/5 divide-y divide-white/5">
+        <div className="overflow-hidden rounded-xl divide-y divide-white/5">
           {(producers ?? []).map((producer) => (
             <ProducerCard key={producer.user_id} producer={producer} />
           ))}

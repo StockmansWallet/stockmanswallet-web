@@ -52,7 +52,7 @@ export function ConnectedAdvisorCard({ connection }: { connection: ConnectionReq
   return (
     <>
       <Link href={`/dashboard/advisory-hub/my-advisors/${connection.id}`} className="block">
-        <Card className="group border border-white/5 transition-all hover:border-white/10 hover:bg-white/[0.02]">
+        <Card className="group transition-all hover:bg-white/[0.02]">
           <div className="p-0">
             {/* Main row */}
             <div className="flex items-center gap-4 p-4">

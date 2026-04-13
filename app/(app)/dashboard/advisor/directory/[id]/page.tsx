@@ -59,7 +59,7 @@ export default async function ProducerProfilePage({
         Find Producers
       </Link>
 
-      <Card className="overflow-hidden border border-white/5">
+      <Card className="overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-emerald-500/[0.06] to-transparent p-6">
           <div className="flex items-center gap-4">

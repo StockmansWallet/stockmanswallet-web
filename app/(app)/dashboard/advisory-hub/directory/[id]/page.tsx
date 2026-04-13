@@ -61,7 +61,7 @@ export default async function AdvisorProfilePage({
       </Link>
 
       {/* Profile card */}
-      <Card className="mb-6 overflow-hidden border border-white/5">
+      <Card className="mb-6 overflow-hidden">
         {/* Header with gradient */}
         <div className="bg-gradient-to-r from-white/[0.04] to-transparent p-6">
           <div className="flex items-center gap-4">

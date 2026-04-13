@@ -40,7 +40,7 @@ function OverrideField({ label, baselineValue, value, onChange, suffix = "", ste
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="--"
-        className="w-24 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-right text-sm tabular-nums text-text-primary outline-none focus:border-brand"
+        className="w-24 rounded-lg bg-white/5 px-2.5 py-1.5 text-right text-sm tabular-nums text-text-primary outline-none focus:border-brand"
       />
     </div>
   );
@@ -214,7 +214,7 @@ export function AdvisorLensPanel({
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Reasoning for adjustments..."
                 rows={3}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand"
+                className="w-full rounded-lg bg-white/5 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand"
               />
             </CardContent>
           </Card>

@@ -28,7 +28,7 @@ export function PendingRequestCard({
 
   if (resolved === "accepted") {
     return (
-      <Card className="border border-green-500/20 bg-green-500/5">
+      <Card className="bg-green-500/5">
         <CardContent className="flex items-center gap-3 p-4">
           <Check className="h-5 w-5 text-green-400" />
           <p className="text-sm font-medium text-green-400">
@@ -41,7 +41,7 @@ export function PendingRequestCard({
 
   if (resolved === "declined") {
     return (
-      <Card className="border border-white/5 bg-white/[0.02] opacity-60">
+      <Card className="bg-white/[0.02] opacity-60">
         <CardContent className="flex items-center gap-3 p-4">
           <X className="h-5 w-5 text-text-muted" />
           <p className="text-sm text-text-muted">Request from {clientName} declined.</p>
@@ -65,7 +65,7 @@ export function PendingRequestCard({
   };
 
   return (
-    <Card className="border border-amber-500/20 bg-amber-500/5">
+    <Card className="bg-amber-500/[0.03]">
       <CardContent className="p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">

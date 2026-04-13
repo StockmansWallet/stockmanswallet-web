@@ -42,7 +42,7 @@ export function AdvisorRequestCard({ request }: { request: ConnectionRequest }) 
 
   return (
     <>
-    <Card className="border border-amber-500/20 bg-amber-500/[0.03]">
+    <Card className="bg-amber-500/[0.03]">
       <CardContent className="p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3.5">

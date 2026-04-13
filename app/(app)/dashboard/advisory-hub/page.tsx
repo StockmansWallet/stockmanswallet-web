@@ -89,7 +89,7 @@ export default async function AdvisoryHubPage() {
       {/* Action cards */}
       <div className="mb-6 grid gap-4 sm:grid-cols-2">
         <Link href="/dashboard/advisory-hub/my-advisors">
-          <Card className="group h-full cursor-pointer border border-white/5 transition-all hover:border-[#2F8CD9]/30 hover:bg-surface-low">
+          <Card className="group h-full cursor-pointer transition-all hover:bg-surface-low">
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -117,7 +117,7 @@ export default async function AdvisoryHubPage() {
         </Link>
 
         <Link href="/dashboard/advisory-hub/directory">
-          <Card className="group h-full cursor-pointer border border-white/5 transition-all hover:border-[#2F8CD9]/30 hover:bg-surface-low">
+          <Card className="group h-full cursor-pointer transition-all hover:bg-surface-low">
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -137,7 +137,7 @@ export default async function AdvisoryHubPage() {
       </div>
 
       {/* Privacy note */}
-      <Card className="border border-white/5 bg-emerald-500/[0.03]">
+      <Card className="bg-emerald-500/[0.03]">
         <CardContent className="flex items-start gap-3 p-4">
           <Shield className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" />
           <p className="text-xs leading-relaxed text-text-muted">

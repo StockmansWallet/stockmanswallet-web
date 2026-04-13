@@ -66,7 +66,7 @@ export function DirectoryFilters({ currentCategory, currentSearch }: DirectoryFi
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
           onBlur={() => updateParams("q", searchValue)}
-          className="w-full rounded-xl border border-white/5 bg-surface py-2 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus:border-[#2F8CD9]/30 focus:outline-none focus:ring-1 focus:ring-[#2F8CD9]/20"
+          className="w-full rounded-xl bg-surface py-2 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus:border-[#2F8CD9]/30 focus:outline-none focus:ring-1 focus:ring-[#2F8CD9]/20"
         />
       </form>
     </div>
