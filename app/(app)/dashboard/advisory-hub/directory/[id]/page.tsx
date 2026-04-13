@@ -33,12 +33,11 @@ export default async function AdvisorProfilePage({
 
   if (!advisor) notFound();
 
-  // Check for existing connection
+  // Check for existing connection in either direction
   const { data: existingConnections } = await supabase
     .from("connection_requests")
     .select("id, status")
-    .eq("requester_user_id", user.id)
-    .eq("target_user_id", id)
+    .or(`and(requester_user_id.eq.${user.id},target_user_id.eq.${id}),and(requester_user_id.eq.${id},target_user_id.eq.${user.id})`)
     .in("status", ["pending", "approved"]);
 
   const existingConnection = existingConnections?.[0] ?? null;

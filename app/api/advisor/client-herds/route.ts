@@ -29,14 +29,15 @@ export async function POST(request: NextRequest) {
 
   const clientUserId = parsed.data;
 
-  // Verify active permission window via user's own supabase client (RLS allows this)
-  const { data: connection } = await supabase
+  // Verify active approved connection in either direction (advisor or farmer initiated)
+  const { data: connectionRows } = await supabase
     .from("connection_requests")
     .select("*")
-    .eq("requester_user_id", user.id)
-    .eq("target_user_id", clientUserId)
+    .or(`and(requester_user_id.eq.${user.id},target_user_id.eq.${clientUserId}),and(requester_user_id.eq.${clientUserId},target_user_id.eq.${user.id})`)
     .eq("status", "approved")
-    .single();
+    .limit(1);
+
+  const connection = connectionRows?.[0] ?? null;
 
   if (!connection) {
     return NextResponse.json({ error: "No approved connection" }, { status: 403 });

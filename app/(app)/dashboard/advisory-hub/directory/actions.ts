@@ -5,16 +5,22 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createNotification } from "@/lib/advisory/notifications";
 
-const DEFAULT_SHARING = { herds: true, properties: true, reports: true, valuations: true };
+interface SharingPrefs {
+  herds: boolean;
+  properties: boolean;
+  reports: boolean;
+  valuations: boolean;
+}
+
+const DEFAULT_SHARING: SharingPrefs = { herds: true, properties: true, reports: true, valuations: true };
 
 const targetUserIdSchema = z.object({
   targetUserId: z.string().uuid(),
 });
 
 // Producer-initiated connection request to an advisor.
-// Auto-approves with full sharing permissions since the producer
-// is voluntarily sharing their data with the advisor.
-export async function sendConnectionRequest(targetUserId: string) {
+// Auto-approves with the producer's chosen sharing permissions.
+export async function sendConnectionRequest(targetUserId: string, sharing?: SharingPrefs) {
   const parsed = targetUserIdSchema.safeParse({ targetUserId });
   if (!parsed.success) return { error: "Invalid input" };
   const supabase = await createClient();
@@ -56,7 +62,7 @@ export async function sendConnectionRequest(targetUserId: string) {
       requester_company: requesterCompany,
       status: "approved",
       permission_granted_at: new Date().toISOString(),
-      sharing_permissions: DEFAULT_SHARING,
+      sharing_permissions: sharing ?? DEFAULT_SHARING,
       connection_type: "advisory",
     })
     .select("id")
