@@ -1,8 +1,10 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
-import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, MessageCircle } from "lucide-react";
 import { ConnectionChatClient } from "./connection-chat-client";
 import { SharingPreferencesCard } from "@/components/app/advisory/sharing-preferences-card";
 import { ConnectionRealtime } from "@/components/app/advisory/connection-realtime";
@@ -10,10 +12,11 @@ import {
   getCategoryConfig,
   hasActivePermission,
   parseSharingPermissions,
-  permissionStatusLabel,
   type ConnectionRequest,
   type AdvisoryMessage,
 } from "@/lib/types/advisory";
+
+export const revalidate = 0;
 
 export const metadata = {
   title: "Advisor Connection",
@@ -41,7 +44,6 @@ export default async function ProducerConnectionDetailPage({
   if (!connection) notFound();
   if (connection.target_user_id !== user.id && connection.requester_user_id !== user.id) notFound();
 
-  // Mark any unread notifications for this connection as read
   await supabase
     .from("notifications")
     .update({ is_read: true })
@@ -52,30 +54,32 @@ export default async function ProducerConnectionDetailPage({
   const conn = connection as ConnectionRequest;
   const isActive = hasActivePermission(conn);
 
-  // Resolve the advisor (other party) regardless of who initiated
   const advisorUserId = conn.requester_user_id === user.id
     ? conn.target_user_id
     : conn.requester_user_id;
 
-  // Fetch advisor profile
   const { data: advisorProfile } = await supabase
     .from("user_profiles")
-    .select("display_name, role, company_name")
+    .select("display_name, role, company_name, state, region")
     .eq("user_id", advisorUserId)
     .single();
 
   const advisorName = advisorProfile?.display_name ?? conn.requester_name;
   const advisorRole = advisorProfile?.role ?? conn.requester_role;
   const categoryConfig = getCategoryConfig(advisorRole);
+  const categoryBg = categoryConfig?.bgClass ?? "bg-[#2F8CD9]/15";
+  const categoryColour = categoryConfig?.colorClass ?? "text-[#2F8CD9]";
 
-  // Fetch messages
+  const connectedDate = new Date(conn.created_at).toLocaleDateString("en-AU", {
+    day: "numeric", month: "short", year: "numeric",
+  });
+
   const { data: messages } = await supabase
     .from("advisory_messages")
     .select("*")
     .eq("connection_id", id)
     .order("created_at", { ascending: true });
 
-  // Build participant map
   const { data: producerProfile } = await supabase
     .from("user_profiles")
     .select("display_name")
@@ -83,39 +87,54 @@ export default async function ProducerConnectionDetailPage({
     .single();
 
   const participants: Record<string, { name: string; role: string }> = {
-    [advisorUserId]: {
-      name: advisorName,
-      role: advisorRole,
-    },
-    [user.id]: {
-      name: producerProfile?.display_name ?? "You",
-      role: "producer",
-    },
+    [advisorUserId]: { name: advisorName, role: advisorRole },
+    [user.id]: { name: producerProfile?.display_name ?? "You", role: "producer" },
   };
 
   return (
     <div className="max-w-3xl">
       <ConnectionRealtime userId={user.id} />
-      <PageHeader
-        title={advisorName}
-        titleClassName="text-4xl font-bold text-[#2F8CD9]"
-        titleHref="/dashboard/advisory-hub/my-advisors"
-        subtitle="Back to My Advisors"
-        subtitleClassName="text-sm font-medium text-text-secondary"
-        inline
-        actions={
-          <div className="flex items-center gap-2">
-            {categoryConfig && (
-              <Badge variant="default">{categoryConfig.label}</Badge>
-            )}
-            <Badge variant={isActive ? "success" : "warning"}>
-              {permissionStatusLabel(conn)}
+
+      {/* Back link */}
+      <Link
+        href="/dashboard/advisory-hub/my-advisors"
+        className="mb-4 inline-flex items-center gap-1.5 text-sm text-text-muted transition-colors hover:text-text-secondary"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        My Advisors
+      </Link>
+
+      {/* Advisor header card */}
+      <Card className="mb-6 overflow-hidden border border-white/5">
+        <div className="bg-gradient-to-r from-white/[0.03] to-transparent p-5">
+          <div className="flex items-center gap-4">
+            <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${categoryBg} shadow-sm`}>
+              {categoryConfig ? (
+                <categoryConfig.icon className={`h-7 w-7 ${categoryColour}`} />
+              ) : (
+                <span className="text-lg font-bold text-[#2F8CD9]">{advisorName.charAt(0)}</span>
+              )}
+            </div>
+            <div className="flex-1">
+              <h1 className="text-xl font-bold text-text-primary">{advisorName}</h1>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                {categoryConfig && (
+                  <Badge variant="default">{categoryConfig.label}</Badge>
+                )}
+                {advisorProfile?.company_name && (
+                  <span className="text-sm text-text-muted">{advisorProfile.company_name}</span>
+                )}
+                <span className="text-sm text-text-muted">Connected {connectedDate}</span>
+              </div>
+            </div>
+            <Badge variant={isActive ? "success" : "default"} className="shrink-0 text-sm">
+              {isActive ? "Sharing" : "Not sharing"}
             </Badge>
           </div>
-        }
-      />
+        </div>
+      </Card>
 
-
+      {/* Sharing preferences */}
       <div className="mb-6">
         <SharingPreferencesCard
           connectionId={id}
@@ -124,17 +143,23 @@ export default async function ProducerConnectionDetailPage({
         />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Chat</CardTitle>
+      {/* Chat */}
+      <Card className="border border-white/5">
+        <CardHeader className="border-b border-white/5 pb-4">
+          <div className="flex items-center gap-2">
+            <MessageCircle className="h-5 w-5 text-[#2F8CD9]" />
+            <CardTitle className="text-base">Chat with {advisorName}</CardTitle>
+          </div>
         </CardHeader>
-        <CardContent className="px-5 pb-5 min-h-[500px]">
-          <ConnectionChatClient
-            connectionId={id}
-            currentUserId={user.id}
-            messages={(messages ?? []) as AdvisoryMessage[]}
-            participants={participants}
-          />
+        <CardContent className="min-h-[400px] p-0">
+          <div className="px-5 py-4">
+            <ConnectionChatClient
+              connectionId={id}
+              currentUserId={user.id}
+              messages={(messages ?? []) as AdvisoryMessage[]}
+              participants={participants}
+            />
+          </div>
         </CardContent>
       </Card>
     </div>
