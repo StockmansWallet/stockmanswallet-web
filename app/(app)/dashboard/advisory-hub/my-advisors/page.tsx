@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Users, Search } from "lucide-react";
 import { AdvisorRequestCard } from "@/components/app/advisory/advisor-request-card";
 import { ConnectedAdvisorCard } from "@/components/app/advisory/connected-advisor-card";
+import { ConnectionRealtime } from "@/components/app/advisory/connection-realtime";
 import type { ConnectionRequest } from "@/lib/types/advisory";
 
 export const metadata = {
@@ -73,6 +74,7 @@ export default async function MyAdvisorsPage() {
 
   return (
     <div className="max-w-3xl">
+      <ConnectionRealtime userId={user.id} />
       <PageHeader
         title="My Advisors"
         titleClassName="text-4xl font-bold text-[#2F8CD9]"

@@ -7,6 +7,7 @@ import { Users } from "lucide-react";
 import { ClientCard } from "@/components/app/advisory/client-card";
 import { PendingRequestCard } from "@/components/app/advisory/pending-request-card";
 import { ClientSearch } from "./client-search";
+import { ConnectionRealtime } from "@/components/app/advisory/connection-realtime";
 import { hasActivePermission, type ConnectionRequest } from "@/lib/types/advisory";
 
 export const revalidate = 0;
@@ -63,6 +64,7 @@ export default async function AdvisorClientsPage() {
 
   return (
     <div className="max-w-4xl">
+      <ConnectionRealtime userId={user.id} />
       <PageHeader
         title="Clients"
         titleClassName="text-4xl font-bold text-[#2F8CD9]"
