@@ -1,56 +1,86 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-// Invisible component that auto-refreshes the page when connection_requests
-// change. Uses RLS (not column filters) to scope events to the current user.
-// Also refreshes on tab focus as a fallback for any missed events.
+// Auto-refreshes the page when connection_requests change for the current user.
+// Mirrors the notification bell pattern: authenticate first, then subscribe with
+// a column filter. Two channels cover both directions (as requester and as target).
 export function ConnectionRealtime({ userId }: { userId: string }) {
   const router = useRouter();
-  const lastRefresh = useRef(0);
-
-  // Debounce refreshes to avoid multiple rapid re-renders
-  const debouncedRefresh = useCallback(() => {
-    const now = Date.now();
-    if (now - lastRefresh.current < 2000) return;
-    lastRefresh.current = now;
-    router.refresh();
-  }, [router]);
+  const supabaseRef = useRef(createClient());
 
   useEffect(() => {
-    const supabase = createClient();
+    const supabase = supabaseRef.current;
+    let channelA: ReturnType<typeof supabase.channel> | null = null;
+    let channelB: ReturnType<typeof supabase.channel> | null = null;
 
-    // Subscribe to ALL connection_requests changes visible to this user (RLS-scoped)
-    const channel = supabase
-      .channel(`conn-live-${userId.slice(0, 8)}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "connection_requests",
-        },
-        () => {
-          debouncedRefresh();
-        }
-      )
-      .subscribe();
+    async function init() {
+      // Ensure authenticated (same pattern as notification bell)
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-    // Fallback: refresh on tab focus (catches missed Realtime events)
-    function handleVisibility() {
-      if (document.visibilityState === "visible") {
-        debouncedRefresh();
-      }
+      const handler = () => { router.refresh(); };
+
+      // Channel 1: changes where current user is the requester
+      channelA = supabase
+        .channel(`conn-req-${user.id.slice(0, 8)}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "connection_requests",
+            filter: `requester_user_id=eq.${user.id}`,
+          },
+          handler
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "connection_requests",
+            filter: `requester_user_id=eq.${user.id}`,
+          },
+          handler
+        )
+        .subscribe();
+
+      // Channel 2: changes where current user is the target
+      channelB = supabase
+        .channel(`conn-tgt-${user.id.slice(0, 8)}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "connection_requests",
+            filter: `target_user_id=eq.${user.id}`,
+          },
+          handler
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "connection_requests",
+            filter: `target_user_id=eq.${user.id}`,
+          },
+          handler
+        )
+        .subscribe();
     }
-    document.addEventListener("visibilitychange", handleVisibility);
+
+    init();
 
     return () => {
-      supabase.removeChannel(channel);
-      document.removeEventListener("visibilitychange", handleVisibility);
+      if (channelA) supabase.removeChannel(channelA);
+      if (channelB) supabase.removeChannel(channelB);
     };
-  }, [userId, debouncedRefresh]);
+  }, [userId, router]);
 
   return null;
 }

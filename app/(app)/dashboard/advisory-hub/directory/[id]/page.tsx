@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Mail, Phone, Building2 } from "lucide-react";
 import { getCategoryConfig } from "@/lib/types/advisory";
 import { ConnectionRequestButton } from "@/components/app/advisory/connection-request-button";
+import { ConnectionRealtime } from "@/components/app/advisory/connection-realtime";
 
 export const metadata = {
   title: "Advisor Profile",
@@ -45,6 +46,7 @@ export default async function AdvisorProfilePage({
 
   return (
     <div className="max-w-2xl">
+      <ConnectionRealtime userId={user.id} />
       <PageHeader
         title="Advisor Profile"
         titleClassName="text-4xl font-bold text-[#2F8CD9]"
