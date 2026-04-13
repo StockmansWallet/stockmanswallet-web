@@ -116,7 +116,7 @@ export default async function ProducerConnectionDetailPage({
       <div className="pb-4 pt-6">
         <Link
           href="/dashboard/advisory-hub/my-advisors"
-          className="inline-flex items-center gap-0.5 text-sm text-text-muted transition-colors hover:text-text-secondary"
+          className="inline-flex items-center gap-1 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-sm text-text-muted transition-colors hover:bg-surface-low hover:text-text-secondary"
         >
           <ChevronLeft className="h-4 w-4" />
           My Advisors

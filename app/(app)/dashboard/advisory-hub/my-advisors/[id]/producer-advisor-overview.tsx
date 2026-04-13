@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mail, Phone, MapPin, Calendar, Shield, Trash2, EyeOff, Eye, Building2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Mail, Phone, MapPin, Calendar, Trash2, Building2 } from "lucide-react";
 import { stopSharing, grantDataAccess, disconnectAdvisor } from "../actions";
 import { ConfirmModal } from "@/components/app/advisory/confirm-modal";
 import { useRouter } from "next/navigation";
@@ -104,38 +105,25 @@ export function ProducerAdvisorOverview({
           </CardContent>
         </Card>
 
-        {/* Right: Sharing status + toggle */}
+        {/* Right: Sharing + connection info */}
         <Card>
           <CardContent className="p-5">
-            <div className="flex items-start gap-3">
-              <Shield className={`mt-0.5 h-5 w-5 shrink-0 ${isActive ? "text-emerald-400" : "text-text-muted"}`} />
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-text-primary">
-                  {isActive ? "Data sharing is active" : "Data sharing is paused"}
-                </p>
-                <p className="mt-0.5 text-xs text-text-muted">
-                  {isActive
-                    ? "Your advisor can view the data categories you have enabled."
-                    : "Your advisor cannot view any of your data."}
-                </p>
-                <Button
-                  variant={isActive ? "ghost" : "teal"}
-                  size="sm"
-                  onClick={handleToggleSharing}
-                  disabled={loading}
-                  className="mt-3 gap-1.5"
-                >
-                  {isActive ? (
-                    <><EyeOff className="h-3.5 w-3.5" /> Stop Sharing</>
-                  ) : (
-                    <><Eye className="h-3.5 w-3.5" /> Start Sharing</>
-                  )}
-                </Button>
+            <div className="space-y-4">
+              <Switch
+                id="data-sharing"
+                checked={isActive}
+                onChange={handleToggleSharing}
+                disabled={loading}
+                color="green"
+                label="Data sharing"
+                description={isActive
+                  ? "Your advisor can view the data categories you have enabled."
+                  : "Your advisor cannot view any of your data."}
+              />
+              <div className="flex items-center gap-2.5 border-t border-white/[0.06] pt-3 text-xs text-text-muted">
+                <Calendar className="h-3.5 w-3.5 shrink-0" />
+                Connected {connectedDate}
               </div>
-            </div>
-            <div className="mt-4 flex items-center gap-2.5 border-t border-white/[0.06] pt-3 text-xs text-text-muted">
-              <Calendar className="h-3.5 w-3.5 shrink-0" />
-              Connected {connectedDate}
             </div>
           </CardContent>
         </Card>
