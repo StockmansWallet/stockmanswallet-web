@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, MessageCircle } from "lucide-react";
+import { Tabs } from "@/components/ui/tabs";
+import { ArrowLeft, Mail, Phone, MapPin, Shield, Calendar } from "lucide-react";
 import { ConnectionChatClient } from "./connection-chat-client";
 import { SharingPreferencesCard } from "@/components/app/advisory/sharing-preferences-card";
 import { ConnectionRealtime } from "@/components/app/advisory/connection-realtime";
+import { ProducerAdvisorOverview } from "./producer-advisor-overview";
 import {
   getCategoryConfig,
   hasActivePermission,
@@ -60,7 +61,7 @@ export default async function ProducerConnectionDetailPage({
 
   const { data: advisorProfile } = await supabase
     .from("user_profiles")
-    .select("display_name, role, company_name, state, region")
+    .select("display_name, role, company_name, state, region, contact_email, contact_phone, bio")
     .eq("user_id", advisorUserId)
     .single();
 
@@ -104,64 +105,78 @@ export default async function ProducerConnectionDetailPage({
         My Advisors
       </Link>
 
-      {/* Advisor header card */}
-      <Card className="mb-6 overflow-hidden border border-white/5">
-        <div className="bg-gradient-to-r from-white/[0.03] to-transparent p-5">
-          <div className="flex items-center gap-4">
-            <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${categoryBg} shadow-sm`}>
-              {categoryConfig ? (
-                <categoryConfig.icon className={`h-7 w-7 ${categoryColour}`} />
-              ) : (
-                <span className="text-lg font-bold text-[#2F8CD9]">{advisorName.charAt(0)}</span>
-              )}
-            </div>
-            <div className="flex-1">
-              <h1 className="text-xl font-bold text-text-primary">{advisorName}</h1>
-              <div className="mt-1 flex flex-wrap items-center gap-2">
-                {categoryConfig && (
-                  <Badge variant="default">{categoryConfig.label}</Badge>
-                )}
-                {advisorProfile?.company_name && (
-                  <span className="text-sm text-text-muted">{advisorProfile.company_name}</span>
-                )}
-                <span className="text-sm text-text-muted">Connected {connectedDate}</span>
-              </div>
-            </div>
-            <Badge variant={isActive ? "success" : "default"} className="shrink-0 text-sm">
+      {/* Advisor header */}
+      <div className="mb-6 flex items-center gap-4">
+        <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${categoryBg} shadow-sm`}>
+          {categoryConfig ? (
+            <categoryConfig.icon className={`h-7 w-7 ${categoryColour}`} />
+          ) : (
+            <span className="text-lg font-bold text-[#2F8CD9]">{advisorName.charAt(0)}</span>
+          )}
+        </div>
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold text-text-primary">{advisorName}</h1>
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            {categoryConfig && (
+              <Badge variant="default">{categoryConfig.label}</Badge>
+            )}
+            <Badge variant={isActive ? "success" : "default"}>
               {isActive ? "Sharing" : "Not sharing"}
             </Badge>
           </div>
         </div>
-      </Card>
-
-      {/* Sharing preferences */}
-      <div className="mb-6">
-        <SharingPreferencesCard
-          connectionId={id}
-          permissions={parseSharingPermissions(conn.sharing_permissions)}
-          isActive={isActive}
-        />
       </div>
 
-      {/* Chat */}
-      <Card className="border border-white/5">
-        <CardHeader className="border-b border-white/5 pb-4">
-          <div className="flex items-center gap-2">
-            <MessageCircle className="h-5 w-5 text-[#2F8CD9]" />
-            <CardTitle className="text-base">Chat with {advisorName}</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="px-5 py-4">
-            <ConnectionChatClient
-              connectionId={id}
-              currentUserId={user.id}
-              messages={(messages ?? []) as AdvisoryMessage[]}
-              participants={participants}
-            />
-          </div>
-        </CardContent>
-      </Card>
+      {/* Tabs */}
+      <Tabs
+        tabs={[
+          {
+            id: "overview",
+            label: "Overview",
+            content: (
+              <ProducerAdvisorOverview
+                advisorName={advisorName}
+                advisorCompany={advisorProfile?.company_name}
+                advisorState={advisorProfile?.state}
+                advisorRegion={advisorProfile?.region}
+                advisorBio={advisorProfile?.bio}
+                advisorEmail={advisorProfile?.contact_email}
+                advisorPhone={advisorProfile?.contact_phone}
+                connectedDate={connectedDate}
+                isActive={isActive}
+                connectionId={id}
+              />
+            ),
+          },
+          {
+            id: "sharing",
+            label: "Sharing",
+            content: (
+              <SharingPreferencesCard
+                connectionId={id}
+                permissions={parseSharingPermissions(conn.sharing_permissions)}
+                isActive={isActive}
+              />
+            ),
+          },
+          {
+            id: "chat",
+            label: "Chat",
+            content: (
+              <Card className="border border-white/5">
+                <CardContent className="p-5">
+                  <ConnectionChatClient
+                    connectionId={id}
+                    currentUserId={user.id}
+                    messages={(messages ?? []) as AdvisoryMessage[]}
+                    participants={participants}
+                  />
+                </CardContent>
+              </Card>
+            ),
+          },
+        ]}
+      />
     </div>
   );
 }
