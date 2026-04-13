@@ -94,16 +94,20 @@ export async function sendAdvisorConnectionRequest(targetUserId: string) {
   let connId: string;
 
   if (existing) {
-    // Reactivate existing removed/denied/expired connection instead of creating a duplicate
+    // Reactivate existing removed/denied/expired connection.
+    // Update direction so requester is always the current user (the advisor).
     const { data: updated, error } = await supabase
       .from("connection_requests")
       .update({
+        requester_user_id: user.id,
+        target_user_id: targetUserId,
         status: "pending",
         requester_name: requesterName,
         requester_role: requesterRole,
         requester_company: requesterCompany,
         permission_granted_at: null,
         permission_expires_at: null,
+        sharing_permissions: null,
         updated_at: new Date().toISOString(),
       })
       .eq("id", existing.id)
