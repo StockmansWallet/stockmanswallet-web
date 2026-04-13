@@ -1,5 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { redirect, notFound } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -65,6 +67,15 @@ export default async function ProducerConnectionDetailPage({
     .eq("user_id", advisorUserId)
     .single();
 
+  // Fetch advisor's avatar from auth metadata (stored there, not in user_profiles)
+  let advisorAvatarUrl: string | null = null;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (serviceRoleKey) {
+    const svc = createServiceClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceRoleKey);
+    const { data: authUser } = await svc.auth.admin.getUserById(advisorUserId);
+    advisorAvatarUrl = authUser?.user?.user_metadata?.avatar_url ?? null;
+  }
+
   const advisorName = advisorProfile?.display_name ?? conn.requester_name;
   const advisorRole = advisorProfile?.role ?? conn.requester_role;
   const categoryConfig = getCategoryConfig(advisorRole);
@@ -114,9 +125,19 @@ export default async function ProducerConnectionDetailPage({
 
       {/* Advisor header: avatar + name + badges */}
       <div className="mb-6 flex items-center gap-4">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#2F8CD9]/15">
-          <span className="text-lg font-bold text-[#2F8CD9]">{initials}</span>
-        </div>
+        {advisorAvatarUrl ? (
+          <Image
+            src={advisorAvatarUrl}
+            alt={advisorName}
+            width={56}
+            height={56}
+            className="h-14 w-14 shrink-0 rounded-full object-cover"
+          />
+        ) : (
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#2F8CD9]/15">
+            <span className="text-lg font-bold text-[#2F8CD9]">{initials}</span>
+          </div>
+        )}
         <div className="min-w-0 flex-1">
           <h1 className="text-2xl font-bold text-text-primary">{advisorName}</h1>
           <div className="mt-1 flex flex-wrap items-center gap-2">
