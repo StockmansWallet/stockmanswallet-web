@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { notifyConnectionRequest } from "@/lib/advisory/notifications";
+import { createNotification } from "@/lib/advisory/notifications";
 
 const searchQuerySchema = z.object({
   query: z.string().min(2).max(100),
@@ -132,7 +132,14 @@ export async function sendAdvisorConnectionRequest(targetUserId: string) {
     connId = conn.id;
   }
 
-  await notifyConnectionRequest(supabase, targetUserId, requesterName, connId);
+  await createNotification(supabase, {
+    userId: targetUserId,
+    type: "new_connection_request",
+    title: `${requesterName} wants to connect`,
+    body: "Review and approve or deny this connection request.",
+    link: "/dashboard/advisory-hub/my-advisors",
+    connectionId: connId,
+  });
 
   revalidatePath("/dashboard/advisor/clients");
   return { success: true };
@@ -222,6 +229,109 @@ export async function removeClient(connectionId: string) {
     .from("advisor_scenarios")
     .update({ is_deleted: true, updated_at: new Date().toISOString() })
     .eq("client_connection_id", connectionId);
+
+  revalidatePath("/dashboard/advisor/clients");
+  return { success: true };
+}
+
+// Advisor accepts a pending connection request from a producer.
+// Sets status to "approved" and activates the sharing permissions the producer chose.
+export async function acceptClientRequest(connectionId: string) {
+  const parsed = connectionIdSchema.safeParse({ connectionId });
+  if (!parsed.success) return { error: "Invalid input" };
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { data: connection } = await supabase
+    .from("connection_requests")
+    .select("id, requester_user_id, target_user_id, status")
+    .eq("id", connectionId)
+    .eq("status", "pending")
+    .single();
+
+  if (!connection) return { error: "Request not found" };
+  const isRequester = connection.requester_user_id === user.id;
+  const isTarget = connection.target_user_id === user.id;
+  if (!isRequester && !isTarget) return { error: "Request not found" };
+
+  const producerUserId = isTarget ? connection.requester_user_id : connection.target_user_id;
+
+  const { error } = await supabase
+    .from("connection_requests")
+    .update({
+      status: "approved",
+      permission_granted_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", connectionId);
+
+  if (error) return { error: error.message };
+
+  // Notify the producer that their request was accepted
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("display_name")
+    .eq("user_id", user.id)
+    .single();
+  const advisorName = profile?.display_name || "Your advisor";
+
+  await createNotification(supabase, {
+    userId: producerUserId,
+    type: "request_approved",
+    title: `${advisorName} accepted your connection`,
+    body: "You are now connected. Your advisor can view your shared data.",
+    link: `/dashboard/advisory-hub/my-advisors/${connectionId}`,
+    connectionId,
+  });
+
+  revalidatePath("/dashboard/advisor/clients");
+  revalidatePath("/dashboard/advisory-hub/my-advisors");
+  return { success: true };
+}
+
+// Advisor declines a pending connection request from a producer.
+export async function declineClientRequest(connectionId: string) {
+  const parsed = connectionIdSchema.safeParse({ connectionId });
+  if (!parsed.success) return { error: "Invalid input" };
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { data: connection } = await supabase
+    .from("connection_requests")
+    .select("id, requester_user_id, target_user_id, status")
+    .eq("id", connectionId)
+    .eq("status", "pending")
+    .single();
+
+  if (!connection) return { error: "Request not found" };
+  const isRequester = connection.requester_user_id === user.id;
+  const isTarget = connection.target_user_id === user.id;
+  if (!isRequester && !isTarget) return { error: "Request not found" };
+
+  const producerUserId = isTarget ? connection.requester_user_id : connection.target_user_id;
+
+  const { error } = await supabase
+    .from("connection_requests")
+    .update({ status: "denied", updated_at: new Date().toISOString() })
+    .eq("id", connectionId);
+
+  if (error) return { error: error.message };
+
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("display_name")
+    .eq("user_id", user.id)
+    .single();
+
+  await createNotification(supabase, {
+    userId: producerUserId,
+    type: "request_denied",
+    title: `${profile?.display_name || "An advisor"} declined your request`,
+    link: "/dashboard/advisory-hub/my-advisors",
+    connectionId,
+  });
 
   revalidatePath("/dashboard/advisor/clients");
   return { success: true };

@@ -58,7 +58,7 @@ export function ConnectionRequestButton({
     if (result.error) {
       setError(result.error);
     } else {
-      setStatus("approved");
+      setStatus("pending");
     }
     setLoading(false);
   };

@@ -19,7 +19,8 @@ const targetUserIdSchema = z.object({
 });
 
 // Producer-initiated connection request to an advisor.
-// Auto-approves with the producer's chosen sharing permissions.
+// Sets status to "pending". The advisor must accept before data is shared.
+// Sharing preferences are stored so they activate immediately on acceptance.
 export async function sendConnectionRequest(targetUserId: string, sharing?: SharingPrefs) {
   const parsed = targetUserIdSchema.safeParse({ targetUserId });
   if (!parsed.success) return { error: "Invalid input" };
@@ -60,8 +61,7 @@ export async function sendConnectionRequest(targetUserId: string, sharing?: Shar
       requester_name: requesterName,
       requester_role: requesterRole,
       requester_company: requesterCompany,
-      status: "approved",
-      permission_granted_at: new Date().toISOString(),
+      status: "pending",
       sharing_permissions: sharing ?? DEFAULT_SHARING,
       connection_type: "advisory",
     })
@@ -70,13 +70,13 @@ export async function sendConnectionRequest(targetUserId: string, sharing?: Shar
 
   if (error) return { error: error.message };
 
-  // Notify the advisor they have a new client (not a pending request)
+  // Notify the advisor of the pending request
   await createNotification(supabase, {
     userId: targetUserId,
-    type: "request_approved",
-    title: `${requesterName} has connected with you`,
-    body: "You can now view their portfolio data.",
-    link: `/dashboard/advisor/clients/${conn.id}`,
+    type: "new_connection_request",
+    title: `${requesterName} wants to connect`,
+    body: "Review and accept or decline this connection request.",
+    link: "/dashboard/advisor/clients",
     connectionId: conn.id,
   });
 
