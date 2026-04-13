@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
@@ -62,14 +61,13 @@ export default async function ProducerConnectionDetailPage({
 
   const { data: advisorProfile } = await supabase
     .from("user_profiles")
-    .select("display_name, role, company_name, state, region, contact_email, contact_phone, bio, avatar_url")
+    .select("display_name, role, company_name, state, region, contact_email, contact_phone, bio")
     .eq("user_id", advisorUserId)
     .single();
 
   const advisorName = advisorProfile?.display_name ?? conn.requester_name;
   const advisorRole = advisorProfile?.role ?? conn.requester_role;
   const categoryConfig = getCategoryConfig(advisorRole);
-  const advisorAvatarUrl = advisorProfile?.avatar_url as string | null;
 
   const initials = advisorName
     .split(" ")
@@ -116,19 +114,9 @@ export default async function ProducerConnectionDetailPage({
 
       {/* Advisor header: avatar + name + badges */}
       <div className="mb-6 flex items-center gap-4">
-        {advisorAvatarUrl ? (
-          <Image
-            src={advisorAvatarUrl}
-            alt={advisorName}
-            width={56}
-            height={56}
-            className="h-14 w-14 shrink-0 rounded-full object-cover"
-          />
-        ) : (
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#2F8CD9]/15">
-            <span className="text-lg font-bold text-[#2F8CD9]">{initials}</span>
-          </div>
-        )}
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#2F8CD9]/15">
+          <span className="text-lg font-bold text-[#2F8CD9]">{initials}</span>
+        </div>
         <div className="min-w-0 flex-1">
           <h1 className="text-2xl font-bold text-text-primary">{advisorName}</h1>
           <div className="mt-1 flex flex-wrap items-center gap-2">
