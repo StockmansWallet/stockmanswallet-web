@@ -608,13 +608,13 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
 
       {/* Summary card strip - persistent bottom strip, full width for edge-to-edge scrolling */}
       {sessionCards.length > 0 && (
-        <div data-print-cards className="border-t border-white/8 py-2">
+        <div data-print-cards className="border-t border-white/10 py-2">
           <QuickInsightRow insights={sessionCards} onCardAction={handleCardAction} />
         </div>
       )}
 
       {/* Input area */}
-      <div data-print-hide className="border-t border-white/6 p-4">
+      <div data-print-hide className="border-t border-white/10 p-4">
         <div className="mx-auto max-w-2xl">
           <ChatInput
             onSend={handleSend}
