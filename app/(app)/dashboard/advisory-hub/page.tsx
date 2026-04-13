@@ -24,12 +24,12 @@ export default async function AdvisoryHubPage() {
 
   if (!user) redirect("/sign-in");
 
-  // Fetch connection counts for badges
+  // Fetch connection counts for badges (both directions)
   const { data: connections } = await supabase
     .from("connection_requests")
     .select("id, status")
-    .eq("target_user_id", user.id)
-    .eq("connection_type", "advisory");
+    .or(`target_user_id.eq.${user.id},requester_user_id.eq.${user.id}`)
+    .in("status", ["pending", "approved"]);
 
   const pendingCount = connections?.filter((c) => c.status === "pending").length ?? 0;
   const activeCount = connections?.filter((c) => c.status === "approved").length ?? 0;

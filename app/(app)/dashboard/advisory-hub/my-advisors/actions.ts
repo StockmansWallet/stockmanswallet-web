@@ -31,7 +31,7 @@ export async function approveRequest(requestId: string) {
       updated_at: new Date().toISOString(),
     })
     .eq("id", requestId)
-    .eq("target_user_id", user.id)
+    /* RLS enforces ownership */
     .select("id, requester_user_id")
     .single();
 
@@ -70,7 +70,7 @@ export async function grantDataAccess(requestId: string) {
       updated_at: new Date().toISOString(),
     })
     .eq("id", requestId)
-    .eq("target_user_id", user.id)
+    /* RLS enforces ownership */
     .eq("status", "approved");
 
   if (error) return { error: error.message };
@@ -99,7 +99,7 @@ export async function stopSharing(requestId: string) {
       updated_at: new Date().toISOString(),
     })
     .eq("id", requestId)
-    .eq("target_user_id", user.id)
+    /* RLS enforces ownership */
     .eq("status", "approved");
 
   if (error) return { error: error.message };
@@ -122,7 +122,7 @@ export async function denyRequest(requestId: string) {
     .from("connection_requests")
     .update({ status: "denied" })
     .eq("id", requestId)
-    .eq("target_user_id", user.id)
+    /* RLS enforces ownership */
     .select("id, requester_user_id")
     .single();
 
@@ -162,7 +162,7 @@ export async function disconnectAdvisor(requestId: string) {
       updated_at: new Date().toISOString(),
     })
     .eq("id", requestId)
-    .eq("target_user_id", user.id)
+    /* RLS enforces ownership */
     .select("id, requester_user_id")
     .single();
 

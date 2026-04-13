@@ -37,7 +37,8 @@ export default async function ProducerConnectionDetailPage({
     .eq("id", id)
     .single();
 
-  if (!connection || connection.target_user_id !== user.id) notFound();
+  if (!connection) notFound();
+  if (connection.target_user_id !== user.id && connection.requester_user_id !== user.id) notFound();
 
   // Mark any unread notifications for this connection as read
   await supabase
@@ -48,8 +49,23 @@ export default async function ProducerConnectionDetailPage({
     .eq("is_read", false);
 
   const conn = connection as ConnectionRequest;
-  const categoryConfig = getCategoryConfig(conn.requester_role);
   const isActive = hasActivePermission(conn);
+
+  // Resolve the advisor (other party) regardless of who initiated
+  const advisorUserId = conn.requester_user_id === user.id
+    ? conn.target_user_id
+    : conn.requester_user_id;
+
+  // Fetch advisor profile
+  const { data: advisorProfile } = await supabase
+    .from("user_profiles")
+    .select("display_name, role, company_name")
+    .eq("user_id", advisorUserId)
+    .single();
+
+  const advisorName = advisorProfile?.display_name ?? conn.requester_name;
+  const advisorRole = advisorProfile?.role ?? conn.requester_role;
+  const categoryConfig = getCategoryConfig(advisorRole);
 
   // Fetch messages
   const { data: messages } = await supabase
@@ -59,12 +75,6 @@ export default async function ProducerConnectionDetailPage({
     .order("created_at", { ascending: true });
 
   // Build participant map
-  const { data: advisorProfile } = await supabase
-    .from("user_profiles")
-    .select("display_name")
-    .eq("user_id", conn.requester_user_id)
-    .single();
-
   const { data: producerProfile } = await supabase
     .from("user_profiles")
     .select("display_name")
@@ -72,9 +82,9 @@ export default async function ProducerConnectionDetailPage({
     .single();
 
   const participants: Record<string, { name: string; role: string }> = {
-    [conn.requester_user_id]: {
-      name: advisorProfile?.display_name ?? conn.requester_name,
-      role: conn.requester_role,
+    [advisorUserId]: {
+      name: advisorName,
+      role: advisorRole,
     },
     [user.id]: {
       name: producerProfile?.display_name ?? "You",
@@ -85,7 +95,7 @@ export default async function ProducerConnectionDetailPage({
   return (
     <div className="max-w-3xl">
       <PageHeader
-        title={conn.requester_name}
+        title={advisorName}
         titleClassName="text-4xl font-bold text-[#2F8CD9]"
         titleHref="/dashboard/advisory-hub/my-advisors"
         subtitle="Back to My Advisors"

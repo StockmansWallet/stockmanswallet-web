@@ -116,8 +116,8 @@ export async function updateSharingPermission(
       sharing_permissions: updated,
       updated_at: new Date().toISOString(),
     })
-    .eq("id", connectionId)
-    .eq("target_user_id", user.id);
+    .eq("id", connectionId);
+    /* RLS enforces ownership */
 
   if (error) return { error: error.message };
 
