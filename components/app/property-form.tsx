@@ -38,6 +38,7 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
   const [state, setState] = useState(property?.state ?? "");
   const [postcode, setPostcode] = useState(property?.postcode ?? "");
   const [lga, setLga] = useState(property?.lga ?? "");
+  const [address, setAddress] = useState(property?.address ?? "");
   const [latitude, setLatitude] = useState(property?.latitude ?? "");
   const [longitude, setLongitude] = useState(property?.longitude ?? "");
 
@@ -77,6 +78,7 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
   }, [state, latitude, longitude]);
 
   function handleAddressSelect(result: AddressResult) {
+    setAddress(result.address);
     if (result.suburb) setSuburb(result.suburb);
     if (result.state) setState(result.state);
     if (result.postcode) setPostcode(result.postcode);
@@ -89,11 +91,15 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
     setError(null);
     setSubmitting(true);
 
-    const formData = new FormData(e.currentTarget);
-    const result = await action(formData);
-
-    if (result?.error) {
-      setError(result.error);
+    try {
+      const formData = new FormData(e.currentTarget);
+      const result = await action(formData);
+      if (result?.error) {
+        setError(result.error);
+      }
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
       setSubmitting(false);
     }
   }
@@ -180,7 +186,7 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
               onSelect={handleAddressSelect}
               placeholder="Start typing a property address..."
             />
-            <input type="hidden" name="address" value={property?.address ?? ""} />
+            <input type="hidden" name="address" value={address} />
           </div>
           <Input
             id="suburb"

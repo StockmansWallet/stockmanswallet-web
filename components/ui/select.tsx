@@ -61,6 +61,7 @@ function OptionButton({ opt, selected, onSelect }: { opt: SelectOption; selected
 
 function GroupedSelect({
   id,
+  name,
   label,
   error,
   helperText,
@@ -167,6 +168,9 @@ function GroupedSelect({
           {label}
         </label>
       )}
+
+      {/* Hidden input so value is included in FormData */}
+      {name && <input type="hidden" name={name} value={selectedValue} />}
 
       {/* Trigger */}
       <button
