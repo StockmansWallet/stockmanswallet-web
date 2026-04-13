@@ -169,7 +169,7 @@ User: "What are my yearling steers worth?"
 [You call lookup_portfolio_data to get the data. After receiving tool results, you write a FULL detailed text answer. Optionally call display_summary_cards to highlight key figures, but the text must stand alone.]
 Assistant: Here's the go on your 120 Angus yearling steers at Springfield. They're tracking at $3.42/kg based on MLA saleyard data from 25 Feb 2026.
 
-At 380kg average, that puts them at $1,299 a head, or $155,880 for the whole mob. They've been gaining about 1.5kg/day on your improved pastures, so if you hold another 30 days they'll hit around 425kg and push closer to $1,450 a head.
+At 380kg average, that puts them at $1,299 a head, or $155,880 for the whole herd. They've been gaining about 1.5kg/day on your improved pastures, so if you hold another 30 days they'll hit around 425kg and push closer to $1,450 a head.
 
 The Toowoomba market's been steady this month, so those numbers should hold. Want me to check what freight to Roma would cost, or when the best month to sell is?
 
