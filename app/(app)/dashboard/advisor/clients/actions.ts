@@ -67,16 +67,14 @@ export async function sendAdvisorConnectionRequest(targetUserId: string) {
 
   if (!user) return { error: "Not authenticated" };
 
-  // Check for existing advisory connection in either direction (any status)
+  // Check for existing active connection in either direction
   const { data: existingList } = await supabase
     .from("connection_requests")
-    .select("id, status, requester_user_id")
+    .select("id, status")
     .or(`and(requester_user_id.eq.${user.id},target_user_id.eq.${targetUserId}),and(requester_user_id.eq.${targetUserId},target_user_id.eq.${user.id})`)
-    .limit(1);
+    .in("status", ["pending", "approved"]);
 
-  const existing = existingList?.[0] ?? null;
-
-  if (existing && (existing.status === "pending" || existing.status === "approved")) {
+  if (existingList && existingList.length > 0) {
     return { error: "You already have an active or pending connection with this producer." };
   }
 
@@ -91,50 +89,23 @@ export async function sendAdvisorConnectionRequest(targetUserId: string) {
   const requesterRole = profile?.role || "accountant";
   const requesterCompany = profile?.company_name || "";
 
-  let connId: string;
+  // Always create a fresh connection (simpler than reactivating old ones)
+  const { data: conn, error } = await supabase
+    .from("connection_requests")
+    .insert({
+      requester_user_id: user.id,
+      target_user_id: targetUserId,
+      requester_name: requesterName,
+      requester_role: requesterRole,
+      requester_company: requesterCompany,
+      status: "pending",
+      connection_type: "advisory",
+    })
+    .select("id")
+    .single();
 
-  if (existing) {
-    // Reactivate existing removed/denied/expired connection.
-    // Update direction so requester is always the current user (the advisor).
-    const { data: updated, error } = await supabase
-      .from("connection_requests")
-      .update({
-        requester_user_id: user.id,
-        target_user_id: targetUserId,
-        status: "pending",
-        requester_name: requesterName,
-        requester_role: requesterRole,
-        requester_company: requesterCompany,
-        permission_granted_at: null,
-        permission_expires_at: null,
-        sharing_permissions: { herds: false, properties: false, reports: false, valuations: false },
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", existing.id)
-      .select("id")
-      .single();
-
-    if (error) return { error: error.message };
-    connId = updated.id;
-  } else {
-    // Create new connection request
-    const { data: conn, error } = await supabase
-      .from("connection_requests")
-      .insert({
-        requester_user_id: user.id,
-        target_user_id: targetUserId,
-        requester_name: requesterName,
-        requester_role: requesterRole,
-        requester_company: requesterCompany,
-        status: "pending",
-        connection_type: "advisory",
-      })
-      .select("id")
-      .single();
-
-    if (error) return { error: error.message };
-    connId = conn.id;
-  }
+  if (error) return { error: error.message };
+  const connId = conn.id;
 
   await createNotification(supabase, {
     userId: targetUserId,
