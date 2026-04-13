@@ -53,14 +53,21 @@ export default async function AdvisorClientsPage() {
     }
   }
 
-  // Split by status
-  const pendingConnections = allConnections.filter((c) => c.status === "pending");
+  // Split by status and direction
+  // Incoming: producer sent request TO this advisor (advisor is target) - show Accept/Decline
+  const incomingRequests = allConnections.filter(
+    (c) => c.status === "pending" && c.target_user_id === user.id
+  );
+  // Outgoing: advisor sent request, waiting for producer response - show "Pending" badge
+  const outgoingPending = allConnections.filter(
+    (c) => c.status === "pending" && c.requester_user_id === user.id
+  );
   const approvedConnections = allConnections.filter((c) => c.status === "approved");
 
   // Stats
   const totalClients = allConnections.length;
   const activePermissions = approvedConnections.filter((c) => hasActivePermission(c)).length;
-  const pendingRequests = pendingConnections.length;
+  const pendingRequests = incomingRequests.length + outgoingPending.length;
 
   return (
     <div className="max-w-4xl">
@@ -99,18 +106,15 @@ export default async function AdvisorClientsPage() {
         </div>
       )}
 
-      {/* Pending requests from producers */}
-      {pendingConnections.length > 0 && (
+      {/* Incoming requests from producers (Accept/Decline) */}
+      {incomingRequests.length > 0 && (
         <div className="mb-6">
           <h3 className="mb-3 text-sm font-semibold text-amber-400">
-            Pending Requests ({pendingConnections.length})
+            Incoming Requests ({incomingRequests.length})
           </h3>
           <div className="flex flex-col gap-3">
-            {pendingConnections.map((connection) => {
-              const clientId =
-                connection.requester_user_id === user.id
-                  ? connection.target_user_id
-                  : connection.requester_user_id;
+            {incomingRequests.map((connection) => {
+              const clientId = connection.requester_user_id;
               const profile = clientProfiles[clientId];
               return (
                 <PendingRequestCard
@@ -127,8 +131,32 @@ export default async function AdvisorClientsPage() {
         </div>
       )}
 
+      {/* Outgoing requests awaiting producer response */}
+      {outgoingPending.length > 0 && (
+        <div className="mb-6">
+          <h3 className="mb-3 text-sm font-semibold text-text-secondary">
+            Awaiting Response ({outgoingPending.length})
+          </h3>
+          <div className="flex flex-col gap-3">
+            {outgoingPending.map((connection) => {
+              const clientId = connection.target_user_id;
+              const profile = clientProfiles[clientId];
+              return (
+                <ClientCard
+                  key={connection.id}
+                  connection={connection}
+                  clientName={profile?.display_name ?? "Unknown Producer"}
+                  clientState={profile?.state}
+                  clientCompany={profile?.company_name}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Connected clients */}
-      {approvedConnections.length === 0 && pendingConnections.length === 0 ? (
+      {approvedConnections.length === 0 && incomingRequests.length === 0 && outgoingPending.length === 0 ? (
         <Card>
           <EmptyState
             icon={<Users className="h-6 w-6 text-[#2F8CD9]" />}
@@ -139,7 +167,7 @@ export default async function AdvisorClientsPage() {
         </Card>
       ) : approvedConnections.length > 0 ? (
         <div>
-          {pendingConnections.length > 0 && (
+          {(incomingRequests.length > 0 || outgoingPending.length > 0) && (
             <h3 className="mb-3 text-sm font-semibold text-text-secondary">
               Connected Clients ({approvedConnections.length})
             </h3>
