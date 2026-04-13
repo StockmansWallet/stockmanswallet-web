@@ -22,18 +22,20 @@ export default async function AdvisorClientsPage() {
 
   if (!user) redirect("/sign-in");
 
-  // Fetch connections where current user is the advisor (requester)
+  // Fetch connections where current user is involved (advisor-initiated OR farmer-initiated)
   const { data: connections } = await supabase
     .from("connection_requests")
     .select("*")
-    .eq("requester_user_id", user.id)
+    .or(`requester_user_id.eq.${user.id},target_user_id.eq.${user.id}`)
     .in("status", ["pending", "approved"])
     .order("created_at", { ascending: false });
 
   const allConnections = (connections ?? []) as ConnectionRequest[];
 
-  // Get client profiles for display names
-  const clientUserIds = allConnections.map((c) => c.target_user_id);
+  // Get client (other party) profiles for display names
+  const clientUserIds = allConnections.map((c) =>
+    c.requester_user_id === user.id ? c.target_user_id : c.requester_user_id
+  );
   let clientProfiles: Record<string, { display_name: string; company_name: string; state: string }> = {};
 
   if (clientUserIds.length > 0) {
@@ -103,7 +105,12 @@ export default async function AdvisorClientsPage() {
       ) : (
         <div className="flex flex-col gap-3">
           {allConnections.map((connection) => {
-            const profile = clientProfiles[connection.target_user_id];
+            // Resolve the other party's profile regardless of who initiated
+            const clientId =
+              connection.requester_user_id === user.id
+                ? connection.target_user_id
+                : connection.requester_user_id;
+            const profile = clientProfiles[clientId];
             return (
               <ClientCard
                 key={connection.id}

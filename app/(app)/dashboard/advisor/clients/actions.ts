@@ -32,15 +32,16 @@ export async function searchProducers(query: string) {
   const sanitised = query.replace(/[^a-zA-Z0-9\s\-']/g, "").trim();
   if (!sanitised) return { producers: [] };
 
-  // Get existing connections to exclude
+  // Get existing connections to exclude (both directions)
   const { data: existingConns } = await supabase
     .from("connection_requests")
-    .select("target_user_id")
-    .eq("requester_user_id", user.id)
-    .eq("connection_type", "advisory")
+    .select("requester_user_id, target_user_id")
+    .or(`requester_user_id.eq.${user.id},target_user_id.eq.${user.id}`)
     .in("status", ["pending", "approved"]);
 
-  const excludeIds = [user.id, ...(existingConns ?? []).map((c) => c.target_user_id)];
+  const excludeIds = [user.id, ...(existingConns ?? []).map((c) =>
+    c.requester_user_id === user.id ? c.target_user_id : c.requester_user_id
+  )];
 
   const { data: producers } = await supabase
     .from("user_profiles")
@@ -66,15 +67,14 @@ export async function sendAdvisorConnectionRequest(targetUserId: string) {
 
   if (!user) return { error: "Not authenticated" };
 
-  // Check for existing advisory connection (any status)
-  const { data: existing } = await supabase
+  // Check for existing advisory connection in either direction (any status)
+  const { data: existingList } = await supabase
     .from("connection_requests")
-    .select("id, status")
-    .eq("requester_user_id", user.id)
-    .eq("target_user_id", targetUserId)
-    .eq("connection_type", "advisory")
-    .limit(1)
-    .maybeSingle();
+    .select("id, status, requester_user_id")
+    .or(`and(requester_user_id.eq.${user.id},target_user_id.eq.${targetUserId}),and(requester_user_id.eq.${targetUserId},target_user_id.eq.${user.id})`)
+    .limit(1);
+
+  const existing = existingList?.[0] ?? null;
 
   if (existing && (existing.status === "pending" || existing.status === "approved")) {
     return { error: "You already have an active or pending connection with this producer." };
@@ -148,13 +148,27 @@ export async function requestRenewal(connectionId: string) {
 
   if (!user) return { error: "Not authenticated" };
 
+  // Fetch the connection to identify the other party
+  const { data: connCheck } = await supabase
+    .from("connection_requests")
+    .select("id, requester_user_id, target_user_id")
+    .eq("id", connectionId)
+    .single();
+
+  if (!connCheck) return { error: "Connection not found" };
+  const isRequester = connCheck.requester_user_id === user.id;
+  const isTarget = connCheck.target_user_id === user.id;
+  if (!isRequester && !isTarget) return { error: "Connection not found" };
+
+  // The other party (producer) who needs to re-approve
+  const producerUserId = isRequester ? connCheck.target_user_id : connCheck.requester_user_id;
+
   // Update the connection to pending renewal (re-set to pending so farmer can re-approve)
   const { data: conn, error } = await supabase
     .from("connection_requests")
     .update({ status: "pending" })
     .eq("id", connectionId)
-    .eq("requester_user_id", user.id)
-    .select("id, target_user_id")
+    .select("id")
     .single();
 
   if (error) return { error: error.message };
@@ -168,7 +182,7 @@ export async function requestRenewal(connectionId: string) {
   const advisorName = profile?.display_name || "An advisor";
 
   const { notifyRenewalRequested } = await import("@/lib/advisory/notifications");
-  await notifyRenewalRequested(supabase, conn.target_user_id, advisorName, conn.id);
+  await notifyRenewalRequested(supabase, producerUserId, advisorName, conn.id);
 
   revalidatePath("/dashboard/advisor/clients");
   revalidatePath(`/dashboard/advisor/clients/${connectionId}`);
@@ -186,7 +200,7 @@ export async function removeClient(connectionId: string) {
   if (!user) return { error: "Not authenticated" };
 
   // Soft-delete: set status to "removed" so both platforms detect it.
-  // Advisor is the requester, RLS policy "Requester can update own requests" allows this.
+  // RLS allows update by requester OR target, so this works for both directions.
   const { error } = await supabase
     .from("connection_requests")
     .update({
@@ -194,8 +208,7 @@ export async function removeClient(connectionId: string) {
       permission_expires_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })
-    .eq("id", connectionId)
-    .eq("requester_user_id", user.id);
+    .eq("id", connectionId);
 
   if (error) return { error: error.message };
 

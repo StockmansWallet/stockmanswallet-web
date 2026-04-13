@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs } from "@/components/ui/tabs";
 import { ClientOverview } from "@/components/app/advisory/client-overview";
 import { ClientHerdsTable } from "@/components/app/advisory/client-herds-table";
-import { AdvisorNotes } from "./advisor-notes";
+import { AdvisorChatClient } from "./advisor-chat-client";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Lock } from "lucide-react";
 import { RemoveClientButton } from "./remove-client-button";
@@ -45,8 +45,13 @@ export default async function ClientDetailPage({
 
   if (!connection) notFound();
 
-  // Verify the current user is the advisor on this connection
-  if (connection.requester_user_id !== user.id) notFound();
+  // Verify the current user is involved in this connection (either direction)
+  const isRequester = connection.requester_user_id === user.id;
+  const isTarget = connection.target_user_id === user.id;
+  if (!isRequester && !isTarget) notFound();
+
+  // Resolve the client (other party) user ID regardless of who initiated
+  const clientUserId = isRequester ? connection.target_user_id : connection.requester_user_id;
 
   // Mark unread notifications as read
   await supabase
@@ -63,7 +68,7 @@ export default async function ClientDetailPage({
   const { data: clientProfile } = await supabase
     .from("user_profiles")
     .select("display_name, company_name")
-    .eq("user_id", conn.target_user_id)
+    .eq("user_id", clientUserId)
     .single();
 
   const clientName = clientProfile?.display_name ?? "Unknown Producer";
@@ -87,7 +92,7 @@ export default async function ClientDetailPage({
       ? serviceClient
           .from("herds")
           .select("*")
-          .eq("user_id", conn.target_user_id)
+          .eq("user_id", clientUserId)
           .eq("is_sold", false)
           .eq("is_deleted", false)
           .neq("is_demo_data", true)
@@ -170,7 +175,7 @@ export default async function ClientDetailPage({
   const now = new Date();
   const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
   const reportData = permissions.reports && serviceClient
-    ? await generateAccountantData(serviceClient, conn.target_user_id, {
+    ? await generateAccountantData(serviceClient, clientUserId, {
         reportType: "accountant",
         startDate: oneYearAgo.toISOString().slice(0, 10),
         endDate: now.toISOString().slice(0, 10),
@@ -179,8 +184,8 @@ export default async function ClientDetailPage({
     : null;
 
   const participants: Record<string, { name: string; role: string }> = {
-    [user.id]: { name: "You", role: conn.requester_role },
-    [conn.target_user_id]: { name: clientName, role: "producer" },
+    [user.id]: { name: "You", role: isRequester ? conn.requester_role : "advisor" },
+    [clientUserId]: { name: clientName, role: isRequester ? "producer" : conn.requester_role },
   };
 
   return (
@@ -234,13 +239,13 @@ export default async function ClientDetailPage({
             ),
           },
           {
-            id: "notes",
-            label: "Notes",
+            id: "chat",
+            label: "Chat",
             content: (
               <Card>
-                <CardHeader><CardTitle>Notes</CardTitle></CardHeader>
-                <CardContent className="px-5 pb-5">
-                  <AdvisorNotes
+                <CardHeader><CardTitle>Chat</CardTitle></CardHeader>
+                <CardContent className="px-5 pb-5 min-h-[500px]">
+                  <AdvisorChatClient
                     connectionId={id}
                     currentUserId={user.id}
                     messages={(messages ?? []) as AdvisoryMessage[]}

@@ -4,7 +4,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { notifyNewMessage } from "@/lib/advisory/notifications";
-import type { MessageType } from "@/lib/types/advisory";
+import type { AdvisoryMessage, MessageType } from "@/lib/types/advisory";
 
 const sendMessageSchema = z.object({
   connectionId: z.string().uuid(),
@@ -26,16 +26,20 @@ export async function sendAdvisorMessage(
 
   if (!user) return { error: "Not authenticated" };
 
-  // Verify the user is the advisor (requester) on this connection
+  // Verify the user is involved in this connection (either direction)
   const { data: connection } = await supabase
     .from("connection_requests")
     .select("id, requester_user_id, target_user_id")
     .eq("id", connectionId)
     .single();
 
-  if (!connection || connection.requester_user_id !== user.id) {
-    return { error: "Connection not found" };
-  }
+  if (!connection) return { error: "Connection not found" };
+  const isRequester = connection.requester_user_id === user.id;
+  const isTarget = connection.target_user_id === user.id;
+  if (!isRequester && !isTarget) return { error: "Connection not found" };
+
+  // Resolve the other party for notification
+  const recipientId = isRequester ? connection.target_user_id : connection.requester_user_id;
 
   const { error } = await supabase.from("advisory_messages").insert({
     connection_id: connectionId,
@@ -57,7 +61,7 @@ export async function sendAdvisorMessage(
 
   await notifyNewMessage(
     supabase,
-    connection.target_user_id,
+    recipientId,
     senderName,
     connectionId,
     true
@@ -67,4 +71,23 @@ export async function sendAdvisorMessage(
   revalidatePath(`/dashboard/advisory-hub/my-advisors/${connectionId}`);
 
   return { success: true };
+}
+
+// Fetch all messages for a connection (used by polling in AdvisorChatClient)
+export async function fetchAdvisorMessages(connectionId: string): Promise<{ messages?: AdvisoryMessage[]; error?: string }> {
+  const parsed = z.string().uuid().safeParse(connectionId);
+  if (!parsed.success) return { error: "Invalid connection ID" };
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { data: messages, error } = await supabase
+    .from("advisory_messages")
+    .select("*")
+    .eq("connection_id", connectionId)
+    .order("created_at", { ascending: true });
+
+  if (error) return { error: error.message };
+  return { messages: (messages ?? []) as AdvisoryMessage[] };
 }

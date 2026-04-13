@@ -3,7 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ConnectionNotes } from "./connection-notes";
+import { ConnectionChatClient } from "./connection-chat-client";
 import { SharingPreferencesCard } from "@/components/app/advisory/sharing-preferences-card";
 import {
   getCategoryConfig,
@@ -114,10 +114,10 @@ export default async function ProducerConnectionDetailPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>Notes</CardTitle>
+          <CardTitle>Chat</CardTitle>
         </CardHeader>
-        <CardContent className="px-5 pb-5">
-          <ConnectionNotes
+        <CardContent className="px-5 pb-5 min-h-[500px]">
+          <ConnectionChatClient
             connectionId={id}
             currentUserId={user.id}
             messages={(messages ?? []) as AdvisoryMessage[]}

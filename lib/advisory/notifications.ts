@@ -127,7 +127,7 @@ export async function notifyNewMessage(
   await createNotification(supabase, {
     userId: recipientUserId,
     type: "new_message",
-    title: `New note from ${senderName}`,
+    title: `New message from ${senderName}`,
     link,
     connectionId,
   });
