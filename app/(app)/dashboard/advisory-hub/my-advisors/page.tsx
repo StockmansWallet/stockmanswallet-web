@@ -22,16 +22,50 @@ export default async function MyAdvisorsPage() {
 
   if (!user) redirect("/sign-in");
 
-  const { data: connections } = await supabase
+  // Fetch connections in both directions (advisor-initiated and producer-initiated)
+  const { data: rawConnections } = await supabase
     .from("connection_requests")
     .select("*")
-    .eq("target_user_id", user.id)
+    .or(`target_user_id.eq.${user.id},requester_user_id.eq.${user.id}`)
+    .in("status", ["pending", "approved"])
     .order("created_at", { ascending: false });
 
-  const pending = (connections ?? []).filter(
+  // For producer-initiated connections, resolve the advisor's profile so cards
+  // display the advisor's name/role/company instead of the producer's own info.
+  const allConns = (rawConnections ?? []) as ConnectionRequest[];
+  const producerInitiatedIds = allConns
+    .filter((c) => c.requester_user_id === user.id)
+    .map((c) => c.target_user_id);
+
+  let advisorProfiles: Record<string, { display_name: string; role: string; company_name: string }> = {};
+  if (producerInitiatedIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("user_profiles")
+      .select("user_id, display_name, role, company_name")
+      .in("user_id", producerInitiatedIds);
+    for (const p of profiles ?? []) {
+      advisorProfiles[p.user_id] = p;
+    }
+  }
+
+  // Normalise: swap requester fields to the advisor's info for producer-initiated
+  const connections = allConns.map((c) => {
+    if (c.requester_user_id === user.id) {
+      const profile = advisorProfiles[c.target_user_id];
+      return {
+        ...c,
+        requester_name: profile?.display_name ?? "Unknown Advisor",
+        requester_role: profile?.role ?? "advisor",
+        requester_company: profile?.company_name ?? null,
+      };
+    }
+    return c;
+  });
+
+  const pending = connections.filter(
     (c: ConnectionRequest) => c.status === "pending"
   );
-  const approved = (connections ?? []).filter(
+  const approved = connections.filter(
     (c: ConnectionRequest) => c.status === "approved"
   );
 
