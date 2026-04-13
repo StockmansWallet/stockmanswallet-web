@@ -1,10 +1,10 @@
-import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs } from "@/components/ui/tabs";
-import { ArrowLeft } from "lucide-react";
+import { PageHeader } from "@/components/ui/page-header";
 import { ConnectionChatClient } from "./connection-chat-client";
 import { SharingPreferencesCard } from "@/components/app/advisory/sharing-preferences-card";
 import { ConnectionRealtime } from "@/components/app/advisory/connection-realtime";
@@ -61,15 +61,22 @@ export default async function ProducerConnectionDetailPage({
 
   const { data: advisorProfile } = await supabase
     .from("user_profiles")
-    .select("display_name, role, company_name, state, region, contact_email, contact_phone, bio")
+    .select("display_name, role, company_name, state, region, contact_email, contact_phone, bio, avatar_url")
     .eq("user_id", advisorUserId)
     .single();
 
   const advisorName = advisorProfile?.display_name ?? conn.requester_name;
   const advisorRole = advisorProfile?.role ?? conn.requester_role;
   const categoryConfig = getCategoryConfig(advisorRole);
-  const categoryBg = categoryConfig?.bgClass ?? "bg-[#2F8CD9]/15";
-  const categoryColour = categoryConfig?.colorClass ?? "text-[#2F8CD9]";
+  const advisorAvatarUrl = advisorProfile?.avatar_url as string | null;
+
+  // Build initials from advisor name
+  const initials = advisorName
+    .split(" ")
+    .map((n: string) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   const connectedDate = new Date(conn.created_at).toLocaleDateString("en-AU", {
     day: "numeric", month: "short", year: "numeric",
@@ -96,34 +103,48 @@ export default async function ProducerConnectionDetailPage({
     <div className="max-w-3xl">
       <ConnectionRealtime userId={user.id} />
 
-      {/* Back link */}
-      <Link
-        href="/dashboard/advisory-hub/my-advisors"
-        className="mb-5 mt-1 inline-flex items-center gap-1.5 text-sm text-text-muted transition-colors hover:text-text-secondary"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        My Advisors
-      </Link>
+      {/* Header with back nav */}
+      <PageHeader
+        title={advisorName}
+        titleClassName="text-2xl font-bold text-text-primary"
+        titleHref="/dashboard/advisory-hub/my-advisors"
+        subtitle={categoryConfig?.label ?? advisorRole}
+        subtitleClassName="text-sm font-medium text-text-muted"
+        inline
+        actions={
+          <Badge variant={isActive ? "success" : "default"}>
+            {isActive ? "Sharing" : "Not sharing"}
+          </Badge>
+        }
+      />
 
-      {/* Advisor header */}
+      {/* Advisor identity */}
       <div className="mb-6 flex items-center gap-4">
-        <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${categoryBg} shadow-sm`}>
-          {categoryConfig ? (
-            <categoryConfig.icon className={`h-7 w-7 ${categoryColour}`} />
-          ) : (
-            <span className="text-lg font-bold text-[#2F8CD9]">{advisorName.charAt(0)}</span>
-          )}
-        </div>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-text-primary">{advisorName}</h1>
-          <div className="mt-1 flex flex-wrap items-center gap-2">
-            {categoryConfig && (
-              <Badge variant="default">{categoryConfig.label}</Badge>
-            )}
-            <Badge variant={isActive ? "success" : "default"}>
-              {isActive ? "Sharing" : "Not sharing"}
-            </Badge>
+        {advisorAvatarUrl ? (
+          <Image
+            src={advisorAvatarUrl}
+            alt={advisorName}
+            width={56}
+            height={56}
+            className="h-14 w-14 shrink-0 rounded-full object-cover"
+          />
+        ) : (
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#2F8CD9]/15">
+            <span className="text-lg font-bold text-[#2F8CD9]">{initials}</span>
           </div>
+        )}
+        <div className="min-w-0 flex-1">
+          {advisorProfile?.company_name && (
+            <p className="text-sm text-text-secondary">{advisorProfile.company_name}</p>
+          )}
+          {advisorProfile?.state && (
+            <p className="text-sm text-text-muted">
+              {advisorProfile.state}{advisorProfile.region ? `, ${advisorProfile.region}` : ""}
+            </p>
+          )}
+          {advisorProfile?.bio && (
+            <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-text-muted">{advisorProfile.bio}</p>
+          )}
         </div>
       </div>
 
@@ -136,10 +157,6 @@ export default async function ProducerConnectionDetailPage({
             content: (
               <ProducerAdvisorOverview
                 advisorName={advisorName}
-                advisorCompany={advisorProfile?.company_name}
-                advisorState={advisorProfile?.state}
-                advisorRegion={advisorProfile?.region}
-                advisorBio={advisorProfile?.bio}
                 advisorEmail={advisorProfile?.contact_email}
                 advisorPhone={advisorProfile?.contact_phone}
                 connectedDate={connectedDate}
