@@ -34,11 +34,11 @@ export default async function AdvisorDashboardPage() {
 
   const firstName = user.user_metadata?.first_name || "Advisor";
 
-  // Fetch connections + client data via RPC (SECURITY DEFINER bypasses RLS on properties)
+  // Fetch connections in both directions (advisor-initiated and farmer-initiated)
   const { data: connections } = await supabase
     .from("connection_requests")
     .select("*")
-    .eq("requester_user_id", user.id)
+    .or(`requester_user_id.eq.${user.id},target_user_id.eq.${user.id}`)
     .in("status", ["pending", "approved"])
     .order("created_at", { ascending: false });
 
@@ -88,9 +88,10 @@ export default async function AdvisorDashboardPage() {
 
   // Aggregate total livestock value from client portfolio snapshots
   // Uses service client to bypass RLS on portfolio_snapshots
+  // Resolve the client (other party) ID regardless of who initiated the connection
   const activeClientIds = allConnections
     .filter((c) => hasActivePermission(c))
-    .map((c) => c.target_user_id);
+    .map((c) => c.requester_user_id === user.id ? c.target_user_id : c.requester_user_id);
 
   let totalValue: number | undefined;
   let prevTotalValue: number | undefined;
@@ -251,7 +252,8 @@ export default async function AdvisorDashboardPage() {
           ) : (
             <CardContent className="divide-y divide-white/5 px-5 pb-5">
               {recentClients.map((conn) => {
-                const clientProfile = profileMap.get(conn.target_user_id);
+                const clientId = conn.requester_user_id === user.id ? conn.target_user_id : conn.requester_user_id;
+                const clientProfile = profileMap.get(clientId);
                 const isActive = hasActivePermission(conn);
                 return (
                   <Link
