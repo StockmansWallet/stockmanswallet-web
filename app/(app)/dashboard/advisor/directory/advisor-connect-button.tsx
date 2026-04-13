@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, Check, Clock } from "lucide-react";
-import { sendAdvisorConnectionRequest } from "./actions";
+import { sendAdvisorConnectionRequest } from "../clients/actions";
 
 interface AdvisorConnectButtonProps {
   targetUserId: string;
