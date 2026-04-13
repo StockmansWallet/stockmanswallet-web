@@ -3,13 +3,17 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mail, Phone, Calendar, Shield, Trash2, EyeOff, Eye } from "lucide-react";
+import { Mail, Phone, MapPin, Calendar, Shield, Trash2, EyeOff, Eye, Building2 } from "lucide-react";
 import { stopSharing, grantDataAccess, disconnectAdvisor } from "../actions";
 import { ConfirmModal } from "@/components/app/advisory/confirm-modal";
 import { useRouter } from "next/navigation";
 
 interface ProducerAdvisorOverviewProps {
   advisorName: string;
+  advisorCompany?: string | null;
+  advisorState?: string | null;
+  advisorRegion?: string | null;
+  advisorBio?: string | null;
   advisorEmail?: string | null;
   advisorPhone?: string | null;
   connectedDate: string;
@@ -19,6 +23,10 @@ interface ProducerAdvisorOverviewProps {
 
 export function ProducerAdvisorOverview({
   advisorName,
+  advisorCompany,
+  advisorState,
+  advisorRegion,
+  advisorBio,
   advisorEmail,
   advisorPhone,
   connectedDate,
@@ -46,11 +54,57 @@ export function ProducerAdvisorOverview({
     router.push("/dashboard/advisory-hub/my-advisors");
   };
 
+  const hasDetails = advisorCompany || advisorState || advisorBio || advisorEmail || advisorPhone;
+
   return (
     <div className="space-y-4">
-      {/* Two-column grid: sharing status + contact */}
       <div className="grid gap-4 sm:grid-cols-2">
-        {/* Data sharing status + toggle */}
+        {/* Left: Advisor details */}
+        <Card>
+          <CardContent className="p-5">
+            {hasDetails ? (
+              <div className="space-y-3">
+                {advisorCompany && (
+                  <div className="flex items-center gap-2.5 text-sm text-text-secondary">
+                    <Building2 className="h-4 w-4 shrink-0 text-text-muted" />
+                    {advisorCompany}
+                  </div>
+                )}
+                {advisorState && (
+                  <div className="flex items-center gap-2.5 text-sm text-text-secondary">
+                    <MapPin className="h-4 w-4 shrink-0 text-text-muted" />
+                    {advisorState}{advisorRegion ? `, ${advisorRegion}` : ""}
+                  </div>
+                )}
+                {advisorBio && (
+                  <p className="text-sm leading-relaxed text-text-muted">{advisorBio}</p>
+                )}
+                {advisorEmail && (
+                  <a
+                    href={`mailto:${advisorEmail}`}
+                    className="flex items-center gap-2.5 text-sm text-[#2F8CD9] transition-colors hover:text-[#5AA8E8]"
+                  >
+                    <Mail className="h-4 w-4 shrink-0" />
+                    <span className="truncate">{advisorEmail}</span>
+                  </a>
+                )}
+                {advisorPhone && (
+                  <a
+                    href={`tel:${advisorPhone.replace(/\s/g, "")}`}
+                    className="flex items-center gap-2.5 text-sm text-[#2F8CD9] transition-colors hover:text-[#5AA8E8]"
+                  >
+                    <Phone className="h-4 w-4 shrink-0" />
+                    {advisorPhone}
+                  </a>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm text-text-muted">No details shared by this advisor.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Right: Sharing status + toggle */}
         <Card>
           <CardContent className="p-5">
             <div className="flex items-start gap-3">
@@ -79,40 +133,9 @@ export function ProducerAdvisorOverview({
                 </Button>
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Contact + connection info */}
-        <Card>
-          <CardContent className="p-5">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2.5 text-xs text-text-muted">
-                <Calendar className="h-3.5 w-3.5 shrink-0" />
-                Connected {connectedDate}
-              </div>
-
-              {advisorEmail && (
-                <a
-                  href={`mailto:${advisorEmail}`}
-                  className="flex items-center gap-2.5 text-sm text-[#2F8CD9] transition-colors hover:text-[#5AA8E8]"
-                >
-                  <Mail className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{advisorEmail}</span>
-                </a>
-              )}
-              {advisorPhone && (
-                <a
-                  href={`tel:${advisorPhone.replace(/\s/g, "")}`}
-                  className="flex items-center gap-2.5 text-sm text-[#2F8CD9] transition-colors hover:text-[#5AA8E8]"
-                >
-                  <Phone className="h-4 w-4 shrink-0" />
-                  {advisorPhone}
-                </a>
-              )}
-
-              {!advisorEmail && !advisorPhone && (
-                <p className="text-xs text-text-muted">No contact details shared.</p>
-              )}
+            <div className="mt-4 flex items-center gap-2.5 border-t border-white/[0.06] pt-3 text-xs text-text-muted">
+              <Calendar className="h-3.5 w-3.5 shrink-0" />
+              Connected {connectedDate}
             </div>
           </CardContent>
         </Card>
