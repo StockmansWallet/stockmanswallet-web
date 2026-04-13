@@ -83,12 +83,17 @@ export async function notifyConnectionRequest(
   connectionId: string,
   recipientRole: "producer" | "advisor" = "producer"
 ) {
+  // Link to the LIST page (not detail) because Approve/Deny buttons are on the list
+  const link = recipientRole === "producer"
+    ? "/dashboard/advisory-hub/my-advisors"
+    : "/dashboard/advisor/clients";
+
   await createNotification(supabase, {
     userId: recipientUserId,
     type: "new_connection_request",
     title: `${senderName} wants to connect`,
     body: "Review and accept or decline this connection request.",
-    link: linkForRole(recipientRole, connectionId),
+    link,
     connectionId,
   });
 }

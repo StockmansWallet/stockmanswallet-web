@@ -136,8 +136,8 @@ export async function sendAdvisorConnectionRequest(targetUserId: string) {
     userId: targetUserId,
     type: "new_connection_request",
     title: `${requesterName} wants to connect`,
-    body: "Review and approve or deny this connection request.",
-    link: `/dashboard/advisory-hub/my-advisors/${connId}`,
+    body: "Review and accept or decline this connection request.",
+    link: "/dashboard/advisory-hub/my-advisors",
     connectionId: connId,
   });
 
@@ -206,8 +206,21 @@ export async function removeClient(connectionId: string) {
 
   if (!user) return { error: "Not authenticated" };
 
+  // Fetch connection to resolve the other party before removing
+  const { data: conn } = await supabase
+    .from("connection_requests")
+    .select("id, requester_user_id, target_user_id")
+    .eq("id", connectionId)
+    .single();
+
+  if (!conn) return { error: "Connection not found" };
+  const isRequester = conn.requester_user_id === user.id;
+  const isTarget = conn.target_user_id === user.id;
+  if (!isRequester && !isTarget) return { error: "Connection not found" };
+
+  const otherUserId = isRequester ? conn.target_user_id : conn.requester_user_id;
+
   // Soft-delete: set status to "removed" so both platforms detect it.
-  // RLS allows update by requester OR target, so this works for both directions.
   const { error } = await supabase
     .from("connection_requests")
     .update({
@@ -218,6 +231,21 @@ export async function removeClient(connectionId: string) {
     .eq("id", connectionId);
 
   if (error) return { error: error.message };
+
+  // Notify the other party so their page auto-updates
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("display_name")
+    .eq("user_id", user.id)
+    .single();
+
+  await createNotification(supabase, {
+    userId: otherUserId,
+    type: "request_denied",
+    title: `${profile?.display_name || "An advisor"} removed the connection`,
+    link: "/dashboard/advisory-hub/my-advisors",
+    connectionId,
+  });
 
   // Clean up advisor lenses and scenarios for this connection
   await supabase
