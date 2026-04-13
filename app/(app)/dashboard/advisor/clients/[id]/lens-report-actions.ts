@@ -30,7 +30,7 @@ import type {
 const uuidSchema = z.string().uuid();
 
 const herdOverridesSchema = z.object({
-  shading_percentage: z.number().min(0).max(200).default(100),
+  shading_percentage: z.number().min(0).max(100).default(100),
   breed_premium_override: z.number().nullable().default(null),
   adwg_override: z.number().nullable().default(null),
   calving_rate_override: z.number().nullable().default(null),

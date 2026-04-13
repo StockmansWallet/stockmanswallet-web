@@ -161,15 +161,15 @@ export function LensHerdCard({
             <input
               type="range"
               min={0}
-              max={200}
+              max={100}
               value={overrides.shading_percentage}
               onChange={(e) => update("shading_percentage", Number(e.target.value))}
               className="w-full accent-[#2F8CD9]"
             />
             <div className="flex justify-between text-[10px] text-text-muted">
               <span>0%</span>
+              <span>50%</span>
               <span>100%</span>
-              <span>200%</span>
             </div>
           </div>
 
