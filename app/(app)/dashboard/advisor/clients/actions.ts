@@ -146,6 +146,8 @@ export async function sendAdvisorConnectionRequest(targetUserId: string) {
   });
 
   revalidatePath("/dashboard/advisor/clients");
+  revalidatePath("/dashboard/advisory-hub/my-advisors");
+  revalidatePath("/dashboard/advisory-hub");
   return { success: true };
 }
 
@@ -197,6 +199,8 @@ export async function requestRenewal(connectionId: string) {
 
   revalidatePath("/dashboard/advisor/clients");
   revalidatePath(`/dashboard/advisor/clients/${connectionId}`);
+  revalidatePath("/dashboard/advisory-hub/my-advisors");
+  revalidatePath("/dashboard/advisory-hub");
   return { success: true };
 }
 
@@ -263,6 +267,8 @@ export async function removeClient(connectionId: string) {
     .eq("client_connection_id", connectionId);
 
   revalidatePath("/dashboard/advisor/clients");
+  revalidatePath("/dashboard/advisory-hub/my-advisors");
+  revalidatePath("/dashboard/advisory-hub");
   return { success: true };
 }
 

@@ -48,6 +48,7 @@ export async function approveRequest(requestId: string) {
   await notifyApproval(supabase, advisorUserId, myName, conn.id, "advisor");
 
   revalidatePath("/dashboard/advisory-hub");
+  revalidatePath("/dashboard/advisor/clients");
   return { success: true };
 }
 
@@ -77,6 +78,7 @@ export async function grantDataAccess(requestId: string) {
   if (error) return { error: error.message };
 
   revalidatePath("/dashboard/advisory-hub");
+  revalidatePath("/dashboard/advisor/clients");
   return { success: true };
 }
 
@@ -106,6 +108,7 @@ export async function stopSharing(requestId: string) {
   if (error) return { error: error.message };
 
   revalidatePath("/dashboard/advisory-hub");
+  revalidatePath("/dashboard/advisor/clients");
   return { success: true };
 }
 
@@ -140,6 +143,7 @@ export async function denyRequest(requestId: string) {
   await notifyDenial(supabase, otherUserId, myName, conn.id, "advisor");
 
   revalidatePath("/dashboard/advisory-hub");
+  revalidatePath("/dashboard/advisor/clients");
   return { success: true };
 }
 
@@ -181,5 +185,6 @@ export async function disconnectAdvisor(requestId: string) {
   await notifyDenial(supabase, otherUserId, myName, conn.id, "advisor");
 
   revalidatePath("/dashboard/advisory-hub");
+  revalidatePath("/dashboard/advisor/clients");
   return { success: true };
 }
