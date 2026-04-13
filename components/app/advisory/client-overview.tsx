@@ -15,6 +15,7 @@ import { Users, MapPin, Lock } from "lucide-react";
 
 interface ClientOverviewProps {
   connection: ConnectionRequest;
+  clientUserId: string;
   baselineValue?: number;
 }
 
@@ -51,7 +52,7 @@ interface ClientData {
   permissions: SharingPermissions;
 }
 
-export function ClientOverview({ connection, baselineValue = 0 }: ClientOverviewProps) {
+export function ClientOverview({ connection, clientUserId, baselineValue = 0 }: ClientOverviewProps) {
   const [data, setData] = useState<ClientData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -68,7 +69,7 @@ export function ClientOverview({ connection, baselineValue = 0 }: ClientOverview
         const res = await fetch("/api/advisor/client-herds", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ clientUserId: connection.target_user_id }),
+          body: JSON.stringify({ clientUserId }),
         });
 
         if (!res.ok) {

@@ -210,7 +210,7 @@ export default async function ClientDetailPage({
           {
             id: "overview",
             label: "Overview",
-            content: <ClientOverview connection={conn} baselineValue={baselineValue} />,
+            content: <ClientOverview connection={conn} clientUserId={clientUserId} baselineValue={baselineValue} />,
           },
           {
             id: "herds",
