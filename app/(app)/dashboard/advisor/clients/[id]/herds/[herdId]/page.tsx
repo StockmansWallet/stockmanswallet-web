@@ -8,8 +8,6 @@ import { calculateProjectedWeight, calculateHerdValuation, categoryFallback, par
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 import { expandWithNearbySaleyards } from "@/lib/data/saleyard-proximity";
-import { HerdLensPanel } from "@/components/app/advisory/herd-lens-panel";
-import type { AdvisorLens } from "@/lib/types/advisor-lens";
 import { Info, Scale, Heart, MapPin, DollarSign, AlertTriangle, BarChart3, Clock } from "lucide-react";
 
 export const revalidate = 0;
@@ -70,17 +68,10 @@ export default async function AdvisorHerdDetailPage({
 
   if (!herd) notFound();
 
-  // Fetch breed premiums and per-herd lens in parallel
-  const [{ data: breedPremiumData }, { data: herdLens }] = await Promise.all([
-    serviceClient.from("breed_premiums").select("breed, premium_percent:premium_pct"),
-    supabase
-      .from("advisor_lenses")
-      .select("*")
-      .eq("client_connection_id", connectionId)
-      .eq("herd_id", herdId)
-      .eq("is_deleted", false)
-      .maybeSingle(),
-  ]);
+  // Fetch breed premiums
+  const { data: breedPremiumData } = await serviceClient
+    .from("breed_premiums")
+    .select("breed, premium_percent:premium_pct");
 
   // Fetch pricing data
   const mlaCategory = resolveMLACategory(herd.category, herd.initial_weight, herd.breeder_sub_type ?? undefined).primaryMLACategory;
@@ -281,21 +272,6 @@ export default async function AdvisorHerdDetailPage({
         </div>
       </div>
 
-      {/* Advisor Lens Panel (per-herd overrides) */}
-      <HerdLensPanel
-        connectionId={connectionId}
-        herdId={herdId}
-        lens={(herdLens as AdvisorLens) ?? null}
-        baselineValue={herdValue}
-        metrics={{
-          headCount: herd.head_count ?? 0,
-          weight: projectedWeight ?? herd.current_weight ?? herd.initial_weight ?? 0,
-          dwg: herd.daily_weight_gain ?? 0,
-          mortalityRate: herd.mortality_rate ?? 0,
-          calvingRate: herd.calving_rate ?? 0.85,
-          breedPremium: valuation.breedPremiumApplied,
-        }}
-      />
     </div>
   );
 }

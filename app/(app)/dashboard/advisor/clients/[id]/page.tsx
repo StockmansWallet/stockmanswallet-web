@@ -19,6 +19,10 @@ import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/referenc
 import { expandWithNearbySaleyards } from "@/lib/data/saleyard-proximity";
 import { generateAccountantData } from "@/lib/services/report-service";
 import { ClientReportTab } from "@/components/app/advisory/client-report-tab";
+import { LensSavedList } from "@/components/app/advisory/lens-saved-list";
+import { Eye } from "lucide-react";
+import type { LensReport } from "@/lib/types/lens-report";
+import type { HerdInfo } from "@/components/app/advisory/lens-herd-card";
 
 export const revalidate = 0;
 export const metadata = { title: "Client Detail" };
@@ -183,6 +187,33 @@ export default async function ClientDetailPage({
       })
     : null;
 
+  // Fetch saved lens reports for this connection
+  const { data: lensReportsRaw } = await supabase
+    .from("lens_reports")
+    .select("*")
+    .eq("client_connection_id", id)
+    .eq("is_deleted", false)
+    .order("created_at", { ascending: false });
+
+  const lensReports = (lensReportsRaw ?? []) as LensReport[];
+
+  // Build HerdInfo array for the lens wizard
+  const lensHerds: HerdInfo[] = herds.map((h) => ({
+    id: h.id as string,
+    name: (h.name as string) ?? "",
+    category: h.category as string,
+    breed: h.breed as string,
+    species: h.species as string,
+    head_count: h.head_count as number,
+    initial_weight: h.initial_weight as number,
+    daily_weight_gain: h.daily_weight_gain as number,
+    mortality_rate: h.mortality_rate as number | null,
+    calving_rate: h.calving_rate as number,
+    breed_premium_override: h.breed_premium_override as number | null,
+    selected_saleyard: h.selected_saleyard as string | null,
+    is_breeder: h.is_breeder as boolean,
+  }));
+
   const participants: Record<string, { name: string; role: string }> = {
     [user.id]: { name: "You", role: isRequester ? conn.requester_role : "advisor" },
     [clientUserId]: { name: clientName, role: isRequester ? "producer" : conn.requester_role },
@@ -265,6 +296,27 @@ export default async function ClientDetailPage({
                   icon={<Lock className="h-6 w-6 text-[#2F8CD9]" />}
                   title="Reports Not Shared"
                   description="This producer has not enabled report sharing."
+                  variant="advisor"
+                />
+              </Card>
+            ),
+          },
+          {
+            id: "lens",
+            label: "Lens",
+            content: permissions.herds ? (
+              <LensSavedList
+                connectionId={id}
+                lensReports={lensReports}
+                herds={lensHerds}
+                herdValues={herdValues}
+              />
+            ) : (
+              <Card>
+                <EmptyState
+                  icon={<Eye className="h-6 w-6 text-[#2F8CD9]" />}
+                  title="Herds Not Shared"
+                  description="Herd data sharing is required to create lens assessments."
                   variant="advisor"
                 />
               </Card>

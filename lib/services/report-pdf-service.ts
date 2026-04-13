@@ -561,3 +561,230 @@ export async function generateReportPDF(
 
   return doc.save();
 }
+
+// MARK: - Advisor Lens Report PDF
+
+import type { AdvisorLensReportData, LensHerdSummary } from "@/lib/types/lens-report";
+
+export async function generateAdvisorLensPDF(
+  reportData: AdvisorLensReportData
+): Promise<Uint8Array> {
+  const doc = await PDFDocument.create();
+  const font = await doc.embedFont("Helvetica");
+  const bold = await doc.embedFont("Helvetica-Bold");
+
+  const title = `Advisor Lens: ${reportData.lens_name}`;
+  doc.setTitle(title);
+  doc.setCreator("Stockman's Wallet");
+  doc.setProducer("Stockman's Wallet Web");
+
+  let logo: PDFImage | null = null;
+  try {
+    const logoRes = await fetch("/images/sw-logo.png");
+    if (logoRes.ok) {
+      const logoBytes = await logoRes.arrayBuffer();
+      logo = await doc.embedPng(new Uint8Array(logoBytes));
+    }
+  } catch {
+    // continue without logo
+  }
+
+  const ctx: Ctx = { doc, font, bold, page: null as unknown as PDFPage, y: 0, pageNum: 0, logo };
+  newPage(ctx);
+
+  // Title and logo
+  ctx.page.drawText("Valuation Assessment", { x: MARGIN, y: ctx.y, size: 28, font: bold, color: BLACK });
+  if (logo) {
+    const logoH = 60;
+    const aspect = logo.width / logo.height;
+    const logoW = logoH * aspect;
+    ctx.page.drawImage(logo, {
+      x: PAGE_W - MARGIN - logoW,
+      y: ctx.y - logoH + 28,
+      width: logoW,
+      height: logoH,
+    });
+  }
+  ctx.y -= 36;
+
+  // Subtitle
+  ctx.page.drawText(reportData.lens_name, { x: MARGIN, y: ctx.y, size: 14, font: bold, color: SECONDARY });
+  ctx.y -= 20;
+
+  // Date and advisor/client
+  const dateStr = new Date(reportData.generated_at).toLocaleDateString("en-AU", {
+    day: "2-digit", month: "short", year: "numeric",
+  });
+  ctx.page.drawText(`Prepared by ${reportData.advisor_name} for ${reportData.client_name}  |  ${dateStr}`, {
+    x: MARGIN, y: ctx.y, size: 10, font, color: SECONDARY,
+  });
+  ctx.y -= 16;
+
+  ctx.page.drawLine({ start: { x: MARGIN, y: ctx.y }, end: { x: PAGE_W - MARGIN, y: ctx.y }, thickness: 0.5, color: BORDER });
+  ctx.y -= 24;
+
+  // Hero card: shaded value
+  drawHeroCard(ctx, "SHADED PORTFOLIO VALUE (LENDING)", fmt(reportData.totals.shaded_value));
+
+  // Summary stats
+  drawSectionHeader(ctx, "Portfolio Summary");
+  const summaryRows: [string, string][] = [
+    ["Baseline Value", fmt(reportData.totals.baseline_value)],
+    ["Adjusted Value", fmt(reportData.totals.adjusted_value)],
+    ["Shaded Value", fmt(reportData.totals.shaded_value)],
+    ["Total Head (Original)", reportData.totals.total_original_head.toLocaleString()],
+    ["Total Head (Adjusted)", reportData.totals.total_head.toLocaleString()],
+  ];
+  for (const [label, value] of summaryRows) {
+    ensureSpace(ctx, 18);
+    ctx.page.drawText(label, { x: MARGIN, y: ctx.y, size: 11, font, color: SECONDARY });
+    const vw = bold.widthOfTextAtSize(value, 11);
+    ctx.page.drawText(value, { x: MARGIN + 300 - vw + 100, y: ctx.y, size: 11, font: bold, color: BLACK });
+    ctx.y -= 18;
+  }
+  ctx.y -= 16;
+
+  // Per-herd breakdown table
+  drawSectionHeader(ctx, "Individual Herd Assessments");
+
+  const herdCols = [
+    { text: "HERD", width: 120 },
+    { text: "HEAD", width: 50, align: "right" as const },
+    { text: "BASELINE", width: 90, align: "right" as const },
+    { text: "ADJUSTED", width: 90, align: "right" as const },
+    { text: "SHADING", width: 48, align: "right" as const },
+    { text: "SHADED", width: 70, align: "right" as const },
+  ];
+  drawTableHeader(ctx, herdCols);
+
+  for (const h of reportData.herds) {
+    drawTableRow(ctx, [
+      { text: h.herd_name.substring(0, 20), width: 120 },
+      { text: h.head_count.toString(), width: 50, align: "right" },
+      { text: fmt(h.baseline_value), width: 90, align: "right" },
+      { text: fmt(h.adjusted_value), width: 90, align: "right" },
+      { text: `${h.shading_percentage}%`, width: 48, align: "right" },
+      { text: fmt(h.shaded_value), width: 70, align: "right", bold: true },
+    ]);
+  }
+
+  // Total row
+  ensureSpace(ctx, 30);
+  ctx.y -= 4;
+  ctx.page.drawLine({ start: { x: MARGIN, y: ctx.y }, end: { x: PAGE_W - MARGIN, y: ctx.y }, thickness: 0.5, color: BORDER });
+  ctx.y -= 16;
+  ctx.page.drawText("TOTAL", { x: MARGIN, y: ctx.y, size: 11, font: bold, color: BLACK });
+  const totalShadedStr = fmt(reportData.totals.shaded_value);
+  const tsw = bold.widthOfTextAtSize(totalShadedStr, 13);
+  ctx.page.drawText(totalShadedStr, { x: PAGE_W - MARGIN - tsw, y: ctx.y, size: 13, font: bold, color: BLACK });
+  ctx.y -= 24;
+
+  // Per-herd detail cards with overrides and notes
+  for (const h of reportData.herds) {
+    drawLensHerdDetail(ctx, h);
+  }
+
+  // Narrative section
+  if (reportData.narrative) {
+    drawSectionHeader(ctx, "Valuation Assessment Narrative");
+    drawNarrativeText(ctx, reportData.narrative);
+  }
+
+  drawAllFooters(ctx);
+  return doc.save();
+}
+
+function drawLensHerdDetail(ctx: Ctx, h: LensHerdSummary) {
+  ensureSpace(ctx, 140);
+
+  const cardH = 120;
+  const cardY = ctx.y - cardH;
+  drawRoundedRect(ctx.page, MARGIN, cardY, CW, cardH, 8, { fill: CARD_FILL, borderColor: BORDER, borderWidth: 0.5 });
+
+  let iy = cardY + cardH - 18;
+  const px = MARGIN + 12;
+
+  // Herd name and breed
+  ctx.page.drawText(h.herd_name, { x: px, y: iy, size: 12, font: ctx.bold, color: BLACK });
+  const breedStr = `${h.breed} ${h.category}  |  ${h.head_count} head  |  ${h.initial_weight} kg`;
+  ctx.page.drawText(breedStr, { x: px + 160, y: iy, size: 9, font: ctx.font, color: SECONDARY });
+  iy -= 18;
+
+  // Overrides
+  const overrides: string[] = [];
+  if (h.overrides.breed_premium_override != null) overrides.push(`Breed Premium: ${h.overrides.breed_premium_override}%`);
+  if (h.overrides.adwg_override != null) overrides.push(`DWG: ${h.overrides.adwg_override} kg/day`);
+  if (h.overrides.calving_rate_override != null) overrides.push(`Calving Rate: ${Math.round(h.overrides.calving_rate_override * 100)}%`);
+  if (h.overrides.mortality_rate_override != null) overrides.push(`Mortality: ${Math.round(h.overrides.mortality_rate_override * 100)}%`);
+  if (h.overrides.head_count_adjustment != null) overrides.push(`Head Adj: ${h.overrides.head_count_adjustment > 0 ? "+" : ""}${h.overrides.head_count_adjustment}`);
+
+  if (overrides.length > 0) {
+    ctx.page.drawText("Overrides: " + overrides.join("  |  "), { x: px, y: iy, size: 8, font: ctx.font, color: SECONDARY });
+    iy -= 14;
+  }
+
+  ctx.page.drawText(`Shading: ${h.shading_percentage}%`, { x: px, y: iy, size: 8, font: ctx.font, color: SECONDARY });
+  iy -= 14;
+
+  // Values row
+  ctx.page.drawText(`Baseline: ${fmt(h.baseline_value)}`, { x: px, y: iy, size: 9, font: ctx.font, color: SECONDARY });
+  ctx.page.drawText(`Adjusted: ${fmt(h.adjusted_value)}`, { x: px + 140, y: iy, size: 9, font: ctx.font, color: SECONDARY });
+  ctx.page.drawText(`Shaded: ${fmt(h.shaded_value)}`, { x: px + 280, y: iy, size: 9, font: ctx.bold, color: BLACK });
+  iy -= 16;
+
+  // Notes (truncated)
+  if (h.advisor_notes) {
+    const notesStr = h.advisor_notes.substring(0, 120) + (h.advisor_notes.length > 120 ? "..." : "");
+    ctx.page.drawText(`Notes: ${notesStr}`, { x: px, y: iy, size: 8, font: ctx.font, color: TERTIARY });
+  }
+
+  ctx.y = cardY - 12;
+}
+
+function drawNarrativeText(ctx: Ctx, narrative: string) {
+  const lines = narrative.split("\n");
+  const maxLineWidth = CW;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      ctx.y -= 8;
+      continue;
+    }
+
+    // Check if heading (short, no period, starts with uppercase)
+    const isHeading = trimmed.length < 80 && !trimmed.endsWith(".") && /^[A-Z]/.test(trimmed);
+
+    if (isHeading) {
+      ensureSpace(ctx, 30);
+      ctx.y -= 8;
+      ctx.page.drawText(trimmed, { x: MARGIN, y: ctx.y, size: 11, font: ctx.bold, color: BLACK });
+      ctx.y -= 18;
+    } else {
+      // Wrap long paragraphs
+      const words = trimmed.split(" ");
+      let currentLine = "";
+
+      for (const word of words) {
+        const testLine = currentLine ? `${currentLine} ${word}` : word;
+        const testWidth = ctx.font.widthOfTextAtSize(testLine, 10);
+
+        if (testWidth > maxLineWidth && currentLine) {
+          ensureSpace(ctx, 14);
+          ctx.page.drawText(currentLine, { x: MARGIN, y: ctx.y, size: 10, font: ctx.font, color: SECONDARY });
+          ctx.y -= 14;
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      }
+
+      if (currentLine) {
+        ensureSpace(ctx, 14);
+        ctx.page.drawText(currentLine, { x: MARGIN, y: ctx.y, size: 10, font: ctx.font, color: SECONDARY });
+        ctx.y -= 14;
+      }
+      ctx.y -= 4;
+    }
+  }
+}

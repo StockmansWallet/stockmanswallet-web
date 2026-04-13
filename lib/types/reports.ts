@@ -6,7 +6,8 @@ export type ReportType =
   | "asset-register"
   | "sales-summary"
   | "saleyard-comparison"
-  | "accountant";
+  | "accountant"
+  | "advisor-lens";
 
 export type DateRangePreset = "1m" | "3m" | "6m" | "1y" | "custom";
 

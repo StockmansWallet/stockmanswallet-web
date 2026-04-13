@@ -30,6 +30,7 @@ export interface AdvisorLens {
   head_count_adjustment: number | null;
   advisor_notes: string | null;
   active_scenario_id: string | null;
+  lens_report_id: string | null;
   cached_baseline_value: number | null;
   cached_advisor_value: number | null;
   cached_shaded_value: number | null;
