@@ -39,17 +39,17 @@ export function DirectoryFilters({ currentCategory, currentSearch }: DirectoryFi
   ];
 
   return (
-    <div className="mb-6 space-y-4">
-      {/* Category filter tabs */}
-      <div className="flex flex-wrap gap-1.5">
+    <div className="mb-6 space-y-3">
+      {/* Category segmented control */}
+      <div className="flex gap-1 overflow-x-auto rounded-xl bg-surface-lowest p-1">
         {categories.map((cat) => (
           <button
             key={cat.key}
             onClick={() => updateParams("category", cat.key)}
-            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+            className={`shrink-0 rounded-lg px-3.5 py-1.5 text-xs font-medium transition-all duration-150 ${
               currentCategory === cat.key
-                ? "bg-[#2F8CD9]/20 text-[#2F8CD9]"
-                : "bg-surface text-text-muted hover:bg-surface-low hover:text-text-secondary"
+                ? "bg-surface-high text-text-primary shadow-sm"
+                : "text-text-muted hover:text-text-secondary"
             }`}
           >
             {cat.label}
@@ -59,14 +59,14 @@ export function DirectoryFilters({ currentCategory, currentSearch }: DirectoryFi
 
       {/* Search bar */}
       <form onSubmit={handleSearch} className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+        <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
         <input
           type="text"
           placeholder="Search by name or company..."
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
           onBlur={() => updateParams("q", searchValue)}
-          className="w-full rounded-xl bg-surface py-2 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus:border-[#2F8CD9]/30 focus:outline-none focus:ring-1 focus:ring-[#2F8CD9]/20"
+          className="w-full rounded-xl bg-surface-lowest py-2.5 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-white/10"
         />
       </form>
     </div>

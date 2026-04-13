@@ -11,7 +11,7 @@ export function DirectoryAdvisorCard({ advisor }: { advisor: DirectoryAdvisor })
   return (
     <Link
       href={`/dashboard/advisory-hub/directory/${advisor.user_id}`}
-      className="group flex items-center gap-3.5 p-4 transition-colors hover:bg-white/[0.02]"
+      className="group flex items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-white/[0.03]"
     >
       {/* Category avatar */}
       <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${categoryBg}`}>

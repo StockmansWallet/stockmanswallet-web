@@ -72,11 +72,13 @@ export default async function AdvisorProducerDirectoryPage({
           />
         </Card>
       ) : (
-        <div className="overflow-hidden rounded-xl divide-y divide-white/5">
-          {(producers ?? []).map((producer) => (
-            <ProducerCard key={producer.user_id} producer={producer} />
-          ))}
-        </div>
+        <Card>
+          <div className="divide-y divide-white/[0.06]">
+            {(producers ?? []).map((producer) => (
+              <ProducerCard key={producer.user_id} producer={producer} />
+            ))}
+          </div>
+        </Card>
       )}
     </div>
   );

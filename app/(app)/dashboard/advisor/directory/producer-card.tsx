@@ -23,7 +23,7 @@ export function ProducerCard({ producer }: ProducerCardProps) {
   return (
     <Link
       href={`/dashboard/advisor/directory/${producer.user_id}`}
-      className="group flex items-center gap-3.5 p-4 transition-colors hover:bg-white/[0.02]"
+      className="group flex items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-white/[0.03]"
     >
       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15">
         <span className="text-sm font-bold text-emerald-400">{initials}</span>
