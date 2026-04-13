@@ -1,60 +1,56 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-// Invisible component that subscribes to connection_requests changes via
-// Supabase Realtime and auto-refreshes the page when a change is detected.
-// Watches both directions (as requester and as target) so both the advisor
-// and producer see updates immediately without manual refresh.
+// Invisible component that auto-refreshes the page when connection_requests
+// change. Uses RLS (not column filters) to scope events to the current user.
+// Also refreshes on tab focus as a fallback for any missed events.
 export function ConnectionRealtime({ userId }: { userId: string }) {
   const router = useRouter();
-  const userIdRef = useRef(userId);
-  userIdRef.current = userId;
+  const lastRefresh = useRef(0);
+
+  // Debounce refreshes to avoid multiple rapid re-renders
+  const debouncedRefresh = useCallback(() => {
+    const now = Date.now();
+    if (now - lastRefresh.current < 2000) return;
+    lastRefresh.current = now;
+    router.refresh();
+  }, [router]);
 
   useEffect(() => {
     const supabase = createClient();
 
-    // Subscribe to changes where current user is the requester
-    const channelRequester = supabase
-      .channel("conn-requester")
+    // Subscribe to ALL connection_requests changes visible to this user (RLS-scoped)
+    const channel = supabase
+      .channel(`conn-live-${userId.slice(0, 8)}`)
       .on(
         "postgres_changes",
         {
           event: "*",
           schema: "public",
           table: "connection_requests",
-          filter: `requester_user_id=eq.${userIdRef.current}`,
         },
         () => {
-          router.refresh();
+          debouncedRefresh();
         }
       )
       .subscribe();
 
-    // Subscribe to changes where current user is the target
-    const channelTarget = supabase
-      .channel("conn-target")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "connection_requests",
-          filter: `target_user_id=eq.${userIdRef.current}`,
-        },
-        () => {
-          router.refresh();
-        }
-      )
-      .subscribe();
+    // Fallback: refresh on tab focus (catches missed Realtime events)
+    function handleVisibility() {
+      if (document.visibilityState === "visible") {
+        debouncedRefresh();
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
-      supabase.removeChannel(channelRequester);
-      supabase.removeChannel(channelTarget);
+      supabase.removeChannel(channel);
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [router]);
+  }, [userId, debouncedRefresh]);
 
   return null;
 }
