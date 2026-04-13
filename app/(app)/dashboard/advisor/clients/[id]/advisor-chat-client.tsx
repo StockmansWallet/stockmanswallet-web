@@ -109,7 +109,7 @@ export function AdvisorChatClient({
       </div>
 
       {/* Input area */}
-      <div className="shrink-0 p-4">
+      <div className="shrink-0 border-t border-white/10 p-4">
         <ChatInput
           onSend={handleSend}
           onTyping={notifyTyping}

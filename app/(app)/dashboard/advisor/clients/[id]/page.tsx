@@ -242,8 +242,8 @@ export default async function ClientDetailPage({
             id: "chat",
             label: "Chat",
             content: (
-              <Card>
-                <CardContent className="p-0 min-h-[500px]">
+              <Card className="flex h-[500px] flex-col">
+                <CardContent className="flex flex-1 flex-col overflow-hidden p-0">
                   <AdvisorChatClient
                     connectionId={id}
                     currentUserId={user.id}

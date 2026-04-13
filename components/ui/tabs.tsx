@@ -26,7 +26,7 @@ function Tabs({ tabs, defaultTab }: TabsProps) {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-150 ${
+            className={`flex-1 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-150 ${
               activeTab === tab.id
                 ? "bg-surface-high text-text-primary shadow-sm"
                 : "text-text-muted hover:text-text-secondary"
