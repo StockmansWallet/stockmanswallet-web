@@ -195,7 +195,7 @@ export function LensHerdCard({
           {/* Footer: regional fetch + remove on one row */}
           <div className="flex items-center justify-between pt-1">
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={handleFetchRegional}
               disabled={fetchingRegional}
@@ -208,10 +208,9 @@ export function LensHerdCard({
               Fetch Regional Averages
             </Button>
             <Button
-              variant="ghost"
+              variant="destructive"
               size="sm"
               onClick={onRemove}
-              className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
             >
               <Trash2 className="mr-1.5 h-3.5 w-3.5" />
               Remove Herd
