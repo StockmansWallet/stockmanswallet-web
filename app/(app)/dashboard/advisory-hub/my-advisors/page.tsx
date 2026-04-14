@@ -6,11 +6,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Users, Search, ArrowRight, MapPin, Clock, Check, Shield } from "lucide-react";
+import { Users, Search, Clock } from "lucide-react";
 import { AdvisorRequestCard } from "@/components/app/advisory/advisor-request-card";
-import { ConnectedAdvisorCard } from "@/components/app/advisory/connected-advisor-card";
+import { AdvisorBusinessCard } from "@/components/app/advisory/advisor-business-card";
 import { ConnectionRealtime } from "@/components/app/advisory/connection-realtime";
-import { getCategoryConfig, hasActivePermission, type ConnectionRequest } from "@/lib/types/advisory";
+import { getCategoryConfig, type ConnectionRequest } from "@/lib/types/advisory";
 
 export const revalidate = 0;
 
@@ -36,53 +36,56 @@ export default async function MyAdvisorsPage() {
 
   const allConns = (rawConnections ?? []) as ConnectionRequest[];
 
-  // Resolve advisor profiles for producer-initiated connections
-  // (so cards show the advisor's name, not the producer's own name)
+  // Resolve advisor profiles (including contact details for business cards)
   const otherPartyIds = allConns.map((c) =>
     c.requester_user_id === user.id ? c.target_user_id : c.requester_user_id
   );
 
-  let profiles: Record<string, { display_name: string; role: string; company_name: string; state: string }> = {};
+  let profiles: Record<string, {
+    display_name: string;
+    role: string;
+    company_name: string;
+    state: string;
+    contact_email: string | null;
+    contact_phone: string | null;
+  }> = {};
+
   if (otherPartyIds.length > 0) {
     const { data } = await supabase
       .from("user_profiles")
-      .select("user_id, display_name, role, company_name, state")
+      .select("user_id, display_name, role, company_name, state, contact_email, contact_phone")
       .in("user_id", [...new Set(otherPartyIds)]);
     for (const p of data ?? []) {
       profiles[p.user_id] = p;
     }
   }
 
-  // Normalise all connections: resolve the advisor (other party) info
+  // Normalise connections with advisor profile data
   const connections = allConns.map((c) => {
     const otherPartyId = c.requester_user_id === user.id ? c.target_user_id : c.requester_user_id;
     const profile = profiles[otherPartyId];
     return {
       ...c,
-      // Override requester fields with the advisor's actual info for display
       requester_name: profile?.display_name ?? c.requester_name,
       requester_role: profile?.role ?? c.requester_role,
       requester_company: profile?.company_name ?? c.requester_company,
-      _isProducerInitiated: c.requester_user_id === user.id,
+      _otherPartyId: otherPartyId,
     };
   });
 
   // Split into sections
-  // Incoming: advisor sent request TO this producer (user is target, status pending)
   const incomingRequests = connections.filter(
     (c) => c.status === "pending" && c.target_user_id === user.id
   );
-  // Awaiting: producer sent request, waiting for advisor to accept (user is requester, status pending)
   const awaitingResponse = connections.filter(
     (c) => c.status === "pending" && c.requester_user_id === user.id
   );
-  // Connected: approved in either direction
   const connected = connections.filter((c) => c.status === "approved");
 
   const hasAnything = incomingRequests.length > 0 || awaitingResponse.length > 0 || connected.length > 0;
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-4xl">
       <ConnectionRealtime userId={user.id} />
       <PageHeader
         title="My Advisors"
@@ -113,7 +116,7 @@ export default async function MyAdvisorsPage() {
         </Card>
       )}
 
-      {/* Incoming requests from advisors (user needs to approve/deny) */}
+      {/* Incoming requests from advisors */}
       {incomingRequests.length > 0 && (
         <div className="mb-6">
           <h3 className="mb-3 text-sm font-semibold text-amber-400">
@@ -127,7 +130,7 @@ export default async function MyAdvisorsPage() {
         </div>
       )}
 
-      {/* Requests sent by producer, awaiting advisor response */}
+      {/* Awaiting response */}
       {awaitingResponse.length > 0 && (
         <div className="mb-6">
           <h3 className="mb-3 text-sm font-semibold text-text-secondary">
@@ -173,7 +176,7 @@ export default async function MyAdvisorsPage() {
         </div>
       )}
 
-      {/* Connected advisors */}
+      {/* Connected advisors - business card grid */}
       {connected.length > 0 && (
         <div>
           {(incomingRequests.length > 0 || awaitingResponse.length > 0) && (
@@ -181,10 +184,18 @@ export default async function MyAdvisorsPage() {
               Connected Advisors ({connected.length})
             </h3>
           )}
-          <div className="space-y-3">
-            {connected.map((connection) => (
-              <ConnectedAdvisorCard key={connection.id} connection={connection} />
-            ))}
+          <div className="grid gap-4 sm:grid-cols-2">
+            {connected.map((connection) => {
+              const profile = profiles[connection._otherPartyId];
+              return (
+                <AdvisorBusinessCard
+                  key={connection.id}
+                  connection={connection}
+                  advisorEmail={profile?.contact_email}
+                  advisorPhone={profile?.contact_phone}
+                />
+              );
+            })}
           </div>
         </div>
       )}
