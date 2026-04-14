@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Mail, Phone, Building2, Calendar, Trash2 } from "lucide-react";
+import { Mail, Phone, Building2, Calendar, Trash2, Info } from "lucide-react";
 import { grantDataAccess, stopSharing, disconnectAdvisor } from "@/app/(app)/dashboard/advisory-hub/my-advisors/actions";
 import { ConfirmModal } from "@/components/app/advisory/confirm-modal";
 import {
@@ -22,7 +22,6 @@ interface AdvisorBusinessCardProps {
   avatarUrl?: string | null;
 }
 
-// Shared card styling for front and back (Apple Wallet-inspired)
 const cardFace = "absolute inset-0 overflow-hidden rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20";
 const frontGradient = "bg-gradient-to-b from-white/[0.05] to-transparent";
 const backGradient = "bg-gradient-to-b from-white/[0.03] to-transparent";
@@ -62,7 +61,7 @@ export function AdvisorBusinessCard({ connection, advisorEmail, advisorPhone, av
   return (
     <>
       <div
-        className="cursor-pointer select-none"
+        className="select-none"
         style={{ perspective: "1000px" }}
       >
         <div
@@ -73,10 +72,10 @@ export function AdvisorBusinessCard({ connection, advisorEmail, advisorPhone, av
           }}
         >
           {/* ---- FRONT ---- */}
-          <div
-            className={`${cardFace} ${frontGradient}`}
+          <Link
+            href={`/dashboard/advisory-hub/my-advisors/${connection.id}`}
+            className={`${cardFace} ${frontGradient} block cursor-pointer transition-colors hover:border-white/[0.12]`}
             style={{ backfaceVisibility: "hidden" }}
-            onClick={() => setFlipped(true)}
           >
             <div className="flex h-full flex-col justify-between p-5">
               {/* Top: avatar + name + badges */}
@@ -105,37 +104,45 @@ export function AdvisorBusinessCard({ connection, advisorEmail, advisorPhone, av
                 </div>
               </div>
 
-              {/* Contact details */}
-              <div className="space-y-1">
-                {connection.requester_company && (
-                  <div className="flex items-center gap-2 text-xs text-text-secondary">
-                    <Building2 className="h-3 w-3 shrink-0 text-text-muted" />
-                    <span className="truncate">{connection.requester_company}</span>
-                  </div>
-                )}
-                {advisorEmail && (
-                  <a
-                    href={`mailto:${advisorEmail}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex w-fit items-center gap-2 text-xs text-[#2F8CD9] transition-colors hover:text-[#5AA8E8]"
-                  >
-                    <Mail className="h-3 w-3 shrink-0" />
-                    <span className="truncate">{advisorEmail}</span>
-                  </a>
-                )}
-                {advisorPhone && (
-                  <div className="flex items-center gap-2 text-xs text-text-secondary">
-                    <Phone className="h-3 w-3 shrink-0 text-text-muted" />
-                    {advisorPhone}
-                  </div>
-                )}
+              {/* Contact details + info button */}
+              <div className="flex items-end justify-between">
+                <div className="space-y-1">
+                  {connection.requester_company && (
+                    <div className="flex items-center gap-2 text-xs text-text-secondary">
+                      <Building2 className="h-3 w-3 shrink-0 text-text-muted" />
+                      <span className="truncate">{connection.requester_company}</span>
+                    </div>
+                  )}
+                  {advisorEmail && (
+                    <div className="flex items-center gap-2 text-xs text-text-secondary">
+                      <Mail className="h-3 w-3 shrink-0 text-text-muted" />
+                      <span className="truncate">{advisorEmail}</span>
+                    </div>
+                  )}
+                  {advisorPhone && (
+                    <div className="flex items-center gap-2 text-xs text-text-secondary">
+                      <Phone className="h-3 w-3 shrink-0 text-text-muted" />
+                      {advisorPhone}
+                    </div>
+                  )}
+                </div>
+
+                {/* Settings (i) button */}
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setFlipped(true); }}
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.08] text-text-muted transition-colors hover:bg-white/[0.15] hover:text-text-secondary"
+                  aria-label="Settings"
+                >
+                  <Info className="h-3.5 w-3.5" />
+                </button>
               </div>
             </div>
-          </div>
+          </Link>
 
           {/* ---- BACK ---- */}
           <div
-            className={`${cardFace} ${backGradient}`}
+            className={`${cardFace} ${backGradient} cursor-pointer`}
             style={{
               backfaceVisibility: "hidden",
               transform: "rotateY(180deg)",
@@ -165,24 +172,17 @@ export function AdvisorBusinessCard({ connection, advisorEmail, advisorPhone, av
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="mt-auto flex items-center gap-2 pt-4">
-                <Link
-                  href={`/dashboard/advisory-hub/my-advisors/${connection.id}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="inline-flex items-center rounded-lg bg-white/[0.05] px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.08] hover:text-text-primary"
-                >
-                  View details
-                </Link>
+              {/* Remove */}
+              <div className="mt-auto pt-3" onClick={(e) => e.stopPropagation()}>
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={(e) => { e.stopPropagation(); setShowRemove(true); }}
+                  onClick={() => setShowRemove(true)}
                   disabled={loading}
                   className="gap-1.5"
                 >
                   <Trash2 className="h-3 w-3" />
-                  Remove
+                  Remove Advisor
                 </Button>
               </div>
             </div>
