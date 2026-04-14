@@ -110,7 +110,6 @@ export function HerdLensPanel({
             value={breedPremium}
             onChange={setBreedPremium}
             step="0.1"
-            hint="Enter a new value to override"
           />
           <OverrideField
             label="DWG (kg/day)"
@@ -118,7 +117,6 @@ export function HerdLensPanel({
             value={dwg}
             onChange={setDwg}
             step="0.01"
-            hint="Enter a new value to override"
           />
           <OverrideField
             label="Calving Rate (%)"
@@ -126,7 +124,6 @@ export function HerdLensPanel({
             value={calvingRate}
             onChange={setCalvingRate}
             step="1"
-            hint="Enter a new value to override"
           />
           <OverrideField
             label="Mortality (%)"
@@ -134,7 +131,6 @@ export function HerdLensPanel({
             value={mortality}
             onChange={setMortality}
             step="0.1"
-            hint="Enter a new value to override"
           />
           <OverrideField
             label="Head Count Adj."
@@ -142,8 +138,7 @@ export function HerdLensPanel({
             value={headAdj}
             onChange={setHeadAdj}
             step="1"
-            placeholder="e.g. -10 to remove 10"
-            hint="+/- adjustment to current count"
+            placeholder="e.g. -10"
           />
         </div>
 
@@ -216,7 +211,6 @@ function OverrideField({
   onChange,
   step,
   placeholder,
-  hint,
 }: {
   label: string;
   currentValue: string;
@@ -224,7 +218,6 @@ function OverrideField({
   onChange: (v: string) => void;
   step?: string;
   placeholder?: string;
-  hint?: string;
 }) {
   return (
     <div className="space-y-1.5">
@@ -237,9 +230,7 @@ function OverrideField({
         placeholder={placeholder ?? `Current: ${currentValue}`}
         className="border-border bg-surface"
       />
-      <p className="text-[10px] text-text-muted">
-        Current: {currentValue}{hint ? ` · ${hint}` : ""}
-      </p>
+      <p className="text-[10px] text-text-muted">Current: {currentValue}</p>
     </div>
   );
 }

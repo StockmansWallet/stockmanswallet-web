@@ -118,7 +118,6 @@ export function LensHerdCard({
               value={overrides.breed_premium_override}
               onChange={(v) => update("breed_premium_override", v)}
               step="0.1"
-              hint="Enter a new value to override"
             />
             <OverrideField
               label="DWG (kg/day)"
@@ -126,7 +125,6 @@ export function LensHerdCard({
               value={overrides.adwg_override}
               onChange={(v) => update("adwg_override", v)}
               step="0.01"
-              hint="Enter a new value to override"
             />
             <OverrideField
               label="Calving Rate (%)"
@@ -134,7 +132,6 @@ export function LensHerdCard({
               value={overrides.calving_rate_override}
               onChange={(v) => update("calving_rate_override", v)}
               step="1"
-              hint="Enter a new value to override"
             />
             <OverrideField
               label="Mortality (%)"
@@ -142,7 +139,6 @@ export function LensHerdCard({
               value={overrides.mortality_rate_override}
               onChange={(v) => update("mortality_rate_override", v)}
               step="0.1"
-              hint="Enter a new value to override"
             />
             <OverrideField
               label="Head Count Adj."
@@ -150,8 +146,7 @@ export function LensHerdCard({
               value={overrides.head_count_adjustment}
               onChange={(v) => update("head_count_adjustment", v)}
               step="1"
-              placeholder="e.g. -10 to remove 10"
-              hint="+/- adjustment to current count"
+              placeholder="e.g. -10"
             />
           </div>
 
@@ -245,7 +240,6 @@ function OverrideField({
   onChange,
   step,
   placeholder,
-  hint,
 }: {
   label: string;
   currentValue: string;
@@ -253,7 +247,6 @@ function OverrideField({
   onChange: (v: string) => void;
   step?: string;
   placeholder?: string;
-  hint?: string;
 }) {
   return (
     <div className="space-y-1.5">
@@ -266,9 +259,7 @@ function OverrideField({
         placeholder={placeholder ?? `Current: ${currentValue}`}
         className="border-border bg-surface"
       />
-      <p className="text-[10px] text-text-muted">
-        Current: {currentValue}{hint ? ` · ${hint}` : ""}
-      </p>
+      <p className="text-[10px] text-text-muted">Current: {currentValue}</p>
     </div>
   );
 }
