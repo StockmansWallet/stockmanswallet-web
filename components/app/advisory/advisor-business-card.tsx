@@ -3,11 +3,10 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Mail, Phone, Building2, Calendar, Trash2 } from "lucide-react";
+import { Mail, Building2, Calendar, Trash2 } from "lucide-react";
 import { grantDataAccess, stopSharing, disconnectAdvisor } from "@/app/(app)/dashboard/advisory-hub/my-advisors/actions";
 import { ConfirmModal } from "@/components/app/advisory/confirm-modal";
 import {
@@ -19,11 +18,15 @@ import {
 interface AdvisorBusinessCardProps {
   connection: ConnectionRequest;
   advisorEmail?: string | null;
-  advisorPhone?: string | null;
   avatarUrl?: string | null;
 }
 
-export function AdvisorBusinessCard({ connection, advisorEmail, advisorPhone, avatarUrl }: AdvisorBusinessCardProps) {
+// Shared card styling for front and back (Apple Wallet-inspired)
+const cardFace = "absolute inset-0 overflow-hidden rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20";
+const frontGradient = "bg-gradient-to-br from-white/[0.06] via-transparent to-black/[0.04]";
+const backGradient = "bg-gradient-to-br from-white/[0.04] via-surface-lowest to-black/[0.06]";
+
+export function AdvisorBusinessCard({ connection, advisorEmail, avatarUrl }: AdvisorBusinessCardProps) {
   const [flipped, setFlipped] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showRemove, setShowRemove] = useState(false);
@@ -58,19 +61,19 @@ export function AdvisorBusinessCard({ connection, advisorEmail, advisorPhone, av
   return (
     <>
       <div
-        className="cursor-pointer"
+        className="cursor-pointer select-none"
         style={{ perspective: "1000px" }}
       >
         <div
-          className="relative h-[210px] transition-transform duration-500"
+          className="relative h-[210px] transition-transform duration-500 ease-out"
           style={{
             transformStyle: "preserve-3d",
             transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
           }}
         >
           {/* ---- FRONT ---- */}
-          <Card
-            className="absolute inset-0 overflow-hidden"
+          <div
+            className={`${cardFace} ${frontGradient}`}
             style={{ backfaceVisibility: "hidden" }}
             onClick={() => setFlipped(true)}
           >
@@ -83,10 +86,10 @@ export function AdvisorBusinessCard({ connection, advisorEmail, advisorPhone, av
                     alt={connection.requester_name}
                     width={44}
                     height={44}
-                    className="h-11 w-11 shrink-0 rounded-full object-cover"
+                    className="h-11 w-11 shrink-0 rounded-full object-cover ring-2 ring-white/10"
                   />
                 ) : (
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#2F8CD9]/15">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#2F8CD9]/15 ring-2 ring-white/10">
                     <span className="text-sm font-bold text-[#2F8CD9]">{initials}</span>
                   </div>
                 )}
@@ -101,7 +104,7 @@ export function AdvisorBusinessCard({ connection, advisorEmail, advisorPhone, av
                 </div>
               </div>
 
-              {/* Middle: contact details */}
+              {/* Contact details */}
               <div className="space-y-1">
                 {connection.requester_company && (
                   <div className="flex items-center gap-2 text-xs text-text-secondary">
@@ -119,26 +122,16 @@ export function AdvisorBusinessCard({ connection, advisorEmail, advisorPhone, av
                     <span className="truncate">{advisorEmail}</span>
                   </a>
                 )}
-                {advisorPhone && (
-                  <a
-                    href={`tel:${advisorPhone.replace(/\s/g, "")}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex items-center gap-2 text-xs text-[#2F8CD9] transition-colors hover:text-[#5AA8E8]"
-                  >
-                    <Phone className="h-3 w-3 shrink-0" />
-                    {advisorPhone}
-                  </a>
-                )}
               </div>
 
               {/* Bottom hint */}
-              <p className="text-center text-[10px] text-text-muted/40">Tap for settings</p>
+              <p className="text-center text-[10px] text-text-muted/30">Tap for settings</p>
             </div>
-          </Card>
+          </div>
 
           {/* ---- BACK ---- */}
-          <Card
-            className="absolute inset-0 overflow-hidden"
+          <div
+            className={`${cardFace} ${backGradient}`}
             style={{
               backfaceVisibility: "hidden",
               transform: "rotateY(180deg)",
@@ -149,7 +142,7 @@ export function AdvisorBusinessCard({ connection, advisorEmail, advisorPhone, av
               {/* Header */}
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-text-primary">{connection.requester_name}</h3>
-                <span className="text-[10px] text-text-muted/40">Tap to flip back</span>
+                <span className="text-[10px] text-text-muted/30">Tap to flip back</span>
               </div>
 
               {/* Settings */}
@@ -171,7 +164,7 @@ export function AdvisorBusinessCard({ connection, advisorEmail, advisorPhone, av
                 <Link
                   href={`/dashboard/advisory-hub/my-advisors/${connection.id}`}
                   onClick={(e) => e.stopPropagation()}
-                  className="inline-flex items-center rounded-lg bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-low hover:text-text-primary"
+                  className="inline-flex items-center rounded-lg bg-white/[0.05] px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.08] hover:text-text-primary"
                 >
                   View details
                 </Link>
@@ -189,7 +182,7 @@ export function AdvisorBusinessCard({ connection, advisorEmail, advisorPhone, av
                 Remove Advisor
               </Button>
             </div>
-          </Card>
+          </div>
         </div>
       </div>
 
