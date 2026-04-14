@@ -26,10 +26,12 @@ export default async function ConnectedClientsPage() {
 
   if (!user) redirect("/sign-in");
 
+  // Advisory connections only (exclude farmer_peer)
   const { data: connections } = await supabase
     .from("connection_requests")
     .select("*")
     .or(`requester_user_id.eq.${user.id},target_user_id.eq.${user.id}`)
+    .eq("connection_type", "advisory")
     .in("status", ["pending", "approved"])
     .order("created_at", { ascending: false });
 

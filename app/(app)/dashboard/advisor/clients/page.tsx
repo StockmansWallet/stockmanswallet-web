@@ -29,10 +29,12 @@ export default async function AdvisorClientsHubPage() {
 
   if (!user) redirect("/sign-in");
 
+  // Advisory connections only (exclude farmer_peer)
   const { data: connections } = await supabase
     .from("connection_requests")
     .select("id, status, target_user_id, requester_user_id, sharing_permissions, permission_granted_at")
     .or(`requester_user_id.eq.${user.id},target_user_id.eq.${user.id}`)
+    .eq("connection_type", "advisory")
     .in("status", ["pending", "approved"]);
 
   const allConnections = (connections ?? []) as ConnectionRequest[];

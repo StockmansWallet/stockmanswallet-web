@@ -4,6 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createNotification } from "@/lib/advisory/notifications";
+import { DEFAULT_SHARING_PERMISSIONS, ALL_OFF_SHARING_PERMISSIONS } from "@/lib/types/advisory";
 
 const searchQuerySchema = z.object({
   query: z.string().min(2).max(100),
@@ -199,12 +200,15 @@ export async function removeClient(connectionId: string) {
 
   const otherUserId = isRequester ? conn.target_user_id : conn.requester_user_id;
 
-  // Soft-delete: set status to "removed" so both platforms detect it.
+  // Soft-delete: set status to "removed", clear all permissions.
+  // Matches iOS disconnectAdvisor() and web disconnectAdvisor().
   const { error } = await supabase
     .from("connection_requests")
     .update({
       status: "removed",
+      permission_granted_at: null,
       permission_expires_at: new Date().toISOString(),
+      sharing_permissions: ALL_OFF_SHARING_PERMISSIONS,
       updated_at: new Date().toISOString(),
     })
     .eq("id", connectionId);
@@ -271,6 +275,7 @@ export async function acceptClientRequest(connectionId: string) {
     .update({
       status: "approved",
       permission_granted_at: new Date().toISOString(),
+      sharing_permissions: DEFAULT_SHARING_PERMISSIONS,
       updated_at: new Date().toISOString(),
     })
     .eq("id", connectionId);

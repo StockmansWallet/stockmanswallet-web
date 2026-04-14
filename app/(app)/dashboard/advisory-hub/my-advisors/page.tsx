@@ -27,11 +27,12 @@ export default async function MyAdvisorsPage() {
 
   if (!user) redirect("/sign-in");
 
-  // Fetch all connections in both directions
+  // Fetch advisory connections only (exclude farmer_peer)
   const { data: rawConnections } = await supabase
     .from("connection_requests")
     .select("*")
     .or(`target_user_id.eq.${user.id},requester_user_id.eq.${user.id}`)
+    .eq("connection_type", "advisory")
     .in("status", ["pending", "approved"])
     .order("created_at", { ascending: false });
 
