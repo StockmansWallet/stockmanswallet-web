@@ -154,7 +154,6 @@ function ClientDataView({ data, baselineValue }: { data: ClientData; baselineVal
   }
 
   const hasPropertyData = permissions.properties && data.properties.length > 0;
-  const hasCompositionData = permissions.herds && Object.keys(speciesGroups).length > 0;
 
   // Build stats array based on what's shared
   const stats: { label: string; value: string; isCurrency?: boolean }[] = [];
@@ -187,36 +186,22 @@ function ClientDataView({ data, baselineValue }: { data: ClientData; baselineVal
         </div>
       )}
 
-      {/* Properties + Composition detail rows */}
-      {(hasPropertyData || hasCompositionData) && (
+      {/* Properties row */}
+      {hasPropertyData && (
         <Card>
-          <CardContent className="divide-y divide-white/[0.06] p-0">
-            {hasPropertyData && (
-              <div className="flex items-center justify-between px-4 py-3">
-                <span className="text-sm text-text-muted">Properties</span>
-                <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
-                  {data.properties.map((property) => (
-                    <span key={property.id} className="flex items-center gap-1.5 text-sm text-text-primary">
-                      <MapPin className="h-3 w-3 text-text-muted" />
-                      {property.property_name}
-                      {property.state && <span className="text-xs text-text-muted">{property.state}</span>}
-                    </span>
-                  ))}
-                </div>
+          <CardContent className="p-0">
+            <div className="flex items-center justify-between px-4 py-3">
+              <span className="text-sm text-text-muted">Properties</span>
+              <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
+                {data.properties.map((property) => (
+                  <span key={property.id} className="flex items-center gap-1.5 text-sm text-text-primary">
+                    <MapPin className="h-3 w-3 text-text-muted" />
+                    {property.property_name}
+                    {property.state && <span className="text-xs text-text-muted">{property.state}</span>}
+                  </span>
+                ))}
               </div>
-            )}
-            {hasCompositionData && (
-              <div className="flex items-center justify-between px-4 py-3">
-                <span className="text-sm text-text-muted">Composition</span>
-                <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
-                  {Object.entries(speciesGroups).map(([species, info]) => (
-                    <span key={species} className="text-sm text-text-primary">
-                      {species} · {info.count} herds · {info.head.toLocaleString()} head
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
+            </div>
           </CardContent>
         </Card>
       )}
