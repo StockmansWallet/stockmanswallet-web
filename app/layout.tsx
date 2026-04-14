@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Nunito } from "next/font/google";
+import { Caveat, Geist_Mono, Nunito } from "next/font/google";
 import "./globals.css";
 
 const geistMono = Geist_Mono({
@@ -13,13 +13,19 @@ const nunito = Nunito({
   weight: ["400", "500", "600", "700", "800"],
 });
 
+const caveat = Caveat({
+  variable: "--font-caveat",
+  subsets: ["latin"],
+  weight: ["700"],
+});
+
 export const metadata: Metadata = {
   title: {
     default: "Stockman's Wallet - Intelligent Livestock Valuation",
     template: "Stockman's Wallet | %s",
   },
   description:
-    "Track your cattle, sheep and pig herds as financial assets with real-time MLA market valuations. Built for Australian producers and rural advisors.",
+    "Track your cattle, sheep and pig herds as financial assets with real-time MLA market valuations. Built for Australian producers.",
   keywords: [
     "livestock",
     "cattle",
@@ -51,7 +57,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en-AU" className="dark">
-      <body className={`${geistMono.variable} ${nunito.variable} font-sans antialiased`}>
+      <body className={`${geistMono.variable} ${nunito.variable} ${caveat.variable} font-sans antialiased`}>
         {children}
       </body>
     </html>
