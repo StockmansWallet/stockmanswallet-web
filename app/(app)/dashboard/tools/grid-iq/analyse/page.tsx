@@ -52,7 +52,6 @@ export default async function NewAnalysisPage() {
         titleClassName="text-2xl font-semibold text-text-primary"
         subtitle="Build a consignment and compare processor vs saleyard returns"
         subtitleClassName="text-sm text-text-muted"
-        inline
         compact
       />
       <PreSaleFlow

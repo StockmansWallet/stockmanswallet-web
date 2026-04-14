@@ -41,7 +41,6 @@ export default async function AnalysesListPage() {
         titleClassName="text-2xl font-semibold text-text-primary"
         subtitle="Saleyard vs over-the-hooks comparisons"
         subtitleClassName="text-sm text-text-muted"
-        inline
         compact
       />
 

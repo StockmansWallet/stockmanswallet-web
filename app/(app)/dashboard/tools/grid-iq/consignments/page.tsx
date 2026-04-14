@@ -53,7 +53,6 @@ export default async function ConsignmentsListPage() {
           titleClassName="text-2xl font-semibold text-text-primary"
           subtitle="Processor bookings and kill records"
           subtitleClassName="text-sm text-text-muted"
-          inline
           compact
         />
         <Link href="/dashboard/tools/grid-iq/consignments/new">

@@ -108,7 +108,6 @@ export default async function MyAdvisorsPage() {
         titleClassName="text-4xl font-bold text-[#2F8CD9]"
         subtitle="Manage your advisory connections"
         subtitleClassName="text-sm font-medium text-text-secondary"
-        inline
         actions={
           <Link href="/dashboard/advisory-hub/directory">
             <Button variant="advisor" size="sm">

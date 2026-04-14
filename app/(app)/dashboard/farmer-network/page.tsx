@@ -37,7 +37,6 @@ export default async function FarmerNetworkPage() {
         titleClassName="text-4xl font-bold text-orange-400"
         subtitle="Connect and chat with other producers"
         subtitleClassName="text-sm font-medium text-text-secondary"
-        inline
       />
 
       {/* Hero section */}

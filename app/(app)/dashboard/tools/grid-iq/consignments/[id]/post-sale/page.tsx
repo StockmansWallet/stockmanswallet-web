@@ -79,7 +79,6 @@ export default async function PostSalePage({ params }: PageProps) {
         titleClassName="text-2xl font-semibold text-text-primary"
         subtitle={`${consignment.processor_name} - ${consignment.total_head_count} head`}
         subtitleClassName="text-sm text-text-muted"
-        inline
         compact
       />
       <PostSaleFlow

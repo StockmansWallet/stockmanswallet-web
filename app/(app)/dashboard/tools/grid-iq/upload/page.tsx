@@ -21,7 +21,6 @@ export default async function GridIQUploadPage({
           : "Upload a processor grid photo or PDF to extract the price matrix."
         }
         subtitleClassName="text-sm text-text-muted"
-        inline
         compact
       />
       <GridIQUploader key={initialType} initialType={initialType} />

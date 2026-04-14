@@ -89,7 +89,6 @@ export default async function AdvisorProducerDirectoryPage({
         titleClassName="text-4xl font-bold text-[#2F8CD9]"
         subtitle="Search for producers to connect with"
         subtitleClassName="text-sm font-medium text-text-secondary"
-        inline
       />
 
       <ProducerDirectorySearch currentSearch={searchQuery} currentState={stateFilter} />

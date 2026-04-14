@@ -79,7 +79,6 @@ export default async function AdvisorClientsPage() {
         titleClassName="text-4xl font-bold text-[#2F8CD9]"
         subtitle="Manage your client connections"
         subtitleClassName="text-sm font-medium text-text-secondary"
-        inline
       />
 
       {/* Stats row */}

@@ -41,7 +41,6 @@ export default async function SavedGridsPage() {
         titleClassName="text-2xl font-semibold text-text-primary"
         subtitle="Uploaded processor price grids"
         subtitleClassName="text-sm text-text-muted"
-        inline
         compact
       />
 

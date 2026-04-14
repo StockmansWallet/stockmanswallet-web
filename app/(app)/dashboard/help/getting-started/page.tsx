@@ -82,7 +82,6 @@ export default function GettingStartedPage() {
         titleHref="/dashboard/help"
         subtitle="Back to Help Center"
         subtitleClassName="text-sm font-medium text-text-secondary"
-        inline
       />
 
       <p className="mb-6 text-sm text-text-muted">

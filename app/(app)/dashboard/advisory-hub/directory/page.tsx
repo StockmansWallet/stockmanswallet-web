@@ -58,7 +58,6 @@ export default async function AdvisorDirectoryPage({
         titleHref="/dashboard/advisory-hub"
         subtitle="Find and connect with advisors"
         subtitleClassName="text-sm font-medium text-text-secondary"
-        inline
       />
 
       <DirectoryFilters

@@ -41,7 +41,6 @@ export default async function KillSheetHistoryPage() {
         titleClassName="text-2xl font-semibold text-text-primary"
         subtitle="Over-the-hooks performance"
         subtitleClassName="text-sm text-text-muted"
-        inline
         compact
       />
 

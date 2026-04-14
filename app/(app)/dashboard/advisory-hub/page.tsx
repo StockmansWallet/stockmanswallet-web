@@ -48,7 +48,6 @@ export default async function AdvisoryHubPage() {
         titleClassName="text-4xl font-bold text-[#2F8CD9]"
         subtitle="Connect with your advisory team"
         subtitleClassName="text-sm font-medium text-text-secondary"
-        inline
       />
 
       {/* Stats row */}

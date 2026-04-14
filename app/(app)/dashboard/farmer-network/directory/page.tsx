@@ -57,7 +57,6 @@ export default async function FarmerDirectoryPage({
         titleHref="/dashboard/farmer-network"
         subtitle="Back to Producer Network"
         subtitleClassName="text-sm font-medium text-text-secondary"
-        inline
       />
 
       <FarmerDirectorySearch currentSearch={searchQuery} currentState={stateFilter} />

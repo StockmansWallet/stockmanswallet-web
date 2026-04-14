@@ -35,7 +35,6 @@ export default async function FreightPage() {
         titleClassName="text-4xl font-bold text-sky-400"
         subtitle="Deck loading and route costing"
         subtitleClassName="text-sm font-medium text-text-secondary"
-        inline
       />
       <FreightCalculator herds={herds ?? []} properties={properties ?? []} />
     </div>

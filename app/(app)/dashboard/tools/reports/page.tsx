@@ -40,7 +40,6 @@ export default function ReportsPage() {
         titleClassName="text-4xl font-bold text-amber-400"
         subtitle="Generate and export reports"
         subtitleClassName="text-sm font-medium text-text-secondary"
-        inline
       />
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
         {reports.map((report) => (

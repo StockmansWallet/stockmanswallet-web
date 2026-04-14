@@ -75,7 +75,6 @@ export default async function ConnectedClientsPage() {
         titleClassName="text-4xl font-bold text-[#2F8CD9]"
         subtitle="Manage your client connections"
         subtitleClassName="text-sm font-medium text-text-secondary"
-        inline
         actions={
           <Link href="/dashboard/advisor/directory">
             <Button variant="advisor" size="sm">

@@ -117,7 +117,6 @@ export default async function LensDetailPage({
         title={report.name}
         titleClassName="text-4xl font-bold text-[#2F8CD9]"
         titleHref={`/dashboard/advisor/clients/${connectionId}`}
-        inline
         actions={
           <div className="flex items-center gap-2">
             <Badge className={status.className}>{status.label}</Badge>

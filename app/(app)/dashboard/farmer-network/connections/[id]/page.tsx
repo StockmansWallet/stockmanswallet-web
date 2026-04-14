@@ -85,7 +85,6 @@ export default async function FarmerConnectionDetailPage({
         titleHref="/dashboard/farmer-network/connections"
         subtitle="Back to Connections"
         subtitleClassName="text-sm font-medium text-text-secondary"
-        inline
       />
 
       {otherProfile?.company_name && (

@@ -81,7 +81,6 @@ export default async function FarmerConnectionsPage() {
         titleHref="/dashboard/farmer-network"
         subtitle="Back to Producer Network"
         subtitleClassName="text-sm font-medium text-text-secondary"
-        inline
       />
 
       {!hasContent ? (

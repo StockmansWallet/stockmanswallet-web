@@ -56,7 +56,6 @@ export default async function FarmerProfilePage({
         titleHref="/dashboard/farmer-network/directory"
         subtitle="Back to directory"
         subtitleClassName="text-sm font-medium text-text-secondary"
-        inline
       />
 
       <Card className="mb-6 overflow-hidden">

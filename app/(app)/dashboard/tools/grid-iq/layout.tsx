@@ -10,7 +10,6 @@ export default function GridIQLayout({ children }: { children: React.ReactNode }
         titleClassName="text-4xl font-bold text-teal-400"
         subtitle="Processor intelligence"
         subtitleClassName="text-sm font-medium text-text-secondary"
-        inline
       />
       <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
         <GridIQSidebar />
