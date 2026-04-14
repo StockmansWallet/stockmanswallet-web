@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,7 @@ export function HerdsTable({
   herdProjectedWeight,
   herdBreedPremium,
   propertyGroups,
+  headerActions,
 }: {
   herds: HerdWithProperty[];
   herdValues: Record<string, number>;
@@ -57,6 +58,7 @@ export function HerdsTable({
   herdProjectedWeight?: Record<string, number>;
   herdBreedPremium?: Record<string, number>;
   propertyGroups: PropertyGroup[];
+  headerActions?: ReactNode;
 }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<string>("All");
@@ -386,7 +388,8 @@ export function HerdsTable({
     <div>
       {/* Toolbar: species pills + manage + search */}
       <div className="mb-4 flex flex-col gap-3 rounded-full bg-surface-lowest px-2 py-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex gap-1.5 overflow-x-auto">
+        {/* Left: list controls (filters + select) */}
+        <div className="flex items-center gap-1.5 overflow-x-auto">
           {SPECIES_TABS.map((tab) => {
             const count = tab === "All" ? herds.length : speciesCounts[tab] || 0;
             if (tab !== "All" && count === 0) return null;
@@ -408,9 +411,6 @@ export function HerdsTable({
               </button>
             );
           })}
-        </div>
-
-        <div className="flex items-center gap-2">
           {herds.length > 0 && (
             <button
               onClick={isEditing ? exitEditMode : () => setIsEditing(true)}
@@ -424,7 +424,10 @@ export function HerdsTable({
               {isEditing ? "Done" : "Select"}
             </button>
           )}
+        </div>
 
+        {/* Right: search + actions */}
+        <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
             <input
@@ -432,9 +435,10 @@ export function HerdsTable({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search herds..."
-              className="w-full rounded-full border border-border bg-surface py-2 pl-9 pr-4 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand/50 focus:ring-2 focus:ring-brand/20 sm:w-64"
+              className="w-full rounded-full border border-border bg-surface py-1.5 pl-9 pr-4 text-xs text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand/50 focus:ring-2 focus:ring-brand/20 sm:w-48"
             />
           </div>
+          {headerActions}
         </div>
       </div>
 

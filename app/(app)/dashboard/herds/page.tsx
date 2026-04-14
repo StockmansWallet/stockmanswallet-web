@@ -163,22 +163,6 @@ export default async function HerdsPage() {
         title="Herds"
         titleClassName="text-4xl font-bold text-brand"
         subtitle="Manage your livestock herds."
-        actions={
-          <div className="flex items-center gap-2">
-            <Link href="/dashboard/herds/sold">
-              <Button variant="secondary" size="md">
-                <Archive className="mr-1.5 h-4 w-4" />
-                Sold Herds
-              </Button>
-            </Link>
-            <Link href="/dashboard/herds/new">
-              <Button size="md">
-                <Plus className="mr-1.5 h-4 w-4" />
-                Add Herd
-              </Button>
-            </Link>
-          </div>
-        }
       />
 
       {!herds || herds.length === 0 ? (
@@ -212,6 +196,22 @@ export default async function HerdsPage() {
             herdProjectedWeight={herdProjectedWeightObj}
             herdBreedPremium={herdBreedPremiumObj}
             propertyGroups={propertyGroups}
+            headerActions={
+              <div className="flex items-center gap-2">
+                <Link href="/dashboard/herds/sold">
+                  <Button variant="secondary" size="sm">
+                    <Archive className="mr-1.5 h-3.5 w-3.5" />
+                    Sold
+                  </Button>
+                </Link>
+                <Link href="/dashboard/herds/new">
+                  <Button size="sm">
+                    <Plus className="mr-1.5 h-3.5 w-3.5" />
+                    Add
+                  </Button>
+                </Link>
+              </div>
+            }
           />
         </>
       )}
