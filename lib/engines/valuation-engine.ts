@@ -647,9 +647,13 @@ export function calculateHerdValuation(
   //   AI/Controlled: midpoint of joining period
   //   Uncontrolled: herd creation date (accrual commences 1 day after creation)
   //   Fallback: explicit joined_date or joining_period_start
+  // Debug: Uncontrolled breeders are implicitly pregnant (bulls always present),
+  // so pregnancy toggle is not required. AI/controlled require explicit is_pregnant.
   let preBirthAccrual = 0;
   const effectiveJoinedDate = getEffectiveJoinedDate(herd);
-  if (herd.is_breeder && herd.is_pregnant && effectiveJoinedDate && effectiveJoinedDate <= now) {
+  const isUncontrolled = herd.breeding_program_type === "uncontrolled" || (herd.breeding_program_type as string) === "uncontrolled_breeding";
+  const pregnancyValid = herd.is_pregnant || isUncontrolled;
+  if (herd.is_breeder && pregnancyValid && effectiveJoinedDate && effectiveJoinedDate <= now) {
     const accrualStart = effectiveJoinedDate;
     const calvingDays = daysBetween(accrualStart, now);
     // calving_rate may be stored as decimal (0.85) or integer percent (85)
