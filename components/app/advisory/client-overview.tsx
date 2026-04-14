@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PermissionBanner } from "@/components/app/advisory/permission-banner";
 import {
@@ -154,6 +153,9 @@ function ClientDataView({ data, baselineValue }: { data: ClientData; baselineVal
     speciesGroups[herd.species].head += herd.head_count;
   }
 
+  const hasPropertyData = permissions.properties && data.properties.length > 0;
+  const hasCompositionData = permissions.herds && Object.keys(speciesGroups).length > 0;
+
   // Build stats array based on what's shared
   const stats: { label: string; value: string; isCurrency?: boolean }[] = [];
   if (permissions.valuations && baselineValue > 0) {
@@ -185,40 +187,38 @@ function ClientDataView({ data, baselineValue }: { data: ClientData; baselineVal
         </div>
       )}
 
-      {/* Properties - compact inline list */}
-      {permissions.properties && data.properties.length > 0 && (
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-1">
-          <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">Properties</span>
-          {data.properties.map((property) => (
-            <span key={property.id} className="flex items-center gap-1 text-sm text-text-secondary">
-              <MapPin className="h-3 w-3 text-text-muted" />
-              {property.property_name}
-              {property.state && <span className="text-xs text-text-muted">{property.state}</span>}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Herd Composition - compact inline */}
-      {permissions.herds && Object.keys(speciesGroups).length > 0 && (
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-1">
-          <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">Composition</span>
-          {Object.entries(speciesGroups).map(([species, info]) => (
-            <span key={species} className="flex items-center gap-2 text-sm text-text-secondary">
-              <span className="font-medium text-text-primary">{species}</span>
-              <Badge variant="default">{info.count} herds</Badge>
-              <span className="tabular-nums">{info.head.toLocaleString()} head</span>
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Locked property notice */}
-      {!permissions.properties && (
-        <div className="flex items-center gap-2 px-1">
-          <Lock className="h-3.5 w-3.5 text-text-muted" />
-          <span className="text-xs text-text-muted">Property data not shared</span>
-        </div>
+      {/* Properties + Composition detail rows */}
+      {(hasPropertyData || hasCompositionData) && (
+        <Card>
+          <CardContent className="divide-y divide-white/[0.06] p-0">
+            {hasPropertyData && (
+              <div className="flex items-center justify-between px-4 py-3">
+                <span className="text-sm text-text-muted">Properties</span>
+                <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
+                  {data.properties.map((property) => (
+                    <span key={property.id} className="flex items-center gap-1.5 text-sm text-text-primary">
+                      <MapPin className="h-3 w-3 text-text-muted" />
+                      {property.property_name}
+                      {property.state && <span className="text-xs text-text-muted">{property.state}</span>}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {hasCompositionData && (
+              <div className="flex items-center justify-between px-4 py-3">
+                <span className="text-sm text-text-muted">Composition</span>
+                <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
+                  {Object.entries(speciesGroups).map(([species, info]) => (
+                    <span key={species} className="text-sm text-text-primary">
+                      {species} · {info.count} herds · {info.head.toLocaleString()} head
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       )}
     </>
   );
