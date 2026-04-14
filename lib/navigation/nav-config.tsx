@@ -18,6 +18,7 @@ import {
   Search,
 } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
+import { ADVISOR_ENABLED } from "@/lib/feature-flags";
 
 export interface NavItem {
   label: string;
@@ -47,7 +48,8 @@ export const farmerToolItems: NavItem[] = [
   { label: "Reports", href: "/dashboard/tools/reports", icon: <FileText className="h-5 w-5" />, activeClass: "bg-amber-500/15 text-amber-400" },
   { label: "Freight IQ", href: "/dashboard/tools/freight", icon: <Truck className="h-5 w-5" />, activeClass: "bg-sky-500/15 text-sky-400" },
   { label: "Grid IQ", href: "/dashboard/tools/grid-iq", icon: <Grid3x3 className="h-5 w-5" />, activeClass: "bg-teal-500/15 text-teal-400" },
-  { label: "Advisory Hub", href: "/dashboard/advisory-hub", icon: <Users className="h-5 w-5" />, activeClass: "bg-[#2F8CD9]/15 text-[#2F8CD9]" },
+  // Advisory Hub hidden when advisor feature flag is off
+  ...(ADVISOR_ENABLED ? [{ label: "Advisory Hub", href: "/dashboard/advisory-hub", icon: <Users className="h-5 w-5" />, activeClass: "bg-[#2F8CD9]/15 text-[#2F8CD9]" }] : []),
   { label: "Producer Network", href: "/dashboard/farmer-network", icon: <Handshake className="h-5 w-5" />, activeClass: "bg-orange-500/15 text-orange-400" },
 ];
 
@@ -86,4 +88,7 @@ export const bottomNavItems: NavItem[] = [
 
 // Mobile flat list per mode (combined main + intel + tools for simpler rendering)
 export const farmerMobileItems: NavItem[] = [...farmerNavItems, ...farmerIntelItems, ...farmerToolItems];
-export const advisorMobileItems: NavItem[] = [...advisorNavItems, ...advisorIntelItems, ...advisorToolItems];
+// Advisor mobile nav only available when feature flag is on
+export const advisorMobileItems: NavItem[] = ADVISOR_ENABLED
+  ? [...advisorNavItems, ...advisorIntelItems, ...advisorToolItems]
+  : [];

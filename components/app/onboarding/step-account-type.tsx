@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Users } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
+import { ADVISOR_ENABLED } from "@/lib/feature-flags";
 
 export type AccountType = "producer" | "advisor";
 
@@ -14,7 +15,7 @@ const advisorRoles = [
   "Succession Planner",
 ];
 
-const options: {
+const allOptions: {
   value: AccountType;
   label: string;
   description: string;
@@ -33,6 +34,11 @@ const options: {
     icon: <Users className="h-5 w-5" />,
   },
 ];
+
+// Advisor option hidden from MVP when feature flag is off
+const options = ADVISOR_ENABLED
+  ? allOptions
+  : allOptions.filter((o) => o.value !== "advisor");
 
 export function StepAccountType({
   value,

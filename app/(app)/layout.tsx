@@ -4,6 +4,7 @@ import { Sidebar } from "@/components/app/sidebar";
 import { MobileNav } from "@/components/app/mobile-nav";
 import { TopBar } from "@/components/app/top-bar";
 import { isAdvisorRole, roleDisplayName } from "@/lib/types/advisory";
+import { ADVISOR_ENABLED } from "@/lib/feature-flags";
 
 // Prevent Next.js from caching this layout - auth state must be fresh on every request
 export const dynamic = "force-dynamic";
@@ -59,7 +60,8 @@ export default async function AppLayout({
     }
   }
 
-  const isAdvisor = !!(profile?.role && isAdvisorRole(profile.role));
+  // When advisor feature flag is off, never treat anyone as an advisor
+  const isAdvisor = ADVISOR_ENABLED && !!(profile?.role && isAdvisorRole(profile.role));
 
   return (
     <div className="flex min-h-screen flex-col bg-background">

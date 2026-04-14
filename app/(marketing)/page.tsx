@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Hero from '@/components/marketing/sections/hero'
 import Features from '@/components/marketing/sections/features'
 import StockmanIQ from '@/components/marketing/sections/stockman-iq'
+import { ADVISOR_ENABLED } from '@/lib/feature-flags'
 import ForAdvisors from '@/components/marketing/sections/for-advisors'
 import Pricing from '@/components/marketing/sections/pricing'
 import About from '@/components/marketing/sections/about'
@@ -10,7 +11,7 @@ import ContactSignup from '@/components/marketing/sections/contact-signup'
 export const metadata: Metadata = {
   title: "Stockman's Wallet | Intelligent Livestock Valuation",
   description:
-    "Australia's first livestock portfolio management platform. Live market data, intelligent valuation models, AI-powered timing analysis, and professional-grade reporting for producers and rural advisors.",
+    "Australia's first livestock portfolio management platform. Live market data, intelligent valuation models, AI-powered timing analysis, and professional-grade reporting for Australian producers.",
   openGraph: {
     title: "Stockman's Wallet | Intelligent Livestock Valuation",
     description:
@@ -27,7 +28,7 @@ export default function HomePage() {
       <Hero />
       <Features />
       <StockmanIQ />
-      <ForAdvisors />
+      {ADVISOR_ENABLED && <ForAdvisors />}
       <Pricing />
       <About />
       <ContactSignup />
