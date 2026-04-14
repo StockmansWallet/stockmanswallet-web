@@ -85,46 +85,47 @@ export default async function NotificationsPage() {
               <p className="mb-2 text-xs font-medium uppercase tracking-wider text-text-muted">
                 {date}
               </p>
-              <div className="space-y-2">
+              <ul className="space-y-2">
                 {items.map((n) => {
                   const Icon = typeIcons[n.type] ?? Bell;
                   return (
-                    <a
-                      key={n.id}
-                      href={n.link ?? "#"}
-                      className={`flex items-start gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-white/[0.03] ${
-                        !n.is_read ? "bg-orange-500/5" : ""
-                      }`}
-                    >
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange-500/10">
-                        <Icon className="h-4 w-4 text-orange-400" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p
-                          className={`text-sm ${
-                            n.is_read
-                              ? "text-text-secondary"
-                              : "font-semibold text-text-primary"
-                          }`}
-                        >
-                          {n.title}
-                        </p>
-                        {n.body && (
-                          <p className="mt-0.5 text-xs text-text-muted">
-                            {n.body}
+                    <li key={n.id}>
+                      <a
+                        href={n.link ?? "#"}
+                        className={`flex items-start gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-white/[0.03] ${
+                          !n.is_read ? "bg-orange-500/5" : ""
+                        }`}
+                      >
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange-500/10">
+                          <Icon className="h-4 w-4 text-orange-400" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p
+                            className={`text-sm ${
+                              n.is_read
+                                ? "text-text-secondary"
+                                : "font-semibold text-text-primary"
+                            }`}
+                          >
+                            {n.title}
                           </p>
+                          {n.body && (
+                            <p className="mt-0.5 text-xs text-text-muted">
+                              {n.body}
+                            </p>
+                          )}
+                          <p className="mt-1 text-[10px] text-text-muted">
+                            {formatDate(n.created_at)}
+                          </p>
+                        </div>
+                        {!n.is_read && (
+                          <div className="mt-2 h-2 w-2 shrink-0 rounded-full bg-orange-400" />
                         )}
-                        <p className="mt-1 text-[10px] text-text-muted">
-                          {formatDate(n.created_at)}
-                        </p>
-                      </div>
-                      {!n.is_read && (
-                        <div className="mt-2 h-2 w-2 shrink-0 rounded-full bg-orange-400" />
-                      )}
-                    </a>
+                      </a>
+                    </li>
                   );
                 })}
-              </div>
+              </ul>
             </div>
           ))}
         </div>

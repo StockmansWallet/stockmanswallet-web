@@ -30,7 +30,7 @@ function PageHeader({
         <div className={inline ? "flex items-baseline gap-3" : undefined}>
           {titleHref ? <Link href={titleHref}>{titleEl}</Link> : titleEl}
           {subtitle && (
-            <p className={subtitleClassName ?? (inline ? "text-sm text-text-muted" : "mt-1 text-sm text-text-muted")}>
+            <p className={subtitleClassName ?? (inline ? "text-base text-text-muted" : "mt-1.5 text-base text-text-muted")}>
               {subtitle}
             </p>
           )}
@@ -46,7 +46,7 @@ function PageHeader({
         <div className={inline ? "flex items-baseline gap-3" : undefined}>
           {titleHref ? <Link href={titleHref}>{titleEl}</Link> : titleEl}
           {subtitle && (
-            <p className={subtitleClassName ?? (inline ? "text-sm text-text-muted" : "mt-1 text-sm text-text-muted")}>
+            <p className={subtitleClassName ?? (inline ? "text-base text-text-muted" : "mt-1.5 text-base text-text-muted")}>
               {subtitle}
             </p>
           )}

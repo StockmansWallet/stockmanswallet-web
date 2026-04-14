@@ -144,14 +144,14 @@ export function WaitlistTable({ signups }: WaitlistTableProps) {
                   <button
                     onClick={handleDelete}
                     disabled={deleting}
-                    className="inline-flex h-8 items-center gap-1.5 rounded-xl bg-red-500/15 px-3.5 text-[13px] font-semibold text-red-400 transition-all hover:bg-red-500/25 active:scale-[0.97] disabled:opacity-40 cursor-pointer"
+                    className="inline-flex h-8 items-center gap-1.5 rounded-full bg-red-500/15 px-3.5 text-[13px] font-semibold text-red-400 transition-all hover:bg-red-500/25 active:scale-[0.97] disabled:opacity-40 cursor-pointer"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                     {deleting ? "Deleting..." : "Confirm Delete"}
                   </button>
                   <button
                     onClick={() => setConfirmDelete(false)}
-                    className="inline-flex h-8 items-center rounded-xl px-3 text-[13px] font-medium text-text-muted transition-colors hover:text-text-primary cursor-pointer"
+                    className="inline-flex h-8 items-center rounded-full px-3 text-[13px] font-medium text-text-muted transition-colors hover:text-text-primary cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -159,7 +159,7 @@ export function WaitlistTable({ signups }: WaitlistTableProps) {
               ) : (
                 <button
                   onClick={handleDelete}
-                  className="inline-flex h-8 items-center gap-1.5 rounded-xl bg-red-500/15 px-3.5 text-[13px] font-semibold text-red-400 transition-all hover:bg-red-500/25 active:scale-[0.97] cursor-pointer"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-full bg-red-500/15 px-3.5 text-[13px] font-semibold text-red-400 transition-all hover:bg-red-500/25 active:scale-[0.97] cursor-pointer"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                   Delete
@@ -175,6 +175,7 @@ export function WaitlistTable({ signups }: WaitlistTableProps) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, email, or postcode..."
+            aria-label="Search waitlist"
             className="w-72 rounded-xl bg-surface pl-9 pr-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
           />
         </div>

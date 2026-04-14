@@ -39,6 +39,7 @@ export function ProducerDirectorySearch({ currentSearch, currentState }: Produce
         <input
           type="text"
           placeholder="Search by name or property..."
+          aria-label="Search producers"
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
           onBlur={() => updateParams("q", searchValue)}

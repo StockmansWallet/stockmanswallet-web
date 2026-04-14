@@ -50,41 +50,43 @@ export default async function PropertiesPage() {
           />
         </Card>
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
           {properties.map((property) => (
-            <Link key={property.id} href={`/dashboard/properties/${property.id}`}>
-              <Card className="group h-full transition-all hover:bg-white/[0.07]">
-                <div className="p-5">
-                  <div className="mb-3 flex items-start justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/15">
-                        <MapPinned className="h-4 w-4 text-brand" />
+            <li key={property.id}>
+              <Link href={`/dashboard/properties/${property.id}`}>
+                <Card className="group h-full transition-all hover:bg-white/[0.07]">
+                  <div className="p-5">
+                    <div className="mb-3 flex items-start justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/15">
+                          <MapPinned className="h-4 w-4 text-brand" />
+                        </div>
+                        <div className="min-w-0">
+                          <h3 className="text-sm font-semibold text-text-primary">{property.property_name}</h3>
+                          {property.suburb && (
+                            <p className="text-xs text-text-muted">
+                              {property.suburb}{property.postcode ? `, ${property.postcode}` : ""}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <h3 className="text-sm font-semibold text-text-primary">{property.property_name}</h3>
-                        {property.suburb && (
-                          <p className="text-xs text-text-muted">
-                            {property.suburb}{property.postcode ? `, ${property.postcode}` : ""}
-                          </p>
-                        )}
-                      </div>
+                      <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
                     </div>
-                    <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="default">{property.state}</Badge>
+                      {property.property_pic && (
+                        <span className="text-xs text-text-muted">PIC: {property.property_pic}</span>
+                      )}
+                      {property.acreage && (
+                        <span className="text-xs tabular-nums text-text-muted">{property.acreage.toLocaleString()} acres</span>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="default">{property.state}</Badge>
-                    {property.property_pic && (
-                      <span className="text-xs text-text-muted">PIC: {property.property_pic}</span>
-                    )}
-                    {property.acreage && (
-                      <span className="text-xs tabular-nums text-text-muted">{property.acreage.toLocaleString()} acres</span>
-                    )}
-                  </div>
-                </div>
-              </Card>
-            </Link>
+                </Card>
+              </Link>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </div>
   );

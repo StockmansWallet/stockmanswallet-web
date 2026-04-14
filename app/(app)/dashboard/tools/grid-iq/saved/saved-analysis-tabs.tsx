@@ -98,7 +98,7 @@ export function SavedAnalysisTabs({ defaultTab, analyses }: Props) {
               <Icon className="h-3.5 w-3.5" />
               {tab.label}
               {count > 0 && (
-                <span className={`ml-0.5 text-xs ${active ? "text-teal-400/60" : "text-text-muted/50"}`}>
+                <span className={`ml-0.5 text-xs ${active ? "text-teal-400/60" : "text-text-muted"}`}>
                   ({count})
                 </span>
               )}
@@ -279,7 +279,7 @@ function AnalysisList({ analyses, tab, selecting, selected, onSelectedChange, on
                   </p>
                 </div>
                 {!selecting && (
-                  <ChevronRight className="h-4 w-4 shrink-0 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
+                  <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
                 )}
               </>
             );

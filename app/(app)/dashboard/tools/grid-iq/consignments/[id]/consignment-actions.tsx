@@ -133,6 +133,7 @@ export function ConsignmentActions({
             size="sm"
             className="text-text-muted hover:text-red-400"
             onClick={() => setShowDeleteConfirm(true)}
+            aria-label="Delete consignment"
           >
             <Trash2 className="h-4 w-4" />
           </Button>

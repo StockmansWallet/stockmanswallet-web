@@ -137,9 +137,9 @@ export default async function AdvisorClientsPage() {
       {/* Incoming requests from producers (Accept/Decline) */}
       {incomingRequests.length > 0 && (
         <div className="mb-6">
-          <h3 className="mb-3 text-sm font-semibold text-amber-400">
+          <h2 className="mb-3 text-sm font-semibold text-amber-400">
             Incoming Requests ({incomingRequests.length})
-          </h3>
+          </h2>
           <div className="flex flex-col gap-3">
             {incomingRequests.map((connection) => {
               const clientId = connection.requester_user_id;
@@ -162,9 +162,9 @@ export default async function AdvisorClientsPage() {
       {/* Outgoing requests awaiting producer response */}
       {outgoingPending.length > 0 && (
         <div className="mb-6">
-          <h3 className="mb-3 text-sm font-semibold text-text-secondary">
+          <h2 className="mb-3 text-sm font-semibold text-text-secondary">
             Awaiting Response ({outgoingPending.length})
-          </h3>
+          </h2>
           <div className="flex flex-col gap-3">
             {outgoingPending.map((connection) => {
               const clientId = connection.target_user_id;
@@ -187,9 +187,9 @@ export default async function AdvisorClientsPage() {
       {approvedConnections.length > 0 && (
         <div className="mb-6">
           {(incomingRequests.length > 0 || outgoingPending.length > 0) && (
-            <h3 className="mb-3 text-sm font-semibold text-text-secondary">
+            <h2 className="mb-3 text-sm font-semibold text-text-secondary">
               Connected Clients ({approvedConnections.length})
-            </h3>
+            </h2>
           )}
           <div className="flex flex-col gap-3">
             {approvedConnections.map((connection) => {

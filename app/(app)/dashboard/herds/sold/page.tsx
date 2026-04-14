@@ -92,11 +92,12 @@ export default async function SoldHerdsPage() {
           </div>
 
           {/* Sold herds list */}
-          <div className="space-y-3">
+          <ul className="space-y-3">
             {(soldHerds ?? []).map((herd) => {
               const sale = salesMap.get(herd.id);
               return (
-                <Link key={herd.id} href={`/dashboard/herds/${herd.id}`}>
+                <li key={herd.id}>
+                <Link href={`/dashboard/herds/${herd.id}`}>
                   <Card className="transition-colors hover:bg-white/[0.03]">
                     <div className="flex items-center justify-between p-5">
                       <div className="min-w-0 flex-1">
@@ -138,9 +139,10 @@ export default async function SoldHerdsPage() {
                     </div>
                   </Card>
                 </Link>
+                </li>
               );
             })}
-          </div>
+          </ul>
         </>
       )}
     </div>

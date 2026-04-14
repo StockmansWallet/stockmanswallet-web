@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   BookOpen,
@@ -124,12 +125,11 @@ const faqs = [
 export default function HelpCenterPage() {
   return (
     <div className="max-w-6xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-text-primary">Help Center</h1>
-        <p className="mt-1 text-sm text-text-muted">
-          Guides, FAQs, and support for Stockman&rsquo;s Wallet.
-        </p>
-      </div>
+      <PageHeader
+        title="Help Center"
+        titleClassName="text-4xl font-bold text-brand"
+        subtitle="Guides, FAQs, and support for Stockman's Wallet."
+      />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {/* Left Column: Getting Started + Feature Guides + FAQs */}
@@ -147,20 +147,23 @@ export default function HelpCenterPage() {
                 </Link>
               </div>
             </CardHeader>
-            <CardContent className="divide-y divide-white/5 px-5 pb-5">
-              {gettingStarted.map((item) => (
-                <Link
-                  key={item.title}
-                  href={item.href}
-                  className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
-                >
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-text-primary">{item.title}</p>
-                    <p className="text-xs text-text-muted">{item.description}</p>
-                  </div>
-                  <ChevronRight className="ml-3 h-4 w-4 flex-shrink-0 text-text-muted" />
-                </Link>
-              ))}
+            <CardContent className="px-5 pb-5">
+              <ul className="divide-y divide-white/5">
+                {gettingStarted.map((item) => (
+                  <li key={item.title}>
+                    <Link
+                      href={item.href}
+                      className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-text-primary">{item.title}</p>
+                        <p className="text-xs text-text-muted">{item.description}</p>
+                      </div>
+                      <ChevronRight className="ml-3 h-4 w-4 flex-shrink-0 text-text-muted" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </CardContent>
           </Card>
 
@@ -169,19 +172,21 @@ export default function HelpCenterPage() {
             <CardHeader>
               <CardTitle>Feature Guides</CardTitle>
             </CardHeader>
-            <CardContent className="divide-y divide-white/5 px-5 pb-5">
-              {featureGuides.map((item) => (
-                <div
-                  key={item.title}
-                  className="-mx-2 flex items-start gap-3 rounded-lg px-2 py-3"
-                >
-                  <div className="mt-0.5 flex-shrink-0 text-text-muted">{item.icon}</div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-text-primary">{item.title}</p>
-                    <p className="text-xs text-text-muted">{item.description}</p>
-                  </div>
-                </div>
-              ))}
+            <CardContent className="px-5 pb-5">
+              <ul className="divide-y divide-white/5">
+                {featureGuides.map((item) => (
+                  <li
+                    key={item.title}
+                    className="-mx-2 flex items-start gap-3 rounded-lg px-2 py-3"
+                  >
+                    <div className="mt-0.5 flex-shrink-0 text-text-muted">{item.icon}</div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-text-primary">{item.title}</p>
+                      <p className="text-xs text-text-muted">{item.description}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </CardContent>
           </Card>
 

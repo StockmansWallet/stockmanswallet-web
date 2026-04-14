@@ -51,9 +51,10 @@ export default function ToolsPage() {
         subtitle="Calculators and utilities for your operation."
       />
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
         {tools.map((tool) => (
-          <Link key={tool.href} href={tool.href}>
+          <li key={tool.href}>
+          <Link href={tool.href}>
             <Card className="group h-full transition-all hover:bg-white/[0.07]">
               <div className="flex items-start gap-4 p-5">
                 <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${tool.iconBg} ${tool.iconText}`}>
@@ -67,12 +68,13 @@ export default function ToolsPage() {
                     {tool.description}
                   </p>
                 </div>
-                <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
+                <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
               </div>
             </Card>
           </Link>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }

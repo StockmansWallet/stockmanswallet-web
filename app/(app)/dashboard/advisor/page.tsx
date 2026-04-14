@@ -215,53 +215,56 @@ export default async function AdvisorDashboardPage() {
               variant="advisor"
             />
           ) : (
-            <CardContent className="divide-y divide-white/5 px-5 pb-5">
-              {recentClients.map((conn) => {
-                const clientId = conn.requester_user_id === user.id ? conn.target_user_id : conn.requester_user_id;
-                const clientProfile = profileMap.get(clientId);
-                const isActive = hasActivePermission(conn);
-                const clientValue = clientValueMap.get(clientId);
-                return (
-                  <Link
-                    key={conn.id}
-                    href={`/dashboard/advisor/clients/${conn.id}`}
-                    className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-text-primary">
-                        {clientProfile?.display_name ?? "Unknown Producer"}
-                      </p>
-                      {clientProfile?.property_name && (
-                        <p className="truncate text-xs text-text-muted">
-                          {clientProfile.property_name}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex shrink-0 items-center gap-3">
-                      {clientValue !== undefined && (
-                        <p className="text-sm font-semibold tabular-nums text-text-primary">
-                          ${Math.round(clientValue).toLocaleString()}
-                        </p>
-                      )}
-                      <Badge
-                        variant={
-                          conn.status === "pending"
-                            ? "warning"
-                            : isActive
-                              ? "success"
-                              : "default"
-                        }
+            <CardContent className="px-5 pb-5">
+              <ul className="divide-y divide-white/5">
+                {recentClients.map((conn) => {
+                  const clientId = conn.requester_user_id === user.id ? conn.target_user_id : conn.requester_user_id;
+                  const clientProfile = profileMap.get(clientId);
+                  const isActive = hasActivePermission(conn);
+                  const clientValue = clientValueMap.get(clientId);
+                  return (
+                    <li key={conn.id}>
+                      <Link
+                        href={`/dashboard/advisor/clients/${conn.id}`}
+                        className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
                       >
-                        {conn.status === "pending"
-                          ? "Pending"
-                          : isActive
-                            ? "Active"
-                            : "Expired"}
-                      </Badge>
-                    </div>
-                  </Link>
-                );
-              })}
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-text-primary">
+                            {clientProfile?.display_name ?? "Unknown Producer"}
+                          </p>
+                          {clientProfile?.property_name && (
+                            <p className="truncate text-xs text-text-muted">
+                              {clientProfile.property_name}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex shrink-0 items-center gap-3">
+                          {clientValue !== undefined && (
+                            <p className="text-sm font-semibold tabular-nums text-text-primary">
+                              ${Math.round(clientValue).toLocaleString()}
+                            </p>
+                          )}
+                          <Badge
+                            variant={
+                              conn.status === "pending"
+                                ? "warning"
+                                : isActive
+                                  ? "success"
+                                  : "default"
+                            }
+                          >
+                            {conn.status === "pending"
+                              ? "Pending"
+                              : isActive
+                                ? "Active"
+                                : "Expired"}
+                          </Badge>
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
             </CardContent>
           )}
         </Card>

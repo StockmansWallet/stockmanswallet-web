@@ -136,9 +136,10 @@ export function ValuationTable({ herds, onTestHerd }: Props) {
         <input
           type="text"
           placeholder="Search herds..."
+          aria-label="Search herds"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="rounded-lg border border-white/[0.06] bg-surface-secondary px-3 py-1.5 text-xs text-text-primary placeholder:text-text-muted/50 outline-none focus:border-brand/40 w-48"
+          className="rounded-lg border border-white/[0.06] bg-surface-secondary px-3 py-1.5 text-xs text-text-primary placeholder:text-text-muted outline-none focus:border-brand/40 w-48"
         />
         <button
           onClick={exportCsv}
@@ -237,7 +238,7 @@ export function ValuationTable({ herds, onTestHerd }: Props) {
                       {onTestHerd && (
                         <button
                           onClick={(e) => { e.stopPropagation(); onTestHerd(h.id); }}
-                          className="rounded p-0.5 text-text-muted/40 hover:text-brand hover:bg-white/[0.06] transition-colors"
+                          className="rounded p-0.5 text-text-muted hover:text-brand hover:bg-white/[0.06] transition-colors"
                           title="Test in calculator"
                         >
                           <FlaskConical className="h-3 w-3" />
@@ -284,7 +285,7 @@ export function ValuationTable({ herds, onTestHerd }: Props) {
         </table>
       </div>
 
-      <p className="text-[10px] text-text-muted/50">
+      <p className="text-[10px] text-text-muted">
         {filtered.length} herd{filtered.length !== 1 ? "s" : ""} shown. Click a row to expand formula details. CSV copies to clipboard.
       </p>
     </div>
@@ -378,7 +379,7 @@ function ColGroup({ label, span, first }: { label: string; span: number; first?:
   return (
     <th
       colSpan={span}
-      className={`px-2 py-1.5 text-[9px] font-semibold uppercase tracking-widest text-text-muted/60 text-center ${
+      className={`px-2 py-1.5 text-[9px] font-semibold uppercase tracking-widest text-text-muted text-center ${
         !first ? "border-l border-white/[0.06]" : ""
       }`}
     >
@@ -420,7 +421,7 @@ function SortTh({
     >
       <span className="inline-flex items-center gap-0.5">
         {children}
-        <ArrowUpDown className={`h-2.5 w-2.5 ${active ? "text-brand" : "text-text-muted/30"}`} />
+        <ArrowUpDown className={`h-2.5 w-2.5 ${active ? "text-brand" : "text-text-muted"}`} />
         {active && <span className="text-[8px] text-brand">{dir === "asc" ? "↑" : "↓"}</span>}
       </span>
     </th>

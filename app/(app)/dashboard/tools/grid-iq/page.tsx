@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -79,6 +80,12 @@ export default async function GridIQPage() {
 
   return (
     <div className="space-y-4">
+      <PageHeader
+        title="Grid IQ"
+        titleClassName="text-4xl font-bold text-teal-400"
+        subtitle="Processor grid analysis and kill sheet comparison."
+        compact
+      />
       {/* Pending Consignments - Action Needed (full width) */}
       {safePending.length > 0 && (
         <Card className="border-amber-500/20">
@@ -280,7 +287,7 @@ export default async function GridIQPage() {
                           : `${daysUntilExpiry}d left`}
                       </div>
                     )}
-                    <ChevronRight className="ml-2 h-4 w-4 shrink-0 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
+                    <ChevronRight className="ml-2 h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
                   </Link>
                 );
               })
@@ -337,7 +344,7 @@ export default async function GridIQPage() {
                       ks.total_gross_value as number
                     ).toLocaleString()}
                   </p>
-                  <ChevronRight className="ml-2 h-4 w-4 shrink-0 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
+                  <ChevronRight className="ml-2 h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
                 </Link>
               ))
             ) : (
@@ -402,7 +409,7 @@ export default async function GridIQPage() {
                         ${Math.round(c.total_gross_value as number).toLocaleString()}
                       </p>
                     )}
-                    <ChevronRight className="ml-2 h-4 w-4 shrink-0 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
+                    <ChevronRight className="ml-2 h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
                   </Link>
                 );
               })

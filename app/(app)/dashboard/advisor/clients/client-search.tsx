@@ -65,6 +65,7 @@ export function ClientSearch() {
         <input
           type="text"
           placeholder="Search for a producer by name or property..."
+          aria-label="Search for a producer"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="w-full rounded-full bg-surface py-2.5 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-white/10"
@@ -88,7 +89,7 @@ export function ClientSearch() {
                       <span>{producer.company_name}</span>
                     )}
                     {producer.property_name && (
-                      <span className="text-text-muted/70">{producer.property_name}</span>
+                      <span className="text-text-muted">{producer.property_name}</span>
                     )}
                     {producer.state && (
                       <span className="flex items-center gap-0.5">
@@ -99,7 +100,7 @@ export function ClientSearch() {
                     )}
                   </div>
                   {producer.bio && (
-                    <p className="mt-0.5 text-[11px] text-text-muted/60 line-clamp-1">{producer.bio}</p>
+                    <p className="mt-0.5 text-[11px] text-text-muted line-clamp-1">{producer.bio}</p>
                   )}
                 </div>
                 {sentTo.has(producer.user_id) ? (

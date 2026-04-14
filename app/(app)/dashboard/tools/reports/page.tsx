@@ -42,9 +42,10 @@ export default function ReportsPage() {
         subtitleClassName="text-sm font-medium text-text-secondary"
         inline
       />
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
         {reports.map((report) => (
-          <Link key={report.href} href={report.href}>
+          <li key={report.href}>
+          <Link href={report.href}>
             <Card className="group h-full transition-all hover:bg-white/[0.07]">
               <CardContent className="flex items-start gap-4 p-5">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 text-amber-400">
@@ -54,12 +55,13 @@ export default function ReportsPage() {
                   <h3 className="text-sm font-semibold text-text-primary">{report.name}</h3>
                   <p className="mt-1 text-xs leading-relaxed text-text-muted">{report.description}</p>
                 </div>
-                <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
+                <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
               </CardContent>
             </Card>
           </Link>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }

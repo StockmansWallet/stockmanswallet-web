@@ -7,6 +7,7 @@ import { StatCard } from "@/components/ui/stat-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HerdsTable } from "./herds-table";
 import { YardBookBanner } from "@/components/app/yard-book-banner";
+import { Button } from "@/components/ui/button";
 import { Plus, Tags, Layers, DollarSign, Scale, Archive } from "lucide-react";
 import { calculateHerdValuation, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
@@ -197,19 +198,17 @@ export default async function HerdsPage() {
             propertyGroups={propertyGroups}
             headerActions={
               <div className="flex items-center gap-1.5">
-                <Link
-                  href="/dashboard/herds/sold"
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-surface px-3.5 py-1.5 text-xs font-medium text-text-muted transition-all hover:bg-surface-raised hover:text-text-secondary"
-                >
-                  <Archive className="h-3.5 w-3.5" />
-                  Sold
+                <Link href="/dashboard/herds/sold">
+                  <Button variant="secondary" size="sm">
+                    <Archive className="mr-1.5 h-3.5 w-3.5" />
+                    Sold
+                  </Button>
                 </Link>
-                <Link
-                  href="/dashboard/herds/new"
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-brand/15 px-3.5 py-1.5 text-xs font-medium text-brand transition-all hover:bg-brand/25"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  Add
+                <Link href="/dashboard/herds/new">
+                  <Button size="sm">
+                    <Plus className="mr-1.5 h-3.5 w-3.5" />
+                    Add
+                  </Button>
                 </Link>
               </div>
             }

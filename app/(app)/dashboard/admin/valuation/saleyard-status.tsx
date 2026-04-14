@@ -136,13 +136,14 @@ export function SaleyardStatus() {
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative w-full max-w-sm">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted/50" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
             placeholder="Search saleyards..."
+            aria-label="Search saleyards"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-white/[0.06] bg-surface-secondary py-2 pl-9 pr-3 text-xs text-text-primary placeholder:text-text-muted/40 outline-none focus:border-brand/40"
+            className="w-full rounded-lg border border-white/[0.06] bg-surface-secondary py-2 pl-9 pr-3 text-xs text-text-primary placeholder:text-text-muted outline-none focus:border-brand/40"
           />
         </div>
         <div className="flex flex-wrap gap-1">
@@ -190,7 +191,7 @@ export function SaleyardStatus() {
                     className={`border-b border-white/[0.04] transition-colors hover:bg-white/[0.02] cursor-pointer ${freshnessBg(days)}`}
                     onClick={() => setExpandedRow(isExpanded ? null : s.name)}
                   >
-                    <td className="px-3 py-2.5 text-text-muted/50">
+                    <td className="px-3 py-2.5 text-text-muted">
                       {isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                     </td>
                     <td className="px-3 py-2.5 font-medium text-text-primary">{s.name}</td>
@@ -206,14 +207,14 @@ export function SaleyardStatus() {
                           {s.breeds.length} breeds
                         </span>
                       ) : (
-                        <span className="text-text-muted/40">-</span>
+                        <span className="text-text-muted">-</span>
                       )}
                     </td>
                     <td className="px-3 py-2.5 text-right tabular-nums">
                       {s.herdsUsing > 0 ? (
                         <span className="font-medium text-brand">{s.herdsUsing}</span>
                       ) : (
-                        <span className="text-text-muted/40">0</span>
+                        <span className="text-text-muted">0</span>
                       )}
                     </td>
                   </tr>
@@ -257,14 +258,14 @@ function RowGroup({ children }: { children: React.ReactNode }) {
 function DetailList({ title, items, muted }: { title: string; items: string[]; muted?: boolean }) {
   return (
     <div>
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted/60 mb-1">{title}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1">{title}</p>
       <div className="flex flex-wrap gap-1">
         {items.map((item) => (
           <span
             key={item}
             className={`inline-flex rounded px-1.5 py-0.5 text-[10px] ${
               muted
-                ? "text-text-muted/40"
+                ? "text-text-muted"
                 : "bg-white/[0.05] text-text-muted"
             }`}
           >

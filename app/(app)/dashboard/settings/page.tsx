@@ -39,7 +39,7 @@ function NavItem({ href, icon: Icon, iconBg, iconColor, label, description }: Na
         <p className="text-sm font-medium text-text-primary">{label}</p>
         <p className="text-xs text-text-muted">{description}</p>
       </div>
-      <ChevronRight className="h-4 w-4 shrink-0 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
+      <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
     </Link>
   );
 }

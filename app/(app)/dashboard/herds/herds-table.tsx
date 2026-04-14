@@ -335,7 +335,7 @@ export function HerdsTable({
         </td>
         <td className="hidden px-5 py-3.5 text-text-secondary md:table-cell">{herd.breed}</td>
         <td className="hidden px-5 py-3.5 text-text-secondary lg:table-cell">{herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} (${herd.sub_category})` : herd.category}</td>
-        <td className={`hidden px-5 py-3.5 xl:table-cell ${!herd.selected_saleyard ? "text-red-400/70 italic" : nearestSaleyard || isFallback ? "text-text-muted/50 line-through" : "text-text-muted"}`}>
+        <td className={`hidden px-5 py-3.5 xl:table-cell ${!herd.selected_saleyard ? "text-red-400/70 italic" : nearestSaleyard || isFallback ? "text-text-muted line-through" : "text-text-muted"}`}>
           {herd.selected_saleyard ? resolveShortSaleyardName(herd.selected_saleyard) ?? herd.selected_saleyard : "No Saleyard"}
         </td>
         <td className={`hidden px-5 py-3.5 text-right tabular-nums lg:table-cell ${isFallback ? "text-red-400" : (isStale || nearestSaleyard) ? "text-amber-400" : "text-text-secondary"}`}>
@@ -377,7 +377,7 @@ export function HerdsTable({
         </td>
         {!isEditing && (
           <td className="px-3 py-3.5">
-            <ChevronRight className="h-4 w-4 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
+            <ChevronRight className="h-4 w-4 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
           </td>
         )}
       </tr>
@@ -405,7 +405,7 @@ export function HerdsTable({
                 }`}
               >
                 {tab}
-                <span className={`tabular-nums ${isActive ? "text-brand/70" : "text-text-muted/60"}`}>
+                <span className={`tabular-nums ${isActive ? "text-brand/70" : "text-text-muted"}`}>
                   {count}
                 </span>
               </button>
@@ -435,6 +435,7 @@ export function HerdsTable({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search herds..."
+              aria-label="Search herds"
               className="w-full rounded-full border border-border bg-surface py-1.5 pl-9 pr-4 text-xs text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand/50 focus:ring-2 focus:ring-brand/20 sm:w-48"
             />
           </div>

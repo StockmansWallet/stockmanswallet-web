@@ -104,7 +104,7 @@ export function EditableProcessorName({
       title="Click to rename"
     >
       <span className="text-2xl font-bold text-teal-400">{name}</span>
-      <Pencil className="h-3.5 w-3.5 text-text-muted/50 transition-colors group-hover:text-teal-400" />
+      <Pencil className="h-3.5 w-3.5 text-text-muted transition-colors group-hover:text-teal-400" />
     </button>
   );
 }

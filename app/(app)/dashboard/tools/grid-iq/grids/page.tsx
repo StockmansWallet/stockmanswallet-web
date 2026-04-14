@@ -109,7 +109,7 @@ export default async function SavedGridsPage() {
                         : `${daysUntilExpiry}d left`}
                     </div>
                   )}
-                  <ChevronRight className="h-4 w-4 shrink-0 text-text-muted/50 transition-all group-hover:translate-x-0.5 group-hover:text-text-muted" />
+                  <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
                 </Link>
               );
             })}

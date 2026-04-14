@@ -60,9 +60,9 @@ export default function DataSourcesPage() {
                   {source.icon}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-sm font-semibold text-text-primary">
+                  <h2 className="text-sm font-semibold text-text-primary">
                     {source.title}
-                  </h3>
+                  </h2>
                   <p className="mt-1 text-xs leading-relaxed text-text-muted">
                     {source.description}
                   </p>

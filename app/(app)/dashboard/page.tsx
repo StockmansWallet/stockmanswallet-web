@@ -17,8 +17,9 @@ import { GrowthMortalityCard } from "@/components/app/growth-mortality-card";
 import { DashboardSaleyardSelector } from "@/components/app/dashboard-saleyard-selector";
 import { DashboardInsights } from "@/components/app/dashboard-insights";
 import { CalvingAccrualCard } from "@/components/app/calving-accrual-card";
-import { Wallet, MapPinned } from "lucide-react";
+import { Wallet, MapPinned, Tags, Layers } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
+import { StatCard } from "@/components/ui/stat-card";
 import { evaluateInsights } from "@/lib/stockman-iq/insight-engine";
 
 export const revalidate = 0;
@@ -320,7 +321,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             <div className="mt-8 flex w-full max-w-xs flex-col gap-3">
               <Link
                 href="/dashboard/herds/new"
-                className="inline-flex w-full items-center justify-center rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                className="inline-flex w-full items-center justify-center rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
               >
                 Add Your First Herd
               </Link>
@@ -347,24 +348,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
               {/* Stats row */}
               <div className="grid grid-cols-3 gap-3">
-                <Card>
-                  <CardContent className="px-4 py-3 text-center">
-                    <p className="text-xs text-text-muted">Head</p>
-                    <p className="text-xl font-bold text-text-primary">{totalHead.toLocaleString()}</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="px-4 py-3 text-center">
-                    <p className="text-xs text-text-muted">Herds</p>
-                    <p className="text-xl font-bold text-text-primary">{herdCount}</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="px-4 py-3 text-center">
-                    <p className="text-xs text-text-muted">Properties</p>
-                    <p className="text-xl font-bold text-text-primary">{propertyCount}</p>
-                  </CardContent>
-                </Card>
+                <StatCard icon={<Tags className="h-3.5 w-3.5" />} label="Head" value={totalHead.toLocaleString()} />
+                <StatCard icon={<Layers className="h-3.5 w-3.5" />} label="Herds" value={String(herdCount)} />
+                <StatCard icon={<MapPinned className="h-3.5 w-3.5" />} label="Properties" value={String(propertyCount)} />
               </div>
 
               <DashboardSaleyardSelector
@@ -453,34 +439,35 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                         <MapPinned className="h-3 w-3 text-text-muted" />
                         <p className="text-xs font-medium text-text-muted">{propName}</p>
                       </div>
-                      <div className="divide-y divide-white/5">
+                      <ul className="divide-y divide-white/5">
                         {herds.map((herd) => (
-                          <Link
-                            key={herd.id}
-                            href={`/dashboard/herds/${herd.id}`}
-                            className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
-                          >
-                            <div className="min-w-0">
-                              <p className="truncate text-sm font-medium text-text-primary">
-                                {herd.name}
-                              </p>
-                              <p className="text-xs text-text-muted">
-                                {herd.breed} &middot; {herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} (${herd.sub_category})` : herd.category}
-                              </p>
-                            </div>
-                            <div className="ml-4 flex flex-shrink-0 items-center gap-3">
-                              <span className="text-sm font-semibold tabular-nums text-text-primary">
-                                {herd.head_count?.toLocaleString()} hd
-                              </span>
-                              {herd.current_weight > 0 && (
-                                <span className="text-xs tabular-nums text-text-muted">
-                                  {herd.current_weight} kg
+                          <li key={herd.id}>
+                            <Link
+                              href={`/dashboard/herds/${herd.id}`}
+                              className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
+                            >
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-semibold text-text-primary">
+                                  {herd.name}
+                                </p>
+                                <p className="text-xs text-text-muted">
+                                  {herd.breed} &middot; {herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} (${herd.sub_category})` : herd.category}
+                                </p>
+                              </div>
+                              <div className="ml-4 flex flex-shrink-0 items-center gap-3">
+                                <span className="text-sm font-semibold tabular-nums text-text-primary">
+                                  {herd.head_count?.toLocaleString()} hd
                                 </span>
-                              )}
-                            </div>
-                          </Link>
+                                {herd.current_weight > 0 && (
+                                  <span className="text-xs tabular-nums text-text-muted">
+                                    {herd.current_weight} kg
+                                  </span>
+                                )}
+                              </div>
+                            </Link>
+                          </li>
                         ))}
-                      </div>
+                      </ul>
                     </div>
                   ))}
                 </CardContent>
