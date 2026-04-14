@@ -20,7 +20,7 @@ export function DeletePropertyButton({ id, name }: { id: string; name: string })
 
   return (
     <>
-      <Button variant="destructive" size="sm" onClick={() => setOpen(true)}>
+      <Button variant="destructive" size="md" onClick={() => setOpen(true)}>
         Delete
       </Button>
 

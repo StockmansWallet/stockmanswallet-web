@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { PageHeader } from "@/components/ui/page-header";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { PropertyForm } from "@/components/app/property-form";
 import { updateProperty } from "../actions";
 import { DeletePropertyButton } from "./delete-button";
+import { MapPinned, Landmark, Ruler } from "lucide-react";
 
 export const metadata = {
   title: "Property Details",
@@ -33,26 +34,106 @@ export default async function PropertyDetailPage({
 
   const boundUpdate = updateProperty.bind(null, id);
 
-  return (
-    <div className="max-w-6xl">
-      <PageHeader
-        title={property.property_name}
-        subtitle={[property.state, property.property_pic]
-          .filter(Boolean)
-          .join(" · ")}
-      />
+  const initials = property.property_name
+    .split(" ")
+    .map((w: string) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
-      <Card>
-        <CardContent className="p-6">
-          <PropertyForm
-            property={property}
-            action={boundUpdate}
-            submitLabel="Save Changes"
-            cancelHref="/dashboard/properties"
-            deleteButton={<DeletePropertyButton id={id} name={property.property_name} />}
-          />
-        </CardContent>
-      </Card>
+  return (
+    <div className="max-w-5xl">
+      {/* Property header */}
+      <div className="mb-6 mt-6 flex items-end gap-4">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-brand/15">
+          <MapPinned className="h-7 w-7 text-brand" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl font-bold text-text-primary">{property.property_name}</h1>
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-3 text-sm text-text-secondary">
+            {property.state && <span>{property.state}</span>}
+            {property.property_pic && (
+              <>
+                <span className="text-white/15">|</span>
+                <span>PIC: {property.property_pic}</span>
+              </>
+            )}
+            {property.lga && (
+              <>
+                <span className="text-white/15">|</span>
+                <span>{property.lga}</span>
+              </>
+            )}
+          </div>
+        </div>
+        <div className="flex shrink-0 items-center gap-3">
+          {property.acreage && (
+            <div className="flex items-center gap-1.5 text-sm text-text-muted">
+              <Ruler className="h-3.5 w-3.5" />
+              {Number(property.acreage).toLocaleString()} acres
+            </div>
+          )}
+          {property.property_type && (
+            <Badge variant="default">{property.property_type}</Badge>
+          )}
+        </div>
+      </div>
+
+      {/* Stats row */}
+      {(property.suburb || property.address) && (
+        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {property.address && (
+            <Card>
+              <CardContent className="flex items-center gap-3 p-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/10">
+                  <MapPinned className="h-5 w-5 text-brand" />
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-text-primary">{property.address}</p>
+                  <p className="text-[11px] text-text-muted">Address</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          {property.suburb && (
+            <Card>
+              <CardContent className="flex items-center gap-3 p-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
+                  <Landmark className="h-5 w-5 text-emerald-400" />
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-text-primary">
+                    {property.suburb}{property.postcode ? ` ${property.postcode}` : ""}
+                  </p>
+                  <p className="text-[11px] text-text-muted">Town</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          {property.region && (
+            <Card>
+              <CardContent className="flex items-center gap-3 p-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
+                  <MapPinned className="h-5 w-5 text-amber-400" />
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-text-primary">{property.region}</p>
+                  <p className="text-[11px] text-text-muted">Region</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* Edit form */}
+      <PropertyForm
+        property={property}
+        action={boundUpdate}
+        submitLabel="Save Changes"
+        cancelHref="/dashboard/properties"
+        deleteButton={<DeletePropertyButton id={id} name={property.property_name} />}
+      />
     </div>
   );
 }

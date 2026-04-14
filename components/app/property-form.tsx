@@ -5,7 +5,9 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AddressAutocomplete, { type AddressResult } from "@/components/app/address-autocomplete";
+import { Home, MapPin, FileText } from "lucide-react";
 
 import type { Database } from "@/lib/types/database";
 import { lgasForState } from "@/lib/data/lga-data";
@@ -110,160 +112,181 @@ export function PropertyForm({ property, action, submitLabel, cancelHref, delete
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+        <div className="rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm text-red-400">
           {error}
         </div>
       )}
 
       {/* Property Details */}
-      <section>
-        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
-          Property Details
-        </h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Input
-            id="property_name"
-            name="property_name"
-            label="Property Name"
-            required
-            defaultValue={property?.property_name ?? ""}
-            placeholder="e.g. Springfield Station"
-          />
-          <Input
-            id="property_pic"
-            name="property_pic"
-            label="PIC Number"
-            defaultValue={property?.property_pic ?? ""}
-            placeholder="e.g. QABC1234"
-            helperText="Property Identification Code"
-          />
-          <Input
-            id="region"
-            name="region"
-            label="Region"
-            defaultValue={property?.region ?? ""}
-            placeholder="e.g. Central Queensland"
-          />
-          <Select
-            id="lga"
-            name="lga"
-            label="Local Government Area"
-            options={lgaFlat}
-            groups={lgaGroups}
-            custom={!!lgaGroups}
-            placeholder="Select Local Government Area"
-            value={lga}
-            onChange={(e) => setLga(e.target.value)}
-          />
-          <Input
-            id="acreage"
-            name="acreage"
-            label="Acreage"
-            type="number"
-            step="any"
-            defaultValue={property?.acreage ?? ""}
-            placeholder="e.g. 5000"
-          />
-          <Input
-            id="property_type"
-            name="property_type"
-            label="Property Type"
-            defaultValue={property?.property_type ?? ""}
-            placeholder="e.g. Grazing, Mixed Farming"
-          />
-        </div>
-      </section>
-
-      {/* Address */}
-      <section>
-        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
-          Address
-        </h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="sm:col-span-2">
-            <label htmlFor="address" className="mb-1.5 block text-sm font-medium text-text-secondary">
-              Property Address
-            </label>
-            <AddressAutocomplete
-              defaultValue={property?.address ?? ""}
-              onSelect={handleAddressSelect}
-              placeholder="Start typing a property address..."
-            />
-            <input type="hidden" name="address" value={address} />
-          </div>
-          <Input
-            id="suburb"
-            name="suburb"
-            label="Town / Suburb"
-            value={suburb}
-            onChange={(e) => setSuburb(e.target.value)}
-          />
-          <Input
-            id="postcode"
-            name="postcode"
-            label="Postcode"
-            value={postcode}
-            onChange={(e) => setPostcode(e.target.value)}
-          />
-          <Select
-            id="state"
-            name="state"
-            label="State"
-            required
-            options={AU_STATES}
-            placeholder="Select state"
-            value={state}
-            onChange={(e) => {
-              setState(e.target.value);
-              setLga("");
-            }}
-          />
-          {/* Coordinates auto-filled from address selection */}
-          <input type="hidden" name="latitude" value={latitude} />
-          <input type="hidden" name="longitude" value={longitude} />
-          {latitude && longitude && (
-            <div className="sm:col-span-2">
-              <p className="text-xs text-text-muted">
-                Coordinates: {Number(latitude).toFixed(4)}, {Number(longitude).toFixed(4)}
-              </p>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
+              <Home className="h-3.5 w-3.5 text-brand" />
             </div>
-          )}
-        </div>
-      </section>
+            <CardTitle>Property Details</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="px-5 pb-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Input
+              id="property_name"
+              name="property_name"
+              label="Property Name"
+              required
+              defaultValue={property?.property_name ?? ""}
+              placeholder="e.g. Springfield Station"
+            />
+            <Input
+              id="property_pic"
+              name="property_pic"
+              label="PIC Number"
+              defaultValue={property?.property_pic ?? ""}
+              placeholder="e.g. QABC1234"
+              helperText="Property Identification Code"
+            />
+            <Input
+              id="region"
+              name="region"
+              label="Region"
+              defaultValue={property?.region ?? ""}
+              placeholder="e.g. Central Queensland"
+            />
+            <Select
+              id="lga"
+              name="lga"
+              label="Local Government Area"
+              options={lgaFlat}
+              groups={lgaGroups}
+              custom={!!lgaGroups}
+              placeholder="Select Local Government Area"
+              value={lga}
+              onChange={(e) => setLga(e.target.value)}
+            />
+            <Input
+              id="acreage"
+              name="acreage"
+              label="Acreage"
+              type="number"
+              step="any"
+              defaultValue={property?.acreage ?? ""}
+              placeholder="e.g. 5000"
+            />
+            <Input
+              id="property_type"
+              name="property_type"
+              label="Property Type"
+              defaultValue={property?.property_type ?? ""}
+              placeholder="e.g. Grazing, Mixed Farming"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Location & Address */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15">
+              <MapPin className="h-3.5 w-3.5 text-emerald-400" />
+            </div>
+            <CardTitle>Location</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="px-5 pb-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <label htmlFor="address" className="mb-1.5 block text-sm font-medium text-text-secondary">
+                Property Address
+              </label>
+              <AddressAutocomplete
+                defaultValue={property?.address ?? ""}
+                onSelect={handleAddressSelect}
+                placeholder="Start typing a property address..."
+              />
+              <input type="hidden" name="address" value={address} />
+            </div>
+            <Input
+              id="suburb"
+              name="suburb"
+              label="Town / Suburb"
+              value={suburb}
+              onChange={(e) => setSuburb(e.target.value)}
+            />
+            <Input
+              id="postcode"
+              name="postcode"
+              label="Postcode"
+              value={postcode}
+              onChange={(e) => setPostcode(e.target.value)}
+            />
+            <Select
+              id="state"
+              name="state"
+              label="State"
+              required
+              options={AU_STATES}
+              placeholder="Select state"
+              value={state}
+              onChange={(e) => {
+                setState(e.target.value);
+                setLga("");
+              }}
+            />
+            {/* Coordinates auto-filled from address selection */}
+            <input type="hidden" name="latitude" value={latitude} />
+            <input type="hidden" name="longitude" value={longitude} />
+            {latitude && longitude && (
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-text-secondary">
+                  GPS Coordinates
+                </label>
+                <div className="flex items-center gap-2.5 rounded-xl bg-white/5 px-4 py-3">
+                  <MapPin className="h-4 w-4 shrink-0 text-emerald-400" />
+                  <span className="text-sm tabular-nums text-text-primary">
+                    {Number(latitude).toFixed(4)}° S, {Number(longitude).toFixed(4)}° E
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Notes */}
-      <section>
-        <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">Notes</h3>
-        <textarea
-          id="notes"
-          name="notes"
-          rows={3}
-          defaultValue={property?.notes ?? ""}
-          placeholder="Any additional notes about this property..."
-          className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all ring-1 ring-inset ring-white/10 focus:ring-brand/60 focus:bg-white/8"
-        />
-      </section>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/15">
+              <FileText className="h-3.5 w-3.5 text-amber-400" />
+            </div>
+            <CardTitle>Notes</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="px-5 pb-5">
+          <textarea
+            id="notes"
+            name="notes"
+            rows={3}
+            defaultValue={property?.notes ?? ""}
+            placeholder="Any additional notes about this property..."
+            className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all ring-1 ring-inset ring-white/10 focus:ring-brand/60 focus:bg-white/8"
+          />
+        </CardContent>
+      </Card>
 
       {/* Actions */}
-      <div className="flex items-center gap-3">
-        <Button type="submit" disabled={submitting}>
+      <div className="flex items-center gap-3 pt-2">
+        <Button type="submit" size="md" disabled={submitting}>
           {submitting ? "Saving..." : submitLabel}
         </Button>
-        {cancelHref ? (
-          <Link href={cancelHref}>
-            <Button type="button" variant="ghost">
-              Cancel
-            </Button>
-          </Link>
-        ) : (
-          <Link href="/dashboard/properties">
-            <Button type="button" variant="ghost">
-              Cancel
-            </Button>
-          </Link>
-        )}
+        <Link href={cancelHref ?? "/dashboard/properties"}>
+          <Button type="button" variant="secondary" size="md">
+            Cancel
+          </Button>
+        </Link>
         {deleteButton && (
           <div className="ml-auto">
             {deleteButton}
