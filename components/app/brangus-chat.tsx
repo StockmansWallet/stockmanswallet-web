@@ -490,7 +490,7 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
     <div data-print-chat className="flex flex-1 flex-col overflow-hidden">
       {/* Print header - hidden on screen, shown in print */}
       <div data-print-header className="hidden items-center gap-3 px-6 py-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#D9762F]">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FF8000]">
           <Brain className="h-5 w-5 text-white" />
         </div>
         <div>

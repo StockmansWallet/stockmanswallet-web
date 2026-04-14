@@ -79,7 +79,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               error
                 ? "ring-1 ring-inset ring-red-500/60 focus:ring-red-500"
                 : hint
-                  ? "ring-1 ring-inset ring-brand/40 shadow-[0_0_8px_#D9762F40] focus:ring-brand/60 focus:shadow-[0_0_12px_#D9762F59] focus:bg-surface-raised"
+                  ? "ring-1 ring-inset ring-brand/40 shadow-[0_0_8px_#FF800040] focus:ring-brand/60 focus:shadow-[0_0_12px_#FF800059] focus:bg-surface-raised"
                   : "focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
             } ${className}`}
             {...props}

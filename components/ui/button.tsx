@@ -12,11 +12,11 @@ const variantClasses: Record<ButtonVariant, string> = {
   primary:
     "bg-brand text-white hover:bg-brand-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   secondary:
-    "ring-1 ring-inset ring-ring-medium bg-surface text-text-primary hover:bg-surface-high active:scale-[0.97]",
+    "bg-[#333333] text-white/70 hover:bg-[#3D3D3D] active:scale-[0.97]",
   ghost:
     "text-text-secondary hover:bg-surface-raised hover:text-text-primary",
   destructive:
-    "bg-red-500/15 text-red-400 hover:bg-red-500/25 active:scale-[0.97]",
+    "bg-[#8A1316] text-white/80 hover:bg-[#9E1619] active:scale-[0.97] shadow-sm",
   teal:
     "bg-teal-500 text-white hover:bg-teal-600 active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   lime:
@@ -34,9 +34,9 @@ const variantClasses: Record<ButtonVariant, string> = {
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: "h-8 rounded-lg px-3.5 text-[13px]",
-  md: "h-9 rounded-lg px-4 text-[13px]",
-  lg: "h-11 rounded-lg px-5 text-[14px]",
+  sm: "h-8 rounded-full px-4 text-[13px]",
+  md: "h-9 rounded-full px-5 text-[13px]",
+  lg: "h-11 rounded-full px-6 text-[14px]",
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(

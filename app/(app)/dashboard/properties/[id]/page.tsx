@@ -114,7 +114,7 @@ export default async function PropertyDetailPage({
       <PropertyForm
         property={property}
         action={boundUpdate}
-        submitLabel="Save Changes"
+        submitLabel="Save"
         cancelHref="/dashboard/properties"
         deleteButton={<DeletePropertyButton id={id} name={property.property_name} />}
       />

@@ -177,7 +177,15 @@ export function HerdLensPanel({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-end gap-3">
+          <Button
+            variant="secondary"
+            disabled={isPending}
+            onClick={handleReset}
+          >
+            <RotateCcw className="mr-2 h-4 w-4" />
+            Reset
+          </Button>
           <Button
             variant="advisor"
             disabled={isPending}
@@ -189,14 +197,6 @@ export function HerdLensPanel({
               <Save className="mr-2 h-4 w-4" />
             )}
             Save Lens
-          </Button>
-          <Button
-            variant="ghost"
-            disabled={isPending}
-            onClick={handleReset}
-          >
-            <RotateCcw className="mr-2 h-4 w-4" />
-            Reset
           </Button>
         </div>
       </CardContent>

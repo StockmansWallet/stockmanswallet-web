@@ -2,7 +2,7 @@
 export const categoryColours: Record<string, string> = {
   "Steer": "#F87171",
   "Heifer": "#7CA749",
-  "Breeder": "#D9762F",
+  "Breeder": "#FF8000",
   "Dry Cow": "#8B5E3C",
   "Bull": "#60A5FA",
 };

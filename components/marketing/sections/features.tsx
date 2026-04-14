@@ -25,7 +25,7 @@ const FEATURE_TABS: FeatureTab[] = [
     name: 'Dashboard',
     tagline: 'Your herds at a glance',
     description: 'View your total livestock portfolio in one place. Track live market-linked pricing, monitor performance over time, and understand where your capital is concentrated across the herd.',
-    color: '#D9762F',
+    color: '#FF8000',
     colorLight: '#F4A871',
     bullets: [
       'See your total livestock portfolio value update in real time',
@@ -42,7 +42,7 @@ const FEATURE_TABS: FeatureTab[] = [
     name: 'Herd Valuation',
     tagline: 'Live financial assets',
     description: 'Turn each herd into a live financial asset. Market-linked valuations reflect breed premiums, daily weight gain, breeding activity, and projected biological change, so your balance sheet keeps pace with the paddock.',
-    color: '#D9762F',
+    color: '#FF8000',
     colorLight: '#F4A871',
     bullets: [
       'Add and manage herds as financial assets within your portfolio',
@@ -178,7 +178,7 @@ const FEATURE_TABS: FeatureTab[] = [
     name: 'Insights',
     tagline: 'Brangus Powered Decisions',
     description: 'Brangus evaluates your portfolio every day against live market conditions and surfaces the calls that matter. Sell vs hold, optimal timing, weight targets, best market, price sensitivity, calving forecasts and much more.',
-    color: '#D9762F',
+    color: '#FF8000',
     colorLight: '#F4A871',
     bullets: [
       'Daily evaluation of your portfolio against current market data',

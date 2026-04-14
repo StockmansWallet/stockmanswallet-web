@@ -492,7 +492,7 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                   className={`flex shrink-0 items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors hover:bg-surface-secondary/80 ${
                     breedPremiumConfirmed
                       ? "border-border bg-surface-secondary"
-                      : "border-brand/40 shadow-[0_0_8px_#D9762F40] bg-surface-secondary"
+                      : "border-brand/40 shadow-[0_0_8px_#FF800040] bg-surface-secondary"
                   }`}
                 >
                   <span

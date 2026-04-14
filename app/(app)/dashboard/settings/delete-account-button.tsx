@@ -64,16 +64,16 @@ export function DeleteAccountButton() {
             </div>
           )}
 
-          <div className="flex items-center gap-3 pt-2">
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <Button variant="secondary" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
             <Button
+              variant="destructive"
               onClick={handleDelete}
               disabled={confirmText !== "DELETE" || pending}
-              className="bg-red-500 text-white hover:bg-red-600 disabled:opacity-40"
             >
               {pending ? "Deleting..." : "Delete My Account"}
-            </Button>
-            <Button variant="ghost" onClick={() => setOpen(false)}>
-              Cancel
             </Button>
           </div>
         </div>

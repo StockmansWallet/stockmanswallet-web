@@ -270,7 +270,7 @@ export default function StockmanIQ() {
                     <p className="text-xs leading-relaxed text-white whitespace-pre-line sm:text-sm">
                       {current.assistantMessage}
                     </p>
-                    <BubbleTail side="left" color="#D9762F" />
+                    <BubbleTail side="left" color="#FF8000" />
                   </motion.div>
                 </div>
 

@@ -42,7 +42,7 @@ export function ProducerDirectorySearch({ currentSearch, currentState }: Produce
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
           onBlur={() => updateParams("q", searchValue)}
-          className="w-full rounded-xl bg-surface-lowest py-2.5 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-white/10"
+          className="w-full rounded-full bg-surface-lowest py-2.5 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-white/10"
         />
       </form>
     </div>

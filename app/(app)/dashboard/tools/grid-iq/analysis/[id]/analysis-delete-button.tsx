@@ -33,11 +33,11 @@ export function AnalysisDeleteButton({ analysisId }: { analysisId: string }) {
     return (
       <div className="flex items-center gap-2">
         <span className="text-xs text-amber-400">Delete this analysis?</span>
+        <Button size="sm" variant="secondary" onClick={() => setShowConfirm(false)} disabled={isDeleting}>
+          Cancel
+        </Button>
         <Button size="sm" variant="destructive" onClick={handleDelete} disabled={isDeleting}>
           {isDeleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Confirm"}
-        </Button>
-        <Button size="sm" variant="ghost" onClick={() => setShowConfirm(false)} disabled={isDeleting}>
-          Cancel
         </Button>
       </div>
     );

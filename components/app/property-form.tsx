@@ -279,19 +279,17 @@ export function PropertyForm({ property, action, submitLabel, cancelHref, delete
 
       {/* Actions */}
       <div className="flex items-center gap-3 pt-2">
-        <Button type="submit" size="md" disabled={submitting}>
-          {submitting ? "Saving..." : submitLabel}
-        </Button>
-        <Link href={cancelHref ?? "/dashboard/properties"}>
-          <Button type="button" variant="secondary" size="md">
-            Cancel
+        {deleteButton}
+        <div className="ml-auto flex items-center gap-3">
+          <Link href={cancelHref ?? "/dashboard/properties"}>
+            <Button type="button" variant="secondary">
+              Cancel
+            </Button>
+          </Link>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? "Saving..." : submitLabel}
           </Button>
-        </Link>
-        {deleteButton && (
-          <div className="ml-auto">
-            {deleteButton}
-          </div>
-        )}
+        </div>
       </div>
     </form>
   );

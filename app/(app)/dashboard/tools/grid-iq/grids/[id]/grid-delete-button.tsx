@@ -36,6 +36,14 @@ export function GridDeleteButton({ gridId }: { gridId: string }) {
         <span className="text-xs text-amber-400">Delete this grid?</span>
         <Button
           size="sm"
+          variant="secondary"
+          onClick={() => setShowConfirm(false)}
+          disabled={isDeleting}
+        >
+          Cancel
+        </Button>
+        <Button
+          size="sm"
           variant="destructive"
           onClick={handleDelete}
           disabled={isDeleting}
@@ -45,14 +53,6 @@ export function GridDeleteButton({ gridId }: { gridId: string }) {
           ) : (
             "Confirm"
           )}
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => setShowConfirm(false)}
-          disabled={isDeleting}
-        >
-          Cancel
         </Button>
       </div>
     );

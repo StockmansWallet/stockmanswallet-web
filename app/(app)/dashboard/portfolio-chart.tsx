@@ -218,8 +218,8 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
         >
           <defs>
             <linearGradient id="valueGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#D9762F" stopOpacity={0.25} />
-              <stop offset="100%" stopColor="#D9762F" stopOpacity={0.02} />
+              <stop offset="0%" stopColor="#FF8000" stopOpacity={0.25} />
+              <stop offset="100%" stopColor="#FF8000" stopOpacity={0.02} />
             </linearGradient>
           </defs>
           <XAxis
@@ -263,11 +263,11 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
           <Area
             type="monotone"
             dataKey="value"
-            stroke="#D9762F"
+            stroke="#FF8000"
             strokeWidth={2.5}
             fill="url(#valueGrad)"
             dot={false}
-            activeDot={{ r: 4, fill: "#D9762F", strokeWidth: 0 }}
+            activeDot={{ r: 4, fill: "#FF8000", strokeWidth: 0 }}
             connectNulls
             isAnimationActive
             animationDuration={1200}

@@ -385,7 +385,7 @@ export function HerdsTable({
   return (
     <div>
       {/* Toolbar: species pills + manage + search */}
-      <div className="mb-4 flex flex-col gap-3 rounded-2xl bg-surface-lowest px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-4 flex flex-col gap-3 rounded-full bg-surface-lowest px-2 py-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex gap-1.5 overflow-x-auto">
           {SPECIES_TABS.map((tab) => {
             const count = tab === "All" ? herds.length : speciesCounts[tab] || 0;
@@ -432,7 +432,7 @@ export function HerdsTable({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search herds..."
-              className="w-full rounded-lg border border-border bg-surface py-2 pl-9 pr-4 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand/50 focus:ring-2 focus:ring-brand/20 sm:w-64"
+              className="w-full rounded-full border border-border bg-surface py-2 pl-9 pr-4 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand/50 focus:ring-2 focus:ring-brand/20 sm:w-64"
             />
           </div>
         </div>
@@ -524,7 +524,7 @@ export function HerdsTable({
       {/* Floating action bar when items selected */}
       {isEditing && selectedIds.size > 0 && (
         <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
-          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-bg-alt px-5 py-3 shadow-2xl">
+          <div className="flex items-center gap-3 rounded-full border border-white/10 bg-bg-alt px-5 py-3 shadow-2xl">
             <span className="text-sm font-medium text-text-primary tabular-nums">
               {selectedIds.size} selected
             </span>

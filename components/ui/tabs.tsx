@@ -50,10 +50,10 @@ function Tabs({ tabs, defaultTab }: TabsProps) {
   return (
     <div>
       {/* Tab bar */}
-      <div ref={containerRef} className="relative mb-6 flex gap-1 rounded-2xl bg-surface p-1">
+      <div ref={containerRef} className="relative mb-6 flex gap-1 rounded-full bg-surface p-1">
         {/* Sliding indicator */}
         <div
-          className={`absolute top-1 bottom-1 rounded-xl bg-surface-high shadow-sm ${ready ? "transition-all duration-250 ease-out" : ""}`}
+          className={`absolute top-1 bottom-1 rounded-full bg-surface-high shadow-sm ${ready ? "transition-all duration-250 ease-out" : ""}`}
           style={{ left: indicator.left, width: indicator.width }}
         />
 
@@ -64,7 +64,7 @@ function Tabs({ tabs, defaultTab }: TabsProps) {
               if (el) buttonRefs.current.set(tab.id, el);
             }}
             onClick={() => setActiveTab(tab.id)}
-            className={`relative z-10 flex-1 rounded-xl px-4 py-2 text-sm font-medium transition-colors duration-150 ${
+            className={`relative z-10 flex-1 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-150 ${
               activeTab === tab.id
                 ? "text-text-primary"
                 : "text-text-muted hover:text-text-secondary"

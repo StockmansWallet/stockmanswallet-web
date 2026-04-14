@@ -18,9 +18,9 @@ summary {
   color-scheme: dark;
 
   /* Brand */
-  --brand-orange: #D9762F;
-  --brand-orange-light: #F4A871;
-  --brand-orange-dark: #BD580F;
+  --brand-orange: #FF8000;
+  --brand-orange-light: #FFa333;
+  --brand-orange-dark: #CC6600;
 
   /* Backgrounds — dark tones matching mockup */
   --background: #1F1B18;
@@ -95,16 +95,16 @@ summary {
   --color-bg-card-4: #4E3C2C;
 
   /* Accent ramp (landing page) */
-  --color-accent: #D9762F;
-  --color-accent-light: #F4A871;
-  --color-accent-secondary: #BD580F;
+  --color-accent: #FF8000;
+  --color-accent-light: #FFa333;
+  --color-accent-secondary: #CC6600;
   --color-accent-tertiary: #8E420B;
   --color-accent-quaternary: #5F2C07;
   --color-accent-quinary: #472105;
 
   /* Feature accent colours */
-  --color-stockman-iq: #D9762F;
-  --color-stockman-iq-light: #F4A871;
+  --color-stockman-iq: #FF8000;
+  --color-stockman-iq-light: #FFa333;
   --color-freight-iq: #1399EC;
   --color-freight-iq-light: #64BBF5;
   --color-yard-book: #87B11B;
@@ -251,7 +251,7 @@ select option {
 
   /* Summary cards - make them wrap for print */
   [data-print-cards] {
-    border-top: 2px solid #D9762F !important;
+    border-top: 2px solid #FF8000 !important;
     padding-top: 12px !important;
   }
 
@@ -273,7 +273,7 @@ select option {
 
   /* Chat bubbles - preserve colours */
   [data-print-chat] [class*="bg-brand"] {
-    background: #D9762F !important;
+    background: #FF8000 !important;
     color: white !important;
   }
 
