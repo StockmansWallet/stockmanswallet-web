@@ -85,7 +85,6 @@ summary {
   --color-error: var(--error);
   --font-sans: ui-rounded, "SF Pro Rounded", "SF Pro Display", -apple-system, BlinkMacSystemFont, var(--font-nunito), "Nunito", system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
-  --font-handwritten: var(--font-caveat), "Caveat", cursive;
 
   /* Landing page backgrounds */
   --color-bg-deep: #1D1916;

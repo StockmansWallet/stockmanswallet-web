@@ -170,17 +170,18 @@ export default function StockmanIQ() {
             <h2 className="mt-3 text-3xl font-semibold sm:text-4xl lg:text-5xl">
               <span className="text-brand">Meet Brangus.</span>
               <br />
-              <span className="text-white">Your intelligent livestock advisor...</span>
+              <span className="text-white">Your intelligent livestock advisor.</span>
               <br />
               <span
-                className="inline-block text-[#FF8000]"
+                className="inline-block whitespace-nowrap text-[#4A90D9]"
                 style={{
-                  fontFamily: 'var(--font-handwritten)',
-                  transform: 'rotate(-2deg)',
-                  fontSize: '1.15em',
-                  marginTop: '0.1em',
+                  fontFamily: 'var(--font-caveat), Caveat, cursive',
+                  transform: 'rotate(-3.5deg) translateX(2.5em)',
+                  fontSize: '0.85em',
+                  marginTop: '0.15em',
+                  fontWeight: 700,
                 }}
-              >And new best mate.</span>
+              >and new best mate!</span>
             </h2>
             <p className="mt-6 max-w-md text-base leading-relaxed text-text-secondary">
               Brangus is the engine room of Stockman's Wallet. He is always on, with direct access to your data, herds, portfolio, tools, and workflows. He analyses the numbers, connects the moving parts, and helps drive better decisions across your operation. He is your portfolio manager and new best mate.
