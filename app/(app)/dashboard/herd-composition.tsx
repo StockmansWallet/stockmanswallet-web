@@ -1,4 +1,4 @@
-// Category → colour mapping (warm earth tones for 5 master categories)
+// Category colour mapping (warm earth tones for 5 master categories)
 export const categoryColours: Record<string, string> = {
   "Steer": "#F87171",
   "Heifer": "#7CA749",
@@ -31,30 +31,54 @@ export function HerdComposition({ herds }: HerdCompositionProps) {
 
   if (total === 0) return null;
 
+  // Build donut segments
+  const radius = 40;
+  const circumference = 2 * Math.PI * radius;
+  let offset = 0;
+  const segments = entries.map(([cat, count]) => {
+    const pct = count / total;
+    const length = pct * circumference;
+    const gap = entries.length > 1 ? 2 : 0;
+    const seg = { cat, count, pct, offset, length: Math.max(length - gap, 0.5), colour: categoryColours[cat] ?? fallbackColour };
+    offset += length;
+    return seg;
+  });
+
   return (
-    <div>
-      {/* Stacked bar */}
-      <div className="mb-5 flex h-3 overflow-hidden rounded-full">
-        {entries.map(([cat, count]) => (
-          <div
-            key={cat}
-            className="transition-all"
-            style={{
-              width: `${(count / total) * 100}%`,
-              backgroundColor: categoryColours[cat] ?? fallbackColour,
-            }}
-          />
-        ))}
+    <div className="flex items-center gap-6">
+      {/* Donut chart */}
+      <div className="relative flex-shrink-0">
+        <svg width="110" height="110" viewBox="0 0 100 100">
+          {segments.map((seg) => (
+            <circle
+              key={seg.cat}
+              cx="50"
+              cy="50"
+              r={radius}
+              fill="none"
+              stroke={seg.colour}
+              strokeWidth="12"
+              strokeDasharray={`${seg.length} ${circumference - seg.length}`}
+              strokeDashoffset={-seg.offset}
+              strokeLinecap="round"
+              transform="rotate(-90 50 50)"
+            />
+          ))}
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-lg font-bold text-text-primary">{total.toLocaleString()}</span>
+          <span className="text-[10px] text-text-muted">head</span>
+        </div>
       </div>
 
-      {/* Category list */}
-      <div className="space-y-2.5">
+      {/* Legend */}
+      <div className="flex-1 space-y-2">
         {entries.map(([cat, count]) => {
           const pct = ((count / total) * 100).toFixed(1);
           const colour = categoryColours[cat] ?? fallbackColour;
           return (
             <div key={cat} className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2">
                 <span
                   className="h-2.5 w-2.5 rounded-full flex-shrink-0"
                   style={{ backgroundColor: colour }}

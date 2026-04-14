@@ -1,4 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, TrendingDown } from "lucide-react";
 
 interface PortfolioValueCardProps {
@@ -12,40 +11,37 @@ export function PortfolioValueCard({ value, changeDollar, changePercent, fallbac
   const isPositive = changePercent !== undefined && changePercent >= 0;
 
   return (
-    <Card>
-      <CardContent className="p-5">
-        <div className="flex flex-col items-center py-2">
-          <h2 className="text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
-            ${Math.round(value).toLocaleString()}
-          </h2>
-          {changePercent !== undefined && (
-            <span
-              className={`mt-1 flex items-center gap-1 text-sm font-medium ${
-                isPositive ? "text-success" : "text-error"
-              }`}
-            >
-              {isPositive ? (
-                <TrendingUp className="h-3.5 w-3.5" />
-              ) : (
-                <TrendingDown className="h-3.5 w-3.5" />
-              )}
-              {changeDollar !== undefined && (
-                <>
-                  ${Math.round(Math.abs(changeDollar)).toLocaleString()}
-                  <span className="opacity-50">|</span>
-                </>
-              )}
-              {isPositive ? "+" : ""}
-              {changePercent.toFixed(1)}%
+    <div className="flex rounded-2xl bg-surface-lowest p-5">
+      <div className="flex flex-1 flex-col items-center justify-center text-center">
+        <p className="text-xs font-medium uppercase tracking-wide text-text-muted">Total Value</p>
+        <p className="mt-1.5 text-xl font-bold text-text-primary">
+          ${Math.round(value).toLocaleString()}
+        </p>
+        {changePercent !== undefined && (
+          <p
+            className={`mt-1 flex items-center gap-1 text-xs font-medium ${
+              isPositive ? "text-success" : "text-error"
+            }`}
+          >
+            {isPositive ? (
+              <TrendingUp className="h-3 w-3" />
+            ) : (
+              <TrendingDown className="h-3 w-3" />
+            )}
+            {changeDollar !== undefined && (
+              <>${Math.round(Math.abs(changeDollar)).toLocaleString()}</>
+            )}
+            <span className="opacity-60">
+              {isPositive ? "+" : ""}{changePercent.toFixed(1)}%
             </span>
-          )}
-          {fallbackCount > 0 && (
-            <span className="mt-2 inline-flex items-center rounded-md bg-red-500/15 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
-              {fallbackCount} {fallbackCount === 1 ? "herd" : "herds"} using national avg
-            </span>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+          </p>
+        )}
+        {fallbackCount > 0 && (
+          <span className="mt-1.5 inline-flex items-center rounded-full bg-red-500/15 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
+            {fallbackCount} {fallbackCount === 1 ? "herd" : "herds"} national avg
+          </span>
+        )}
+      </div>
+    </div>
   );
 }

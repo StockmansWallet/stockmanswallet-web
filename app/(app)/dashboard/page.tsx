@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { LoadDemoDataButton } from "@/components/app/load-demo-data-button";
 import { HerdComposition } from "./herd-composition";
-import { PortfolioChart } from "./portfolio-chart";
+import { OutlookCard } from "./outlook-card";
 import { calculateHerdValuation, categoryFallback, parseCalvesAtFoot, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
@@ -17,7 +17,7 @@ import { GrowthMortalityCard } from "@/components/app/growth-mortality-card";
 import { DashboardSaleyardSelector } from "@/components/app/dashboard-saleyard-selector";
 import { DashboardInsights } from "@/components/app/dashboard-insights";
 import { CalvingAccrualCard } from "@/components/app/calving-accrual-card";
-import { Wallet, MapPinned, Tags, Layers } from "lucide-react";
+import { MapPinned, Tags, Layers } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
 import { StatCard } from "@/components/ui/stat-card";
 import { evaluateInsights } from "@/lib/stockman-iq/insight-engine";
@@ -307,7 +307,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
   return (
     <>
-      <div className="max-w-6xl">
+      <div className="max-w-4xl">
         {!hasData ? (
           /* Empty state - matches iOS EmptyDashboardView */
           <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
@@ -336,88 +336,79 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               subtitle="Here&#8217;s your herd overview."
             />
 
-            <div className="flex flex-col gap-3 lg:flex-row lg:gap-4">
-              {/* Left column – narrow sidebar */}
-              <div className="flex w-full flex-col gap-3 lg:w-[480px] lg:gap-4">
+            {/* Top row: value + stats */}
+            <div className="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-4 lg:gap-4">
               <PortfolioValueCard
                 value={portfolioValue}
                 changeDollar={changeDollar}
                 changePercent={changePercent}
                 fallbackCount={fallbackCount}
               />
+              <StatCard icon={<Tags className="h-3.5 w-3.5" />} label="Head" value={totalHead.toLocaleString()} />
+              <StatCard icon={<Layers className="h-3.5 w-3.5" />} label="Herds" value={String(herdCount)} />
+              <StatCard icon={<MapPinned className="h-3.5 w-3.5" />} label="Properties" value={String(propertyCount)} />
+            </div>
 
-              {/* Stats row */}
-              <div className="grid grid-cols-3 gap-3">
-                <StatCard icon={<Tags className="h-3.5 w-3.5" />} label="Head" value={totalHead.toLocaleString()} />
-                <StatCard icon={<Layers className="h-3.5 w-3.5" />} label="Herds" value={String(herdCount)} />
-                <StatCard icon={<MapPinned className="h-3.5 w-3.5" />} label="Properties" value={String(propertyCount)} />
-              </div>
+            {/* Portfolio Outlook chart - full width */}
+            <div className="mt-3 lg:mt-4">
+              <OutlookCard data={chartData} />
+            </div>
 
+            {/* Saleyard selector - full width */}
+            <div className="mt-3 lg:mt-4">
               <DashboardSaleyardSelector
                 currentSaleyard={saleyardOverride ?? null}
                 primaryProperty={(properties ?? []).find((p) => p.is_default) ?? (properties ?? [])[0] ?? null}
               />
-
-              <ComingUpCard items={upcomingItems ?? []} />
-
-              <GrowthMortalityCard
-                avgMortalityRate={avgMortalityRate}
-                avgDailyWeightGain={avgDailyWeightGain}
-                totalHead={totalHead}
-              />
-
-              {totalBreedingAccrual > 0 && (
-                <CalvingAccrualCard
-                  totalAccrual={totalPreBirthAccrual}
-                  calvesAtFootValue={totalCalvesAtFootValue}
-                  calvesAtFootHead={totalCalvesAtFootHead}
-                  breederCount={breederCount}
-                  pregnantCount={pregnantCount}
-                />
-              )}
             </div>
 
-              {/* Right column – main content */}
-              <div className="flex min-w-0 flex-1 flex-col gap-3 lg:gap-4">
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
-                        <Wallet className="h-3.5 w-3.5 text-brand" />
+            {/* Two columns */}
+            <div className="mt-3 grid grid-cols-1 gap-3 lg:mt-4 lg:grid-cols-2 lg:gap-4">
+              {/* Left column */}
+              <div className="flex flex-col gap-3 lg:gap-4">
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
+                          <IconCattleTags className="h-3.5 w-3.5 text-brand" />
+                        </div>
+                        <CardTitle>Herd Composition</CardTitle>
                       </div>
-                      <CardTitle>Portfolio Outlook</CardTitle>
+                      <Link
+                        href="/dashboard/herds"
+                        className="text-xs font-medium text-brand hover:underline"
+                      >
+                        View all
+                      </Link>
                     </div>
-                    <span className="text-xs text-text-muted">portfolio value over time</span>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <PortfolioChart data={chartData} />
-                </CardContent>
-              </Card>
+                  </CardHeader>
+                  <CardContent>
+                    <HerdComposition herds={activeHerds} />
+                  </CardContent>
+                </Card>
 
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
-                        <IconCattleTags className="h-3.5 w-3.5 text-brand" />
-                      </div>
-                      <CardTitle>Herd Composition</CardTitle>
-                    </div>
-                    <Link
-                      href="/dashboard/herds"
-                      className="text-xs font-medium text-brand hover:underline"
-                    >
-                      View all
-                    </Link>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <HerdComposition herds={activeHerds} />
-                </CardContent>
-              </Card>
+                <ComingUpCard items={upcomingItems ?? []} />
 
+                <GrowthMortalityCard
+                  avgMortalityRate={avgMortalityRate}
+                  avgDailyWeightGain={avgDailyWeightGain}
+                  totalHead={totalHead}
+                />
+
+                {totalBreedingAccrual > 0 && (
+                  <CalvingAccrualCard
+                    totalAccrual={totalPreBirthAccrual}
+                    calvesAtFootValue={totalCalvesAtFootValue}
+                    calvesAtFootHead={totalCalvesAtFootHead}
+                    breederCount={breederCount}
+                    pregnantCount={pregnantCount}
+                  />
+                )}
+              </div>
+
+              {/* Right column */}
+              <div className="flex min-w-0 flex-col gap-3 lg:gap-4">
               <DashboardInsights insights={insights} />
 
               <Card>

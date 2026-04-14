@@ -27,7 +27,9 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString("en-AU", { day: "numeric", month: "short" });
 }
 
-export function ComingUpCard({ items }: { items: YardBookItem[] }) {
+export function ComingUpCard({ items, limit = 3 }: { items: YardBookItem[]; limit?: number }) {
+  const visible = items.slice(0, limit);
+
   return (
     <Card>
       <CardHeader>
@@ -55,12 +57,12 @@ export function ComingUpCard({ items }: { items: YardBookItem[] }) {
           actionHref="/dashboard/tools/yard-book"
         />
       ) : (
-        <CardContent className="divide-y divide-white/5 px-5 pb-5">
-          {items.map((item) => (
+        <CardContent className="divide-y divide-white/[0.06] px-5 pb-5">
+          {visible.map((item) => (
             <Link
               key={item.id}
               href={`/dashboard/tools/yard-book/${item.id}`}
-              className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
+              className="flex items-center justify-between py-3 transition-colors hover:opacity-80"
             >
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium text-text-primary">

@@ -7,6 +7,7 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  ReferenceLine,
   ResponsiveContainer,
 } from "recharts";
 
@@ -159,14 +160,35 @@ function buildTimeAxis(
   return result;
 }
 
-export function PortfolioChart({ data }: PortfolioChartProps) {
-  const [range, setRange] = useState<DateRange>("All");
+export function PortfolioChartRangePicker({ range, onRangeChange }: { range: DateRange; onRangeChange: (r: DateRange) => void }) {
+  return (
+    <div className="flex items-center gap-1">
+      {DATE_RANGES.map((r) => (
+        <button
+          key={r}
+          onClick={() => onRangeChange(r)}
+          className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+            range === r
+              ? "bg-brand text-white"
+              : "text-text-muted hover:bg-white/5 hover:text-text-primary"
+          }`}
+        >
+          {r}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function PortfolioChart({ data, range }: PortfolioChartProps & { range?: DateRange }) {
+  const [internalRange, setInternalRange] = useState<DateRange>("All");
+  const activeRange = range ?? internalRange;
 
   const chartData = useMemo<ChartPoint[]>(() => {
     if (!data.length) return [];
 
     const todayStr = data[data.length - 1].date;
-    const { days, stepDays } = rangeConfig(range);
+    const { days, stepDays } = rangeConfig(activeRange);
 
     let startStr: string;
     if (days === null) {
@@ -188,30 +210,38 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
     const showYear = startStr.slice(0, 4) !== todayStr.slice(0, 4);
 
     return buildTimeAxis(data, startStr, todayStr, actualStep, showYear);
-  }, [data, range]);
+  }, [data, activeRange]);
+
+  const { minVal, maxVal } = useMemo(() => {
+    const values = chartData.map((p) => p.value).filter((v): v is number => v !== null);
+    if (values.length === 0) return { minVal: 0, maxVal: 0 };
+    return { minVal: Math.min(...values), maxVal: Math.max(...values) };
+  }, [chartData]);
 
   if (!data.length) return null;
 
   return (
     <div>
-      {/* Range selector */}
-      <div className="mb-3 flex items-center gap-1">
-        {DATE_RANGES.map((r) => (
-          <button
-            key={r}
-            onClick={() => setRange(r)}
-            className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-              range === r
-                ? "bg-brand text-white"
-                : "text-text-muted hover:bg-white/5 hover:text-text-primary"
-            }`}
-          >
-            {r}
-          </button>
-        ))}
-      </div>
+      {/* Inline range selector fallback when not controlled externally */}
+      {range === undefined && (
+        <div className="mb-3 flex items-center justify-center gap-1">
+          {DATE_RANGES.map((r) => (
+            <button
+              key={r}
+              onClick={() => setInternalRange(r)}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                activeRange === r
+                  ? "bg-brand text-white"
+                  : "text-text-muted hover:bg-white/5 hover:text-text-primary"
+              }`}
+            >
+              {r}
+            </button>
+          ))}
+        </div>
+      )}
 
-      <ResponsiveContainer key={range} width="100%" height={240}>
+      <ResponsiveContainer key={activeRange} width="100%" height={240}>
         <AreaChart
           data={chartData}
           margin={{ top: 8, right: 0, bottom: 0, left: 0 }}
@@ -260,6 +290,12 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
             width={60}
           />
           <Tooltip content={<CustomTooltip />} />
+          {minVal !== maxVal && (
+            <>
+              <ReferenceLine y={maxVal} stroke="rgba(255,255,255,0.08)" strokeDasharray="4 4" />
+              <ReferenceLine y={minVal} stroke="rgba(255,255,255,0.08)" strokeDasharray="4 4" />
+            </>
+          )}
           <Area
             type="monotone"
             dataKey="value"

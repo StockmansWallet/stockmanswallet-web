@@ -25,26 +25,21 @@ interface StatCardProps {
 
 function StatCard({ label, value, change, icon, accent = "brand" }: StatCardProps) {
   return (
-    <div className="rounded-2xl bg-surface-lowest p-5">
-      <div className="flex items-center gap-2">
-        {icon && (
-          <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg ${accentClasses[accent]}`}>
-            {icon}
-          </div>
+    <div className="flex rounded-2xl bg-surface-lowest p-5">
+      <div className="flex flex-1 flex-col items-center justify-center text-center">
+        <p className="text-xs font-medium uppercase tracking-wide text-text-muted">{label}</p>
+        <p className="mt-1.5 text-xl font-bold text-text-primary">{value}</p>
+        {change && (
+          <p
+            className={`mt-1 text-xs font-medium ${
+              change.positive ? "text-success" : "text-error"
+            }`}
+          >
+            {change.positive ? "+" : ""}
+            {change.value}
+          </p>
         )}
-        <p className="text-xs font-medium text-text-muted uppercase tracking-wide">{label}</p>
       </div>
-      <p className="mt-2 text-2xl font-bold text-text-primary">{value}</p>
-      {change && (
-        <p
-          className={`mt-1 text-xs font-medium ${
-            change.positive ? "text-success" : "text-error"
-          }`}
-        >
-          {change.positive ? "+" : ""}
-          {change.value}
-        </p>
-      )}
     </div>
   );
 }
