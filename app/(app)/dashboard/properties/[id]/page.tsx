@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { PropertyForm } from "@/components/app/property-form";
 import { updateProperty } from "../actions";
 import { DeletePropertyButton } from "./delete-button";
@@ -66,65 +65,50 @@ export default async function PropertyDetailPage({
             )}
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-3">
-          {property.acreage && (
-            <div className="flex items-center gap-1.5 text-sm text-text-muted">
-              <Ruler className="h-3.5 w-3.5" />
-              {Number(property.acreage).toLocaleString()} acres
-            </div>
-          )}
-          {property.property_type && (
-            <Badge variant="default">{property.property_type}</Badge>
-          )}
-        </div>
       </div>
 
       {/* Stats row */}
-      {(property.suburb || property.address) && (
-        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {property.address && (
-            <Card>
-              <CardContent className="flex items-center gap-3 p-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/10">
-                  <MapPinned className="h-5 w-5 text-brand" />
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-text-primary">{property.address}</p>
-                  <p className="text-[11px] text-text-muted">Address</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          {property.suburb && (
-            <Card>
-              <CardContent className="flex items-center gap-3 p-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
-                  <Landmark className="h-5 w-5 text-emerald-400" />
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-text-primary">
-                    {property.suburb}{property.postcode ? ` ${property.postcode}` : ""}
-                  </p>
-                  <p className="text-[11px] text-text-muted">Town</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          {property.region && (
-            <Card>
-              <CardContent className="flex items-center gap-3 p-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
-                  <MapPinned className="h-5 w-5 text-amber-400" />
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-text-primary">{property.region}</p>
-                  <p className="text-[11px] text-text-muted">Region</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
+      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/10">
+              <MapPinned className="h-5 w-5 text-brand" />
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-text-primary">
+                {property.address || property.suburb || "Not set"}
+              </p>
+              <p className="text-[11px] text-text-muted">Address</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
+              <Landmark className="h-5 w-5 text-emerald-400" />
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-text-primary">
+                {property.region || property.lga || "Not set"}
+              </p>
+              <p className="text-[11px] text-text-muted">Region</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
+              <Ruler className="h-5 w-5 text-amber-400" />
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-text-primary">
+                {property.acreage ? `${Number(property.acreage).toLocaleString()} acres` : "Not set"}
+              </p>
+              <p className="text-[11px] text-text-muted">Acreage</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Edit form */}
       <PropertyForm
