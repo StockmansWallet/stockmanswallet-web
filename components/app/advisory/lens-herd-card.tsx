@@ -109,8 +109,8 @@ export function LensHerdCard({
       </button>
 
       {expanded && (
-        <CardContent className="space-y-5 px-5 pb-5 pt-0 border-t border-border/50">
-          {/* Override fields */}
+        <CardContent className="space-y-4 px-5 pb-5 pt-0 border-t border-border/50">
+          {/* Assumptions grid: 5 overrides + shading in a clean 3x2 grid */}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 mt-4">
             <OverrideField
               label="Breed Premium (%)"
@@ -148,75 +148,65 @@ export function LensHerdCard({
               step="1"
               placeholder="e.g. -10"
             />
-          </div>
 
-          {/* Shading slider */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-medium text-text-muted">Shading</label>
-              <Badge className="bg-surface-raised text-text-secondary">
-                {overrides.shading_percentage}%
-              </Badge>
-            </div>
-            <input
-              type="range"
-              min={0}
-              max={100}
-              value={overrides.shading_percentage}
-              onChange={(e) => update("shading_percentage", Number(e.target.value))}
-              className="w-full accent-[#2F8CD9]"
-            />
-            <div className="flex justify-between text-[10px] text-text-muted">
-              <span>0%</span>
-              <span>50%</span>
-              <span>100%</span>
+            {/* Shading as 6th grid item */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-medium text-text-muted">Shading</label>
+                <span className="text-xs tabular-nums font-medium text-text-secondary">
+                  {overrides.shading_percentage}%
+                </span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={overrides.shading_percentage}
+                onChange={(e) => update("shading_percentage", Number(e.target.value))}
+                className="w-full accent-[#2F8CD9] mt-1.5"
+              />
+              <div className="flex justify-between text-[10px] text-text-muted">
+                <span>0%</span>
+                <span>100%</span>
+              </div>
             </div>
           </div>
 
           {/* Notes */}
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-text-muted">
-              Justification / Notes
-            </label>
+            <label className="text-xs font-medium text-text-muted">Notes</label>
             <textarea
               value={overrides.advisor_notes}
               onChange={(e) => update("advisor_notes", e.target.value)}
               maxLength={5000}
-              rows={3}
-              placeholder="Record your reasoning for these adjustments..."
+              rows={2}
+              placeholder="Reasoning for adjustments..."
               className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-[#2F8CD9]/40"
             />
           </div>
 
-          {/* Regional data */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-medium text-text-muted">
-                Regional Market Data
-              </label>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleFetchRegional}
-                disabled={fetchingRegional}
-              >
-                {fetchingRegional ? (
-                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <MapPin className="mr-1.5 h-3.5 w-3.5" />
-                )}
-                Fetch Regional Averages
-              </Button>
+          {/* Regional data (expanded inline when fetched) */}
+          {overrides.regional_data && (
+            <div className="rounded-lg border border-border/50 bg-surface-raised/30 p-3">
+              <RegionalDataDisplay data={overrides.regional_data} />
             </div>
-            {overrides.regional_data && (
-              <div className="rounded-lg border border-border/50 bg-surface-raised/30 p-3">
-                <RegionalDataDisplay data={overrides.regional_data} />
-              </div>
-            )}
-          </div>
+          )}
 
-          {/* Remove button */}
-          <div className="flex justify-end pt-2 border-t border-border/50">
+          {/* Footer: regional fetch + remove on one row */}
+          <div className="flex items-center justify-between pt-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleFetchRegional}
+              disabled={fetchingRegional}
+            >
+              {fetchingRegional ? (
+                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <MapPin className="mr-1.5 h-3.5 w-3.5" />
+              )}
+              Fetch Regional Averages
+            </Button>
             <Button
               variant="ghost"
               size="sm"
