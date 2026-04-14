@@ -76,21 +76,64 @@ function ensureSpace(ctx: Ctx, needed: number) {
   }
 }
 
-// MARK: - Rounded Rect
+// MARK: - Rounded Rect (proper Bezier curves, matching iOS UIBezierPath roundedRect)
+
+function roundedRectPath(w: number, h: number, r: number): string {
+  // SVG path for a rounded rectangle at origin (0,0).
+  // pdf-lib drawSvgPath places the path relative to the given x,y position.
+  // We draw clockwise from top-left corner, with the origin at bottom-left
+  // of the rect (PDF coordinate system: y increases upward).
+  // The path starts at (r, h) which is the top-left edge after the corner radius.
+  const right = w;
+  const top = h;
+  // Kappa for quarter-circle Bezier approximation
+  const k = 0.5522847498;
+  const kr = r * k;
+
+  return [
+    `M ${r} ${top}`,                                                         // top-left after radius
+    `L ${right - r} ${top}`,                                                 // top edge
+    `C ${right - r + kr} ${top} ${right} ${top - r + kr} ${right} ${top - r}`, // top-right corner
+    `L ${right} ${r}`,                                                       // right edge
+    `C ${right} ${r - kr} ${right - r + kr} 0 ${right - r} 0`,                // bottom-right corner
+    `L ${r} 0`,                                                              // bottom edge
+    `C ${r - kr} 0 0 ${r - kr} 0 ${r}`,                                      // bottom-left corner
+    `L 0 ${top - r}`,                                                        // left edge
+    `C 0 ${top - r + kr} ${r - kr} ${top} ${r} ${top}`,                      // top-left corner
+    "Z",
+  ].join(" ");
+}
 
 function drawRoundedRect(
   page: PDFPage,
   x: number, y: number, w: number, h: number,
-  _r: number,
+  r: number,
   options: { fill?: ReturnType<typeof rgb>; borderColor?: ReturnType<typeof rgb>; borderWidth?: number }
 ) {
-  // pdf-lib does not have native rounded rect, draw as filled rect + border lines
-  if (options.fill) {
-    page.drawRectangle({ x, y, width: w, height: h, color: options.fill });
+  // Clamp radius to half of smallest dimension
+  const maxR = Math.min(w, h) / 2;
+  const radius = Math.min(r, maxR);
+
+  if (radius <= 0) {
+    // Fallback to sharp rectangle if no radius
+    if (options.fill) {
+      page.drawRectangle({ x, y, width: w, height: h, color: options.fill });
+    }
+    if (options.borderColor && options.borderWidth) {
+      page.drawRectangle({ x, y, width: w, height: h, borderColor: options.borderColor, borderWidth: options.borderWidth });
+    }
+    return;
   }
-  if (options.borderColor && options.borderWidth) {
-    page.drawRectangle({ x, y, width: w, height: h, borderColor: options.borderColor, borderWidth: options.borderWidth });
-  }
+
+  const path = roundedRectPath(w, h, radius);
+
+  // Draw fill and border in a single path operation for clean rendering
+  page.drawSvgPath(path, {
+    x,
+    y: y + h,
+    ...(options.fill ? { color: options.fill } : {}),
+    ...(options.borderColor && options.borderWidth ? { borderColor: options.borderColor, borderWidth: options.borderWidth } : {}),
+  });
 }
 
 // MARK: - Report Header (title, logo, user details)
