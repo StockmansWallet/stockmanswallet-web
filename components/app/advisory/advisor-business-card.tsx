@@ -150,43 +150,39 @@ export function AdvisorBusinessCard({ connection, advisorEmail, advisorPhone, av
             onClick={() => setFlipped(false)}
           >
             <div className="flex h-full flex-col justify-between p-5">
-              {/* Header */}
-              <h3 className="text-sm font-bold text-text-primary">{connection.requester_name}</h3>
+              {/* Connection info group */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-bold text-text-primary">{connection.requester_name}</h3>
 
-              {/* Data sharing row: label left, toggle right */}
-              <div className="flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
-                <span className="text-sm text-text-primary">Data sharing</span>
-                <Switch
-                  id={`sharing-${connection.id}`}
-                  checked={isSharing}
-                  onChange={handleToggleSharing}
-                  disabled={loading}
-                  color="green"
-                />
+                <div className="flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
+                  <div>
+                    <p className="text-sm text-text-primary">Data sharing</p>
+                    <p className="text-xs text-text-muted">Connected {connectedDate}</p>
+                  </div>
+                  <Switch
+                    id={`sharing-${connection.id}`}
+                    checked={isSharing}
+                    onChange={handleToggleSharing}
+                    disabled={loading}
+                    color="green"
+                  />
+                </div>
               </div>
 
-              {/* Connected date + remove */}
-              <div className="flex items-end justify-between">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-xs text-text-muted">
-                    <Calendar className="h-3 w-3 shrink-0" />
-                    Connected {connectedDate}
-                  </div>
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => setShowRemove(true)}
-                      disabled={loading}
-                      className="gap-1.5"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                      Remove Advisor
-                    </Button>
-                  </div>
+              {/* Remove + close */}
+              <div className="flex items-center justify-between">
+                <div onClick={(e) => e.stopPropagation()}>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setShowRemove(true)}
+                    disabled={loading}
+                    className="gap-1.5"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    Remove Advisor
+                  </Button>
                 </div>
-
-                {/* Close button */}
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); setFlipped(false); }}
