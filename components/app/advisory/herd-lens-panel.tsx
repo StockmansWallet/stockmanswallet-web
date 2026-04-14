@@ -106,39 +106,44 @@ export function HerdLensPanel({
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
           <OverrideField
             label="Breed Premium (%)"
-            baseline={`${metrics.breedPremium > 0 ? "+" : ""}${metrics.breedPremium}%`}
+            currentValue={`${metrics.breedPremium > 0 ? "+" : ""}${metrics.breedPremium}%`}
             value={breedPremium}
             onChange={setBreedPremium}
             step="0.1"
+            hint="Enter a new value to override"
           />
           <OverrideField
             label="DWG (kg/day)"
-            baseline={`${metrics.dwg} kg/day`}
+            currentValue={`${metrics.dwg} kg/day`}
             value={dwg}
             onChange={setDwg}
             step="0.01"
+            hint="Enter a new value to override"
           />
           <OverrideField
             label="Calving Rate (%)"
-            baseline={`${Math.round(metrics.calvingRate * 100)}%`}
+            currentValue={`${Math.round(metrics.calvingRate * 100)}%`}
             value={calvingRate}
             onChange={setCalvingRate}
             step="1"
+            hint="Enter a new value to override"
           />
           <OverrideField
             label="Mortality (%)"
-            baseline={`${Math.round(metrics.mortalityRate * 100)}%`}
+            currentValue={`${Math.round(metrics.mortalityRate * 100)}%`}
             value={mortality}
             onChange={setMortality}
             step="0.1"
+            hint="Enter a new value to override"
           />
           <OverrideField
             label="Head Count Adj."
-            baseline={`${metrics.headCount} head`}
+            currentValue={`${metrics.headCount} head`}
             value={headAdj}
             onChange={setHeadAdj}
             step="1"
-            placeholder="e.g. -10"
+            placeholder="e.g. -10 to remove 10"
+            hint="+/- adjustment to current count"
           />
         </div>
 
@@ -206,18 +211,20 @@ export function HerdLensPanel({
 
 function OverrideField({
   label,
-  baseline,
+  currentValue,
   value,
   onChange,
   step,
   placeholder,
+  hint,
 }: {
   label: string;
-  baseline: string;
+  currentValue: string;
   value: string;
   onChange: (v: string) => void;
   step?: string;
   placeholder?: string;
+  hint?: string;
 }) {
   return (
     <div className="space-y-1.5">
@@ -227,10 +234,12 @@ function OverrideField({
         step={step}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder ?? `Baseline: ${baseline}`}
+        placeholder={placeholder ?? `Current: ${currentValue}`}
         className="border-border bg-surface"
       />
-      <p className="text-[10px] text-text-muted">Baseline: {baseline}</p>
+      <p className="text-[10px] text-text-muted">
+        Current: {currentValue}{hint ? ` · ${hint}` : ""}
+      </p>
     </div>
   );
 }

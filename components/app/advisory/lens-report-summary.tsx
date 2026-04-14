@@ -42,7 +42,7 @@ export function LensReportSummary({
       {/* Summary cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <SummaryCard
-          label="Baseline Value"
+          label="Client Value"
           value={totalBaseline}
           icon={<DollarSign className="h-4 w-4" />}
           muted
@@ -78,7 +78,7 @@ export function LensReportSummary({
                 <tr className="text-text-muted text-xs">
                   <th className="text-left font-medium pb-2 pr-4">Herd</th>
                   <th className="text-right font-medium pb-2 pr-4">Head</th>
-                  <th className="text-right font-medium pb-2 pr-4">Baseline</th>
+                  <th className="text-right font-medium pb-2 pr-4">Client Value</th>
                   <th className="text-right font-medium pb-2 pr-4">Adjusted</th>
                   <th className="text-right font-medium pb-2 pr-4">Shaded</th>
                   <th className="text-center font-medium pb-2 pr-4">Shading %</th>

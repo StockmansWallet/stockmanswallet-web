@@ -182,7 +182,7 @@ export function LensWizard({
                     </span>
                     <span className="text-text-muted">·</span>
                     <span className="text-text-secondary">
-                      Baseline:{" "}
+                      Client Value:{" "}
                       <span className="font-semibold text-text-primary">
                         ${totalBaseline.toLocaleString("en-AU", { maximumFractionDigits: 0 })}
                       </span>
@@ -325,7 +325,7 @@ export function LensWizard({
                     <tr className="text-text-muted text-xs">
                       <th className="text-left font-medium pb-2 pr-4">Herd</th>
                       <th className="text-right font-medium pb-2 pr-4">Head</th>
-                      <th className="text-right font-medium pb-2 pr-4">Baseline</th>
+                      <th className="text-right font-medium pb-2 pr-4">Client Value</th>
                       <th className="text-right font-medium pb-2 pr-4">Shading</th>
                       <th className="text-center font-medium pb-2">Overrides</th>
                     </tr>

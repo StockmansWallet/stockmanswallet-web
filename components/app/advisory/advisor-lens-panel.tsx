@@ -20,19 +20,19 @@ interface AdvisorLensPanelProps {
 
 interface OverrideFieldProps {
   label: string;
-  baselineValue: string;
+  currentValue: string;
   value: string;
   onChange: (v: string) => void;
   suffix?: string;
   step?: string;
 }
 
-function OverrideField({ label, baselineValue, value, onChange, suffix = "", step = "0.01" }: OverrideFieldProps) {
+function OverrideField({ label, currentValue, value, onChange, suffix = "", step = "0.01" }: OverrideFieldProps) {
   return (
     <div className="flex items-center justify-between gap-4 py-2.5">
       <div className="min-w-0">
         <p className="text-sm text-text-primary">{label}</p>
-        <p className="text-xs text-text-muted">Baseline: {baselineValue}{suffix}</p>
+        <p className="text-xs text-text-muted">Current: {currentValue}{suffix}</p>
       </div>
       <input
         type="number"
@@ -135,7 +135,7 @@ export function AdvisorLensPanel({
           {isActive && (
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div className="rounded-lg bg-white/[0.03] p-3 text-center">
-                <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Baseline</p>
+                <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Client Value</p>
                 <p className="mt-1 text-lg font-bold tabular-nums text-text-primary">${Math.round(baselineValue).toLocaleString()}</p>
               </div>
               <div className="rounded-lg bg-[#2F8CD9]/10 p-3 text-center">
@@ -164,11 +164,11 @@ export function AdvisorLensPanel({
               </div>
             </CardHeader>
             <CardContent className="divide-y divide-white/[0.04] px-5 pb-5">
-              <OverrideField label="Breed Premium" baselineValue="0" value={breedPremium} onChange={setBreedPremium} suffix="%" />
-              <OverrideField label="Daily Weight Gain" baselineValue="0" value={adwg} onChange={setAdwg} suffix=" kg/day" />
-              <OverrideField label="Calving Rate" baselineValue="85" value={calvingRate} onChange={setCalvingRate} suffix="%" step="1" />
-              <OverrideField label="Mortality Rate" baselineValue="0" value={mortality} onChange={setMortality} suffix="%" />
-              <OverrideField label="Head Count Adj." baselineValue="0" value={headAdj} onChange={setHeadAdj} step="1" />
+              <OverrideField label="Breed Premium" currentValue="0" value={breedPremium} onChange={setBreedPremium} suffix="%" />
+              <OverrideField label="Daily Weight Gain" currentValue="0" value={adwg} onChange={setAdwg} suffix=" kg/day" />
+              <OverrideField label="Calving Rate" currentValue="85" value={calvingRate} onChange={setCalvingRate} suffix="%" step="1" />
+              <OverrideField label="Mortality Rate" currentValue="0" value={mortality} onChange={setMortality} suffix="%" />
+              <OverrideField label="Head Count Adj." currentValue="0" value={headAdj} onChange={setHeadAdj} step="1" />
             </CardContent>
           </Card>
 

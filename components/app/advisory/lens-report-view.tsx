@@ -75,7 +75,7 @@ export function LensReportView({
           {/* Value summary row */}
           <div className="grid grid-cols-3 gap-4 mt-5 pt-4 border-t border-[#2F8CD9]/20">
             <div>
-              <p className="text-xs text-text-muted">Baseline Portfolio</p>
+              <p className="text-xs text-text-muted">Client Portfolio</p>
               <p className="text-lg font-bold text-text-secondary">
                 ${(report.total_baseline_value ?? 0).toLocaleString("en-AU", { maximumFractionDigits: 0 })}
               </p>
