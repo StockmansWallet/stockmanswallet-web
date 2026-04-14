@@ -747,7 +747,7 @@ export async function generateReportPDF(
   // Embed logo
   let logo: PDFImage | null = null;
   try {
-    const logoRes = await fetch("/images/sw-logo.png");
+    const logoRes = await fetch("/images/sw-report-logo.png");
     if (logoRes.ok) {
       const logoBytes = await logoRes.arrayBuffer();
       logo = await doc.embedPng(new Uint8Array(logoBytes));
@@ -799,7 +799,7 @@ export async function generateAdvisorLensPDF(
 
   let logo: PDFImage | null = null;
   try {
-    const logoRes = await fetch("/images/sw-logo.png");
+    const logoRes = await fetch("/images/sw-report-logo.png");
     if (logoRes.ok) {
       const logoBytes = await logoRes.arrayBuffer();
       logo = await doc.embedPng(new Uint8Array(logoBytes));
