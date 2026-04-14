@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useMemo, type ReactNode } from "react";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -28,10 +28,11 @@ interface PropertyFormProps {
   property?: PropertyRow;
   action: (formData: FormData) => Promise<{ error: string } | void>;
   submitLabel: string;
+  cancelHref?: string;
+  deleteButton?: ReactNode;
 }
 
-export function PropertyForm({ property, action, submitLabel }: PropertyFormProps) {
-  const router = useRouter();
+export function PropertyForm({ property, action, submitLabel, cancelHref, deleteButton }: PropertyFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [suburb, setSuburb] = useState(property?.suburb ?? "");
@@ -250,13 +251,24 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
         <Button type="submit" disabled={submitting}>
           {submitting ? "Saving..." : submitLabel}
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={() => router.back()}
-        >
-          Cancel
-        </Button>
+        {cancelHref ? (
+          <Link href={cancelHref}>
+            <Button type="button" variant="ghost">
+              Cancel
+            </Button>
+          </Link>
+        ) : (
+          <Link href="/dashboard/properties">
+            <Button type="button" variant="ghost">
+              Cancel
+            </Button>
+          </Link>
+        )}
+        {deleteButton && (
+          <div className="ml-auto">
+            {deleteButton}
+          </div>
+        )}
       </div>
     </form>
   );

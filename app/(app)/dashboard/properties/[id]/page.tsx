@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { PropertyForm } from "@/components/app/property-form";
-import { updateProperty, deleteProperty } from "../actions";
+import { updateProperty } from "../actions";
 import { DeletePropertyButton } from "./delete-button";
 
 export const metadata = {
@@ -40,7 +40,6 @@ export default async function PropertyDetailPage({
         subtitle={[property.state, property.property_pic]
           .filter(Boolean)
           .join(" · ")}
-        actions={<DeletePropertyButton id={id} name={property.property_name} />}
       />
 
       <Card>
@@ -49,6 +48,8 @@ export default async function PropertyDetailPage({
             property={property}
             action={boundUpdate}
             submitLabel="Save Changes"
+            cancelHref="/dashboard/properties"
+            deleteButton={<DeletePropertyButton id={id} name={property.property_name} />}
           />
         </CardContent>
       </Card>
