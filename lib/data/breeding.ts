@@ -22,7 +22,9 @@ export function getEffectiveJoinedDate(herd: {
   if (herd.joining_period_start && herd.joining_period_end) {
     const start = parseLocalDate(herd.joining_period_start).getTime();
     const end = parseLocalDate(herd.joining_period_end).getTime();
-    return new Date((start + end) / 2);
+    // Normalize midpoint to local midnight so daysBetween counts full days
+    const mid = new Date((start + end) / 2);
+    return new Date(mid.getFullYear(), mid.getMonth(), mid.getDate());
   }
 
   if (

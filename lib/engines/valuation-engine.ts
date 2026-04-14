@@ -472,7 +472,9 @@ function getEffectiveJoinedDate(herd: HerdForValuation): Date | null {
   if (herd.joining_period_start && herd.joining_period_end) {
     const pStart = parseLocal(herd.joining_period_start).getTime();
     const pEnd = parseLocal(herd.joining_period_end).getTime();
-    return new Date((pStart + pEnd) / 2);
+    // Normalize midpoint to local midnight so daysBetween counts full days
+    const mid = new Date((pStart + pEnd) / 2);
+    return new Date(mid.getFullYear(), mid.getMonth(), mid.getDate());
   }
   if (herd.breeding_program_type === "uncontrolled" || (herd.breeding_program_type as string) === "uncontrolled_breeding") return new Date(herd.created_at);
   if (herd.joining_period_start) return parseLocal(herd.joining_period_start);
