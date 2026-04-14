@@ -207,6 +207,7 @@ export default async function MyAdvisorsPage() {
                   key={connection.id}
                   connection={connection}
                   advisorEmail={profile?.contact_email}
+                  advisorPhone={profile?.contact_phone}
                   avatarUrl={avatarMap[connection._otherPartyId]}
                 />
               );
