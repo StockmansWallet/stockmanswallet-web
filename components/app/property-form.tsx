@@ -32,9 +32,11 @@ interface PropertyFormProps {
   submitLabel: string;
   cancelHref?: string;
   deleteButton?: ReactNode;
+  /** When true, renders the bottom actions as a rounded-full pill bar. */
+  actionBarLayout?: boolean;
 }
 
-export function PropertyForm({ property, action, submitLabel, cancelHref, deleteButton }: PropertyFormProps) {
+export function PropertyForm({ property, action, submitLabel, cancelHref, deleteButton, actionBarLayout }: PropertyFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [suburb, setSuburb] = useState(property?.suburb ?? "");
@@ -278,19 +280,42 @@ export function PropertyForm({ property, action, submitLabel, cancelHref, delete
       </Card>
 
       {/* Actions */}
-      <div className="flex items-center gap-3 pt-2">
-        {deleteButton}
-        <div className="ml-auto flex items-center gap-3">
-          <Link href={cancelHref ?? "/dashboard/properties"}>
-            <Button type="button" variant="secondary">
+      {actionBarLayout ? (
+        <div className="flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2">
+          <div className="flex items-center gap-1.5 pl-1">
+            {deleteButton}
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Link
+              href={cancelHref ?? "/dashboard/properties"}
+              className="inline-flex h-8 shrink-0 items-center rounded-full bg-surface-lowest px-3.5 text-xs font-medium text-text-muted transition-all hover:bg-surface-raised hover:text-text-secondary"
+            >
               Cancel
-            </Button>
-          </Link>
-          <Button type="submit" disabled={submitting}>
-            {submitting ? "Saving..." : submitLabel}
-          </Button>
+            </Link>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="inline-flex h-8 shrink-0 items-center rounded-full bg-brand px-3.5 text-xs font-medium text-white transition-all hover:bg-brand-dark disabled:opacity-50"
+            >
+              {submitting ? "Saving..." : submitLabel}
+            </button>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="flex items-center gap-3 pt-2">
+          {deleteButton}
+          <div className="ml-auto flex items-center gap-3">
+            <Link href={cancelHref ?? "/dashboard/properties"}>
+              <Button type="button" variant="secondary">
+                Cancel
+              </Button>
+            </Link>
+            <Button type="submit" disabled={submitting}>
+              {submitting ? "Saving..." : submitLabel}
+            </Button>
+          </div>
+        </div>
+      )}
     </form>
   );
 }

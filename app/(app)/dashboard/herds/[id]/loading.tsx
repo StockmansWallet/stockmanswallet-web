@@ -2,14 +2,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function SkeletonInfoCard({ rows = 4 }: { rows?: number }) {
   return (
-    <div className="rounded-xl bg-white/5">
+    <div className="rounded-2xl bg-surface-lowest">
       <div className="px-5 pt-5 pb-4">
         <div className="flex items-center gap-2.5">
           <Skeleton className="h-7 w-7 rounded-lg" />
           <Skeleton className="h-5 w-32" />
         </div>
       </div>
-      <div className="px-5 pb-5 divide-y divide-white/5">
+      <div className="px-5 pb-5 divide-y divide-white/[0.04]">
         {Array.from({ length: rows }).map((_, i) => (
           <div key={i} className="flex justify-between py-3">
             <Skeleton className="h-4 w-28" />
@@ -23,35 +23,39 @@ function SkeletonInfoCard({ rows = 4 }: { rows?: number }) {
 
 export default function HerdDetailLoading() {
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-4xl">
       {/* PageHeader */}
-      <div className="flex items-end justify-between pb-4 pt-6">
-        <div>
-          <Skeleton className="mb-2 h-8 w-44" />
-          <Skeleton className="h-4 w-52" />
-        </div>
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-9 w-16 rounded-xl" />
-          <Skeleton className="h-9 w-20 rounded-xl" />
-        </div>
+      <div className="pb-4 pt-6">
+        <Skeleton className="mb-2 h-9 w-56" />
+        <Skeleton className="h-4 w-52" />
       </div>
 
-      {/* Herd Value card */}
-      <div className="mb-4 rounded-xl bg-white/5 p-5">
-        <div className="flex items-center gap-3">
-          <Skeleton className="h-10 w-10 rounded-xl" />
-          <div>
-            <Skeleton className="mb-1 h-3 w-28" />
-            <Skeleton className="mb-1 h-7 w-36" />
-            <Skeleton className="h-3 w-20" />
+      {/* Stat cards (5 cols) */}
+      <div className="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-5 lg:gap-4">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="rounded-2xl bg-surface-lowest p-5">
+            <Skeleton className="mx-auto mb-2 h-3 w-16" />
+            <Skeleton className="mx-auto h-6 w-20" />
           </div>
+        ))}
+      </div>
+
+      {/* Action bar */}
+      <div className="mt-3 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2 lg:mt-4">
+        <div className="flex items-center gap-1.5 pl-2">
+          <Skeleton className="h-5 w-20 rounded-full" />
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Skeleton className="h-8 w-14 rounded-full" />
+          <Skeleton className="h-8 w-14 rounded-full" />
+          <Skeleton className="h-8 w-16 rounded-full" />
         </div>
       </div>
 
-      {/* Info cards grid */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <SkeletonInfoCard rows={4} />
-        <SkeletonInfoCard rows={7} />
+      {/* Info cards (single column) */}
+      <div className="mt-3 flex flex-col gap-4 lg:mt-4">
+        <SkeletonInfoCard rows={6} />
+        <SkeletonInfoCard rows={3} />
         <SkeletonInfoCard rows={4} />
         <SkeletonInfoCard rows={3} />
         <SkeletonInfoCard rows={3} />

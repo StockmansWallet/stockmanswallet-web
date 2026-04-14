@@ -33,15 +33,8 @@ export default async function PropertyDetailPage({
 
   const boundUpdate = updateProperty.bind(null, id);
 
-  const initials = property.property_name
-    .split(" ")
-    .map((w: string) => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-
   return (
-    <div className="max-w-5xl">
+    <div className="max-w-4xl">
       {/* Property header */}
       <div className="mb-6 mt-6 flex items-end gap-4">
         <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-brand/15">
@@ -110,13 +103,14 @@ export default async function PropertyDetailPage({
         </Card>
       </div>
 
-      {/* Edit form */}
+      {/* Edit form with action bar */}
       <PropertyForm
         property={property}
         action={boundUpdate}
         submitLabel="Save"
         cancelHref="/dashboard/properties"
         deleteButton={<DeletePropertyButton id={id} name={property.property_name} />}
+        actionBarLayout
       />
     </div>
   );
