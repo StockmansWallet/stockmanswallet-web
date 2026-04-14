@@ -65,14 +65,14 @@ export function SharingPreferencesCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Sharing Preferences</CardTitle>
+        <CardTitle>Shared Data</CardTitle>
+        <p className="mt-1 text-xs leading-relaxed text-text-muted">
+          {isActive
+            ? "Choose which data categories your advisor can view. Changes take effect immediately."
+            : "Enable data sharing on the Overview tab to configure what your advisor can access."}
+        </p>
       </CardHeader>
       <CardContent>
-        {!isActive && (
-          <p className="mb-4 text-xs text-text-muted">
-            Grant data access to configure sharing preferences.
-          </p>
-        )}
         <div className="space-y-4">
           {CATEGORIES.map(({ key, label, description, icon: Icon }) => (
             <div
@@ -98,6 +98,7 @@ export function SharingPreferencesCard({
                 checked={local[key]}
                 onChange={(checked) => handleToggle(key, checked)}
                 disabled={!isActive}
+                color="green"
               />
             </div>
           ))}
