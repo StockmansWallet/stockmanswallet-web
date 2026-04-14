@@ -160,7 +160,7 @@ export function NotificationBell() {
             <Link
               href="/dashboard/notifications"
               onClick={() => setOpen(false)}
-              className="text-xs text-purple-400 hover:underline"
+              className="text-xs text-orange-400 hover:underline"
             >
               View all
             </Link>
@@ -180,8 +180,8 @@ export function NotificationBell() {
                     onClick={() => handleNotificationClick(n)}
                     className="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-white/[0.03]"
                   >
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-purple-500/10">
-                      <Icon className="h-3.5 w-3.5 text-purple-400" />
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange-500/10">
+                      <Icon className="h-3.5 w-3.5 text-orange-400" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className={`text-xs ${n.is_read ? "text-text-secondary" : "font-semibold text-text-primary"}`}>
@@ -194,7 +194,7 @@ export function NotificationBell() {
                     <div className="flex shrink-0 items-center gap-1.5">
                       <span className="text-[10px] text-text-muted">{timeAgo(n.created_at)}</span>
                       {!n.is_read && (
-                        <div className="h-2 w-2 rounded-full bg-purple-400" />
+                        <div className="h-2 w-2 rounded-full bg-orange-400" />
                       )}
                     </div>
                   </button>
