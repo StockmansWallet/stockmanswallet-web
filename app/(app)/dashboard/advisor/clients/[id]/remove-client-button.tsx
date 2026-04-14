@@ -33,12 +33,12 @@ export function RemoveClientButton({
   if (!showConfirm) {
     return (
       <Button
-        variant="ghost"
+        variant="destructive"
         size="sm"
         onClick={() => setShowConfirm(true)}
-        className="text-red-400 hover:bg-red-500/10 hover:text-red-300"
+        className="gap-1.5"
       >
-        <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+        <Trash2 className="h-3.5 w-3.5" />
         Remove Client
       </Button>
     );

@@ -275,9 +275,6 @@ export default async function ClientDetailPage({
             </Badge>
           </div>
         </div>
-        <div className="shrink-0">
-          <RemoveClientButton connectionId={id} clientName={clientName} />
-        </div>
       </div>
 
       <Tabs
@@ -368,6 +365,11 @@ export default async function ClientDetailPage({
           },
         ]}
       />
+
+      {/* Remove client */}
+      <div className="pt-6">
+        <RemoveClientButton connectionId={id} clientName={clientName} />
+      </div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PermissionBanner } from "@/components/app/advisory/permission-banner";
@@ -79,7 +79,6 @@ export function ClientOverview({ connection, clientUserId, baselineValue = 0 }: 
         }
 
         const clientData = await res.json();
-        // Ensure permissions are parsed from the API response
         clientData.permissions = parseSharingPermissions(clientData.permissions);
         setData(clientData);
       } catch {
@@ -94,11 +93,14 @@ export function ClientOverview({ connection, clientUserId, baselineValue = 0 }: 
 
   return (
     <div className="space-y-4">
-      <PermissionBanner
-        connection={connection}
-        isActive={isActive}
-        permissions={data?.permissions}
-      />
+      {/* Only show banner for non-active states (pending, locked) */}
+      {!isActive && (
+        <PermissionBanner
+          connection={connection}
+          isActive={isActive}
+          permissions={data?.permissions}
+        />
+      )}
 
       {!isActive && (
         <Card>
@@ -113,18 +115,18 @@ export function ClientOverview({ connection, clientUserId, baselineValue = 0 }: 
       )}
 
       {isActive && loading && (
-        <div className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-3">
-            {[1, 2, 3].map((i) => (
-              <Card key={i}>
-                <CardContent className="p-4">
-                  <Skeleton className="mb-2 h-8 w-16" />
-                  <Skeleton className="h-3 w-24" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
+        <Card>
+          <CardContent className="p-5">
+            <div className="grid grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i}>
+                  <Skeleton className="mb-2 h-8 w-20" />
+                  <Skeleton className="h-3 w-16" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {isActive && error && (
@@ -137,17 +139,6 @@ export function ClientOverview({ connection, clientUserId, baselineValue = 0 }: 
 
       {isActive && data && <ClientDataView data={data} baselineValue={baselineValue} />}
     </div>
-  );
-}
-
-function LockedSection({ label }: { label: string }) {
-  return (
-    <Card>
-      <CardContent className="py-6 text-center">
-        <Lock className="mx-auto mb-2 h-5 w-5 text-text-muted" />
-        <p className="text-xs text-text-muted">{label} not shared</p>
-      </CardContent>
-    </Card>
   );
 }
 
@@ -167,103 +158,91 @@ function ClientDataView({ data, baselineValue }: { data: ClientData; baselineVal
 
   return (
     <>
-      {/* Portfolio value */}
-      {permissions.valuations && baselineValue > 0 && (
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-text-muted">Portfolio Value</p>
-            <p className="mt-1 text-3xl font-bold tabular-nums text-brand">
-              ${Math.round(baselineValue).toLocaleString()}
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Summary stats */}
-      <div className="grid gap-3 sm:grid-cols-3">
-        {permissions.herds && (
-          <>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <p className="text-2xl font-bold text-text-primary">
-                  {totalHead.toLocaleString()}
+      {/* Combined stats row */}
+      <Card>
+        <CardContent className="p-0">
+          <div className="grid grid-cols-2 divide-x divide-white/[0.06] sm:grid-cols-4">
+            {permissions.valuations && baselineValue > 0 && (
+              <div className="p-4">
+                <p className="text-xs text-text-muted">Portfolio Value</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums text-brand">
+                  ${Math.round(baselineValue).toLocaleString()}
                 </p>
-                <p className="text-xs text-text-muted">Total Head</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <p className="text-2xl font-bold text-text-primary">{activeHerds.length}</p>
-                <p className="text-xs text-text-muted">Active Herds</p>
-              </CardContent>
-            </Card>
-          </>
-        )}
-        {permissions.properties && (
-          <Card>
-            <CardContent className="p-4 text-center">
-              <p className="text-2xl font-bold text-text-primary">{data.properties.length}</p>
-              <p className="text-xs text-text-muted">Properties</p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Properties section */}
-      {permissions.properties ? (
-        data.properties.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Properties</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {data.properties.map((property) => (
-                  <div
-                    key={property.id}
-                    className="flex items-center gap-2 rounded-lg bg-surface px-3 py-2"
-                  >
-                    <MapPin className="h-4 w-4 text-text-muted" />
-                    <span className="text-sm text-text-primary">{property.property_name}</span>
-                    {property.state && (
-                      <span className="text-xs text-text-muted">
-                        {property.state}
-                        {property.region ? `, ${property.region}` : ""}
-                      </span>
-                    )}
-                  </div>
-                ))}
               </div>
-            </CardContent>
-          </Card>
-        )
-      ) : (
-        <LockedSection label="Property data" />
-      )}
-
-      {/* Herd Composition */}
-      {permissions.herds && Object.keys(speciesGroups).length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Herd Composition</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {Object.entries(speciesGroups).map(([species, info]) => (
-                <div
-                  key={species}
-                  className="flex items-center justify-between rounded-lg bg-surface px-3 py-2"
-                >
-                  <span className="text-sm font-medium text-text-primary">{species}</span>
-                  <div className="flex items-center gap-3">
-                    <Badge variant="default">{info.count} herds</Badge>
-                    <span className="text-sm font-semibold text-text-primary">
-                      {info.head.toLocaleString()} head
-                    </span>
-                  </div>
+            )}
+            {permissions.herds && (
+              <>
+                <div className="p-4">
+                  <p className="text-xs text-text-muted">Total Head</p>
+                  <p className="mt-1 text-2xl font-bold tabular-nums text-text-primary">
+                    {totalHead.toLocaleString()}
+                  </p>
                 </div>
-              ))}
-            </div>
+                <div className="p-4">
+                  <p className="text-xs text-text-muted">Active Herds</p>
+                  <p className="mt-1 text-2xl font-bold tabular-nums text-text-primary">
+                    {activeHerds.length}
+                  </p>
+                </div>
+              </>
+            )}
+            {permissions.properties && (
+              <div className="p-4">
+                <p className="text-xs text-text-muted">Properties</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums text-text-primary">
+                  {data.properties.length}
+                </p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Properties + Herd Composition in a compact card */}
+      {(permissions.properties || permissions.herds) && (
+        <Card>
+          <CardContent className="divide-y divide-white/[0.06] p-0">
+            {/* Properties */}
+            {permissions.properties && data.properties.length > 0 && (
+              <div className="p-4">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">Properties</p>
+                <div className="flex flex-wrap gap-x-4 gap-y-1">
+                  {data.properties.map((property) => (
+                    <span key={property.id} className="flex items-center gap-1.5 text-sm text-text-secondary">
+                      <MapPin className="h-3 w-3 text-text-muted" />
+                      {property.property_name}
+                      {property.state && (
+                        <span className="text-xs text-text-muted">{property.state}</span>
+                      )}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Herd Composition */}
+            {permissions.herds && Object.keys(speciesGroups).length > 0 && (
+              <div className="p-4">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">Herd Composition</p>
+                <div className="flex flex-wrap gap-x-4 gap-y-1">
+                  {Object.entries(speciesGroups).map(([species, info]) => (
+                    <span key={species} className="flex items-center gap-2 text-sm text-text-secondary">
+                      <span className="font-medium text-text-primary">{species}</span>
+                      <Badge variant="default">{info.count} herds</Badge>
+                      <span className="tabular-nums">{info.head.toLocaleString()} head</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Locked sections */}
+            {!permissions.properties && (
+              <div className="flex items-center gap-2 p-4">
+                <Lock className="h-3.5 w-3.5 text-text-muted" />
+                <span className="text-xs text-text-muted">Property data not shared</span>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
