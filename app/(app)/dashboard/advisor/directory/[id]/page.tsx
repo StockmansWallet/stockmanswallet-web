@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, MapPin, Mail, Phone } from "lucide-react";
+import { ChevronLeft, MapPin, Mail, Phone } from "lucide-react";
 import { AdvisorConnectButton } from "../advisor-connect-button";
 
 export const revalidate = 0;
@@ -50,14 +50,16 @@ export default async function ProducerProfilePage({
 
   return (
     <div className="max-w-2xl">
-      {/* Back link */}
-      <Link
-        href="/dashboard/advisor/directory"
-        className="mb-5 mt-1 inline-flex items-center gap-1.5 text-sm text-text-muted transition-colors hover:text-text-secondary"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Find Producers
-      </Link>
+      {/* Back nav */}
+      <div className="pb-4 pt-6">
+        <Link
+          href="/dashboard/advisor/directory"
+          className="inline-flex items-center gap-1 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-sm text-text-muted transition-colors hover:bg-surface-low hover:text-text-secondary"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Producer Directory
+        </Link>
+      </div>
 
       <Card className="overflow-hidden">
         {/* Header */}

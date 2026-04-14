@@ -109,7 +109,7 @@ export function ClientSearch() {
                   </span>
                 ) : (
                   <Button
-                    variant="purple"
+                    variant="advisor"
                     size="sm"
                     onClick={() => handleConnect(producer.user_id)}
                     disabled={sendingTo === producer.user_id}

@@ -43,5 +43,20 @@ Live URL: `https://stockmanswallet.com.au` (Vercel hosting, custom domain).
 | `lib/brangus/chat-service.ts` | Brangus AI system prompt, API calls, tool loop |
 | `lib/navigation/nav-config.tsx` | Role-based sidebar navigation |
 
+## UI Consistency Patterns
+These are the established patterns. All new pages and changes MUST follow them.
+
+| Element | Pattern | Reference |
+|---------|---------|-----------|
+| Back navigation | `ChevronLeft` in a rounded container (`bg-surface-lowest rounded-lg px-2.5 py-1.5`) | Advisor detail, Client detail |
+| Stat cards | Separate `Card` components in a `grid grid-cols-N gap-3` row | Dashboard, Client overview |
+| Page header | Avatar (circle, `rounded-full`) + name + badges inline | Advisor detail, Client detail |
+| On/off controls | `Switch` component (green), not toggle buttons | Advisor sharing, Shared Data |
+| Destructive actions | `Button variant="destructive"`, positioned below main content | Advisor detail, Client detail |
+| Tab component | `Tabs` with sliding pill indicator, `rounded-xl` inner buttons | All tabbed pages |
+| Directory lists | Rows inside a `Card` with `divide-y divide-white/[0.06]` | Advisor directory, Producer directory |
+| Settings rows | `NavItem` style with icon + label + chevron, `divide-y` dividers | Settings page |
+| Detail page avatars | Fetch from auth metadata via service client (`svc.auth.admin.getUserById`) | Advisor detail, Client detail |
+
 ## Docs
 Detailed docs in `docs/`. Changelog is in Supabase (Muster project), not local files.

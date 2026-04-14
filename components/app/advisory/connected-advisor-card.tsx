@@ -114,29 +114,29 @@ export function ConnectedAdvisorCard({ connection }: { connection: ConnectionReq
                 )}
               </div>
 
-              {/* Action buttons with labels */}
-              <div className="flex items-center gap-1">
+              {/* Action buttons */}
+              <div className="flex items-center gap-2">
                 <Button
-                  variant="ghost"
+                  variant="secondary"
                   size="sm"
                   onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleToggleSharing(); }}
                   disabled={loading}
-                  className="h-8 gap-1.5 px-2.5 text-xs"
+                  className="h-7 gap-1.5 px-2.5 text-xs"
                 >
                   {isSharing ? (
-                    <><EyeOff className="h-3.5 w-3.5" /> Stop</>
+                    <><EyeOff className="h-3 w-3" /> Stop</>
                   ) : (
-                    <><Eye className="h-3.5 w-3.5 text-emerald-400" /> Share</>
+                    <><Eye className="h-3 w-3" /> Share</>
                   )}
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="destructive"
                   size="sm"
                   onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowDisconnect(true); }}
                   disabled={loading}
-                  className="h-8 gap-1.5 px-2.5 text-xs text-red-400/70 hover:text-red-400"
+                  className="h-7 gap-1.5 px-2.5 text-xs"
                 >
-                  <Trash2 className="h-3.5 w-3.5" /> Remove
+                  <Trash2 className="h-3 w-3" /> Remove
                 </Button>
               </div>
             </div>

@@ -54,7 +54,7 @@ export function AdvisorConnectButton({
   return (
     <div>
       <Button
-        variant="purple"
+        variant="advisor"
         onClick={handleRequest}
         disabled={loading}
       >

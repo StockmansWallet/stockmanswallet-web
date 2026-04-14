@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, MapPin, Mail, Phone, Building2 } from "lucide-react";
+import { ChevronLeft, MapPin, Mail, Phone, Building2 } from "lucide-react";
 import { getCategoryConfig } from "@/lib/types/advisory";
 import { ConnectionRequestButton } from "@/components/app/advisory/connection-request-button";
 import { ConnectionRealtime } from "@/components/app/advisory/connection-realtime";
@@ -51,14 +51,16 @@ export default async function AdvisorProfilePage({
     <div className="max-w-2xl">
       <ConnectionRealtime userId={user.id} />
 
-      {/* Back link */}
-      <Link
-        href="/dashboard/advisory-hub/directory"
-        className="mb-5 mt-1 inline-flex items-center gap-1.5 text-sm text-text-muted transition-colors hover:text-text-secondary"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Advisor Directory
-      </Link>
+      {/* Back nav */}
+      <div className="pb-4 pt-6">
+        <Link
+          href="/dashboard/advisory-hub/directory"
+          className="inline-flex items-center gap-1 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-sm text-text-muted transition-colors hover:bg-surface-low hover:text-text-secondary"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Advisor Directory
+        </Link>
+      </div>
 
       {/* Profile card */}
       <Card className="mb-6 overflow-hidden">

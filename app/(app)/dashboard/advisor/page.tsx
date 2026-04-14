@@ -249,7 +249,7 @@ export default async function AdvisorDashboardPage() {
             <EmptyState
               title="No clients yet"
               description="Connect with producers to start managing your advisory portfolio."
-              variant="purple"
+              variant="advisor"
             />
           ) : (
             <CardContent className="divide-y divide-white/5 px-5 pb-5">

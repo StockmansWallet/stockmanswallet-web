@@ -68,7 +68,7 @@ export default async function AdvisorProducerDirectoryPage({
                 ? `No producers match "${searchQuery}". Try a different search.`
                 : "No producers are registered yet."
             }
-            variant="purple"
+            variant="advisor"
           />
         </Card>
       ) : (

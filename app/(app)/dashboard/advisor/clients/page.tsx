@@ -177,7 +177,7 @@ export default async function AdvisorClientsPage() {
             icon={<Users className="h-6 w-6 text-[#2F8CD9]" />}
             title="No clients yet"
             description="When producers send you connection requests, they will appear here. You can also search for producers above."
-            variant="purple"
+            variant="advisor"
           />
         </Card>
       ) : approvedConnections.length > 0 ? (
