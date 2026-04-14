@@ -187,7 +187,7 @@ export default async function HerdDetailPage({
   // Breeding countdown logic (matches iOS Herd.effectiveJoinedDate)
   const effectiveJoinedDateObj = getEffectiveJoinedDate(herd);
   const hasJoiningStarted = effectiveJoinedDateObj ? effectiveJoinedDateObj <= new Date() : false;
-  const gestationDays = herd.species === "Sheep" ? 150 : 283;
+  const breedingCycleDays = 365;
   const daysSinceJoined = hasJoiningStarted && effectiveJoinedDateObj
     ? Math.max(0, Math.round((Date.now() - effectiveJoinedDateObj.getTime()) / 86400000))
     : 0;
@@ -195,10 +195,10 @@ export default async function HerdDetailPage({
     ? Math.max(0, Math.round((effectiveJoinedDateObj.getTime() - Date.now()) / 86400000))
     : 0;
   const daysUntilCalving = hasJoiningStarted
-    ? Math.max(0, gestationDays - daysSinceJoined)
+    ? Math.max(0, breedingCycleDays - daysSinceJoined)
     : 0;
   const gestationProgress = hasJoiningStarted
-    ? Math.min(100, Math.max(0, (daysSinceJoined / gestationDays) * 100))
+    ? Math.min(100, Math.max(0, (daysSinceJoined / breedingCycleDays) * 100))
     : 0;
 
   const property = herd.properties as { property_name: string } | null;
@@ -411,7 +411,7 @@ export default async function HerdDetailPage({
                 {effectiveJoinedDateObj && (
                   <InfoRow
                     label="Expected Calving"
-                    value={new Date(effectiveJoinedDateObj.getTime() + gestationDays * 86400000).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+                    value={new Date(effectiveJoinedDateObj.getTime() + breedingCycleDays * 86400000).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
                   />
                 )}
                 {effectiveJoinedDateObj && hasJoiningStarted && herd.is_pregnant && daysUntilCalving > 0 && (

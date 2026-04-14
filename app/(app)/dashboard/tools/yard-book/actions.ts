@@ -235,7 +235,7 @@ export async function toggleYardBookItemComplete(
 
 // MARK: - Breeding Milestone Auto-Creation
 // Debug: Cattle gestation and pregnancy testing constants
-const GESTATION_DAYS = 283;
+const BREEDING_CYCLE_DAYS = 365;
 const PREG_TEST_DAYS = 60;
 
 // Debug: Adds days to a date string and returns ISO date string (yyyy-MM-dd)
@@ -314,9 +314,9 @@ export async function syncBreedingMilestonesForHerd(
   const today = now.split("T")[0];
   const items: Array<Record<string, unknown>> = [];
 
-  // Milestone 1: Expected Calving (joinedDate + 283 days)
+  // Milestone 1: Expected Calving (joinedDate + 365 days breeding cycle)
   if (!completedPrefixes.has("Expected Calving")) {
-    const calvingDate = addDays(effectiveJoinedDate, GESTATION_DAYS);
+    const calvingDate = addDays(effectiveJoinedDate, BREEDING_CYCLE_DAYS);
     items.push({
       id: crypto.randomUUID(),
       user_id: user.id,

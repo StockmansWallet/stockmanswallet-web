@@ -137,11 +137,11 @@ export default async function AdvisorHerdDetailPage({
   const calvesData = parseCalvesAtFoot(herd.additional_info);
   const effectiveJoinedDateObj = getEffectiveJoinedDate(herd);
   const hasJoiningStarted = effectiveJoinedDateObj ? effectiveJoinedDateObj <= new Date() : false;
-  const gestationDays = herd.species === "Sheep" ? 150 : 283;
+  const breedingCycleDays = 365;
   const daysSinceJoined = hasJoiningStarted && effectiveJoinedDateObj ? Math.max(0, Math.round((Date.now() - effectiveJoinedDateObj.getTime()) / 86400000)) : 0;
   const daysUntilJoining = !hasJoiningStarted && effectiveJoinedDateObj ? Math.max(0, Math.round((effectiveJoinedDateObj.getTime() - Date.now()) / 86400000)) : 0;
-  const daysUntilCalving = hasJoiningStarted ? Math.max(0, gestationDays - daysSinceJoined) : 0;
-  const gestationProgress = hasJoiningStarted ? Math.min(100, Math.max(0, (daysSinceJoined / gestationDays) * 100)) : 0;
+  const daysUntilCalving = hasJoiningStarted ? Math.max(0, breedingCycleDays - daysSinceJoined) : 0;
+  const gestationProgress = hasJoiningStarted ? Math.min(100, Math.max(0, (daysSinceJoined / breedingCycleDays) * 100)) : 0;
 
   const categoryDisplay = herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} (${herd.sub_category})` : herd.category;
 
@@ -260,7 +260,7 @@ export default async function AdvisorHerdDetailPage({
                 {herd.joining_period_end && <InfoRow label={herd.breeding_program_type === "ai" ? "Insemination Complete" : "Pull Bulls Out"} value={new Date(herd.joining_period_end).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })} />}
                 {effectiveJoinedDateObj && hasJoiningStarted && <InfoRow label="Days Since Joining" value={`${daysSinceJoined} days`} />}
                 {effectiveJoinedDateObj && !hasJoiningStarted && daysUntilJoining > 0 && <InfoRow label="Days Until Joining" value={`${daysUntilJoining} days`} />}
-                {effectiveJoinedDateObj && <InfoRow label="Expected Calving" value={new Date(effectiveJoinedDateObj.getTime() + gestationDays * 86400000).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })} />}
+                {effectiveJoinedDateObj && <InfoRow label="Expected Calving" value={new Date(effectiveJoinedDateObj.getTime() + breedingCycleDays * 86400000).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })} />}
                 {effectiveJoinedDateObj && hasJoiningStarted && herd.is_pregnant && daysUntilCalving > 0 && <InfoRow label="Est. Days to Calving" value={`${daysUntilCalving} days`} />}
                 {effectiveJoinedDateObj && hasJoiningStarted && gestationProgress > 5 && gestationProgress < 100 && <InfoRow label="Gestation Progress" value={`${Math.round(gestationProgress)}%`} />}
                 <InfoRow label="Calving Rate" value={herd.calving_rate ? `${Math.round(herd.calving_rate > 1 ? herd.calving_rate : herd.calving_rate * 100)}%` : null} />

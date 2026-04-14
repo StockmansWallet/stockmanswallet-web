@@ -352,16 +352,16 @@ function evaluateBreeding(
 ): StockmanIQInsight[] {
   const insights: StockmanIQInsight[] = [];
   const now = new Date();
-  const GESTATION_DAYS = 283; // cattle
+  const BREEDING_CYCLE_DAYS = 365;
 
   const pregnantHerds = valuations.filter((v) => v.herd.is_pregnant && getEffectiveJoinedDate(v.herd) !== null);
 
   for (const { herd, result } of pregnantHerds.slice(0, 2)) {
     const joinedDate = getEffectiveJoinedDate(herd)!;
     const daysSinceJoining = daysBetween(joinedDate, now);
-    const progress = Math.min(100, Math.round((daysSinceJoining / GESTATION_DAYS) * 100));
-    const daysRemaining = Math.max(0, GESTATION_DAYS - daysSinceJoining);
-    const expectedCalvingDate = new Date(joinedDate.getTime() + GESTATION_DAYS * 86400000);
+    const progress = Math.min(100, Math.round((daysSinceJoining / BREEDING_CYCLE_DAYS) * 100));
+    const daysRemaining = Math.max(0, BREEDING_CYCLE_DAYS - daysSinceJoining);
+    const expectedCalvingDate = new Date(joinedDate.getTime() + BREEDING_CYCLE_DAYS * 86400000);
 
     const calvingRate = herd.calving_rate > 0 ? herd.calving_rate : 0.85;
     const expectedCalves = Math.round(herd.head_count * calvingRate);
