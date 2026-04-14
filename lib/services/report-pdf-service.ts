@@ -619,34 +619,111 @@ function drawSaleyardComparison(ctx: Ctx, data: ReportData) {
   }
 }
 
-// MARK: - Accountant Report
+// MARK: - Accountant Report (matching iOS AccountantReportExportService)
 
 function drawAccountantReport(ctx: Ctx, data: ReportData) {
-  // Portfolio summary
-  if (data.executiveSummary) {
-    drawSectionHeader(ctx, "Portfolio Summary");
-    const stats: [string, string][] = [
-      ["Total Portfolio Value", fmt(data.executiveSummary.totalPortfolioValue)],
-      ["Total Head Count", data.executiveSummary.totalHeadCount.toLocaleString()],
-      ["Sales Revenue (Period)", fmt(data.totalSales)],
-    ];
-    for (const [label, value] of stats) {
-      ensureSpace(ctx, 18);
-      ctx.page.drawText(label, { x: MARGIN, y: ctx.y, size: FONT_BODY, font: ctx.font, color: SECONDARY });
-      const vw = ctx.bold.widthOfTextAtSize(value, FONT_BODY);
-      ctx.page.drawText(value, { x: MARGIN + 300 - vw + 100, y: ctx.y, size: FONT_BODY, font: ctx.bold, color: BLACK });
-      ctx.y -= 18;
+  const snap = data.accountantSnapshot;
+  if (!snap) return;
+
+  // Subtitle: "Accounting Summary - FY2026"
+  ctx.page.drawText(`Accounting Summary - ${snap.financialYearShortTitle}`, {
+    x: MARGIN, y: ctx.y, size: FONT_EXEC_VALUE, font: ctx.bold, color: BLACK,
+  });
+  ctx.y -= 20;
+
+  // Generated timestamp
+  const genDate = new Date(snap.generatedAt);
+  const genStr = genDate.toLocaleDateString("en-AU", {
+    day: "numeric", month: "short", year: "numeric",
+  }) + ", " + genDate.toLocaleTimeString("en-AU", {
+    hour: "numeric", minute: "2-digit", hour12: true,
+  });
+  ctx.page.drawText(`Generated: ${genStr}`, {
+    x: MARGIN, y: ctx.y, size: FONT_CAPTION, font: ctx.font, color: SECONDARY,
+  });
+  ctx.y -= 30;
+
+  // "STATEMENT" section label
+  ctx.page.drawText("STATEMENT", {
+    x: MARGIN, y: ctx.y, size: FONT_LABEL, font: ctx.bold, color: TERTIARY,
+  });
+  ctx.y -= 20;
+
+  // Statement card with 6 rows
+  const rowHeight = 30;
+  const verticalPad = 20;
+  const rows: [string, number, boolean][] = [
+    ["Opening Book Value", snap.openingBookValue, false],
+    ["Purchases Recorded", snap.purchasesRecorded, false],
+    ["Sales Recorded", snap.salesRecorded, false],
+    ["Modelled Closing Book Position", snap.modelledClosingBookPosition, false],
+    ["Market Value (at June 30)", snap.marketValuationAtYearEnd, false],
+    ["Closing Book Value", snap.marketMinusBookDifference, true],
+  ];
+
+  const cardH = verticalPad + rowHeight * rows.length + verticalPad;
+  const cardY = ctx.y - cardH;
+
+  drawRoundedRect(ctx.page, MARGIN, cardY, CW, cardH, CARD_CORNER_RADIUS, {
+    fill: CARD_FILL, borderColor: BORDER, borderWidth: 1,
+  });
+
+  const innerX = MARGIN + CARD_PADDING;
+  const innerW = CW - CARD_PADDING * 2;
+  let rowY = ctx.y - verticalPad;
+
+  for (let i = 0; i < rows.length; i++) {
+    const [label, amount, isEmphasis] = rows[i];
+    const labelFont = isEmphasis ? ctx.bold : ctx.font;
+    const valueFont = isEmphasis ? ctx.bold : ctx.font;
+    const fontSize = 12;
+
+    // Label left
+    ctx.page.drawText(label, {
+      x: innerX, y: rowY, size: fontSize, font: labelFont, color: BLACK,
+    });
+
+    // Value right-aligned
+    const valueStr = fmt(amount);
+    const valueW = valueFont.widthOfTextAtSize(valueStr, fontSize);
+    ctx.page.drawText(valueStr, {
+      x: innerX + innerW - valueW, y: rowY, size: fontSize, font: valueFont, color: BLACK,
+    });
+
+    rowY -= rowHeight;
+
+    // Divider between rows (not after last)
+    if (i < rows.length - 1) {
+      ctx.page.drawLine({
+        start: { x: innerX, y: rowY + rowHeight - 6 },
+        end: { x: innerX + innerW, y: rowY + rowHeight - 6 },
+        thickness: 0.5, color: BORDER,
+      });
     }
-    ctx.y -= 16;
   }
 
-  if (data.herdData.length > 0) {
-    drawAssetRegister(ctx, data);
-    ctx.y -= 16;
-  }
+  ctx.y = cardY - 20;
 
-  if (data.salesData.length > 0) {
-    drawSalesSummary(ctx, data);
+  // Notes section
+  const noteText = "Notes: Purchases are currently estimated from herds created during the selected financial year. Sales are derived from recorded Stockman's Wallet sales transactions.";
+  const noteWords = noteText.split(" ");
+  let noteLine = "";
+
+  for (const word of noteWords) {
+    const testLine = noteLine ? `${noteLine} ${word}` : word;
+    const testWidth = ctx.font.widthOfTextAtSize(testLine, 9.5);
+
+    if (testWidth > CW && noteLine) {
+      ctx.page.drawText(noteLine, { x: MARGIN, y: ctx.y, size: 9.5, font: ctx.font, color: TERTIARY });
+      ctx.y -= 14;
+      noteLine = word;
+    } else {
+      noteLine = testLine;
+    }
+  }
+  if (noteLine) {
+    ctx.page.drawText(noteLine, { x: MARGIN, y: ctx.y, size: 9.5, font: ctx.font, color: TERTIARY });
+    ctx.y -= 14;
   }
 }
 

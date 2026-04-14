@@ -478,17 +478,27 @@ export async function generateSaleyardComparisonData(
   };
 }
 
-// MARK: - Accountant Report (combined asset + sales)
+// MARK: - Accountant Report (financial year reconciliation statement)
 
 export async function generateAccountantData(
   supabase: SupabaseClient,
   userId: string,
-  config: ReportConfiguration
+  config: ReportConfiguration,
+  openingBookValue: number = 0,
+  financialYearLabel: string = "",
+  financialYearShortTitle: string = ""
 ): Promise<ReportData> {
   const [assetData, salesData] = await Promise.all([
     generateAssetRegisterData(supabase, userId, config),
     generateSalesSummaryData(supabase, userId, config),
   ]);
+
+  // Accountant reconciliation calculations (matching iOS)
+  const purchasesRecorded = 0; // $0 until purchase price field is added
+  const salesRecorded = salesData.totalSales;
+  const modelledClosingBookPosition = openingBookValue + purchasesRecorded - salesRecorded;
+  const marketValuationAtYearEnd = assetData.totalValue;
+  const marketMinusBookDifference = marketValuationAtYearEnd - modelledClosingBookPosition;
 
   return {
     farmName: assetData.farmName,
@@ -502,5 +512,18 @@ export async function generateAccountantData(
     userDetails: assetData.userDetails,
     generatedAt: new Date().toISOString(),
     dateRange: { start: config.startDate, end: config.endDate },
+    accountantSnapshot: {
+      financialYearLabel,
+      financialYearShortTitle,
+      periodStart: config.startDate,
+      periodEnd: config.endDate,
+      openingBookValue,
+      purchasesRecorded,
+      salesRecorded,
+      modelledClosingBookPosition,
+      marketValuationAtYearEnd,
+      marketMinusBookDifference,
+      generatedAt: new Date().toISOString(),
+    },
   };
 }

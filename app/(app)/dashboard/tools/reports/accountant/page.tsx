@@ -1,240 +1,215 @@
-import { Suspense } from "react";
-import { createClient } from "@/lib/supabase/server";
+"use client";
+
+import { useState, useTransition, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ReportFilters } from "@/components/app/report-filters";
-import { parseReportConfig } from "@/lib/utils/report-config";
-import { ReportExportButton } from "@/components/app/report-export-button";
-import { ReportCompositionChart } from "@/components/app/report-composition-chart";
-import { generateAccountantData } from "@/lib/services/report-service";
+import { Download, Loader2, Calculator } from "lucide-react";
+import { fetchAccountantReport } from "./actions";
+import type { ReportData, AccountantSnapshot } from "@/lib/types/reports";
 
-export const revalidate = 0;
-export const metadata = { title: "Accountant Report" };
+export default function AccountantReportPage() {
+  // Financial year options (Australian FY: 1 Jul - 30 Jun)
+  const fyOptions = [
+    { label: "FY2025 (1 Jul 2024 - 30 Jun 2025)", short: "FY2025", start: "2024-07-01", end: "2025-06-30" },
+    { label: "FY2026 (1 Jul 2025 - 30 Jun 2026)", short: "FY2026", start: "2025-07-01", end: "2026-06-30" },
+  ];
 
-function fmt(v: number) {
-  return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 }).format(v);
-}
+  const [selectedFY, setSelectedFY] = useState(fyOptions[1]); // Default to current FY
+  const [openingBookValue, setOpeningBookValue] = useState("");
+  const [reportData, setReportData] = useState<ReportData | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const [exporting, setExporting] = useState(false);
 
-function fmtDate(dateStr: string) {
-  const d = new Date(dateStr + "T00:00:00");
-  return d.toLocaleDateString("en-AU", { day: "2-digit", month: "short", year: "numeric" });
-}
+  // Generate report when FY changes or user clicks generate
+  function handleGenerate() {
+    startTransition(async () => {
+      const data = await fetchAccountantReport(
+        selectedFY.start,
+        selectedFY.end,
+        parseFloat(openingBookValue) || 0,
+        selectedFY.label,
+        selectedFY.short
+      );
+      setReportData(data);
+    });
+  }
 
-function fmtKg(v: number) {
-  return `${v.toFixed(0)} kg`;
-}
+  // Auto-generate on mount with defaults
+  useEffect(() => {
+    handleGenerate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-export default async function AccountantReportPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
-  const params = await searchParams;
-  const config = parseReportConfig(params);
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const snap = reportData?.accountantSnapshot;
 
-  const { data: properties } = await supabase
-    .from("properties")
-    .select("id, property_name")
-    .eq("user_id", user!.id)
-    .eq("is_deleted", false)
-    .order("property_name");
-
-  const reportData = await generateAccountantData(supabase, user!.id, {
-    reportType: "accountant",
-    startDate: config.startDate,
-    endDate: config.endDate,
-    selectedPropertyIds: config.selectedPropertyIds,
-  });
-
-  const { executiveSummary, herdData, salesData, herdComposition, totalValue, totalSales, farmName } = reportData;
-  const isEmpty = herdData.length === 0 && salesData.length === 0;
-
-  const reportDateRange = `${fmtDate(config.startDate)} — ${fmtDate(config.endDate)}`;
-  const totalHead = herdData.reduce((s, h) => s + h.headCount, 0);
-  const totalSalesHead = salesData.reduce((s, r) => s + r.headCount, 0);
+  async function handleExportPDF() {
+    if (!reportData) return;
+    setExporting(true);
+    try {
+      const { generateReportPDF } = await import("@/lib/services/report-pdf-service");
+      const pdfBytes = await generateReportPDF(reportData, "accountant", "Accountant Report");
+      const blob = new Blob([pdfBytes as BlobPart], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `accountant-report-${snap?.financialYearShortTitle ?? "report"}-${new Date().toISOString().split("T")[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("PDF export failed:", err);
+    } finally {
+      setExporting(false);
+    }
+  }
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-3xl">
       <PageHeader
         title="Accountant Report"
-        subtitle="Professional summary for your accountant or bank manager."
-        actions={!isEmpty ? <ReportExportButton reportData={reportData} reportType="accountant" title="Accountant Report" /> : undefined}
+        subtitle="Financial year reconciliation statement for your accountant."
       />
 
-      <div className="mb-4">
-        <Suspense>
-          <ReportFilters properties={properties ?? []} />
-        </Suspense>
-      </div>
+      {/* Configuration */}
+      <Card className="mb-4">
+        <CardContent className="p-5 space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {/* Financial Year */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-text-muted">Financial Year</label>
+              <select
+                value={selectedFY.short}
+                onChange={(e) => {
+                  const fy = fyOptions.find((f) => f.short === e.target.value)!;
+                  setSelectedFY(fy);
+                }}
+                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary outline-none focus:border-[#D4A053]/40"
+              >
+                {fyOptions.map((fy) => (
+                  <option key={fy.short} value={fy.short}>{fy.label}</option>
+                ))}
+              </select>
+            </div>
 
-      {isEmpty ? (
-        <Card>
-          <CardContent className="p-6">
-            <p className="text-sm text-text-muted">No data available for this date range. Add herds and record sales to generate your accountant report.</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="flex flex-col gap-4">
-          {/* Report Header */}
-          <Card className="border-amber-500/20">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
+            {/* Opening Book Value */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-text-muted">Opening Book Value ($)</label>
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                value={openingBookValue}
+                onChange={(e) => setOpeningBookValue(e.target.value)}
+                placeholder="0.00"
+                className="border-border bg-surface"
+              />
+              <p className="text-[10px] text-text-muted">
+                Your livestock book value at the start of the financial year.
+              </p>
+            </div>
+          </div>
+
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleGenerate}
+            disabled={isPending}
+          >
+            {isPending ? (
+              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Calculator className="mr-1.5 h-3.5 w-3.5" />
+            )}
+            Generate Statement
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Statement Preview */}
+      {snap && (
+        <>
+          <Card className="mb-4">
+            <CardHeader>
+              <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-text-primary">{farmName ?? "Livestock Portfolio"}</h2>
-                  <p className="mt-0.5 text-xs text-text-muted">Financial Summary &middot; {reportDateRange}</p>
-                  <p className="text-xs text-text-muted">Generated {new Date().toLocaleDateString("en-AU", { day: "2-digit", month: "long", year: "numeric" })}</p>
+                  <CardTitle>Accounting Summary - {snap.financialYearShortTitle}</CardTitle>
+                  <p className="mt-1 text-xs text-text-muted">
+                    {new Date(snap.generatedAt).toLocaleDateString("en-AU", {
+                      day: "numeric", month: "short", year: "numeric",
+                    })}, {new Date(snap.generatedAt).toLocaleTimeString("en-AU", {
+                      hour: "numeric", minute: "2-digit", hour12: true,
+                    })}
+                  </p>
                 </div>
-                <Badge className="bg-amber-500/15 text-amber-400">Professional Report</Badge>
+                <Badge className="bg-amber-500/15 text-amber-400">Statement</Badge>
               </div>
+            </CardHeader>
+            <CardContent className="px-5 pb-5">
+              <div className="rounded-xl border border-border bg-surface-raised/30 divide-y divide-white/[0.06]">
+                <StatementRow label="Opening Book Value" amount={snap.openingBookValue} />
+                <StatementRow label="Purchases Recorded" amount={snap.purchasesRecorded} />
+                <StatementRow label="Sales Recorded" amount={snap.salesRecorded} />
+                <StatementRow label="Modelled Closing Book Position" amount={snap.modelledClosingBookPosition} />
+                <StatementRow label="Market Value (at June 30)" amount={snap.marketValuationAtYearEnd} />
+                <StatementRow label="Closing Book Value" amount={snap.marketMinusBookDifference} emphasis />
+              </div>
+
+              <p className="mt-4 text-[11px] text-text-muted leading-relaxed">
+                Notes: Purchases are currently estimated from herds created during the selected financial year.
+                Sales are derived from recorded Stockman&apos;s Wallet sales transactions.
+              </p>
             </CardContent>
           </Card>
 
-          {/* Financial Overview */}
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Card>
-              <CardContent className="px-5 py-4">
-                <p className="text-xs text-text-muted">Portfolio Value</p>
-                <p className="mt-1 text-xl font-bold tabular-nums text-amber-400">{fmt(totalValue)}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="px-5 py-4">
-                <p className="text-xs text-text-muted">Active Herds</p>
-                <p className="mt-1 text-xl font-bold tabular-nums text-text-primary">{totalHead.toLocaleString()} hd</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="px-5 py-4">
-                <p className="text-xs text-text-muted">Sales Revenue</p>
-                <p className="mt-1 text-xl font-bold tabular-nums text-text-primary">{fmt(totalSales)}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="px-5 py-4">
-                <p className="text-xs text-text-muted">Head Sold</p>
-                <p className="mt-1 text-xl font-bold tabular-nums text-text-primary">{totalSalesHead.toLocaleString()}</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Herd Composition */}
-          {herdComposition.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Asset Composition</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ReportCompositionChart data={herdComposition} />
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Asset Register Summary */}
-          {herdData.length > 0 && (
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Asset Register</CardTitle>
-                  <span className="text-xs tabular-nums text-text-muted">{herdData.length} herds &middot; {fmt(totalValue)}</span>
-                </div>
-              </CardHeader>
-              <CardContent className="px-0 pb-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="border-b border-white/5 text-left text-text-muted">
-                        <th className="px-5 pb-2 font-medium">Herd</th>
-                        <th className="px-3 pb-2 font-medium">Category</th>
-                        <th className="px-3 pb-2 font-medium">Property</th>
-                        <th className="px-3 pb-2 text-right font-medium">Head</th>
-                        <th className="px-3 pb-2 text-right font-medium">Weight</th>
-                        <th className="px-3 pb-2 text-right font-medium">Price/kg</th>
-                        <th className="px-5 pb-2 text-right font-medium">Net Value</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {herdData.map((h) => (
-                        <tr key={h.id} className="transition-colors hover:bg-white/[0.02]">
-                          <td className="px-5 py-2 font-medium text-text-primary">{h.name}</td>
-                          <td className="px-3 py-2 text-text-secondary">{h.category}</td>
-                          <td className="px-3 py-2 text-text-muted">{h.propertyName ?? "—"}</td>
-                          <td className="px-3 py-2 text-right tabular-nums text-text-primary">{h.headCount}</td>
-                          <td className="px-3 py-2 text-right tabular-nums text-text-secondary">{fmtKg(h.weight)}</td>
-                          <td className="px-3 py-2 text-right tabular-nums text-text-secondary">${h.pricePerKg.toFixed(2)}</td>
-                          <td className="px-5 py-2 text-right tabular-nums font-medium text-text-primary">{fmt(h.netValue)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot>
-                      <tr className="border-t border-white/10 font-medium">
-                        <td className="px-5 py-3 text-text-primary" colSpan={3}>Total</td>
-                        <td className="px-3 py-3 text-right tabular-nums text-text-primary">{totalHead}</td>
-                        <td className="px-3 py-3" />
-                        <td className="px-3 py-3" />
-                        <td className="px-5 py-3 text-right tabular-nums text-amber-400">{fmt(totalValue)}</td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Sales Summary */}
-          {salesData.length > 0 && (
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Sales History</CardTitle>
-                  <span className="text-xs tabular-nums text-text-muted">{salesData.length} sales &middot; {fmt(totalSales)}</span>
-                </div>
-              </CardHeader>
-              <CardContent className="px-0 pb-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="border-b border-white/5 text-left text-text-muted">
-                        <th className="px-5 pb-2 font-medium">Date</th>
-                        <th className="px-3 pb-2 font-medium">Herd</th>
-                        <th className="px-3 pb-2 text-right font-medium">Head</th>
-                        <th className="px-3 pb-2 text-right font-medium">Avg Wt</th>
-                        <th className="px-3 pb-2 font-medium">Location</th>
-                        <th className="px-3 pb-2 text-right font-medium">Gross</th>
-                        <th className="px-3 pb-2 text-right font-medium">Freight</th>
-                        <th className="px-5 pb-2 text-right font-medium">Net Value</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {salesData.map((s) => (
-                        <tr key={s.id} className="transition-colors hover:bg-white/[0.02]">
-                          <td className="px-5 py-2 tabular-nums text-text-secondary">{fmtDate(s.date)}</td>
-                          <td className="px-3 py-2 text-text-secondary">{s.herdName ?? "—"}</td>
-                          <td className="px-3 py-2 text-right tabular-nums text-text-primary">{s.headCount}</td>
-                          <td className="px-3 py-2 text-right tabular-nums text-text-secondary">{s.avgWeight.toFixed(0)} kg</td>
-                          <td className="px-3 py-2 text-text-muted">{s.saleLocation ?? "—"}</td>
-                          <td className="px-3 py-2 text-right tabular-nums text-text-secondary">{fmt(s.grossValue)}</td>
-                          <td className="px-3 py-2 text-right tabular-nums text-text-muted">{fmt(s.freightCost)}</td>
-                          <td className="px-5 py-2 text-right tabular-nums font-medium text-text-primary">{fmt(s.netValue)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot>
-                      <tr className="border-t border-white/10 font-medium">
-                        <td className="px-5 py-3 text-text-primary" colSpan={2}>Total</td>
-                        <td className="px-3 py-3 text-right tabular-nums text-text-primary">{totalSalesHead}</td>
-                        <td className="px-3 py-3" />
-                        <td className="px-3 py-3" />
-                        <td className="px-3 py-3 text-right tabular-nums text-text-primary">{fmt(salesData.reduce((s, r) => s + r.grossValue, 0))}</td>
-                        <td className="px-3 py-3 text-right tabular-nums text-text-primary">{fmt(salesData.reduce((s, r) => s + r.freightCost, 0))}</td>
-                        <td className="px-5 py-3 text-right tabular-nums text-amber-400">{fmt(totalSales)}</td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+          {/* Export */}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleExportPDF}
+            disabled={exporting}
+          >
+            {exporting ? (
+              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Download className="mr-1.5 h-3.5 w-3.5" />
+            )}
+            Export PDF
+          </Button>
+        </>
       )}
+
+      {isPending && !snap && (
+        <Card>
+          <CardContent className="p-6 text-center">
+            <Loader2 className="mx-auto h-6 w-6 animate-spin text-text-muted" />
+            <p className="mt-2 text-sm text-text-muted">Generating statement...</p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+function StatementRow({ label, amount, emphasis }: { label: string; amount: number; emphasis?: boolean }) {
+  const formatted = new Intl.NumberFormat("en-AU", {
+    style: "currency",
+    currency: "AUD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+
+  return (
+    <div className="flex items-center justify-between px-5 py-3.5">
+      <span className={`text-sm ${emphasis ? "font-semibold text-text-primary" : "text-text-secondary"}`}>
+        {label}
+      </span>
+      <span className={`text-sm tabular-nums ${emphasis ? "font-semibold text-text-primary" : "text-text-secondary"}`}>
+        {formatted}
+      </span>
     </div>
   );
 }

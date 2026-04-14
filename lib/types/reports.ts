@@ -102,6 +102,22 @@ export interface UserReportDetails {
   location: string | null;
 }
 
+// MARK: - Accountant Report Snapshot (mirrors iOS AccountantReportSnapshot)
+
+export interface AccountantSnapshot {
+  financialYearLabel: string;
+  financialYearShortTitle: string;
+  periodStart: string;
+  periodEnd: string;
+  openingBookValue: number;
+  purchasesRecorded: number;
+  salesRecorded: number;
+  modelledClosingBookPosition: number;
+  marketValuationAtYearEnd: number;
+  marketMinusBookDifference: number;
+  generatedAt: string;
+}
+
 // MARK: - Main Report Data Container
 
 export interface ReportData {
@@ -116,4 +132,5 @@ export interface ReportData {
   userDetails: UserReportDetails | null;
   generatedAt: string;
   dateRange: { start: string; end: string };
+  accountantSnapshot?: AccountantSnapshot;
 }
