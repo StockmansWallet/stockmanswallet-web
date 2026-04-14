@@ -237,7 +237,7 @@ export default async function ClientDetailPage({
   };
 
   return (
-    <div className="max-w-[1800px]">
+    <div className="max-w-6xl">
       {/* Back nav */}
       <div className="pb-4 pt-6">
         <Link

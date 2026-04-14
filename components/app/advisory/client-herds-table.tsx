@@ -123,7 +123,7 @@ export function ClientHerdsTable({
             placeholder="Search herds..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-8 w-48 rounded-lg border border-border bg-surface pl-8 pr-3 text-xs text-text-primary placeholder:text-text-muted focus:border-brand/40 focus:outline-none sm:w-64"
+            className="h-8 w-48 rounded-lg border border-border bg-surface pl-8 pr-3 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-white/10 sm:w-64"
           />
         </div>
       </div>
@@ -132,7 +132,7 @@ export function ClientHerdsTable({
       <div className="overflow-x-auto rounded-2xl bg-surface-lowest">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/[0.04]">
+            <tr className="border-b border-white/5">
               <th onClick={() => handleSort("head_count")} className="cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary">
                 Head <SortIcon column="head_count" />
               </th>
@@ -163,7 +163,7 @@ export function ClientHerdsTable({
               <th className="w-10 px-3 py-3.5" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/[0.04]">
+          <tbody className="divide-y divide-white/5">
             {sorted.map((herd) => {
               const value = herdValues[herd.id] ?? 0;
               const source = herdSources?.[herd.id];

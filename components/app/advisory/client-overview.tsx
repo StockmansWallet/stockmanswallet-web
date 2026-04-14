@@ -104,7 +104,7 @@ export function ClientOverview({ connection, clientUserId, baselineValue = 0 }: 
       {!isActive && (
         <Card>
           <CardContent className="py-12 text-center">
-            <Users className="mx-auto mb-3 h-8 w-8 text-text-muted" />
+            <Users className="mx-auto mb-3 h-6 w-6 text-text-muted" />
             <p className="text-sm font-medium text-text-secondary">Data Locked</p>
             <p className="mt-1 text-xs text-text-muted">
               Request a permission renewal to view this client's portfolio.
