@@ -25,6 +25,9 @@ export interface ExecutiveSummary {
   totalHeadCount: number;
   averageValuePerHead: number;
   valuationDate: string;
+  changeDollars?: number;
+  changePercent?: number;
+  previousDate?: string;
 }
 
 // MARK: - Herd Composition Item (for donut chart)

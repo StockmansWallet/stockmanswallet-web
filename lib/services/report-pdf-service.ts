@@ -19,10 +19,32 @@ const TERTIARY = rgb(0.6, 0.6, 0.6);
 const CARD_FILL = rgb(0.98, 0.98, 0.98);
 const BORDER = rgb(0.9, 0.9, 0.9);
 
+// MARK: - Typography Sizes (matching iOS SF Rounded hierarchy)
+
+const FONT_HERO = 36;
+const FONT_TITLE = 32;
+const FONT_LARGE_TITLE = 28;
+const FONT_SECTION = 18;
+const FONT_HEADLINE = 15;
+const FONT_VALUE = 16;
+const FONT_EXEC_VALUE = 14;
+const FONT_BODY = 13;
+const FONT_CAPTION = 11;
+const FONT_TABLE_ROW = 11;
+const FONT_LABEL = 9;
+const FONT_FOOTER = 7.5;
+
+// MARK: - Spacing Constants (matching iOS)
+
+const CARD_PADDING = 20;
+const CARD_CORNER_RADIUS = 12;
+const CARD_SPACING = 12;
+const SECTION_SPACING = 24;
+
 // MARK: - Formatting Helpers
 
 function fmt(v: number) {
-  return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 }).format(v);
+  return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 2 }).format(v);
 }
 
 function fmtDate(dateStr: string) {
@@ -59,7 +81,7 @@ function ensureSpace(ctx: Ctx, needed: number) {
 function drawRoundedRect(
   page: PDFPage,
   x: number, y: number, w: number, h: number,
-  r: number,
+  _r: number,
   options: { fill?: ReturnType<typeof rgb>; borderColor?: ReturnType<typeof rgb>; borderWidth?: number }
 ) {
   // pdf-lib does not have native rounded rect, draw as filled rect + border lines
@@ -75,25 +97,25 @@ function drawRoundedRect(
 
 function drawReportHeader(ctx: Ctx, title: string, data: ReportData) {
   // Title left, logo right
-  ctx.page.drawText(title, { x: MARGIN, y: ctx.y, size: 28, font: ctx.bold, color: BLACK });
+  ctx.page.drawText(title, { x: MARGIN, y: ctx.y, size: FONT_TITLE, font: ctx.bold, color: BLACK });
 
   if (ctx.logo) {
-    const logoH = 60;
+    const logoH = 70;
     const aspect = ctx.logo.width / ctx.logo.height;
     const logoW = logoH * aspect;
     ctx.page.drawImage(ctx.logo, {
       x: PAGE_W - MARGIN - logoW,
-      y: ctx.y - logoH + 28,
+      y: ctx.y - logoH + 32,
       width: logoW,
       height: logoH,
     });
   }
 
-  ctx.y -= 36;
+  ctx.y -= 40;
 
   // Period
   const period = `${fmtDate(data.dateRange.start)} to ${fmtDate(data.dateRange.end)}`;
-  ctx.page.drawText(period, { x: MARGIN, y: ctx.y, size: 11, font: ctx.font, color: SECONDARY });
+  ctx.page.drawText(period, { x: MARGIN, y: ctx.y, size: FONT_BODY, font: ctx.font, color: SECONDARY });
   ctx.y -= 20;
 
   // Divider
@@ -118,10 +140,10 @@ function drawReportHeader(ctx: Ctx, title: string, data: ReportData) {
         if (!value) continue;
         const x = MARGIN + col * colW;
 
-        ctx.page.drawText(label, { x, y: ctx.y, size: 8, font: ctx.bold, color: TERTIARY });
-        ctx.page.drawText(value, { x, y: ctx.y - 14, size: 12, font: ctx.font, color: BLACK });
+        ctx.page.drawText(label, { x, y: ctx.y, size: FONT_LABEL, font: ctx.bold, color: TERTIARY });
+        ctx.page.drawText(value, { x, y: ctx.y - 14, size: FONT_BODY, font: ctx.font, color: BLACK });
       }
-      ctx.y -= 36;
+      ctx.y -= 40;
     }
 
     ctx.page.drawLine({ start: { x: MARGIN, y: ctx.y }, end: { x: PAGE_W - MARGIN, y: ctx.y }, thickness: 0.5, color: BORDER });
@@ -136,17 +158,17 @@ function drawHeroCard(ctx: Ctx, label: string, value: string) {
   const cardH = 90;
   const cardY = ctx.y - cardH;
 
-  drawRoundedRect(ctx.page, MARGIN, cardY, CW, cardH, 12, { fill: CARD_FILL, borderColor: BORDER, borderWidth: 0.5 });
+  drawRoundedRect(ctx.page, MARGIN, cardY, CW, cardH, CARD_CORNER_RADIUS, { fill: CARD_FILL, borderColor: BORDER, borderWidth: 1 });
 
   // Label centred
-  const labelW = ctx.bold.widthOfTextAtSize(label, 9);
-  ctx.page.drawText(label, { x: MARGIN + (CW - labelW) / 2, y: cardY + cardH - 28, size: 9, font: ctx.bold, color: TERTIARY });
+  const labelW = ctx.bold.widthOfTextAtSize(label, FONT_LABEL);
+  ctx.page.drawText(label, { x: MARGIN + (CW - labelW) / 2, y: cardY + cardH - 28, size: FONT_LABEL, font: ctx.bold, color: TERTIARY });
 
   // Value centred
-  const valW = ctx.bold.widthOfTextAtSize(value, 32);
-  ctx.page.drawText(value, { x: MARGIN + (CW - valW) / 2, y: cardY + cardH - 64, size: 32, font: ctx.bold, color: BLACK });
+  const valW = ctx.bold.widthOfTextAtSize(value, FONT_HERO);
+  ctx.page.drawText(value, { x: MARGIN + (CW - valW) / 2, y: cardY + cardH - 64, size: FONT_HERO, font: ctx.bold, color: BLACK });
 
-  ctx.y = cardY - 24;
+  ctx.y = cardY - SECTION_SPACING;
 }
 
 // MARK: - Executive Summary Card
@@ -155,80 +177,98 @@ function drawExecutiveSummary(ctx: Ctx, data: ReportData) {
   if (!data.executiveSummary) return;
   const es = data.executiveSummary;
 
-  ensureSpace(ctx, 200);
+  ensureSpace(ctx, 240);
 
   // Section label
-  ctx.page.drawText("EXECUTIVE SUMMARY", { x: MARGIN, y: ctx.y, size: 10, font: ctx.bold, color: TERTIARY });
-  ctx.y -= 20;
+  ctx.page.drawText("EXECUTIVE SUMMARY", { x: MARGIN, y: ctx.y, size: FONT_CAPTION, font: ctx.bold, color: TERTIARY });
+  ctx.y -= 22;
+
+  const hasChange = es.changeDollars != null && es.changePercent != null;
+  const numRows = hasChange ? 3 : 2;
 
   const rows: [string, string][][] = [
     [["TOTAL PORTFOLIO VALUE", fmt(es.totalPortfolioValue)], ["TOTAL HEAD COUNT", es.totalHeadCount.toLocaleString()]],
     [["AVERAGE VALUE PER HEAD", fmt(es.averageValuePerHead)], ["VALUATION DATE", fmtDate(es.valuationDate)]],
   ];
 
-  const cardH = 24 + rows.length * 46 + 24;
+  if (hasChange) {
+    const sign = es.changeDollars! >= 0 ? "+" : "";
+    const arrow = es.changeDollars! >= 0 ? "\u25B2" : "\u25BC";
+    const changeText = `${arrow} ${sign}${fmt(es.changeDollars!)}  (${sign}${es.changePercent!.toFixed(1)}%)`;
+    const sinceText = es.previousDate ? `since ${fmtDate(es.previousDate)}` : "";
+    rows.push([["CHANGE SINCE LAST REPORT", changeText], ["", sinceText]]);
+  }
+
+  const rowHeight = 46;
+  const verticalPad = 24;
+  const cardH = verticalPad + numRows * rowHeight + verticalPad;
   const cardY = ctx.y - cardH;
 
-  drawRoundedRect(ctx.page, MARGIN, cardY, CW, cardH, 12, { fill: CARD_FILL, borderColor: BORDER, borderWidth: 0.5 });
+  drawRoundedRect(ctx.page, MARGIN, cardY, CW, cardH, CARD_CORNER_RADIUS, { fill: CARD_FILL, borderColor: BORDER, borderWidth: 1 });
 
-  let rowY = ctx.y - 24;
+  let rowY = ctx.y - verticalPad;
   const colW = (CW - 40) / 2;
 
   for (const row of rows) {
     for (let col = 0; col < row.length; col++) {
       const [label, value] = row[col];
-      const x = MARGIN + 20 + col * colW;
+      if (!label && !value) continue;
+      const x = MARGIN + CARD_PADDING + col * colW;
 
-      ctx.page.drawText(label, { x, y: rowY, size: 8, font: ctx.bold, color: TERTIARY });
-      ctx.page.drawText(value, { x, y: rowY - 16, size: 13, font: ctx.bold, color: BLACK });
+      if (label) {
+        ctx.page.drawText(label, { x, y: rowY, size: FONT_LABEL, font: ctx.bold, color: TERTIARY });
+      }
+      if (value) {
+        ctx.page.drawText(value, { x, y: rowY - 16, size: FONT_EXEC_VALUE, font: ctx.bold, color: BLACK });
+      }
     }
-    rowY -= 46;
+    rowY -= rowHeight;
   }
 
-  ctx.y = cardY - 24;
+  ctx.y = cardY - SECTION_SPACING;
 }
 
 // MARK: - Section Header
 
 function drawSectionHeader(ctx: Ctx, title: string) {
-  ensureSpace(ctx, 40);
-  ctx.page.drawText(title, { x: MARGIN, y: ctx.y, size: 16, font: ctx.bold, color: BLACK });
-  ctx.y -= 28;
+  ensureSpace(ctx, 50);
+  ctx.page.drawText(title, { x: MARGIN, y: ctx.y, size: FONT_SECTION, font: ctx.bold, color: BLACK });
+  ctx.y -= 36;
 }
 
 // MARK: - Property Group Header
 
 function drawPropertyHeader(ctx: Ctx, name: string) {
   ensureSpace(ctx, 30);
-  ctx.page.drawText(name, { x: MARGIN, y: ctx.y, size: 13, font: ctx.bold, color: SECONDARY });
-  ctx.y -= 20;
+  ctx.y -= 12;
+  ctx.page.drawText(name, { x: MARGIN, y: ctx.y, size: FONT_HEADLINE, font: ctx.bold, color: BLACK });
+  ctx.y -= 24;
 }
 
 // MARK: - Herd Asset Card
 
 function drawHerdCard(ctx: Ctx, h: ReportData["herdData"][0]) {
-  // Estimate card height
   const riskFields = buildRiskFields(h);
-  const cardH = riskFields.length > 0 ? 150 : 110;
+  const cardH = riskFields.length > 0 ? 170 : 130;
   ensureSpace(ctx, cardH + 16);
 
   const cardY = ctx.y - cardH;
-  drawRoundedRect(ctx.page, MARGIN, cardY, CW, cardH, 12, { fill: CARD_FILL, borderColor: BORDER, borderWidth: 0.5 });
+  drawRoundedRect(ctx.page, MARGIN, cardY, CW, cardH, CARD_CORNER_RADIUS, { fill: CARD_FILL, borderColor: BORDER, borderWidth: 0.5 });
 
-  const pad = 20;
+  const pad = CARD_PADDING;
   const innerW = CW - pad * 2;
   let iy = ctx.y - pad;
 
   // Header: name left, value right
-  ctx.page.drawText(h.name, { x: MARGIN + pad, y: iy, size: 13, font: ctx.bold, color: BLACK });
+  ctx.page.drawText(h.name, { x: MARGIN + pad, y: iy, size: FONT_HEADLINE, font: ctx.bold, color: BLACK });
   const valStr = fmt(h.netValue);
-  const valW = ctx.bold.widthOfTextAtSize(valStr, 14);
-  ctx.page.drawText(valStr, { x: PAGE_W - MARGIN - pad - valW, y: iy, size: 14, font: ctx.bold, color: BLACK });
-  iy -= 16;
+  const valW = ctx.bold.widthOfTextAtSize(valStr, FONT_VALUE);
+  ctx.page.drawText(valStr, { x: PAGE_W - MARGIN - pad - valW, y: iy, size: FONT_VALUE, font: ctx.bold, color: BLACK });
+  iy -= 22;
 
   // Category
-  ctx.page.drawText(h.category, { x: MARGIN + pad, y: iy, size: 10, font: ctx.font, color: SECONDARY });
-  iy -= 22;
+  ctx.page.drawText(h.category, { x: MARGIN + pad, y: iy, size: FONT_CAPTION, font: ctx.font, color: SECONDARY });
+  iy -= 28;
 
   // Stats grid: 4 columns
   const statW = innerW / 4;
@@ -242,36 +282,38 @@ function drawHerdCard(ctx: Ctx, h: ReportData["herdData"][0]) {
 
   for (let i = 0; i < 4; i++) {
     const sx = MARGIN + pad + i * statW;
-    ctx.page.drawText(labels[i], { x: sx, y: iy, size: 7, font: ctx.bold, color: TERTIARY });
-    ctx.page.drawText(values[i], { x: sx, y: iy - 12, size: 11, font: ctx.font, color: BLACK });
+    ctx.page.drawText(labels[i], { x: sx, y: iy, size: FONT_LABEL, font: ctx.bold, color: TERTIARY });
+    ctx.page.drawText(values[i], { x: sx, y: iy - 14, size: FONT_BODY, font: ctx.font, color: BLACK });
   }
   iy -= 28;
 
   // Breeding/risk row
   if (riskFields.length > 0) {
-    // Divider inside card
     ctx.page.drawLine({
       start: { x: MARGIN + pad, y: iy },
       end: { x: PAGE_W - MARGIN - pad, y: iy },
-      thickness: 0.3, color: BORDER,
+      thickness: 0.5, color: BORDER,
     });
     iy -= 16;
 
     const riskW = innerW / Math.min(riskFields.length, 4);
     for (let i = 0; i < riskFields.length; i++) {
       const rx = MARGIN + pad + (i % 4) * riskW;
-      ctx.page.drawText(riskFields[i].label, { x: rx, y: iy, size: 7, font: ctx.bold, color: TERTIARY });
-      ctx.page.drawText(riskFields[i].value, { x: rx, y: iy - 12, size: 10, font: ctx.font, color: SECONDARY });
+      ctx.page.drawText(riskFields[i].label, { x: rx, y: iy, size: FONT_LABEL, font: ctx.bold, color: TERTIARY });
+      ctx.page.drawText(riskFields[i].value, { x: rx, y: iy - 14, size: FONT_BODY, font: ctx.font, color: SECONDARY });
     }
   }
 
-  ctx.y = cardY - 12;
+  ctx.y = cardY - CARD_SPACING;
 }
 
 function buildRiskFields(h: ReportData["herdData"][0]): { label: string; value: string }[] {
   const fields: { label: string; value: string }[] = [];
   if (h.breedPremiumOverride != null) {
     fields.push({ label: "BREED ADJ.", value: `${h.breedPremiumOverride >= 0 ? "+" : ""}${h.breedPremiumOverride}% vs. avg` });
+  }
+  if (h.breedingAccrual != null && h.breedingAccrual > 0) {
+    fields.push({ label: "CALF ACCRUAL", value: fmt(h.breedingAccrual) });
   }
   if (h.dailyWeightGain > 0) {
     fields.push({ label: "DWG ALLOCATION", value: `${h.dailyWeightGain.toFixed(2)} kg/day` });
@@ -284,39 +326,169 @@ function buildRiskFields(h: ReportData["herdData"][0]): { label: string; value: 
     const pct = h.mortalityRate > 1 ? h.mortalityRate : h.mortalityRate * 100;
     fields.push({ label: "MORTALITY", value: `${pct.toFixed(1)}% p.a.` });
   }
-  if (h.breedingAccrual != null && h.breedingAccrual > 0) {
-    fields.push({ label: "CALF ACCRUAL", value: fmt(h.breedingAccrual) });
-  }
   return fields;
 }
 
-// MARK: - Table Helpers (for sales/saleyard tables)
+// MARK: - Sale Data Card (matching iOS drawSaleData)
+
+function drawSaleCard(ctx: Ctx, s: ReportData["salesData"][0]) {
+  const cardH = 120;
+  ensureSpace(ctx, cardH + 16);
+
+  const cardY = ctx.y - cardH;
+  drawRoundedRect(ctx.page, MARGIN, cardY, CW, cardH, CARD_CORNER_RADIUS, { fill: CARD_FILL, borderColor: BORDER, borderWidth: 0.5 });
+
+  const pad = CARD_PADDING;
+  let iy = ctx.y - pad;
+  const leftX = MARGIN + pad;
+  const rightX = MARGIN + (CW * 0.55);
+
+  // Header: date left, net value right
+  ctx.page.drawText(fmtDate(s.date), { x: leftX, y: iy, size: FONT_HEADLINE, font: ctx.bold, color: BLACK });
+  const valStr = fmt(s.netValue);
+  const valW = ctx.bold.widthOfTextAtSize(valStr, FONT_VALUE);
+  ctx.page.drawText(valStr, { x: PAGE_W - MARGIN - pad - valW, y: iy, size: FONT_VALUE, font: ctx.bold, color: BLACK });
+  iy -= 22;
+
+  // Subtitle: pricing type
+  ctx.page.drawText(s.pricingType ?? "-", { x: leftX, y: iy, size: FONT_CAPTION, font: ctx.font, color: SECONDARY });
+  iy -= 18;
+
+  // 2-column grid: left side (HEAD COUNT, AVG WEIGHT), right side (PRICE)
+  let leftY = iy;
+  let rightY = iy;
+
+  ctx.page.drawText("HEAD COUNT", { x: leftX, y: leftY, size: FONT_LABEL, font: ctx.bold, color: TERTIARY });
+  leftY -= 14;
+  ctx.page.drawText(`${s.headCount} head`, { x: leftX, y: leftY, size: FONT_BODY, font: ctx.font, color: BLACK });
+  leftY -= 18;
+  ctx.page.drawText("AVG WEIGHT", { x: leftX, y: leftY, size: FONT_LABEL, font: ctx.bold, color: TERTIARY });
+  leftY -= 14;
+  ctx.page.drawText(`${s.avgWeight.toFixed(0)} kg`, { x: leftX, y: leftY, size: FONT_BODY, font: ctx.font, color: BLACK });
+
+  ctx.page.drawText("PRICE", { x: rightX, y: rightY, size: FONT_LABEL, font: ctx.bold, color: TERTIARY });
+  rightY -= 14;
+  ctx.page.drawText(`$${s.pricePerKg.toFixed(2)}/kg`, { x: rightX, y: rightY, size: FONT_BODY, font: ctx.font, color: BLACK });
+
+  ctx.y = cardY - CARD_SPACING;
+}
+
+// MARK: - Saleyard Comparison Card (matching iOS drawSaleyardComparisonData)
+
+function drawSaleyardCard(ctx: Ctx, s: ReportData["saleyardComparison"][0]) {
+  const cardH = 120;
+  ensureSpace(ctx, cardH + 16);
+
+  const cardY = ctx.y - cardH;
+  drawRoundedRect(ctx.page, MARGIN, cardY, CW, cardH, CARD_CORNER_RADIUS, { fill: CARD_FILL, borderColor: BORDER, borderWidth: 0.5 });
+
+  const pad = CARD_PADDING;
+  const innerW = CW - pad * 2;
+  let iy = ctx.y - pad;
+  const leftX = MARGIN + pad;
+
+  // Header: saleyard name
+  ctx.page.drawText(s.saleyardName, { x: leftX, y: iy, size: FONT_HEADLINE, font: ctx.bold, color: BLACK });
+  iy -= 22;
+
+  // Subtitle: head count
+  ctx.page.drawText(`${s.totalHeadCount} head in portfolio`, { x: leftX, y: iy, size: FONT_CAPTION, font: ctx.font, color: SECONDARY });
+  iy -= 18;
+
+  // 3-column grid: AVG PRICE, MIN PRICE, MAX PRICE
+  const col1X = leftX;
+  const col2X = leftX + (innerW * 0.33);
+  const col3X = leftX + (innerW * 0.66);
+
+  ctx.page.drawText("AVG PRICE", { x: col1X, y: iy, size: FONT_LABEL, font: ctx.bold, color: TERTIARY });
+  ctx.page.drawText("MIN PRICE", { x: col2X, y: iy, size: FONT_LABEL, font: ctx.bold, color: TERTIARY });
+  ctx.page.drawText("MAX PRICE", { x: col3X, y: iy, size: FONT_LABEL, font: ctx.bold, color: TERTIARY });
+  iy -= 14;
+
+  ctx.page.drawText(`$${s.avgPrice.toFixed(2)}/kg`, { x: col1X, y: iy, size: FONT_BODY, font: ctx.font, color: BLACK });
+  ctx.page.drawText(`$${s.minPrice.toFixed(2)}/kg`, { x: col2X, y: iy, size: FONT_BODY, font: ctx.font, color: BLACK });
+  ctx.page.drawText(`$${s.maxPrice.toFixed(2)}/kg`, { x: col3X, y: iy, size: FONT_BODY, font: ctx.font, color: BLACK });
+
+  ctx.y = cardY - CARD_SPACING;
+}
+
+// MARK: - Herd Composition Section (matching iOS legend table)
+
+function drawHerdComposition(ctx: Ctx, composition: ReportData["herdComposition"]) {
+  if (!composition || composition.length === 0) return;
+
+  drawSectionHeader(ctx, "Herd Composition");
+
+  // Table header
+  const cols = [
+    { text: "ASSET CLASS", width: 180 },
+    { text: "VALUE", width: 110, align: "right" as const },
+    { text: "HEAD COUNT", width: 90, align: "right" as const },
+    { text: "%", width: 88, align: "right" as const },
+  ];
+
+  ensureSpace(ctx, 22);
+  let x = MARGIN;
+  for (const col of cols) {
+    const tw = ctx.bold.widthOfTextAtSize(col.text, FONT_LABEL);
+    const dx = col.align === "right" ? x + col.width - tw : x;
+    ctx.page.drawText(col.text, { x: dx, y: ctx.y, size: FONT_LABEL, font: ctx.bold, color: TERTIARY });
+    x += col.width;
+  }
+  ctx.y -= 6;
+  ctx.page.drawLine({ start: { x: MARGIN, y: ctx.y }, end: { x: PAGE_W - MARGIN, y: ctx.y }, thickness: 0.3, color: BORDER });
+  ctx.y -= 14;
+
+  // Table rows
+  for (const item of composition) {
+    ensureSpace(ctx, 18);
+    let rx = MARGIN;
+    const rowData = [
+      { text: item.assetClass, width: 180, align: "left" as const, isBold: false },
+      { text: fmt(item.value), width: 110, align: "right" as const, isBold: false },
+      { text: item.headCount.toLocaleString(), width: 90, align: "right" as const, isBold: false },
+      { text: `${item.percentage.toFixed(1)}%`, width: 88, align: "right" as const, isBold: false },
+    ];
+    for (const col of rowData) {
+      const f = col.isBold ? ctx.bold : ctx.font;
+      const tw = f.widthOfTextAtSize(col.text, FONT_TABLE_ROW);
+      const dx = col.align === "right" ? rx + col.width - tw : rx;
+      ctx.page.drawText(col.text, { x: dx, y: ctx.y, size: FONT_TABLE_ROW, font: f, color: SECONDARY });
+      rx += col.width;
+    }
+    ctx.y -= 18;
+  }
+
+  ctx.y -= CARD_SPACING;
+}
+
+// MARK: - Table Helpers (for advisor lens tables)
 
 function drawTableHeader(ctx: Ctx, cols: { text: string; width: number; align?: "left" | "right" }[]) {
   ensureSpace(ctx, 22);
   let x = MARGIN;
   for (const col of cols) {
-    const tw = ctx.bold.widthOfTextAtSize(col.text, 7);
+    const tw = ctx.bold.widthOfTextAtSize(col.text, FONT_LABEL);
     const dx = col.align === "right" ? x + col.width - tw : x;
-    ctx.page.drawText(col.text, { x: dx, y: ctx.y, size: 7, font: ctx.bold, color: TERTIARY });
+    ctx.page.drawText(col.text, { x: dx, y: ctx.y, size: FONT_LABEL, font: ctx.bold, color: TERTIARY });
     x += col.width;
   }
   ctx.y -= 6;
   ctx.page.drawLine({ start: { x: MARGIN, y: ctx.y }, end: { x: PAGE_W - MARGIN, y: ctx.y }, thickness: 0.3, color: BORDER });
-  ctx.y -= 12;
+  ctx.y -= 14;
 }
 
 function drawTableRow(ctx: Ctx, cols: { text: string; width: number; align?: "left" | "right"; bold?: boolean }[]) {
-  ensureSpace(ctx, 16);
+  ensureSpace(ctx, 18);
   let x = MARGIN;
   for (const col of cols) {
     const f = col.bold ? ctx.bold : ctx.font;
-    const tw = f.widthOfTextAtSize(col.text, 9);
+    const tw = f.widthOfTextAtSize(col.text, FONT_TABLE_ROW);
     const dx = col.align === "right" ? x + col.width - tw : x;
-    ctx.page.drawText(col.text, { x: dx, y: ctx.y, size: 9, font: f, color: col.bold ? BLACK : SECONDARY });
+    ctx.page.drawText(col.text, { x: dx, y: ctx.y, size: FONT_TABLE_ROW, font: f, color: col.bold ? BLACK : SECONDARY });
     x += col.width;
   }
-  ctx.y -= 16;
+  ctx.y -= 18;
 }
 
 // MARK: - Page Footer
@@ -333,12 +505,12 @@ function drawAllFooters(ctx: Ctx) {
     p.drawLine({ start: { x: MARGIN, y: MARGIN - 14 }, end: { x: PAGE_W - MARGIN, y: MARGIN - 14 }, thickness: 0.3, color: BORDER });
 
     // Brand text left
-    p.drawText(brandText, { x: MARGIN, y: MARGIN - 28, size: 7, font: ctx.font, color: TERTIARY });
+    p.drawText(brandText, { x: MARGIN, y: MARGIN - 28, size: FONT_FOOTER, font: ctx.font, color: TERTIARY });
 
     // Page number right
     const pageText = `Page ${i + 1} of ${total}`;
-    const pw = ctx.font.widthOfTextAtSize(pageText, 7);
-    p.drawText(pageText, { x: PAGE_W - MARGIN - pw, y: MARGIN - 28, size: 7, font: ctx.font, color: TERTIARY });
+    const pw = ctx.font.widthOfTextAtSize(pageText, FONT_FOOTER);
+    p.drawText(pageText, { x: PAGE_W - MARGIN - pw, y: MARGIN - 28, size: FONT_FOOTER, font: ctx.font, color: TERTIARY });
   }
 }
 
@@ -347,6 +519,11 @@ function drawAllFooters(ctx: Ctx) {
 function drawAssetRegister(ctx: Ctx, data: ReportData) {
   drawHeroCard(ctx, "TOTAL PORTFOLIO VALUE", fmt(data.totalValue));
   drawExecutiveSummary(ctx, data);
+
+  // Herd composition section (matching iOS composition page)
+  if (data.herdComposition && data.herdComposition.length > 0) {
+    drawHerdComposition(ctx, data.herdComposition);
+  }
 
   drawSectionHeader(ctx, "Livestock Assets");
 
@@ -375,12 +552,12 @@ function drawAssetRegister(ctx: Ctx, data: ReportData) {
   ctx.y -= 16;
 
   const totalHead = data.herdData.reduce((s, h) => s + h.headCount, 0);
-  ctx.page.drawText("TOTAL", { x: MARGIN, y: ctx.y, size: 11, font: ctx.bold, color: BLACK });
-  ctx.page.drawText(`${totalHead.toLocaleString()} head`, { x: MARGIN + 140, y: ctx.y, size: 11, font: ctx.font, color: SECONDARY });
+  ctx.page.drawText("TOTAL", { x: MARGIN, y: ctx.y, size: FONT_CAPTION, font: ctx.bold, color: BLACK });
+  ctx.page.drawText(`${totalHead.toLocaleString()} head`, { x: MARGIN + 140, y: ctx.y, size: FONT_CAPTION, font: ctx.font, color: SECONDARY });
   const totalStr = fmt(data.totalValue);
-  const totalW = ctx.bold.widthOfTextAtSize(totalStr, 13);
-  ctx.page.drawText(totalStr, { x: PAGE_W - MARGIN - totalW, y: ctx.y, size: 13, font: ctx.bold, color: BLACK });
-  ctx.y -= 24;
+  const totalW = ctx.bold.widthOfTextAtSize(totalStr, FONT_BODY);
+  ctx.page.drawText(totalStr, { x: PAGE_W - MARGIN - totalW, y: ctx.y, size: FONT_BODY, font: ctx.bold, color: BLACK });
+  ctx.y -= SECTION_SPACING;
 }
 
 // MARK: - Sales Summary
@@ -403,37 +580,18 @@ function drawSalesSummary(ctx: Ctx, data: ReportData) {
 
   for (const [label, value] of overviewRows) {
     ensureSpace(ctx, 18);
-    ctx.page.drawText(label, { x: MARGIN, y: ctx.y, size: 11, font: ctx.font, color: SECONDARY });
-    const vw = ctx.bold.widthOfTextAtSize(value, 11);
-    ctx.page.drawText(value, { x: MARGIN + 200 - vw + 100, y: ctx.y, size: 11, font: ctx.bold, color: BLACK });
+    ctx.page.drawText(label, { x: MARGIN, y: ctx.y, size: FONT_BODY, font: ctx.font, color: SECONDARY });
+    const vw = ctx.bold.widthOfTextAtSize(value, FONT_BODY);
+    ctx.page.drawText(value, { x: MARGIN + 300 - vw + 100, y: ctx.y, size: FONT_BODY, font: ctx.bold, color: BLACK });
     ctx.y -= 18;
   }
-  ctx.y -= 12;
+  ctx.y -= CARD_SPACING;
 
-  // Sales records table
-  drawSectionHeader(ctx, "Sales Records");
-
-  const cols = [
-    { text: "DATE", width: 70 },
-    { text: "HERD", width: 100 },
-    { text: "HEAD", width: 40, align: "right" as const },
-    { text: "AVG WT", width: 55, align: "right" as const },
-    { text: "TYPE", width: 60 },
-    { text: "LOCATION", width: 65 },
-    { text: "NET VALUE", width: 78, align: "right" as const },
-  ];
-  drawTableHeader(ctx, cols);
+  // Sales records as cards (matching iOS)
+  drawSectionHeader(ctx, "Sales History");
 
   for (const s of data.salesData) {
-    drawTableRow(ctx, [
-      { text: fmtDate(s.date), width: 70 },
-      { text: (s.herdName ?? "-").substring(0, 18), width: 100 },
-      { text: s.headCount.toString(), width: 40, align: "right" },
-      { text: `${s.avgWeight.toFixed(0)} kg`, width: 55, align: "right" },
-      { text: (s.saleType ?? "-").substring(0, 10), width: 60 },
-      { text: (s.saleLocation ?? "-").substring(0, 12), width: 65 },
-      { text: fmt(s.netValue), width: 78, align: "right", bold: true },
-    ]);
+    drawSaleCard(ctx, s);
   }
 }
 
@@ -445,35 +603,19 @@ function drawSaleyardComparison(ctx: Ctx, data: ReportData) {
 
     ensureSpace(ctx, 30);
     ctx.page.drawText(`Best Saleyard: ${data.saleyardComparison[0].saleyardName}`, {
-      x: MARGIN, y: ctx.y, size: 11, font: ctx.font, color: SECONDARY,
+      x: MARGIN, y: ctx.y, size: FONT_BODY, font: ctx.font, color: SECONDARY,
     });
     ctx.y -= 16;
     ctx.page.drawText(`${data.saleyardComparison.length} saleyards compared`, {
-      x: MARGIN, y: ctx.y, size: 10, font: ctx.font, color: TERTIARY,
+      x: MARGIN, y: ctx.y, size: FONT_CAPTION, font: ctx.font, color: TERTIARY,
     });
-    ctx.y -= 24;
+    ctx.y -= SECTION_SPACING;
   }
 
   drawSectionHeader(ctx, "Saleyard Price Comparison");
 
-  const cols = [
-    { text: "#", width: 25 },
-    { text: "SALEYARD", width: 200 },
-    { text: "AVG $/KG", width: 80, align: "right" as const },
-    { text: "MIN $/KG", width: 80, align: "right" as const },
-    { text: "MAX $/KG", width: 83, align: "right" as const },
-  ];
-  drawTableHeader(ctx, cols);
-
-  for (let i = 0; i < data.saleyardComparison.length; i++) {
-    const s = data.saleyardComparison[i];
-    drawTableRow(ctx, [
-      { text: (i + 1).toString(), width: 25 },
-      { text: s.saleyardName.substring(0, 38), width: 200 },
-      { text: `$${s.avgPrice.toFixed(2)}`, width: 80, align: "right", bold: i === 0 },
-      { text: `$${s.minPrice.toFixed(2)}`, width: 80, align: "right" },
-      { text: `$${s.maxPrice.toFixed(2)}`, width: 83, align: "right" },
-    ]);
+  for (const s of data.saleyardComparison) {
+    drawSaleyardCard(ctx, s);
   }
 }
 
@@ -490,9 +632,9 @@ function drawAccountantReport(ctx: Ctx, data: ReportData) {
     ];
     for (const [label, value] of stats) {
       ensureSpace(ctx, 18);
-      ctx.page.drawText(label, { x: MARGIN, y: ctx.y, size: 11, font: ctx.font, color: SECONDARY });
-      const vw = ctx.bold.widthOfTextAtSize(value, 11);
-      ctx.page.drawText(value, { x: MARGIN + 300 - vw + 100, y: ctx.y, size: 11, font: ctx.bold, color: BLACK });
+      ctx.page.drawText(label, { x: MARGIN, y: ctx.y, size: FONT_BODY, font: ctx.font, color: SECONDARY });
+      const vw = ctx.bold.widthOfTextAtSize(value, FONT_BODY);
+      ctx.page.drawText(value, { x: MARGIN + 300 - vw + 100, y: ctx.y, size: FONT_BODY, font: ctx.bold, color: BLACK });
       ctx.y -= 18;
     }
     ctx.y -= 16;
@@ -593,9 +735,9 @@ export async function generateAdvisorLensPDF(
   newPage(ctx);
 
   // Title and logo
-  ctx.page.drawText("Valuation Assessment", { x: MARGIN, y: ctx.y, size: 28, font: bold, color: BLACK });
+  ctx.page.drawText("Valuation Assessment", { x: MARGIN, y: ctx.y, size: FONT_LARGE_TITLE, font: bold, color: BLACK });
   if (logo) {
-    const logoH = 60;
+    const logoH = 70;
     const aspect = logo.width / logo.height;
     const logoW = logoH * aspect;
     ctx.page.drawImage(logo, {
@@ -608,7 +750,7 @@ export async function generateAdvisorLensPDF(
   ctx.y -= 36;
 
   // Subtitle
-  ctx.page.drawText(reportData.lens_name, { x: MARGIN, y: ctx.y, size: 14, font: bold, color: SECONDARY });
+  ctx.page.drawText(reportData.lens_name, { x: MARGIN, y: ctx.y, size: FONT_EXEC_VALUE, font: bold, color: SECONDARY });
   ctx.y -= 20;
 
   // Date and advisor/client
@@ -616,12 +758,12 @@ export async function generateAdvisorLensPDF(
     day: "2-digit", month: "short", year: "numeric",
   });
   ctx.page.drawText(`Prepared by ${reportData.advisor_name} for ${reportData.client_name}  |  ${dateStr}`, {
-    x: MARGIN, y: ctx.y, size: 10, font, color: SECONDARY,
+    x: MARGIN, y: ctx.y, size: FONT_CAPTION, font, color: SECONDARY,
   });
   ctx.y -= 16;
 
   ctx.page.drawLine({ start: { x: MARGIN, y: ctx.y }, end: { x: PAGE_W - MARGIN, y: ctx.y }, thickness: 0.5, color: BORDER });
-  ctx.y -= 24;
+  ctx.y -= SECTION_SPACING;
 
   // Hero card: shaded value
   drawHeroCard(ctx, "SHADED PORTFOLIO VALUE (LENDING)", fmt(reportData.totals.shaded_value));
@@ -637,9 +779,9 @@ export async function generateAdvisorLensPDF(
   ];
   for (const [label, value] of summaryRows) {
     ensureSpace(ctx, 18);
-    ctx.page.drawText(label, { x: MARGIN, y: ctx.y, size: 11, font, color: SECONDARY });
-    const vw = bold.widthOfTextAtSize(value, 11);
-    ctx.page.drawText(value, { x: MARGIN + 300 - vw + 100, y: ctx.y, size: 11, font: bold, color: BLACK });
+    ctx.page.drawText(label, { x: MARGIN, y: ctx.y, size: FONT_BODY, font, color: SECONDARY });
+    const vw = bold.widthOfTextAtSize(value, FONT_BODY);
+    ctx.page.drawText(value, { x: MARGIN + 300 - vw + 100, y: ctx.y, size: FONT_BODY, font: bold, color: BLACK });
     ctx.y -= 18;
   }
   ctx.y -= 16;
@@ -673,11 +815,11 @@ export async function generateAdvisorLensPDF(
   ctx.y -= 4;
   ctx.page.drawLine({ start: { x: MARGIN, y: ctx.y }, end: { x: PAGE_W - MARGIN, y: ctx.y }, thickness: 0.5, color: BORDER });
   ctx.y -= 16;
-  ctx.page.drawText("TOTAL", { x: MARGIN, y: ctx.y, size: 11, font: bold, color: BLACK });
+  ctx.page.drawText("TOTAL", { x: MARGIN, y: ctx.y, size: FONT_CAPTION, font: bold, color: BLACK });
   const totalShadedStr = fmt(reportData.totals.shaded_value);
-  const tsw = bold.widthOfTextAtSize(totalShadedStr, 13);
-  ctx.page.drawText(totalShadedStr, { x: PAGE_W - MARGIN - tsw, y: ctx.y, size: 13, font: bold, color: BLACK });
-  ctx.y -= 24;
+  const tsw = bold.widthOfTextAtSize(totalShadedStr, FONT_BODY);
+  ctx.page.drawText(totalShadedStr, { x: PAGE_W - MARGIN - tsw, y: ctx.y, size: FONT_BODY, font: bold, color: BLACK });
+  ctx.y -= SECTION_SPACING;
 
   // Per-herd detail cards with overrides and notes
   for (const h of reportData.herds) {
@@ -707,7 +849,7 @@ function drawLensHerdDetail(ctx: Ctx, h: LensHerdSummary) {
   // Herd name and breed
   ctx.page.drawText(h.herd_name, { x: px, y: iy, size: 12, font: ctx.bold, color: BLACK });
   const breedStr = `${h.breed} ${h.category}  |  ${h.head_count} head  |  ${h.initial_weight} kg`;
-  ctx.page.drawText(breedStr, { x: px + 160, y: iy, size: 9, font: ctx.font, color: SECONDARY });
+  ctx.page.drawText(breedStr, { x: px + 160, y: iy, size: FONT_LABEL, font: ctx.font, color: SECONDARY });
   iy -= 18;
 
   // Overrides
@@ -727,9 +869,9 @@ function drawLensHerdDetail(ctx: Ctx, h: LensHerdSummary) {
   iy -= 14;
 
   // Values row
-  ctx.page.drawText(`Baseline: ${fmt(h.baseline_value)}`, { x: px, y: iy, size: 9, font: ctx.font, color: SECONDARY });
-  ctx.page.drawText(`Adjusted: ${fmt(h.adjusted_value)}`, { x: px + 140, y: iy, size: 9, font: ctx.font, color: SECONDARY });
-  ctx.page.drawText(`Shaded: ${fmt(h.shaded_value)}`, { x: px + 280, y: iy, size: 9, font: ctx.bold, color: BLACK });
+  ctx.page.drawText(`Baseline: ${fmt(h.baseline_value)}`, { x: px, y: iy, size: FONT_LABEL, font: ctx.font, color: SECONDARY });
+  ctx.page.drawText(`Adjusted: ${fmt(h.adjusted_value)}`, { x: px + 140, y: iy, size: FONT_LABEL, font: ctx.font, color: SECONDARY });
+  ctx.page.drawText(`Shaded: ${fmt(h.shaded_value)}`, { x: px + 280, y: iy, size: FONT_LABEL, font: ctx.bold, color: BLACK });
   iy -= 16;
 
   // Notes (truncated)
@@ -738,7 +880,7 @@ function drawLensHerdDetail(ctx: Ctx, h: LensHerdSummary) {
     ctx.page.drawText(`Notes: ${notesStr}`, { x: px, y: iy, size: 8, font: ctx.font, color: TERTIARY });
   }
 
-  ctx.y = cardY - 12;
+  ctx.y = cardY - CARD_SPACING;
 }
 
 function drawNarrativeText(ctx: Ctx, narrative: string) {
@@ -758,7 +900,7 @@ function drawNarrativeText(ctx: Ctx, narrative: string) {
     if (isHeading) {
       ensureSpace(ctx, 30);
       ctx.y -= 8;
-      ctx.page.drawText(trimmed, { x: MARGIN, y: ctx.y, size: 11, font: ctx.bold, color: BLACK });
+      ctx.page.drawText(trimmed, { x: MARGIN, y: ctx.y, size: FONT_CAPTION, font: ctx.bold, color: BLACK });
       ctx.y -= 18;
     } else {
       // Wrap long paragraphs
