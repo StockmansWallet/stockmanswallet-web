@@ -142,26 +142,31 @@ export function AdvisorBusinessCard({ connection, advisorEmail, advisorPhone, av
             }}
             onClick={() => setFlipped(false)}
           >
-            <div className="flex h-full flex-col justify-between p-5">
+            <div className="flex h-full flex-col p-5">
               {/* Header */}
-              <h3 className="text-sm font-bold text-text-primary">{connection.requester_name}</h3>
+              <h3 className="mb-4 text-sm font-bold text-text-primary">{connection.requester_name}</h3>
 
               {/* Settings */}
               <div className="space-y-3">
-                <Switch
-                  id={`sharing-${connection.id}`}
-                  checked={isSharing}
-                  onChange={handleToggleSharing}
-                  disabled={loading}
-                  color="green"
-                  label="Data sharing"
-                />
+                <div className="w-fit" onClick={(e) => e.stopPropagation()}>
+                  <Switch
+                    id={`sharing-${connection.id}`}
+                    checked={isSharing}
+                    onChange={handleToggleSharing}
+                    disabled={loading}
+                    color="green"
+                    label="Data sharing"
+                  />
+                </div>
 
                 <div className="flex items-center gap-2 text-xs text-text-muted">
                   <Calendar className="h-3 w-3 shrink-0" />
                   Connected {connectedDate}
                 </div>
+              </div>
 
+              {/* Actions */}
+              <div className="mt-auto flex items-center gap-2 pt-4">
                 <Link
                   href={`/dashboard/advisory-hub/my-advisors/${connection.id}`}
                   onClick={(e) => e.stopPropagation()}
@@ -169,19 +174,17 @@ export function AdvisorBusinessCard({ connection, advisorEmail, advisorPhone, av
                 >
                   View details
                 </Link>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={(e) => { e.stopPropagation(); setShowRemove(true); }}
+                  disabled={loading}
+                  className="gap-1.5"
+                >
+                  <Trash2 className="h-3 w-3" />
+                  Remove
+                </Button>
               </div>
-
-              {/* Remove */}
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={(e) => { e.stopPropagation(); setShowRemove(true); }}
-                disabled={loading}
-                className="w-full gap-1.5"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                Remove Advisor
-              </Button>
             </div>
           </div>
         </div>
