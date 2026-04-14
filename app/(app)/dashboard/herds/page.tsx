@@ -7,8 +7,7 @@ import { StatCard } from "@/components/ui/stat-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HerdsTable } from "./herds-table";
 import { YardBookBanner } from "@/components/app/yard-book-banner";
-import { Button } from "@/components/ui/button";
-import { Plus, Tags, Layers, DollarSign, Scale, Archive } from "lucide-react";
+import { Tags, Layers, DollarSign, Scale } from "lucide-react";
 import { calculateHerdValuation, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
@@ -155,7 +154,7 @@ export default async function HerdsPage() {
       : 0;
 
   return (
-    <div className="max-w-[1800px]">
+    <div className="max-w-4xl">
       <Suspense>
         <YardBookBanner />
       </Suspense>
@@ -198,17 +197,17 @@ export default async function HerdsPage() {
             propertyGroups={propertyGroups}
             headerActions={
               <div className="flex items-center gap-1.5">
-                <Link href="/dashboard/herds/sold">
-                  <Button variant="secondary" size="sm">
-                    <Archive className="mr-1.5 h-3.5 w-3.5" />
-                    Sold
-                  </Button>
+                <Link
+                  href="/dashboard/herds/sold"
+                  className="inline-flex h-8 shrink-0 items-center rounded-full bg-surface px-3.5 text-xs font-medium text-text-muted transition-all hover:bg-surface-raised hover:text-text-secondary"
+                >
+                  Sold Herds
                 </Link>
-                <Link href="/dashboard/herds/new">
-                  <Button size="sm">
-                    <Plus className="mr-1.5 h-3.5 w-3.5" />
-                    Add
-                  </Button>
+                <Link
+                  href="/dashboard/herds/new"
+                  className="inline-flex h-8 shrink-0 items-center rounded-full bg-brand px-3.5 text-xs font-medium text-white transition-all hover:bg-brand-dark"
+                >
+                  Add Herd
                 </Link>
               </div>
             }

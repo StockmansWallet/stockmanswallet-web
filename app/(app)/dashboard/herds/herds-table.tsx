@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
-import { Search, ChevronUp, ChevronRight, MapPinned, Trash2, CheckSquare, Leaf } from "lucide-react";
+import { Search, ChevronUp, ChevronRight, MapPinned, Trash2 } from "lucide-react";
 import { deleteHerds } from "./actions";
 import { resolveShortSaleyardName } from "@/lib/data/reference-data";
 
@@ -216,74 +216,33 @@ export function HerdsTable({
     );
   }
 
-  function TableHeaders() {
+  const SORT_OPTIONS: { key: SortKey; label: string }[] = [
+    { key: "name", label: "Name" },
+    { key: "head_count", label: "Head" },
+    { key: "value", label: "Value" },
+    { key: "breed", label: "Breed" },
+    { key: "current_weight", label: "Weight" },
+  ];
+
+  function SortBar() {
     return (
-      <>
-        {isEditing && (
-          <th className="w-10 px-3 py-3.5">
-            <input
-              type="checkbox"
-              checked={allVisibleSelected}
-              onChange={toggleSelectAll}
-              className="h-4 w-4 rounded border-white/20 bg-transparent accent-brand cursor-pointer"
-            />
-          </th>
-        )}
-        <th
-          onClick={() => handleSort("head_count")}
-          className="cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary"
-        >
-          Head <SortIcon column="head_count" />
-        </th>
-        <th
-          onClick={() => handleSort("name")}
-          className="cursor-pointer select-none px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary"
-        >
-          Name <SortIcon column="name" />
-        </th>
-        <th
-          onClick={() => handleSort("breed")}
-          className="hidden cursor-pointer select-none px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary md:table-cell"
-        >
-          Breed <SortIcon column="breed" />
-        </th>
-        <th
-          onClick={() => handleSort("category")}
-          className="hidden cursor-pointer select-none px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary lg:table-cell"
-        >
-          Category <SortIcon column="category" />
-        </th>
-        <th
-          onClick={() => handleSort("selected_saleyard")}
-          className="hidden cursor-pointer select-none px-5 py-3.5 text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary xl:table-cell"
-        >
-          Saleyard <SortIcon column="selected_saleyard" />
-        </th>
-        <th
-          onClick={() => handleSort("price_per_kg")}
-          className="hidden cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary lg:table-cell"
-        >
-          $/kg <SortIcon column="price_per_kg" />
-        </th>
-        <th
-          className="hidden px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted lg:table-cell"
-        >
-          Premium
-        </th>
-        <th
-          onClick={() => handleSort("current_weight")}
-          className="hidden cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary xl:table-cell"
-        >
-          Weight <SortIcon column="current_weight" />
-        </th>
-        <th
-          onClick={() => handleSort("value")}
-          className="cursor-pointer select-none px-5 py-3.5 text-right text-xs font-medium uppercase tracking-wider text-text-muted transition-colors hover:text-text-secondary"
-        >
-          Value <SortIcon column="value" />
-        </th>
-        {!isEditing && <th className="w-10 px-3 py-3.5" />}
-      </>
+      <div className="flex items-center gap-1 px-5 py-2.5">
+        <span className="mr-1 text-[10px] uppercase tracking-wider text-text-muted">Sort</span>
+        {SORT_OPTIONS.map((opt) => (
+          <button
+            key={opt.key}
+            onClick={() => handleSort(opt.key)}
+            className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors ${
+              sortKey === opt.key
+                ? "bg-brand/15 text-brand"
+                : "text-text-muted hover:text-text-secondary"
+            }`}
+          >
+            {opt.label}
+            <SortIcon column={opt.key} />
+          </button>
+        ))}
+      </div>
     );
   }
 
@@ -296,11 +255,20 @@ export function HerdsTable({
     const nearestSaleyard = herdNearestSaleyard?.[herd.id] ?? null;
     const projectedWeight = herdProjectedWeight?.[herd.id];
     const breedPremium = herdBreedPremium?.[herd.id] ?? 0;
-    // Debug: Stale data amber warning (6-8 weeks old)
     const dataDate = herdDataDates?.[herd.id];
     const dataAgeDays = dataDate ? Math.floor((Date.now() - new Date(dataDate).getTime()) / 86400000) : 0;
     const isStale = dataAgeDays > 42 && !isFallback;
     const isSelected = selectedIds.has(herd.id);
+
+    const categoryLabel = herd.sub_category && herd.sub_category !== herd.category
+      ? `${herd.category} (${herd.sub_category})`
+      : herd.category;
+
+    const weightDisplay = projectedWeight
+      ? `${Math.round(projectedWeight).toLocaleString()} kg`
+      : herd.current_weight
+        ? `${herd.current_weight.toLocaleString()} kg`
+        : null;
 
     function handleRowClick() {
       if (isEditing) {
@@ -311,76 +279,75 @@ export function HerdsTable({
     }
 
     return (
-      <tr
+      <div
         onClick={handleRowClick}
-        className={`group cursor-pointer transition-colors ${
-          isSelected ? "bg-brand/10" : "hover:bg-surface-hover"
+        className={`group flex cursor-pointer items-center gap-3 px-5 py-3.5 transition-colors ${
+          isSelected ? "bg-brand/10" : "hover:bg-white/[0.03]"
         }`}
       >
         {isEditing && (
-          <td className="px-3 py-3.5" onClick={(e) => e.stopPropagation()}>
+          <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
             <input
               type="checkbox"
               checked={isSelected}
               onChange={() => toggleSelect(herd.id)}
               className="h-4 w-4 rounded border-white/20 bg-transparent accent-brand cursor-pointer"
             />
-          </td>
+          </div>
         )}
-        <td className="px-5 py-3.5 text-right tabular-nums font-medium text-text-primary">
+
+        {/* Head count */}
+        <span className="w-12 shrink-0 text-sm font-semibold tabular-nums text-text-primary">
           {herd.head_count?.toLocaleString() ?? "\u2014"}
-        </td>
-        <td className="px-5 py-3.5">
-          <span className="font-medium text-text-primary">{herd.name}</span>
-        </td>
-        <td className="hidden px-5 py-3.5 text-text-secondary md:table-cell">{herd.breed}</td>
-        <td className="hidden px-5 py-3.5 text-text-secondary lg:table-cell">{herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} (${herd.sub_category})` : herd.category}</td>
-        <td className={`hidden px-5 py-3.5 xl:table-cell ${!herd.selected_saleyard ? "text-red-400/70 italic" : nearestSaleyard || isFallback ? "text-text-muted line-through" : "text-text-muted"}`}>
-          {herd.selected_saleyard ? resolveShortSaleyardName(herd.selected_saleyard) ?? herd.selected_saleyard : "No Saleyard"}
-        </td>
-        <td className={`hidden px-5 py-3.5 text-right tabular-nums lg:table-cell ${isFallback ? "text-red-400" : (isStale || nearestSaleyard) ? "text-amber-400" : "text-text-secondary"}`}>
-          <div className="flex items-center justify-end gap-1.5">
-            {isStale && !nearestSaleyard && (
-              <span className="inline-flex items-center rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
-                Stale - {Math.floor(dataAgeDays / 7)}w
-              </span>
-            )}
-            {nearestSaleyard && !isFallback && (
-              <span className="inline-flex items-center rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
-                Via {resolveShortSaleyardName(nearestSaleyard) ?? nearestSaleyard}
-              </span>
-            )}
-            {isFallback && (
-              <span className="inline-flex items-center rounded-full bg-red-500/15 px-1.5 py-0.5 text-[9px] font-medium text-red-400">
-                {source === "national" ? "National Avg" : "Est. Fallback"}
-              </span>
-            )}
-            {pricePerKg > 0 ? `$${pricePerKg.toFixed(2)}` : "\u2014"}
-          </div>
-        </td>
-        <td className={`hidden px-5 py-3.5 text-right tabular-nums text-xs lg:table-cell ${breedPremium > 0 ? "text-emerald-400" : breedPremium < 0 ? "text-red-400" : "text-text-muted"}`}>
-          {breedPremium !== 0 ? `${breedPremium > 0 ? "+" : ""}${breedPremium}%` : "\u2014"}
-        </td>
-        <td className="hidden px-5 py-3.5 text-right tabular-nums text-text-secondary xl:table-cell">
-          {projectedWeight ? `${Math.round(projectedWeight).toLocaleString()} kg` : herd.current_weight ? `${herd.current_weight.toLocaleString()} kg` : "\u2014"}
-        </td>
-        <td className={`px-5 py-3.5 text-right tabular-nums ${isFallback ? "text-red-400" : "text-text-secondary"}`}>
-          <div className="flex flex-col items-end">
-            <span>{value > 0 ? `$${Math.round(value).toLocaleString()}` : "\u2014"}</span>
-            {accrual > 0 && (
-              <span className="flex items-center gap-1 text-xs text-emerald-400">
-                <Leaf className="h-3 w-3" />
-                +${Math.round(accrual).toLocaleString()}
-              </span>
-            )}
-          </div>
-        </td>
+        </span>
+
+        {/* Name + details */}
+        {/* Name + description */}
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium text-text-primary">{herd.name}</p>
+          <p className="truncate text-xs text-text-muted">
+            {herd.breed} | {categoryLabel}
+            {weightDisplay && <> | {weightDisplay}</>}
+            {pricePerKg > 0 && <> | ${pricePerKg.toFixed(2)}/kg</>}
+          </p>
+        </div>
+
+        {/* Pills + value */}
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
+          {breedPremium !== 0 && (
+            <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-medium ${breedPremium > 0 ? "bg-emerald-500/15 text-emerald-400" : "bg-red-500/15 text-red-400"}`}>
+              Breed {breedPremium > 0 ? "+" : ""}{breedPremium}%
+            </span>
+          )}
+          {accrual > 0 && (
+            <span className="inline-flex items-center rounded-full bg-sky-500/15 px-1.5 py-0.5 text-[9px] font-medium text-sky-400">
+              Breeding +${Math.round(accrual).toLocaleString()}
+            </span>
+          )}
+          {nearestSaleyard && !isFallback && (
+            <span className="inline-flex items-center rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
+              Via {resolveShortSaleyardName(nearestSaleyard) ?? nearestSaleyard}
+            </span>
+          )}
+          {isStale && !nearestSaleyard && (
+            <span className="inline-flex items-center rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
+              Stale
+            </span>
+          )}
+          {isFallback && (
+            <span className="inline-flex items-center rounded-full bg-red-500/15 px-1.5 py-0.5 text-[9px] font-medium text-red-400">
+              {source === "national" ? "National" : "Fallback"}
+            </span>
+          )}
+          <span className={`text-sm font-semibold tabular-nums ${isFallback ? "text-red-400" : "text-text-primary"}`}>
+            {value > 0 ? `$${Math.round(value).toLocaleString()}` : "\u2014"}
+          </span>
+        </div>
+
         {!isEditing && (
-          <td className="px-3 py-3.5">
-            <ChevronRight className="h-4 w-4 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
-          </td>
+          <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
         )}
-      </tr>
+      </div>
     );
   }
 
@@ -388,7 +355,7 @@ export function HerdsTable({
     <div>
       {/* Toolbar: species pills + manage + search */}
       <div className="mb-4 flex flex-col gap-3 rounded-full bg-surface-lowest px-2 py-2 sm:flex-row sm:items-center sm:justify-between">
-        {/* Left: list controls (filters + select) */}
+        {/* Left: species filters */}
         <div className="flex items-center gap-1.5 overflow-x-auto">
           {SPECIES_TABS.map((tab) => {
             const count = tab === "All" ? herds.length : speciesCounts[tab] || 0;
@@ -398,7 +365,7 @@ export function HerdsTable({
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
+                className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-xs font-medium transition-all ${
                   isActive
                     ? "bg-brand/15 text-brand"
                     : "bg-surface text-text-muted hover:bg-surface-raised hover:text-text-secondary"
@@ -411,23 +378,10 @@ export function HerdsTable({
               </button>
             );
           })}
-          {herds.length > 0 && (
-            <button
-              onClick={isEditing ? exitEditMode : () => setIsEditing(true)}
-              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
-                isEditing
-                  ? "bg-brand/15 text-brand"
-                  : "bg-surface text-text-muted hover:bg-surface-raised hover:text-text-secondary"
-              }`}
-            >
-              <CheckSquare className="h-3.5 w-3.5" />
-              {isEditing ? "Done" : "Select"}
-            </button>
-          )}
         </div>
 
-        {/* Right: search + actions */}
-        <div className="flex items-center gap-2">
+        {/* Right: search + select + actions */}
+        <div className="flex items-center gap-1.5">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
             <input
@@ -436,9 +390,21 @@ export function HerdsTable({
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search herds..."
               aria-label="Search herds"
-              className="w-full rounded-full border border-border bg-surface py-1.5 pl-9 pr-4 text-xs text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand/50 focus:ring-2 focus:ring-brand/20 sm:w-48"
+              className="h-8 w-full rounded-full bg-surface pl-9 pr-4 text-xs text-text-primary placeholder:text-text-muted outline-none transition-all focus:ring-2 focus:ring-brand/20 sm:w-48"
             />
           </div>
+          {herds.length > 0 && (
+            <button
+              onClick={isEditing ? exitEditMode : () => setIsEditing(true)}
+              className={`inline-flex h-8 shrink-0 items-center rounded-full px-3.5 text-xs font-medium transition-all ${
+                isEditing
+                  ? "bg-brand/15 text-brand"
+                  : "bg-surface text-text-muted hover:bg-surface-raised hover:text-text-secondary"
+              }`}
+            >
+              {isEditing ? "Done" : "Select"}
+            </button>
+          )}
           {headerActions}
         </div>
       </div>
@@ -476,20 +442,11 @@ export function HerdsTable({
                     )}
                   </div>
                 </div>
-                {/* Table */}
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
-                    <thead>
-                      <tr className="border-b border-border-subtle">
-                        <TableHeaders />
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-divider">
-                      {group.herds.map((herd) => (
-                        <HerdRow key={herd.id} herd={herd} />
-                      ))}
-                    </tbody>
-                  </table>
+                <SortBar />
+                <div className="divide-y divide-white/[0.06]">
+                  {group.herds.map((herd) => (
+                    <HerdRow key={herd.id} herd={herd} />
+                  ))}
                 </div>
                 <div className="border-t border-border-subtle px-5 py-2.5">
                   <p className="text-xs text-text-muted">
@@ -502,19 +459,11 @@ export function HerdsTable({
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl bg-surface-lowest">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-border-subtle">
-                  <TableHeaders />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-divider">
-                {sorted.map((herd) => (
-                  <HerdRow key={herd.id} herd={herd} />
-                ))}
-              </tbody>
-            </table>
+          <SortBar />
+          <div className="divide-y divide-white/[0.06]">
+            {sorted.map((herd) => (
+              <HerdRow key={herd.id} herd={herd} />
+            ))}
           </div>
           <div className="border-t border-border-subtle px-5 py-3">
             <p className="text-xs text-text-muted">
