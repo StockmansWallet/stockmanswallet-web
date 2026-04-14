@@ -3,7 +3,6 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/ui/stat-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HerdsTable } from "./herds-table";
@@ -197,18 +196,20 @@ export default async function HerdsPage() {
             herdBreedPremium={herdBreedPremiumObj}
             propertyGroups={propertyGroups}
             headerActions={
-              <div className="flex items-center gap-2">
-                <Link href="/dashboard/herds/sold">
-                  <Button variant="secondary" size="sm">
-                    <Archive className="mr-1.5 h-3.5 w-3.5" />
-                    Sold
-                  </Button>
+              <div className="flex items-center gap-1.5">
+                <Link
+                  href="/dashboard/herds/sold"
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-surface px-3.5 py-1.5 text-xs font-medium text-text-muted transition-all hover:bg-surface-raised hover:text-text-secondary"
+                >
+                  <Archive className="h-3.5 w-3.5" />
+                  Sold
                 </Link>
-                <Link href="/dashboard/herds/new">
-                  <Button size="sm">
-                    <Plus className="mr-1.5 h-3.5 w-3.5" />
-                    Add
-                  </Button>
+                <Link
+                  href="/dashboard/herds/new"
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-brand/15 px-3.5 py-1.5 text-xs font-medium text-brand transition-all hover:bg-brand/25"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add
                 </Link>
               </div>
             }
