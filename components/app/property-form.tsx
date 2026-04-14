@@ -97,7 +97,11 @@ export function PropertyForm({ property, action, submitLabel }: PropertyFormProp
       if (result?.error) {
         setError(result.error);
       }
-    } catch {
+    } catch (err) {
+      // Next.js redirect() throws a special error that must propagate
+      if (err && typeof err === "object" && "digest" in err && typeof (err as { digest: unknown }).digest === "string" && (err as { digest: string }).digest.startsWith("NEXT_REDIRECT")) {
+        throw err;
+      }
       setError("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);

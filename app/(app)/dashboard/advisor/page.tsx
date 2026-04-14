@@ -8,7 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { ConnectionRealtime } from "@/components/app/advisory/connection-realtime";
 import { hasActivePermission, isAdvisorRole, type ConnectionRequest } from "@/lib/types/advisory";
-import { TrendingUp, TrendingDown, UserCheck, Clock, Shield, Users, MapPin, DollarSign } from "lucide-react";
+import { UserCheck, Clock, Shield, Users, MapPin, DollarSign } from "lucide-react";
 import { ClientsByLgaChart } from "@/components/app/advisory/clients-by-lga-chart";
 
 export const metadata = {
@@ -95,7 +95,6 @@ export default async function AdvisorDashboardPage() {
     .map((c) => c.requester_user_id === user.id ? c.target_user_id : c.requester_user_id);
 
   let totalValue: number | undefined;
-  let prevTotalValue: number | undefined;
   const clientValueMap = new Map<string, number>();
 
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -122,31 +121,8 @@ export default async function AdvisorDashboardPage() {
       }
       totalValue = Array.from(latestByUser.values()).reduce((sum, s) => sum + Number(s.total_value), 0);
 
-      // Get previous snapshots (one before each user's latest) for change ticker
-      const prevByUser = new Map<string, number>();
-      for (const snap of latestSnapshots) {
-        const latest = latestByUser.get(snap.user_id);
-        if (latest && snap.snapshot_date < latest.snapshot_date && !prevByUser.has(snap.user_id)) {
-          prevByUser.set(snap.user_id, Number(snap.total_value));
-        }
-      }
-      if (prevByUser.size > 0) {
-        // Sum previous values for users we have data for, plus latest for users without previous
-        prevTotalValue = 0;
-        for (const [uid, latestSnap] of latestByUser) {
-          prevTotalValue += prevByUser.get(uid) ?? Number(latestSnap.total_value);
-        }
-      }
     }
   }
-
-  const changeDollar = totalValue !== undefined && prevTotalValue !== undefined
-    ? totalValue - prevTotalValue
-    : undefined;
-  const changePercent = changeDollar !== undefined && prevTotalValue && prevTotalValue > 0
-    ? (changeDollar / prevTotalValue) * 100
-    : undefined;
-  const isPositive = changePercent !== undefined && changePercent >= 0;
 
   return (
     <div className="max-w-5xl">
@@ -171,15 +147,6 @@ export default async function AdvisorDashboardPage() {
                   : "\u2014"}
               </p>
               <p className="text-[11px] text-text-muted">Under Management</p>
-              {changePercent !== undefined && (
-                <span className={`inline-flex items-center gap-1 text-[10px] font-medium ${isPositive ? "text-success" : "text-error"}`}>
-                  {isPositive
-                    ? <TrendingUp className="h-2.5 w-2.5" />
-                    : <TrendingDown className="h-2.5 w-2.5" />
-                  }
-                  {isPositive ? "+" : ""}{changePercent.toFixed(1)}%
-                </span>
-              )}
             </div>
           </CardContent>
         </Card>
