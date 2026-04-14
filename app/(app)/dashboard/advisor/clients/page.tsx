@@ -1,16 +1,16 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ConnectionRealtime } from "@/components/app/advisory/connection-realtime";
+import { ClientCard } from "@/components/app/advisory/client-card";
+import { PendingRequestCard } from "@/components/app/advisory/pending-request-card";
+import { ClientSearch } from "./client-search";
 import { hasActivePermission, type ConnectionRequest } from "@/lib/types/advisory";
 import {
   Users,
-  Search,
   Shield,
-  ArrowRight,
   UserCheck,
   Clock,
 } from "lucide-react";
@@ -21,7 +21,7 @@ export const metadata = {
   title: "Clients",
 };
 
-export default async function AdvisorClientsHubPage() {
+export default async function AdvisorClientsPage() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -32,20 +32,47 @@ export default async function AdvisorClientsHubPage() {
   // Advisory connections only (exclude farmer_peer)
   const { data: connections } = await supabase
     .from("connection_requests")
-    .select("id, status, target_user_id, requester_user_id, sharing_permissions, permission_granted_at")
+    .select("*")
     .or(`requester_user_id.eq.${user.id},target_user_id.eq.${user.id}`)
     .eq("connection_type", "advisory")
-    .in("status", ["pending", "approved"]);
+    .in("status", ["pending", "approved"])
+    .order("created_at", { ascending: false });
 
   const allConnections = (connections ?? []) as ConnectionRequest[];
 
-  const pendingCount = allConnections.filter((c) => c.status === "pending").length;
+  // Get client profiles for display names
+  const clientUserIds = allConnections.map((c) =>
+    c.requester_user_id === user.id ? c.target_user_id : c.requester_user_id
+  );
+  let clientProfiles: Record<string, { display_name: string; company_name: string; state: string }> = {};
+
+  if (clientUserIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("user_profiles")
+      .select("user_id, display_name, company_name, state")
+      .in("user_id", clientUserIds);
+
+    if (profiles) {
+      for (const p of profiles) {
+        clientProfiles[p.user_id] = p;
+      }
+    }
+  }
+
+  // Split by status and direction
+  const incomingRequests = allConnections.filter(
+    (c) => c.status === "pending" && c.target_user_id === user.id
+  );
+  const outgoingPending = allConnections.filter(
+    (c) => c.status === "pending" && c.requester_user_id === user.id
+  );
   const approvedConnections = allConnections.filter((c) => c.status === "approved");
-  const activeCount = approvedConnections.length;
   const sharingCount = approvedConnections.filter((c) => hasActivePermission(c)).length;
+  const pendingCount = incomingRequests.length + outgoingPending.length;
+  const hasAnything = incomingRequests.length > 0 || outgoingPending.length > 0 || approvedConnections.length > 0;
 
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-5xl">
       <ConnectionRealtime userId={user.id} />
       <PageHeader
         title="Clients"
@@ -63,7 +90,7 @@ export default async function AdvisorClientsHubPage() {
               <UserCheck className="h-5 w-5 text-emerald-400" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-text-primary">{activeCount}</p>
+              <p className="text-2xl font-bold text-text-primary">{approvedConnections.length}</p>
               <p className="text-[11px] text-text-muted">Connected</p>
             </div>
           </CardContent>
@@ -92,62 +119,105 @@ export default async function AdvisorClientsHubPage() {
         </Card>
       </div>
 
-      {/* Action cards */}
-      <div className="mb-6 grid gap-4 sm:grid-cols-2">
-        <Link href="/dashboard/advisor/clients/connected">
-          <Card className="group h-full cursor-pointer transition-all hover:bg-surface-low">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#2F8CD9]/15 shadow-sm">
-                    <Users className="h-5 w-5 text-[#2F8CD9]" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-text-primary">My Clients</h3>
-                    <p className="text-xs text-text-muted">
-                      {activeCount > 0 ? `${activeCount} connected` : "No clients yet"}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {pendingCount > 0 && (
-                    <Badge variant="warning" className="animate-pulse shadow-sm shadow-amber-500/20">
-                      {pendingCount} pending
-                    </Badge>
-                  )}
-                  <ArrowRight className="h-4 w-4 text-text-muted transition-transform group-hover:translate-x-0.5" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
+      <ClientSearch />
 
-        <Link href="/dashboard/advisor/directory">
-          <Card className="group h-full cursor-pointer transition-all hover:bg-surface-low">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#2F8CD9]/15 shadow-sm">
-                    <Search className="h-5 w-5 text-[#2F8CD9]" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-text-primary">Find Producers</h3>
-                    <p className="text-xs text-text-muted">Browse the producer directory</p>
-                  </div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-text-muted transition-transform group-hover:translate-x-0.5" />
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-      </div>
+      {!hasAnything && (
+        <Card>
+          <EmptyState
+            icon={<Users className="h-6 w-6 text-[#2F8CD9]" />}
+            title="No clients yet"
+            description="Browse the producer directory to connect with farmers and graziers."
+            actionLabel="Find Producers"
+            actionHref="/dashboard/advisor/directory"
+            variant="advisor"
+          />
+        </Card>
+      )}
+
+      {/* Incoming requests from producers (Accept/Decline) */}
+      {incomingRequests.length > 0 && (
+        <div className="mb-6">
+          <h3 className="mb-3 text-sm font-semibold text-amber-400">
+            Incoming Requests ({incomingRequests.length})
+          </h3>
+          <div className="flex flex-col gap-3">
+            {incomingRequests.map((connection) => {
+              const clientId = connection.requester_user_id;
+              const profile = clientProfiles[clientId];
+              return (
+                <PendingRequestCard
+                  key={connection.id}
+                  connectionId={connection.id}
+                  clientName={profile?.display_name ?? "Unknown Producer"}
+                  clientCompany={profile?.company_name}
+                  clientState={profile?.state}
+                  createdAt={connection.created_at}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Outgoing requests awaiting producer response */}
+      {outgoingPending.length > 0 && (
+        <div className="mb-6">
+          <h3 className="mb-3 text-sm font-semibold text-text-secondary">
+            Awaiting Response ({outgoingPending.length})
+          </h3>
+          <div className="flex flex-col gap-3">
+            {outgoingPending.map((connection) => {
+              const clientId = connection.target_user_id;
+              const profile = clientProfiles[clientId];
+              return (
+                <ClientCard
+                  key={connection.id}
+                  connection={connection}
+                  clientName={profile?.display_name ?? "Unknown Producer"}
+                  clientState={profile?.state}
+                  clientCompany={profile?.company_name}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Connected clients */}
+      {approvedConnections.length > 0 && (
+        <div className="mb-6">
+          {(incomingRequests.length > 0 || outgoingPending.length > 0) && (
+            <h3 className="mb-3 text-sm font-semibold text-text-secondary">
+              Connected Clients ({approvedConnections.length})
+            </h3>
+          )}
+          <div className="flex flex-col gap-3">
+            {approvedConnections.map((connection) => {
+              const clientId =
+                connection.requester_user_id === user.id
+                  ? connection.target_user_id
+                  : connection.requester_user_id;
+              const profile = clientProfiles[clientId];
+              return (
+                <ClientCard
+                  key={connection.id}
+                  connection={connection}
+                  clientName={profile?.display_name ?? "Unknown Producer"}
+                  clientState={profile?.state}
+                  clientCompany={profile?.company_name}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Info note */}
       <Card className="bg-emerald-500/[0.03]">
         <CardContent className="flex items-start gap-3 p-4">
           <Shield className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" />
           <p className="text-xs leading-relaxed text-text-muted">
-            You can view shared portfolio data but never modify a producer's records. Data access
+            You can view shared portfolio data but never modify a producer&apos;s records. Data access
             is controlled by each producer and can be revoked at any time.
           </p>
         </CardContent>

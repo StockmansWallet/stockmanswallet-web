@@ -15,6 +15,7 @@ import {
   Upload,
   Handshake,
   ClipboardList,
+  Search,
 } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
 
@@ -54,6 +55,7 @@ export const farmerToolItems: NavItem[] = [
 export const advisorNavItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard/advisor", icon: <Wallet className="h-5 w-5" />, activeClass: "bg-[#2F8CD9]/15 text-[#2F8CD9]" },
   { label: "Clients", href: "/dashboard/advisor/clients", icon: <Users className="h-5 w-5" />, activeClass: "bg-[#2F8CD9]/15 text-[#2F8CD9]" },
+  { label: "Producer Directory", href: "/dashboard/advisor/directory", icon: <Search className="h-5 w-5" />, activeClass: "bg-[#2F8CD9]/15 text-[#2F8CD9]" },
 ];
 
 // Advisor mode - intelligence section

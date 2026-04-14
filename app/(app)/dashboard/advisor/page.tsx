@@ -8,7 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { ConnectionRealtime } from "@/components/app/advisory/connection-realtime";
 import { hasActivePermission, isAdvisorRole, type ConnectionRequest } from "@/lib/types/advisory";
-import { Users, Search, TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown, UserCheck, Clock, Shield, Users, MapPin, DollarSign } from "lucide-react";
 import { ClientsByLgaChart } from "@/components/app/advisory/clients-by-lga-chart";
 
 export const metadata = {
@@ -96,6 +96,7 @@ export default async function AdvisorDashboardPage() {
 
   let totalValue: number | undefined;
   let prevTotalValue: number | undefined;
+  const clientValueMap = new Map<string, number>();
 
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (serviceRoleKey && activeClientIds.length > 0) {
@@ -116,6 +117,7 @@ export default async function AdvisorDashboardPage() {
       for (const snap of latestSnapshots) {
         if (!latestByUser.has(snap.user_id)) {
           latestByUser.set(snap.user_id, snap);
+          clientValueMap.set(snap.user_id, Number(snap.total_value));
         }
       }
       totalValue = Array.from(latestByUser.values()).reduce((sum, s) => sum + Number(s.total_value), 0);
@@ -155,90 +157,84 @@ export default async function AdvisorDashboardPage() {
         subtitle="Your advisor workspace overview."
       />
 
-      {/* Top row: Total Value + Stats */}
-      <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-[auto_1fr] lg:mb-4 lg:gap-4">
-        {/* Total Livestock Under Management */}
+      {/* Stats row */}
+      <div className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:mb-4 lg:gap-4">
         <Card>
-          <CardContent className="p-5 text-center sm:min-w-[260px]">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
-              Total Livestock Under Management
-            </p>
-            {totalValue !== undefined ? (
-              <>
-                <p className="mt-1.5 text-2xl font-bold tabular-nums text-text-primary sm:text-3xl">
-                  ${Math.round(totalValue).toLocaleString()}
-                </p>
-                {changePercent !== undefined && (
-                  <span className={`mt-1 inline-flex items-center gap-1 text-xs font-medium ${isPositive ? "text-success" : "text-error"}`}>
-                    {isPositive
-                      ? <TrendingUp className="h-3 w-3" />
-                      : <TrendingDown className="h-3 w-3" />
-                    }
-                    {changeDollar !== undefined && (
-                      <>
-                        ${Math.round(Math.abs(changeDollar)).toLocaleString()}
-                        <span className="opacity-50">|</span>
-                      </>
-                    )}
-                    {isPositive ? "+" : ""}{changePercent.toFixed(1)}%
-                  </span>
-                )}
-              </>
-            ) : (
-              <p className="mt-1.5 text-2xl font-bold text-text-muted">&mdash;</p>
-            )}
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#2F8CD9]/10">
+              <DollarSign className="h-5 w-5 text-[#2F8CD9]" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold tabular-nums text-text-primary">
+                {totalValue !== undefined
+                  ? `$${Math.round(totalValue).toLocaleString()}`
+                  : "\u2014"}
+              </p>
+              <p className="text-[11px] text-text-muted">Under Management</p>
+              {changePercent !== undefined && (
+                <span className={`inline-flex items-center gap-1 text-[10px] font-medium ${isPositive ? "text-success" : "text-error"}`}>
+                  {isPositive
+                    ? <TrendingUp className="h-2.5 w-2.5" />
+                    : <TrendingDown className="h-2.5 w-2.5" />
+                  }
+                  {isPositive ? "+" : ""}{changePercent.toFixed(1)}%
+                </span>
+              )}
+            </div>
           </CardContent>
         </Card>
 
-        {/* Stats row */}
-        <div className="grid grid-cols-3 gap-3 lg:gap-4">
-          <Card>
-            <CardContent className="p-4 sm:p-5">
-              <div className="flex items-center gap-2.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#2F8CD9]" />
-                <p className="text-2xl font-bold tabular-nums text-text-primary">
-                  {totalClients}
-                </p>
-              </div>
-              <p className="mt-1 text-xs text-text-muted">Total Clients</p>
-            </CardContent>
-          </Card>
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
+              <UserCheck className="h-5 w-5 text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-text-primary">{totalClients}</p>
+              <p className="text-[11px] text-text-muted">Total Clients</p>
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardContent className="p-4 sm:p-5">
-              <div className="flex items-center gap-2.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-                <p className="text-2xl font-bold tabular-nums text-text-primary">
-                  {activePerms}
-                </p>
-              </div>
-              <p className="mt-1 text-xs text-text-muted">Sharing Data</p>
-            </CardContent>
-          </Card>
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#2F8CD9]/10">
+              <Shield className="h-5 w-5 text-[#2F8CD9]" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-text-primary">{activePerms}</p>
+              <p className="text-[11px] text-text-muted">Sharing Data</p>
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardContent className="p-4 sm:p-5">
-              <div className="flex items-center gap-2.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-                <p className="text-2xl font-bold tabular-nums text-text-primary">
-                  {pending}
-                </p>
-              </div>
-              <p className="mt-1 text-xs text-text-muted">Pending</p>
-            </CardContent>
-          </Card>
-        </div>
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
+              <Clock className="h-5 w-5 text-amber-400" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-amber-400">{pending}</p>
+              <p className="text-[11px] text-text-muted">Pending</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Two-column: Recent Clients (narrow) + LGA chart (wider) */}
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[2fr_3fr] lg:gap-4">
+      {/* Two-column: Recent Clients + LGA chart */}
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
         {/* Recent Clients */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Recent Clients</CardTitle>
+              <div className="flex items-center gap-2">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#2F8CD9]/15">
+                  <Users className="h-3.5 w-3.5 text-[#2F8CD9]" />
+                </div>
+                <CardTitle>Recent Clients</CardTitle>
+              </div>
               <Link
-                href="/dashboard/advisor/clients"
+                href="/dashboard/advisor/clients/connected"
                 className="text-xs font-medium text-[#2F8CD9] hover:underline"
               >
                 View all
@@ -257,6 +253,7 @@ export default async function AdvisorDashboardPage() {
                 const clientId = conn.requester_user_id === user.id ? conn.target_user_id : conn.requester_user_id;
                 const clientProfile = profileMap.get(clientId);
                 const isActive = hasActivePermission(conn);
+                const clientValue = clientValueMap.get(clientId);
                 return (
                   <Link
                     key={conn.id}
@@ -273,21 +270,28 @@ export default async function AdvisorDashboardPage() {
                         </p>
                       )}
                     </div>
-                    <Badge
-                      variant={
-                        conn.status === "pending"
-                          ? "warning"
+                    <div className="flex shrink-0 items-center gap-3">
+                      {clientValue !== undefined && (
+                        <p className="text-sm font-semibold tabular-nums text-text-primary">
+                          ${Math.round(clientValue).toLocaleString()}
+                        </p>
+                      )}
+                      <Badge
+                        variant={
+                          conn.status === "pending"
+                            ? "warning"
+                            : isActive
+                              ? "success"
+                              : "default"
+                        }
+                      >
+                        {conn.status === "pending"
+                          ? "Pending"
                           : isActive
-                            ? "success"
-                            : "default"
-                      }
-                    >
-                      {conn.status === "pending"
-                        ? "Pending"
-                        : isActive
-                          ? "Active"
-                          : "Expired"}
-                    </Badge>
+                            ? "Active"
+                            : "Expired"}
+                      </Badge>
+                    </div>
                   </Link>
                 );
               })}
@@ -295,45 +299,20 @@ export default async function AdvisorDashboardPage() {
           )}
         </Card>
 
-        {/* Right column: LGA chart + Quick actions */}
-        <div className="flex flex-col gap-3 lg:gap-4">
-          <Card>
-            <CardHeader>
+        {/* Right column: LGA chart */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#2F8CD9]/15">
+                <MapPin className="h-3.5 w-3.5 text-[#2F8CD9]" />
+              </div>
               <CardTitle>Clients by Local Govt Area</CardTitle>
-            </CardHeader>
-            <CardContent className="px-5 pb-5">
-              <ClientsByLgaChart data={lgaData} total={totalClients} />
-            </CardContent>
-          </Card>
-
-          {/* Quick actions */}
-          <div className="grid grid-cols-2 gap-3 lg:gap-4">
-            <Link href="/dashboard/advisor/clients">
-              <Card className="transition-colors hover:bg-white/[0.03]">
-                <CardContent className="flex items-center gap-3 p-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#2F8CD9]/15">
-                    <Users className="h-4 w-4 text-[#2F8CD9]" />
-                  </div>
-                  <span className="text-sm font-medium text-text-secondary">
-                    My Clients
-                  </span>
-                </CardContent>
-              </Card>
-            </Link>
-            <Link href="/dashboard/advisor/directory">
-              <Card className="transition-colors hover:bg-white/[0.03]">
-                <CardContent className="flex items-center gap-3 p-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#2F8CD9]/15">
-                    <Search className="h-4 w-4 text-[#2F8CD9]" />
-                  </div>
-                  <span className="text-sm font-medium text-text-secondary">
-                    Find Producers
-                  </span>
-                </CardContent>
-              </Card>
-            </Link>
-          </div>
-        </div>
+            </div>
+          </CardHeader>
+          <CardContent className="px-5 pb-5">
+            <ClientsByLgaChart data={lgaData} total={totalClients} />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

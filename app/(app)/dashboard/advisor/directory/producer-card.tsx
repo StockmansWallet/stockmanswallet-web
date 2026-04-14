@@ -1,18 +1,22 @@
-import Link from "next/link";
-import { ArrowRight, MapPin } from "lucide-react";
+import Image from "next/image";
+import { MapPin } from "lucide-react";
+import { AdvisorConnectButton } from "./advisor-connect-button";
 
 interface ProducerCardProps {
   producer: {
     user_id: string;
     display_name: string;
     company_name: string;
+    property_name?: string;
     state: string;
     region: string;
     bio: string;
   };
+  connectionStatus: string | null;
+  avatarUrl: string | null;
 }
 
-export function ProducerCard({ producer }: ProducerCardProps) {
+export function ProducerCard({ producer, connectionStatus, avatarUrl }: ProducerCardProps) {
   const initials = producer.display_name
     .split(" ")
     .map((n) => n[0])
@@ -21,31 +25,53 @@ export function ProducerCard({ producer }: ProducerCardProps) {
     .toUpperCase();
 
   return (
-    <Link
-      href={`/dashboard/advisor/directory/${producer.user_id}`}
-      className="group flex items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-white/[0.03]"
-    >
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15">
-        <span className="text-sm font-bold text-emerald-400">{initials}</span>
-      </div>
+    <div className="flex items-center gap-3.5 px-4 py-3">
+      {avatarUrl ? (
+        <Image
+          src={avatarUrl}
+          alt={producer.display_name}
+          width={40}
+          height={40}
+          className="h-10 w-10 shrink-0 rounded-full object-cover"
+        />
+      ) : (
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/15">
+          <span className="text-xs font-bold text-emerald-400">{initials}</span>
+        </div>
+      )}
       <div className="min-w-0 flex-1">
         <p className="text-sm font-semibold text-text-primary">{producer.display_name}</p>
-        <div className="mt-0.5 flex items-center gap-2">
-          {producer.company_name && (
-            <span className="text-xs text-text-muted">{producer.company_name}</span>
-          )}
-          {producer.state && (
-            <span className="flex items-center gap-1 text-xs text-text-muted">
-              <MapPin className="h-3 w-3" />
-              {producer.state}{producer.region ? `, ${producer.region}` : ""}
-            </span>
-          )}
+        <div className="mt-0.5 flex items-center gap-x-2 overflow-hidden text-xs text-text-muted">
+          {[
+            producer.company_name && (
+              <span key="company" className="shrink-0 text-text-secondary">{producer.company_name}</span>
+            ),
+            producer.property_name && (
+              <span key="property" className="truncate">{producer.property_name}</span>
+            ),
+            producer.state && (
+              <span key="location" className="inline-flex shrink-0 items-center gap-1">
+                <MapPin className="h-3 w-3" />
+                {producer.state}{producer.region ? `, ${producer.region}` : ""}
+              </span>
+            ),
+            producer.bio && (
+              <span key="bio" className="truncate">{producer.bio}</span>
+            ),
+          ]
+            .filter(Boolean)
+            .flatMap((item, i) =>
+              i === 0 ? [item] : [<span key={`sep-${i}`} className="text-white/15">|</span>, item]
+            )}
         </div>
-        {producer.bio && (
-          <p className="mt-1 line-clamp-1 text-xs text-text-muted">{producer.bio}</p>
-        )}
       </div>
-      <ArrowRight className="h-4 w-4 shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5" />
-    </Link>
+      <div className="shrink-0">
+        <AdvisorConnectButton
+          targetUserId={producer.user_id}
+          existingStatus={connectionStatus}
+          compact
+        />
+      </div>
+    </div>
   );
 }

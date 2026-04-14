@@ -1,39 +1,45 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { UserPlus, Check, Clock } from "lucide-react";
 import { sendAdvisorConnectionRequest } from "../clients/actions";
 
 interface AdvisorConnectButtonProps {
   targetUserId: string;
   existingStatus: string | null;
+  compact?: boolean;
 }
+
+const base = "inline-flex items-center justify-center font-semibold transition-all duration-150";
+const sm = "h-8 rounded-lg px-3.5 text-[13px]";
+const md = "h-9 rounded-lg px-4 text-[13px]";
 
 export function AdvisorConnectButton({
   targetUserId,
   existingStatus,
+  compact,
 }: AdvisorConnectButtonProps) {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(existingStatus);
   const [error, setError] = useState<string | null>(null);
 
+  const sizeClass = compact ? sm : md;
+
   if (status === "approved") {
     return (
-      <Badge variant="success">
-        <Check className="mr-1 h-3 w-3" />
+      <span className={`${base} ${sizeClass} bg-emerald-500/15 text-emerald-400`}>
+        <Check className="mr-1.5 h-4 w-4" />
         Connected
-      </Badge>
+      </span>
     );
   }
 
   if (status === "pending") {
     return (
-      <Badge variant="warning">
-        <Clock className="mr-1 h-3 w-3" />
-        Request Pending
-      </Badge>
+      <span className={`${base} ${sizeClass} bg-amber-500/15 text-amber-400`}>
+        <Clock className="mr-1.5 h-4 w-4" />
+        Pending
+      </span>
     );
   }
 
@@ -51,17 +57,23 @@ export function AdvisorConnectButton({
     setLoading(false);
   };
 
+  const label = loading
+    ? "Sending..."
+    : compact
+      ? isDeniedOrExpired ? "Reconnect" : "Connect"
+      : isDeniedOrExpired ? "Re-request Connection" : "Request Connection";
+
   return (
     <div>
-      <Button
-        variant="advisor"
+      <button
+        className={`${base} ${sizeClass} bg-brand text-white shadow-sm hover:bg-brand-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none`}
         onClick={handleRequest}
         disabled={loading}
       >
         <UserPlus className="mr-1.5 h-4 w-4" />
-        {loading ? "Sending..." : isDeniedOrExpired ? "Re-request Connection" : "Request Connection"}
-      </Button>
-      {isDeniedOrExpired && (
+        {label}
+      </button>
+      {!compact && isDeniedOrExpired && (
         <p className="mt-1 text-xs text-text-muted">
           Previous request was {status}. You can send a new one.
         </p>

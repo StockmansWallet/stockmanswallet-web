@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { redirect, notFound } from "next/navigation";
@@ -10,7 +9,7 @@ import { ClientOverview } from "@/components/app/advisory/client-overview";
 import { ClientHerdsTable } from "@/components/app/advisory/client-herds-table";
 import { AdvisorChatClient } from "./advisor-chat-client";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Lock, ChevronLeft } from "lucide-react";
+import { Lock } from "lucide-react";
 import { RemoveClientButton } from "./remove-client-button";
 import type { ConnectionRequest, AdvisoryMessage } from "@/lib/types/advisory";
 import { parseSharingPermissions, hasActivePermission } from "@/lib/types/advisory";
@@ -79,7 +78,7 @@ export default async function ClientDetailPage({
   // Get client display name
   const { data: clientProfile } = await supabase
     .from("user_profiles")
-    .select("display_name, company_name")
+    .select("display_name, company_name, property_name, role")
     .eq("user_id", clientUserId)
     .single();
 
@@ -237,20 +236,9 @@ export default async function ClientDetailPage({
   };
 
   return (
-    <div className="max-w-6xl">
-      {/* Back nav */}
-      <div className="pb-4 pt-6">
-        <Link
-          href="/dashboard/advisor/clients"
-          className="inline-flex items-center gap-1 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-sm text-text-muted transition-colors hover:bg-surface-low hover:text-text-secondary"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          Clients
-        </Link>
-      </div>
-
+    <div className="max-w-5xl">
       {/* Client header: avatar + name + badges + actions */}
-      <div className="mb-6 flex items-center gap-4">
+      <div className="mb-6 mt-6 flex items-end gap-4">
         {clientAvatarUrl ? (
           <Image
             src={clientAvatarUrl}
@@ -266,14 +254,16 @@ export default async function ClientDetailPage({
         )}
         <div className="min-w-0 flex-1">
           <h1 className="text-2xl font-bold text-text-primary">{clientName}</h1>
-          <div className="mt-1 flex flex-wrap items-center gap-2">
-            {clientProfile?.company_name && (
-              <Badge variant="default">{clientProfile.company_name}</Badge>
-            )}
-            <Badge variant={isActive ? "success" : "default"}>
-              {isActive ? "Sharing" : "Not sharing"}
-            </Badge>
-          </div>
+          {(clientProfile?.property_name || clientProfile?.company_name) && (
+            <p className="mt-0.5 text-sm text-text-secondary">
+              {[clientProfile?.property_name, clientProfile?.company_name].filter(Boolean).join(" · ")}
+            </p>
+          )}
+        </div>
+        <div className="shrink-0">
+          <Badge variant={isActive ? "success" : "default"}>
+            {isActive ? "Sharing Data" : "Not Sharing"}
+          </Badge>
         </div>
       </div>
 
