@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Wallet, TrendingUp, BookOpen, FileText, Truck, Grid3x3, Users, Handshake, Lightbulb } from 'lucide-react'
+import { ADVISOR_ENABLED } from '@/lib/feature-flags'
 import { IconCattleTags } from '@/components/icons/icon-cattle-tags'
 
 interface FeatureTab {
@@ -71,7 +72,8 @@ const FEATURE_TABS: FeatureTab[] = [
     mockup: '/images/iphone-screen-reports.webp',
     icon: <FileText className="h-5 w-5" />,
   },
-  {
+  // Advisory Hub feature tab - hidden when advisor feature flag is off
+  ...(ADVISOR_ENABLED ? [{
     id: 'advisory',
     name: 'Advisory Hub',
     tagline: 'Your portfolio, your terms',
@@ -87,7 +89,7 @@ const FEATURE_TABS: FeatureTab[] = [
     ],
     mockup: '/images/iphone-screen-advisor-directory.webp',
     icon: <Users className="h-5 w-5" />,
-  },
+  }] as FeatureTab[] : []),
   {
     id: 'yardbook',
     name: 'Yard Book',

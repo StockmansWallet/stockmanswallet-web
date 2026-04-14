@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { X, Check } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Modal } from '@/components/ui/modal'
+import { ADVISOR_ENABLED } from '@/lib/feature-flags'
 
 type Role = 'producer' | 'advisor'
 type HerdSize = 'under_50' | '50_500' | '500_2000' | '2000_plus'
@@ -24,10 +25,15 @@ interface WaitlistFormData {
   contact_opt_in: boolean
 }
 
-const ROLE_OPTIONS: { value: Role; label: string }[] = [
+const ALL_ROLE_OPTIONS: { value: Role; label: string }[] = [
   { value: 'producer', label: 'Producer' },
   { value: 'advisor', label: 'Advisor' },
 ]
+
+// Advisor role hidden from waitlist when feature flag is off
+const ROLE_OPTIONS = ADVISOR_ENABLED
+  ? ALL_ROLE_OPTIONS
+  : ALL_ROLE_OPTIONS.filter((o) => o.value !== 'advisor')
 
 const HERD_SIZE_OPTIONS: { value: HerdSize; label: string }[] = [
   { value: 'under_50', label: 'Under 50' },
@@ -69,7 +75,8 @@ const FEATURE_OPTIONS: Record<Role, { value: string; label: string }[]> = {
     { value: 'grid_iq', label: 'Grid IQ' },
     { value: 'insights', label: 'Insights' },
     { value: 'producer_network', label: 'Producer Network' },
-    { value: 'advisory_hub', label: 'Advisory Hub' },
+    // Advisory Hub hidden when advisor feature flag is off
+    ...(ADVISOR_ENABLED ? [{ value: 'advisory_hub', label: 'Advisory Hub' }] : []),
     { value: 'markets', label: 'Markets' },
   ],
   advisor: [
@@ -86,7 +93,8 @@ const FEATURE_OPTIONS: Record<Role, { value: string; label: string }[]> = {
 const INITIAL_FORM: WaitlistFormData = {
   name: '',
   email: '',
-  role: '',
+  // Auto-select producer when it's the only role option
+  role: ROLE_OPTIONS.length === 1 ? ROLE_OPTIONS[0].value : '',
   postcode: '',
   herd_size: '',
   property_count: '',
@@ -312,28 +320,30 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Role — Apple segmented control */}
-          <div>
-            <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-text-muted">
-              I am a <span className="text-brand/80">*</span>
-            </label>
-            <div className="flex rounded-xl bg-white/[0.04] p-1">
-              {ROLE_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => updateField('role', opt.value)}
-                  className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer ${
-                    form.role === opt.value
-                      ? 'bg-brand text-white shadow-sm'
-                      : 'text-text-muted hover:text-text-secondary'
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
+          {/* Role — Apple segmented control (hidden when only one option) */}
+          {ROLE_OPTIONS.length > 1 ? (
+            <div>
+              <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-text-muted">
+                I am a <span className="text-brand/80">*</span>
+              </label>
+              <div className="flex rounded-xl bg-white/[0.04] p-1">
+                {ROLE_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => updateField('role', opt.value)}
+                    className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer ${
+                      form.role === opt.value
+                        ? 'bg-brand text-white shadow-sm'
+                        : 'text-text-muted hover:text-text-secondary'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          ) : null}
 
           {/* Name + Email */}
           <div className="grid gap-4 sm:grid-cols-2">
