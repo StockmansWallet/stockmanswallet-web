@@ -174,7 +174,7 @@ export default async function ProducerConnectionDetailPage({
           },
           {
             id: "sharing",
-            label: "Sharing",
+            label: "Shared Data",
             content: (
               <SharingPreferencesCard
                 connectionId={id}
@@ -185,7 +185,7 @@ export default async function ProducerConnectionDetailPage({
           },
           {
             id: "chat",
-            label: "Chat",
+            label: "Agent Chat",
             content: (
               <Card className="flex h-[500px] flex-col">
                 <CardContent className="flex flex-1 flex-col overflow-hidden p-0">
