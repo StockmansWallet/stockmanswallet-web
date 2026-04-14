@@ -3,6 +3,7 @@
 // Runs as a server component data loader (no client JS)
 
 import { createClient } from "@/lib/supabase/server";
+import { getEffectiveJoinedDate } from "@/lib/data/breeding";
 import {
   calculateHerdValuation,
   calculateProjectedWeight,
@@ -353,10 +354,10 @@ function evaluateBreeding(
   const now = new Date();
   const GESTATION_DAYS = 283; // cattle
 
-  const pregnantHerds = valuations.filter((v) => v.herd.is_pregnant && v.herd.joined_date);
+  const pregnantHerds = valuations.filter((v) => v.herd.is_pregnant && getEffectiveJoinedDate(v.herd) !== null);
 
   for (const { herd, result } of pregnantHerds.slice(0, 2)) {
-    const joinedDate = new Date(herd.joined_date!);
+    const joinedDate = getEffectiveJoinedDate(herd)!;
     const daysSinceJoining = daysBetween(joinedDate, now);
     const progress = Math.min(100, Math.round((daysSinceJoining / GESTATION_DAYS) * 100));
     const daysRemaining = Math.max(0, GESTATION_DAYS - daysSinceJoining);

@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { Download, ArrowUpDown, ChevronDown, ChevronRight, FlaskConical } from "lucide-react";
 import type { HerdWithValuation } from "./page";
+import { getEffectiveJoinedDate } from "@/lib/data/breeding";
 
 type SortKey = "name" | "netValue" | "physicalValue" | "projectedWeight" | "pricePerKg" | "head_count" | "daysHeld";
 type SortDir = "asc" | "desc";
@@ -310,7 +311,12 @@ function ExpandedDetail({ herd }: { herd: HerdWithValuation }) {
             },
             {
               label: "Effective Joined Date",
-              value: herd.joined_date ? new Date(herd.joined_date).toLocaleDateString("en-AU") : "not derived",
+              value: (() => {
+                const effective = getEffectiveJoinedDate(herd);
+                if (!effective) return "not derived";
+                const label = effective.toLocaleDateString("en-AU");
+                return herd.joined_date ? label : `${label} (derived)`;
+              })(),
             },
           ]
         : herd.breeding_program_type === "uncontrolled"

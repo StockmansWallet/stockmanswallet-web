@@ -4,6 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getEffectiveJoinedDate } from "@/lib/data/breeding";
 
 const yardBookItemSchema = z.object({
   title: z.string().min(1).max(200),
@@ -281,8 +282,13 @@ export async function syncBreedingMilestonesForHerd(
     .eq("is_deleted", false)
     .eq("is_completed", false);
 
-  // Step 2: Guard - only create milestones for breeders with joining data
-  if (!herd.is_breeder || !herd.joined_date) {
+  // Step 2: Derive effective joined date (mirrors iOS Herd.effectiveJoinedDate)
+  const effectiveJoinedDateObj = getEffectiveJoinedDate(herd);
+  const effectiveJoinedDate = effectiveJoinedDateObj
+    ? `${effectiveJoinedDateObj.getFullYear()}-${String(effectiveJoinedDateObj.getMonth() + 1).padStart(2, "0")}-${String(effectiveJoinedDateObj.getDate()).padStart(2, "0")}`
+    : null;
+
+  if (!herd.is_breeder || !effectiveJoinedDate) {
     revalidatePath("/dashboard/tools/yard-book");
     return;
   }
@@ -310,7 +316,7 @@ export async function syncBreedingMilestonesForHerd(
 
   // Milestone 1: Expected Calving (joinedDate + 283 days)
   if (!completedPrefixes.has("Expected Calving")) {
-    const calvingDate = addDays(herd.joined_date, GESTATION_DAYS);
+    const calvingDate = addDays(effectiveJoinedDate, GESTATION_DAYS);
     items.push({
       id: crypto.randomUUID(),
       user_id: user.id,
@@ -332,7 +338,7 @@ export async function syncBreedingMilestonesForHerd(
 
   // Milestone 2: Pregnancy Testing (joinedDate + 60 days)
   if (!completedPrefixes.has("Pregnancy Testing")) {
-    const pregTestDate = addDays(herd.joined_date, PREG_TEST_DAYS);
+    const pregTestDate = addDays(effectiveJoinedDate, PREG_TEST_DAYS);
     items.push({
       id: crypto.randomUUID(),
       user_id: user.id,
