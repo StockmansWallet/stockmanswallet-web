@@ -49,3 +49,44 @@ export async function markAllAsRead() {
   revalidatePath("/dashboard/notifications");
   return { success: true };
 }
+
+export async function deleteNotification(notificationId: string) {
+  const parsed = notificationIdSchema.safeParse({ notificationId });
+  if (!parsed.success) return { error: "Invalid input" };
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Not authenticated" };
+
+  const { error } = await supabase
+    .from("notifications")
+    .delete()
+    .eq("id", notificationId)
+    .eq("user_id", user.id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/notifications");
+  return { success: true };
+}
+
+export async function deleteAllNotifications() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Not authenticated" };
+
+  const { error } = await supabase
+    .from("notifications")
+    .delete()
+    .eq("user_id", user.id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/notifications");
+  return { success: true };
+}

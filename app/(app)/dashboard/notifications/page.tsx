@@ -4,7 +4,8 @@ import { Bell, UserPlus, Check, X, Clock, MessageSquare, RefreshCw, Handshake, B
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import type { AppNotification, NotificationType } from "@/lib/types/advisory";
-import { MarkAllReadButton } from "./mark-all-read-button";
+import { NotificationActionsBar } from "./notification-actions-bar";
+import { DeleteNotificationButton } from "./delete-notification-button";
 
 const typeIcons: Record<NotificationType, typeof Bell> = {
   new_connection_request: UserPlus,
@@ -68,7 +69,12 @@ export default async function NotificationsPage() {
       <PageHeader
         title="Notifications"
         subtitle={unreadCount > 0 ? `${unreadCount} unread` : undefined}
-        actions={unreadCount > 0 ? <MarkAllReadButton /> : undefined}
+        actions={
+          <NotificationActionsBar
+            hasUnread={unreadCount > 0}
+            totalCount={notifications.length}
+          />
+        }
       />
 
       {notifications.length === 0 ? (
@@ -89,7 +95,7 @@ export default async function NotificationsPage() {
                 {items.map((n) => {
                   const Icon = typeIcons[n.type] ?? Bell;
                   return (
-                    <li key={n.id}>
+                    <li key={n.id} className="group">
                       <a
                         href={n.link ?? "#"}
                         className={`flex items-start gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-white/[0.03] ${
@@ -121,6 +127,7 @@ export default async function NotificationsPage() {
                         {!n.is_read && (
                           <div className="mt-2 h-2 w-2 shrink-0 rounded-full bg-orange-400" />
                         )}
+                        <DeleteNotificationButton notificationId={n.id} />
                       </a>
                     </li>
                   );
