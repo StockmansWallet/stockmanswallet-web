@@ -195,7 +195,7 @@ export function LensHerdCard({
           {/* Footer: regional fetch + remove on one row */}
           <div className="flex items-center justify-between pt-1">
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={handleFetchRegional}
               disabled={fetchingRegional}
