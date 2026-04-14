@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Mail, Phone, Building2, Calendar, Trash2, Info } from "lucide-react";
+import { Mail, Phone, Building2, Calendar, Trash2, Info, X } from "lucide-react";
 import { grantDataAccess, stopSharing, disconnectAdvisor } from "@/app/(app)/dashboard/advisory-hub/my-advisors/actions";
 import { ConfirmModal } from "@/components/app/advisory/confirm-modal";
 import {
@@ -149,41 +149,52 @@ export function AdvisorBusinessCard({ connection, advisorEmail, advisorPhone, av
             }}
             onClick={() => setFlipped(false)}
           >
-            <div className="flex h-full flex-col p-5">
+            <div className="flex h-full flex-col justify-between p-5">
               {/* Header */}
-              <h3 className="mb-4 text-sm font-bold text-text-primary">{connection.requester_name}</h3>
+              <h3 className="text-sm font-bold text-text-primary">{connection.requester_name}</h3>
 
-              {/* Settings */}
-              <div className="space-y-3">
-                <div className="w-fit" onClick={(e) => e.stopPropagation()}>
-                  <Switch
-                    id={`sharing-${connection.id}`}
-                    checked={isSharing}
-                    onChange={handleToggleSharing}
-                    disabled={loading}
-                    color="green"
-                    label="Data sharing"
-                  />
-                </div>
-
-                <div className="flex items-center gap-2 text-xs text-text-muted">
-                  <Calendar className="h-3 w-3 shrink-0" />
-                  Connected {connectedDate}
-                </div>
+              {/* Data sharing row: label left, toggle right */}
+              <div className="flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
+                <span className="text-sm text-text-primary">Data sharing</span>
+                <Switch
+                  id={`sharing-${connection.id}`}
+                  checked={isSharing}
+                  onChange={handleToggleSharing}
+                  disabled={loading}
+                  color="green"
+                />
               </div>
 
-              {/* Remove */}
-              <div className="mt-auto pt-3" onClick={(e) => e.stopPropagation()}>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setShowRemove(true)}
-                  disabled={loading}
-                  className="gap-1.5"
+              {/* Connected date + remove */}
+              <div className="flex items-end justify-between">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-xs text-text-muted">
+                    <Calendar className="h-3 w-3 shrink-0" />
+                    Connected {connectedDate}
+                  </div>
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => setShowRemove(true)}
+                      disabled={loading}
+                      className="gap-1.5"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                      Remove Advisor
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Close button */}
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setFlipped(false); }}
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.08] text-text-muted transition-colors hover:bg-white/[0.15] hover:text-text-secondary"
+                  aria-label="Close settings"
                 >
-                  <Trash2 className="h-3 w-3" />
-                  Remove Advisor
-                </Button>
+                  <X className="h-3.5 w-3.5" />
+                </button>
               </div>
             </div>
           </div>
