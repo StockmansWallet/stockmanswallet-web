@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { YardBookBanner } from "@/components/app/yard-book-banner";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { StatCard } from "@/components/ui/stat-card";
 import { calculateProjectedWeight, calculateHerdValuation, categoryFallback, parseCalvesAtFoot, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
@@ -15,7 +15,7 @@ import { getEffectiveJoinedDate } from "@/lib/data/breeding";
 import { DeleteHerdButton } from "./delete-button";
 import { MusterRecordsSection } from "@/components/app/muster-records-section";
 import { HealthRecordsSection } from "@/components/app/health-records-section";
-import { Pencil, Info, Scale, Heart, MapPin, FileText, DollarSign, AlertTriangle, BarChart3, Clock, HandCoins } from "lucide-react";
+import { Info, Scale, Heart, MapPin, FileText, Clock } from "lucide-react";
 
 export const revalidate = 0;
 
@@ -203,296 +203,250 @@ export default async function HerdDetailPage({
 
   const property = herd.properties as { property_name: string } | null;
 
+  const categoryLabel = herd.sub_category && herd.sub_category !== herd.category
+    ? `${herd.category} (${herd.sub_category})`
+    : herd.category;
+  const avgWeight = Math.round(projectedWeight ?? herd.current_weight ?? herd.initial_weight ?? 0);
+  const valuePerHead = herd.head_count ? Math.round(herdValue / herd.head_count) : 0;
+
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-4xl">
       <PageHeader
         title={herd.name}
-        subtitle={[herd.species, herd.breed, herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} (${herd.sub_category})` : herd.category].filter(Boolean).join(" \u00B7 ")}
-        actions={
-          <div className="flex items-center gap-2">
-            {!herd.is_sold && (
-              <Link href={`/dashboard/herds/${id}/sell`}>
-                <Button variant="secondary" size="sm">
-                  <HandCoins className="mr-1.5 h-3.5 w-3.5" />
-                  Sell
-                </Button>
-              </Link>
-            )}
-            <Link href={`/dashboard/herds/${id}/edit`}>
-              <Button variant="secondary" size="sm">
-                <Pencil className="mr-1.5 h-3.5 w-3.5" />
-                Edit
-              </Button>
-            </Link>
-            <DeleteHerdButton id={id} name={herd.name} />
-          </div>
-        }
+        titleClassName="text-4xl font-bold text-brand"
+        subtitle={[herd.species, herd.breed, categoryLabel].filter(Boolean).join(" | ")}
       />
 
-      <div className="flex flex-col gap-4 lg:flex-row">
-        {/* Left column */}
-        <div className="flex min-w-0 flex-1 flex-col gap-4">
-          {/* Herd Value */}
-          {herdValue > 0 && (
-            <div className="rounded-2xl bg-white/5 p-5">
-              <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isFallback ? "bg-red-500/15" : isStale ? "bg-amber-500/15" : "bg-brand/15"}`}>
-                  {isFallback
-                    ? <AlertTriangle className="h-5 w-5 text-red-400" />
-                    : isStale
-                      ? <Clock className="h-5 w-5 text-amber-400" />
-                      : <DollarSign className="h-5 w-5 text-brand" />
-                  }
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-text-muted">Estimated Herd Value</p>
-                  <p className={`mt-0.5 text-2xl font-bold tabular-nums ${isFallback ? "text-red-400" : isStale ? "text-amber-400" : "text-text-primary"}`}>
-                    ${Math.round(herdValue).toLocaleString()}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    {(herd.head_count ?? 0) > 0 && (
-                      <p className={`text-xs ${isFallback ? "text-red-400/70" : isStale ? "text-amber-400/70" : "text-text-muted"}`}>
-                        ${Math.round(herdValue / herd.head_count).toLocaleString()} per head
-                      </p>
-                    )}
-                    {isFallback && (
-                      <span className="inline-flex items-center rounded-md bg-red-500/15 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
-                        {valuation.priceSource === "national" ? "National Avg" : "Est. Fallback"}
-                      </span>
-                    )}
-                    {isStale && (
-                      <span className="inline-flex items-center rounded-md bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-400">
-                        Stale - {staleWeeks}w
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Key Metrics */}
-          {herdValue > 0 && (
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2.5">
-                  <SectionIcon icon={BarChart3} />
-                  <CardTitle>Key Metrics</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
-                <InfoRow label="Price (Per Kilogram)" value={`$${valuation.pricePerKg.toFixed(2)}/kg`} valueClassName={isFallback ? "text-red-400" : isStale ? "text-amber-400" : undefined} />
-                <InfoRow label="Average Weight" value={`${Math.round(projectedWeight ?? herd.current_weight ?? herd.initial_weight ?? 0)} kg`} />
-                <InfoRow label="Value Per Head" value={`$${Math.round(herdValue / (herd.head_count || 1)).toLocaleString()}`} />
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Weight Tracking */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2.5">
-                <SectionIcon icon={Scale} />
-                <CardTitle>Weight Tracking</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
-              <InfoRow label="Initial Weight" value={herd.initial_weight ? `${herd.initial_weight} kg` : null} />
-              <InfoRow label="Current Weight" value={herd.current_weight ? `${herd.current_weight} kg` : null} />
-              {projectedWeight && <InfoRow label="Projected Weight" value={`${Math.round(projectedWeight)} kg`} />}
-              <InfoRow label="Daily Weight Gain" value={herd.daily_weight_gain ? `${herd.daily_weight_gain} kg/day` : null} />
-              {herd.mortality_rate != null && herd.mortality_rate > 0 && (
-                <InfoRow label="Mortality Rate" value={`${Math.round(herd.mortality_rate * 100)}% annually`} />
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Timeline */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2.5">
-                <SectionIcon icon={Clock} />
-                <CardTitle>Timeline</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
-              <InfoRow label="Days Held" value={`${Math.max(0, Math.round((Date.now() - new Date(herd.created_at).getTime()) / 86400000))} days`} />
-              <InfoRow label="Created" value={new Date(herd.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })} />
-              <InfoRow label="Last Updated" value={new Date(herd.updated_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })} />
-            </CardContent>
-          </Card>
+      {/* Stats row */}
+      {herdValue > 0 && (
+        <div className="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-5 lg:gap-4">
+          <StatCard label="Herd Value" value={`$${Math.round(herdValue).toLocaleString()}`} />
+          <StatCard label="$/kg" value={valuation.pricePerKg > 0 ? `$${valuation.pricePerKg.toFixed(2)}` : "\u2014"} />
+          <StatCard label="Avg Weight" value={avgWeight > 0 ? `${avgWeight} kg` : "\u2014"} />
+          <StatCard label="Value/Head" value={valuePerHead > 0 ? `$${valuePerHead.toLocaleString()}` : "\u2014"} />
+          {herd.head_count && <StatCard label="Head Count" value={`${herd.head_count.toLocaleString()}`} />}
         </div>
+      )}
 
-        {/* Right column */}
-        <div className="flex min-w-0 flex-1 flex-col gap-4">
-          {/* Location */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2.5">
-                <SectionIcon icon={MapPin} />
-                <CardTitle>Location</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
-              {property && (
-                <div className="flex items-center justify-between py-3 text-sm">
-                  <span className="text-text-muted">Property</span>
-                  <Link href={`/dashboard/properties/${herd.property_id}`} className="font-medium text-brand hover:underline">
-                    {property.property_name}
-                  </Link>
-                </div>
-              )}
-              <InfoRow label="Paddock" value={herd.paddock_name} />
-              <InfoRow label="Saleyard" value={herd.selected_saleyard} />
-            </CardContent>
-          </Card>
-
-          {/* Physical Attributes */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2.5">
-                <SectionIcon icon={Info} />
-                <CardTitle>Physical Attributes</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
-              <InfoRow label="Herd Size" value={herd.head_count ? `${herd.head_count.toLocaleString()} head` : null} />
-              <InfoRow label="Species" value={herd.species} />
-              <InfoRow label="Breed" value={herd.breed} />
-              <InfoRow label="Category" value={herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} (${herd.sub_category})` : herd.category} />
-              <InfoRow label="Age" value={herd.age_months ? `${herd.age_months} months` : null} />
-              <InfoRow label="Breed Premium" value={valuation.breedPremiumApplied !== 0 ? `${valuation.breedPremiumApplied > 0 ? "+" : ""}${valuation.breedPremiumApplied}%` : null} />
-              <InfoRow label="Animal ID" value={herd.animal_id_number} />
-              {herd.is_sold && (
-                <div className="flex items-center justify-between py-3 text-sm">
-                  <span className="text-text-muted">Status</span>
-                  <Badge variant="danger">Sold</Badge>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Breeding */}
-          {herd.is_breeder && (
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2.5">
-                  <SectionIcon icon={Heart} />
-                  <CardTitle>Breeding</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
-                <div className="flex items-center justify-between py-3 text-sm">
-                  <span className="text-text-muted">Pregnant</span>
-                  <Badge variant={herd.is_pregnant ? "success" : "default"}>{herd.is_pregnant ? "Yes" : "No"}</Badge>
-                </div>
-                <InfoRow label="Breeding Program" value={herd.breeding_program_type ? herd.breeding_program_type.charAt(0).toUpperCase() + herd.breeding_program_type.slice(1) : null} />
-                {herd.joining_period_start && (
-                  <InfoRow
-                    label={herd.breeding_program_type === "ai" ? "Insemination Started" : "Put Bulls In"}
-                    value={new Date(herd.joining_period_start).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
-                  />
-                )}
-                {herd.joining_period_end && (
-                  <InfoRow
-                    label={herd.breeding_program_type === "ai" ? "Insemination Complete" : "Pull Bulls Out"}
-                    value={new Date(herd.joining_period_end).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
-                  />
-                )}
-                {effectiveJoinedDateObj && (herd.breeding_program_type === "ai" || herd.breeding_program_type === "controlled") && (
-                  <InfoRow label="Effective Joining Date" value={effectiveJoinedDateObj.toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })} />
-                )}
-                {effectiveJoinedDateObj && hasJoiningStarted && (
-                  <InfoRow label="Days Since Joining" value={`${daysSinceJoined} days`} />
-                )}
-                {effectiveJoinedDateObj && !hasJoiningStarted && daysUntilJoining > 0 && (
-                  <InfoRow label="Days Until Joining" value={`${daysUntilJoining} days`} />
-                )}
-                {effectiveJoinedDateObj && (
-                  <InfoRow
-                    label="Expected Calving"
-                    value={new Date(effectiveJoinedDateObj.getTime() + breedingCycleDays * 86400000).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
-                  />
-                )}
-                {effectiveJoinedDateObj && hasJoiningStarted && herd.is_pregnant && daysUntilCalving > 0 && (
-                  <InfoRow label="Est. Days to Calving" value={`${daysUntilCalving} days`} />
-                )}
-                {effectiveJoinedDateObj && hasJoiningStarted && gestationProgress > 5 && gestationProgress < 100 && (
-                  <InfoRow label="Gestation Progress" value={`${Math.round(gestationProgress)}%`} />
-                )}
-                <InfoRow label="Calving Rate" value={herd.calving_rate ? `${Math.round(herd.calving_rate > 1 ? herd.calving_rate : herd.calving_rate * 100)}%` : null} />
-                <InfoRow label="Lactation Status" value={herd.lactation_status} />
-                {calvesData && (
-                  <InfoRow
-                    label="Calves at Foot"
-                    value={`${calvesData.headCount} head, ${calvesData.ageMonths} months${calvesData.averageWeight ? `, ${Math.round(calvesData.averageWeight)} kg` : ""}`}
-                  />
-                )}
-              </CardContent>
-
-              {/* Calf Value Breakdown */}
-              {valuation.breedingAccrual > 0 && (
-                <CardContent className="px-5 pb-5 pt-0">
-                  <div className="border-t border-white/[0.04] pt-3">
-                    <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-text-muted">
-                      Calf Value Breakdown
-                    </p>
-                    <div className="divide-y divide-white/[0.04]">
-                      {estimatedCalfBirthValue != null && estimatedCalfBirthValue > 0 && (
-                        <InfoRow label="Est. Value Per Calf" value={`$${Math.round(estimatedCalfBirthValue).toLocaleString()}`} />
-                      )}
-                      {unbornProgenyValue > 0 && (
-                        <InfoRow label="Unborn Progeny (Accruing)" value={`$${Math.round(unbornProgenyValue).toLocaleString()}`} />
-                      )}
-                      {calvesData && calvesAtFootValue > 0 && (
-                        <InfoRow label={`Calves at Foot (${calvesData.headCount} head)`} value={`$${Math.round(calvesAtFootValue).toLocaleString()}`} />
-                      )}
-                      {unbornProgenyValue > 0 && calvesData && calvesAtFootValue > 0 && (
-                        <>
-                          <div className="flex items-center justify-between py-3 text-sm">
-                            <span className="font-semibold text-text-primary">Total Calf Value</span>
-                            <span className="font-semibold tabular-nums text-emerald-400">
-                              ${Math.round(valuation.breedingAccrual).toLocaleString()}
-                            </span>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              )}
-            </Card>
+      {/* Action bar */}
+      <div className="mt-3 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2 lg:mt-4">
+        <div className="flex items-center gap-1.5 pl-2">
+          {isFallback && (
+            <span className="inline-flex items-center rounded-full bg-red-500/15 px-2 py-1 text-[10px] font-medium text-red-400">
+              {valuation.priceSource === "national" ? "National Avg" : "Est. Fallback"}
+            </span>
           )}
-
-          {/* Debug: Yard Book confirmation banner, placed below the breeding card for visibility */}
-          {herd.is_breeder && (
-            <Suspense>
-              <YardBookBanner />
-            </Suspense>
+          {isStale && (
+            <span className="inline-flex items-center rounded-full bg-amber-500/15 px-2 py-1 text-[10px] font-medium text-amber-400">
+              Stale - {staleWeeks}w
+            </span>
           )}
-
-          {/* Mustering Records */}
-          <MusterRecordsSection herdId={id} records={musterRecords ?? []} editable />
-
-          {/* Health Records */}
-          <HealthRecordsSection herdId={id} records={healthRecords ?? []} editable />
+        </div>
+        <div className="flex items-center gap-1.5">
+          {!herd.is_sold && (
+            <Link
+              href={`/dashboard/herds/${id}/sell`}
+              className="inline-flex h-8 shrink-0 items-center rounded-full bg-surface-lowest px-3.5 text-xs font-medium text-text-muted transition-all hover:bg-surface-raised hover:text-text-secondary"
+            >
+              Sell
+            </Link>
+          )}
+          <Link
+            href={`/dashboard/herds/${id}/edit`}
+            className="inline-flex h-8 shrink-0 items-center rounded-full bg-surface-lowest px-3.5 text-xs font-medium text-text-muted transition-all hover:bg-surface-raised hover:text-text-secondary"
+          >
+            Edit
+          </Link>
+          <DeleteHerdButton id={id} name={herd.name} />
         </div>
       </div>
 
-      {/* Notes - full width below both columns */}
-      {herd.notes && (
-        <Card className="mt-4">
+      <div className="mt-3 flex flex-col gap-4 lg:mt-4">
+        {/* 1. Physical Attributes */}
+        <Card>
           <CardHeader>
             <div className="flex items-center gap-2.5">
-              <SectionIcon icon={FileText} />
-              <CardTitle>Notes</CardTitle>
+              <SectionIcon icon={Info} />
+              <CardTitle>Physical Attributes</CardTitle>
             </div>
           </CardHeader>
-          <CardContent>
-            <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-secondary">{herd.notes}</p>
+          <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
+            <InfoRow label="Herd Size" value={herd.head_count ? `${herd.head_count.toLocaleString()} head` : null} />
+            <InfoRow label="Species" value={herd.species} />
+            <InfoRow label="Breed" value={herd.breed} />
+            <InfoRow label="Category" value={categoryLabel} />
+            <InfoRow label="Age" value={herd.age_months ? `${herd.age_months} months` : null} />
+            <InfoRow label="Breed Premium" value={valuation.breedPremiumApplied !== 0 ? `${valuation.breedPremiumApplied > 0 ? "+" : ""}${valuation.breedPremiumApplied}%` : null} />
+            <InfoRow label="Animal ID" value={herd.animal_id_number} />
+            {herd.is_sold && (
+              <div className="flex items-center justify-between py-3 text-sm">
+                <span className="text-text-muted">Status</span>
+                <Badge variant="danger">Sold</Badge>
+              </div>
+            )}
           </CardContent>
         </Card>
-      )}
+
+        {/* 2. Location */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2.5">
+              <SectionIcon icon={MapPin} />
+              <CardTitle>Location</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
+            {property && (
+              <div className="flex items-center justify-between py-3 text-sm">
+                <span className="text-text-muted">Property</span>
+                <Link href={`/dashboard/properties/${herd.property_id}`} className="font-medium text-brand hover:underline">
+                  {property.property_name}
+                </Link>
+              </div>
+            )}
+            <InfoRow label="Paddock" value={herd.paddock_name} />
+            <InfoRow label="Saleyard" value={herd.selected_saleyard} />
+          </CardContent>
+        </Card>
+
+        {/* 3. Weight Tracking */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2.5">
+              <SectionIcon icon={Scale} />
+              <CardTitle>Weight Tracking</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
+            <InfoRow label="Initial Weight" value={herd.initial_weight ? `${herd.initial_weight} kg` : null} />
+            <InfoRow label="Current Weight" value={herd.current_weight ? `${herd.current_weight} kg` : null} />
+            {projectedWeight && <InfoRow label="Projected Weight" value={`${Math.round(projectedWeight)} kg`} />}
+            <InfoRow label="Daily Weight Gain" value={herd.daily_weight_gain ? `${herd.daily_weight_gain} kg/day` : null} />
+            {herd.mortality_rate != null && herd.mortality_rate > 0 && (
+              <InfoRow label="Mortality Rate" value={`${Math.round(herd.mortality_rate * 100)}% annually`} />
+            )}
+          </CardContent>
+        </Card>
+
+        {/* 4. Breeding */}
+        {herd.is_breeder && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2.5">
+                <SectionIcon icon={Heart} />
+                <CardTitle>Breeding</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
+              <div className="flex items-center justify-between py-3 text-sm">
+                <span className="text-text-muted">Pregnant</span>
+                <Badge variant={herd.is_pregnant ? "success" : "default"}>{herd.is_pregnant ? "Yes" : "No"}</Badge>
+              </div>
+              <InfoRow label="Breeding Program" value={herd.breeding_program_type ? herd.breeding_program_type.charAt(0).toUpperCase() + herd.breeding_program_type.slice(1) : null} />
+              {herd.joining_period_start && (
+                <InfoRow
+                  label={herd.breeding_program_type === "ai" ? "Insemination Started" : "Put Bulls In"}
+                  value={new Date(herd.joining_period_start).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+                />
+              )}
+              {herd.joining_period_end && (
+                <InfoRow
+                  label={herd.breeding_program_type === "ai" ? "Insemination Complete" : "Pull Bulls Out"}
+                  value={new Date(herd.joining_period_end).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+                />
+              )}
+              {effectiveJoinedDateObj && (herd.breeding_program_type === "ai" || herd.breeding_program_type === "controlled") && (
+                <InfoRow label="Effective Joining Date" value={effectiveJoinedDateObj.toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })} />
+              )}
+              {effectiveJoinedDateObj && hasJoiningStarted && (
+                <InfoRow label="Days Since Joining" value={`${daysSinceJoined} days`} />
+              )}
+              {effectiveJoinedDateObj && !hasJoiningStarted && daysUntilJoining > 0 && (
+                <InfoRow label="Days Until Joining" value={`${daysUntilJoining} days`} />
+              )}
+              {effectiveJoinedDateObj && (
+                <InfoRow
+                  label="Expected Calving"
+                  value={new Date(effectiveJoinedDateObj.getTime() + breedingCycleDays * 86400000).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+                />
+              )}
+              {effectiveJoinedDateObj && hasJoiningStarted && herd.is_pregnant && daysUntilCalving > 0 && (
+                <InfoRow label="Est. Days to Calving" value={`${daysUntilCalving} days`} />
+              )}
+              {effectiveJoinedDateObj && hasJoiningStarted && gestationProgress > 5 && gestationProgress < 100 && (
+                <InfoRow label="Gestation Progress" value={`${Math.round(gestationProgress)}%`} />
+              )}
+              <InfoRow label="Calving Rate" value={herd.calving_rate ? `${Math.round(herd.calving_rate > 1 ? herd.calving_rate : herd.calving_rate * 100)}%` : null} />
+              <InfoRow label="Lactation Status" value={herd.lactation_status} />
+              {calvesData && (
+                <InfoRow
+                  label="Calves at Foot"
+                  value={`${calvesData.headCount} head, ${calvesData.ageMonths} months${calvesData.averageWeight ? `, ${Math.round(calvesData.averageWeight)} kg` : ""}`}
+                />
+              )}
+              {estimatedCalfBirthValue != null && estimatedCalfBirthValue > 0 && (
+                <InfoRow label="Est. Value Per Calf" value={`$${Math.round(estimatedCalfBirthValue).toLocaleString()}`} />
+              )}
+              {unbornProgenyValue > 0 && (
+                <InfoRow label="Unborn Progeny (Accruing)" value={`$${Math.round(unbornProgenyValue).toLocaleString()}`} />
+              )}
+              {calvesData && calvesAtFootValue > 0 && (
+                <InfoRow label={`Calves at Foot (${calvesData.headCount} head)`} value={`$${Math.round(calvesAtFootValue).toLocaleString()}`} />
+              )}
+              {valuation.breedingAccrual > 0 && (
+                <div className="flex items-center justify-between py-3 text-sm">
+                  <span className="font-semibold text-text-primary">Total Breeding Value</span>
+                  <span className="font-semibold tabular-nums text-emerald-400">
+                    ${Math.round(valuation.breedingAccrual).toLocaleString()}
+                  </span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {herd.is_breeder && (
+          <Suspense>
+            <YardBookBanner />
+          </Suspense>
+        )}
+
+        {/* 5. Timeline */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2.5">
+              <SectionIcon icon={Clock} />
+              <CardTitle>Timeline</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
+            <InfoRow label="Days Held" value={`${Math.max(0, Math.round((Date.now() - new Date(herd.created_at).getTime()) / 86400000))} days`} />
+            <InfoRow label="Created" value={new Date(herd.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })} />
+            <InfoRow label="Last Updated" value={new Date(herd.updated_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })} />
+          </CardContent>
+        </Card>
+
+        {/* 6. Mustering Records */}
+        <MusterRecordsSection herdId={id} records={musterRecords ?? []} editable />
+
+        {/* 7. Health Records */}
+        <HealthRecordsSection herdId={id} records={healthRecords ?? []} editable />
+
+        {/* 8. Notes */}
+        {herd.notes && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2.5">
+                <SectionIcon icon={FileText} />
+                <CardTitle>Notes</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-secondary">{herd.notes}</p>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { Stethoscope, Plus, Pencil, Trash2, X, Syringe, Droplets, Bug, Cross } from "lucide-react";
+import { Stethoscope, Pencil, Trash2, X, Syringe, Droplets, Bug, Cross } from "lucide-react";
 import {
   createHealthRecord,
   updateHealthRecord,
@@ -143,7 +143,7 @@ export function HealthRecordsSection({
           </div>
           {editable && !showForm && (
             <Button size="sm" variant="secondary" onClick={() => { setShowForm(true); setEditingId(null); }}>
-              <Plus className="mr-1 h-3.5 w-3.5" /> Add
+              Add
             </Button>
           )}
         </div>

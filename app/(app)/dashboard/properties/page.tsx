@@ -1,11 +1,12 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatCard } from "@/components/ui/stat-card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Plus, MapPinned, ChevronRight } from "lucide-react";
+import { PropertiesTable } from "./properties-table";
+import { MapPinned, LandPlot, Map } from "lucide-react";
+
+export const revalidate = 0;
 
 export const metadata = {
   title: "Properties",
@@ -17,27 +18,40 @@ export default async function PropertiesPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: properties } = await supabase
-    .from("properties")
-    .select("*")
-    .eq("user_id", user!.id)
-    .eq("is_deleted", false)
-    .order("property_name");
+  const [{ data: properties }, { data: herds }] = await Promise.all([
+    supabase
+      .from("properties")
+      .select("*")
+      .eq("user_id", user!.id)
+      .eq("is_deleted", false)
+      .order("property_name"),
+    supabase
+      .from("herds")
+      .select("id, property_id, head_count")
+      .eq("user_id", user!.id)
+      .eq("is_sold", false)
+      .eq("is_deleted", false),
+  ]);
+
+  // Build herd counts per property
+  const herdCountMap: Record<string, number> = {};
+  const headCountMap: Record<string, number> = {};
+  for (const h of herds ?? []) {
+    if (h.property_id) {
+      herdCountMap[h.property_id] = (herdCountMap[h.property_id] ?? 0) + 1;
+      headCountMap[h.property_id] = (headCountMap[h.property_id] ?? 0) + (h.head_count ?? 0);
+    }
+  }
+
+  const totalAcreage = (properties ?? []).reduce((sum, p) => sum + (p.acreage ?? 0), 0);
+  const uniqueStates = [...new Set((properties ?? []).map((p) => p.state).filter(Boolean))];
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-4xl">
       <PageHeader
         title="Properties"
         titleClassName="text-4xl font-bold text-brand"
         subtitle="Manage your properties and locations."
-        actions={
-          <Link href="/dashboard/properties/new">
-            <Button size="sm">
-              <Plus className="mr-1.5 h-3.5 w-3.5" />
-              Add Property
-            </Button>
-          </Link>
-        }
       />
 
       {!properties || properties.length === 0 ? (
@@ -50,43 +64,21 @@ export default async function PropertiesPage() {
           />
         </Card>
       ) : (
-        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
-          {properties.map((property) => (
-            <li key={property.id}>
-              <Link href={`/dashboard/properties/${property.id}`}>
-                <Card className="group h-full transition-all hover:bg-white/[0.07]">
-                  <div className="p-5">
-                    <div className="mb-3 flex items-start justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/15">
-                          <MapPinned className="h-4 w-4 text-brand" />
-                        </div>
-                        <div className="min-w-0">
-                          <h3 className="text-sm font-semibold text-text-primary">{property.property_name}</h3>
-                          {property.suburb && (
-                            <p className="text-xs text-text-muted">
-                              {property.suburb}{property.postcode ? `, ${property.postcode}` : ""}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant="default">{property.state}</Badge>
-                      {property.property_pic && (
-                        <span className="text-xs text-text-muted">PIC: {property.property_pic}</span>
-                      )}
-                      {property.acreage && (
-                        <span className="text-xs tabular-nums text-text-muted">{property.acreage.toLocaleString()} acres</span>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <>
+          {/* Stats */}
+          <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+            <StatCard icon={<MapPinned className="h-4 w-4" />} label="Properties" value={String(properties.length)} />
+            <StatCard icon={<LandPlot className="h-4 w-4" />} label="Total Acreage" value={totalAcreage > 0 ? `${totalAcreage.toLocaleString()} ac` : "\u2014"} />
+            <StatCard icon={<Map className="h-4 w-4" />} label="States" value={uniqueStates.length > 0 ? uniqueStates.join(", ") : "\u2014"} />
+          </div>
+
+          {/* Table */}
+          <PropertiesTable
+            properties={properties}
+            herdCounts={herdCountMap}
+            headCounts={headCountMap}
+          />
+        </>
       )}
     </div>
   );

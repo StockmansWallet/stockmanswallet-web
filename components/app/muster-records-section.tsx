@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Users, Plus, Pencil, Trash2, X } from "lucide-react";
+import { Users, Pencil, Trash2, X } from "lucide-react";
 import {
   createMusterRecord,
   updateMusterRecord,
@@ -129,7 +129,7 @@ export function MusterRecordsSection({
           </div>
           {editable && !showForm && (
             <Button size="sm" variant="secondary" onClick={() => { setShowForm(true); setEditingId(null); }}>
-              <Plus className="mr-1 h-3.5 w-3.5" /> Add
+              Add
             </Button>
           )}
         </div>
