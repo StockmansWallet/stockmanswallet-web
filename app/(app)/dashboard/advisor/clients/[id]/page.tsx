@@ -1,7 +1,8 @@
+import Image from "next/image";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { redirect, notFound } from "next/navigation";
-import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs } from "@/components/ui/tabs";
@@ -9,10 +10,10 @@ import { ClientOverview } from "@/components/app/advisory/client-overview";
 import { ClientHerdsTable } from "@/components/app/advisory/client-herds-table";
 import { AdvisorChatClient } from "./advisor-chat-client";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Lock } from "lucide-react";
+import { Lock, ChevronLeft } from "lucide-react";
 import { RemoveClientButton } from "./remove-client-button";
 import type { ConnectionRequest, AdvisoryMessage } from "@/lib/types/advisory";
-import { parseSharingPermissions } from "@/lib/types/advisory";
+import { parseSharingPermissions, hasActivePermission } from "@/lib/types/advisory";
 import { calculateHerdValuation, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
@@ -67,6 +68,13 @@ export default async function ClientDetailPage({
 
   const conn = connection as ConnectionRequest;
   const permissions = parseSharingPermissions(conn.sharing_permissions);
+  const isActive = hasActivePermission(conn);
+
+  // Service client to read client's data (bypasses RLS)
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceClient = serviceRoleKey
+    ? createServiceClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceRoleKey)
+    : null;
 
   // Get client display name
   const { data: clientProfile } = await supabase
@@ -77,18 +85,27 @@ export default async function ClientDetailPage({
 
   const clientName = clientProfile?.display_name ?? "Unknown Producer";
 
+  // Fetch client avatar from auth metadata
+  let clientAvatarUrl: string | null = null;
+  if (serviceRoleKey) {
+    const svc = createServiceClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceRoleKey);
+    const { data: authUser } = await svc.auth.admin.getUserById(clientUserId);
+    clientAvatarUrl = authUser?.user?.user_metadata?.avatar_url ?? null;
+  }
+
+  const clientInitials = clientName
+    .split(" ")
+    .map((n: string) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
   // Fetch messages for Notes tab
   const { data: messages } = await supabase
     .from("advisory_messages")
     .select("*")
     .eq("connection_id", id)
     .order("created_at", { ascending: true });
-
-  // Service client to read client's data (bypasses RLS)
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const serviceClient = serviceRoleKey
-    ? createServiceClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceRoleKey)
-    : null;
 
   // Fetch client herds and breed premiums
   const [{ data: clientHerds }, { data: breedPremiumData }] = await Promise.all([
@@ -221,20 +238,47 @@ export default async function ClientDetailPage({
 
   return (
     <div className="max-w-[1800px]">
-      <PageHeader
-        title={clientName}
-        titleClassName="text-4xl font-bold text-[#2F8CD9]"
-        titleHref="/dashboard/advisor/clients"
-        inline
-        actions={
-          <div className="flex items-center gap-2">
+      {/* Back nav */}
+      <div className="pb-4 pt-6">
+        <Link
+          href="/dashboard/advisor/clients"
+          className="inline-flex items-center gap-1 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-sm text-text-muted transition-colors hover:bg-surface-low hover:text-text-secondary"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Clients
+        </Link>
+      </div>
+
+      {/* Client header: avatar + name + badges + actions */}
+      <div className="mb-6 flex items-center gap-4">
+        {clientAvatarUrl ? (
+          <Image
+            src={clientAvatarUrl}
+            alt={clientName}
+            width={56}
+            height={56}
+            className="h-14 w-14 shrink-0 rounded-full object-cover"
+          />
+        ) : (
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-emerald-500/15">
+            <span className="text-lg font-bold text-emerald-400">{clientInitials}</span>
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl font-bold text-text-primary">{clientName}</h1>
+          <div className="mt-1 flex flex-wrap items-center gap-2">
             {clientProfile?.company_name && (
               <Badge variant="default">{clientProfile.company_name}</Badge>
             )}
-            <RemoveClientButton connectionId={id} clientName={clientName} />
+            <Badge variant={isActive ? "success" : "default"}>
+              {isActive ? "Sharing" : "Not sharing"}
+            </Badge>
           </div>
-        }
-      />
+        </div>
+        <div className="shrink-0">
+          <RemoveClientButton connectionId={id} clientName={clientName} />
+        </div>
+      </div>
 
       <Tabs
         tabs={[
@@ -270,18 +314,23 @@ export default async function ClientDetailPage({
             ),
           },
           {
-            id: "chat",
-            label: "Chat",
-            content: (
-              <Card className="flex h-[500px] flex-col">
-                <CardContent className="flex flex-1 flex-col overflow-hidden p-0">
-                  <AdvisorChatClient
-                    connectionId={id}
-                    currentUserId={user.id}
-                    messages={(messages ?? []) as AdvisoryMessage[]}
-                    participants={participants}
-                  />
-                </CardContent>
+            id: "lens",
+            label: "Lens",
+            content: permissions.herds ? (
+              <LensSavedList
+                connectionId={id}
+                lensReports={lensReports}
+                herds={lensHerds}
+                herdValues={herdValues}
+              />
+            ) : (
+              <Card>
+                <EmptyState
+                  icon={<Eye className="h-6 w-6 text-[#2F8CD9]" />}
+                  title="Herds Not Shared"
+                  description="Herd data sharing is required to create lens assessments."
+                  variant="advisor"
+                />
               </Card>
             ),
           },
@@ -302,23 +351,18 @@ export default async function ClientDetailPage({
             ),
           },
           {
-            id: "lens",
-            label: "Lens",
-            content: permissions.herds ? (
-              <LensSavedList
-                connectionId={id}
-                lensReports={lensReports}
-                herds={lensHerds}
-                herdValues={herdValues}
-              />
-            ) : (
-              <Card>
-                <EmptyState
-                  icon={<Eye className="h-6 w-6 text-[#2F8CD9]" />}
-                  title="Herds Not Shared"
-                  description="Herd data sharing is required to create lens assessments."
-                  variant="advisor"
-                />
+            id: "chat",
+            label: "Chat",
+            content: (
+              <Card className="flex h-[500px] flex-col">
+                <CardContent className="flex flex-1 flex-col overflow-hidden p-0">
+                  <AdvisorChatClient
+                    connectionId={id}
+                    currentUserId={user.id}
+                    messages={(messages ?? []) as AdvisoryMessage[]}
+                    participants={participants}
+                  />
+                </CardContent>
               </Card>
             ),
           },
