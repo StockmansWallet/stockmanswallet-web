@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -58,6 +59,20 @@ export default async function MyAdvisorsPage() {
     for (const p of data ?? []) {
       profiles[p.user_id] = p;
     }
+  }
+
+  // Fetch advisor avatars from auth metadata
+  const avatarMap: Record<string, string | null> = {};
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (serviceRoleKey && otherPartyIds.length > 0) {
+    const svc = createServiceClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceRoleKey);
+    const uniqueIds = [...new Set(otherPartyIds)];
+    await Promise.all(
+      uniqueIds.map(async (uid) => {
+        const { data: authUser } = await svc.auth.admin.getUserById(uid);
+        avatarMap[uid] = authUser?.user?.user_metadata?.avatar_url ?? null;
+      })
+    );
   }
 
   // Normalise connections with advisor profile data
@@ -193,6 +208,7 @@ export default async function MyAdvisorsPage() {
                   connection={connection}
                   advisorEmail={profile?.contact_email}
                   advisorPhone={profile?.contact_phone}
+                  avatarUrl={avatarMap[connection._otherPartyId]}
                 />
               );
             })}
