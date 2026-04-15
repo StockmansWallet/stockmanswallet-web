@@ -174,6 +174,7 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
   const [breed, setBreed] = useState("");
   const [category, setCategory] = useState("");
   const [breedPremiumOverride, setBreedPremiumOverride] = useState("");
+  const [breedPremiumJustification, setBreedPremiumJustification] = useState("");
 
   // Section 1 - Breeder sub-type and breed premium confirmation
   const [breederSubType, setBreederSubType] = useState<BreederSubType | "">("");
@@ -321,7 +322,10 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
     formData.set("paddock_name", paddock.trim());
     formData.set("property_id", propertyId);
     formData.set("selected_saleyard", saleyard);
-    if (breedPremiumOverride) formData.set("breed_premium_override", breedPremiumOverride);
+    if (breedPremiumOverride) {
+      formData.set("breed_premium_override", breedPremiumOverride);
+      if (breedPremiumJustification.trim()) formData.set("breed_premium_justification", breedPremiumJustification.trim());
+    }
     if (breederSubType) formData.set("breeder_sub_type", breederSubType);
     if (derivedSubCategory) formData.set("sub_category", derivedSubCategory);
 
@@ -452,6 +456,24 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
               nudgeDefault={autoPremium ?? 0}
             />
           </div>
+
+          {/* Breed premium justification - only shown when custom premium is set */}
+          {breedPremiumOverride && (
+            <div>
+              <label htmlFor="breed_premium_justification" className="mb-1 block text-xs font-medium text-text-secondary">
+                Premium Justification
+              </label>
+              <textarea
+                id="breed_premium_justification"
+                value={breedPremiumJustification}
+                onChange={(e) => setBreedPremiumJustification(e.target.value)}
+                placeholder="e.g. High quality Brahman herd with PCAS certification"
+                rows={2}
+                className="w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+              />
+              <p className="mt-1 text-[11px] text-text-muted">Optional. Provides transparency for banks and advisors.</p>
+            </div>
+          )}
 
           {/* Breed premium footer: divider, info left, confirm right */}
           {breed && (

@@ -54,7 +54,7 @@ const HERD_SELECT = `id, name, species, breed, category, head_count,
   dwg_change_date, previous_dwg, created_at,
   is_breeder, is_pregnant, joined_date, calving_rate,
   breeding_program_type, joining_period_start, joining_period_end,
-  breed_premium_override, mortality_rate, is_sold, selected_saleyard,
+  breed_premium_override, breed_premium_justification, mortality_rate, is_sold, selected_saleyard,
   additional_info, calf_weight_recorded_date, updated_at,
   breeder_sub_type, sub_category, property_id`;
 
@@ -229,6 +229,7 @@ export async function generateAssetRegisterData(
       propertyName,
       breedPremiumOverride: herd.breed_premium_override ?? null,
       breedPremiumApplied: valuation.breedPremiumApplied ?? 0,
+      breedPremiumJustification: herd.breed_premium_justification ?? null,
       priceSource: valuation.priceSource,
       dataDate: valuation.dataDate,
     });

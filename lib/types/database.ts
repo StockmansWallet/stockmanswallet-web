@@ -134,6 +134,7 @@ export type Database = {
           location_longitude: number | null;
           property_id: string | null;
           breed_premium_override: number | null;
+          breed_premium_justification: string | null;
           additional_info: string | null;
           notes: string | null;
           mortality_rate: number | null;
@@ -183,6 +184,7 @@ export type Database = {
           location_longitude?: number | null;
           property_id?: string | null;
           breed_premium_override?: number | null;
+          breed_premium_justification?: string | null;
           additional_info?: string | null;
           notes?: string | null;
           mortality_rate?: number | null;
@@ -232,6 +234,7 @@ export type Database = {
           location_longitude?: number | null;
           property_id?: string | null;
           breed_premium_override?: number | null;
+          breed_premium_justification?: string | null;
           additional_info?: string | null;
           notes?: string | null;
           mortality_rate?: number | null;

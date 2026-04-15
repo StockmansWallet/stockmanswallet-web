@@ -127,6 +127,13 @@ function HerdCard({ herd }: { herd: HerdReportData }) {
           ))}
         </div>
       )}
+
+      {/* Breed premium justification */}
+      {herd.breedPremiumJustification && (
+        <p className="border-t border-[#271F16]/10 px-4 py-2 text-[10px] italic text-[#271F16]/50">
+          {herd.breedPremiumJustification}
+        </p>
+      )}
     </div>
   );
 }

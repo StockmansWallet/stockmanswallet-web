@@ -229,6 +229,13 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
                                 ))}
                               </div>
                             )}
+
+                            {/* Breed premium justification */}
+                            {h.breedPremiumJustification && (
+                              <p className="mt-1.5 border-t border-white/[0.03] pt-1.5 text-[11px] italic text-text-muted">
+                                {h.breedPremiumJustification}
+                              </p>
+                            )}
                           </CardContent>
                         </Card>
                       );

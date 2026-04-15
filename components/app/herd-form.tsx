@@ -349,6 +349,22 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
               helperText="Leave blank for automatic breed premium"
             />
           </div>
+
+          {/* Breed premium justification */}
+          <div>
+            <label htmlFor="breed_premium_justification" className="mb-1 block text-xs font-medium text-text-secondary">
+              Premium Justification
+            </label>
+            <textarea
+              id="breed_premium_justification"
+              name="breed_premium_justification"
+              defaultValue={herd?.breed_premium_justification ?? ""}
+              placeholder="e.g. High quality Brahman herd with PCAS certification"
+              rows={2}
+              className="w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+            />
+            <p className="mt-1 text-[11px] text-text-muted">Optional. Provides transparency for banks and advisors.</p>
+          </div>
         </CardContent>
       </Card>
 

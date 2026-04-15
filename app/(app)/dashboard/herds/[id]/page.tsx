@@ -276,7 +276,10 @@ export default async function HerdDetailPage({
             <InfoRow label="Breed" value={herd.breed} />
             <InfoRow label="Category" value={categoryLabel} />
             <InfoRow label="Age" value={herd.age_months ? `${herd.age_months} months` : null} />
-            <InfoRow label="Breed Premium" value={valuation.breedPremiumApplied !== 0 ? `${valuation.breedPremiumApplied > 0 ? "+" : ""}${valuation.breedPremiumApplied}%` : null} />
+            <InfoRow label="Breed Premium" value={valuation.breedPremiumApplied !== 0 ? `${valuation.breedPremiumApplied > 0 ? "+" : ""}${valuation.breedPremiumApplied}%${herd.breed_premium_override != null ? " (custom)" : ""}` : null} />
+            {herd.breed_premium_justification && (
+              <InfoRow label="Premium Justification" value={herd.breed_premium_justification} />
+            )}
             <InfoRow label="Animal ID" value={herd.animal_id_number} />
             {herd.is_sold && (
               <div className="flex items-center justify-between py-3 text-sm">
