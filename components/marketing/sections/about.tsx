@@ -18,7 +18,7 @@ export default function About() {
           className="text-center"
         >
           <span className="text-sm font-medium uppercase tracking-wider text-brand">About Us</span>
-          <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl lg:text-5xl">
+          <h2 className="mt-3 text-3xl font-semibold text-white text-balance sm:text-4xl lg:text-5xl">
             Built by Australians, for{' '}
             <br className="hidden sm:block" />
             Australian producers

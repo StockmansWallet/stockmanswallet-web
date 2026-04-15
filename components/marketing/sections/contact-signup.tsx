@@ -17,7 +17,7 @@ export default function ContactSignup() {
           transition={{ duration: 0.7 }}
         >
           <span className="text-sm font-medium uppercase tracking-wider text-brand">Get Early Access</span>
-          <h2 className="mt-4 text-2xl font-semibold text-white sm:text-3xl lg:text-5xl">
+          <h2 className="mt-4 text-2xl font-semibold text-white text-balance sm:text-3xl lg:text-5xl">
             The future of
             <br />
             <span className="text-brand">

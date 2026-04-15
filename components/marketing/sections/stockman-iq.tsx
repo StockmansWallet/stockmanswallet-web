@@ -167,7 +167,7 @@ export default function StockmanIQ() {
             transition={{ duration: 0.6 }}
           >
             <span className="text-sm font-medium uppercase tracking-wider text-brand">Portfolio Intelligence</span>
-            <h2 className="mt-3 text-3xl font-semibold sm:text-4xl lg:text-5xl">
+            <h2 className="mt-3 text-3xl font-semibold text-balance sm:text-4xl lg:text-5xl">
               <span className="text-brand">Meet Brangus.</span>
               <br />
               <span className="text-white">Your intelligent livestock advisor.</span>
@@ -196,7 +196,7 @@ export default function StockmanIQ() {
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand/15">
-                    <svg className="h-3 w-3 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
+                    <svg aria-hidden="true" className="h-3 w-3 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                   </div>

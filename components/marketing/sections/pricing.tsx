@@ -50,7 +50,7 @@ export default function Pricing() {
           className="text-center"
         >
           <span className="text-sm font-medium uppercase tracking-wider text-brand">Pricing</span>
-          <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl lg:text-5xl">
+          <h2 className="mt-3 text-3xl font-semibold text-white text-balance sm:text-4xl lg:text-5xl">
             Simple, transparent pricing
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-base text-text-secondary">
@@ -62,14 +62,14 @@ export default function Pricing() {
 
         {/* Tab Toggle - hidden when only one tab */}
         {TABS.length > 1 && <div className="mt-10 flex justify-center">
-          <div className="inline-flex gap-2 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-2">
+          <div className="inline-flex gap-2 rounded-full border border-white/[0.06] bg-white/[0.02] p-2">
             {TABS.map((tab) => {
               const isActive = activeTab === tab.id
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className="relative cursor-pointer rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-300"
+                  className="relative cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
                   style={{
                     color: isActive ? '#fff' : tab.colour,
                   }}
@@ -77,14 +77,14 @@ export default function Pricing() {
                   {isActive && (
                     <motion.div
                       layoutId="pricingTab"
-                      className="absolute inset-0 rounded-xl"
+                      className="absolute inset-0 rounded-full"
                       style={{ backgroundColor: tab.colour, border: `1px solid ${tab.colour}` }}
                       transition={{ type: 'spring', duration: 0.5, bounce: 0.15 }}
                     />
                   )}
                   {!isActive && (
                     <div
-                      className="absolute inset-0 rounded-xl"
+                      className="absolute inset-0 rounded-full"
                       style={{ border: `1px solid ${tab.colour}40` }}
                     />
                   )}
@@ -117,10 +117,10 @@ export default function Pricing() {
             {tiers.map((tier) => (
               <div
                 key={tier.id}
-                className={`group relative flex flex-col rounded-2xl p-4 transition-all duration-300 sm:p-6 ${
+                className={`group relative flex flex-col rounded-2xl p-4 transition-colors duration-300 sm:p-6 ${
                   tier.highlighted
                     ? `border ${accent.border} ${accent.cardBg} ${accent.glow}`
-                    : 'bg-white/[0.04] hover:bg-white/[0.06]'
+                    : 'border border-white/[0.06] bg-white/[0.04] hover:bg-white/[0.06]'
                 }`}
               >
                 {tier.badge && (
@@ -153,11 +153,11 @@ export default function Pricing() {
                   {tier.features.map((f) => (
                     <li key={f.name} className="flex items-start gap-2.5">
                       {f.included ? (
-                        <svg className={`mt-0.5 h-4 w-4 shrink-0 ${accent.check}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                        <svg aria-hidden="true" className={`mt-0.5 h-4 w-4 shrink-0 ${accent.check}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       ) : (
-                        <svg className="mt-0.5 h-4 w-4 shrink-0 text-text-quaternary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                        <svg aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-text-quaternary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M18 12H6" />
                         </svg>
                       )}
@@ -170,7 +170,7 @@ export default function Pricing() {
 
                 <a
                   href="#signup"
-                  className={`mt-6 flex h-10 items-center justify-center rounded-xl text-sm font-semibold transition-all duration-200 ${
+                  className={`mt-6 flex h-10 items-center justify-center rounded-full text-sm font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
                     tier.highlighted
                       ? `${accent.bg} text-white ${accent.bgHover}`
                       : 'border border-white/10 text-white hover:bg-white/5'

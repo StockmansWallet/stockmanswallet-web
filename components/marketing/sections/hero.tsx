@@ -81,7 +81,7 @@ export default function Hero() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
-              className="text-[clamp(1.8rem,3.5vw,3rem)] font-semibold leading-[1.1] tracking-tight text-white"
+              className="text-[clamp(1.8rem,3.5vw,3rem)] font-semibold leading-[1.1] tracking-tight text-white text-balance"
             >
               <span className="text-brand">
                 Live. Stock. Market.
@@ -126,7 +126,7 @@ export default function Hero() {
                 alt="Download on the App Store"
                 width={120}
                 height={40}
-                className="h-10 w-auto opacity-60 transition-opacity hover:opacity-100"
+                className="h-10 w-auto opacity-75 transition-opacity hover:opacity-100"
               />
               <span className="text-sm text-text-muted">Coming May 2026</span>
             </motion.div>

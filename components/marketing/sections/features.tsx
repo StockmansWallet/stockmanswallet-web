@@ -245,7 +245,7 @@ export default function Features() {
           className="text-center"
         >
           <span className="text-sm font-medium uppercase tracking-wider text-brand">Features</span>
-          <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl lg:text-5xl">
+          <h2 className="mt-3 text-3xl font-semibold text-white text-balance sm:text-4xl lg:text-5xl">
             Everything you need to manage{' '}
             <br className="hidden sm:block" />
             <span className="text-brand">livestock as financial assets</span>
@@ -260,12 +260,12 @@ export default function Features() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mt-12 flex justify-center"
         >
-          <div className="inline-flex max-w-full flex-nowrap justify-start gap-1 overflow-x-auto rounded-2xl border border-white/[0.08] bg-white/[0.03] p-1.5 scrollbar-none sm:max-w-3xl sm:flex-wrap sm:justify-center sm:overflow-visible">
+          <div className="inline-flex max-w-full flex-nowrap justify-start gap-1 overflow-x-auto rounded-full border border-white/[0.08] bg-white/[0.03] p-1.5 scrollbar-none sm:max-w-3xl sm:flex-wrap sm:justify-center sm:overflow-visible">
             {FEATURE_TABS.map((tab, i) => (
               <button
                 key={tab.id}
                 onClick={() => setActive(i)}
-                className={`relative flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-300 cursor-pointer ${
+                className={`relative flex shrink-0 items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition-colors duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
                   active === i
                     ? ''
                     : 'text-white/50 hover:text-white/75'
@@ -275,7 +275,7 @@ export default function Features() {
                 {active === i && (
                   <motion.div
                     layoutId="featureTab"
-                    className="absolute inset-0 rounded-xl"
+                    className="absolute inset-0 rounded-full"
                     style={{ background: `${tab.color}15`, border: `1px solid ${tab.color}30` }}
                     transition={{ type: 'spring', duration: 0.5, bounce: 0.15 }}
                   />
@@ -293,7 +293,7 @@ export default function Features() {
           <button
             onClick={goPrev}
             aria-label="Previous feature"
-            className="absolute -left-2 top-1/2 z-20 hidden -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-brand/30 bg-brand/15 p-4 text-brand shadow-lg shadow-brand/10 backdrop-blur-sm transition-all hover:scale-105 hover:bg-brand/25 hover:shadow-brand/20 lg:-left-24 lg:flex"
+            className="absolute -left-2 top-1/2 z-20 hidden -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-brand/30 bg-brand/15 p-4 text-brand shadow-lg shadow-brand/10 backdrop-blur-sm transition-colors hover:bg-brand/25 hover:shadow-brand/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand lg:-left-24 lg:flex"
           >
             <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -302,7 +302,7 @@ export default function Features() {
           <button
             onClick={goNext}
             aria-label="Next feature"
-            className="absolute -right-2 top-1/2 z-20 hidden -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-brand/30 bg-brand/15 p-4 text-brand shadow-lg shadow-brand/10 backdrop-blur-sm transition-all hover:scale-105 hover:bg-brand/25 hover:shadow-brand/20 lg:-right-24 lg:flex"
+            className="absolute -right-2 top-1/2 z-20 hidden -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-brand/30 bg-brand/15 p-4 text-brand shadow-lg shadow-brand/10 backdrop-blur-sm transition-colors hover:bg-brand/25 hover:shadow-brand/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand lg:-right-24 lg:flex"
           >
             <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
@@ -335,6 +335,7 @@ export default function Features() {
                   {feature.bullets.map((bullet) => (
                     <li key={bullet} className="flex items-start gap-3">
                       <svg
+                        aria-hidden="true"
                         className="mt-0.5 h-5 w-5 shrink-0"
                         style={{ color: feature.color }}
                         viewBox="0 0 24 24"
@@ -354,7 +355,7 @@ export default function Features() {
                   <button
                     onClick={goPrev}
                     aria-label="Previous feature"
-                    className="flex cursor-pointer items-center justify-center rounded-full border border-brand/30 bg-brand/15 p-3 text-brand transition-all hover:scale-105 hover:bg-brand/25"
+                    className="flex cursor-pointer items-center justify-center rounded-full border border-brand/30 bg-brand/15 p-3 text-brand transition-colors hover:bg-brand/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
                   >
                     <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -366,7 +367,7 @@ export default function Features() {
                   <button
                     onClick={goNext}
                     aria-label="Next feature"
-                    className="flex cursor-pointer items-center justify-center rounded-full border border-brand/30 bg-brand/15 p-3 text-brand transition-all hover:scale-105 hover:bg-brand/25"
+                    className="flex cursor-pointer items-center justify-center rounded-full border border-brand/30 bg-brand/15 p-3 text-brand transition-colors hover:bg-brand/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
                   >
                     <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
