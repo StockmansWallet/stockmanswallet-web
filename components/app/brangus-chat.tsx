@@ -568,7 +568,7 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
         {messages.length === 0 && !isLoading ? (
           <EmptyState onPromptClick={(prompt) => handleSend(prompt)} />
         ) : (
-          <div className="mx-auto max-w-2xl space-y-3">
+          <div className="space-y-3">
             {messages.map((msg) => {
               const isUser = msg.role === "user";
               const isPostTyping = msg.id === postTypingIdRef.current;
@@ -615,7 +615,7 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
 
       {/* Input area */}
       <div data-print-hide className="border-t border-white/10 p-4">
-        <div className="mx-auto max-w-2xl">
+        <div>
           <ChatInput
             onSend={handleSend}
             placeholder="Ask Brangus anything..."

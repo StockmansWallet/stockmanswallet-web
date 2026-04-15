@@ -10,7 +10,7 @@ export default async function InsightsPage() {
   const insights = await evaluateInsights();
 
   return (
-    <div>
+    <div className="max-w-4xl">
       <PageHeader
         title="Insights"
         titleClassName="text-4xl font-bold text-brand"

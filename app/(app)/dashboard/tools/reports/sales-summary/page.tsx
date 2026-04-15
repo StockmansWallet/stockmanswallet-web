@@ -64,9 +64,10 @@ export default async function SalesSummaryPage({ searchParams }: { searchParams:
     });
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-4xl">
       <PageHeader
         title="Sales Summary"
+        titleClassName="text-4xl font-bold text-amber-400"
         subtitle="Transaction history and performance metrics."
         actions={!isEmpty ? <ReportExportButton reportData={reportData} reportType="sales-summary" title="Sales Summary" /> : undefined}
       />

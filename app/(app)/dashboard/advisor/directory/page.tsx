@@ -83,7 +83,7 @@ export default async function AdvisorProducerDirectoryPage({
   }
 
   return (
-    <div className="max-w-5xl">
+    <div className="max-w-4xl">
       <PageHeader
         title="Producer Directory"
         titleClassName="text-4xl font-bold text-[#2F8CD9]"

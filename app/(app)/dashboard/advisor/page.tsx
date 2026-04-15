@@ -125,7 +125,7 @@ export default async function AdvisorDashboardPage() {
   }
 
   return (
-    <div className="max-w-5xl">
+    <div className="max-w-4xl">
       <ConnectionRealtime userId={user.id} />
       <PageHeader
         title={`Welcome, ${firstName}`}

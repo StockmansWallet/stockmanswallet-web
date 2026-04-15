@@ -65,7 +65,7 @@ export default async function AccountSettingsPage() {
   const isAdvisor = isAdvisorRole(userRole);
 
   return (
-    <div className="max-w-5xl">
+    <div className="max-w-4xl">
       <PageHeader
         title="Account"
         subtitle="Subscription, security, and account management."

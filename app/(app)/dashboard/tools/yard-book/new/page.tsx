@@ -31,7 +31,7 @@ export default async function NewYardBookItemPage() {
   ]);
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-4xl">
       <PageHeader title="Add Item" subtitle="Add a new item to your yard book." />
       <YardBookForm
         herds={herds ?? []}

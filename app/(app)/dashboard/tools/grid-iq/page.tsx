@@ -80,12 +80,6 @@ export default async function GridIQPage() {
 
   return (
     <div className="space-y-4">
-      <PageHeader
-        title="Grid IQ"
-        titleClassName="text-4xl font-bold text-teal-400"
-        subtitle="Processor grid analysis and kill sheet comparison."
-        compact
-      />
       {/* Pending Consignments - Action Needed (full width) */}
       {safePending.length > 0 && (
         <Card className="border-amber-500/20">

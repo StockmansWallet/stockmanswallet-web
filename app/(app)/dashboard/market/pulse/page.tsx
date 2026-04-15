@@ -86,7 +86,7 @@ export default async function MarketPulsePage() {
   }
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-4xl">
       <PageHeader
         title="Market Pulse"
         subtitle="Physical saleyard prices by category."

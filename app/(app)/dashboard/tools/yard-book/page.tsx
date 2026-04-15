@@ -65,7 +65,7 @@ export default async function YardBookPage() {
   const completedCount = allItems.filter((i) => i.is_completed).length;
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-4xl">
       <PageHeader
         title="Yard Book"
         titleClassName="text-4xl font-bold text-lime-400"

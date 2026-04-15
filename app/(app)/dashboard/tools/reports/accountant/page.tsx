@@ -71,6 +71,7 @@ export default function AccountantReportPage() {
     <div className="max-w-3xl">
       <PageHeader
         title="Accountant Report"
+        titleClassName="text-4xl font-bold text-amber-400"
         subtitle="Financial year reconciliation statement for your accountant."
       />
 

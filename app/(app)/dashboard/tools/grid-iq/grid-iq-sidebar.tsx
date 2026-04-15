@@ -33,7 +33,7 @@ const items = [
   },
 ];
 
-export function GridIQSidebar() {
+export function GridIQNav() {
   const pathname = usePathname();
 
   function isActive(matchPrefixes: string[]) {
@@ -41,27 +41,25 @@ export function GridIQSidebar() {
   }
 
   return (
-    <nav className="hidden w-48 shrink-0 sm:block">
-      <div className="flex flex-col gap-1.5">
-        {items.map((item) => {
-          const active = isActive(item.matchPrefixes);
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
-                active
-                  ? "bg-teal-500/15 text-teal-400"
-                  : "text-text-secondary hover:bg-white/[0.05] hover:text-text-primary"
-              }`}
-            >
-              <Icon className={`h-4 w-4 ${active ? "text-teal-400" : "text-text-muted"}`} />
-              {item.label}
-            </Link>
-          );
-        })}
-      </div>
+    <nav className="mb-4 flex gap-1.5 overflow-x-auto">
+      {items.map((item) => {
+        const active = isActive(item.matchPrefixes);
+        const Icon = item.icon;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-medium transition-all ${
+              active
+                ? "bg-teal-500/15 text-teal-400"
+                : "text-text-secondary hover:bg-white/[0.05] hover:text-text-primary"
+            }`}
+          >
+            <Icon className={`h-4 w-4 ${active ? "text-teal-400" : "text-text-muted"}`} />
+            {item.label}
+          </Link>
+        );
+      })}
     </nav>
   );
 }

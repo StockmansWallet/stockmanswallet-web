@@ -8,7 +8,7 @@ export default async function BrangusPage() {
   const conversations = await fetchConversationsServer();
 
   return (
-    <div>
+    <div className="max-w-4xl">
       <PageHeader
         title="Brangus"
         titleClassName="text-4xl font-bold text-brand"

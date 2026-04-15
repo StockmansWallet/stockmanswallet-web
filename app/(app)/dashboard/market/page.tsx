@@ -111,7 +111,7 @@ export default async function MarketPage() {
   const reportDate = uniqueIndicators[0]?.report_date ?? null;
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-4xl">
       <PageHeader
         title="Market"
         titleClassName="text-4xl font-bold text-brand"

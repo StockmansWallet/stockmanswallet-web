@@ -22,7 +22,7 @@ const notificationGroups = [
 
 export default function NotificationsPage() {
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-4xl">
       <PageHeader title="Notifications" subtitle="Manage your alerts and reminders." />
 
       <div className="space-y-6">

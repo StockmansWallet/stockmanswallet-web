@@ -236,7 +236,7 @@ export default async function ClientDetailPage({
   };
 
   return (
-    <div className="max-w-5xl">
+    <div className="max-w-4xl">
       {/* Client header: avatar + name + badges + actions */}
       <div className="mb-6 mt-6 flex items-end gap-4">
         {clientAvatarUrl ? (

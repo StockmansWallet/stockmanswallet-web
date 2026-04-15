@@ -47,9 +47,10 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
   }));
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-4xl">
       <PageHeader
         title="Saleyard Comparison"
+        titleClassName="text-4xl font-bold text-amber-400"
         subtitle="Compare prices across saleyards for your herd categories."
         actions={!isEmpty ? <ReportExportButton reportData={reportData} reportType="saleyard-comparison" title="Saleyard Comparison" /> : undefined}
       />

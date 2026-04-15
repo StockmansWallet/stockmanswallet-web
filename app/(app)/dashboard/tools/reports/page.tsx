@@ -34,7 +34,7 @@ const reports = [
 
 export default function ReportsPage() {
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-4xl">
       <PageHeader
         title="Reports"
         titleClassName="text-4xl font-bold text-amber-400"

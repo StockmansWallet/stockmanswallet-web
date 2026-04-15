@@ -57,7 +57,7 @@ export default async function SoldHerdsPage() {
     : 0;
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-4xl">
       <PageHeader
         title="Sold Herds"
         titleClassName="text-4xl font-bold text-brand"

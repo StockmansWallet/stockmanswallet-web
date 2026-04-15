@@ -48,7 +48,7 @@ export default async function SimulatorEditHerdPage({
   const boundUpdate = updateSimulatorHerd.bind(null, id);
 
   return (
-    <div className="max-w-6xl pb-24">
+    <div className="max-w-4xl pb-24">
       <PageHeader
         title={`Edit: ${herd.name}`}
         subtitle={[herd.species, herd.breed].join(" \u00B7 ")}

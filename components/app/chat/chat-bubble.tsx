@@ -75,7 +75,7 @@ export function ChatBubble({
 
   return (
     <div
-      className={`flex items-end gap-2 ${isRight ? "justify-end" : "justify-start"} ${animClass}`}
+      className={`flex items-end gap-2 ${isRight ? "justify-end pl-14" : "justify-start pr-14"} ${animClass}`}
       style={animate && animationType === "bounce" ? { transformOrigin: isRight ? "bottom right" : "bottom left" } : undefined}
     >
       {!isRight && avatar}
@@ -93,7 +93,7 @@ export function ChatBubble({
               )}
             </div>
           )}
-          <div className="whitespace-pre-wrap">{children}</div>
+          <div className="whitespace-pre-wrap break-words">{children}</div>
         </div>
         <BubbleTail side={side} color={tailColor} />
       </div>

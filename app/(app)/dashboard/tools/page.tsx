@@ -44,7 +44,7 @@ const tools = [
 
 export default function ToolsPage() {
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-4xl">
       <PageHeader
         title="Tools"
         titleClassName="text-4xl font-bold text-brand"

@@ -175,7 +175,7 @@ export default async function SimulatorHerdDetailPage({
     : herd.category;
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-4xl">
       <PageHeader
         title={herd.name}
         subtitle={[herd.species, herd.breed, categoryDisplay].filter(Boolean).join(" \u00B7 ")}

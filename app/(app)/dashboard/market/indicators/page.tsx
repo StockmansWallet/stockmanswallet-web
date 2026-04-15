@@ -55,7 +55,7 @@ export default async function IndicatorsPage() {
   const reportDate = uniqueIndicators[0]?.report_date ?? null;
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-4xl">
       <PageHeader title="National Indicators" subtitle="MLA national livestock price indicators." />
 
       <Card>

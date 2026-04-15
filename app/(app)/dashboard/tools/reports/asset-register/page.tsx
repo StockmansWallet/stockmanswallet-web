@@ -62,9 +62,10 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
   }
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-4xl">
       <PageHeader
         title="Asset Register"
+        titleClassName="text-4xl font-bold text-amber-400"
         subtitle="Complete herd listing with current valuations."
         actions={!isEmpty ? <ReportExportButton reportData={reportData} reportType="asset-register" title="Asset Register" /> : undefined}
       />

@@ -48,7 +48,7 @@ export default async function EditYardBookItemPage({
   const boundUpdate = updateYardBookItem.bind(null, id);
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-4xl">
       <PageHeader
         title={`Edit: ${item.title}`}
         subtitle={item.category_raw}

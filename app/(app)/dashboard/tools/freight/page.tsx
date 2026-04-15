@@ -29,7 +29,7 @@ export default async function FreightPage() {
   ]);
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-4xl">
       <PageHeader
         title="Freight IQ"
         titleClassName="text-4xl font-bold text-sky-400"

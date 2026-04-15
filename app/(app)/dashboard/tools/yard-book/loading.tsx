@@ -2,7 +2,7 @@ import { Skeleton, SkeletonCard } from "@/components/ui/skeleton";
 
 export default function YardBookLoading() {
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-4xl">
       {/* PageHeader */}
       <div className="flex items-end justify-between pb-4 pt-6">
         <div>

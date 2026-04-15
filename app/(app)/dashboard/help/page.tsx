@@ -124,7 +124,7 @@ const faqs = [
 
 export default function HelpCenterPage() {
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-4xl">
       <PageHeader
         title="Help Center"
         titleClassName="text-4xl font-bold text-brand"

@@ -35,7 +35,7 @@ export default async function ProfileSettingsPage() {
   const isAdvisor = profile?.role ? isAdvisorRole(profile.role) : false;
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-4xl">
       <PageHeader
         title="Profile"
         subtitle="Your personal information, contact details, and visibility settings."

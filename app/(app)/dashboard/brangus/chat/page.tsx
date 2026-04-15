@@ -23,7 +23,7 @@ export default async function StockmanIQChatPage() {
   }
 
   return (
-    <div className="flex max-w-3xl flex-col" style={{ height: "calc(100vh - 8rem)" }}>
+    <div className="flex max-w-4xl flex-col" style={{ height: "calc(100vh - 8rem)" }}>
       <PageHeader
         title="Brangus"
         subtitle="Your personal livestock advisor, and new best mate."

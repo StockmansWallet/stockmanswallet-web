@@ -65,7 +65,7 @@ export default async function NotificationsPage() {
   const grouped = groupByDate(notifications);
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-4xl">
       <PageHeader
         title="Notifications"
         subtitle={unreadCount > 0 ? `${unreadCount} unread` : undefined}

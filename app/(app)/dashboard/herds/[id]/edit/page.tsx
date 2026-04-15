@@ -56,7 +56,7 @@ export default async function EditHerdPage({
   const boundUpdate = updateHerd.bind(null, id);
 
   return (
-    <div className="max-w-6xl pb-24">
+    <div className="max-w-4xl pb-24">
       <PageHeader
         title={`Edit: ${herd.name}`}
         subtitle={[herd.species, herd.breed].join(" · ")}
