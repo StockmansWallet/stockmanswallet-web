@@ -99,30 +99,34 @@ function HerdCard({ herd }: { herd: HerdReportData }) {
   }
 
   return (
-    <div className="break-inside-avoid rounded border border-gray-200 bg-gray-50 px-4 py-3">
+    <div className="break-inside-avoid rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
       {/* Header: name + value */}
       <div className="flex items-start justify-between">
         <div>
           <h4 className="text-sm font-bold text-gray-900">{herd.name}</h4>
           <p className="text-xs text-gray-500">{herd.category}</p>
         </div>
-        <p className="ml-4 shrink-0 text-sm font-bold tabular-nums text-gray-900">
+        <p className="ml-4 shrink-0 text-base font-bold tabular-nums text-gray-900">
           {fmtFull(herd.netValue)}
         </p>
       </div>
 
-      {/* Stats: single inline row */}
-      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-0.5 border-t border-gray-200 pt-2 text-xs">
-        <span><strong>{herd.headCount}</strong> head</span>
-        <span><strong>{herd.ageMonths}</strong> months</span>
-        <span><strong>{herd.weight.toFixed(0)}</strong> kg</span>
-        <span><strong>${herd.pricePerKg.toFixed(2)}</strong>/kg</span>
-        {extras.map((e) => (
-          <span key={e.label} className="text-gray-600">
-            {e.label}: <strong>{e.value}</strong>
-          </span>
-        ))}
+      {/* Core metrics: structured 4-column grid */}
+      <div className="mt-2 grid grid-cols-4 gap-x-3 border-t border-gray-200 pt-2">
+        <PrintStat label="Head Count" value={`${herd.headCount}`} />
+        <PrintStat label="Age" value={`${herd.ageMonths} months`} />
+        <PrintStat label="Weight" value={`${herd.weight.toFixed(0)} kg`} />
+        <PrintStat label="Price" value={`$${herd.pricePerKg.toFixed(2)}/kg`} />
       </div>
+
+      {/* Supplementary metrics: only rows with data */}
+      {extras.length > 0 && (
+        <div className="mt-1.5 grid grid-cols-4 gap-x-3 border-t border-gray-100 pt-1.5">
+          {extras.map((e) => (
+            <PrintStat key={e.label} label={e.label} value={e.value} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -264,6 +268,15 @@ export function AssetRegisterTemplate({ data }: { data: ReportData }) {
 }
 
 // -- Small helpers ------------------------------------------------------------
+
+function PrintStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[8px] font-semibold uppercase tracking-wider text-gray-400">{label}</p>
+      <p className="text-xs font-semibold tabular-nums text-gray-900">{value}</p>
+    </div>
+  );
+}
 
 function Detail({ label, value }: { label: string; value: string | null | undefined }) {
   if (!value) return null;
