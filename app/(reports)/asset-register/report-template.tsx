@@ -138,8 +138,8 @@ function HerdCard({ herd }: { herd: HerdReportData }) {
 
       {/* Breed premium justification */}
       {herd.breedPremiumOverride != null && herd.breedPremiumJustification && (
-        <p className="border-t border-[#271F16]/10 px-4 py-2 text-[10px] text-[#271F16]/50">
-          Baseline breed premium: <span className="font-semibold text-[#271F16]">{herd.baseBreedPremium >= 0 ? "+" : ""}{herd.baseBreedPremium}%</span> <span className="mx-1 text-[#271F16]/20">|</span> Custom breed premium: <span className="font-bold text-[#d97706]">{herd.breedPremiumOverride >= 0 ? "+" : ""}{herd.breedPremiumOverride}%</span> <span className="mx-1 text-[#271F16]/20">|</span> Justification: <span className="italic">{herd.breedPremiumJustification}</span>
+        <p className="border-t border-[#271F16]/10 px-4 py-2 text-[10px] text-[#271F16]/70">
+          <span className="font-medium text-[#271F16]/45">Baseline breed premium:</span> <span className="font-semibold text-[#271F16]">{herd.baseBreedPremium >= 0 ? "+" : ""}{herd.baseBreedPremium}%</span> <span className="mx-1.5 text-[#271F16]/20">|</span> <span className="font-medium text-[#271F16]/45">Custom breed premium:</span> <span className="font-bold text-[#d97706]">{herd.breedPremiumOverride >= 0 ? "+" : ""}{herd.breedPremiumOverride}%</span> <span className="mx-1.5 text-[#271F16]/20">|</span> <span className="font-medium text-[#271F16]/45">Justification:</span> <span className="text-[#271F16]">{herd.breedPremiumJustification}</span>
         </p>
       )}
     </div>

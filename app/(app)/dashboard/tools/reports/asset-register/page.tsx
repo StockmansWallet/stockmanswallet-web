@@ -233,8 +233,8 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
 
                             {/* Breed premium justification */}
                             {h.breedPremiumOverride != null && h.breedPremiumJustification && (
-                              <p className="mt-1.5 border-t border-white/[0.03] pt-1.5 text-[11px] text-text-muted">
-                                Baseline breed premium: <span className="font-semibold text-text-primary">{h.baseBreedPremium >= 0 ? "+" : ""}{h.baseBreedPremium}%</span> <span className="mx-1 text-white/20">|</span> Custom breed premium: <span className="font-bold text-amber-400">{h.breedPremiumOverride >= 0 ? "+" : ""}{h.breedPremiumOverride}%</span> <span className="mx-1 text-white/20">|</span> Justification: <span className="italic">{h.breedPremiumJustification}</span>
+                              <p className="mt-1.5 border-t border-white/[0.03] pt-1.5 text-[11px] text-text-secondary">
+                                <span className="font-medium text-text-muted">Baseline breed premium:</span> <span className="font-semibold text-text-primary">{h.baseBreedPremium >= 0 ? "+" : ""}{h.baseBreedPremium}%</span> <span className="mx-1.5 text-white/15">|</span> <span className="font-medium text-text-muted">Custom breed premium:</span> <span className="font-bold text-amber-400">{h.breedPremiumOverride >= 0 ? "+" : ""}{h.breedPremiumOverride}%</span> <span className="mx-1.5 text-white/15">|</span> <span className="font-medium text-text-muted">Justification:</span> <span className="text-text-primary">{h.breedPremiumJustification}</span>
                               </p>
                             )}
                           </CardContent>
