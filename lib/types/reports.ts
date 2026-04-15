@@ -103,6 +103,14 @@ export interface UserReportDetails {
   location: string | null;
 }
 
+// MARK: - Property Details (for report header)
+
+export interface ReportPropertyDetails {
+  name: string;
+  picCode: string | null;
+  state: string | null;
+}
+
 // MARK: - Accountant Report Snapshot (mirrors iOS AccountantReportSnapshot)
 
 export interface AccountantSnapshot {
@@ -131,6 +139,7 @@ export interface ReportData {
   executiveSummary: ExecutiveSummary | null;
   herdComposition: HerdCompositionItem[];
   userDetails: UserReportDetails | null;
+  properties: ReportPropertyDetails[];
   generatedAt: string;
   dateRange: { start: string; end: string };
   accountantSnapshot?: AccountantSnapshot;

@@ -45,7 +45,7 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
     selectedPropertyIds: config.selectedPropertyIds,
   });
 
-  const { executiveSummary, herdData, herdComposition } = reportData;
+  const { executiveSummary, herdData, herdComposition, userDetails, properties: reportProperties } = reportData;
   const isEmpty = herdData.length === 0;
 
   // Group herds by property
@@ -72,6 +72,19 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
         </Suspense>
         {!isEmpty && <ReportPreviewButton reportPath="/asset-register" />}
       </div>
+
+      {/* Producer and property details */}
+      {userDetails && !isEmpty && (
+        <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-xs text-text-muted">
+          <span>Producer: <span className="font-medium text-text-secondary">{userDetails.preparedFor}</span></span>
+          {reportProperties.map((p) => (
+            <span key={p.name}>
+              &middot; <span className="font-medium text-text-secondary">{p.name}</span>
+              {p.picCode && <span className="ml-1 text-text-muted">(PIC: {p.picCode})</span>}
+            </span>
+          ))}
+        </div>
+      )}
 
       {isEmpty ? (
         <Card>
@@ -136,7 +149,7 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
                   <div className="mb-2 flex items-center justify-between rounded-lg bg-white/[0.04] px-4 py-2.5">
                     <h4 className="text-sm font-bold text-text-primary">{propertyName}</h4>
                     <span className="text-xs tabular-nums text-text-secondary">
-                      {herds.reduce((s, h) => s + h.headCount, 0).toLocaleString()} head &middot; <span className="font-semibold text-text-primary">{fmt(herds.reduce((s, h) => s + h.netValue, 0))}</span>
+                      {herds.reduce((s, h) => s + h.headCount, 0).toLocaleString()} head &middot; <span className="font-semibold text-amber-400">{fmt(herds.reduce((s, h) => s + h.netValue, 0))}</span>
                     </span>
                   </div>
 
@@ -148,7 +161,7 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
                       const calvingPct = h.calvingRate > 1 ? h.calvingRate : h.calvingRate * 100;
                       const mortalityPct = h.mortalityRate > 1 ? h.mortalityRate : h.mortalityRate * 100;
 
-                      // Collect extra fields dynamically
+                      // Collect supplementary fields dynamically
                       const extras: { label: string; value: string }[] = [];
                       if (h.breedPremiumApplied !== 0) {
                         extras.push({ label: "Breed Adj.", value: `${h.breedPremiumApplied >= 0 ? "+" : ""}${h.breedPremiumApplied}%` });
@@ -169,7 +182,7 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
                       return (
                         <Card key={h.id}>
                           <CardContent className="px-4 py-3">
-                            {/* Row 1: Name + category + badge | Value */}
+                            {/* Header: Name + category + badge | Value */}
                             <div className="flex items-start justify-between gap-3">
                               <div className="min-w-0">
                                 <h5 className="text-sm font-semibold text-text-primary">{h.name}</h5>
@@ -183,16 +196,22 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
                               <p className="shrink-0 text-base font-bold tabular-nums text-text-primary">{fmtFull(h.netValue)}</p>
                             </div>
 
-                            {/* Row 2: Core stats in a compact inline row */}
-                            <div className="mt-2.5 flex flex-wrap gap-x-5 gap-y-1 border-t border-white/5 pt-2.5">
-                              <Stat label="Head" value={`${h.headCount}`} />
-                              <Stat label="Age" value={`${h.ageMonths}mo`} />
+                            {/* Core metrics: 4-column grid */}
+                            <div className="mt-2.5 grid grid-cols-4 gap-x-3 border-t border-white/5 pt-2.5">
+                              <Stat label="Head Count" value={`${h.headCount}`} />
+                              <Stat label="Age" value={`${h.ageMonths} months`} />
                               <Stat label="Weight" value={`${h.weight.toFixed(0)} kg`} />
                               <Stat label="Price" value={`$${h.pricePerKg.toFixed(2)}/kg`} />
-                              {extras.map((e) => (
-                                <Stat key={e.label} label={e.label} value={e.value} />
-                              ))}
                             </div>
+
+                            {/* Supplementary metrics: conditional row */}
+                            {extras.length > 0 && (
+                              <div className="mt-1.5 grid grid-cols-4 gap-x-3 border-t border-white/[0.03] pt-1.5">
+                                {extras.map((e) => (
+                                  <Stat key={e.label} label={e.label} value={e.value} />
+                                ))}
+                              </div>
+                            )}
                           </CardContent>
                         </Card>
                       );
@@ -203,11 +222,11 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
             </div>
 
             {/* Grand total */}
-            <div className="mt-4 flex items-center justify-between border-t border-white/10 px-1 pt-3">
+            <div className="mt-4 flex items-center justify-between rounded-lg bg-white/[0.04] px-4 py-3">
               <p className="text-xs font-bold uppercase tracking-wider text-text-muted">Total</p>
-              <p className="text-sm font-bold tabular-nums text-text-primary">
-                {herdData.reduce((s, h) => s + h.headCount, 0).toLocaleString()} head &middot; {fmt(herdData.reduce((s, h) => s + h.netValue, 0))}
-              </p>
+              <span className="text-sm tabular-nums text-text-secondary">
+                {herdData.reduce((s, h) => s + h.headCount, 0).toLocaleString()} head &middot; <span className="text-base font-bold text-amber-400">{fmt(herdData.reduce((s, h) => s + h.netValue, 0))}</span>
+              </span>
             </div>
           </div>
         </div>
@@ -216,13 +235,13 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
   );
 }
 
-// -- Inline stat helper -------------------------------------------------------
+// -- Stat cell helper ---------------------------------------------------------
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-baseline gap-1">
-      <span className="text-[10px] font-medium uppercase tracking-wider text-text-muted">{label}</span>
-      <span className="text-xs font-semibold tabular-nums text-text-primary">{value}</span>
+    <div>
+      <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">{label}</p>
+      <p className="mt-0.5 text-sm font-semibold tabular-nums text-text-primary">{value}</p>
     </div>
   );
 }

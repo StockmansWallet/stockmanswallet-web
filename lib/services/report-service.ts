@@ -20,6 +20,7 @@ import type {
   ExecutiveSummary,
   HerdCompositionItem,
   UserReportDetails,
+  ReportPropertyDetails,
 } from "@/lib/types/reports";
 
 // MARK: - User Details for PDF Header
@@ -164,7 +165,7 @@ export async function generateAssetRegisterData(
       .order("name"),
     supabase
       .from("properties")
-      .select("id, property_name, state, acreage, is_default, default_saleyard, region")
+      .select("id, property_name, property_pic, state, acreage, is_default, default_saleyard, region")
       .eq("user_id", userId)
       .eq("is_deleted", false)
       .order("property_name"),
@@ -273,6 +274,16 @@ export async function generateAssetRegisterData(
   const defaultProp = allProperties.find((p: { is_default: boolean }) => p.is_default) ?? allProperties[0];
   const farmName = defaultProp?.property_name ?? null;
 
+  // Build property details (only properties with herds in the report)
+  const activePropertyIds = new Set(herdDataArray.map((h) => h.propertyId).filter(Boolean));
+  const reportProperties: ReportPropertyDetails[] = allProperties
+    .filter((p: { id: string }) => activePropertyIds.has(p.id))
+    .map((p: { property_name: string; property_pic: string | null; state: string | null }) => ({
+      name: p.property_name,
+      picCode: p.property_pic ?? null,
+      state: p.state ?? null,
+    }));
+
   return {
     farmName,
     totalValue,
@@ -283,6 +294,7 @@ export async function generateAssetRegisterData(
     executiveSummary,
     herdComposition,
     userDetails,
+    properties: reportProperties,
     generatedAt: new Date().toISOString(),
     dateRange: { start: config.startDate, end: config.endDate },
   };
@@ -362,6 +374,7 @@ export async function generateSalesSummaryData(
     executiveSummary: null,
     herdComposition: [],
     userDetails,
+    properties: [],
     generatedAt: new Date().toISOString(),
     dateRange: { start: config.startDate, end: config.endDate },
   };
@@ -474,6 +487,7 @@ export async function generateSaleyardComparisonData(
     executiveSummary: null,
     herdComposition: [],
     userDetails,
+    properties: [],
     generatedAt: new Date().toISOString(),
     dateRange: { start: config.startDate, end: config.endDate },
   };
@@ -511,6 +525,7 @@ export async function generateAccountantData(
     executiveSummary: assetData.executiveSummary,
     herdComposition: assetData.herdComposition,
     userDetails: assetData.userDetails,
+    properties: assetData.properties,
     generatedAt: new Date().toISOString(),
     dateRange: { start: config.startDate, end: config.endDate },
     accountantSnapshot: {
