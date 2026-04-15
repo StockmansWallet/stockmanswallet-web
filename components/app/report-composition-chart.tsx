@@ -16,16 +16,16 @@ export function ReportCompositionChart({ data }: { data: HerdCompositionItem[] }
   if (data.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-      <div className="h-48 w-48 shrink-0">
+    <div className="flex items-center gap-5">
+      <div className="h-28 w-28 shrink-0">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={data}
               cx="50%"
               cy="50%"
-              innerRadius={40}
-              outerRadius={70}
+              innerRadius={28}
+              outerRadius={50}
               dataKey="value"
               nameKey="assetClass"
               stroke="none"
@@ -43,13 +43,13 @@ export function ReportCompositionChart({ data }: { data: HerdCompositionItem[] }
           </PieChart>
         </ResponsiveContainer>
       </div>
-      <div className="flex flex-1 flex-col gap-1.5">
+      <div className="flex flex-1 flex-col gap-1">
         {data.map((item, i) => (
           <div key={item.assetClass} className="flex items-center gap-2 text-xs">
-            <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+            <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
             <span className="min-w-0 flex-1 truncate text-text-secondary">{item.assetClass}</span>
-            <span className="tabular-nums text-text-muted">{item.headCount} hd</span>
-            <span className="w-16 text-right tabular-nums font-medium text-text-primary">{item.percentage.toFixed(1)}%</span>
+            <span className="tabular-nums text-text-muted">{item.headCount} head</span>
+            <span className="w-14 text-right tabular-nums font-medium text-text-primary">{item.percentage.toFixed(1)}%</span>
           </div>
         ))}
       </div>

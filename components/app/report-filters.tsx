@@ -77,13 +77,13 @@ export function ReportFilters({ properties, showPropertyFilter = true }: ReportF
   return (
     <div className="flex flex-wrap items-center gap-2">
       {/* Date range presets */}
-      <div className="flex items-center gap-1 rounded-lg bg-white/[0.04] p-0.5">
+      <div className="flex items-center gap-1 rounded-full bg-white/[0.04] p-0.5">
         <Calendar className="ml-2 h-3.5 w-3.5 text-text-muted" />
         {DATE_PRESETS.map((preset) => (
           <button
             key={preset.value}
             onClick={() => handlePresetChange(preset.value)}
-            className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
               currentPreset === preset.value
                 ? "bg-amber-500/20 text-amber-400"
                 : "text-text-muted hover:text-text-secondary"
@@ -131,7 +131,7 @@ function PropertyDropdown({
 
   return (
     <details className="group">
-      <summary className="flex cursor-pointer list-none items-center gap-1.5 rounded-lg bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.07]">
+      <summary className="flex cursor-pointer list-none items-center gap-1.5 rounded-full bg-white/[0.04] px-4 py-2 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.07]">
         {label}
         <ChevronDown className="h-3 w-3 text-text-muted transition-transform group-open:rotate-180" />
       </summary>
