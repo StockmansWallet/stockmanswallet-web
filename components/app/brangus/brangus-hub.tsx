@@ -1,15 +1,17 @@
 "use client";
 
-// Chat hub layout: live chat panel + saved conversations sidebar
-// Extracted from StockmanIQTabs when Brangus became its own section
+// Chat hub layout: tabbed view with live chat + saved conversations
+// Both tabs stay mounted so chat state is preserved when switching
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { MessageCircle, Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { BrangusChat } from "@/components/app/brangus-chat";
 import { ConversationList } from "@/components/app/brangus/conversation-list";
 import { fetchMessages } from "@/lib/brangus/conversation-service";
 import type { BrangusConversationRow, BrangusMessageRow } from "@/lib/brangus/conversation-service";
+
+type TabId = "chat" | "saved";
 
 interface BrangusHubProps {
   conversations: BrangusConversationRow[];
@@ -21,6 +23,33 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
   const [activeMessages, setActiveMessages] = useState<BrangusMessageRow[] | null>(null);
   const [loadingConv, setLoadingConv] = useState(false);
   const [chatResetKey, setChatResetKey] = useState(0);
+  const [activeTab, setActiveTab] = useState<TabId>("chat");
+
+  // Sliding indicator state
+  const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const [indicator, setIndicator] = useState({ left: 0, width: 0 });
+  const [ready, setReady] = useState(false);
+
+  const measure = useCallback(() => {
+    const container = containerRef.current;
+    const btn = buttonRefs.current.get(activeTab);
+    if (!container || !btn) return;
+    const containerRect = container.getBoundingClientRect();
+    const btnRect = btn.getBoundingClientRect();
+    setIndicator({
+      left: btnRect.left - containerRect.left,
+      width: btnRect.width,
+    });
+    setReady(true);
+  }, [activeTab]);
+
+  useEffect(() => { measure(); }, [measure]);
+  useEffect(() => {
+    const observer = new ResizeObserver(measure);
+    if (containerRef.current) observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, [measure]);
 
   const handleSelectConversation = useCallback(async (id: string) => {
     if (id === activeConvId) return;
@@ -29,6 +58,7 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
       const messages = await fetchMessages(id);
       setActiveConvId(id);
       setActiveMessages(messages);
+      setActiveTab("chat");
     } catch (err) {
       console.error("Failed to load conversation:", err);
     } finally {
@@ -40,6 +70,7 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
     setActiveConvId(null);
     setActiveMessages(null);
     setChatResetKey((k) => k + 1);
+    setActiveTab("chat");
   }, []);
 
   const handleConversationCreated = useCallback((conv: BrangusConversationRow) => {
@@ -61,60 +92,91 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
     }
   }, [activeConvId]);
 
+  const tabs: { id: TabId; label: string }[] = [
+    { id: "chat", label: "Chat" },
+    { id: "saved", label: "Saved Chats" },
+  ];
+
   return (
-    <div className="flex gap-4" style={{ height: "calc(100vh - 14rem)" }}>
-      {/* Chat panel */}
-      <Card className="flex flex-1 flex-col overflow-hidden rounded-3xl">
-        {loadingConv ? (
-          <div className="flex flex-1 items-center justify-center">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-brand border-t-transparent" />
-          </div>
-        ) : (
-          <BrangusChat
-            key={activeConvId ?? `new-${chatResetKey}`}
-            conversationId={activeConvId ?? undefined}
-            initialMessages={activeMessages ?? undefined}
-            pastConversationCount={conversations.length}
-            onConversationCreated={handleConversationCreated}
-            onConversationUpdated={handleConversationUpdated}
-          />
-        )}
-      </Card>
+    <div>
+      {/* Tab bar */}
+      <div ref={containerRef} className="relative mb-4 flex gap-1 rounded-full bg-surface p-1">
+        <div
+          className={`absolute top-1 bottom-1 rounded-full bg-surface-high shadow-sm ${ready ? "transition-all duration-250 ease-out" : ""}`}
+          style={{ left: indicator.left, width: indicator.width }}
+        />
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            ref={(el) => { if (el) buttonRefs.current.set(tab.id, el); }}
+            onClick={() => setActiveTab(tab.id)}
+            className={`relative z-10 flex-1 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-150 ${
+              activeTab === tab.id
+                ? "text-text-primary"
+                : "text-text-muted hover:text-text-secondary"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
-      {/* Saved conversations sidebar */}
-      <div className="flex w-96 shrink-0 flex-col gap-3">
-        <button
-          onClick={handleNewChat}
-          className="flex items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
-        >
-          <Plus className="h-4 w-4" />
-          New Chat
-        </button>
+      {/* Chat tab (always mounted, hidden when inactive) */}
+      <div className={activeTab !== "chat" ? "hidden" : ""} style={{ height: "calc(100vh - 16rem)" }}>
+        <Card className="flex h-full flex-col overflow-hidden rounded-3xl">
+          {loadingConv ? (
+            <div className="flex flex-1 items-center justify-center">
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-brand border-t-transparent" />
+            </div>
+          ) : (
+            <BrangusChat
+              key={activeConvId ?? `new-${chatResetKey}`}
+              conversationId={activeConvId ?? undefined}
+              initialMessages={activeMessages ?? undefined}
+              pastConversationCount={conversations.length}
+              onConversationCreated={handleConversationCreated}
+              onConversationUpdated={handleConversationUpdated}
+            />
+          )}
+        </Card>
+      </div>
 
-        {conversations.length > 0 ? (
-          <Card className="flex-1 overflow-y-auto rounded-2xl">
-            <CardContent className="p-2">
-              <ConversationList
-                conversations={conversations}
-                onSelect={handleSelectConversation}
-                onDeleted={handleConversationDeleted}
-                activeId={activeConvId}
-              />
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="flex-1 rounded-2xl">
-            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-brand/10">
-                <MessageCircle className="h-6 w-6 text-brand" />
-              </div>
-              <p className="text-sm font-medium text-text-primary">No conversations yet</p>
-              <p className="mt-1 max-w-xs text-xs leading-relaxed text-text-muted">
-                Start a chat with Brangus to get AI-powered insights about your herd and the market.
-              </p>
-            </CardContent>
-          </Card>
-        )}
+      {/* Saved Chats tab (always mounted, hidden when inactive) */}
+      <div className={activeTab !== "saved" ? "hidden" : ""} style={{ height: "calc(100vh - 16rem)" }}>
+        <div className="flex h-full flex-col gap-3">
+          <button
+            onClick={handleNewChat}
+            className="flex items-center justify-center gap-2 rounded-full bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
+          >
+            <Plus className="h-4 w-4" />
+            New Chat
+          </button>
+
+          {conversations.length > 0 ? (
+            <Card className="flex-1 overflow-y-auto rounded-2xl">
+              <CardContent className="p-2">
+                <ConversationList
+                  conversations={conversations}
+                  onSelect={handleSelectConversation}
+                  onDeleted={handleConversationDeleted}
+                  activeId={activeConvId}
+                />
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="flex-1 rounded-2xl">
+              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-brand/10">
+                  <MessageCircle className="h-6 w-6 text-brand" />
+                </div>
+                <p className="text-sm font-medium text-text-primary">No conversations yet</p>
+                <p className="mt-1 max-w-xs text-xs leading-relaxed text-text-muted">
+                  Start a chat with Brangus to get AI-powered insights about your herd and the market.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );
