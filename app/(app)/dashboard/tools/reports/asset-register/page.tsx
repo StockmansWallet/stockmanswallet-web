@@ -1,7 +1,9 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { ReportFilters } from "@/components/app/report-filters";
 import { parseReportConfig } from "@/lib/utils/report-config";
 import { ReportPreviewButton } from "@/components/app/report-preview-button";
@@ -59,7 +61,7 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
     <div className="max-w-4xl">
       <PageHeader
         title="Asset Register"
-        titleClassName="text-4xl font-bold text-amber-400"
+        titleClassName="text-4xl font-bold text-[#FFAA00]"
         subtitle="Complete herd listing with current valuations."
       />
 
@@ -73,8 +75,11 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
 
       {isEmpty ? (
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
             <p className="text-sm text-text-muted">No active herds found. Add herds to generate your asset register.</p>
+            <Link href="/dashboard/herds/new">
+              <Button>Add Herd</Button>
+            </Link>
           </CardContent>
         </Card>
       ) : (
@@ -83,9 +88,9 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
           {/* Executive Summary: full width with dark header */}
           {executiveSummary && (
             <div className="overflow-hidden rounded-xl">
-              <div className="bg-white/[0.08] px-5 py-4">
+              <div className="bg-white/[0.06] px-5 py-4">
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">Executive Summary</p>
-                <p className="mt-1 text-3xl font-bold tabular-nums tracking-tight text-amber-400">
+                <p className="mt-1 text-3xl font-bold tabular-nums tracking-tight text-[#FFAA00]">
                   {fmt(executiveSummary.totalPortfolioValue)}
                 </p>
               </div>
@@ -126,7 +131,7 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
                     <p className="mt-0.5 text-base font-semibold text-text-primary">{userDetails.preparedFor}</p>
                   </div>
                   {reportProperties.length > 0 && (
-                    <div className="border-t border-white/5 pt-3">
+                    <div className="border-t border-white/[0.06] pt-3">
                       <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-text-muted">
                         {reportProperties.length > 1 ? "Properties" : "Property"}
                       </p>
@@ -167,7 +172,7 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
                   <div className="mb-2 flex items-center justify-between rounded-full bg-white/[0.06] px-4 py-2.5">
                     <h4 className="text-sm font-semibold text-white">{propertyName}</h4>
                     <span className="text-xs tabular-nums text-white/60">
-                      {herds.reduce((s, h) => s + h.headCount, 0).toLocaleString()} head &middot; <span className="font-semibold text-amber-400">{fmt(herds.reduce((s, h) => s + h.netValue, 0))}</span>
+                      {herds.reduce((s, h) => s + h.headCount, 0).toLocaleString()} head &middot; <span className="font-semibold text-[#FFAA00]">{fmt(herds.reduce((s, h) => s + h.netValue, 0))}</span>
                     </span>
                   </div>
 
@@ -201,7 +206,7 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
                       return (
                         <Card key={h.id} className="overflow-hidden">
                           {/* Header: tinted row with name + category inline | value */}
-                          <div className="flex items-center justify-between bg-white/[0.03] px-4 py-2.5">
+                          <div className="flex items-center justify-between bg-white/[0.04] px-4 py-2.5">
                             <div className="flex items-center gap-2">
                               <h5 className="text-sm font-semibold text-text-primary">{h.name}</h5>
                               <p className="text-xs text-text-muted">{h.category}</p>
@@ -223,7 +228,7 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
                               const rows: typeof extras[] = [];
                               for (let i = 0; i < extras.length; i += 4) rows.push(extras.slice(i, i + 4));
                               return rows.map((row, ri) => (
-                                <div key={ri} className="mt-1.5 grid grid-cols-4 gap-x-3 border-t border-white/[0.03] pt-1.5">
+                                <div key={ri} className="mt-1.5 grid grid-cols-4 gap-x-3 border-t border-white/[0.04] pt-1.5">
                                   {row.map((e) => (
                                     <Stat key={e.label} label={e.label} value={e.value} accent={e.accent} />
                                   ))}
@@ -233,8 +238,8 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
 
                             {/* Breed premium justification */}
                             {h.breedPremiumOverride != null && h.breedPremiumJustification && (
-                              <p className="mt-1.5 border-t border-white/[0.03] pt-1.5 text-[11px] text-text-secondary">
-                                <span className="font-medium text-text-muted">Baseline breed premium:</span> <span className="font-semibold text-text-primary">{h.baseBreedPremium >= 0 ? "+" : ""}{h.baseBreedPremium}%</span> <span className="mx-1.5 text-white/15">|</span> <span className="font-medium text-text-muted">Custom breed premium:</span> <span className="font-bold text-amber-400">{h.breedPremiumOverride >= 0 ? "+" : ""}{h.breedPremiumOverride}%</span> <span className="mx-1.5 text-white/15">|</span> <span className="font-medium text-text-muted">Justification:</span> <span className="text-text-primary">{h.breedPremiumJustification}</span>
+                              <p className="-mx-4 -mb-2 mt-1.5 bg-[#FFAA00]/[0.06] px-4 py-2 text-[11px] text-text-secondary">
+                                <span className="font-medium text-text-muted">Baseline breed premium:</span> <span className="font-semibold text-text-primary">{h.baseBreedPremium >= 0 ? "+" : ""}{h.baseBreedPremium}%</span> <span className="mx-1.5 text-white/20">|</span> <span className="font-medium text-text-muted">Custom breed premium:</span> <span className="font-bold text-[#FFAA00]">{h.breedPremiumOverride >= 0 ? "+" : ""}{h.breedPremiumOverride}%</span> <span className="mx-1.5 text-white/20">|</span> <span className="font-medium text-text-muted">Justification:</span> <span className="text-text-primary">{h.breedPremiumJustification}</span>
                               </p>
                             )}
                           </CardContent>
@@ -247,10 +252,10 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
             </div>
 
             {/* Grand total */}
-            <div className="mt-4 flex items-center justify-between rounded-lg bg-white/[0.06] px-4 py-3">
+            <div className="mt-4 flex items-center justify-between rounded-full bg-white/[0.06] px-4 py-3">
               <p className="text-xs font-bold uppercase tracking-wider text-white/60">Total</p>
               <span className="text-sm tabular-nums text-white/60">
-                {herdData.reduce((s, h) => s + h.headCount, 0).toLocaleString()} head &middot; <span className="text-base font-bold text-amber-400">{fmt(herdData.reduce((s, h) => s + h.netValue, 0))}</span>
+                {herdData.reduce((s, h) => s + h.headCount, 0).toLocaleString()} head &middot; <span className="text-base font-bold text-[#FFAA00]">{fmt(herdData.reduce((s, h) => s + h.netValue, 0))}</span>
               </span>
             </div>
           </div>
@@ -266,7 +271,7 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
   return (
     <div>
       <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">{label}</p>
-      <p className={`mt-0.5 text-sm font-semibold tabular-nums ${accent ? "text-amber-400" : "text-text-primary"}`}>{value}</p>
+      <p className={`mt-0.5 text-sm font-semibold tabular-nums ${accent ? "text-[#FFAA00]" : "text-text-primary"}`}>{value}</p>
     </div>
   );
 }

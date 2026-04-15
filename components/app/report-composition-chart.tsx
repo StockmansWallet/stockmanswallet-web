@@ -4,7 +4,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import type { HerdCompositionItem } from "@/lib/types/reports";
 
 const COLORS = [
-  "#f59e0b", "#3b82f6", "#10b981", "#8b5cf6", "#ef4444",
+  "#FFAA00", "#3b82f6", "#10b981", "#8b5cf6", "#ef4444",
   "#06b6d4", "#f97316", "#ec4899", "#14b8a6", "#a855f7",
 ];
 

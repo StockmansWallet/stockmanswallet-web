@@ -32,7 +32,7 @@ function fmtDate(iso: string) {
 // -- Colour palette (matches web app) -----------------------------------------
 
 const CHART_COLOURS = [
-  "#f59e0b", "#3b82f6", "#10b981", "#8b5cf6", "#ef4444",
+  "#FFAA00", "#3b82f6", "#10b981", "#8b5cf6", "#ef4444",
   "#06b6d4", "#f97316", "#ec4899", "#14b8a6", "#a855f7",
 ];
 
@@ -103,9 +103,9 @@ function HerdCard({ herd }: { herd: HerdReportData }) {
   }
 
   return (
-    <div className="break-inside-avoid overflow-hidden rounded-xl border border-[#271F16]/15">
+    <div className="break-inside-avoid overflow-hidden rounded-xl border border-[#8B7355]/25">
       {/* Header: name + value with background */}
-      <div className="flex items-center justify-between px-4 py-2.5" style={{ backgroundColor: "rgba(39, 31, 22, 0.15)" }}>
+      <div className="flex items-center justify-between px-4 py-2.5" style={{ backgroundColor: "rgba(139, 115, 85, 0.25)" }}>
         <div className="flex items-baseline gap-2">
           <h4 className="text-sm font-bold text-[#271F16]">{herd.name}</h4>
           <p className="text-xs text-[#271F16]/60">{herd.category}</p>
@@ -128,7 +128,7 @@ function HerdCard({ herd }: { herd: HerdReportData }) {
         const rows: typeof extras[] = [];
         for (let i = 0; i < extras.length; i += 4) rows.push(extras.slice(i, i + 4));
         return rows.map((row, ri) => (
-          <div key={ri} className="grid grid-cols-4 gap-x-3 border-t border-[#271F16]/10 px-4 py-2">
+          <div key={ri} className="grid grid-cols-4 gap-x-3 border-t border-[#8B7355]/20 px-4 py-2">
             {row.map((e) => (
               <PrintStat key={e.label} label={e.label} value={e.value} accent={e.accent} />
             ))}
@@ -138,8 +138,8 @@ function HerdCard({ herd }: { herd: HerdReportData }) {
 
       {/* Breed premium justification */}
       {herd.breedPremiumOverride != null && herd.breedPremiumJustification && (
-        <p className="border-t border-[#271F16]/10 px-4 py-2 text-[10px] text-[#271F16]/70">
-          <span className="font-medium text-[#271F16]/45">Baseline breed premium:</span> <span className="font-semibold text-[#271F16]">{herd.baseBreedPremium >= 0 ? "+" : ""}{herd.baseBreedPremium}%</span> <span className="mx-1.5 text-[#271F16]/20">|</span> <span className="font-medium text-[#271F16]/45">Custom breed premium:</span> <span className="font-bold text-[#d97706]">{herd.breedPremiumOverride >= 0 ? "+" : ""}{herd.breedPremiumOverride}%</span> <span className="mx-1.5 text-[#271F16]/20">|</span> <span className="font-medium text-[#271F16]/45">Justification:</span> <span className="text-[#271F16]">{herd.breedPremiumJustification}</span>
+        <p className="px-4 py-2 text-[10px] text-[#271F16]/70" style={{ backgroundColor: "rgba(255, 170, 0, 0.10)", borderBottomLeftRadius: "12px", borderBottomRightRadius: "12px" }}>
+          <span className="font-medium text-[#271F16]/45">Baseline breed premium:</span> <span className="font-semibold text-[#271F16]">{herd.baseBreedPremium >= 0 ? "+" : ""}{herd.baseBreedPremium}%</span> <span className="mx-1.5 text-[#271F16]/20">|</span> <span className="font-medium text-[#271F16]/45">Custom breed premium:</span> <span className="font-bold text-[#FFAA00]">{herd.breedPremiumOverride >= 0 ? "+" : ""}{herd.breedPremiumOverride}%</span> <span className="mx-1.5 text-[#271F16]/20">|</span> <span className="font-medium text-[#271F16]/45">Justification:</span> <span className="text-[#271F16]">{herd.breedPremiumJustification}</span>
         </p>
       )}
     </div>
@@ -183,21 +183,21 @@ export function AssetRegisterTemplate({ data }: { data: ReportData }) {
               <p className="text-[9px] font-semibold uppercase tracking-widest text-white/70">Executive Summary</p>
               <p className="mt-1 text-3xl font-bold tabular-nums text-white">{fmtFull(executiveSummary.totalPortfolioValue)}</p>
             </div>
-            <div className="grid grid-cols-4 gap-x-4 border-x border-b border-[#271F16]/15 px-5 py-3" style={{ borderBottomLeftRadius: "12px", borderBottomRightRadius: "12px" }}>
+            <div className="grid grid-cols-4 gap-x-4 border-x border-b border-[#8B7355]/25 px-5 py-3" style={{ borderBottomLeftRadius: "12px", borderBottomRightRadius: "12px" }}>
               <div>
-                <p className="text-[9px] font-semibold uppercase tracking-widest text-[#271F16]/55">Head Count</p>
+                <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Head Count</p>
                 <p className="mt-0.5 text-lg font-semibold tabular-nums text-[#271F16]">{executiveSummary.totalHeadCount.toLocaleString()}</p>
               </div>
               <div>
-                <p className="text-[9px] font-semibold uppercase tracking-widest text-[#271F16]/55">Avg per Head</p>
+                <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Avg per Head</p>
                 <p className="mt-0.5 text-lg font-semibold tabular-nums text-[#271F16]">{fmt(executiveSummary.averageValuePerHead)}</p>
               </div>
               <div>
-                <p className="text-[9px] font-semibold uppercase tracking-widest text-[#271F16]/55">Valuation Date</p>
+                <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Valuation Date</p>
                 <p className="mt-0.5 text-sm font-medium tabular-nums text-[#271F16]/80">{fmtDate(executiveSummary.valuationDate)}</p>
               </div>
               <div>
-                <p className="text-[9px] font-semibold uppercase tracking-widest text-[#271F16]/55">Report Period</p>
+                <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Report Period</p>
                 <p className="mt-0.5 text-sm font-medium tabular-nums text-[#271F16]/80">{fmtDate(dateRange.start)}</p>
                 <p className="text-sm font-medium tabular-nums text-[#271F16]/80">{fmtDate(dateRange.end)}</p>
               </div>
@@ -209,14 +209,14 @@ export function AssetRegisterTemplate({ data }: { data: ReportData }) {
         <div className="mt-4" style={{ display: "flex", gap: "16px" }}>
           {/* Producer and properties */}
           {userDetails && (
-            <div style={{ flex: 1, borderRadius: "12px", border: "1px solid rgba(39, 31, 22, 0.15)", padding: "16px 20px" }}>
+            <div style={{ flex: 1, borderRadius: "12px", border: "1px solid rgba(139, 115, 85, 0.25)", padding: "16px 20px" }}>
               <div className="mb-3">
-                <p className="text-[9px] font-semibold uppercase tracking-wider text-[#271F16]/55">Producer</p>
+                <p className="text-[9px] font-semibold uppercase tracking-wider text-[#6B5B45]">Producer</p>
                 <p className="mt-0.5 text-base font-semibold text-[#271F16]">{userDetails.preparedFor}</p>
               </div>
               {properties.length > 0 && (
-                <div className="border-t border-[#271F16]/15 pt-3">
-                  <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-[#271F16]/55">
+                <div className="border-t border-[#8B7355]/25 pt-3">
+                  <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-[#6B5B45]">
                     {properties.length > 1 ? "Properties" : "Property"}
                   </p>
                   <div className="flex flex-col gap-1">
@@ -235,8 +235,8 @@ export function AssetRegisterTemplate({ data }: { data: ReportData }) {
 
           {/* Herd Composition */}
           {herdComposition.length > 0 && (
-            <div style={{ flex: 1, borderRadius: "12px", border: "1px solid rgba(39, 31, 22, 0.15)", padding: "16px 20px" }}>
-              <p className="mb-3 text-[9px] font-semibold uppercase tracking-widest text-[#271F16]/55">Herd Composition</p>
+            <div style={{ flex: 1, borderRadius: "12px", border: "1px solid rgba(139, 115, 85, 0.25)", padding: "16px 20px" }}>
+              <p className="mb-3 text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Herd Composition</p>
               <div className="flex items-center gap-4">
                 <DonutChart items={herdComposition.map((c) => ({ label: c.assetClass, percentage: c.percentage }))} />
                 <div className="flex flex-1 flex-col gap-0.5 text-xs">
@@ -263,7 +263,7 @@ export function AssetRegisterTemplate({ data }: { data: ReportData }) {
               <div className="mb-1.5 flex items-center justify-between px-4 py-2" style={{ backgroundColor: "#271F16", borderRadius: "9999px" }}>
                 <h3 className="text-sm font-semibold text-white">{propertyName}</h3>
                 <p className="text-xs tabular-nums text-white/60">
-                  {herds.reduce((s, h) => s + h.headCount, 0).toLocaleString()} head &middot; <span className="font-semibold text-white">{fmt(herds.reduce((s, h) => s + h.netValue, 0))}</span>
+                  {herds.reduce((s, h) => s + h.headCount, 0).toLocaleString()} head &middot; <span className="font-semibold text-[#FFAA00]">{fmt(herds.reduce((s, h) => s + h.netValue, 0))}</span>
                 </p>
               </div>
 
@@ -286,7 +286,7 @@ export function AssetRegisterTemplate({ data }: { data: ReportData }) {
         </section>
 
         {/* End-of-report footer (inline, always visible) */}
-        <div className="mt-6 pt-2 text-[7px] text-[#271F16]/55">
+        <div className="mt-6 pt-2 text-[7px] text-[#6B5B45]">
           <div className="flex items-center justify-between">
             <p>Stockman&apos;s Wallet &nbsp;|&nbsp; Intelligent Livestock Valuation &nbsp;|&nbsp; www.stockmanswallet.com.au</p>
             <p>Generated {fmtDate(new Date().toISOString())}</p>
@@ -303,18 +303,9 @@ export function AssetRegisterTemplate({ data }: { data: ReportData }) {
 function PrintStat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
     <div>
-      <p className="text-[8px] font-semibold uppercase tracking-wider text-[#271F16]/55">{label}</p>
-      <p className={`text-xs font-semibold tabular-nums ${accent ? "text-[#d97706]" : "text-[#271F16]"}`}>{value}</p>
+      <p className="text-[9px] font-semibold uppercase tracking-wider text-[#6B5B45]">{label}</p>
+      <p className={`text-xs font-semibold tabular-nums ${accent ? "text-[#FFAA00]" : "text-[#271F16]"}`}>{value}</p>
     </div>
   );
 }
 
-function Detail({ label, value }: { label: string; value: string | null | undefined }) {
-  if (!value) return null;
-  return (
-    <div>
-      <p className="text-[9px] font-semibold uppercase tracking-wider text-[#271F16]/55">{label}</p>
-      <p className="mt-0.5 text-sm font-medium text-[#271F16]">{value}</p>
-    </div>
-  );
-}
