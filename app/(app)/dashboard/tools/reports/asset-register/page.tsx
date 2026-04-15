@@ -73,19 +73,6 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
         {!isEmpty && <ReportPreviewButton reportPath="/asset-register" />}
       </div>
 
-      {/* Producer and property details */}
-      {userDetails && !isEmpty && (
-        <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-xs text-text-muted">
-          <span>Producer: <span className="font-medium text-text-secondary">{userDetails.preparedFor}</span></span>
-          {reportProperties.map((p) => (
-            <span key={p.name}>
-              &middot; <span className="font-medium text-text-secondary">{p.name}</span>
-              {p.picCode && <span className="ml-1 text-text-muted">(PIC: {p.picCode})</span>}
-            </span>
-          ))}
-        </div>
-      )}
-
       {isEmpty ? (
         <Card>
           <CardContent className="p-6">
@@ -95,24 +82,25 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
       ) : (
         <div className="flex flex-col gap-4">
 
-          {/* Summary row: Executive summary + Herd composition side by side */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {/* Executive summary */}
-            {executiveSummary && (
-              <Card className="border-amber-500/10">
-                <CardContent className="px-5 py-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">Executive Summary</p>
-                  <p className="mt-1 text-3xl font-extrabold tabular-nums tracking-tight text-amber-400">
-                    {fmt(executiveSummary.totalPortfolioValue)}
-                  </p>
-                  <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-white/5 pt-3">
+          {/* Executive Summary: full width with dark header */}
+          {executiveSummary && (
+            <div className="overflow-hidden rounded-xl">
+              <div className="bg-white/[0.08] px-5 py-4">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">Executive Summary</p>
+                <p className="mt-1 text-3xl font-bold tabular-nums tracking-tight text-amber-400">
+                  {fmt(executiveSummary.totalPortfolioValue)}
+                </p>
+              </div>
+              <Card className="rounded-t-none border-t-0">
+                <CardContent className="px-5 py-3">
+                  <div className="grid grid-cols-4 gap-x-4">
                     <div>
                       <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">Head Count</p>
-                      <p className="mt-0.5 text-lg font-bold tabular-nums text-text-primary">{executiveSummary.totalHeadCount.toLocaleString()}</p>
+                      <p className="mt-0.5 text-lg font-semibold tabular-nums text-text-primary">{executiveSummary.totalHeadCount.toLocaleString()}</p>
                     </div>
                     <div>
                       <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">Avg per Head</p>
-                      <p className="mt-0.5 text-lg font-bold tabular-nums text-text-primary">{fmt(executiveSummary.averageValuePerHead)}</p>
+                      <p className="mt-0.5 text-lg font-semibold tabular-nums text-text-primary">{fmt(executiveSummary.averageValuePerHead)}</p>
                     </div>
                     <div>
                       <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">Valuation Date</p>
@@ -120,9 +108,41 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
                     </div>
                     <div>
                       <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">Report Period</p>
-                      <p className="mt-0.5 text-sm font-medium tabular-nums text-text-secondary">{fmtDate(config.startDate)} to {fmtDate(config.endDate)}</p>
+                      <p className="mt-0.5 text-sm font-medium tabular-nums text-text-secondary">{fmtDate(config.startDate)}</p>
+                      <p className="text-sm font-medium tabular-nums text-text-secondary">{fmtDate(config.endDate)}</p>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Details row: Producer/Properties + Herd Composition side by side */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {/* Producer and properties */}
+            {userDetails && (
+              <Card>
+                <CardContent className="px-5 py-4">
+                  <div className="mb-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">Producer</p>
+                    <p className="mt-0.5 text-base font-semibold text-text-primary">{userDetails.preparedFor}</p>
+                  </div>
+                  {reportProperties.length > 0 && (
+                    <div className="border-t border-white/5 pt-3">
+                      <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-text-muted">
+                        {reportProperties.length > 1 ? "Properties" : "Property"}
+                      </p>
+                      <div className="flex flex-col gap-1">
+                        {reportProperties.map((p) => (
+                          <div key={p.name} className="text-sm">
+                            <span className="font-medium text-text-primary">{p.name}</span>
+                            {p.picCode && <span className="ml-2 text-xs text-text-muted">PIC: {p.picCode}</span>}
+                            {p.state && <span className="ml-2 text-xs text-text-muted">{p.state}</span>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
@@ -138,17 +158,17 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
             )}
           </div>
 
-          {/* LIVESTOCK ASSETS: Herd cards grouped by property */}
+          {/* LIVESTOCK ASSETS */}
           <div>
             <h3 className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-muted">Livestock Assets</h3>
 
             <div className="flex flex-col gap-4">
               {[...grouped.entries()].map(([propertyName, herds]) => (
                 <div key={propertyName}>
-                  {/* Property header */}
-                  <div className="mb-2 flex items-center justify-between rounded-lg bg-white/[0.04] px-4 py-2.5">
-                    <h4 className="text-sm font-bold text-text-primary">{propertyName}</h4>
-                    <span className="text-xs tabular-nums text-text-secondary">
+                  {/* Property header - dark bar */}
+                  <div className="mb-2 flex items-center justify-between rounded-lg bg-white/[0.06] px-4 py-2.5">
+                    <h4 className="text-sm font-semibold text-white">{propertyName}</h4>
+                    <span className="text-xs tabular-nums text-white/60">
                       {herds.reduce((s, h) => s + h.headCount, 0).toLocaleString()} head &middot; <span className="font-semibold text-amber-400">{fmt(herds.reduce((s, h) => s + h.netValue, 0))}</span>
                     </span>
                   </div>
@@ -161,7 +181,6 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
                       const calvingPct = h.calvingRate > 1 ? h.calvingRate : h.calvingRate * 100;
                       const mortalityPct = h.mortalityRate > 1 ? h.mortalityRate : h.mortalityRate * 100;
 
-                      // Collect supplementary fields dynamically
                       const extras: { label: string; value: string }[] = [];
                       if (h.breedPremiumApplied !== 0) {
                         extras.push({ label: "Breed Adj.", value: `${h.breedPremiumApplied >= 0 ? "+" : ""}${h.breedPremiumApplied}%` });
@@ -180,24 +199,22 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
                       }
 
                       return (
-                        <Card key={h.id}>
-                          <CardContent className="px-4 py-3">
-                            {/* Header: Name + category + badge | Value */}
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="min-w-0">
-                                <h5 className="text-sm font-semibold text-text-primary">{h.name}</h5>
-                                <div className="mt-0.5 flex items-center gap-2">
-                                  <p className="text-xs text-text-muted">{h.category}</p>
-                                  <Badge variant={h.priceSource === "saleyard" ? (isStale ? "warning" : "success") : "danger"} className="text-[9px] leading-none">
-                                    {isStale ? `Stale ${Math.floor(ageDays / 7)}w` : h.priceSource === "national" ? "National Avg" : h.priceSource === "fallback" ? "Fallback" : h.priceSource}
-                                  </Badge>
-                                </div>
-                              </div>
-                              <p className="shrink-0 text-base font-bold tabular-nums text-text-primary">{fmtFull(h.netValue)}</p>
+                        <Card key={h.id} className="overflow-hidden">
+                          {/* Header: tinted row with name + category inline + badge | value */}
+                          <div className="flex items-center justify-between bg-white/[0.03] px-4 py-2.5">
+                            <div className="flex items-center gap-2">
+                              <h5 className="text-sm font-semibold text-text-primary">{h.name}</h5>
+                              <p className="text-xs text-text-muted">{h.category}</p>
+                              <Badge variant={h.priceSource === "saleyard" ? (isStale ? "warning" : "success") : "danger"} className="text-[9px] leading-none">
+                                {isStale ? `Stale ${Math.floor(ageDays / 7)}w` : h.priceSource === "national" ? "National Avg" : h.priceSource === "fallback" ? "Fallback" : h.priceSource}
+                              </Badge>
                             </div>
+                            <p className="shrink-0 text-base font-bold tabular-nums text-text-primary">{fmtFull(h.netValue)}</p>
+                          </div>
 
-                            {/* Core metrics: 4-column grid */}
-                            <div className="mt-2.5 grid grid-cols-4 gap-x-3 border-t border-white/5 pt-2.5">
+                          {/* Core metrics: 4-column grid */}
+                          <CardContent className="px-4 py-2">
+                            <div className="grid grid-cols-4 gap-x-3">
                               <Stat label="Head Count" value={`${h.headCount}`} />
                               <Stat label="Age" value={`${h.ageMonths} months`} />
                               <Stat label="Weight" value={`${h.weight.toFixed(0)} kg`} />
@@ -222,9 +239,9 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
             </div>
 
             {/* Grand total */}
-            <div className="mt-4 flex items-center justify-between rounded-lg bg-white/[0.04] px-4 py-3">
-              <p className="text-xs font-bold uppercase tracking-wider text-text-muted">Total</p>
-              <span className="text-sm tabular-nums text-text-secondary">
+            <div className="mt-4 flex items-center justify-between rounded-lg bg-white/[0.06] px-4 py-3">
+              <p className="text-xs font-bold uppercase tracking-wider text-white/60">Total</p>
+              <span className="text-sm tabular-nums text-white/60">
                 {herdData.reduce((s, h) => s + h.headCount, 0).toLocaleString()} head &middot; <span className="text-base font-bold text-amber-400">{fmt(herdData.reduce((s, h) => s + h.netValue, 0))}</span>
               </span>
             </div>
