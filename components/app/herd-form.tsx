@@ -72,6 +72,7 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
   const [joiningStart, setJoiningStart] = useState(herd?.joining_period_start ? herd.joining_period_start.split("T")[0] : "");
   const [joiningEnd, setJoiningEnd] = useState(herd?.joining_period_end ? herd.joining_period_end.split("T")[0] : "");
   const [currentWeight, setCurrentWeight] = useState<string>(String(herd?.current_weight ?? herd?.initial_weight ?? ""));
+  const [hasCustomPremium, setHasCustomPremium] = useState(herd?.breed_premium_override != null && herd.breed_premium_override !== 0);
 
   // Calves at foot — parse existing data from additional_info
   const parsedCalves = useMemo(() => parseCalvesAtFoot(herd?.additional_info ?? null), [herd?.additional_info]);
@@ -341,29 +342,33 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
             <Input
               id="breed_premium_override"
               name="breed_premium_override"
-              label="Breed Premium (%)"
+              label="Custom Breed Premium (%)"
               type="number"
               step="0.1"
               defaultValue={herd?.breed_premium_override ?? ""}
               placeholder={autoPremium !== null ? `Auto (${autoPremium}%)` : "Auto (none)"}
               helperText="Leave blank for automatic breed premium"
+              onChange={(e) => setHasCustomPremium(e.target.value.trim() !== "")}
             />
           </div>
 
           {/* Breed premium justification */}
           <div>
             <label htmlFor="breed_premium_justification" className="mb-1 block text-xs font-medium text-text-secondary">
-              Premium Justification
+              Premium Justification {hasCustomPremium && <span className="text-red-400">*</span>}
             </label>
             <textarea
               id="breed_premium_justification"
               name="breed_premium_justification"
+              required={hasCustomPremium}
               defaultValue={herd?.breed_premium_justification ?? ""}
               placeholder="e.g. High quality Brahman herd with PCAS certification"
               rows={2}
               className="w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
             />
-            <p className="mt-1 text-[11px] text-text-muted">Optional. Provides transparency for banks and advisors.</p>
+            <p className="mt-1 text-[11px] text-text-muted">
+              {hasCustomPremium ? "Required. Explains why a custom premium is applied." : "Optional. Provides transparency for banks and advisors."}
+            </p>
           </div>
         </CardContent>
       </Card>

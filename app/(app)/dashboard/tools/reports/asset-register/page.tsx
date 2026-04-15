@@ -2,13 +2,11 @@ import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ReportFilters } from "@/components/app/report-filters";
 import { parseReportConfig } from "@/lib/utils/report-config";
 import { ReportPreviewButton } from "@/components/app/report-preview-button";
 import { ReportCompositionChart } from "@/components/app/report-composition-chart";
 import { generateAssetRegisterData } from "@/lib/services/report-service";
-import { STALE_WARNING_THRESHOLD_DAYS } from "@/lib/engines/valuation-engine";
 
 export const revalidate = 0;
 export const metadata = { title: "Asset Register" };
@@ -166,7 +164,7 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
               {[...grouped.entries()].map(([propertyName, herds]) => (
                 <div key={propertyName}>
                   {/* Property header - dark bar */}
-                  <div className="mb-2 flex items-center justify-between rounded-lg bg-white/[0.06] px-4 py-2.5">
+                  <div className="mb-2 flex items-center justify-between rounded-full bg-white/[0.06] px-4 py-2.5">
                     <h4 className="text-sm font-semibold text-white">{propertyName}</h4>
                     <span className="text-xs tabular-nums text-white/60">
                       {herds.reduce((s, h) => s + h.headCount, 0).toLocaleString()} head &middot; <span className="font-semibold text-amber-400">{fmt(herds.reduce((s, h) => s + h.netValue, 0))}</span>
@@ -176,14 +174,15 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
                   {/* Herd cards */}
                   <div className="flex flex-col gap-2">
                     {herds.map((h) => {
-                      const ageDays = h.dataDate ? Math.floor((Date.now() - new Date(h.dataDate).getTime()) / 86400000) : 0;
-                      const isStale = ageDays > STALE_WARNING_THRESHOLD_DAYS && h.priceSource === "saleyard";
                       const calvingPct = h.calvingRate > 1 ? h.calvingRate : h.calvingRate * 100;
                       const mortalityPct = h.mortalityRate > 1 ? h.mortalityRate : h.mortalityRate * 100;
 
-                      const extras: { label: string; value: string }[] = [];
-                      if (h.breedPremiumApplied !== 0) {
-                        extras.push({ label: "Breed Adj.", value: `${h.breedPremiumApplied >= 0 ? "+" : ""}${h.breedPremiumApplied}%` });
+                      const extras: { label: string; value: string; accent?: boolean }[] = [];
+                      if (h.baseBreedPremium !== 0) {
+                        extras.push({ label: "Breed Premium", value: `${h.baseBreedPremium >= 0 ? "+" : ""}${h.baseBreedPremium}%` });
+                      }
+                      if (h.breedPremiumOverride != null) {
+                        extras.push({ label: "Custom Breed Premium", value: `${h.breedPremiumOverride >= 0 ? "+" : ""}${h.breedPremiumOverride}%`, accent: true });
                       }
                       if (h.dailyWeightGain > 0) {
                         extras.push({ label: "DWG", value: `${h.dailyWeightGain.toFixed(2)} kg/day` });
@@ -200,14 +199,11 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
 
                       return (
                         <Card key={h.id} className="overflow-hidden">
-                          {/* Header: tinted row with name + category inline + badge | value */}
+                          {/* Header: tinted row with name + category inline | value */}
                           <div className="flex items-center justify-between bg-white/[0.03] px-4 py-2.5">
                             <div className="flex items-center gap-2">
                               <h5 className="text-sm font-semibold text-text-primary">{h.name}</h5>
                               <p className="text-xs text-text-muted">{h.category}</p>
-                              <Badge variant={h.priceSource === "saleyard" ? (isStale ? "warning" : "success") : "danger"} className="text-[9px] leading-none">
-                                {isStale ? `Stale ${Math.floor(ageDays / 7)}w` : h.priceSource === "national" ? "National Avg" : h.priceSource === "fallback" ? "Fallback" : h.priceSource}
-                              </Badge>
                             </div>
                             <p className="shrink-0 text-base font-bold tabular-nums text-text-primary">{fmtFull(h.netValue)}</p>
                           </div>
@@ -223,18 +219,19 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
 
                             {/* Supplementary metrics: conditional row */}
                             {extras.length > 0 && (
-                              <div className="mt-1.5 grid grid-cols-4 gap-x-3 border-t border-white/[0.03] pt-1.5">
+                              <div className="mt-1.5 grid grid-cols-4 gap-x-3 gap-y-1.5 border-t border-white/[0.03] pt-1.5">
                                 {extras.map((e) => (
-                                  <Stat key={e.label} label={e.label} value={e.value} />
+                                  <Stat key={e.label} label={e.label} value={e.value} accent={e.accent} />
                                 ))}
                               </div>
                             )}
 
                             {/* Breed premium justification */}
                             {h.breedPremiumJustification && (
-                              <p className="mt-1.5 border-t border-white/[0.03] pt-1.5 text-[11px] italic text-text-muted">
-                                {h.breedPremiumJustification}
-                              </p>
+                              <div className="mt-1.5 border-t border-white/[0.03] pt-1.5">
+                                <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Custom Premium Justification</p>
+                                <p className="mt-0.5 text-[11px] italic text-text-muted">{h.breedPremiumJustification}</p>
+                              </div>
                             )}
                           </CardContent>
                         </Card>
@@ -261,11 +258,11 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
 
 // -- Stat cell helper ---------------------------------------------------------
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
     <div>
       <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">{label}</p>
-      <p className="mt-0.5 text-sm font-semibold tabular-nums text-text-primary">{value}</p>
+      <p className={`mt-0.5 text-sm font-semibold tabular-nums ${accent ? "text-amber-400" : "text-text-primary"}`}>{value}</p>
     </div>
   );
 }

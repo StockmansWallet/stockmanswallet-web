@@ -85,6 +85,10 @@ export async function createHerd(formData: FormData) {
     : null;
   const isBreeder = v.is_breeder === "on";
 
+  if (breedPremiumOverride != null && !v.breed_premium_justification?.trim()) {
+    return { error: "A justification is required when setting a custom breed premium." };
+  }
+
   const herdId = crypto.randomUUID();
   const { error } = await supabase.from("herds").insert({
     id: herdId,
@@ -193,6 +197,10 @@ export async function updateHerd(id: string, formData: FormData) {
   const updatePremiumOverride = v.breed_premium_override
     ? parseFloat(v.breed_premium_override)
     : null;
+
+  if (updatePremiumOverride != null && !v.breed_premium_justification?.trim()) {
+    return { error: "A justification is required when setting a custom breed premium." };
+  }
 
   const { error } = await supabase
     .from("herds")

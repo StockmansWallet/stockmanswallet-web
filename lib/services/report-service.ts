@@ -227,6 +227,7 @@ export async function generateAssetRegisterData(
       isBreeder: herd.is_breeder ?? false,
       propertyId: herd.property_id ?? null,
       propertyName,
+      baseBreedPremium: premiumMap.get(herd.breed) ?? 0,
       breedPremiumOverride: herd.breed_premium_override ?? null,
       breedPremiumApplied: valuation.breedPremiumApplied ?? 0,
       breedPremiumJustification: herd.breed_premium_justification ?? null,

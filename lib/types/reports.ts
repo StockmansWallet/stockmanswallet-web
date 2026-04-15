@@ -60,6 +60,7 @@ export interface HerdReportData {
   isBreeder: boolean;
   propertyId: string | null;
   propertyName: string | null;
+  baseBreedPremium: number;
   breedPremiumOverride: number | null;
   breedPremiumApplied: number;
   breedPremiumJustification: string | null;
