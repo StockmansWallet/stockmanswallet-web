@@ -12,6 +12,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
 import type { Database } from "@/lib/types/database";
 import type { YardBookCategory } from "@/lib/types/models";
@@ -27,33 +28,38 @@ type IconComponent = React.ComponentType<{ className?: string }>;
 
 const CATEGORY_CONFIG: Record<
   YardBookCategory,
-  { icon: IconComponent; bg: string; text: string; iconBg: string }
+  { label: string; icon: IconComponent; bg: string; text: string; iconBg: string }
 > = {
   Livestock: {
+    label: "Livestock",
     icon: IconCattleTags,
     bg: "bg-orange-500/15",
     text: "text-orange-400",
     iconBg: "bg-orange-500/20",
   },
   Operations: {
+    label: "Operations",
     icon: Wrench,
     bg: "bg-amber-700/15",
     text: "text-amber-600",
     iconBg: "bg-amber-700/20",
   },
   Finance: {
+    label: "Finance",
     icon: DollarSign,
     bg: "bg-blue-500/15",
     text: "text-blue-400",
     iconBg: "bg-blue-500/20",
   },
   Family: {
+    label: "Family",
     icon: Home,
     bg: "bg-purple-500/15",
     text: "text-purple-400",
     iconBg: "bg-purple-500/20",
   },
   Me: {
+    label: "Personal",
     icon: User,
     bg: "bg-green-500/15",
     text: "text-green-400",
@@ -187,64 +193,51 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
     }));
   }, [filteredItems]);
 
-  const categoryCounts = useMemo(() => {
-    const counts: Record<YardBookCategory, number> = {
-      Livestock: 0,
-      Operations: 0,
-      Finance: 0,
-      Family: 0,
-      Me: 0,
-    };
-    for (const item of items) {
-      if (!showCompleted && item.is_completed) continue;
-      if (counts[item.category_raw as YardBookCategory] !== undefined) {
-        counts[item.category_raw as YardBookCategory]++;
-      }
-    }
-    return counts;
-  }, [items, showCompleted]);
-
-  const totalFiltered = useMemo(
-    () => Object.values(categoryCounts).reduce((a, b) => a + b, 0),
-    [categoryCounts]
-  );
-
   return (
     <div>
-      {/* Category filter pills */}
-      <div className="mb-4 flex flex-wrap items-center gap-1.5">
-        <button
-          onClick={() => setFilterCategory(null)}
-          className={`inline-flex items-center rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
-            filterCategory === null
-              ? "bg-lime-500/15 text-lime-400"
-              : "bg-white/5 text-text-muted hover:bg-white/8 hover:text-text-secondary"
-          }`}
-        >
-          All
-          <span className="ml-1.5 opacity-60">{totalFiltered}</span>
-        </button>
-        {(Object.keys(CATEGORY_CONFIG) as YardBookCategory[]).map((cat) => {
-          const config = CATEGORY_CONFIG[cat];
-          const Icon = config.icon;
-          const isActive = filterCategory === cat;
-          const count = categoryCounts[cat];
-          return (
-            <button
-              key={cat}
-              onClick={() => setFilterCategory(isActive ? null : cat)}
-              className={`inline-flex items-center gap-1 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
-                isActive
-                  ? `${config.bg} ${config.text}`
-                  : "bg-white/5 text-text-muted hover:bg-white/8 hover:text-text-secondary"
-              }`}
-            >
-              <Icon className="h-3 w-3" />
-              {cat}
-              <span className="opacity-60">{count}</span>
-            </button>
-          );
-        })}
+      {/* Toolbar: category pills + add item */}
+      <div className="mb-4 flex flex-col gap-3 rounded-full bg-surface-lowest px-2 py-2 sm:flex-row sm:items-center sm:justify-between">
+        {/* Left: category filters */}
+        <div className="flex items-center gap-1.5 overflow-x-auto">
+          <button
+            onClick={() => setFilterCategory(null)}
+            className={`inline-flex h-8 shrink-0 items-center rounded-full px-3.5 text-xs font-medium transition-all ${
+              filterCategory === null
+                ? "bg-lime-500/15 text-lime-400"
+                : "bg-surface text-text-muted hover:bg-surface-raised hover:text-text-secondary"
+            }`}
+          >
+            All
+          </button>
+          {(Object.keys(CATEGORY_CONFIG) as YardBookCategory[]).map((cat) => {
+            const config = CATEGORY_CONFIG[cat];
+            const Icon = config.icon;
+            const isActive = filterCategory === cat;
+            return (
+              <button
+                key={cat}
+                onClick={() => setFilterCategory(isActive ? null : cat)}
+                className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-xs font-medium transition-all ${
+                  isActive
+                    ? `${config.bg} ${config.text}`
+                    : "bg-surface text-text-muted hover:bg-surface-raised hover:text-text-secondary"
+                }`}
+              >
+                <Icon className="h-3 w-3" />
+                {config.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Right: add item */}
+        <div className="flex items-center gap-1.5">
+          <Link href="/dashboard/tools/yard-book/new">
+            <Button size="sm" variant="lime">
+              Add Item
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Show/hide completed toggle */}
@@ -282,7 +275,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
                 >
                   {group.title}
                 </h3>
-                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-white/8 px-1.5 text-[10px] font-semibold tabular-nums text-text-muted">
+                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-lime-500/15 px-1.5 text-[10px] font-semibold tabular-nums text-lime-400">
                   {group.items.length}
                 </span>
               </div>

@@ -1,14 +1,11 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatCard } from "@/components/ui/stat-card";
 import { YardBookRunSheet } from "@/components/app/yard-book-run-sheet";
 import {
-  Plus,
   CalendarClock,
   AlertTriangle,
   CalendarCheck,
@@ -71,14 +68,6 @@ export default async function YardBookPage() {
         titleClassName="text-4xl font-bold text-lime-400"
         subtitle="Top Pocket Stuff"
         subtitleClassName="text-sm font-medium text-text-secondary"
-        actions={
-          <Link href="/dashboard/tools/yard-book/new">
-            <Button size="sm" variant="lime">
-              <Plus className="mr-1.5 h-3.5 w-3.5" />
-              Add Item
-            </Button>
-          </Link>
-        }
       />
 
       {allItems.length === 0 ? (

@@ -8,7 +8,7 @@ export function PrintActions() {
       </p>
       <button
         onClick={() => window.print()}
-        className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-600"
+        className="rounded-full bg-[#FFAA00] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#E69900]"
       >
         Save as PDF
       </button>
