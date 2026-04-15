@@ -4,7 +4,7 @@
 // Both tabs stay mounted so chat state is preserved when switching
 
 import { useState, useCallback, useRef, useEffect } from "react";
-import { MessageCircle, Plus } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { BrangusChat } from "@/components/app/brangus-chat";
 import { ConversationList } from "@/components/app/brangus/conversation-list";
@@ -24,6 +24,9 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
   const [loadingConv, setLoadingConv] = useState(false);
   const [chatResetKey, setChatResetKey] = useState(0);
   const [activeTab, setActiveTab] = useState<TabId>("chat");
+
+  // Toolbar portal container (callback ref so it triggers re-render when set)
+  const [toolbarEl, setToolbarEl] = useState<HTMLDivElement | null>(null);
 
   // Sliding indicator state
   const containerRef = useRef<HTMLDivElement>(null);
@@ -121,8 +124,22 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
         ))}
       </div>
 
+      {/* Action toolbar: export buttons (portalled from BrangusChat) + New Chat */}
+      <div className="mb-4 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-1.5">
+        {/* Left: portal target for export buttons from BrangusChat */}
+        <div ref={setToolbarEl} className="flex items-center" />
+
+        {/* Right: New Chat */}
+        <button
+          onClick={handleNewChat}
+          className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-brand px-3.5 text-xs font-semibold text-white transition-colors hover:bg-brand-dark"
+        >
+          New Chat
+        </button>
+      </div>
+
       {/* Chat tab (always mounted, hidden when inactive) */}
-      <div className={activeTab !== "chat" ? "hidden" : ""} style={{ height: "calc(100vh - 16rem)" }}>
+      <div className={activeTab !== "chat" ? "hidden" : ""} style={{ height: "calc(100vh - 19rem)" }}>
         <Card className="flex h-full flex-col overflow-hidden rounded-3xl">
           {loadingConv ? (
             <div className="flex flex-1 items-center justify-center">
@@ -136,47 +153,38 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
               pastConversationCount={conversations.length}
               onConversationCreated={handleConversationCreated}
               onConversationUpdated={handleConversationUpdated}
+              toolbarContainer={toolbarEl}
             />
           )}
         </Card>
       </div>
 
       {/* Saved Chats tab (always mounted, hidden when inactive) */}
-      <div className={activeTab !== "saved" ? "hidden" : ""} style={{ height: "calc(100vh - 16rem)" }}>
-        <div className="flex h-full flex-col gap-3">
-          <button
-            onClick={handleNewChat}
-            className="flex items-center justify-center gap-2 rounded-full bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
-          >
-            <Plus className="h-4 w-4" />
-            New Chat
-          </button>
-
-          {conversations.length > 0 ? (
-            <Card className="flex-1 overflow-y-auto rounded-2xl">
-              <CardContent className="p-2">
-                <ConversationList
-                  conversations={conversations}
-                  onSelect={handleSelectConversation}
-                  onDeleted={handleConversationDeleted}
-                  activeId={activeConvId}
-                />
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="flex-1 rounded-2xl">
-              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-brand/10">
-                  <MessageCircle className="h-6 w-6 text-brand" />
-                </div>
-                <p className="text-sm font-medium text-text-primary">No conversations yet</p>
-                <p className="mt-1 max-w-xs text-xs leading-relaxed text-text-muted">
-                  Start a chat with Brangus to get AI-powered insights about your herd and the market.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+      <div className={activeTab !== "saved" ? "hidden" : ""} style={{ height: "calc(100vh - 19rem)" }}>
+        {conversations.length > 0 ? (
+          <Card className="h-full overflow-y-auto rounded-2xl">
+            <CardContent className="p-2">
+              <ConversationList
+                conversations={conversations}
+                onSelect={handleSelectConversation}
+                onDeleted={handleConversationDeleted}
+                activeId={activeConvId}
+              />
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="h-full rounded-2xl">
+            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-brand/10">
+                <MessageCircle className="h-6 w-6 text-brand" />
+              </div>
+              <p className="text-sm font-medium text-text-primary">No conversations yet</p>
+              <p className="mt-1 max-w-xs text-xs leading-relaxed text-text-muted">
+                Start a chat with Brangus to get AI-powered insights about your herd and the market.
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

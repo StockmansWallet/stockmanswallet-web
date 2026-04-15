@@ -4,6 +4,7 @@
 // Handles message display, input, API calls, and tool execution loop
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Brain, Loader2, AlertCircle, ClipboardCopy, Download, Check, FileText, Share2, Mail, MessageCircle } from "lucide-react";
 import { sendMessage, buildSystemPrompt, loadChatDataStore, fetchServerConfig } from "@/lib/brangus/chat-service";
@@ -94,6 +95,8 @@ interface BrangusChatProps {
   pastConversationCount?: number;
   onConversationCreated?: (conv: BrangusConversationRow) => void;
   onConversationUpdated?: (id: string, updates: Partial<BrangusConversationRow>) => void;
+  /** Portal container for the export toolbar (rendered outside the chat card) */
+  toolbarContainer?: HTMLElement | null;
 }
 
 // Restore QuickInsight cards from saved cards_json
@@ -118,7 +121,7 @@ function hydrateCards(messages: SavedMessage[]): QuickInsight[] {
   return cards;
 }
 
-export function BrangusChat({ conversationId: existingConvId, initialMessages, pastConversationCount = 0, onConversationCreated, onConversationUpdated }: BrangusChatProps = {}) {
+export function BrangusChat({ conversationId: existingConvId, initialMessages, pastConversationCount = 0, onConversationCreated, onConversationUpdated, toolbarContainer }: BrangusChatProps = {}) {
   // Hydrate UI messages from saved conversation (if resuming)
   const hydratedMessages: ChatMessage[] = (initialMessages ?? []).map((m) => ({
     id: m.id,
@@ -501,67 +504,80 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
         </div>
       </div>
 
-      {/* Export toolbar - shown when conversation has 2+ messages */}
-      {messages.length >= 2 && (
-        <div data-print-hide className="flex items-center justify-end gap-1 border-b border-white/6 px-4 py-1.5">
-          <button
-            onClick={handleCopy}
-            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] text-text-muted transition-colors hover:bg-white/[0.05] hover:text-text-secondary"
-            aria-label="Copy conversation"
-          >
-            {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <ClipboardCopy className="h-3.5 w-3.5" />}
-            {copied ? "Copied" : "Copy"}
-          </button>
-          <button
-            onClick={handleDownload}
-            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] text-text-muted transition-colors hover:bg-white/[0.05] hover:text-text-secondary"
-            aria-label="Download conversation"
-          >
-            <Download className="h-3.5 w-3.5" />
-            Save
-          </button>
-          <button
-            onClick={handlePrint}
-            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] text-text-muted transition-colors hover:bg-white/[0.05] hover:text-text-secondary"
-            aria-label="Save as PDF"
-          >
-            <FileText className="h-3.5 w-3.5" />
-            PDF
-          </button>
-          <div className="relative">
+      {/* Export toolbar - always rendered, disabled until 2+ messages */}
+      {(() => {
+        const canExport = messages.length >= 2;
+        const btnClass = canExport
+          ? "inline-flex h-8 items-center gap-1.5 rounded-full bg-surface px-3.5 text-xs font-medium text-text-muted transition-colors hover:bg-surface-raised hover:text-text-secondary"
+          : "inline-flex h-8 items-center gap-1.5 rounded-full bg-surface px-3.5 text-xs font-medium text-text-muted/40 opacity-40 cursor-not-allowed";
+        const toolbar = (
+          <div data-print-hide className="flex items-center gap-1.5">
             <button
-              onClick={handleShare}
-              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] text-text-muted transition-colors hover:bg-white/[0.05] hover:text-text-secondary"
-              aria-label="Share conversation"
+              onClick={canExport ? handleCopy : undefined}
+              disabled={!canExport}
+              className={btnClass}
+              aria-label="Copy conversation"
             >
-              <Share2 className="h-3.5 w-3.5" />
-              Share
+              {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <ClipboardCopy className="h-3.5 w-3.5" />}
+              {copied ? "Copied" : "Copy"}
             </button>
-            {/* Fallback share menu (shown when Web Share API not available) */}
-            {showShareMenu && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setShowShareMenu(false)} />
-                <div className="absolute right-0 top-full z-50 mt-1 w-40 rounded-xl border border-white/10 bg-[#2a2420] py-1 shadow-lg">
-                  <button
-                    onClick={handleShareEmail}
-                    className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-white/[0.05] hover:text-text-primary"
-                  >
-                    <Mail className="h-3.5 w-3.5" />
-                    Email
-                  </button>
-                  <button
-                    onClick={handleShareWhatsApp}
-                    className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-white/[0.05] hover:text-text-primary"
-                  >
-                    <MessageCircle className="h-3.5 w-3.5" />
-                    WhatsApp
-                  </button>
-                </div>
-              </>
-            )}
+            <button
+              onClick={canExport ? handleDownload : undefined}
+              disabled={!canExport}
+              className={btnClass}
+              aria-label="Download conversation"
+            >
+              <Download className="h-3.5 w-3.5" />
+              Save
+            </button>
+            <button
+              onClick={canExport ? handlePrint : undefined}
+              disabled={!canExport}
+              className={btnClass}
+              aria-label="Save as PDF"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              PDF
+            </button>
+            <div className="relative">
+              <button
+                onClick={canExport ? handleShare : undefined}
+                disabled={!canExport}
+                className={btnClass}
+                aria-label="Share conversation"
+              >
+                <Share2 className="h-3.5 w-3.5" />
+                Share
+              </button>
+              {showShareMenu && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowShareMenu(false)} />
+                  <div className="absolute right-0 top-full z-50 mt-1 w-40 rounded-xl border border-white/10 bg-[#2a2420] py-1 shadow-lg">
+                    <button
+                      onClick={handleShareEmail}
+                      className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-white/[0.05] hover:text-text-primary"
+                    >
+                      <Mail className="h-3.5 w-3.5" />
+                      Email
+                    </button>
+                    <button
+                      onClick={handleShareWhatsApp}
+                      className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-white/[0.05] hover:text-text-primary"
+                    >
+                      <MessageCircle className="h-3.5 w-3.5" />
+                      WhatsApp
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        );
+        // Portal into the hub toolbar if available, otherwise render inline
+        return toolbarContainer
+          ? createPortal(toolbar, toolbarContainer)
+          : <div className="flex justify-end border-b border-white/6 px-4 py-1.5">{toolbar}</div>;
+      })()}
 
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto px-4 pt-4 pb-2">
