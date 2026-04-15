@@ -43,13 +43,13 @@ export function ReportCompositionChart({ data }: { data: HerdCompositionItem[] }
           </PieChart>
         </ResponsiveContainer>
       </div>
-      <div className="flex flex-1 flex-col gap-1">
+      <div className="flex flex-1 flex-col gap-1.5">
         {data.map((item, i) => (
           <div key={item.assetClass} className="flex items-center gap-2 text-xs">
             <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-            <span className="min-w-0 flex-1 truncate text-text-secondary">{item.assetClass}</span>
+            <span className="min-w-0 flex-1 text-text-secondary">{item.assetClass}</span>
             <span className="tabular-nums text-text-muted">{item.headCount} head</span>
-            <span className="w-14 text-right tabular-nums font-medium text-text-primary">{item.percentage.toFixed(1)}%</span>
+            <span className="w-12 text-right tabular-nums font-semibold text-text-primary">{item.percentage.toFixed(1)}%</span>
           </div>
         ))}
       </div>

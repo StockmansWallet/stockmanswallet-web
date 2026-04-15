@@ -82,8 +82,8 @@ function HerdCard({ herd }: { herd: HerdReportData }) {
   const mortalityPct = herd.mortalityRate > 1 ? herd.mortalityRate : herd.mortalityRate * 100;
 
   const extras: { label: string; value: string }[] = [];
-  if (herd.breedPremiumOverride != null) {
-    extras.push({ label: "Breed Adj.", value: `${herd.breedPremiumOverride >= 0 ? "+" : ""}${herd.breedPremiumOverride}% vs. avg` });
+  if (herd.breedPremiumApplied !== 0) {
+    extras.push({ label: "Breed Adj.", value: `${herd.breedPremiumApplied >= 0 ? "+" : ""}${herd.breedPremiumApplied}%` });
   }
   if (herd.dailyWeightGain > 0) {
     extras.push({ label: "DWG", value: `${herd.dailyWeightGain.toFixed(2)} kg/day` });
@@ -174,11 +174,11 @@ export function AssetRegisterTemplate({ data }: { data: ReportData }) {
         {/* SUMMARY ROW: Portfolio value + Composition side by side */}
         {executiveSummary && (
           <div className="mt-4 flex gap-4">
-            {/* Portfolio value card */}
+            {/* Executive summary card */}
             <div className="flex-1 rounded border border-gray-200 bg-gray-50 px-5 py-4">
-              <p className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">Total Portfolio Value</p>
-              <p className="mt-0.5 text-3xl font-extrabold tabular-nums text-gray-900">{fmtFull(executiveSummary.totalPortfolioValue)}</p>
-              <div className="mt-3 flex gap-6 border-t border-gray-200 pt-2">
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">Executive Summary</p>
+              <p className="mt-1 text-3xl font-extrabold tabular-nums text-gray-900">{fmtFull(executiveSummary.totalPortfolioValue)}</p>
+              <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-gray-200 pt-2">
                 <div>
                   <p className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">Head Count</p>
                   <p className="mt-0.5 text-lg font-bold tabular-nums text-gray-900">{executiveSummary.totalHeadCount.toLocaleString()}</p>
@@ -187,10 +187,15 @@ export function AssetRegisterTemplate({ data }: { data: ReportData }) {
                   <p className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">Avg per Head</p>
                   <p className="mt-0.5 text-lg font-bold tabular-nums text-gray-900">{fmt(executiveSummary.averageValuePerHead)}</p>
                 </div>
+                <div>
+                  <p className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">Valuation Date</p>
+                  <p className="mt-0.5 text-sm font-medium tabular-nums text-gray-700">{fmtDate(executiveSummary.valuationDate)}</p>
+                </div>
+                <div>
+                  <p className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">Report Period</p>
+                  <p className="mt-0.5 text-sm font-medium tabular-nums text-gray-700">{fmtDate(dateRange.start)} to {fmtDate(dateRange.end)}</p>
+                </div>
               </div>
-              <p className="mt-2 text-[10px] text-gray-400">
-                Valued {fmtDate(executiveSummary.valuationDate)}
-              </p>
             </div>
 
             {/* Composition card */}
@@ -224,7 +229,7 @@ export function AssetRegisterTemplate({ data }: { data: ReportData }) {
               <div className="mb-1.5 flex items-center justify-between rounded bg-gray-100 px-3 py-1.5">
                 <h3 className="text-xs font-bold text-gray-800">{propertyName}</h3>
                 <p className="text-[10px] tabular-nums text-gray-500">
-                  {herds.reduce((s, h) => s + h.headCount, 0).toLocaleString()} head &middot; {fmt(herds.reduce((s, h) => s + h.netValue, 0))}
+                  {herds.reduce((s, h) => s + h.headCount, 0).toLocaleString()} head &middot; <span className="font-semibold text-gray-800">{fmt(herds.reduce((s, h) => s + h.netValue, 0))}</span>
                 </p>
               </div>
 

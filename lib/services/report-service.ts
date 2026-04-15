@@ -227,6 +227,7 @@ export async function generateAssetRegisterData(
       propertyId: herd.property_id ?? null,
       propertyName,
       breedPremiumOverride: herd.breed_premium_override ?? null,
+      breedPremiumApplied: valuation.breedPremiumApplied ?? 0,
       priceSource: valuation.priceSource,
       dataDate: valuation.dataDate,
     });

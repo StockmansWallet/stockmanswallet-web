@@ -82,17 +82,17 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
       ) : (
         <div className="flex flex-col gap-4">
 
-          {/* Summary row: Portfolio value + Herd composition side by side */}
+          {/* Summary row: Executive summary + Herd composition side by side */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {/* Portfolio value */}
+            {/* Executive summary */}
             {executiveSummary && (
               <Card className="border-amber-500/10">
                 <CardContent className="px-5 py-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">Total Portfolio Value</p>
-                  <p className="mt-0.5 text-3xl font-extrabold tabular-nums tracking-tight text-amber-400">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">Executive Summary</p>
+                  <p className="mt-1 text-3xl font-extrabold tabular-nums tracking-tight text-amber-400">
                     {fmt(executiveSummary.totalPortfolioValue)}
                   </p>
-                  <div className="mt-3 flex items-baseline gap-6 border-t border-white/5 pt-3">
+                  <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-white/5 pt-3">
                     <div>
                       <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">Head Count</p>
                       <p className="mt-0.5 text-lg font-bold tabular-nums text-text-primary">{executiveSummary.totalHeadCount.toLocaleString()}</p>
@@ -101,10 +101,15 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
                       <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">Avg per Head</p>
                       <p className="mt-0.5 text-lg font-bold tabular-nums text-text-primary">{fmt(executiveSummary.averageValuePerHead)}</p>
                     </div>
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">Valuation Date</p>
+                      <p className="mt-0.5 text-sm font-medium tabular-nums text-text-secondary">{fmtDate(executiveSummary.valuationDate)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">Report Period</p>
+                      <p className="mt-0.5 text-sm font-medium tabular-nums text-text-secondary">{fmtDate(config.startDate)} to {fmtDate(config.endDate)}</p>
+                    </div>
                   </div>
-                  <p className="mt-2 text-[11px] text-text-muted">
-                    Valued {fmtDate(executiveSummary.valuationDate)} &nbsp;·&nbsp; {fmtDate(config.startDate)} to {fmtDate(config.endDate)}
-                  </p>
                 </CardContent>
               </Card>
             )}
@@ -130,8 +135,8 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
                   {/* Property header */}
                   <div className="mb-2 flex items-center justify-between rounded-lg bg-white/[0.04] px-4 py-2.5">
                     <h4 className="text-sm font-bold text-text-primary">{propertyName}</h4>
-                    <span className="text-xs tabular-nums text-text-muted">
-                      {herds.reduce((s, h) => s + h.headCount, 0).toLocaleString()} head &middot; {fmt(herds.reduce((s, h) => s + h.netValue, 0))}
+                    <span className="text-xs tabular-nums text-text-secondary">
+                      {herds.reduce((s, h) => s + h.headCount, 0).toLocaleString()} head &middot; <span className="font-semibold text-text-primary">{fmt(herds.reduce((s, h) => s + h.netValue, 0))}</span>
                     </span>
                   </div>
 
@@ -145,8 +150,8 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
 
                       // Collect extra fields dynamically
                       const extras: { label: string; value: string }[] = [];
-                      if (h.breedPremiumOverride != null) {
-                        extras.push({ label: "Breed Adj.", value: `${h.breedPremiumOverride >= 0 ? "+" : ""}${h.breedPremiumOverride}% vs. avg` });
+                      if (h.breedPremiumApplied !== 0) {
+                        extras.push({ label: "Breed Adj.", value: `${h.breedPremiumApplied >= 0 ? "+" : ""}${h.breedPremiumApplied}%` });
                       }
                       if (h.dailyWeightGain > 0) {
                         extras.push({ label: "DWG", value: `${h.dailyWeightGain.toFixed(2)} kg/day` });
