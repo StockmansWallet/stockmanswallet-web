@@ -82,12 +82,7 @@ function HerdCard({ herd }: { herd: HerdReportData }) {
   const mortalityPct = herd.mortalityRate > 1 ? herd.mortalityRate : herd.mortalityRate * 100;
 
   const extras: { label: string; value: string; accent?: boolean }[] = [];
-  if (herd.baseBreedPremium !== 0) {
-    extras.push({ label: "Breed Premium", value: `${herd.baseBreedPremium >= 0 ? "+" : ""}${herd.baseBreedPremium}%` });
-  }
-  if (herd.breedPremiumOverride != null) {
-    extras.push({ label: "Custom Breed Premium", value: `${herd.breedPremiumOverride >= 0 ? "+" : ""}${herd.breedPremiumOverride}%`, accent: true });
-  }
+  extras.push({ label: "Avg per Head", value: fmtFull(herd.netValue / herd.headCount) });
   if (herd.dailyWeightGain > 0) {
     extras.push({ label: "DWG", value: `${herd.dailyWeightGain.toFixed(2)} kg/day` });
   }
@@ -99,6 +94,12 @@ function HerdCard({ herd }: { herd: HerdReportData }) {
   }
   if (mortalityPct > 0) {
     extras.push({ label: "Mortality", value: `${mortalityPct.toFixed(1)}% p.a.` });
+  }
+  if (herd.baseBreedPremium !== 0) {
+    extras.push({ label: "Breed Premium", value: `${herd.baseBreedPremium >= 0 ? "+" : ""}${herd.baseBreedPremium}%` });
+  }
+  if (herd.breedPremiumOverride != null) {
+    extras.push({ label: "Custom Breed Premium", value: `${herd.breedPremiumOverride >= 0 ? "+" : ""}${herd.breedPremiumOverride}%`, accent: true });
   }
 
   return (
@@ -122,21 +123,24 @@ function HerdCard({ herd }: { herd: HerdReportData }) {
         <PrintStat label="Price" value={`$${herd.pricePerKg.toFixed(2)}/kg`} />
       </div>
 
-      {/* Supplementary metrics: only rows with data */}
-      {extras.length > 0 && (
-        <div className="grid grid-cols-4 gap-x-3 gap-y-1.5 border-t border-[#271F16]/10 px-4 py-2">
-          {extras.map((e) => (
-            <PrintStat key={e.label} label={e.label} value={e.value} accent={e.accent} />
-          ))}
-        </div>
-      )}
+      {/* Supplementary metrics: rows of 4 */}
+      {extras.length > 0 && (() => {
+        const rows: typeof extras[] = [];
+        for (let i = 0; i < extras.length; i += 4) rows.push(extras.slice(i, i + 4));
+        return rows.map((row, ri) => (
+          <div key={ri} className="grid grid-cols-4 gap-x-3 border-t border-[#271F16]/10 px-4 py-2">
+            {row.map((e) => (
+              <PrintStat key={e.label} label={e.label} value={e.value} accent={e.accent} />
+            ))}
+          </div>
+        ));
+      })()}
 
       {/* Breed premium justification */}
-      {herd.breedPremiumJustification && (
-        <div className="border-t border-[#271F16]/10 px-4 py-2">
-          <p className="text-[8px] font-semibold uppercase tracking-wider text-[#271F16]/55">Custom Premium Justification</p>
-          <p className="mt-0.5 text-[10px] italic text-[#271F16]/50">{herd.breedPremiumJustification}</p>
-        </div>
+      {herd.breedPremiumOverride != null && herd.breedPremiumJustification && (
+        <p className="border-t border-[#271F16]/10 px-4 py-2 text-[10px] text-[#271F16]/50">
+          Baseline breed premium: <span className="font-semibold text-[#271F16]">{herd.baseBreedPremium >= 0 ? "+" : ""}{herd.baseBreedPremium}%</span> <span className="mx-1 text-[#271F16]/20">|</span> Custom breed premium: <span className="font-bold text-[#d97706]">{herd.breedPremiumOverride >= 0 ? "+" : ""}{herd.breedPremiumOverride}%</span> <span className="mx-1 text-[#271F16]/20">|</span> Justification: <span className="italic">{herd.breedPremiumJustification}</span>
+        </p>
       )}
     </div>
   );
@@ -272,7 +276,7 @@ export function AssetRegisterTemplate({ data }: { data: ReportData }) {
           ))}
 
           {/* Grand total */}
-          <div className="mt-3 flex items-center justify-between border-t border-[#271F16]/30 pt-2">
+          <div className="mt-3 flex items-center justify-between pt-2">
             <p className="text-sm font-bold text-[#271F16]">TOTAL</p>
             <div className="flex items-center gap-6">
               <p className="text-xs tabular-nums text-[#271F16]/60">{totalHead.toLocaleString()} head</p>

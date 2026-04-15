@@ -178,12 +178,7 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
                       const mortalityPct = h.mortalityRate > 1 ? h.mortalityRate : h.mortalityRate * 100;
 
                       const extras: { label: string; value: string; accent?: boolean }[] = [];
-                      if (h.baseBreedPremium !== 0) {
-                        extras.push({ label: "Breed Premium", value: `${h.baseBreedPremium >= 0 ? "+" : ""}${h.baseBreedPremium}%` });
-                      }
-                      if (h.breedPremiumOverride != null) {
-                        extras.push({ label: "Custom Breed Premium", value: `${h.breedPremiumOverride >= 0 ? "+" : ""}${h.breedPremiumOverride}%`, accent: true });
-                      }
+                      extras.push({ label: "Avg per Head", value: fmtFull(h.netValue / h.headCount) });
                       if (h.dailyWeightGain > 0) {
                         extras.push({ label: "DWG", value: `${h.dailyWeightGain.toFixed(2)} kg/day` });
                       }
@@ -195,6 +190,12 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
                       }
                       if (mortalityPct > 0) {
                         extras.push({ label: "Mortality", value: `${mortalityPct.toFixed(1)}% p.a.` });
+                      }
+                      if (h.baseBreedPremium !== 0) {
+                        extras.push({ label: "Breed Premium", value: `${h.baseBreedPremium >= 0 ? "+" : ""}${h.baseBreedPremium}%` });
+                      }
+                      if (h.breedPremiumOverride != null) {
+                        extras.push({ label: "Custom Breed Premium", value: `${h.breedPremiumOverride >= 0 ? "+" : ""}${h.breedPremiumOverride}%`, accent: true });
                       }
 
                       return (
@@ -217,21 +218,24 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
                               <Stat label="Price" value={`$${h.pricePerKg.toFixed(2)}/kg`} />
                             </div>
 
-                            {/* Supplementary metrics: conditional row */}
-                            {extras.length > 0 && (
-                              <div className="mt-1.5 grid grid-cols-4 gap-x-3 gap-y-1.5 border-t border-white/[0.03] pt-1.5">
-                                {extras.map((e) => (
-                                  <Stat key={e.label} label={e.label} value={e.value} accent={e.accent} />
-                                ))}
-                              </div>
-                            )}
+                            {/* Supplementary metrics: rows of 4 */}
+                            {extras.length > 0 && (() => {
+                              const rows: typeof extras[] = [];
+                              for (let i = 0; i < extras.length; i += 4) rows.push(extras.slice(i, i + 4));
+                              return rows.map((row, ri) => (
+                                <div key={ri} className="mt-1.5 grid grid-cols-4 gap-x-3 border-t border-white/[0.03] pt-1.5">
+                                  {row.map((e) => (
+                                    <Stat key={e.label} label={e.label} value={e.value} accent={e.accent} />
+                                  ))}
+                                </div>
+                              ));
+                            })()}
 
                             {/* Breed premium justification */}
-                            {h.breedPremiumJustification && (
-                              <div className="mt-1.5 border-t border-white/[0.03] pt-1.5">
-                                <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Custom Premium Justification</p>
-                                <p className="mt-0.5 text-[11px] italic text-text-muted">{h.breedPremiumJustification}</p>
-                              </div>
+                            {h.breedPremiumOverride != null && h.breedPremiumJustification && (
+                              <p className="mt-1.5 border-t border-white/[0.03] pt-1.5 text-[11px] text-text-muted">
+                                Baseline breed premium: <span className="font-semibold text-text-primary">{h.baseBreedPremium >= 0 ? "+" : ""}{h.baseBreedPremium}%</span> <span className="mx-1 text-white/20">|</span> Custom breed premium: <span className="font-bold text-amber-400">{h.breedPremiumOverride >= 0 ? "+" : ""}{h.breedPremiumOverride}%</span> <span className="mx-1 text-white/20">|</span> Justification: <span className="italic">{h.breedPremiumJustification}</span>
+                              </p>
                             )}
                           </CardContent>
                         </Card>
