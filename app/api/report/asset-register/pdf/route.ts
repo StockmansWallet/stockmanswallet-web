@@ -58,10 +58,11 @@ export async function GET(request: NextRequest) {
       });
     });
 
+    // Debug: preferCSSPageSize uses the @page { size: A4; margin: 0 } CSS rules
+    // from print-styles.tsx, producing identical pagination to the browser's "Save as PDF".
     const pdfBuffer = await page.pdf({
-      format: "A4",
+      preferCSSPageSize: true,
       printBackground: true,
-      margin: { top: "0", right: "0", bottom: "0", left: "0" },
     });
 
     return new NextResponse(Buffer.from(pdfBuffer), {
