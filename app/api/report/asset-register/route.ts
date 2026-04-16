@@ -91,17 +91,18 @@ body{font-family:system-ui,-apple-system,sans-serif;color:#271F16;background:#ff
 @page{size:A4;margin:0}
 .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;break-inside:avoid;page-break-inside:avoid}
 .flex-between{display:flex;align-items:center;justify-content:space-between}
 .label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#6B5B45}
 .val{font-size:14px;font-weight:600;color:#271F16;margin-top:2px}
 .val-lg{font-size:18px;font-weight:700}
 .val-xl{font-size:28px;font-weight:700}
-.card{border:1px solid rgba(139,115,85,0.25);border-radius:12px;overflow:hidden}
+.card{border:1px solid rgba(139,115,85,0.25);border-radius:12px;overflow:hidden;break-inside:avoid;page-break-inside:avoid}
 .card-head{padding:10px 16px;background:rgba(139,115,85,0.25)}
 .card-body{padding:8px 16px}
 .pill{border-radius:9999px;padding:8px 16px}
 .bg-dark{background:#271F16;color:#fff}
+.break-avoid{break-inside:avoid;page-break-inside:avoid}
 .text-muted{color:rgba(39,31,22,0.5)}
 .text-green{color:#15803d}
 .text-red{color:#b91c1c}
