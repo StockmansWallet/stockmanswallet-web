@@ -465,8 +465,8 @@ export function HerdsTable({
                   ))}
                 </div>
                 <div className="border-t border-border-subtle px-5 py-2.5">
-                  <p className="text-xs text-text-muted">
-                    {group.herds.length} {group.herds.length === 1 ? "herd" : "herds"} · {groupHead.toLocaleString()} head
+                  <p className="text-right text-xs text-text-muted">
+                    {group.herds.length} {group.herds.length === 1 ? "herd" : "herds"} | {groupHead.toLocaleString()} head
                   </p>
                 </div>
               </div>
