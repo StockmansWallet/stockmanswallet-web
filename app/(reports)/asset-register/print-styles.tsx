@@ -11,10 +11,7 @@ export function ReportPrintStyles() {
       }
       @page {
         size: A4;
-        margin: 4mm 0 0 0;
-      }
-      @page :first {
-        margin: 0;
+        margin: 6mm 0;
         @bottom-right {
           content: "Page " counter(page) " of " counter(pages);
           font-size: 8px;
