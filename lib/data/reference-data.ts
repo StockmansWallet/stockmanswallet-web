@@ -512,14 +512,17 @@ export function getPhysicalSaleyardShortNames(): string[] {
 
 // MARK: - Short Display Name for Saleyards
 
-/** Strips common suffixes for compact display (e.g. "Wagga Wagga Livestock Marketing Centre" -> "Wagga Wagga") */
+/** Strips suffixes and regional descriptors to get just the place name (e.g. "Mortlake Western Victorian Livestock Exchange" -> "Mortlake") */
 export function shortSaleyardName(name: string): string {
   return name
+    // Strip facility type suffixes first
     .replace(/ Livestock (Marketing Centre|Selling Centre|Exchange|Centre)$/i, "")
     .replace(/ Regional Livestock (Exchange|Market)$/i, "")
     .replace(/ Central [\w ]+ Livestock Exchange$/i, "")
-    .replace(/ (Dalrymple |Northern Victoria |Great Southern Regional Cattle |Gippsland Regional |South Eastern |Western Victorian |Victorian |Southern |South Australian )?Saleyards?$/i, "")
     .replace(/ Livestock Exchange$/i, "")
+    .replace(/ Saleyards?$/i, "")
+    // Strip regional/directional descriptors that follow the place name
+    .replace(/ (Western Victorian|Northern Victoria|South Eastern|South Australian|Great Southern|Gippsland|Victorian|Southern|Regional|Central|Tablelands|Dalrymple).*$/i, "")
     .trim();
 }
 
