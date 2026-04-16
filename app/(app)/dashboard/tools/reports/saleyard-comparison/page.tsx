@@ -121,7 +121,10 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
           {chartData.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Top 10 Saleyards by Portfolio Value</CardTitle>
+                <div>
+                  <CardTitle>Top 10 Saleyards by Portfolio Value</CardTitle>
+                  <p className="mt-0.5 text-xs text-text-muted">Your portfolio valued using each saleyard&apos;s latest MLA category prices.</p>
+                </div>
               </CardHeader>
               <CardContent>
                 <LazyChart data={chartData} />
