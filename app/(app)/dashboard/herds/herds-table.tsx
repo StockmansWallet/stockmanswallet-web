@@ -299,18 +299,20 @@ export function HerdsTable({
           </div>
         )}
 
-        {/* Head count */}
-        <span className="w-12 shrink-0 text-sm font-semibold tabular-nums text-text-primary">
+        {/* Head count pill */}
+        <span className="flex h-9 w-12 shrink-0 items-center justify-center rounded-lg bg-white/[0.04] text-sm font-semibold tabular-nums text-text-primary">
           {herd.head_count?.toLocaleString() ?? "\u2014"}
         </span>
 
         {/* Name + details + pills */}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-text-primary">{herd.name}</p>
-          <p className="truncate text-xs text-text-muted">
-            {herd.breed} | {categoryLabel}
-            {weightDisplay && <> | {weightDisplay}</>}
-            {pricePerKg > 0 && <> | ${pricePerKg.toFixed(2)}/kg</>}
+          <p className="flex items-baseline gap-2 truncate">
+            <span className="text-sm font-medium text-text-primary">{herd.name}</span>
+            <span className="truncate text-xs text-text-muted">
+              {herd.breed} | {categoryLabel}
+              {weightDisplay && <> | {weightDisplay}</>}
+              {pricePerKg > 0 && <> | ${pricePerKg.toFixed(2)}/kg</>}
+            </span>
           </p>
           {(defaultPremium !== 0 || customDelta !== null || accrual > 0 || (nearestSaleyard && !isFallback) || (isStale && !nearestSaleyard) || isFallback) && (
             <div className="mt-1.5 flex flex-wrap items-center gap-1">
