@@ -522,6 +522,7 @@ export function shortSaleyardName(name: string): string {
     .replace(/ Livestock Exchange$/i, "")
     .replace(/ Saleyards?$/i, "")
     // Strip regional/directional descriptors that follow the place name
+    .replace(/ \(.*?\)/g, "") // strip parenthetical disambiguators like "(Barnawartha)"
     .replace(/ (Western Victorian|Northern Victoria|South Eastern|South Australian|Great Southern|Gippsland|Victorian|Southern|Regional|Central|Tablelands|Dalrymple).*$/i, "")
     .trim();
 }

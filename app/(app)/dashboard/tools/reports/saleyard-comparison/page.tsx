@@ -42,8 +42,8 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
   const { saleyardComparison: sc } = reportData;
   const isEmpty = sc.length === 0;
 
-  // Top 15 for chart (by portfolio value, short names)
-  const chartData = sc.slice(0, 15).map((s) => ({
+  // Top 10 for chart (by portfolio value, short names)
+  const chartData = sc.slice(0, 10).map((s) => ({
     name: shortSaleyardName(s.saleyardName),
     portfolioValue: Math.round(s.totalPortfolioValue),
   }));
@@ -128,7 +128,7 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
           {chartData.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Portfolio Value by Saleyard</CardTitle>
+                <CardTitle>Top 10 Saleyards by Portfolio Value</CardTitle>
               </CardHeader>
               <CardContent>
                 <SaleyardComparisonChart data={chartData} />
