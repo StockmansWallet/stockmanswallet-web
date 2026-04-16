@@ -58,11 +58,14 @@ export async function GET(request: NextRequest) {
       });
     });
 
-    // Debug: preferCSSPageSize uses the @page { size: A4; margin: 0 } CSS rules
-    // from print-styles.tsx, producing identical pagination to the browser's "Save as PDF".
+    // Debug: 6mm top margin on every page creates white space at the top.
+    // Page 1: 6mm (Puppeteer) + 6mm (CSS .report-page padding) = 12mm total.
+    // Pages 2+: 6mm of white space so content doesn't sit flush against the edge.
+    // @page { margin: 0 } keeps pages flush with no black gap between them.
     const pdfBuffer = await page.pdf({
-      preferCSSPageSize: true,
+      format: "A4",
       printBackground: true,
+      margin: { top: "6mm", right: "0", bottom: "0", left: "0" },
     });
 
     return new NextResponse(Buffer.from(pdfBuffer), {

@@ -11,7 +11,7 @@ export function ReportPrintStyles() {
       }
       @page {
         size: A4;
-        margin: 6mm 0;
+        margin: 0;
         @bottom-right {
           content: "Page " counter(page) " of " counter(pages);
           font-size: 8px;
@@ -42,7 +42,7 @@ export function ReportPrintStyles() {
         thead { display: table-header-group; }
         tr { break-inside: avoid; page-break-inside: avoid; }
         .report-page {
-          padding: 12mm 16mm;
+          padding: 6mm 16mm 12mm 16mm;
           max-width: none;
           margin: 0;
         }
