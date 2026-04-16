@@ -179,7 +179,7 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
 
         {/* Executive Summary: full width */}
         {executiveSummary && (
-          <div className="mt-4 overflow-hidden rounded-xl break-inside-avoid">
+          <div className="mt-4 overflow-hidden rounded-xl">
             <div className="px-5 py-4" style={{ backgroundColor: "#271F16" }}>
               <p className="text-[9px] font-semibold uppercase tracking-widest text-white/70">Executive Summary</p>
               <p className="mt-1 text-3xl font-bold tabular-nums text-white">{fmtFull(executiveSummary.totalPortfolioValue)}</p>
@@ -207,7 +207,7 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
         )}
 
         {/* Details row: Producer/Properties + Herd Composition side by side */}
-        <div className="mt-4 break-inside-avoid" style={{ display: "flex", gap: "16px" }}>
+        <div className="mt-4" style={{ display: "flex", gap: "16px" }}>
           {/* Producer and properties */}
           {userDetails && (
             <div style={{ flex: 1, borderRadius: "12px", border: "1px solid rgba(139, 115, 85, 0.25)", padding: "16px 20px" }}>
@@ -258,7 +258,7 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
 
         {/* PORTFOLIO MOVEMENT */}
         {movementSummary && (
-          <section className="mt-5 break-inside-avoid">
+          <section className="mt-5">
             <h2 className="mb-2 text-base font-bold text-[#271F16]">Portfolio Movement</h2>
             <p className="mb-3 text-xs text-[#6B5B45]">{fmtDate(movementSummary.openingDate)} to {fmtDate(movementSummary.closingDate)}</p>
 
