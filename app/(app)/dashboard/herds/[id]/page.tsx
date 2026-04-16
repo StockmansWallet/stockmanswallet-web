@@ -15,7 +15,7 @@ import { getEffectiveJoinedDate } from "@/lib/data/breeding";
 import { DeleteHerdButton } from "./delete-button";
 import { MusterRecordsSection } from "@/components/app/muster-records-section";
 import { HealthRecordsSection } from "@/components/app/health-records-section";
-import { Info, Scale, Heart, MapPin, FileText, Clock } from "lucide-react";
+import { Info, Scale, Heart, MapPin, FileText, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const revalidate = 0;
 
@@ -52,8 +52,8 @@ export default async function HerdDetailPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Fetch herd + breed premiums + records in parallel
-  const [herdResult, { data: breedPremiumData }, { data: musterRecords }, { data: healthRecords }] = await Promise.all([
+  // Fetch herd + breed premiums + records + sibling IDs in parallel
+  const [herdResult, { data: breedPremiumData }, { data: musterRecords }, { data: healthRecords }, { data: siblingHerds }] = await Promise.all([
     supabase
       .from("herds")
       .select("*, properties(property_name)")
@@ -78,6 +78,14 @@ export default async function HerdDetailPage({
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
       .order("date", { ascending: false }),
+    // Lightweight query for prev/next navigation (matches list page sort)
+    supabase
+      .from("herds")
+      .select("id")
+      .eq("user_id", user!.id)
+      .eq("is_sold", false)
+      .eq("is_deleted", false)
+      .order("name"),
   ]);
 
   let herd = herdResult.data;
@@ -209,12 +217,55 @@ export default async function HerdDetailPage({
   const avgWeight = Math.round(projectedWeight ?? herd.current_weight ?? herd.initial_weight ?? 0);
   const valuePerHead = herd.head_count ? Math.round(herdValue / herd.head_count) : 0;
 
+  // Prev/next herd navigation
+  const herdIds = (siblingHerds ?? []).map((h) => h.id);
+  const currentIndex = herdIds.indexOf(id);
+  const prevId = currentIndex > 0 ? herdIds[currentIndex - 1] : null;
+  const nextId = currentIndex >= 0 && currentIndex < herdIds.length - 1 ? herdIds[currentIndex + 1] : null;
+  const herdPosition = currentIndex >= 0 ? currentIndex + 1 : null;
+  const herdTotal = herdIds.length;
+
   return (
     <div className="max-w-4xl">
       <PageHeader
         title={herd.name}
         titleClassName="text-4xl font-bold text-brand"
         subtitle={[herd.species, herd.breed, categoryLabel].filter(Boolean).join(" | ")}
+        actions={
+          herdTotal > 1 ? (
+            <div className="flex items-center gap-2">
+              {prevId ? (
+                <Link
+                  href={`/dashboard/herds/${prevId}`}
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-lowest text-text-muted transition-colors hover:bg-surface-raised hover:text-text-primary"
+                  aria-label="Previous herd"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Link>
+              ) : (
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-lowest text-text-muted/30">
+                  <ChevronLeft className="h-4 w-4" />
+                </span>
+              )}
+              <span className="min-w-[3rem] text-center text-xs tabular-nums text-text-muted">
+                {herdPosition} of {herdTotal}
+              </span>
+              {nextId ? (
+                <Link
+                  href={`/dashboard/herds/${nextId}`}
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-lowest text-text-muted transition-colors hover:bg-surface-raised hover:text-text-primary"
+                  aria-label="Next herd"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              ) : (
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-lowest text-text-muted/30">
+                  <ChevronRight className="h-4 w-4" />
+                </span>
+              )}
+            </div>
+          ) : undefined
+        }
       />
 
       {/* Stats row */}

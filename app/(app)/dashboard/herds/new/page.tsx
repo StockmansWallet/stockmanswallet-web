@@ -25,6 +25,7 @@ export default async function NewHerdPage() {
       <PageHeader
         title="Add Herd"
         subtitle="Create a new herd to track your livestock."
+        titleClassName="text-4xl font-bold text-brand"
       />
       <AddHerdForm
         properties={properties ?? []}
