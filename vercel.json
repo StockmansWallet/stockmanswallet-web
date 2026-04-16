@@ -3,8 +3,7 @@
   "functions": {
     "app/api/report/asset-register/pdf/route.ts": {
       "memory": 1024,
-      "maxDuration": 60,
-      "includeFiles": "node_modules/@sparticuz/chromium/bin/**"
+      "maxDuration": 60
     }
   }
 }

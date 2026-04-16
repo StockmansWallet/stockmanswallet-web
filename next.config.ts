@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Debug: Include @sparticuz/chromium binary files in the PDF route's serverless function.
+  // Without this, Vercel's output file tracing excludes the bin/ directory and Chromium fails to start.
+  outputFileTracingIncludes: {
+    "/api/report/asset-register/pdf": ["./node_modules/@sparticuz/chromium/bin/**"],
+  },
   images: {
     remotePatterns: [
       {
