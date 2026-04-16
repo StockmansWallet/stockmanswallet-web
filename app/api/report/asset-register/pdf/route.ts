@@ -45,24 +45,20 @@ export async function GET(request: NextRequest) {
   if (endDate) printURL.searchParams.set("endDate", endDate);
   if (propertyIds) printURL.searchParams.set("propertyIds", propertyIds);
 
-  // 3. Build Supabase auth cookies matching @supabase/ssr format
-  // The session needs to include access_token and refresh_token
-  const { data: sessionData } = await supabase.auth.getSession();
-  const session = sessionData?.session;
-  if (!session) {
-    return NextResponse.json({ error: "No active session" }, { status: 401 });
-  }
-
+  // 3. Build Supabase auth cookies matching @supabase/ssr format.
+  // We construct the session JSON directly from the JWT since the Supabase client
+  // was created with a header, not a session store (getSession() would return null).
+  // The web middleware only needs a valid access_token to authenticate.
   const sessionJSON = JSON.stringify({
-    access_token: session.access_token,
-    token_type: session.token_type,
-    expires_in: session.expires_in,
-    expires_at: session.expires_at,
-    refresh_token: session.refresh_token,
+    access_token: jwt,
+    token_type: "bearer",
+    expires_in: 3600,
+    expires_at: Math.floor(Date.now() / 1000) + 3600,
+    refresh_token: "",
     user: {
       id: user.id,
-      email: user.email,
-      role: user.role,
+      email: user.email ?? "",
+      role: user.role ?? "authenticated",
     },
   });
 
