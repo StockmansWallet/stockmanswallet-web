@@ -9,6 +9,7 @@ import { Search, MapPinned, ChevronRight } from "lucide-react";
 type Property = {
   id: string;
   property_name: string;
+  livestock_owner: string | null;
   suburb: string | null;
   postcode: string | null;
   state: string | null;
@@ -36,6 +37,7 @@ export function PropertiesTable({
     return properties.filter(
       (p) =>
         p.property_name.toLowerCase().includes(q) ||
+        (p.livestock_owner ?? "").toLowerCase().includes(q) ||
         (p.suburb ?? "").toLowerCase().includes(q) ||
         (p.state ?? "").toLowerCase().includes(q) ||
         (p.property_pic ?? "").toLowerCase().includes(q)
@@ -107,6 +109,9 @@ export function PropertiesTable({
                         <Badge variant="brand" className="text-[10px] px-1.5 py-0">Primary</Badge>
                       )}
                     </div>
+                    {property.livestock_owner && (
+                      <p className="truncate text-[11px] text-text-muted">Owner: {property.livestock_owner}</p>
+                    )}
                     <p className="truncate text-xs text-text-muted">
                       {[
                         property.suburb && property.postcode

@@ -17,6 +17,7 @@ export type Database = {
           state: string;
           region: string | null;
           lga: string | null;
+          livestock_owner: string | null;
           address: string | null;
           suburb: string | null;
           postcode: string | null;
@@ -46,6 +47,7 @@ export type Database = {
           state: string;
           region?: string | null;
           lga?: string | null;
+          livestock_owner?: string | null;
           address?: string | null;
           suburb?: string | null;
           postcode?: string | null;
@@ -75,6 +77,7 @@ export type Database = {
           state?: string;
           region?: string | null;
           lga?: string | null;
+          livestock_owner?: string | null;
           address?: string | null;
           suburb?: string | null;
           postcode?: string | null;

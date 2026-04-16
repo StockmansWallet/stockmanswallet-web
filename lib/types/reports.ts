@@ -60,6 +60,7 @@ export interface HerdReportData {
   isBreeder: boolean;
   propertyId: string | null;
   propertyName: string | null;
+  livestockOwner: string | null;
   baseBreedPremium: number;
   breedPremiumOverride: number | null;
   breedPremiumApplied: number;
@@ -109,6 +110,7 @@ export interface UserReportDetails {
 
 export interface ReportPropertyDetails {
   name: string;
+  livestockOwner: string | null;
   picCode: string | null;
   state: string | null;
 }

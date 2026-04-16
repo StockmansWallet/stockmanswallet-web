@@ -165,7 +165,7 @@ export async function generateAssetRegisterData(
       .order("name"),
     supabase
       .from("properties")
-      .select("id, property_name, property_pic, state, acreage, is_default, default_saleyard, region")
+      .select("id, property_name, property_pic, state, acreage, is_default, default_saleyard, region, livestock_owner")
       .eq("user_id", userId)
       .eq("is_deleted", false)
       .order("property_name"),
@@ -187,8 +187,8 @@ export async function generateAssetRegisterData(
   // Build price maps
   const { nationalPriceMap, saleyardPriceMap, saleyardBreedPriceMap } = await buildPriceMaps(supabase, filteredHerds);
 
-  // Build property lookup
-  const propertyMap = new Map(allProperties.map((p: { id: string; property_name: string }) => [p.id, p.property_name]));
+  // Build property lookup (name + livestock owner)
+  const propertyMap = new Map(allProperties.map((p: { id: string; property_name: string; livestock_owner: string | null }) => [p.id, { name: p.property_name, owner: p.livestock_owner }]));
 
   // Calculate valuations
   const herdDataArray: HerdReportData[] = [];
@@ -206,7 +206,9 @@ export async function generateAssetRegisterData(
     );
 
     const currentPrice = valuation.pricePerKg;
-    const propertyName = herd.property_id ? (propertyMap.get(herd.property_id) ?? null) : null;
+    const propertyInfo = herd.property_id ? (propertyMap.get(herd.property_id) ?? null) : null;
+    const propertyName = propertyInfo?.name ?? null;
+    const livestockOwner = propertyInfo?.owner ?? null;
 
     herdDataArray.push({
       id: herd.id,
@@ -227,6 +229,7 @@ export async function generateAssetRegisterData(
       isBreeder: herd.is_breeder ?? false,
       propertyId: herd.property_id ?? null,
       propertyName,
+      livestockOwner,
       baseBreedPremium: premiumMap.get(herd.breed) ?? 0,
       breedPremiumOverride: herd.breed_premium_override ?? null,
       breedPremiumApplied: valuation.breedPremiumApplied ?? 0,
@@ -280,8 +283,9 @@ export async function generateAssetRegisterData(
   const activePropertyIds = new Set(herdDataArray.map((h) => h.propertyId).filter(Boolean));
   const reportProperties: ReportPropertyDetails[] = allProperties
     .filter((p: { id: string }) => activePropertyIds.has(p.id))
-    .map((p: { property_name: string; property_pic: string | null; state: string | null }) => ({
+    .map((p: { property_name: string; livestock_owner: string | null; property_pic: string | null; state: string | null }) => ({
       name: p.property_name,
+      livestockOwner: p.livestock_owner ?? null,
       picCode: p.property_pic ?? null,
       state: p.state ?? null,
     }));
