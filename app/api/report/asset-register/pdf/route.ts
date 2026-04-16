@@ -1,19 +1,18 @@
-// API route: returns a finished PDF binary of the Asset Register report.
-// Uses puppeteer-core + @sparticuz/chromium to render HTML server-side,
-// producing identical output to the web app's "Save as PDF".
-// iOS calls this endpoint and receives a ready-to-display PDF.
+// API route: returns a finished PDF of the Asset Register.
+// Uses Puppeteer to navigate to the actual web print template page
+// with Supabase auth cookies, producing identical output to the web app's "Save as PDF".
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import puppeteerCore from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
-import { generateAssetRegisterData } from "@/lib/services/report-service";
-import { calculatePortfolioMovement } from "@/lib/services/movement-service";
-import { createMovementPeriod } from "@/lib/types/portfolio-movement";
-import { buildReportHTML } from "@/lib/services/report-html-builder";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
+
+// Debug: Supabase project ref for cookie name
+const SUPABASE_PROJECT_REF = "glxnmljnuzigyqydsxhc";
+const COOKIE_CHUNK_SIZE = 3500;
 
 export async function GET(request: NextRequest) {
   // 1. Auth
@@ -24,33 +23,64 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Missing authentication token" }, { status: 401 });
   }
 
+  // Verify the token
   const supabase = createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     { global: { headers: { Authorization: `Bearer ${jwt}` } } }
   );
-
   const { data: { user }, error: authError } = await supabase.auth.getUser(jwt);
   if (authError || !user) {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 
-  // 2. Generate report data
+  // 2. Build the print template URL (the same page the web app uses)
   const sp = request.nextUrl.searchParams;
-  const startDate = sp.get("startDate") ?? new Date(Date.now() - 365 * 86400000).toISOString().split("T")[0];
-  const endDate = sp.get("endDate") ?? new Date().toISOString().split("T")[0];
-  const propertyIds = sp.get("propertyIds")?.split(",").filter(Boolean) ?? [];
+  const startDate = sp.get("startDate") ?? "";
+  const endDate = sp.get("endDate") ?? "";
+  const propertyIds = sp.get("propertyIds") ?? "";
 
-  const period = createMovementPeriod("1M");
-  const [reportData, movementData] = await Promise.all([
-    generateAssetRegisterData(supabase, user.id, { reportType: "asset-register", startDate, endDate, selectedPropertyIds: propertyIds }),
-    calculatePortfolioMovement(supabase, user.id, period, propertyIds),
-  ]);
+  const printURL = new URL("/asset-register", "https://stockmanswallet.com.au");
+  if (startDate) printURL.searchParams.set("startDate", startDate);
+  if (endDate) printURL.searchParams.set("endDate", endDate);
+  if (propertyIds) printURL.searchParams.set("propertyIds", propertyIds);
 
-  // 3. Build HTML using the shared builder
-  const html = buildReportHTML(reportData, movementData);
+  // 3. Build Supabase auth cookies matching @supabase/ssr format
+  // The session needs to include access_token and refresh_token
+  const { data: sessionData } = await supabase.auth.getSession();
+  const session = sessionData?.session;
+  if (!session) {
+    return NextResponse.json({ error: "No active session" }, { status: 401 });
+  }
 
-  // 4. Render to PDF via headless Chromium
+  const sessionJSON = JSON.stringify({
+    access_token: session.access_token,
+    token_type: session.token_type,
+    expires_in: session.expires_in,
+    expires_at: session.expires_at,
+    refresh_token: session.refresh_token,
+    user: {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    },
+  });
+
+  // Debug: Chunk the cookie if it's too large (matching @supabase/ssr chunking)
+  const cookieBase = `sb-${SUPABASE_PROJECT_REF}-auth-token`;
+  const cookies: { name: string; value: string; domain: string; path: string }[] = [];
+
+  if (sessionJSON.length <= COOKIE_CHUNK_SIZE) {
+    cookies.push({ name: cookieBase, value: encodeURIComponent(sessionJSON), domain: "stockmanswallet.com.au", path: "/" });
+  } else {
+    const encoded = encodeURIComponent(sessionJSON);
+    for (let i = 0; i < encoded.length; i += COOKIE_CHUNK_SIZE) {
+      const chunk = encoded.slice(i, i + COOKIE_CHUNK_SIZE);
+      cookies.push({ name: `${cookieBase}.${Math.floor(i / COOKIE_CHUNK_SIZE)}`, value: chunk, domain: "stockmanswallet.com.au", path: "/" });
+    }
+  }
+
+  // 4. Launch Puppeteer, set cookies, navigate to the print template
   let browser;
   try {
     browser = await puppeteerCore.launch({
@@ -61,8 +91,29 @@ export async function GET(request: NextRequest) {
     });
 
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
 
+    // Set auth cookies before navigation
+    await page.setCookie(...cookies.map(c => ({
+      name: c.name,
+      value: c.value,
+      domain: c.domain,
+      path: c.path,
+      httpOnly: false,
+      secure: true,
+      sameSite: "Lax" as const,
+    })));
+
+    // Navigate to the actual web print template page
+    await page.goto(printURL.toString(), { waitUntil: "networkidle0", timeout: 30000 });
+
+    // Hide the print actions toolbar (it has a .no-print class but also hide via JS)
+    await page.evaluate(() => {
+      document.querySelectorAll("[data-print-actions], .no-print").forEach(el => {
+        (el as HTMLElement).style.display = "none";
+      });
+    });
+
+    // Generate PDF with the same settings as browser print
     const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: true,
