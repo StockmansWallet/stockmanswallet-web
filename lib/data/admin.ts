@@ -3,6 +3,7 @@ export const ADMIN_EMAILS = [
   "leon@stockmanswallet.com.au",
   "mil@stockmanswallet.com.au",
   "luke@stockmanswallet.com.au",
+  "producertest@stockmanswallet.com.au",
 ];
 
 export function isAdminEmail(email: string | null | undefined): boolean {

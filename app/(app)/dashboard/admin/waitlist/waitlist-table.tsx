@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Badge, type BadgeVariant } from "@/components/ui/badge";
-import { Search, Trash2 } from "lucide-react";
+import { Search, Trash2, Mail, MapPin, Layers, Building2, CheckCircle2 } from "lucide-react";
 
 interface WaitlistSignup {
   id: string;
@@ -51,6 +51,10 @@ const FEATURE_LABELS: Record<string, string> = {
   freight_iq: "Freight IQ",
   grid_iq: "Grid IQ",
   producer_network: "Producer Network",
+  insights: "Insights",
+  markets: "Markets",
+  advisor_lens: "Advisor Lens",
+  scenarios: "Scenarios",
 };
 
 function formatDate(iso: string) {
@@ -181,101 +185,122 @@ export function WaitlistTable({ signups }: WaitlistTableProps) {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-white/[0.06] bg-surface-lowest">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="border-b border-white/[0.06]">
-              <th className="w-10 px-4 py-3">
+      {/* Select all */}
+      {filtered.length > 0 && (
+        <div className="flex items-center gap-2 px-1">
+          <input
+            type="checkbox"
+            checked={allSelected}
+            onChange={toggleAll}
+            className="h-4 w-4 cursor-pointer rounded border-white/20 bg-surface accent-brand"
+          />
+          <span className="text-xs text-text-muted">Select all</span>
+        </div>
+      )}
+
+      {/* Card list */}
+      <div className="flex flex-col gap-2">
+        {filtered.length === 0 ? (
+          <div className="rounded-xl border border-white/[0.06] bg-surface-lowest px-4 py-12 text-center text-sm text-text-muted">
+            No waitlist signups yet.
+          </div>
+        ) : (
+          filtered.map((signup) => (
+            <div
+              key={signup.id}
+              className={`rounded-xl border transition-colors ${
+                selected.has(signup.id)
+                  ? "border-brand/20 bg-brand/5"
+                  : "border-white/[0.06] bg-surface-lowest hover:border-white/[0.1]"
+              }`}
+            >
+              {/* Header row: checkbox + name + role + date */}
+              <div className="flex items-start gap-3 px-4 pt-3.5 pb-1">
                 <input
                   type="checkbox"
-                  checked={allSelected}
-                  onChange={toggleAll}
-                  className="h-4 w-4 cursor-pointer rounded border-white/20 bg-surface accent-brand"
+                  checked={selected.has(signup.id)}
+                  onChange={() => toggleOne(signup.id)}
+                  className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-white/20 bg-surface accent-brand"
                 />
-              </th>
-              <th className="px-4 py-3 text-xs font-medium text-text-muted">Name</th>
-              <th className="px-4 py-3 text-xs font-medium text-text-muted">Email</th>
-              <th className="px-4 py-3 text-xs font-medium text-text-muted">Role</th>
-              <th className="px-4 py-3 text-xs font-medium text-text-muted">Postcode</th>
-              <th className="px-4 py-3 text-xs font-medium text-text-muted">Herd Size</th>
-              <th className="px-4 py-3 text-xs font-medium text-text-muted">Properties</th>
-              <th className="px-4 py-3 text-xs font-medium text-text-muted">Interested In</th>
-              <th className="px-4 py-3 text-center text-xs font-medium text-text-muted">Contact OK</th>
-              <th className="px-4 py-3 text-xs font-medium text-text-muted">Signed Up</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.length === 0 ? (
-              <tr>
-                <td colSpan={10} className="px-4 py-12 text-center text-sm text-text-muted">
-                  No waitlist signups yet.
-                </td>
-              </tr>
-            ) : (
-              filtered.map((signup) => (
-                <tr
-                  key={signup.id}
-                  className={`border-b border-surface transition-colors ${
-                    selected.has(signup.id) ? "bg-brand/5" : "hover:bg-surface-lowest"
-                  }`}
-                >
-                  <td className="w-10 px-4 py-3">
-                    <input
-                      type="checkbox"
-                      checked={selected.has(signup.id)}
-                      onChange={() => toggleOne(signup.id)}
-                      className="h-4 w-4 cursor-pointer rounded border-white/20 bg-surface accent-brand"
-                    />
-                  </td>
-                  <td className="px-4 py-3 text-text-primary">{signup.name || "\u2014"}</td>
-                  <td className="px-4 py-3">
-                    <a href={`mailto:${signup.email}`} className="text-brand hover:text-brand-light transition-colors">
+                <div className="flex min-w-0 flex-1 items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-[15px] font-semibold text-text-primary truncate">
+                        {signup.name || "Unknown"}
+                      </span>
+                      {signup.role && (
+                        <Badge variant={ROLE_VARIANTS[signup.role] ?? "default"}>
+                          {ROLE_LABELS[signup.role] ?? signup.role}
+                        </Badge>
+                      )}
+                    </div>
+                    <a
+                      href={`mailto:${signup.email}`}
+                      className="mt-0.5 flex items-center gap-1.5 text-[13px] text-brand hover:text-brand-light transition-colors"
+                    >
+                      <Mail className="h-3 w-3 shrink-0 opacity-60" />
                       {signup.email}
                     </a>
-                  </td>
-                  <td className="px-4 py-3">
-                    {signup.role ? (
-                      <Badge variant={ROLE_VARIANTS[signup.role] ?? "default"}>
-                        {ROLE_LABELS[signup.role] ?? signup.role}
-                      </Badge>
-                    ) : (
-                      "\u2014"
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-text-primary">{signup.postcode || "\u2014"}</td>
-                  <td className="px-4 py-3 text-text-primary">
-                    {signup.herd_size ? HERD_LABELS[signup.herd_size] ?? signup.herd_size : "\u2014"}
-                  </td>
-                  <td className="px-4 py-3 text-text-primary">
-                    {signup.property_count ? PROPERTY_LABELS[signup.property_count] ?? signup.property_count : "\u2014"}
-                  </td>
-                  <td className="px-4 py-3">
-                    {signup.interested_features && signup.interested_features.length > 0 ? (
-                      <div className="flex flex-wrap gap-1">
-                        {signup.interested_features.map((f) => (
-                          <Badge key={f} variant="default">
-                            {FEATURE_LABELS[f] ?? f}
-                          </Badge>
-                        ))}
-                      </div>
-                    ) : (
-                      "\u2014"
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-center">
+                  </div>
+                  <span className="shrink-0 text-xs text-text-muted pt-0.5">
+                    {formatDate(signup.created_at)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Meta row */}
+              <div className="mx-4 mt-2 border-t border-white/[0.06] pt-2.5 pb-3">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px]">
+                  {signup.postcode && (
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="h-3.5 w-3.5 text-text-muted" />
+                      <span className="text-text-muted">Postcode</span>
+                      <span className="text-text-primary font-medium">{signup.postcode}</span>
+                    </span>
+                  )}
+                  {signup.herd_size && (
+                    <span className="flex items-center gap-1.5">
+                      <Layers className="h-3.5 w-3.5 text-text-muted" />
+                      <span className="text-text-muted">Herd</span>
+                      <span className="text-text-primary font-medium">
+                        {HERD_LABELS[signup.herd_size] ?? signup.herd_size}
+                      </span>
+                    </span>
+                  )}
+                  {signup.property_count && (
+                    <span className="flex items-center gap-1.5">
+                      <Building2 className="h-3.5 w-3.5 text-text-muted" />
+                      <span className="text-text-muted">Properties</span>
+                      <span className="text-text-primary font-medium">
+                        {PROPERTY_LABELS[signup.property_count] ?? signup.property_count}
+                      </span>
+                    </span>
+                  )}
+                  <span className="flex items-center gap-1.5">
+                    <CheckCircle2 className={`h-3.5 w-3.5 ${signup.contact_opt_in ? "text-green-400" : "text-text-muted"}`} />
+                    <span className="text-text-muted">Contact</span>
                     {signup.contact_opt_in ? (
                       <Badge variant="success">Yes</Badge>
                     ) : (
-                      <span className="text-text-muted">No</span>
+                      <span className="text-text-muted font-medium">No</span>
                     )}
-                  </td>
-                  <td className="px-4 py-3 text-text-muted">{formatDate(signup.created_at)}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                  </span>
+                </div>
+
+                {/* Feature badges */}
+                {signup.interested_features && signup.interested_features.length > 0 && (
+                  <div className="mt-2.5 flex flex-wrap gap-1.5">
+                    {signup.interested_features.map((f) => (
+                      <Badge key={f} variant="default">
+                        {FEATURE_LABELS[f] ?? f}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
