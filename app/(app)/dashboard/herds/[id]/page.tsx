@@ -287,11 +287,6 @@ export default async function HerdDetailPage({
               {valuation.priceSource === "national" ? "National Avg" : "Est. Fallback"}
             </span>
           )}
-          {isStale && (
-            <span className="inline-flex items-center rounded-full bg-amber-500/15 px-2 py-1 text-[10px] font-medium text-amber-400">
-              Stale - {staleWeeks}w
-            </span>
-          )}
         </div>
         <div className="flex items-center gap-1.5">
           {!herd.is_sold && (
@@ -359,7 +354,17 @@ export default async function HerdDetailPage({
               </div>
             )}
             <InfoRow label="Paddock" value={herd.paddock_name} />
-            <InfoRow label="Saleyard" value={herd.selected_saleyard} />
+            <div className="flex items-center justify-between py-3 text-sm">
+              <span className="text-text-muted">Saleyard</span>
+              <span className="flex items-center gap-2 font-medium text-text-primary">
+                {herd.selected_saleyard}
+                {isStale && (
+                  <span className="inline-flex items-center rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-medium text-amber-400">
+                    Data {staleWeeks}w old
+                  </span>
+                )}
+              </span>
+            </div>
           </CardContent>
         </Card>
 
