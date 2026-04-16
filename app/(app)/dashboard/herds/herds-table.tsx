@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
-import { Search, ChevronUp, ChevronRight, MapPinned, Trash2 } from "lucide-react";
+import { Search, ChevronUp, ChevronRight, MapPinned, Trash2, ArrowUpRight } from "lucide-react";
 import { deleteHerds } from "./actions";
 import { resolveShortSaleyardName } from "@/lib/data/reference-data";
 
@@ -320,32 +320,33 @@ export function HerdsTable({
             <div className="mt-1.5 flex flex-wrap items-center gap-1">
               {defaultPremium !== 0 && (
                 <span className="inline-flex items-center rounded-full bg-white/[0.06] px-1.5 py-0.5 text-[9px] font-medium text-text-muted">
-                  Breed {defaultPremium > 0 ? "+" : ""}{defaultPremium}%
+                  Breed Premium {defaultPremium > 0 ? "+" : ""}{defaultPremium}%
                 </span>
               )}
               {customDelta !== null && (
                 <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-medium ${customDelta > 0 ? "bg-emerald-500/15 text-emerald-400" : customDelta < 0 ? "bg-red-500/15 text-red-400" : "bg-white/[0.06] text-text-muted"}`}>
-                  Custom {customDelta > 0 ? "+" : ""}{customDelta}%
+                  Custom Premium {customDelta > 0 ? "+" : ""}{customDelta}%
                 </span>
               )}
               {accrual > 0 && (
                 <span className="inline-flex items-center rounded-full bg-sky-500/15 px-1.5 py-0.5 text-[9px] font-medium text-sky-400">
-                  Breeding +${Math.round(accrual).toLocaleString()}
+                  Breeding Value +${Math.round(accrual).toLocaleString()}
                 </span>
               )}
               {nearestSaleyard && !isFallback && (
-                <span className="inline-flex items-center rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
+                  <ArrowUpRight className="h-2.5 w-2.5" />
                   Via {resolveShortSaleyardName(nearestSaleyard) ?? nearestSaleyard}
                 </span>
               )}
               {isStale && !nearestSaleyard && (
                 <span className="inline-flex items-center rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
-                  Stale
+                  Stale Data
                 </span>
               )}
               {isFallback && (
                 <span className="inline-flex items-center rounded-full bg-red-500/15 px-1.5 py-0.5 text-[9px] font-medium text-red-400">
-                  {source === "national" ? "National" : "Fallback"}
+                  {source === "national" ? "National Avg" : "Est. Fallback"}
                 </span>
               )}
             </div>
