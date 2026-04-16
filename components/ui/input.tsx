@@ -3,6 +3,8 @@ import { ChevronUp, ChevronDown } from "lucide-react";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
+  /** Muted text appended after the label (e.g. "(Property Identification Code)") */
+  labelSuffix?: string;
   error?: string;
   helperText?: string;
   /** Starting value for number stepper arrows when the field is empty */
@@ -12,7 +14,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, helperText, id, className = "", type, step, min, max, onChange, value, nudgeDefault, hint, required, ...props }, ref) => {
+  ({ label, labelSuffix, error, helperText, id, className = "", type, step, min, max, onChange, value, nudgeDefault, hint, required, ...props }, ref) => {
     const isNumber = type === "number";
     const internalRef = useRef<HTMLInputElement>(null);
     const inputRef = (ref as React.RefObject<HTMLInputElement>) || internalRef;
@@ -60,7 +62,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             htmlFor={id}
             className="mb-1.5 block text-sm font-medium text-text-secondary"
           >
-            {label}{required && <span className="text-red-400"> *</span>}
+            {label}{labelSuffix && <span className="ml-1 text-[11px] font-normal text-text-muted">{labelSuffix}</span>}{required && <span className="text-red-400"> *</span>}
           </label>
         )}
         <div className="relative">

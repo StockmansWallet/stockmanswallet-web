@@ -145,9 +145,9 @@ export function PropertyForm({ property, action, submitLabel, cancelHref, delete
               id="property_pic"
               name="property_pic"
               label="PIC Number"
+              labelSuffix="Property Identification Code"
               defaultValue={property?.property_pic ?? ""}
               placeholder="e.g. QABC1234"
-              helperText="Property Identification Code"
             />
             <Input
               id="livestock_owner"
