@@ -452,12 +452,11 @@ export function HerdsTable({
                       <Badge variant="brand" className="text-[10px] px-1.5 py-0">Primary</Badge>
                     )}
                   </div>
-                  <div className="flex items-center gap-4 text-sm font-semibold tabular-nums text-brand">
-                    <span>{groupHead.toLocaleString()} head</span>
-                    {groupValue > 0 && (
-                      <span>${Math.round(groupValue).toLocaleString()}</span>
-                    )}
-                  </div>
+                  {groupValue > 0 && (
+                    <span className="text-sm font-semibold tabular-nums text-brand">
+                      ${Math.round(groupValue).toLocaleString()}
+                    </span>
+                  )}
                 </div>
                 <SortBar />
                 <div className="divide-y divide-white/[0.06]">
@@ -467,7 +466,7 @@ export function HerdsTable({
                 </div>
                 <div className="border-t border-border-subtle px-5 py-2.5">
                   <p className="text-xs text-text-muted">
-                    {group.herds.length} {group.herds.length === 1 ? "herd" : "herds"}
+                    {group.herds.length} {group.herds.length === 1 ? "herd" : "herds"} · {groupHead.toLocaleString()} head
                   </p>
                 </div>
               </div>
