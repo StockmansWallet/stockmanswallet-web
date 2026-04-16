@@ -301,8 +301,7 @@ export function HerdsTable({
           {herd.head_count?.toLocaleString() ?? "\u2014"}
         </span>
 
-        {/* Name + details */}
-        {/* Name + description */}
+        {/* Name + details + pills */}
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium text-text-primary">{herd.name}</p>
           <p className="truncate text-xs text-text-muted">
@@ -310,39 +309,41 @@ export function HerdsTable({
             {weightDisplay && <> | {weightDisplay}</>}
             {pricePerKg > 0 && <> | ${pricePerKg.toFixed(2)}/kg</>}
           </p>
+          {(breedPremium !== 0 || accrual > 0 || (nearestSaleyard && !isFallback) || (isStale && !nearestSaleyard) || isFallback) && (
+            <div className="mt-1.5 flex flex-wrap items-center gap-1">
+              {breedPremium !== 0 && (
+                <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-medium ${breedPremium > 0 ? "bg-emerald-500/15 text-emerald-400" : "bg-red-500/15 text-red-400"}`}>
+                  Breed {breedPremium > 0 ? "+" : ""}{breedPremium}%
+                </span>
+              )}
+              {accrual > 0 && (
+                <span className="inline-flex items-center rounded-full bg-sky-500/15 px-1.5 py-0.5 text-[9px] font-medium text-sky-400">
+                  Breeding +${Math.round(accrual).toLocaleString()}
+                </span>
+              )}
+              {nearestSaleyard && !isFallback && (
+                <span className="inline-flex items-center rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
+                  Via {resolveShortSaleyardName(nearestSaleyard) ?? nearestSaleyard}
+                </span>
+              )}
+              {isStale && !nearestSaleyard && (
+                <span className="inline-flex items-center rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
+                  Stale
+                </span>
+              )}
+              {isFallback && (
+                <span className="inline-flex items-center rounded-full bg-red-500/15 px-1.5 py-0.5 text-[9px] font-medium text-red-400">
+                  {source === "national" ? "National" : "Fallback"}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Pills + value */}
-        <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
-          {breedPremium !== 0 && (
-            <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-medium ${breedPremium > 0 ? "bg-emerald-500/15 text-emerald-400" : "bg-red-500/15 text-red-400"}`}>
-              Breed {breedPremium > 0 ? "+" : ""}{breedPremium}%
-            </span>
-          )}
-          {accrual > 0 && (
-            <span className="inline-flex items-center rounded-full bg-sky-500/15 px-1.5 py-0.5 text-[9px] font-medium text-sky-400">
-              Breeding +${Math.round(accrual).toLocaleString()}
-            </span>
-          )}
-          {nearestSaleyard && !isFallback && (
-            <span className="inline-flex items-center rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
-              Via {resolveShortSaleyardName(nearestSaleyard) ?? nearestSaleyard}
-            </span>
-          )}
-          {isStale && !nearestSaleyard && (
-            <span className="inline-flex items-center rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
-              Stale
-            </span>
-          )}
-          {isFallback && (
-            <span className="inline-flex items-center rounded-full bg-red-500/15 px-1.5 py-0.5 text-[9px] font-medium text-red-400">
-              {source === "national" ? "National" : "Fallback"}
-            </span>
-          )}
-          <span className={`text-sm font-semibold tabular-nums ${isFallback ? "text-red-400" : "text-text-primary"}`}>
-            {value > 0 ? `$${Math.round(value).toLocaleString()}` : "\u2014"}
-          </span>
-        </div>
+        {/* Value */}
+        <span className={`shrink-0 text-sm font-semibold tabular-nums ${isFallback ? "text-red-400" : "text-text-primary"}`}>
+          {value > 0 ? `$${Math.round(value).toLocaleString()}` : "\u2014"}
+        </span>
 
         {!isEditing && (
           <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
