@@ -95,6 +95,13 @@ export interface SaleyardComparisonData {
   minPrice: number;
   maxPrice: number;
   totalHeadCount: number;
+  totalPortfolioValue: number;
+  avgPerHead: number;
+  spread: number;
+  rank: number;
+  diffToBestDollars: number;
+  diffToBestPercent: number;
+  state: string | null;
 }
 
 // MARK: - User Details (for PDF header)

@@ -4,12 +4,14 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import {
   calculateHerdValuation,
+  calculateHerdValue,
   categoryFallback,
   type CategoryPriceEntry,
+  type HerdForValuation,
   type HerdValuationResult,
 } from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
-import { cattleBreedPremiums, resolveMLASaleyardName, saleyards as allSaleyards } from "@/lib/data/reference-data";
+import { cattleBreedPremiums, resolveMLASaleyardName, saleyards as allSaleyards, saleyardToState } from "@/lib/data/reference-data";
 import { expandWithNearbySaleyards } from "@/lib/data/saleyard-proximity";
 import type {
   ReportConfiguration,
@@ -393,8 +395,8 @@ export async function generateSaleyardComparisonData(
   userId: string,
   config: ReportConfiguration
 ): Promise<ReportData> {
-  // Fetch herds, properties, and user details
-  const [{ data: herds }, { data: properties }, userDetails] = await Promise.all([
+  // Fetch herds (full data for valuation), properties, user details, and breed premiums
+  const [{ data: herds }, { data: properties }, userDetails, premiumMap] = await Promise.all([
     supabase
       .from("herds")
       .select(HERD_SELECT)
@@ -408,21 +410,23 @@ export async function generateSaleyardComparisonData(
       .eq("user_id", userId)
       .eq("is_deleted", false),
     fetchUserReportDetails(supabase, userId),
+    buildPremiumMap(supabase),
   ]);
 
-  let filteredHerds = (herds ?? []) as { category: string; initial_weight: number; breeder_sub_type?: string | null; head_count: number; property_id?: string | null }[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let filteredHerds = (herds ?? []) as any[];
   if (config.selectedPropertyIds.length > 0) {
-    filteredHerds = filteredHerds.filter((h) => h.property_id && config.selectedPropertyIds.includes(h.property_id));
+    filteredHerds = filteredHerds.filter((h: { property_id?: string | null }) => h.property_id && config.selectedPropertyIds.includes(h.property_id));
   }
 
   // Resolve MLA categories from user's herds
   const herdCategories = [
-    ...new Set(filteredHerds.map((h) => resolveMLACategory(h.category, h.initial_weight, h.breeder_sub_type ?? undefined).primaryMLACategory)),
+    ...new Set(filteredHerds.map((h: { category: string; initial_weight: number; breeder_sub_type?: string | null }) =>
+      resolveMLACategory(h.category, h.initial_weight, h.breeder_sub_type ?? undefined).primaryMLACategory)),
   ];
 
-  const totalHerdHead = filteredHerds.reduce((sum, h) => sum + h.head_count, 0);
+  const totalHerdHead = filteredHerds.reduce((sum: number, h: { head_count: number }) => sum + h.head_count, 0);
 
-  // Fetch prices for all saleyards (pass empty saleyard list to get all)
   const mlaCategories = [
     ...new Set([
       ...herdCategories,
@@ -430,16 +434,28 @@ export async function generateSaleyardComparisonData(
     ]),
   ];
 
+  // Fetch ALL prices for all known saleyards + National (for fallback valuation)
   let allPrices: PriceRow[] = [];
   if (mlaCategories.length > 0) {
+    const saleyardsWithNational = [...allSaleyards.slice(0, 50), "National"];
     const { data } = (await supabase.rpc("latest_saleyard_prices", {
-      p_saleyards: allSaleyards.slice(0, 50), // Fetch for all known saleyards
+      p_saleyards: saleyardsWithNational,
       p_categories: mlaCategories,
     })) as unknown as { data: PriceRow[] | null };
     allPrices = data ?? [];
   }
 
-  // Group by saleyard, keep only latest date per saleyard
+  // Build national price map (for valuation fallback)
+  const nationalPriceMap = new Map<string, CategoryPriceEntry[]>();
+  for (const p of allPrices) {
+    if (p.saleyard === "National" && p.breed === null && p.price_per_kg > 0) {
+      const entries = nationalPriceMap.get(p.category) ?? [];
+      entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date });
+      nationalPriceMap.set(p.category, entries);
+    }
+  }
+
+  // Group non-national prices by saleyard, keep only latest date per saleyard
   const rawBySaleyard = new Map<string, PriceRow[]>();
   for (const price of allPrices) {
     if (price.price_per_kg <= 0) continue;
@@ -450,24 +466,88 @@ export async function generateSaleyardComparisonData(
     rawBySaleyard.set(normalized, existing);
   }
 
+  // Cast herds to HerdForValuation for the valuation engine
+  const herdsForValuation: HerdForValuation[] = filteredHerds.map((h: Record<string, unknown>) => ({
+    head_count: (h.head_count as number) ?? 0,
+    initial_weight: (h.initial_weight as number) ?? 0,
+    current_weight: (h.current_weight as number) ?? 0,
+    daily_weight_gain: (h.daily_weight_gain as number) ?? 0,
+    dwg_change_date: (h.dwg_change_date as string) ?? null,
+    previous_dwg: (h.previous_dwg as number) ?? null,
+    created_at: (h.created_at as string) ?? new Date().toISOString(),
+    species: (h.species as "Cattle" | "Sheep" | "Pig" | "Goat") ?? "Cattle",
+    category: (h.category as string) ?? "",
+    breed: (h.breed as string) ?? "",
+    breed_premium_override: (h.breed_premium_override as number) ?? null,
+    mortality_rate: (h.mortality_rate as number) ?? null,
+    is_breeder: (h.is_breeder as boolean) ?? false,
+    is_pregnant: (h.is_pregnant as boolean) ?? false,
+    joined_date: (h.joined_date as string) ?? null,
+    calving_rate: (h.calving_rate as number) ?? 0,
+    breeding_program_type: (h.breeding_program_type as "ai" | "controlled" | "uncontrolled" | null) ?? null,
+    joining_period_start: (h.joining_period_start as string) ?? null,
+    joining_period_end: (h.joining_period_end as string) ?? null,
+    selected_saleyard: (h.selected_saleyard as string) ?? null,
+    additional_info: (h.additional_info as string) ?? null,
+    calf_weight_recorded_date: (h.calf_weight_recorded_date as string) ?? null,
+    updated_at: (h.updated_at as string) ?? new Date().toISOString(),
+    breeder_sub_type: (h.breeder_sub_type as string) ?? null,
+  }));
+
+  // For each saleyard, calculate portfolio value using that saleyard's prices
   const comparisonData: SaleyardComparisonData[] = [];
+  const now = new Date();
 
   for (const [saleyard, prices] of rawBySaleyard) {
-    // Only keep latest date
+    // Filter to latest date only
     const latestDate = prices
       .map((p) => p.data_date)
       .filter((d): d is string => Boolean(d))
       .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] ?? null;
 
     const latestPrices = latestDate
-      ? prices.filter((p) => p.data_date === latestDate).map((p) => p.price_per_kg / 100)
-      : prices.map((p) => p.price_per_kg / 100);
+      ? prices.filter((p) => p.data_date === latestDate)
+      : prices;
 
     if (latestPrices.length === 0) continue;
 
-    const avgPrice = latestPrices.reduce((a, b) => a + b, 0) / latestPrices.length;
-    const minPrice = Math.min(...latestPrices);
-    const maxPrice = Math.max(...latestPrices);
+    // Build saleyard-specific price map for valuation engine
+    const syPriceMap = new Map<string, CategoryPriceEntry[]>();
+    const syBreedPriceMap = new Map<string, CategoryPriceEntry[]>();
+    const priceValues: number[] = [];
+
+    for (const p of latestPrices) {
+      const pricePerKg = p.price_per_kg / 100;
+      if (pricePerKg <= 0) continue;
+      priceValues.push(pricePerKg);
+
+      const entry: CategoryPriceEntry = { price_per_kg: pricePerKg, weight_range: p.weight_range, data_date: p.data_date };
+      if (p.breed === null) {
+        const key = `${p.category}|${saleyard}`;
+        const entries = syPriceMap.get(key) ?? [];
+        entries.push(entry);
+        syPriceMap.set(key, entries);
+      } else {
+        const key = `${p.category}|${p.breed}|${saleyard}`;
+        const entries = syBreedPriceMap.get(key) ?? [];
+        entries.push(entry);
+        syBreedPriceMap.set(key, entries);
+      }
+    }
+
+    if (priceValues.length === 0) continue;
+
+    // Calculate portfolio value at this saleyard
+    let portfolioValue = 0;
+    for (const herd of herdsForValuation) {
+      // Override the herd's saleyard to force valuation against this saleyard
+      const herdWithSaleyard = { ...herd, selected_saleyard: saleyard };
+      portfolioValue += calculateHerdValue(herdWithSaleyard, nationalPriceMap, premiumMap, now, syPriceMap, syBreedPriceMap);
+    }
+
+    const avgPrice = priceValues.reduce((a, b) => a + b, 0) / priceValues.length;
+    const minPrice = Math.min(...priceValues);
+    const maxPrice = Math.max(...priceValues);
 
     comparisonData.push({
       saleyardName: saleyard,
@@ -475,17 +555,34 @@ export async function generateSaleyardComparisonData(
       minPrice,
       maxPrice,
       totalHeadCount: totalHerdHead,
+      totalPortfolioValue: portfolioValue,
+      avgPerHead: totalHerdHead > 0 ? portfolioValue / totalHerdHead : 0,
+      spread: maxPrice - minPrice,
+      rank: 0, // assigned after sorting
+      diffToBestDollars: 0, // assigned after sorting
+      diffToBestPercent: 0, // assigned after sorting
+      state: saleyardToState[saleyard] ?? null,
     });
   }
 
-  // Sort by best price first
-  comparisonData.sort((a, b) => b.avgPrice - a.avgPrice);
+  // Sort by portfolio value descending (best first)
+  comparisonData.sort((a, b) => b.totalPortfolioValue - a.totalPortfolioValue);
+
+  // Assign ranks and diff-to-best
+  const bestValue = comparisonData.length > 0 ? comparisonData[0].totalPortfolioValue : 0;
+  for (let i = 0; i < comparisonData.length; i++) {
+    comparisonData[i].rank = i + 1;
+    comparisonData[i].diffToBestDollars = bestValue - comparisonData[i].totalPortfolioValue;
+    comparisonData[i].diffToBestPercent = bestValue > 0
+      ? ((bestValue - comparisonData[i].totalPortfolioValue) / bestValue) * 100
+      : 0;
+  }
 
   const defaultProp = (properties ?? []).find((p: { is_default: boolean }) => p.is_default) ?? (properties ?? [])[0];
 
   return {
     farmName: defaultProp?.property_name ?? null,
-    totalValue: 0,
+    totalValue: bestValue,
     totalSales: 0,
     herdData: [],
     salesData: [],

@@ -15,6 +15,10 @@ function fmtPrice(v: number) {
   return `$${v.toFixed(2)}/kg`;
 }
 
+function fmtValue(v: number) {
+  return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 }).format(v);
+}
+
 export default async function SaleyardComparisonPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const params = await searchParams;
   const config = parseReportConfig(params);
@@ -35,23 +39,25 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
     selectedPropertyIds: config.selectedPropertyIds,
   });
 
-  const { saleyardComparison } = reportData;
-  const isEmpty = saleyardComparison.length === 0;
+  const { saleyardComparison: sc } = reportData;
+  const isEmpty = sc.length === 0;
 
-  // Top 15 for chart
-  const chartData = saleyardComparison.slice(0, 15).map((s) => ({
+  // Top 15 for chart (by portfolio value)
+  const chartData = sc.slice(0, 15).map((s) => ({
     name: s.saleyardName.replace(/ Saleyards?| Livestock.*| Regional.*| Exchange.*| Centre.*/i, ""),
-    avgPrice: +s.avgPrice.toFixed(2),
-    minPrice: +s.minPrice.toFixed(2),
-    maxPrice: +s.maxPrice.toFixed(2),
+    portfolioValue: Math.round(s.totalPortfolioValue),
   }));
 
+  const best = sc[0] ?? null;
+  const worst = sc[sc.length - 1] ?? null;
+  const bestByPrice = best ? [...sc].sort((a, b) => b.avgPrice - a.avgPrice)[0] : null;
+
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-6xl">
       <PageHeader
         title="Saleyard Comparison"
         titleClassName="text-4xl font-bold text-amber-400"
-        subtitle="Compare prices across saleyards for your herd categories."
+        subtitle="Gross portfolio benchmarking across saleyards."
         actions={!isEmpty ? <ReportExportButton reportData={reportData} reportType="saleyard-comparison" title="Saleyard Comparison" /> : undefined}
       />
 
@@ -69,28 +75,34 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
         </Card>
       ) : (
         <div className="flex flex-col gap-4">
-          {/* Best price highlight */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {/* Summary stats */}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Card>
               <CardContent className="px-5 py-4">
-                <p className="text-xs text-text-muted">Best Avg Price</p>
-                <p className="mt-1 text-2xl font-bold tabular-nums text-amber-400">{fmtPrice(saleyardComparison[0].avgPrice)}</p>
-                <p className="mt-0.5 truncate text-xs text-text-secondary">{saleyardComparison[0].saleyardName}</p>
+                <p className="text-xs text-text-muted">Best Saleyard</p>
+                <p className="mt-1 text-xl font-bold tabular-nums text-amber-400">{fmtValue(best!.totalPortfolioValue)}</p>
+                <p className="mt-0.5 truncate text-xs text-text-secondary">{best!.saleyardName}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="px-5 py-4">
+                <p className="text-xs text-text-muted">Best Avg $/kg</p>
+                <p className="mt-1 text-xl font-bold tabular-nums text-text-primary">{fmtPrice(bestByPrice!.avgPrice)}</p>
+                <p className="mt-0.5 truncate text-xs text-text-secondary">{bestByPrice!.saleyardName}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="px-5 py-4">
                 <p className="text-xs text-text-muted">Saleyards Compared</p>
-                <p className="mt-1 text-2xl font-bold tabular-nums text-text-primary">{saleyardComparison.length}</p>
+                <p className="mt-1 text-xl font-bold tabular-nums text-text-primary">{sc.length}</p>
+                <p className="mt-0.5 text-xs text-text-muted">{best!.totalHeadCount.toLocaleString()} head in portfolio</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="px-5 py-4">
-                <p className="text-xs text-text-muted">Price Spread</p>
-                <p className="mt-1 text-2xl font-bold tabular-nums text-text-primary">
-                  {fmtPrice(saleyardComparison[0].avgPrice - saleyardComparison[saleyardComparison.length - 1].avgPrice)}
-                </p>
-                <p className="mt-0.5 text-xs text-text-muted">best vs worst</p>
+                <p className="text-xs text-text-muted">Best vs Worst</p>
+                <p className="mt-1 text-xl font-bold tabular-nums text-text-primary">{fmtValue(best!.totalPortfolioValue - worst!.totalPortfolioValue)}</p>
+                <p className="mt-0.5 text-xs text-text-muted">portfolio value spread</p>
               </CardContent>
             </Card>
           </div>
@@ -99,7 +111,7 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
           {chartData.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Average Price by Saleyard</CardTitle>
+                <CardTitle>Portfolio Value by Saleyard</CardTitle>
               </CardHeader>
               <CardContent>
                 <SaleyardComparisonChart data={chartData} />
@@ -107,12 +119,12 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
             </Card>
           )}
 
-          {/* Comparison Table */}
+          {/* Full Comparison Table */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>All Saleyards</CardTitle>
-                <span className="text-xs text-text-muted">sorted by best price</span>
+                <span className="text-xs text-text-muted">ranked by portfolio value</span>
               </div>
             </CardHeader>
             <CardContent className="px-0 pb-0">
@@ -122,23 +134,36 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
                     <tr className="border-b border-white/5 text-left text-text-muted">
                       <th className="px-5 pb-2 font-medium">#</th>
                       <th className="px-3 pb-2 font-medium">Saleyard</th>
-                      <th className="px-3 pb-2 text-right font-medium">Avg Price</th>
-                      <th className="px-3 pb-2 text-right font-medium">Min Price</th>
-                      <th className="px-3 pb-2 text-right font-medium">Max Price</th>
-                      <th className="px-5 pb-2 text-right font-medium">Spread</th>
+                      <th className="px-3 pb-2 text-right font-medium">Portfolio Value</th>
+                      <th className="px-3 pb-2 text-right font-medium">Avg $/kg</th>
+                      <th className="px-3 pb-2 text-right font-medium">Avg $/hd</th>
+                      <th className="px-3 pb-2 text-right font-medium">Spread</th>
+                      <th className="px-3 pb-2 text-right font-medium">Diff ($)</th>
+                      <th className="px-3 pb-2 text-right font-medium">Diff (%)</th>
+                      <th className="px-5 pb-2 font-medium">State</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
-                    {saleyardComparison.map((s, i) => (
-                      <tr key={s.saleyardName} className="transition-colors hover:bg-white/[0.02]">
-                        <td className="px-5 py-2.5 tabular-nums text-text-muted">{i + 1}</td>
-                        <td className="px-3 py-2.5 text-text-primary">{s.saleyardName}</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums font-medium text-amber-400">{fmtPrice(s.avgPrice)}</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums text-text-secondary">{fmtPrice(s.minPrice)}</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums text-text-secondary">{fmtPrice(s.maxPrice)}</td>
-                        <td className="px-5 py-2.5 text-right tabular-nums text-text-muted">{fmtPrice(s.maxPrice - s.minPrice)}</td>
-                      </tr>
-                    ))}
+                    {sc.map((s) => {
+                      const isFirst = s.rank === 1;
+                      return (
+                        <tr key={s.saleyardName} className="transition-colors hover:bg-white/[0.02]">
+                          <td className={`px-5 py-2.5 tabular-nums ${isFirst ? "font-semibold text-amber-400" : "text-text-muted"}`}>{s.rank}</td>
+                          <td className={`px-3 py-2.5 ${isFirst ? "font-semibold text-text-primary" : "text-text-primary"}`}>{s.saleyardName}</td>
+                          <td className={`px-3 py-2.5 text-right tabular-nums ${isFirst ? "font-semibold text-amber-400" : "text-text-primary"}`}>{fmtValue(s.totalPortfolioValue)}</td>
+                          <td className="px-3 py-2.5 text-right tabular-nums text-text-secondary">{fmtPrice(s.avgPrice)}</td>
+                          <td className="px-3 py-2.5 text-right tabular-nums text-text-secondary">{fmtValue(s.avgPerHead)}</td>
+                          <td className="px-3 py-2.5 text-right tabular-nums text-text-muted">{fmtPrice(s.spread)}</td>
+                          <td className="px-3 py-2.5 text-right tabular-nums text-text-muted">
+                            {s.diffToBestDollars > 0 ? `-${fmtValue(s.diffToBestDollars)}` : "-"}
+                          </td>
+                          <td className="px-3 py-2.5 text-right tabular-nums text-text-muted">
+                            {s.diffToBestPercent > 0 ? `-${s.diffToBestPercent.toFixed(1)}%` : "-"}
+                          </td>
+                          <td className="px-5 py-2.5 text-text-muted">{s.state ?? ""}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

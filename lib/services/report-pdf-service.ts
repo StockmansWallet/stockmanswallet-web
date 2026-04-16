@@ -416,43 +416,59 @@ function drawSaleCard(ctx: Ctx, s: ReportData["salesData"][0]) {
   ctx.y = cardY - CARD_SPACING;
 }
 
-// MARK: - Saleyard Comparison Card (matching iOS drawSaleyardComparisonData)
+// MARK: - Saleyard Comparison Executive Summary Card
 
-function drawSaleyardCard(ctx: Ctx, s: ReportData["saleyardComparison"][0]) {
-  const cardH = 120;
-  ensureSpace(ctx, cardH + 16);
+function drawSaleyardExecutiveSummary(ctx: Ctx, data: ReportData) {
+  const sc = data.saleyardComparison;
+  if (sc.length === 0) return;
 
+  const best = sc[0];
+  const worst = sc[sc.length - 1];
+  const bestByPrice = [...sc].sort((a, b) => b.avgPrice - a.avgPrice)[0];
+
+  ensureSpace(ctx, 200);
+
+  ctx.page.drawText("EXECUTIVE SUMMARY", { x: MARGIN, y: ctx.y, size: FONT_CAPTION, font: ctx.bold, color: TERTIARY });
+  ctx.y -= 22;
+
+  // Summary card
+  const rows: [string, string][] = [
+    ["Best Saleyard (by value)", `${best.saleyardName} (${fmt(best.totalPortfolioValue)})`],
+    ["Best Avg $/kg", `${bestByPrice.saleyardName} ($${bestByPrice.avgPrice.toFixed(2)}/kg)`],
+    ["Saleyards Compared", sc.length.toString()],
+    ["Total Head in Portfolio", best.totalHeadCount.toLocaleString()],
+    ["Highest Portfolio Value", fmt(best.totalPortfolioValue)],
+    ["Lowest Portfolio Value", fmt(worst.totalPortfolioValue)],
+    ["Best vs Worst Difference", fmt(best.totalPortfolioValue - worst.totalPortfolioValue)],
+  ];
+
+  const rowH = 20;
+  const vertPad = 16;
+  const cardH = vertPad + rows.length * rowH + vertPad;
   const cardY = ctx.y - cardH;
-  drawRoundedRect(ctx.page, MARGIN, cardY, CW, cardH, CARD_CORNER_RADIUS, { fill: CARD_FILL, borderColor: BORDER, borderWidth: 0.5 });
 
-  const pad = CARD_PADDING;
-  const innerW = CW - pad * 2;
-  let iy = ctx.y - pad;
-  const leftX = MARGIN + pad;
+  drawRoundedRect(ctx.page, MARGIN, cardY, CW, cardH, CARD_CORNER_RADIUS, { fill: CARD_FILL, borderColor: BORDER, borderWidth: 1 });
 
-  // Header: saleyard name
-  ctx.page.drawText(s.saleyardName, { x: leftX, y: iy, size: FONT_HEADLINE, font: ctx.bold, color: BLACK });
-  iy -= 22;
+  let rowY = ctx.y - vertPad;
+  const innerX = MARGIN + CARD_PADDING;
+  const innerW = CW - CARD_PADDING * 2;
 
-  // Subtitle: head count
-  ctx.page.drawText(`${s.totalHeadCount} head in portfolio`, { x: leftX, y: iy, size: FONT_CAPTION, font: ctx.font, color: SECONDARY });
-  iy -= 18;
+  for (const [label, value] of rows) {
+    ctx.page.drawText(label, { x: innerX, y: rowY, size: 10, font: ctx.font, color: SECONDARY });
+    const vw = ctx.bold.widthOfTextAtSize(value, 10);
+    ctx.page.drawText(value, { x: innerX + innerW - vw, y: rowY, size: 10, font: ctx.bold, color: BLACK });
+    rowY -= rowH;
+  }
 
-  // 3-column grid: AVG PRICE, MIN PRICE, MAX PRICE
-  const col1X = leftX;
-  const col2X = leftX + (innerW * 0.33);
-  const col3X = leftX + (innerW * 0.66);
+  // Top 3 ranked saleyards
+  if (sc.length >= 3) {
+    rowY -= 4;
+    ctx.page.drawText("Top 3:", { x: innerX, y: rowY, size: 9, font: ctx.bold, color: TERTIARY });
+    const top3Str = `1. ${sc[0].saleyardName}   2. ${sc[1].saleyardName}   3. ${sc[2].saleyardName}`;
+    ctx.page.drawText(top3Str, { x: innerX + 35, y: rowY, size: 9, font: ctx.font, color: SECONDARY });
+  }
 
-  ctx.page.drawText("AVG PRICE", { x: col1X, y: iy, size: FONT_LABEL, font: ctx.bold, color: TERTIARY });
-  ctx.page.drawText("MIN PRICE", { x: col2X, y: iy, size: FONT_LABEL, font: ctx.bold, color: TERTIARY });
-  ctx.page.drawText("MAX PRICE", { x: col3X, y: iy, size: FONT_LABEL, font: ctx.bold, color: TERTIARY });
-  iy -= 14;
-
-  ctx.page.drawText(`$${s.avgPrice.toFixed(2)}/kg`, { x: col1X, y: iy, size: FONT_BODY, font: ctx.font, color: BLACK });
-  ctx.page.drawText(`$${s.minPrice.toFixed(2)}/kg`, { x: col2X, y: iy, size: FONT_BODY, font: ctx.font, color: BLACK });
-  ctx.page.drawText(`$${s.maxPrice.toFixed(2)}/kg`, { x: col3X, y: iy, size: FONT_BODY, font: ctx.font, color: BLACK });
-
-  ctx.y = cardY - CARD_SPACING;
+  ctx.y = cardY - SECTION_SPACING;
 }
 
 // MARK: - Herd Composition Section (matching iOS legend table)
@@ -641,24 +657,47 @@ function drawSalesSummary(ctx: Ctx, data: ReportData) {
 // MARK: - Saleyard Comparison
 
 function drawSaleyardComparison(ctx: Ctx, data: ReportData) {
-  if (data.saleyardComparison.length > 0) {
-    drawHeroCard(ctx, "BEST AVERAGE PRICE", `$${data.saleyardComparison[0].avgPrice.toFixed(2)}/kg`);
+  if (data.saleyardComparison.length === 0) return;
 
-    ensureSpace(ctx, 30);
-    ctx.page.drawText(`Best Saleyard: ${data.saleyardComparison[0].saleyardName}`, {
-      x: MARGIN, y: ctx.y, size: FONT_BODY, font: ctx.font, color: SECONDARY,
-    });
-    ctx.y -= 16;
-    ctx.page.drawText(`${data.saleyardComparison.length} saleyards compared`, {
-      x: MARGIN, y: ctx.y, size: FONT_CAPTION, font: ctx.font, color: TERTIARY,
-    });
-    ctx.y -= SECTION_SPACING;
-  }
+  const best = data.saleyardComparison[0];
 
+  // Hero card with best portfolio value
+  drawHeroCard(ctx, "BEST PORTFOLIO VALUE", fmt(best.totalPortfolioValue));
+
+  // Executive summary
+  drawSaleyardExecutiveSummary(ctx, data);
+
+  // Full comparison table
   drawSectionHeader(ctx, "Saleyard Price Comparison");
 
+  // Table columns: Rank, Saleyard, Portfolio Value, Avg $/kg, Avg $/hd, Spread, Diff ($), Diff (%), State
+  const cols = [
+    { text: "#", width: 20 },
+    { text: "SALEYARD", width: 110 },
+    { text: "PORTFOLIO VALUE", width: 80, align: "right" as const },
+    { text: "AVG $/KG", width: 52, align: "right" as const },
+    { text: "AVG $/HD", width: 55, align: "right" as const },
+    { text: "SPREAD", width: 42, align: "right" as const },
+    { text: "DIFF ($)", width: 55, align: "right" as const },
+    { text: "DIFF (%)", width: 34, align: "right" as const },
+    { text: "STATE", width: 20 },
+  ];
+
+  drawTableHeader(ctx, cols);
+
   for (const s of data.saleyardComparison) {
-    drawSaleyardCard(ctx, s);
+    const isFirst = s.rank === 1;
+    drawTableRow(ctx, [
+      { text: s.rank.toString(), width: 20, bold: isFirst },
+      { text: s.saleyardName.substring(0, 22), width: 110, bold: isFirst },
+      { text: fmt(s.totalPortfolioValue), width: 80, align: "right", bold: isFirst },
+      { text: `$${s.avgPrice.toFixed(2)}`, width: 52, align: "right" },
+      { text: fmt(s.avgPerHead), width: 55, align: "right" },
+      { text: `$${s.spread.toFixed(2)}`, width: 42, align: "right" },
+      { text: s.diffToBestDollars > 0 ? `-${fmt(s.diffToBestDollars)}` : "-", width: 55, align: "right" },
+      { text: s.diffToBestPercent > 0 ? `-${s.diffToBestPercent.toFixed(1)}%` : "-", width: 34, align: "right" },
+      { text: s.state ?? "", width: 20 },
+    ]);
   }
 }
 
