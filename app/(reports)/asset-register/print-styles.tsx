@@ -1,15 +1,6 @@
 export function ReportPrintStyles() {
   return (
-    <>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <style>{`
-      /* Debug: Inter web font ensures identical rendering across browser and Puppeteer.
-         Without this, system fonts differ between macOS (SF Pro) and Linux (DejaVu). */
-      .report-page, .report-page * {
-        font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
-      }
       /* Override dark theme for report pages */
       html.dark .report-root {
         color-scheme: light;
@@ -84,6 +75,5 @@ export function ReportPrintStyles() {
         }
       }
     `}</style>
-    </>
   );
 }
