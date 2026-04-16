@@ -510,6 +510,19 @@ export function getPhysicalSaleyardShortNames(): string[] {
     .sort();
 }
 
+// MARK: - Short Display Name for Saleyards
+
+/** Strips common suffixes for compact display (e.g. "Wagga Wagga Livestock Marketing Centre" -> "Wagga Wagga") */
+export function shortSaleyardName(name: string): string {
+  return name
+    .replace(/ Livestock (Marketing Centre|Selling Centre|Exchange|Centre)$/i, "")
+    .replace(/ Regional Livestock (Exchange|Market)$/i, "")
+    .replace(/ Central [\w ]+ Livestock Exchange$/i, "")
+    .replace(/ (Dalrymple |Northern Victoria |Great Southern Regional Cattle |Gippsland Regional |South Eastern |Western Victorian |Victorian |Southern |South Australian )?Saleyards?$/i, "")
+    .replace(/ Livestock Exchange$/i, "")
+    .trim();
+}
+
 // MARK: - MLA CSV Category Mapping
 // Old mlaCsvCategoryMapping and resolveMLACsvCategory() DELETED - replaced by
 // simplified version in lib/data/weight-mapping.ts (no longer uses sale prefix keying)

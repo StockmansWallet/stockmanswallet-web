@@ -4,8 +4,8 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ReportFilters } from "@/components/app/report-filters";
 import { parseReportConfig } from "@/lib/utils/report-config";
-import { ReportExportButton } from "@/components/app/report-export-button";
 import { generateSaleyardComparisonData } from "@/lib/services/report-service";
+import { shortSaleyardName } from "@/lib/data/reference-data";
 import { SaleyardComparisonChart } from "./saleyard-chart";
 
 export const revalidate = 0;
@@ -42,9 +42,9 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
   const { saleyardComparison: sc } = reportData;
   const isEmpty = sc.length === 0;
 
-  // Top 15 for chart (by portfolio value)
+  // Top 15 for chart (by portfolio value, short names)
   const chartData = sc.slice(0, 15).map((s) => ({
-    name: s.saleyardName.replace(/ Saleyards?| Livestock.*| Regional.*| Exchange.*| Centre.*/i, ""),
+    name: shortSaleyardName(s.saleyardName),
     portfolioValue: Math.round(s.totalPortfolioValue),
   }));
 
@@ -52,13 +52,30 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
   const worst = sc[sc.length - 1] ?? null;
   const bestByPrice = best ? [...sc].sort((a, b) => b.avgPrice - a.avgPrice)[0] : null;
 
+  // Build search params string for the print template link
+  const printParams = new URLSearchParams();
+  printParams.set("start", config.startDate);
+  printParams.set("end", config.endDate);
+  if (config.selectedPropertyIds.length > 0) {
+    printParams.set("properties", config.selectedPropertyIds.join(","));
+  }
+
   return (
     <div className="max-w-6xl">
       <PageHeader
         title="Saleyard Comparison"
         titleClassName="text-4xl font-bold text-amber-400"
         subtitle="Gross portfolio benchmarking across saleyards."
-        actions={!isEmpty ? <ReportExportButton reportData={reportData} reportType="saleyard-comparison" title="Saleyard Comparison" /> : undefined}
+        actions={!isEmpty ? (
+          <a
+            href={`/saleyard-comparison?${printParams.toString()}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-lg ring-1 ring-inset ring-ring-medium bg-surface px-3 py-1.5 text-sm font-medium text-text-primary hover:bg-surface-high transition-colors"
+          >
+            Export PDF
+          </a>
+        ) : undefined}
       />
 
       <div className="mb-4">
@@ -81,14 +98,14 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
               <CardContent className="px-5 py-4">
                 <p className="text-xs text-text-muted">Best Saleyard</p>
                 <p className="mt-1 text-xl font-bold tabular-nums text-amber-400">{fmtValue(best!.totalPortfolioValue)}</p>
-                <p className="mt-0.5 truncate text-xs text-text-secondary">{best!.saleyardName}</p>
+                <p className="mt-0.5 truncate text-xs text-text-secondary">{shortSaleyardName(best!.saleyardName)}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="px-5 py-4">
                 <p className="text-xs text-text-muted">Best Avg $/kg</p>
                 <p className="mt-1 text-xl font-bold tabular-nums text-text-primary">{fmtPrice(bestByPrice!.avgPrice)}</p>
-                <p className="mt-0.5 truncate text-xs text-text-secondary">{bestByPrice!.saleyardName}</p>
+                <p className="mt-0.5 truncate text-xs text-text-secondary">{shortSaleyardName(bestByPrice!.saleyardName)}</p>
               </CardContent>
             </Card>
             <Card>
@@ -146,10 +163,15 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
                   <tbody className="divide-y divide-white/5">
                     {sc.map((s) => {
                       const isFirst = s.rank === 1;
+                      const short = shortSaleyardName(s.saleyardName);
+                      const showFull = short !== s.saleyardName;
                       return (
                         <tr key={s.saleyardName} className="transition-colors hover:bg-white/[0.02]">
                           <td className={`px-5 py-2.5 tabular-nums ${isFirst ? "font-semibold text-amber-400" : "text-text-muted"}`}>{s.rank}</td>
-                          <td className={`px-3 py-2.5 ${isFirst ? "font-semibold text-text-primary" : "text-text-primary"}`}>{s.saleyardName}</td>
+                          <td className="px-3 py-2.5">
+                            <p className={`${isFirst ? "font-semibold text-text-primary" : "text-text-primary"}`}>{short}</p>
+                            {showFull && <p className="text-[10px] text-text-muted">{s.saleyardName}</p>}
+                          </td>
                           <td className={`px-3 py-2.5 text-right tabular-nums ${isFirst ? "font-semibold text-amber-400" : "text-text-primary"}`}>{fmtValue(s.totalPortfolioValue)}</td>
                           <td className="px-3 py-2.5 text-right tabular-nums text-text-secondary">{fmtPrice(s.avgPrice)}</td>
                           <td className="px-3 py-2.5 text-right tabular-nums text-text-secondary">{fmtValue(s.avgPerHead)}</td>
