@@ -19,9 +19,9 @@ export default function About() {
         >
           <span className="text-sm font-medium uppercase tracking-wider text-brand">About Us</span>
           <h2 className="mt-3 text-3xl font-semibold text-white text-balance sm:text-4xl lg:text-5xl">
-            Built by Australians, for{' '}
+            Built by Australians,
             <br className="hidden sm:block" />
-            Australian producers
+            for Australian producers
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-text-secondary">
             We believe livestock producers deserve the same quality of financial tools available to equity investors. Real data, intelligent analysis, professional-grade reporting.

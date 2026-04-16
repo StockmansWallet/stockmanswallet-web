@@ -55,8 +55,8 @@ export default function Pricing() {
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-base text-text-secondary">
             {ADVISOR_ENABLED
-              ? 'Plans for producers and advisors. All plans include a 30-day free trial.'
-              : 'All plans include a 30-day free trial.'}
+              ? 'Plans for producers and advisors. All plans include a 21-day free trial.'
+              : 'All plans include a 21-day free trial.'}
           </p>
         </motion.div>
 
@@ -110,7 +110,7 @@ export default function Pricing() {
             transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
             className={`mt-12 grid gap-4 sm:gap-6 ${
               activeTab === 'producer'
-                ? 'sm:grid-cols-2 lg:grid-cols-3'
+                ? 'mx-auto max-w-3xl sm:grid-cols-2'
                 : 'mx-auto max-w-3xl sm:grid-cols-2'
             }`}
           >
@@ -186,18 +186,17 @@ export default function Pricing() {
         {/* Notes */}
         <div className="mx-auto mt-12 max-w-2xl space-y-4">
           <div className="rounded-2xl bg-white/[0.03] p-5">
-            <h4 className="text-sm font-semibold text-white">30-Day Free Trial</h4>
+            <h4 className="text-sm font-semibold text-white">21-Day Free Trial</h4>
             <p className="mt-1 text-xs leading-relaxed text-text-muted">
-              All plans include a 30-day free trial. You will not be charged until your trial ends.
-              Cancel anytime before the end of the trial to avoid charges.
+              21-day free trial included. Paid subscription begins automatically at the end of
+              the trial unless cancelled beforehand.
             </p>
           </div>
           <div className="rounded-2xl bg-white/[0.03] p-5">
-            <h4 className="text-sm font-semibold text-brand">Founding Member Pricing</h4>
+            <h4 className="text-sm font-semibold text-brand">Usage Limits</h4>
             <p className="mt-1 text-xs leading-relaxed text-text-muted">
-              Eligible early launch users will receive founding member pricing for the first 12 months
-              of their paid subscription. We will let you know in advance before any pricing changes
-              take effect after that period.
+              Plan-based usage limits apply to Brangus and Freight IQ. Additional usage can be
+              purchased if needed.
             </p>
           </div>
         </div>
