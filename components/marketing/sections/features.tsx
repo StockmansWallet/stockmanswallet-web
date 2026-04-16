@@ -18,6 +18,7 @@ interface FeatureTab {
   mockup: string
   video?: string
   icon: React.ReactNode
+  comingSoon?: boolean
 }
 
 const FEATURE_TABS: FeatureTab[] = [
@@ -157,6 +158,7 @@ const FEATURE_TABS: FeatureTab[] = [
     ],
     mockup: '/images/iphone-screen-gridiq.webp',
     icon: <Grid3x3 className="h-5 w-5" />,
+    comingSoon: true,
   },
   {
     id: 'markets',
@@ -325,8 +327,16 @@ export default function Features() {
                 >
                   {feature.tagline}
                 </span>
-                <h3 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">
+                <h3 className="mt-3 flex items-center gap-3 text-2xl font-semibold text-white sm:text-3xl">
                   {feature.name}
+                  {feature.comingSoon && (
+                    <span
+                      className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
+                      style={{ backgroundColor: `${feature.color}20`, color: feature.colorLight, border: `1px solid ${feature.color}40` }}
+                    >
+                      Coming Soon
+                    </span>
+                  )}
                 </h3>
                 <p className="mt-4 text-base leading-relaxed text-text-secondary">
                   {feature.description}

@@ -13,7 +13,7 @@ interface ChatExample {
 const CHAT_EXAMPLES: ChatExample[] = [
   {
     userMessage: "Brangus, what's the freight cost to get 87 of my heifers to Emerald Saleyards?",
-    assistantMessage: `To Emerald it's gonna cost you $5,958 plus $596 GST - so $6,554 all up. Works out to about $68.50 a head. You've got 9 spare spots on that last deck if you want to throw a few extra on and spread the cost, but there you go.`,
+    assistantMessage: `Righto, Emerald's 662 clicks from your place. You're looking at $5,958 plus $596 GST, so $6,554 all up. That's about $68.50 a head. You've got 9 spare spots on that last deck too, so if you've got a few extras worth sending, now's the time to fill it and bring the per-head cost down.`,
     contextCards: [
       { label: 'Freight to Emerald', value: '$5,958', detail: '+ $596 GST' },
       { label: 'Per Head', value: '$68.48', detail: '87 heifers' },
@@ -22,7 +22,7 @@ const CHAT_EXAMPLES: ChatExample[] = [
   },
   {
     userMessage: "Brangus, if the market drops 20c/kg over the next month, what does that look like for my entire portfolio?",
-    assistantMessage: `A 20c drop takes you from $1.67 million down to $1.58 million. That's an $83,649 hit across the whole portfolio. Your breeders cop the worst of it. Not the end of the world if you're holding, but if the market's heading south you'd want to move quick.`,
+    assistantMessage: `Yeah, that'd sting a bit. A 20c drop takes the portfolio from $1.67 million down to $1.58 million, an $83,649 hit. Your breeders cop the worst of it. Not the end of the world if you're sitting tight, but if the indicators keep trending down, you'd want to get those store cattle moving sooner rather than later.`,
     contextCards: [
       { label: 'Current Portfolio', value: '$1,665,732', detail: '' },
       { label: 'After -20c/kg Drop', value: '$1,582,083', detail: '' },
@@ -31,12 +31,12 @@ const CHAT_EXAMPLES: ChatExample[] = [
   },
   {
     userMessage: "Brangus I forgot it's Hilary's birthday on the 10th June, I need to book the mustering chopper for next Thursday for the bulls and Campbells utes in for a Service this Friday.",
-    assistantMessage: `Done, mate. Got all three locked in the Yard Book. Hilary's birthday 10 June, mustering chopper for the bulls next Thursday 26 March, and Campbells utes in for service this Friday 20 March. You'll get reminders so you don't have to remember a thing.`,
+    assistantMessage: `No worries, all sorted. Hilary's birthday is in the Yard Book for 10 June, chopper's booked for the bulls next Thursday, and Campbells utes are down for service this Friday. I'll ping you a reminder for each one so you can keep your head in the paddock and not in your calendar.`,
     contextCards: [],
   },
   {
     userMessage: "Brangus, I've just had a live export order come through for my Yearling Steers on farm at $4.95/kg. Compare to selling at Charters Towers, including transport.",
-    assistantMessage: `Live export at $4.95/kg = $2,227 per head on farm. Charters Towers: $4.84/kg minus $10.73/head freight nets you $2,167 per head. Live export pays $60/head better. That's a $12,600 swing on 210 head.`,
+    assistantMessage: `Good timing on that one. Live export at $4.95/kg puts you at $2,227 per head, cash on farm. Through Charters Towers you're at $4.84/kg, but once you knock out $10.73 a head in freight you're netting $2,167. So the live export order is $60 a head better. Across your 210 steers, that's an extra $12,600 in your pocket. I'd be taking that call.`,
     contextCards: [
       { label: 'Live Export Offer', value: '$4.95/kg', detail: '$2,227/h' },
       { label: 'Charters Towers', value: '$4.84/kg', detail: 'After $10.73 freight' },
@@ -91,7 +91,7 @@ function ContextCard({ card, index }: { card: ChatExample['contextCards'][0]; in
   )
 }
 
-const HOLD_DURATION = 10000
+const HOLD_DURATION = 18000
 
 export default function StockmanIQ() {
   const ref = useRef<HTMLDivElement>(null)
@@ -188,11 +188,11 @@ export default function StockmanIQ() {
             </p>
             <ul className="mt-8 space-y-4">
               {[
-                'Works directly off your live herd and portfolio data',
-                'Has access to years of historical market data to support better decisions',
+                'Live herd and portfolio data',
+                'Years of historical market data',
                 'Always on across your operation',
-                'Connected directly to the tools and workflows inside Stockman\'s Wallet',
-                'Operates your Yard Book and reminders through simple conversation',
+                'Connected to every tool and workflow',
+                'Manages your Yard Book via conversation',
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand/15">

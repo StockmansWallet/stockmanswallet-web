@@ -35,8 +35,8 @@ export default function AboutAustralia() {
             Stockman&apos;s Wallet is built and operated in Queensland, Australia. We source
             our market data from Australian saleyards, calculate freight on
             Australian roads, and design every feature for the conditions and categories
-            that matter to Australian producers. From the Darling Downs to the Top End,
-            this platform understands your country.
+            that matter to Australian producers. From the pastures of Tasmania to the
+            stations of the Top End, Stockman&apos;s Wallet understands your country.
           </p>
         </motion.div>
 
