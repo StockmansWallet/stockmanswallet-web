@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
-import { Search, ChevronUp, ChevronRight, MapPinned, Trash2, ArrowUpRight } from "lucide-react";
+import { Search, ChevronUp, ChevronRight, MapPinned, Trash2, ArrowUpRight, Leaf } from "lucide-react";
 import { deleteHerds } from "./actions";
 import { resolveShortSaleyardName } from "@/lib/data/reference-data";
 
@@ -329,7 +329,8 @@ export function HerdsTable({
                 </span>
               )}
               {accrual > 0 && (
-                <span className="inline-flex items-center rounded-full bg-sky-500/15 px-1.5 py-0.5 text-[9px] font-medium text-sky-400">
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-lime-500/15 px-1.5 py-0.5 text-[9px] font-medium text-lime-400">
+                  <Leaf className="h-2.5 w-2.5" />
                   Breeding Value +${Math.round(accrual).toLocaleString()}
                 </span>
               )}
