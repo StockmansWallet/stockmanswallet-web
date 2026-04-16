@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
-import { Search, ChevronUp, ChevronRight, MapPinned, Trash2, ArrowUpRight, Leaf, TrendingUp } from "lucide-react";
+import { Search, ChevronUp, ChevronRight, MapPinned, Trash2, ArrowUpRight, Leaf, TrendingUp, Receipt } from "lucide-react";
 import { deleteHerds } from "./actions";
 import { resolveShortSaleyardName } from "@/lib/data/reference-data";
 
@@ -316,7 +316,7 @@ export function HerdsTable({
               {pricePerKg > 0 && <> | ${pricePerKg.toFixed(2)}/kg</>}
             </span>
           </p>
-          {(defaultPremium !== 0 || customDelta !== null || accrual > 0 || (nearestSaleyard && !isFallback) || (isStale && !nearestSaleyard) || isFallback) && (
+          {(defaultPremium !== 0 || customDelta !== null || accrual > 0 || herd.selected_saleyard || isFallback) && (
             <div className="mt-1.5 flex flex-wrap items-center gap-1">
               {defaultPremium !== 0 && (
                 <span className="inline-flex items-center gap-0.5 rounded-full bg-white/[0.06] px-1.5 py-0.5 text-[9px] font-medium text-text-muted">
@@ -334,6 +334,12 @@ export function HerdsTable({
                 <span className="inline-flex items-center gap-0.5 rounded-full bg-lime-500/15 px-1.5 py-0.5 text-[9px] font-medium text-lime-400">
                   <Leaf className="h-2.5 w-2.5" />
                   Breeding Value +${Math.round(accrual).toLocaleString()}
+                </span>
+              )}
+              {herd.selected_saleyard && (
+                <span className={`inline-flex items-center gap-0.5 rounded-full bg-white/[0.06] px-1.5 py-0.5 text-[9px] font-medium ${nearestSaleyard && !isFallback ? "line-through text-text-muted/50" : isStale ? "text-amber-400" : "text-text-muted"}`}>
+                  <Receipt className="h-2.5 w-2.5 shrink-0 no-underline" style={{ textDecoration: "none" }} />
+                  {resolveShortSaleyardName(herd.selected_saleyard) ?? herd.selected_saleyard}
                 </span>
               )}
               {nearestSaleyard && !isFallback && (
