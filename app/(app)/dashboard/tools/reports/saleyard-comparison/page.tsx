@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ReportFilters } from "@/components/app/report-filters";
+import { ReportPreviewButton } from "@/components/app/report-preview-button";
 import { parseReportConfig } from "@/lib/utils/report-config";
 import { generateSaleyardComparisonData } from "@/lib/services/report-service";
 import { shortSaleyardName } from "@/lib/data/reference-data";
@@ -52,36 +53,20 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
   const worst = sc[sc.length - 1] ?? null;
   const bestByPrice = best ? [...sc].sort((a, b) => b.avgPrice - a.avgPrice)[0] : null;
 
-  // Build search params string for the print template link
-  const printParams = new URLSearchParams();
-  printParams.set("start", config.startDate);
-  printParams.set("end", config.endDate);
-  if (config.selectedPropertyIds.length > 0) {
-    printParams.set("properties", config.selectedPropertyIds.join(","));
-  }
-
   return (
     <div className="max-w-6xl">
       <PageHeader
         title="Saleyard Comparison"
-        titleClassName="text-4xl font-bold text-amber-400"
-        subtitle="Gross portfolio benchmarking across saleyards."
-        actions={!isEmpty ? (
-          <a
-            href={`/saleyard-comparison?${printParams.toString()}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-lg ring-1 ring-inset ring-ring-medium bg-surface px-3 py-1.5 text-sm font-medium text-text-primary hover:bg-surface-high transition-colors"
-          >
-            Export PDF
-          </a>
-        ) : undefined}
+        titleClassName="text-4xl font-bold text-[#FFAA00]"
+        subtitle="Compare how your portfolio values across saleyards."
       />
 
-      <div className="mb-4">
+      {/* Toolbar: filters + export in pill row */}
+      <div className="mb-6 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2">
         <Suspense>
           <ReportFilters properties={properties ?? []} />
         </Suspense>
+        {!isEmpty && <ReportPreviewButton reportPath="/saleyard-comparison" />}
       </div>
 
       {isEmpty ? (
