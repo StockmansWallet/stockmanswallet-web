@@ -228,22 +228,24 @@ export function HerdsTable({
 
   function SortBar() {
     return (
-      <div className="flex items-center gap-1 px-5 py-2.5">
-        <span className="mr-1 text-[10px] uppercase tracking-wider text-text-muted">Sort</span>
-        {SORT_OPTIONS.map((opt) => (
-          <button
-            key={opt.key}
-            onClick={() => handleSort(opt.key)}
-            className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors ${
-              sortKey === opt.key
-                ? "bg-brand/15 text-brand"
-                : "text-text-muted hover:text-text-secondary"
-            }`}
-          >
-            {opt.label}
-            <SortIcon column={opt.key} />
-          </button>
-        ))}
+      <div className="flex items-center gap-1 border-b border-white/[0.04] px-5 py-2">
+        <span className="mr-1.5 text-[10px] font-medium text-text-muted">Sort by</span>
+        <div className="flex items-center gap-0.5 rounded-full bg-white/[0.03] p-0.5">
+          {SORT_OPTIONS.map((opt) => (
+            <button
+              key={opt.key}
+              onClick={() => handleSort(opt.key)}
+              className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors ${
+                sortKey === opt.key
+                  ? "bg-brand/15 text-brand"
+                  : "text-text-muted hover:text-text-secondary"
+              }`}
+            >
+              {opt.label}
+              <SortIcon column={opt.key} />
+            </button>
+          ))}
+        </div>
       </div>
     );
   }
