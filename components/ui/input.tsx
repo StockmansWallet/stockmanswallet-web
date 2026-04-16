@@ -12,7 +12,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, helperText, id, className = "", type, step, min, max, onChange, value, nudgeDefault, hint, ...props }, ref) => {
+  ({ label, error, helperText, id, className = "", type, step, min, max, onChange, value, nudgeDefault, hint, required, ...props }, ref) => {
     const isNumber = type === "number";
     const internalRef = useRef<HTMLInputElement>(null);
     const inputRef = (ref as React.RefObject<HTMLInputElement>) || internalRef;
@@ -54,13 +54,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     const hasTrailingIcon = isNumber;
 
     return (
-      <div>
+      <div data-field-error={error ? "true" : undefined}>
         {label && (
           <label
             htmlFor={id}
             className="mb-1.5 block text-sm font-medium text-text-secondary"
           >
-            {label}
+            {label}{required && <span className="text-red-400"> *</span>}
           </label>
         )}
         <div className="relative">
@@ -73,6 +73,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             max={max}
             value={value}
             onChange={onChange}
+            required={required}
             className={`w-full rounded-lg bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${
               hasTrailingIcon ? "pr-10" : ""
             } ${

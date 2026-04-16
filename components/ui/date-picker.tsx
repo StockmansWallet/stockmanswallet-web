@@ -112,14 +112,14 @@ function DatePicker({
     if (d) setView([d.getFullYear(), d.getMonth()]);
   }, [value]);
 
-  // Position the popover below the trigger
+  // Position the popover below the trigger (re-measures after render)
   useEffect(() => {
     if (!open || !triggerRef.current) return;
 
     function updatePosition() {
       const rect = triggerRef.current!.getBoundingClientRect();
       const popoverWidth = 280;
-      const popoverHeight = 380;
+      const popoverHeight = popoverRef.current?.offsetHeight ?? 380;
 
       let top = rect.bottom + 8;
       let left = rect.left;
@@ -139,6 +139,7 @@ function DatePicker({
     }
 
     updatePosition();
+    requestAnimationFrame(updatePosition);
 
     window.addEventListener("scroll", updatePosition, true);
     window.addEventListener("resize", updatePosition);
@@ -211,7 +212,7 @@ function DatePicker({
   const days = buildCalendarDays(viewYear, viewMonth);
 
   return (
-    <div className="relative">
+    <div className="relative" data-field-error={error ? "true" : undefined}>
       {label && (
         <label
           htmlFor={id}

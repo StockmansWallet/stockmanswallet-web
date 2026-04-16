@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Info } from "lucide-react";
@@ -22,6 +23,7 @@ import {
   type BreederSubType,
 } from "@/lib/data/weight-mapping";
 import { AlertTriangle, AlertCircle } from "lucide-react";
+import { scrollToFirstError } from "@/lib/validation/scroll-to-first-error";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -209,6 +211,10 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
   // Section 7 - Saleyard (dropdown)
   const [saleyard, setSaleyard] = useState("");
 
+  // Inline validation state
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [sectionAttempted, setSectionAttempted] = useState<Record<string, boolean>>({});
+
   // Derived
   const isBreeder = isBreederCategory(category);
   const needsBreederSubType = category === "Breeder";
@@ -258,7 +264,7 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
   );
 
   // Section unlock checks
-  const section1Done = name.trim().length > 0 && species !== "" && breed !== "" && category !== "" && breedPremiumConfirmed && (!needsBreederSubType || breederSubType !== "");
+  const section1Done = name.trim().length > 0 && species !== "" && breed !== "" && category !== "" && breedPremiumConfirmed && (!needsBreederSubType || breederSubType !== "") && (!breedPremiumOverride || breedPremiumJustification.trim().length > 0);
   const section2Done = Number(headCount) > 0 && ageMonths !== "" && Number(initialWeight) > 0;
   const section3Done = dailyWeightGain !== "" && mortalityRate !== "" && (!isBreeder || calvingRate !== "");
   // Calves at Foot: if yes, detail fields must be filled before advancing
@@ -277,8 +283,113 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
     : showSection3 && section3Done;
   const showSection7 = showSection6;
 
-  // Save enabled - saleyard required, rest validated
-  const canSave = section1Done && section2Done && saleyard !== "" && !submitting && weightValidation?.status !== "error";
+  // -------------------------------------------------------------------------
+  // Validation
+  // -------------------------------------------------------------------------
+
+  // Validation returns a truthy string per invalid field. We use a single
+  // space so the Input/Select error prop triggers the red border without
+  // rendering visible per-field text. The section-level message is enough.
+  const ERR = " ";
+
+  function validateAddForm(): Record<string, string> {
+    const errors: Record<string, string> = {};
+
+    // Section 1
+    if (!name.trim()) errors.name = ERR;
+    if (!category) errors.category = ERR;
+    if (!breed) errors.breed = ERR;
+    if (needsBreederSubType && !breederSubType) errors.breederSubType = ERR;
+    if (!breedPremiumConfirmed) errors.breedPremiumConfirmed = ERR;
+    if (breedPremiumOverride && !breedPremiumJustification.trim()) {
+      errors.breedPremiumJustification = ERR;
+    }
+
+    // Section 2
+    if (!headCount || Number(headCount) < 1) errors.headCount = ERR;
+    if (!ageMonths) errors.ageMonths = ERR;
+    if (!initialWeight || Number(initialWeight) <= 0) errors.initialWeight = ERR;
+
+    // Section 3
+    if (!dailyWeightGain) errors.dailyWeightGain = ERR;
+    if (!mortalityRate) errors.mortalityRate = ERR;
+    if (isBreeder && !calvingRate) errors.calvingRate = ERR;
+
+    // Section 4 (breeder only)
+    if (isBreeder && showSection4 && !calvesAtFootAnswer) errors.calvesAtFootAnswer = ERR;
+    if (calvesAtFootAnswer === "yes") {
+      if (!calvesHeadCount) errors.calvesHeadCount = ERR;
+      if (!calvesAgeMonths) errors.calvesAgeMonths = ERR;
+      if (!calvesWeight) errors.calvesWeight = ERR;
+    }
+
+    // Section 7
+    if (!saleyard) errors.saleyard = ERR;
+
+    return errors;
+  }
+
+  // Show error only if the field's section has been attempted
+  function showError(section: string, fieldKey: string): string | undefined {
+    return sectionAttempted[section] ? fieldErrors[fieldKey] : undefined;
+  }
+
+  // Suppress hint (orange glow) when section is attempted (red errors take over)
+  function showHint(section: string, isEmpty: boolean): boolean {
+    return isEmpty && !sectionAttempted[section];
+  }
+
+  // Mark section 1 as attempted when user has started filling but it's incomplete
+  const section1Started = !!(name.trim() || breed || category);
+  useEffect(() => {
+    if (section1Started && !section1Done && !sectionAttempted["1"]) {
+      // Small delay so hints show first on initial interaction
+      const timer = setTimeout(() => {
+        if (!section1Done) {
+          setSectionAttempted((prev) => ({ ...prev, "1": true }));
+        }
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [section1Started, section1Done, sectionAttempted]);
+
+  // Mark sections 2+ as attempted when they become visible
+  useEffect(() => {
+    if (showSection2 && !sectionAttempted["2"]) setSectionAttempted((prev) => ({ ...prev, "2": true }));
+  }, [showSection2, sectionAttempted]);
+  useEffect(() => {
+    if (showSection3 && !sectionAttempted["3"]) setSectionAttempted((prev) => ({ ...prev, "3": true }));
+  }, [showSection3, sectionAttempted]);
+  useEffect(() => {
+    if (showSection4 && !sectionAttempted["4"]) setSectionAttempted((prev) => ({ ...prev, "4": true }));
+  }, [showSection4, sectionAttempted]);
+  useEffect(() => {
+    if (showSection4b && !sectionAttempted["4b"]) setSectionAttempted((prev) => ({ ...prev, "4b": true }));
+  }, [showSection4b, sectionAttempted]);
+  useEffect(() => {
+    if (showSection7 && !sectionAttempted["7"]) setSectionAttempted((prev) => ({ ...prev, "7": true }));
+  }, [showSection7, sectionAttempted]);
+
+  // Reactively clear errors as the user corrects fields
+  useEffect(() => {
+    if (Object.keys(fieldErrors).length === 0) return;
+    const current = validateAddForm();
+    setFieldErrors((prev) => {
+      const next: Record<string, string> = {};
+      for (const key of Object.keys(prev)) {
+        if (current[key]) next[key] = current[key];
+      }
+      // Only update if something actually changed
+      if (Object.keys(next).length === Object.keys(prev).length) {
+        const same = Object.keys(next).every((k) => next[k] === prev[k]);
+        if (same) return prev;
+      }
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [name, category, breed, breederSubType, breedPremiumConfirmed, breedPremiumJustification,
+      breedPremiumOverride, headCount, ageMonths, initialWeight, dailyWeightGain, mortalityRate,
+      calvingRate, calvesAtFootAnswer, calvesHeadCount, calvesAgeMonths, calvesWeight, saleyard]);
 
   // Handlers
   function handleSpeciesChange(newSpecies: string) {
@@ -306,6 +417,25 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
 
   async function handleSave() {
     setError(null);
+
+    // Mark all visible sections as attempted
+    const attempted: Record<string, boolean> = { "1": true };
+    if (showSection2) attempted["2"] = true;
+    if (showSection3) attempted["3"] = true;
+    if (showSection4) attempted["4"] = true;
+    if (showSection4b) attempted["4b"] = true;
+    if (showSection7) attempted["7"] = true;
+    setSectionAttempted(attempted);
+
+    // Validate
+    const errors = validateAddForm();
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      requestAnimationFrame(() => scrollToFirstError());
+      return;
+    }
+
+    setFieldErrors({});
     setSubmitting(true);
 
     const formData = new FormData();
@@ -382,7 +512,8 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
               id="name"
               label="Herd Name"
               required
-              hint={!name.trim()}
+              hint={showHint("1", !name.trim())}
+              error={showError("1", "name")}
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Breeders, Steers, Heifers"
@@ -392,7 +523,8 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
               id="category"
               label="Category"
               required
-              hint={!category}
+              hint={showHint("1", !category)}
+              error={showError("1", "category")}
               options={categoryOptions}
               placeholder="Select category"
               value={category}
@@ -406,7 +538,8 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
               id="breeder_sub_type"
               label="Breeder Type"
               required
-              hint={!breederSubType}
+              hint={showHint("1", !breederSubType)}
+              error={showError("1", "breederSubType")}
               options={BREEDER_SUB_TYPE_OPTIONS}
               placeholder="Cow or Heifer?"
               value={breederSubType}
@@ -426,7 +559,8 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
               id="breed"
               label="Breed"
               required
-              hint={!breed}
+              hint={showHint("1", !breed)}
+              error={showError("1", "breed")}
               custom
               options={breedOptions}
               placeholder="Select breed"
@@ -459,21 +593,17 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
 
           {/* Breed premium justification - only shown when custom premium is set */}
           {breedPremiumOverride && (
-            <div>
-              <label htmlFor="breed_premium_justification" className="mb-1 block text-xs font-medium text-text-secondary">
-                Premium Justification <span className="text-red-400">*</span>
-              </label>
-              <textarea
-                id="breed_premium_justification"
-                required
-                value={breedPremiumJustification}
-                onChange={(e) => setBreedPremiumJustification(e.target.value)}
-                placeholder="e.g. High quality Brahman herd with PCAS certification"
-                rows={2}
-                className="w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-              />
-              <p className="mt-1 text-[11px] text-text-muted">Required. Explains why a custom premium is applied.</p>
-            </div>
+            <Textarea
+              id="breed_premium_justification"
+              label="Custom Breed Premium Justification"
+              required
+              value={breedPremiumJustification}
+              onChange={(e) => setBreedPremiumJustification(e.target.value)}
+              error={showError("1", "breedPremiumJustification")}
+              placeholder="e.g. High quality Brahman herd with PCAS certification"
+              rows={2}
+              helperText="Required. Explains why a custom premium is applied."
+            />
           )}
 
           {/* Breed premium footer: divider, info left, confirm right */}
@@ -506,44 +636,56 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                 </div>
 
                 {/* Confirm checkbox - right side */}
-                <button
-                  type="button"
-                  role="checkbox"
-                  aria-checked={breedPremiumConfirmed}
-                  aria-label="Confirm breed premium"
-                  onClick={() => setBreedPremiumConfirmed(!breedPremiumConfirmed)}
-                  className={`flex shrink-0 items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors hover:bg-surface-secondary/80 ${
-                    breedPremiumConfirmed
-                      ? "border-border bg-surface-secondary"
-                      : "border-brand/40 shadow-[0_0_8px_#FF800040] bg-surface-secondary"
-                  }`}
-                >
-                  <span
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
+                <div>
+                  <button
+                    type="button"
+                    role="checkbox"
+                    aria-checked={breedPremiumConfirmed}
+                    aria-label="Confirm breed premium"
+                    onClick={() => setBreedPremiumConfirmed(!breedPremiumConfirmed)}
+                    className={`flex shrink-0 items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors hover:bg-surface-secondary/80 ${
                       breedPremiumConfirmed
-                        ? "border-brand bg-brand"
-                        : "border-text-muted"
+                        ? "border-border bg-surface-secondary"
+                        : showError("1", "breedPremiumConfirmed")
+                          ? "border-red-500/60 ring-1 ring-inset ring-red-500/60 bg-surface-secondary"
+                          : "border-brand/40 shadow-[0_0_8px_#FF800040] bg-surface-secondary"
                     }`}
                   >
-                    {breedPremiumConfirmed && (
-                      <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                  </span>
-                  <span className="text-sm text-text-primary">
-                    Confirm{" "}
-                    {autoPremium !== null && !breedPremiumOverride && (
-                      <span className="text-amber-400">{autoPremium > 0 ? "+" : ""}{autoPremium}%</span>
-                    )}
-                    {breedPremiumOverride && (
-                      <span className="text-amber-400">{Number(breedPremiumOverride) > 0 ? "+" : ""}{breedPremiumOverride}%</span>
-                    )}
-                    {" "}breed premium
-                  </span>
-                </button>
+                    <span
+                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
+                        breedPremiumConfirmed
+                          ? "border-brand bg-brand"
+                          : "border-text-muted"
+                      }`}
+                    >
+                      {breedPremiumConfirmed && (
+                        <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </span>
+                    <span className="text-sm text-text-primary">
+                      Confirm{" "}
+                      {autoPremium !== null && !breedPremiumOverride && (
+                        <span className="text-amber-400">{autoPremium > 0 ? "+" : ""}{autoPremium}%</span>
+                      )}
+                      {breedPremiumOverride && (
+                        <span className="text-amber-400">{Number(breedPremiumOverride) > 0 ? "+" : ""}{breedPremiumOverride}%</span>
+                      )}
+                      {" "}breed premium
+                    </span>
+                  </button>
+                </div>
               </div>
             </>
+          )}
+
+          {/* Section incomplete message */}
+          {sectionAttempted["1"] && !section1Done && (
+            <p className="mt-2 flex items-center gap-2 text-xs text-red-400">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+              Complete the required fields above to continue.
+            </p>
           )}
         </CardContent>
       </Card>
@@ -564,7 +706,8 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                 type="number"
                 min={1}
                 required
-                hint={!headCount}
+                hint={showHint("2", !headCount)}
+                error={showError("2", "headCount")}
                 value={headCount}
                 onChange={(e) => setHeadCount(e.target.value)}
                 placeholder="Number of head"
@@ -575,7 +718,8 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                 type="number"
                 min={0}
                 required
-                hint={!ageMonths}
+                hint={showHint("2", !ageMonths)}
+                error={showError("2", "ageMonths")}
                 value={ageMonths}
                 onChange={(e) => setAgeMonths(e.target.value)}
                 placeholder="Months"
@@ -587,7 +731,8 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                 step="0.1"
                 min={0}
                 required
-                hint={!initialWeight}
+                hint={showHint("2", !initialWeight)}
+                error={showError("2", "initialWeight")}
                 value={initialWeight}
                 onChange={(e) => setInitialWeight(e.target.value)}
                 placeholder="Average weight"
@@ -617,6 +762,14 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                 </span>
               </p>
             )}
+
+            {/* Section incomplete message */}
+            {sectionAttempted["2"] && !section2Done && (
+              <p className="mt-2 flex items-center gap-2 text-xs text-red-400">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                Complete the required fields above to continue.
+              </p>
+            )}
           </CardContent>
         </Card>
       </Section>
@@ -640,7 +793,8 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                   max={100}
                   step={1}
                   required
-                  hint={!calvingRate}
+                  hint={showHint("3", !calvingRate)}
+                  error={showError("3", "calvingRate")}
                   value={calvingRate}
                   onChange={(e) => setCalvingRate(e.target.value)}
                   placeholder="%"
@@ -654,11 +808,12 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                 max={3}
                 step={0.1}
                 required
-                hint={!dailyWeightGain}
+                hint={showHint("3", !dailyWeightGain)}
+                error={showError("3", "dailyWeightGain")}
                 value={dailyWeightGain}
                 onChange={(e) => setDailyWeightGain(e.target.value)}
                 placeholder="Annual average kg/day"
-                helperText="Annual average, not seasonal"
+                helperText={!showError("3", "dailyWeightGain") ? "Annual average, not seasonal" : undefined}
               />
               <Input
                 id="mortality_rate"
@@ -669,11 +824,20 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                 step={1}
                 value={mortalityRate}
                 required
-                hint={!mortalityRate}
+                hint={showHint("3", !mortalityRate)}
+                error={showError("3", "mortalityRate")}
                 onChange={(e) => setMortalityRate(e.target.value)}
                 placeholder="%"
               />
             </div>
+
+            {/* Section incomplete message */}
+            {sectionAttempted["3"] && !section3Done && (
+              <p className="mt-2 flex items-center gap-2 text-xs text-red-400">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                Complete the required fields above to continue.
+              </p>
+            )}
           </CardContent>
         </Card>
       </Section>
@@ -734,7 +898,8 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                 type="number"
                 min={0}
                 required
-                hint={!calvesHeadCount}
+                hint={showHint("4b", !calvesHeadCount)}
+                error={showError("4b", "calvesHeadCount")}
                 value={calvesHeadCount}
                 onChange={(e) => setCalvesHeadCount(e.target.value)}
                 placeholder="Number of calves"
@@ -745,7 +910,8 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                 type="number"
                 min={0}
                 required
-                hint={!calvesAgeMonths}
+                hint={showHint("4b", !calvesAgeMonths)}
+                error={showError("4b", "calvesAgeMonths")}
                 value={calvesAgeMonths}
                 onChange={(e) => setCalvesAgeMonths(e.target.value)}
                 placeholder="Months"
@@ -757,7 +923,8 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                 step="0.1"
                 min={0}
                 required
-                hint={!calvesWeight}
+                hint={showHint("4b", !calvesWeight)}
+                error={showError("4b", "calvesWeight")}
                 value={calvesWeight}
                 onChange={(e) => setCalvesWeight(e.target.value)}
                 placeholder="Weight in kg"
@@ -771,6 +938,14 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
                 reaching 100% at calving (approximately 9 months).
               </span>
             </p>
+
+            {/* Section incomplete message */}
+            {sectionAttempted["4b"] && !calvesDetailsDone && (
+              <p className="mt-2 flex items-center gap-2 text-xs text-red-400">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                Complete the required fields above to continue.
+              </p>
+            )}
           </CardContent>
         </Card>
       </Section>
@@ -895,7 +1070,8 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
             <Select
               id="saleyard"
               required
-              hint={!saleyard}
+              hint={showHint("7", !saleyard)}
+              error={showError("7", "saleyard")}
               custom
               options={saleyardData.flat}
               groups={saleyardData.groups}
@@ -917,7 +1093,7 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
       {/* ----------------------------------------------------------------- */}
       <div className="sticky bottom-0 z-30 -mx-6 bg-background/80 backdrop-blur-xl lg:-mx-8">
         <div className="flex items-center justify-end px-6 py-3 lg:px-8">
-          <Button type="button" size="md" disabled={!canSave} onClick={handleSave}>
+          <Button type="button" size="md" disabled={submitting} onClick={handleSave}>
             {submitting ? "Saving..." : "Save Herd"}
           </Button>
         </div>

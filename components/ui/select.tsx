@@ -86,13 +86,14 @@ function GroupedSelect({
     ?? options.find((o) => o.value === selectedValue)?.label
     ?? "";
 
-  // Position popover below trigger
+  // Position popover below trigger (re-measures after render for accurate flip)
   useEffect(() => {
     if (!open || !triggerRef.current) return;
 
     function updatePosition() {
       const rect = triggerRef.current!.getBoundingClientRect();
-      const popoverHeight = 340;
+      // Use actual popover height when available, fallback to estimate
+      const popoverHeight = popoverRef.current?.offsetHeight ?? 340;
 
       let top = rect.bottom + 8;
       let left = rect.left;
@@ -110,6 +111,8 @@ function GroupedSelect({
     }
 
     updatePosition();
+    // Re-measure after the popover has rendered and has its actual height
+    requestAnimationFrame(updatePosition);
 
     window.addEventListener("scroll", updatePosition, true);
     window.addEventListener("resize", updatePosition);
@@ -159,13 +162,13 @@ function GroupedSelect({
   );
 
   return (
-    <div>
+    <div data-field-error={error ? "true" : undefined}>
       {label && (
         <label
           htmlFor={id}
           className="mb-1.5 block text-sm font-medium text-text-secondary"
         >
-          {label}
+          {label}{required && <span className="text-red-400"> *</span>}
         </label>
       )}
 
@@ -247,21 +250,22 @@ function GroupedSelect({
 // ---------------------------------------------------------------------------
 
 const NativeSelect = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, error, helperText, id, options, placeholder, className = "", groups: _groups, custom: _custom, hint, ...props }, ref) => {
+  ({ label, error, helperText, id, options, placeholder, className = "", groups: _groups, custom: _custom, hint, required, ...props }, ref) => {
     return (
-      <div>
+      <div data-field-error={error ? "true" : undefined}>
         {label && (
           <label
             htmlFor={id}
             className="mb-1.5 block text-sm font-medium text-text-secondary"
           >
-            {label}
+            {label}{required && <span className="text-red-400"> *</span>}
           </label>
         )}
         <div className="relative">
           <select
             ref={ref}
             id={id}
+            required={required}
             className={`w-full appearance-none rounded-lg bg-surface py-3 pl-4 pr-10 text-sm text-text-primary outline-none transition-all ${
               error
                 ? "ring-1 ring-inset ring-red-500/60 focus:ring-red-500"

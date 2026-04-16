@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
@@ -20,6 +21,7 @@ import {
 import type { Database } from "@/lib/types/database";
 import { parseCalvesAtFoot } from "@/lib/engines/valuation-engine";
 import { Info, Scale, Heart, MapPin, FileText, AlertTriangle, AlertCircle, Baby } from "lucide-react";
+import { scrollToFirstError } from "@/lib/validation/scroll-to-first-error";
 
 type HerdRow = Database["public"]["Tables"]["herds"]["Row"];
 
@@ -74,13 +76,17 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
   const [currentWeight, setCurrentWeight] = useState<string>(String(herd?.current_weight ?? herd?.initial_weight ?? ""));
   const [hasCustomPremium, setHasCustomPremium] = useState(herd?.breed_premium_override != null && herd.breed_premium_override !== 0);
 
-  // Calves at foot — parse existing data from additional_info
+  // Calves at foot - parse existing data from additional_info
   const parsedCalves = useMemo(() => parseCalvesAtFoot(herd?.additional_info ?? null), [herd?.additional_info]);
   const [calvesHeadCount, setCalvesHeadCount] = useState(parsedCalves?.headCount?.toString() ?? "");
   const [calvesAgeMonths, setCalvesAgeMonths] = useState(parsedCalves?.ageMonths?.toString() ?? "");
   const [calvesWeight, setCalvesWeight] = useState(parsedCalves?.averageWeight?.toString() ?? "");
 
   const needsBreederSubType = category === "Breeder";
+
+  // Inline validation state
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   // Weight validation
   const weightValidation = useMemo(() => {
@@ -148,9 +154,62 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
     label: p.property_name,
   }));
 
+  // -------------------------------------------------------------------------
+  // Validation
+  // -------------------------------------------------------------------------
+
+  const ERR = " ";
+
+  function validateEditForm(form: HTMLFormElement): Record<string, string> {
+    const fd = new FormData(form);
+    const errors: Record<string, string> = {};
+
+    const nameVal = fd.get("name") as string;
+    if (!nameVal?.trim()) errors.name = ERR;
+
+    if (!breed) errors.breed = ERR;
+    if (!category) errors.category = ERR;
+
+    const headCount = fd.get("head_count") as string;
+    if (!headCount || Number(headCount) < 1) errors.head_count = ERR;
+
+    if (needsBreederSubType && !breederSubType) errors.breeder_sub_type = ERR;
+
+    if (hasCustomPremium) {
+      const justification = fd.get("breed_premium_justification") as string;
+      if (!justification?.trim()) {
+        errors.breed_premium_justification = ERR;
+      }
+    }
+
+    return errors;
+  }
+
+  // Clear a specific field error when the user edits that field
+  function clearFieldError(fieldKey: string) {
+    if (fieldErrors[fieldKey]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[fieldKey];
+        return next;
+      });
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+    setSubmitAttempted(true);
+
+    // Client-side validation
+    const errors = validateEditForm(e.currentTarget);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      requestAnimationFrame(() => scrollToFirstError());
+      return;
+    }
+
+    setFieldErrors({});
     setSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
@@ -187,6 +246,8 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
               required
               defaultValue={herd?.name ?? ""}
               placeholder="e.g. Springfield Angus Heifers"
+              error={submitAttempted ? fieldErrors.name : undefined}
+              onInput={() => clearFieldError("name")}
             />
             <Input
               id="animal_id_number"
@@ -212,7 +273,8 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
               options={breedOptions}
               placeholder="Select breed"
               value={breed}
-              onChange={(e) => setBreed(e.target.value)}
+              error={submitAttempted ? fieldErrors.breed : undefined}
+              onChange={(e) => { setBreed(e.target.value); clearFieldError("breed"); }}
             />
             <Select
               id="category"
@@ -222,11 +284,13 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
               options={categoryOptions}
               placeholder="Select category"
               value={category}
+              error={submitAttempted ? fieldErrors.category : undefined}
               onChange={(e) => {
                 const v = e.target.value;
                 setCategory(v);
                 setBreederSubType("");
                 setIsBreeder(v === "Breeder");
+                clearFieldError("category");
               }}
             />
             {needsBreederSubType && (
@@ -238,7 +302,8 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
                 options={BREEDER_SUB_TYPE_OPTIONS}
                 placeholder="Cow or Heifer?"
                 value={breederSubType}
-                onChange={(e) => setBreederSubType(e.target.value as BreederSubType)}
+                error={submitAttempted ? fieldErrors.breeder_sub_type : undefined}
+                onChange={(e) => { setBreederSubType(e.target.value as BreederSubType); clearFieldError("breeder_sub_type"); }}
               />
             )}
             <Input
@@ -249,6 +314,8 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
               min={1}
               required
               defaultValue={herd?.head_count ?? 1}
+              error={submitAttempted ? fieldErrors.head_count : undefined}
+              onInput={() => clearFieldError("head_count")}
             />
             <Input
               id="age_months"
@@ -353,23 +420,19 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
           </div>
 
           {/* Breed premium justification */}
-          <div>
-            <label htmlFor="breed_premium_justification" className="mb-1 block text-xs font-medium text-text-secondary">
-              Premium Justification {hasCustomPremium && <span className="text-red-400">*</span>}
-            </label>
-            <textarea
-              id="breed_premium_justification"
-              name="breed_premium_justification"
-              required={hasCustomPremium}
-              defaultValue={herd?.breed_premium_justification ?? ""}
-              placeholder="e.g. High quality Brahman herd with PCAS certification"
-              rows={2}
-              className="w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-            />
-            <p className="mt-1 text-[11px] text-text-muted">
-              {hasCustomPremium ? "Required. Explains why a custom premium is applied." : "Optional. Provides transparency for banks and advisors."}
-            </p>
-          </div>
+          <Textarea
+            id="breed_premium_justification"
+            name="breed_premium_justification"
+            label="Custom Breed Premium Justification"
+            required={hasCustomPremium}
+            defaultValue={herd?.breed_premium_justification ?? ""}
+            placeholder="e.g. High quality Brahman herd with PCAS certification"
+            rows={2}
+            error={submitAttempted ? fieldErrors.breed_premium_justification : undefined}
+            onInput={() => clearFieldError("breed_premium_justification")}
+            helperText={hasCustomPremium ? "Required. Explains why a custom premium is applied." : "Optional. Provides transparency for banks and advisors."}
+            className="mt-4"
+          />
         </CardContent>
       </Card>
 
