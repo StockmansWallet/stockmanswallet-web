@@ -1,13 +1,15 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { ReportFilters } from "@/components/app/report-filters";
 import { ReportPreviewButton } from "@/components/app/report-preview-button";
 import { parseReportConfig } from "@/lib/utils/report-config";
 import { generateSaleyardComparisonData } from "@/lib/services/report-service";
 import { shortSaleyardName } from "@/lib/data/reference-data";
-import { SaleyardComparisonChart } from "./saleyard-chart";
+import { LazyChart } from "./lazy-chart";
 
 export const revalidate = 0;
 export const metadata = { title: "Saleyard Comparison" };
@@ -24,14 +26,17 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
   const params = await searchParams;
   const config = parseReportConfig(params);
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
 
-  const { data: properties } = await supabase
-    .from("properties")
-    .select("id, property_name")
-    .eq("user_id", user!.id)
-    .eq("is_deleted", false)
-    .order("property_name");
+  // Parallel fetches for speed
+  const [{ data: { user } }, { data: properties }] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase
+      .from("properties")
+      .select("id, property_name")
+      .eq("user_id", (await supabase.auth.getUser()).data.user!.id)
+      .eq("is_deleted", false)
+      .order("property_name"),
+  ]);
 
   const reportData = await generateSaleyardComparisonData(supabase, user!.id, {
     reportType: "saleyard-comparison",
@@ -54,7 +59,7 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
   const bestByPrice = best ? [...sc].sort((a, b) => b.avgPrice - a.avgPrice)[0] : null;
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-5xl">
       <PageHeader
         title="Saleyard Comparison"
         titleClassName="text-4xl font-bold text-[#FFAA00]"
@@ -71,8 +76,11 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
 
       {isEmpty ? (
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
             <p className="text-sm text-text-muted">No market data available for your herd categories. Add herds with valid categories to compare saleyards.</p>
+            <Link href="/dashboard/herds/new">
+              <Button>Add Herd</Button>
+            </Link>
           </CardContent>
         </Card>
       ) : (
@@ -82,7 +90,7 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
             <Card>
               <CardContent className="px-5 py-4">
                 <p className="text-xs text-text-muted">Best Saleyard</p>
-                <p className="mt-1 text-xl font-bold tabular-nums text-amber-400">{fmtValue(best!.totalPortfolioValue)}</p>
+                <p className="mt-1 text-xl font-bold tabular-nums text-[#FFAA00]">{fmtValue(best!.totalPortfolioValue)}</p>
                 <p className="mt-0.5 truncate text-xs text-text-secondary">{shortSaleyardName(best!.saleyardName)}</p>
               </CardContent>
             </Card>
@@ -109,14 +117,14 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
             </Card>
           </div>
 
-          {/* Chart */}
+          {/* Chart (lazy loaded) */}
           {chartData.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle>Top 10 Saleyards by Portfolio Value</CardTitle>
               </CardHeader>
               <CardContent>
-                <SaleyardComparisonChart data={chartData} />
+                <LazyChart data={chartData} />
               </CardContent>
             </Card>
           )}
@@ -139,9 +147,9 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
                       <th className="px-3 pb-2 text-right font-medium">Portfolio Value</th>
                       <th className="px-3 pb-2 text-right font-medium">Avg $/kg</th>
                       <th className="px-3 pb-2 text-right font-medium">Avg $/hd</th>
-                      <th className="px-3 pb-2 text-right font-medium">Spread</th>
-                      <th className="px-3 pb-2 text-right font-medium">Diff ($)</th>
-                      <th className="px-3 pb-2 text-right font-medium">Diff (%)</th>
+                      <th className="hidden px-3 pb-2 text-right font-medium sm:table-cell">Spread</th>
+                      <th className="hidden px-3 pb-2 text-right font-medium sm:table-cell">Diff ($)</th>
+                      <th className="hidden px-3 pb-2 text-right font-medium sm:table-cell">Diff (%)</th>
                       <th className="px-5 pb-2 font-medium">State</th>
                     </tr>
                   </thead>
@@ -152,19 +160,19 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
                       const showFull = short !== s.saleyardName;
                       return (
                         <tr key={s.saleyardName} className="transition-colors hover:bg-white/[0.02]">
-                          <td className={`px-5 py-2.5 tabular-nums ${isFirst ? "font-semibold text-amber-400" : "text-text-muted"}`}>{s.rank}</td>
+                          <td className={`px-5 py-2.5 tabular-nums ${isFirst ? "font-semibold text-[#FFAA00]" : "text-text-muted"}`}>{s.rank}</td>
                           <td className="px-3 py-2.5">
                             <p className={`${isFirst ? "font-semibold text-text-primary" : "text-text-primary"}`}>{short}</p>
                             {showFull && <p className="text-[10px] text-text-muted">{s.saleyardName}</p>}
                           </td>
-                          <td className={`px-3 py-2.5 text-right tabular-nums ${isFirst ? "font-semibold text-amber-400" : "text-text-primary"}`}>{fmtValue(s.totalPortfolioValue)}</td>
+                          <td className={`px-3 py-2.5 text-right tabular-nums ${isFirst ? "font-semibold text-[#FFAA00]" : "text-text-primary"}`}>{fmtValue(s.totalPortfolioValue)}</td>
                           <td className="px-3 py-2.5 text-right tabular-nums text-text-secondary">{fmtPrice(s.avgPrice)}</td>
                           <td className="px-3 py-2.5 text-right tabular-nums text-text-secondary">{fmtValue(s.avgPerHead)}</td>
-                          <td className="px-3 py-2.5 text-right tabular-nums text-text-muted">{fmtPrice(s.spread)}</td>
-                          <td className="px-3 py-2.5 text-right tabular-nums text-text-muted">
+                          <td className="hidden px-3 py-2.5 text-right tabular-nums text-text-muted sm:table-cell">{fmtPrice(s.spread)}</td>
+                          <td className="hidden px-3 py-2.5 text-right tabular-nums text-text-muted sm:table-cell">
                             {s.diffToBestDollars > 0 ? `-${fmtValue(s.diffToBestDollars)}` : "-"}
                           </td>
-                          <td className="px-3 py-2.5 text-right tabular-nums text-text-muted">
+                          <td className="hidden px-3 py-2.5 text-right tabular-nums text-text-muted sm:table-cell">
                             {s.diffToBestPercent > 0 ? `-${s.diffToBestPercent.toFixed(1)}%` : "-"}
                           </td>
                           <td className="px-5 py-2.5 text-text-muted">{s.state ?? ""}</td>

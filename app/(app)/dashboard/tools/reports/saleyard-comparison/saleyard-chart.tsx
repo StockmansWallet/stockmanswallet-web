@@ -12,8 +12,10 @@ export function SaleyardComparisonChart({ data }: { data: { name: string; portfo
   const minVal = Math.min(...values);
   const maxVal = Math.max(...values);
   const range = maxVal - minVal;
-  // Start axis at 80% of the minimum value (or min - 2x the range) to amplify differences
   const domainMin = Math.max(0, Math.floor((minVal - range * 0.5) / 10000) * 10000);
+
+  // Graduated opacity: 1.0 for #1, tapering down to 0.35 for #10
+  const opacityFor = (i: number) => i === 0 ? 1 : Math.max(0.35, 0.7 - (i - 1) * 0.04);
 
   return (
     <div className="h-[320px]">
@@ -29,13 +31,14 @@ export function SaleyardComparisonChart({ data }: { data: { name: string; portfo
             tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
           />
           <Tooltip
-            formatter={(value) => [fmtValue(value as number), "Portfolio Value"]}
+            formatter={(value, _name, props) => [fmtValue(value as number), props.payload?.name ?? "Portfolio Value"]}
             contentStyle={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", fontSize: "12px" }}
-            labelStyle={{ color: "#fff" }}
+            labelStyle={{ color: "#fff", fontWeight: 600 }}
+            labelFormatter={() => ""}
           />
           <Bar dataKey="portfolioValue" radius={[999, 999, 999, 999]} barSize={22} name="Portfolio Value">
             {data.map((_, i) => (
-              <Cell key={i} fill="#FFAA00" fillOpacity={i === 0 ? 1 : 0.4} />
+              <Cell key={i} fill="#FFAA00" fillOpacity={opacityFor(i)} />
             ))}
             <LabelList
               dataKey="name"
