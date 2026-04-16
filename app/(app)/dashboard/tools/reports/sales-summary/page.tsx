@@ -154,14 +154,14 @@ export default async function SalesSummaryPage({ searchParams }: { searchParams:
                     {salesData.map((s) => (
                       <tr key={s.id} className="transition-colors hover:bg-white/[0.02]">
                         <td className="px-5 py-2.5 tabular-nums text-text-secondary">{fmtDate(s.date)}</td>
-                        <td className="px-3 py-2.5 text-text-secondary">{s.herdName ?? "—"}</td>
+                        <td className="px-3 py-2.5 text-text-secondary">{s.herdName ?? "-"}</td>
                         <td className="px-3 py-2.5 text-right tabular-nums text-text-primary">{s.headCount}</td>
                         <td className="px-3 py-2.5 text-right tabular-nums text-text-secondary">{s.avgWeight.toFixed(0)} kg</td>
                         <td className="px-3 py-2.5 text-right tabular-nums text-text-secondary">
                           {s.pricingType === "per_kg" ? `$${s.pricePerKg.toFixed(2)}/kg` : `$${(s.pricePerHead ?? 0).toFixed(0)}/hd`}
                         </td>
-                        <td className="px-3 py-2.5 text-text-muted">{s.saleType ?? "—"}</td>
-                        <td className="px-3 py-2.5 text-text-muted">{s.saleLocation ?? "—"}</td>
+                        <td className="px-3 py-2.5 text-text-muted">{s.saleType ?? "-"}</td>
+                        <td className="px-3 py-2.5 text-text-muted">{s.saleLocation ?? "-"}</td>
                         <td className="px-3 py-2.5 text-right tabular-nums text-text-muted">{fmt(s.freightCost)}</td>
                         <td className="px-5 py-2.5 text-right tabular-nums font-medium text-text-primary">{fmt(s.netValue)}</td>
                       </tr>

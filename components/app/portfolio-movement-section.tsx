@@ -1,6 +1,6 @@
 "use client";
 
-// Portfolio Movement Section — client component with period selection and bridge display
+// Portfolio Movement Section - client component with period selection and bridge display
 // Fetches movement data on period change via server action
 
 import { useState, useEffect, useTransition } from "react";

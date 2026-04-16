@@ -42,7 +42,7 @@ export function ReportPrintStyles() {
         thead { display: table-header-group; }
         tr { break-inside: avoid; page-break-inside: avoid; }
         .report-page {
-          padding: 6mm 16mm 12mm 16mm;
+          padding: 0 16mm 12mm 16mm;
           max-width: none;
           margin: 0;
         }

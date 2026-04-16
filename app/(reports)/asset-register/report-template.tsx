@@ -170,11 +170,11 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
 
       <div className="report-page font-sans text-[#271F16]">
 
-        {/* Logo + title */}
+        {/* Logo + title: text baseline aligned with bottom of logo */}
         <div className="flex items-end justify-between">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/images/sw-logo-light.svg" alt="Stockman's Wallet" className="h-16 w-auto" />
-          <p className="text-3xl font-bold" style={{ color: "#271F16" }}>Asset Register</p>
+          <p className="text-3xl font-bold leading-none" style={{ color: "#271F16", paddingBottom: "2px" }}>Asset Register</p>
         </div>
 
         {/* Executive Summary: full width */}

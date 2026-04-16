@@ -27,16 +27,13 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
   const config = parseReportConfig(params);
   const supabase = await createClient();
 
-  // Parallel fetches for speed
-  const [{ data: { user } }, { data: properties }] = await Promise.all([
-    supabase.auth.getUser(),
-    supabase
-      .from("properties")
-      .select("id, property_name")
-      .eq("user_id", (await supabase.auth.getUser()).data.user!.id)
-      .eq("is_deleted", false)
-      .order("property_name"),
-  ]);
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: properties } = await supabase
+    .from("properties")
+    .select("id, property_name")
+    .eq("user_id", user!.id)
+    .eq("is_deleted", false)
+    .order("property_name");
 
   const reportData = await generateSaleyardComparisonData(supabase, user!.id, {
     reportType: "saleyard-comparison",

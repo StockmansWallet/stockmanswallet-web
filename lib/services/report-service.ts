@@ -327,7 +327,8 @@ export async function generateSalesSummaryData(
     supabase
       .from("herds")
       .select("id, name")
-      .eq("user_id", userId),
+      .eq("user_id", userId)
+      .eq("is_deleted", false),
     supabase
       .from("properties")
       .select("id, property_name, is_default")
@@ -413,19 +414,24 @@ export async function generateSaleyardComparisonData(
     buildPremiumMap(supabase),
   ]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let filteredHerds = (herds ?? []) as any[];
+  type HerdRow = HerdForValuation & {
+    id: string;
+    name: string;
+    property_id: string | null;
+    sub_category: string | null;
+  };
+  let filteredHerds: HerdRow[] = (herds ?? []) as HerdRow[];
   if (config.selectedPropertyIds.length > 0) {
-    filteredHerds = filteredHerds.filter((h: { property_id?: string | null }) => h.property_id && config.selectedPropertyIds.includes(h.property_id));
+    filteredHerds = filteredHerds.filter((h) => h.property_id && config.selectedPropertyIds.includes(h.property_id));
   }
 
   // Resolve MLA categories from user's herds
   const herdCategories = [
-    ...new Set(filteredHerds.map((h: { category: string; initial_weight: number; breeder_sub_type?: string | null }) =>
+    ...new Set(filteredHerds.map((h) =>
       resolveMLACategory(h.category, h.initial_weight, h.breeder_sub_type ?? undefined).primaryMLACategory)),
   ];
 
-  const totalHerdHead = filteredHerds.reduce((sum: number, h: { head_count: number }) => sum + h.head_count, 0);
+  const totalHerdHead = filteredHerds.reduce((sum, h) => sum + h.head_count, 0);
 
   const mlaCategories = [
     ...new Set([
@@ -467,31 +473,31 @@ export async function generateSaleyardComparisonData(
   }
 
   // Cast herds to HerdForValuation for the valuation engine
-  const herdsForValuation: HerdForValuation[] = filteredHerds.map((h: Record<string, unknown>) => ({
-    head_count: (h.head_count as number) ?? 0,
-    initial_weight: (h.initial_weight as number) ?? 0,
-    current_weight: (h.current_weight as number) ?? 0,
-    daily_weight_gain: (h.daily_weight_gain as number) ?? 0,
-    dwg_change_date: (h.dwg_change_date as string) ?? null,
-    previous_dwg: (h.previous_dwg as number) ?? null,
-    created_at: (h.created_at as string) ?? new Date().toISOString(),
-    species: (h.species as "Cattle" | "Sheep" | "Pig" | "Goat") ?? "Cattle",
-    category: (h.category as string) ?? "",
-    breed: (h.breed as string) ?? "",
-    breed_premium_override: (h.breed_premium_override as number) ?? null,
-    mortality_rate: (h.mortality_rate as number) ?? null,
-    is_breeder: (h.is_breeder as boolean) ?? false,
-    is_pregnant: (h.is_pregnant as boolean) ?? false,
-    joined_date: (h.joined_date as string) ?? null,
-    calving_rate: (h.calving_rate as number) ?? 0,
-    breeding_program_type: (h.breeding_program_type as "ai" | "controlled" | "uncontrolled" | null) ?? null,
-    joining_period_start: (h.joining_period_start as string) ?? null,
-    joining_period_end: (h.joining_period_end as string) ?? null,
-    selected_saleyard: (h.selected_saleyard as string) ?? null,
-    additional_info: (h.additional_info as string) ?? null,
-    calf_weight_recorded_date: (h.calf_weight_recorded_date as string) ?? null,
-    updated_at: (h.updated_at as string) ?? new Date().toISOString(),
-    breeder_sub_type: (h.breeder_sub_type as string) ?? null,
+  const herdsForValuation: HerdForValuation[] = filteredHerds.map((h) => ({
+    head_count: h.head_count ?? 0,
+    initial_weight: h.initial_weight ?? 0,
+    current_weight: h.current_weight ?? 0,
+    daily_weight_gain: h.daily_weight_gain ?? 0,
+    dwg_change_date: h.dwg_change_date ?? null,
+    previous_dwg: h.previous_dwg ?? null,
+    created_at: h.created_at ?? new Date().toISOString(),
+    species: h.species ?? "Cattle",
+    category: h.category ?? "",
+    breed: h.breed ?? "",
+    breed_premium_override: h.breed_premium_override ?? null,
+    mortality_rate: h.mortality_rate ?? null,
+    is_breeder: h.is_breeder ?? false,
+    is_pregnant: h.is_pregnant ?? false,
+    joined_date: h.joined_date ?? null,
+    calving_rate: h.calving_rate ?? 0,
+    breeding_program_type: h.breeding_program_type ?? null,
+    joining_period_start: h.joining_period_start ?? null,
+    joining_period_end: h.joining_period_end ?? null,
+    selected_saleyard: h.selected_saleyard ?? null,
+    additional_info: h.additional_info ?? null,
+    calf_weight_recorded_date: h.calf_weight_recorded_date ?? null,
+    updated_at: h.updated_at ?? new Date().toISOString(),
+    breeder_sub_type: h.breeder_sub_type ?? null,
   }));
 
   // For each saleyard, calculate portfolio value using that saleyard's prices

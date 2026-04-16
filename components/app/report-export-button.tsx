@@ -13,9 +13,11 @@ interface ReportExportButtonProps {
 
 export function ReportExportButton({ reportData, reportType, title }: ReportExportButtonProps) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleExport() {
     setLoading(true);
+    setError(null);
     try {
       const { generateReportPDF } = await import("@/lib/services/report-pdf-service");
       const pdfBytes = await generateReportPDF(reportData, reportType, title);
@@ -30,15 +32,21 @@ export function ReportExportButton({ reportData, reportType, title }: ReportExpo
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error("PDF export failed:", err);
+      setError(err instanceof Error ? err.message : "Could not export PDF. Please try again.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <Button variant="secondary" size="sm" onClick={handleExport} disabled={loading}>
-      {loading ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Download className="mr-1.5 h-3.5 w-3.5" />}
-      Export PDF
-    </Button>
+    <div className="flex flex-col items-end gap-1">
+      <Button variant="secondary" size="sm" onClick={handleExport} disabled={loading} aria-label="Download report as PDF">
+        {loading ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" aria-hidden="true" /> : <Download className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />}
+        Export PDF
+      </Button>
+      {error && (
+        <p role="alert" className="text-[11px] text-red-400">{error}</p>
+      )}
+    </div>
   );
 }
