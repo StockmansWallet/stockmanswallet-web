@@ -44,7 +44,8 @@ export function HerdsTable({
   herdDataDates,
   herdNearestSaleyard,
   herdProjectedWeight,
-  herdBreedPremium,
+  herdDefaultBreedPremium,
+  herdCustomBreedPremium,
   propertyGroups,
   headerActions,
 }: {
@@ -56,7 +57,8 @@ export function HerdsTable({
   herdDataDates?: Record<string, string | null>;
   herdNearestSaleyard?: Record<string, string | null>;
   herdProjectedWeight?: Record<string, number>;
-  herdBreedPremium?: Record<string, number>;
+  herdDefaultBreedPremium?: Record<string, number>;
+  herdCustomBreedPremium?: Record<string, number>;
   propertyGroups: PropertyGroup[];
   headerActions?: ReactNode;
 }) {
@@ -254,7 +256,8 @@ export function HerdsTable({
     const accrual = herdBreedingAccrual?.[herd.id] ?? 0;
     const nearestSaleyard = herdNearestSaleyard?.[herd.id] ?? null;
     const projectedWeight = herdProjectedWeight?.[herd.id];
-    const breedPremium = herdBreedPremium?.[herd.id] ?? 0;
+    const defaultPremium = herdDefaultBreedPremium?.[herd.id] ?? 0;
+    const customDelta = herdCustomBreedPremium?.[herd.id] ?? null;
     const dataDate = herdDataDates?.[herd.id];
     const dataAgeDays = dataDate ? Math.floor((Date.now() - new Date(dataDate).getTime()) / 86400000) : 0;
     const isStale = dataAgeDays > 42 && !isFallback;
@@ -309,11 +312,16 @@ export function HerdsTable({
             {weightDisplay && <> | {weightDisplay}</>}
             {pricePerKg > 0 && <> | ${pricePerKg.toFixed(2)}/kg</>}
           </p>
-          {(breedPremium !== 0 || accrual > 0 || (nearestSaleyard && !isFallback) || (isStale && !nearestSaleyard) || isFallback) && (
+          {(defaultPremium !== 0 || customDelta !== null || accrual > 0 || (nearestSaleyard && !isFallback) || (isStale && !nearestSaleyard) || isFallback) && (
             <div className="mt-1.5 flex flex-wrap items-center gap-1">
-              {breedPremium !== 0 && (
-                <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-medium ${breedPremium > 0 ? "bg-emerald-500/15 text-emerald-400" : "bg-red-500/15 text-red-400"}`}>
-                  Breed {breedPremium > 0 ? "+" : ""}{breedPremium}%
+              {defaultPremium !== 0 && (
+                <span className="inline-flex items-center rounded-full bg-white/[0.06] px-1.5 py-0.5 text-[9px] font-medium text-text-muted">
+                  Breed {defaultPremium > 0 ? "+" : ""}{defaultPremium}%
+                </span>
+              )}
+              {customDelta !== null && (
+                <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-medium ${customDelta > 0 ? "bg-emerald-500/15 text-emerald-400" : customDelta < 0 ? "bg-red-500/15 text-red-400" : "bg-white/[0.06] text-text-muted"}`}>
+                  Custom {customDelta > 0 ? "+" : ""}{customDelta}%
                 </span>
               )}
               {accrual > 0 && (

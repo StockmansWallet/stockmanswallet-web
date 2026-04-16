@@ -115,7 +115,8 @@ export default async function HerdsPage() {
   const herdDataDatesObj: Record<string, string | null> = {};
   const herdNearestSaleyardObj: Record<string, string | null> = {};
   const herdProjectedWeightObj: Record<string, number> = {};
-  const herdBreedPremiumObj: Record<string, number> = {};
+  const herdDefaultBreedPremiumObj: Record<string, number> = {};
+  const herdCustomBreedPremiumObj: Record<string, number> = {};
   let totalValue = 0;
   for (const h of (herds ?? [])) {
     const result = calculateHerdValuation(
@@ -129,7 +130,12 @@ export default async function HerdsPage() {
     herdDataDatesObj[h.id] = result.dataDate;
     herdNearestSaleyardObj[h.id] = result.nearestSaleyardUsed;
     herdProjectedWeightObj[h.id] = result.projectedWeight;
-    herdBreedPremiumObj[h.id] = result.breedPremiumApplied;
+    // Split breed premium into default vs custom override
+    const defaultPremium = premiumMap.get(h.breed) ?? 0;
+    herdDefaultBreedPremiumObj[h.id] = defaultPremium;
+    if (h.breed_premium_override != null && h.breed_premium_override !== 0) {
+      herdCustomBreedPremiumObj[h.id] = h.breed_premium_override - defaultPremium;
+    }
     totalValue += result.netValue;
   }
 
@@ -193,7 +199,8 @@ export default async function HerdsPage() {
             herdDataDates={herdDataDatesObj}
             herdNearestSaleyard={herdNearestSaleyardObj}
             herdProjectedWeight={herdProjectedWeightObj}
-            herdBreedPremium={herdBreedPremiumObj}
+            herdDefaultBreedPremium={herdDefaultBreedPremiumObj}
+            herdCustomBreedPremium={herdCustomBreedPremiumObj}
             propertyGroups={propertyGroups}
             headerActions={
               <div className="flex items-center gap-1.5">
