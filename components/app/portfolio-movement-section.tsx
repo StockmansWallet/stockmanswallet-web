@@ -74,19 +74,29 @@ export function PortfolioMovementSection({ propertyFilter }: { propertyFilter: s
         ))}
       </div>
 
-      {isPending && (
-        <div className="flex items-center justify-center py-12">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#FFAA00] border-t-transparent" />
-          <span className="ml-3 text-sm text-text-muted">Calculating movement...</span>
-        </div>
+      {/* Initial load (no prior data): inline spinner occupies the date-label slot */}
+      {!summary && isPending && (
+        <p className="flex items-center justify-center gap-2 text-center text-xs text-text-muted">
+          <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-[#FFAA00] border-t-transparent" />
+          <span>Calculating movement...</span>
+        </p>
       )}
 
-      {summary && !isPending && (
+      {summary && (
         <>
-          {/* Date range label */}
-          <p className="text-center text-xs text-text-muted">
-            {fmtDate(summary.openingDate)} - {fmtDate(summary.closingDate)}
+          {/* Date range label, or inline spinner in the same slot while refetching */}
+          <p className="flex items-center justify-center gap-2 text-center text-xs text-text-muted">
+            {isPending ? (
+              <>
+                <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-[#FFAA00] border-t-transparent" />
+                <span>Calculating movement...</span>
+              </>
+            ) : (
+              <>{fmtDate(summary.openingDate)} - {fmtDate(summary.closingDate)}</>
+            )}
           </p>
+
+          <div className={cn("flex flex-col gap-4 transition-opacity", isPending && "opacity-50")}>
 
           {/* Executive Summary */}
           <Card>
@@ -212,6 +222,7 @@ export function PortfolioMovementSection({ propertyFilter }: { propertyFilter: s
               </CardContent>
             </Card>
           )}
+          </div>
         </>
       )}
     </div>
