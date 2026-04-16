@@ -1,4 +1,5 @@
 import type { ReportData, HerdReportData } from "@/lib/types/reports";
+import type { PortfolioMovementSummary } from "@/lib/types/portfolio-movement";
 import { PrintActions } from "./print-actions";
 import { ReportPrintStyles } from "./print-styles";
 
@@ -148,7 +149,7 @@ function HerdCard({ herd }: { herd: HerdReportData }) {
 
 // -- Main template ------------------------------------------------------------
 
-export function AssetRegisterTemplate({ data }: { data: ReportData }) {
+export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportData; movementSummary?: PortfolioMovementSummary | null }) {
   const { executiveSummary, herdData, herdComposition, userDetails, properties, dateRange } = data;
 
   const grouped = new Map<string, HerdReportData[]>();
@@ -255,6 +256,103 @@ export function AssetRegisterTemplate({ data }: { data: ReportData }) {
           )}
         </div>
 
+        {/* PORTFOLIO MOVEMENT */}
+        {movementSummary && (
+          <section className="mt-5 break-inside-avoid">
+            <h2 className="mb-2 text-base font-bold text-[#271F16]">Portfolio Movement</h2>
+            <p className="mb-3 text-xs text-[#6B5B45]">{fmtDate(movementSummary.openingDate)} to {fmtDate(movementSummary.closingDate)}</p>
+
+            {/* Executive movement stats */}
+            <div className="mb-3 grid grid-cols-4 gap-3 rounded-xl border border-[#8B7355]/25 px-5 py-3">
+              <div>
+                <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Opening Value</p>
+                <p className="mt-0.5 text-base font-semibold tabular-nums text-[#271F16]">{fmt(movementSummary.openingValue)}</p>
+              </div>
+              <div>
+                <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Closing Value</p>
+                <p className="mt-0.5 text-base font-semibold tabular-nums text-[#271F16]">{fmt(movementSummary.closingValue)}</p>
+              </div>
+              <div>
+                <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Net Change</p>
+                <p className={`mt-0.5 text-base font-bold tabular-nums ${movementSummary.netChangeDollars >= 0 ? "text-emerald-700" : "text-red-700"}`}>
+                  {fmt(movementSummary.netChangeDollars)}
+                  {movementSummary.netChangePercent != null && <span className="ml-1 text-xs font-medium">({movementSummary.netChangePercent >= 0 ? "+" : ""}{movementSummary.netChangePercent.toFixed(1)}%)</span>}
+                </p>
+              </div>
+              <div>
+                <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Head Count</p>
+                <p className="mt-0.5 text-sm tabular-nums text-[#271F16]">{movementSummary.openingHeadCount} → {movementSummary.closingHeadCount}</p>
+              </div>
+            </div>
+
+            {/* Movement bridge */}
+            <div className="mb-3 overflow-hidden rounded-xl border border-[#8B7355]/25">
+              <div className="px-4 py-2 text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]" style={{ backgroundColor: "rgba(139, 115, 85, 0.10)" }}>Movement Bridge</div>
+              <div className="flex flex-col">
+                <BridgeRow label="Opening Portfolio Value" value={movementSummary.openingValue} isTotal />
+                <BridgeRow label="Additions" value={movementSummary.additionsValue} />
+                <BridgeRow label="Removals/Sales" value={-movementSummary.removalsValue} />
+                <BridgeRow label="Market Movement" value={movementSummary.marketMovement} />
+                <BridgeRow label="Weight Gain" value={movementSummary.biologicalMovement.weightGain} />
+                <BridgeRow label="Breeding Accrual" value={movementSummary.biologicalMovement.breedingAccrual} />
+                <BridgeRow label="Mortality" value={movementSummary.biologicalMovement.mortality} />
+                {Math.abs(movementSummary.assumptionChanges) > 1 && (
+                  <BridgeRow label="Other / Assumptions" value={movementSummary.assumptionChanges} />
+                )}
+                <BridgeRow label="Closing Portfolio Value" value={movementSummary.closingValue} isTotal />
+              </div>
+            </div>
+
+            {/* Like-for-like */}
+            <div className="mb-3 grid grid-cols-3 gap-3 rounded-xl border border-[#8B7355]/25 px-5 py-3">
+              <div>
+                <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Like-for-Like Opening</p>
+                <p className="mt-0.5 text-sm font-semibold tabular-nums text-[#271F16]">{fmt(movementSummary.likeForLikeOpeningValue)}</p>
+              </div>
+              <div>
+                <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Like-for-Like Closing</p>
+                <p className="mt-0.5 text-sm font-semibold tabular-nums text-[#271F16]">{fmt(movementSummary.likeForLikeClosingValue)}</p>
+              </div>
+              <div>
+                <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Like-for-Like Change</p>
+                <p className={`mt-0.5 text-sm font-bold tabular-nums ${movementSummary.likeForLikeChangeDollars >= 0 ? "text-emerald-700" : "text-red-700"}`}>
+                  {fmt(movementSummary.likeForLikeChangeDollars)}
+                  {movementSummary.likeForLikeChangePercent != null && <span className="ml-1 text-xs font-medium">({movementSummary.likeForLikeChangePercent >= 0 ? "+" : ""}{movementSummary.likeForLikeChangePercent.toFixed(1)}%)</span>}
+                </p>
+              </div>
+            </div>
+
+            {/* Movement by herd table */}
+            {movementSummary.herdMovements.length > 0 && (
+              <div className="overflow-hidden rounded-xl border border-[#8B7355]/25">
+                <div className="px-4 py-2 text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]" style={{ backgroundColor: "rgba(139, 115, 85, 0.10)" }}>Movement by Herd</div>
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-[#8B7355]/20 text-left text-[8px] font-semibold uppercase tracking-wider text-[#6B5B45]">
+                      <th className="px-4 py-1.5">Herd</th>
+                      <th className="px-2 py-1.5">Opening</th>
+                      <th className="px-2 py-1.5">Closing</th>
+                      <th className="px-2 py-1.5">Change</th>
+                      <th className="px-4 py-1.5 text-right">Driver</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {movementSummary.herdMovements.map((m) => (
+                      <tr key={m.id} className="border-b border-[#8B7355]/10">
+                        <td className="px-4 py-1.5 font-medium text-[#271F16]">{m.herdName}</td>
+                        <td className="px-2 py-1.5 tabular-nums text-[#271F16]/70">{m.openingValue != null ? fmt(m.openingValue) : "New"}</td>
+                        <td className="px-2 py-1.5 tabular-nums text-[#271F16]/70">{m.closingValue != null ? fmt(m.closingValue) : "Removed"}</td>
+                        <td className={`px-2 py-1.5 font-semibold tabular-nums ${m.dollarChange >= 0 ? "text-emerald-700" : "text-red-700"}`}>{fmt(m.dollarChange)}</td>
+                        <td className="px-4 py-1.5 text-right text-[#6B5B45]">{m.mainDriver}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        )}
+
         {/* LIVESTOCK ASSETS */}
         <section className="mt-5">
           <h2 className="mb-2 text-base font-bold text-[#271F16]">Livestock Assets</h2>
@@ -306,6 +404,18 @@ export function AssetRegisterTemplate({ data }: { data: ReportData }) {
 }
 
 // -- Small helpers ------------------------------------------------------------
+
+function BridgeRow({ label, value, isTotal }: { label: string; value: number; isTotal?: boolean }) {
+  const absFormatted = fmt(Math.abs(value));
+  const display = isTotal ? absFormatted : value >= 0 ? `+${absFormatted}` : `-${absFormatted}`;
+  const color = isTotal ? "text-[#271F16]" : value > 0 ? "text-emerald-700" : value < 0 ? "text-red-700" : "text-[#6B5B45]";
+  return (
+    <div className={`flex items-center justify-between px-4 py-1.5 ${isTotal ? "font-semibold" : ""}`} style={isTotal ? { backgroundColor: "rgba(139, 115, 85, 0.08)" } : undefined}>
+      <span className={`text-xs ${isTotal ? "font-semibold text-[#271F16]" : "text-[#271F16]/80"}`}>{label}</span>
+      <span className={`text-xs tabular-nums ${isTotal ? "font-semibold" : "font-medium"} ${color}`}>{display}</span>
+    </div>
+  );
+}
 
 function PrintStat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (

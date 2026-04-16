@@ -8,6 +8,7 @@ import { ReportFilters } from "@/components/app/report-filters";
 import { parseReportConfig } from "@/lib/utils/report-config";
 import { ReportPreviewButton } from "@/components/app/report-preview-button";
 import { ReportCompositionChart } from "@/components/app/report-composition-chart";
+import { PortfolioMovementSection } from "@/components/app/portfolio-movement-section";
 import { generateAssetRegisterData } from "@/lib/services/report-service";
 
 export const revalidate = 0;
@@ -160,6 +161,9 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
               </Card>
             )}
           </div>
+
+          {/* PORTFOLIO MOVEMENT */}
+          <PortfolioMovementSection propertyFilter={config.selectedPropertyIds} />
 
           {/* LIVESTOCK ASSETS */}
           <div>
