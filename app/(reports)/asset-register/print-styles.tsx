@@ -11,7 +11,7 @@ export function ReportPrintStyles() {
       }
       @page {
         size: A4;
-        margin: 10mm 0 0 0;
+        margin: 4mm 0 0 0;
       }
       @page :first {
         margin: 0;
