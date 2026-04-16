@@ -76,8 +76,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("PDF generation error:", error);
-    return NextResponse.json({ error: "PDF generation failed" }, { status: 500 });
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("PDF generation error:", message);
+    return NextResponse.json({ error: "PDF generation failed", detail: message }, { status: 500 });
   } finally {
     if (browser) await browser.close();
   }
