@@ -179,7 +179,7 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
 
         {/* Executive Summary: full width */}
         {executiveSummary && (
-          <div className="mt-4 overflow-hidden rounded-xl">
+          <div className="mt-4 overflow-hidden rounded-xl break-inside-avoid">
             <div className="px-5 py-4" style={{ backgroundColor: "#271F16" }}>
               <p className="text-[9px] font-semibold uppercase tracking-widest text-white/70">Executive Summary</p>
               <p className="mt-1 text-3xl font-bold tabular-nums text-white">{fmtFull(executiveSummary.totalPortfolioValue)}</p>
@@ -207,7 +207,7 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
         )}
 
         {/* Details row: Producer/Properties + Herd Composition side by side */}
-        <div className="mt-4" style={{ display: "flex", gap: "16px" }}>
+        <div className="mt-4 break-inside-avoid" style={{ display: "flex", gap: "16px" }}>
           {/* Producer and properties */}
           {userDetails && (
             <div style={{ flex: 1, borderRadius: "12px", border: "1px solid rgba(139, 115, 85, 0.25)", padding: "16px 20px" }}>
@@ -263,7 +263,7 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
             <p className="mb-3 text-xs text-[#6B5B45]">{fmtDate(movementSummary.openingDate)} to {fmtDate(movementSummary.closingDate)}</p>
 
             {/* Executive movement stats */}
-            <div className="mb-3 grid grid-cols-4 gap-3 rounded-xl border border-[#8B7355]/25 px-5 py-3">
+            <div className="mb-3 grid grid-cols-4 gap-3 rounded-xl border border-[#8B7355]/25 px-5 py-3 break-inside-avoid">
               <div>
                 <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Opening Value</p>
                 <p className="mt-0.5 text-base font-semibold tabular-nums text-[#271F16]">{fmt(movementSummary.openingValue)}</p>
@@ -304,7 +304,7 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
             </div>
 
             {/* Like-for-like */}
-            <div className="mb-3 grid grid-cols-3 gap-3 rounded-xl border border-[#8B7355]/25 px-5 py-3">
+            <div className="mb-3 grid grid-cols-3 gap-3 rounded-xl border border-[#8B7355]/25 px-5 py-3 break-inside-avoid">
               <div>
                 <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Like-for-Like Opening</p>
                 <p className="mt-0.5 text-sm font-semibold tabular-nums text-[#271F16]">{fmt(movementSummary.likeForLikeOpeningValue)}</p>

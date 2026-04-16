@@ -34,6 +34,16 @@ export function ReportPrintStyles() {
           display: none !important;
         }
         .break-inside-avoid {
+          break-inside: avoid;
+          page-break-inside: avoid;
+        }
+        /* Prevent cards, tables, and stat grids from splitting across pages */
+        .rounded-xl, table, thead, .grid {
+          break-inside: avoid;
+          page-break-inside: avoid;
+        }
+        tr {
+          break-inside: avoid;
           page-break-inside: avoid;
         }
         .report-page {
