@@ -91,7 +91,7 @@ body{font-family:system-ui,-apple-system,sans-serif;color:#271F16;background:#ff
 @page{size:A4;margin:0}
 .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;break-inside:avoid;page-break-inside:avoid}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
 .flex-between{display:flex;align-items:center;justify-content:space-between}
 .label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#6B5B45}
 .val{font-size:14px;font-weight:600;color:#271F16;margin-top:2px}
