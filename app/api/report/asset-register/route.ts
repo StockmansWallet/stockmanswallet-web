@@ -27,12 +27,13 @@ function fmtDate(iso: string) {
 function esc(s: string) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
 export async function GET(request: NextRequest) {
-  // 1. Extract JWT
+  // 1. Extract JWT from Authorization header or query parameter
   const authHeader = request.headers.get("authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return NextResponse.json({ error: "Missing or invalid Authorization header" }, { status: 401 });
+  const queryToken = request.nextUrl.searchParams.get("token");
+  const jwt = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : queryToken;
+  if (!jwt) {
+    return NextResponse.json({ error: "Missing authentication token" }, { status: 401 });
   }
-  const jwt = authHeader.slice(7);
 
   // 2. Create authenticated Supabase client
   const supabase = createSupabaseClient(
