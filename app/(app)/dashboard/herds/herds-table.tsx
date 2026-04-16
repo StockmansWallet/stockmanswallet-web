@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
-import { Search, ChevronUp, ChevronRight, MapPinned, Trash2, ArrowUpRight, Leaf } from "lucide-react";
+import { Search, ChevronUp, ChevronRight, MapPinned, Trash2, ArrowUpRight, Leaf, TrendingUp } from "lucide-react";
 import { deleteHerds } from "./actions";
 import { resolveShortSaleyardName } from "@/lib/data/reference-data";
 
@@ -319,12 +319,14 @@ export function HerdsTable({
           {(defaultPremium !== 0 || customDelta !== null || accrual > 0 || (nearestSaleyard && !isFallback) || (isStale && !nearestSaleyard) || isFallback) && (
             <div className="mt-1.5 flex flex-wrap items-center gap-1">
               {defaultPremium !== 0 && (
-                <span className="inline-flex items-center rounded-full bg-white/[0.06] px-1.5 py-0.5 text-[9px] font-medium text-text-muted">
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-white/[0.06] px-1.5 py-0.5 text-[9px] font-medium text-text-muted">
+                  <TrendingUp className="h-2.5 w-2.5" />
                   Breed Premium {defaultPremium > 0 ? "+" : ""}{defaultPremium}%
                 </span>
               )}
               {customDelta !== null && (
-                <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-medium ${customDelta > 0 ? "bg-emerald-500/15 text-emerald-400" : customDelta < 0 ? "bg-red-500/15 text-red-400" : "bg-white/[0.06] text-text-muted"}`}>
+                <span className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-medium ${customDelta > 0 ? "bg-emerald-500/15 text-emerald-400" : customDelta < 0 ? "bg-red-500/15 text-red-400" : "bg-white/[0.06] text-text-muted"}`}>
+                  <TrendingUp className="h-2.5 w-2.5" />
                   Custom Premium {customDelta > 0 ? "+" : ""}{customDelta}%
                 </span>
               )}
