@@ -324,8 +324,8 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
 
             {/* Movement by herd table */}
             {movementSummary.herdMovements.length > 0 && (
-              <div className="overflow-hidden rounded-xl border border-[#8B7355]/25">
-                <div className="px-4 py-2 text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]" style={{ backgroundColor: "rgba(139, 115, 85, 0.10)" }}>Movement by Herd</div>
+              <div>
+                <p className="mb-1 text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Movement by Herd</p>
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="border-b border-[#8B7355]/20 text-left text-[8px] font-semibold uppercase tracking-wider text-[#6B5B45]">

@@ -37,6 +37,10 @@ export function ReportPrintStyles() {
           break-inside: avoid;
           page-break-inside: avoid;
         }
+        /* Tables: allow natural page breaks but keep header repeating */
+        table { border-collapse: collapse; }
+        thead { display: table-header-group; }
+        tr { break-inside: avoid; page-break-inside: avoid; }
         .report-page {
           padding: 12mm 16mm;
           max-width: none;
