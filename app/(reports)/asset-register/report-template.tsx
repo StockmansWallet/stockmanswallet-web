@@ -190,7 +190,7 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
           <div className="mt-4 overflow-hidden rounded-xl">
             <div className="px-5 py-4" style={{ backgroundColor: "#271F16" }}>
               <p className="text-[9px] font-semibold uppercase tracking-widest text-white/70">Executive Summary</p>
-              <p className="mt-1 text-3xl font-bold tabular-nums text-white">{fmtFull(executiveSummary.totalPortfolioValue)}</p>
+              <p className="mt-1 text-3xl font-bold tabular-nums text-white">{fmt(executiveSummary.totalPortfolioValue)}</p>
             </div>
             <div className="grid grid-cols-4 gap-x-4 border-x border-b border-[#8B7355]/25 px-5 py-3" style={{ borderBottomLeftRadius: "12px", borderBottomRightRadius: "12px" }}>
               <div>
@@ -286,8 +286,12 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
                 <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Net Change</p>
                 <p className={`mt-0.5 text-base font-bold tabular-nums ${movementSummary.netChangeDollars >= 0 ? "text-emerald-700" : "text-red-700"}`}>
                   {fmt(movementSummary.netChangeDollars)}
-                  {movementSummary.netChangePercent != null && <span className="ml-1 text-xs font-medium">({movementSummary.netChangePercent >= 0 ? "+" : ""}{movementSummary.netChangePercent.toFixed(1)}%)</span>}
                 </p>
+                {movementSummary.netChangePercent != null && (
+                  <p className={`text-[11px] font-medium tabular-nums ${movementSummary.netChangeDollars >= 0 ? "text-emerald-700" : "text-red-700"}`}>
+                    {movementSummary.netChangePercent >= 0 ? "+" : ""}{movementSummary.netChangePercent.toFixed(1)}%
+                  </p>
+                )}
               </div>
               <div>
                 <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Head Count</p>
@@ -316,10 +320,9 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
 
             {/* Like-for-like */}
             <div className="mb-3 break-inside-avoid rounded-xl border border-[#8B7355]/25 px-5 py-3">
-              <div className="flex items-center justify-between">
-                <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Like-for-Like</p>
-                <p className="text-[9px] text-[#6B5B45]">Existing herds only</p>
-              </div>
+              <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">
+                Like-for-Like <span className="font-normal normal-case tracking-normal text-[#8B7355]">(Existing herds only)</span>
+              </p>
               <div className="mt-3 grid grid-cols-3 gap-3">
                 <div>
                   <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Opening</p>
