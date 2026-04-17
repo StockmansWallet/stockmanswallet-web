@@ -140,9 +140,13 @@ export function AnalysisList({
           {analyses.map((a) => {
             const advantage = a.grid_iq_advantage ?? 0;
             const isProcessor = advantage > 0;
+            const saleyardValue = a.net_saleyard_value;
+            const processorValue = a.net_processor_value;
             const killScore = a.kill_score;
             const gcr = a.gcr;
             const checked = selected.has(a.id);
+            const fmt = (v: number | null) =>
+              v === null ? "-" : `$${Math.round(v).toLocaleString()}`;
 
             const content = (
               <>
@@ -191,14 +195,23 @@ export function AnalysisList({
                     )}
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="shrink-0 text-right">
+                  <div className="flex items-baseline justify-end gap-2 text-xs">
+                    <span className="text-text-muted">Saleyard</span>
+                    <span className="tabular-nums text-text-secondary">
+                      {fmt(saleyardValue)}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-end gap-2 text-xs">
+                    <span className="text-text-muted">Grid</span>
+                    <span className="tabular-nums text-text-secondary">
+                      {fmt(processorValue)}
+                    </span>
+                  </div>
                   <p
-                    className={`text-sm font-semibold ${isProcessor ? "text-emerald-400" : "text-brand"}`}
+                    className={`mt-0.5 text-[11px] font-semibold tabular-nums ${isProcessor ? "text-emerald-400" : "text-red-400"}`}
                   >
-                    {isProcessor ? "Over-the-Hooks" : "Saleyard"}
-                  </p>
-                  <p className="text-xs text-text-muted">
-                    {isProcessor ? "+" : ""}$
+                    {isProcessor ? "+" : "-"}$
                     {Math.abs(Math.round(advantage)).toLocaleString()}
                   </p>
                 </div>

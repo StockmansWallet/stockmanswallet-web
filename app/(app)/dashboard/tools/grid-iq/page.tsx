@@ -194,14 +194,18 @@ export default async function GridIQPage() {
               safeAnalyses.map((a: Record<string, unknown>) => {
                 const advantage = (a.grid_iq_advantage as number) ?? 0;
                 const isProcessor = advantage > 0;
+                const saleyardValue = a.net_saleyard_value as number | null;
+                const processorValue = a.net_processor_value as number | null;
                 const killScore = a.kill_score as number | null;
                 const gcr = a.gcr as number | null;
                 const mode = a.analysis_mode as string | null;
+                const fmt = (v: number | null) =>
+                  v === null ? "-" : `$${Math.round(v).toLocaleString()}`;
                 return (
                   <Link
                     key={a.id as string}
                     href={`/dashboard/tools/grid-iq/analysis/${a.id}`}
-                    className="flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-white/[0.04]"
+                    className="flex items-center justify-between gap-4 px-5 py-3.5 transition-colors hover:bg-white/[0.04]"
                   >
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-text-primary">
@@ -233,14 +237,23 @@ export default async function GridIQPage() {
                         )}
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="shrink-0 text-right">
+                      <div className="flex items-baseline justify-end gap-2 text-xs">
+                        <span className="text-text-muted">Saleyard</span>
+                        <span className="tabular-nums text-text-secondary">
+                          {fmt(saleyardValue)}
+                        </span>
+                      </div>
+                      <div className="flex items-baseline justify-end gap-2 text-xs">
+                        <span className="text-text-muted">Grid</span>
+                        <span className="tabular-nums text-text-secondary">
+                          {fmt(processorValue)}
+                        </span>
+                      </div>
                       <p
-                        className={`text-sm font-semibold ${isProcessor ? "text-emerald-400" : "text-brand"}`}
+                        className={`mt-0.5 text-[11px] font-semibold tabular-nums ${isProcessor ? "text-emerald-400" : "text-red-400"}`}
                       >
-                        {isProcessor ? "Over-the-Hooks" : "Saleyard"}
-                      </p>
-                      <p className="text-xs text-text-muted">
-                        {isProcessor ? "+" : ""}$
+                        {isProcessor ? "+" : "-"}$
                         {Math.abs(Math.round(advantage)).toLocaleString()}
                       </p>
                     </div>
