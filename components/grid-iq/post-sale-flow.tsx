@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,8 +10,8 @@ import {
   FileText, Check, Loader2, Upload, ChevronRight, ChevronLeft,
   Users, AlertTriangle, Info,
 } from "lucide-react";
-import Link from "next/link";
 import { runPostSaleAnalysis, confirmSale } from "@/app/(app)/dashboard/tools/grid-iq/analyse/post-sale-actions";
+import { UploadModal } from "@/app/(app)/dashboard/tools/grid-iq/library/upload-modal";
 
 // MARK: - Types
 
@@ -61,27 +62,23 @@ export function PostSaleFlow({
   availableKillSheets,
 }: PostSaleFlowProps) {
   const router = useRouter();
-  const [step, setStep] = useState(1);
+  const [stage, setStage] = useState<"select" | "confirm">("select");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [uploadOpen, setUploadOpen] = useState(false);
 
-  // Step 1: Select kill sheet
   const [selectedKillSheetId, setSelectedKillSheetId] = useState<string | null>(
-    // Auto-select suggested kill sheet if there's exactly one match
     availableKillSheets.filter((ks) => ks.isSuggested).length === 1
       ? availableKillSheets.find((ks) => ks.isSuggested)!.id
       : null
   );
 
-  // Step 2: Analysis results (after running)
   const [analysisId, setAnalysisId] = useState<string | null>(null);
 
-  // Step 3: Allocation confirmation
   const [adjustedAllocations, setAdjustedAllocations] = useState(
     allocations.map((a) => ({ herdGroupId: a.herd_id, headCount: a.head_count, herdName: a.herdName, category: a.category }))
   );
 
-  // Sorted: suggested first
   const sortedKillSheets = [...availableKillSheets].sort((a, b) => {
     if (a.isSuggested && !b.isSuggested) return -1;
     if (!a.isSuggested && b.isSuggested) return 1;
@@ -99,7 +96,7 @@ export function PostSaleFlow({
           setError(result.error);
         } else if (result?.analysisId) {
           setAnalysisId(result.analysisId);
-          setStep(2);
+          setStage("confirm");
         }
       } catch (e) {
         setError(e instanceof Error ? e.message : "Analysis failed");
@@ -125,29 +122,7 @@ export function PostSaleFlow({
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Step indicators */}
-      <div className="flex items-center gap-2">
-        {[1, 2, 3].map((s) => (
-          <div
-            key={s}
-            className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
-              step === s ? "bg-amber-500 text-white"
-                : step > s ? "bg-amber-500/20 text-amber-400"
-                : "bg-white/[0.08] text-text-muted"
-            }`}
-          >
-            {step > s ? <Check className="h-3.5 w-3.5" /> : s}
-          </div>
-        ))}
-        <div className="ml-2 text-sm font-medium text-text-primary">
-          {step === 1 && "Select Kill Sheet"}
-          {step === 2 && "Review Analysis"}
-          {step === 3 && "Confirm Sale"}
-        </div>
-      </div>
-
-      {/* Step 1: Select Kill Sheet */}
-      {step === 1 && (
+      {stage === "select" && (
         <section>
           <p className="mb-3 text-xs text-text-muted">
             Select the actual kill sheet / feedback sheet received from {processorName}.
@@ -158,11 +133,9 @@ export function PostSaleFlow({
               <CardContent className="flex flex-col items-center gap-2 py-6 text-center">
                 <FileText className="h-8 w-8 text-text-muted" />
                 <p className="text-sm text-text-muted">No unlinked kill sheets available.</p>
-                <Link href="/dashboard/tools/grid-iq/library?tab=kill-sheets&upload=killsheet">
-                  <Button size="sm" variant="indigo">
-                    <Upload className="mr-1.5 h-3.5 w-3.5" />Upload Kill Sheet
-                  </Button>
-                </Link>
+                <Button size="sm" variant="indigo" onClick={() => setUploadOpen(true)}>
+                  <Upload className="mr-1.5 h-3.5 w-3.5" />Upload Kill Sheet
+                </Button>
               </CardContent>
             </Card>
           ) : (
@@ -210,9 +183,14 @@ export function PostSaleFlow({
           {error && <div className="mt-3 rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-400">{error}</div>}
 
           <div className="mt-4 flex justify-end gap-2">
-            <Link href="/dashboard/tools/grid-iq/library?tab=kill-sheets&upload=killsheet">
-              <Button variant="ghost" size="sm"><Upload className="mr-1 h-3 w-3" />Upload New</Button>
-            </Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
+              onClick={() => setUploadOpen(true)}
+            >
+              <Upload className="mr-1.5 h-3.5 w-3.5" />Upload New
+            </Button>
             <Button
               variant="indigo"
               disabled={!selectedKillSheetId || isPending}
@@ -228,42 +206,32 @@ export function PostSaleFlow({
         </section>
       )}
 
-      {/* Step 2: Review Analysis */}
-      {step === 2 && analysisId && (
+      {stage === "confirm" && (
         <section>
-          <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
-            <div>
-              <p className="text-sm font-medium text-emerald-400">Analysis complete</p>
-              <p className="mt-0.5 text-xs text-text-secondary">
-                Post-kill analysis has been generated. View the full results or continue to confirm the sale.
-              </p>
+          {analysisId && (
+            <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3">
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-emerald-400">Analysis complete</p>
+                <p className="mt-0.5 text-xs text-text-secondary">
+                  Review the allocations below, then confirm the sale to mark cattle as sold.
+                </p>
+              </div>
+              <Link
+                href={`/dashboard/tools/grid-iq/analysis/${analysisId}`}
+                className="shrink-0 self-center rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-text-primary"
+              >
+                View Full Analysis
+              </Link>
             </div>
-          </div>
+          )}
 
-          <div className="flex gap-2">
-            <Link href={`/dashboard/tools/grid-iq/analysis/${analysisId}`}>
-              <Button variant="ghost" size="sm">View Full Analysis</Button>
-            </Link>
-          </div>
-
-          <div className="mt-4 flex justify-end">
-            <Button variant="indigo" onClick={() => setStep(3)}>
-              Continue to Confirm Sale <ChevronRight className="ml-1 h-4 w-4" />
-            </Button>
-          </div>
-        </section>
-      )}
-
-      {/* Step 3: Confirm Sale Allocations */}
-      {step === 3 && (
-        <section>
           <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
             <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
             <div>
               <p className="text-sm font-medium text-amber-400">Confirm herd allocations</p>
               <p className="mt-0.5 text-xs text-text-secondary">
-                Review and adjust the head counts below if the actual sale differs from the original consignment.
+                Adjust the head counts below if the actual sale differs from the original consignment.
                 Once confirmed, cattle will be marked as sold and removed from herd totals.
               </p>
             </div>
@@ -308,7 +276,6 @@ export function PostSaleFlow({
             </CardContent>
           </Card>
 
-          {/* Warning if head count changed */}
           {adjustedAllocations.reduce((s, a) => s + a.headCount, 0) !== totalHead && (
             <div className="mb-4 flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
@@ -322,14 +289,18 @@ export function PostSaleFlow({
           {error && <div className="mb-3 rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-400">{error}</div>}
 
           <div className="flex justify-between gap-2">
-            <Button variant="ghost" onClick={() => setStep(2)}>
-              <ChevronLeft className="mr-1 h-4 w-4" />Back
+            <Button
+              variant="ghost"
+              size="sm"
+              className="border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
+              onClick={() => setStage("select")}
+            >
+              <ChevronLeft className="mr-1 h-3.5 w-3.5" />Back
             </Button>
             <Button
               variant="indigo"
               disabled={isPending || adjustedAllocations.every((a) => a.headCount <= 0)}
               onClick={handleConfirmSale}
-              className="bg-emerald-600 hover:bg-emerald-700"
             >
               {isPending ? (
                 <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Confirming Sale...</>
@@ -340,6 +311,12 @@ export function PostSaleFlow({
           </div>
         </section>
       )}
+
+      <UploadModal
+        open={uploadOpen}
+        initialType="killsheet"
+        onClose={() => setUploadOpen(false)}
+      />
     </div>
   );
 }
