@@ -921,6 +921,7 @@ export function PreSaleFlow({ processors, grids, herds, killSheets }: PreSaleFlo
         open={uploadOpen !== null}
         initialType={uploadOpen ?? "grid"}
         onClose={() => setUploadOpen(null)}
+        defaultProcessorId={selectedProcessorId}
       />
     </div>
   );

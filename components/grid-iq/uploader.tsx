@@ -103,11 +103,15 @@ interface GridIQUploaderProps {
   // Called after a successful save. Receives the new record id and type so the
   // caller can close a surrounding modal and navigate to the detail page.
   onSaved?: (id: string, type: UploadType) => void;
+  // Pre-select a processor when the uploader is opened from a flow that
+  // already knows the processor (eg. Analyse Step 2 picker).
+  defaultProcessorId?: string | null;
 }
 
 export function GridIQUploader({
   initialType = "grid",
   onSaved,
+  defaultProcessorId = null,
 }: GridIQUploaderProps) {
   const router = useRouter();
   const [uploadType, setUploadType] = useState<UploadType>(initialType);
@@ -130,7 +134,7 @@ export function GridIQUploader({
   }
   const [processors, setProcessors] = useState<ProcessorOption[]>([]);
   const [selectedProcessorId, setSelectedProcessorId] = useState<string | null>(
-    null
+    defaultProcessorId
   );
 
   useEffect(() => {
@@ -146,9 +150,12 @@ export function GridIQUploader({
   }, []);
 
   // Auto-match when extraction returns a processor_name that exists in the
-  // user's directory (case-insensitive exact match).
+  // user's directory (case-insensitive exact match). Only fills when the
+  // field is currently empty so a parent-provided default or the user's
+  // explicit pick is never overridden.
   useEffect(() => {
     if (!result || processors.length === 0) return;
+    if (selectedProcessorId) return;
     const extractedName =
       result.gridData?.processorName || result.killSheetData?.processorName;
     if (!extractedName) return;
@@ -156,7 +163,7 @@ export function GridIQUploader({
       (p) => p.name.trim().toLowerCase() === extractedName.trim().toLowerCase()
     );
     if (match) setSelectedProcessorId(match.id);
-  }, [result, processors]);
+  }, [result, processors, selectedProcessorId]);
 
   const handleFile = useCallback((f: File) => {
     setError(null);
