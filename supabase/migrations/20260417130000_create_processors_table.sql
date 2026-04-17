@@ -41,7 +41,10 @@ ALTER TABLE kill_sheet_records
   ADD COLUMN IF NOT EXISTS processor_id uuid REFERENCES processors(id) ON DELETE SET NULL;
 ALTER TABLE consignments
   ADD COLUMN IF NOT EXISTS processor_id uuid REFERENCES processors(id) ON DELETE SET NULL;
+ALTER TABLE grid_iq_analyses
+  ADD COLUMN IF NOT EXISTS processor_id uuid REFERENCES processors(id) ON DELETE SET NULL;
 
 CREATE INDEX IF NOT EXISTS processor_grids_processor_id_idx ON processor_grids(processor_id) WHERE is_deleted = false;
 CREATE INDEX IF NOT EXISTS kill_sheet_records_processor_id_idx ON kill_sheet_records(processor_id) WHERE is_deleted = false;
 CREATE INDEX IF NOT EXISTS consignments_processor_id_idx ON consignments(processor_id) WHERE is_deleted = false;
+CREATE INDEX IF NOT EXISTS grid_iq_analyses_processor_id_idx ON grid_iq_analyses(processor_id) WHERE is_deleted = false;
