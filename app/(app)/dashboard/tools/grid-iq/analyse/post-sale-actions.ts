@@ -122,6 +122,22 @@ export async function runPostSaleAnalysis(consignmentId: string, killSheetId: st
   }
 
   // Link kill sheet to consignment
+  // If this kill sheet was previously linked to a different (non-completed)
+  // consignment, detach that consignment's kill_sheet_record_id so we don't
+  // leave the graph inconsistent when re-linking.
+  const { data: priorKS } = await supabase
+    .from("kill_sheet_records")
+    .select("consignment_id")
+    .eq("id", killSheetId)
+    .single();
+  const priorConsignmentId = priorKS?.consignment_id as string | null;
+  if (priorConsignmentId && priorConsignmentId !== consignmentId) {
+    await supabase
+      .from("consignments")
+      .update({ kill_sheet_record_id: null })
+      .eq("id", priorConsignmentId);
+  }
+
   await supabase
     .from("consignments")
     .update({ kill_sheet_record_id: killSheetId })

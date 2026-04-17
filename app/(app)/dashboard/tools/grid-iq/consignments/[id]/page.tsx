@@ -88,15 +88,53 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
   const preSaleAnalysis = (linkedAnalyses ?? []).find((a) => a.analysis_mode === "pre_sale");
   const postSaleAnalysis = (linkedAnalyses ?? []).find((a) => a.analysis_mode === "post_sale");
 
-  // Fetch unlinked kill sheets for linking and post-sale flow
-  const { data: availableKillSheets } = await supabase
+  // Fetch kill sheets available to link to this consignment. Includes rows
+  // that are unlinked, OR linked to another non-completed draft/confirmed
+  // consignment (which the user can re-link here), OR linked to a consignment
+  // that has been soft-deleted. A kill sheet already tied to a completed sale
+  // stays locked to that sale.
+  const { data: allKillSheets } = await supabase
     .from("kill_sheet_records")
-    .select("id, record_name, processor_name, kill_date, total_head_count, total_gross_value")
+    .select(
+      "id, record_name, processor_name, kill_date, total_head_count, total_gross_value, consignment_id"
+    )
     .eq("user_id", user!.id)
     .eq("is_deleted", false)
-    .is("consignment_id", null)
     .order("created_at", { ascending: false })
-    .limit(50);
+    .limit(100);
+
+  // Resolve each candidate's owning consignment (if any) so we can filter out
+  // kill sheets locked to a completed sale.
+  const ownerConsignmentIds = Array.from(
+    new Set(
+      (allKillSheets ?? [])
+        .map((k) => k.consignment_id as string | null)
+        .filter((v): v is string => typeof v === "string")
+    )
+  );
+  const ownerStatusMap = new Map<string, { status: string; is_deleted: boolean }>();
+  if (ownerConsignmentIds.length > 0) {
+    const { data: owners } = await supabase
+      .from("consignments")
+      .select("id, status, is_deleted")
+      .in("id", ownerConsignmentIds);
+    for (const o of owners ?? []) {
+      ownerStatusMap.set(o.id as string, {
+        status: o.status as string,
+        is_deleted: o.is_deleted as boolean,
+      });
+    }
+  }
+
+  const availableKillSheets = (allKillSheets ?? []).filter((k) => {
+    const owner = k.consignment_id
+      ? ownerStatusMap.get(k.consignment_id as string)
+      : null;
+    if (!owner) return true; // unlinked or owner missing
+    if (owner.is_deleted) return true; // owner consignment soft-deleted
+    if (owner.status === "completed") return false; // locked to a completed sale
+    return true; // draft / confirmed owner: re-link allowed
+  });
 
   const badge = statusBadge(consignment.status);
   const isCompleted = consignment.status === "completed";
