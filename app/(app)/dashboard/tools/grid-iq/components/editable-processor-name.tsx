@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Loader2, Check, X } from "lucide-react";
+import { Loader2, Check, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 interface EditableProcessorNameProps {
@@ -100,11 +100,10 @@ export function EditableProcessorName({
         setDraft(name);
         setIsEditing(true);
       }}
-      className="group flex items-center gap-2 text-left"
+      className="rounded-md text-left text-2xl font-bold text-indigo-400 transition-colors hover:text-indigo-300"
       title="Click to rename"
     >
-      <span className="text-2xl font-bold text-indigo-400">{name}</span>
-      <Pencil className="h-3.5 w-3.5 text-text-muted transition-colors group-hover:text-indigo-400" />
+      {name}
     </button>
   );
 }
