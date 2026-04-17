@@ -11,7 +11,21 @@ import {
   Scale,
 } from "lucide-react";
 import type { ProducerProfile } from "@/lib/grid-iq/producer-profile";
-import { getConfidenceLabel } from "@/lib/grid-iq/producer-profile";
+
+// Inlined so this client component does not pull in the server-only
+// producer-profile module at runtime.
+function getConfidenceLabel(tier: ProducerProfile["confidenceTier"]): string {
+  switch (tier) {
+    case "expert":
+      return "Expert - Strong historical data. Predictions are highly tuned to your operation.";
+    case "personalised":
+      return "Personalised - Based on your kill history. Predictions are tailored to your operation.";
+    case "provisional":
+      return "Provisional - Based on limited kill history. More data will improve accuracy.";
+    case "baseline":
+      return "Industry Baseline - Using industry defaults. Upload kill sheets to personalise.";
+  }
+}
 
 export interface PerformanceTrendRow {
   id: string;

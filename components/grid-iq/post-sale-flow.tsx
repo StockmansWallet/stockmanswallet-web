@@ -158,7 +158,7 @@ export function PostSaleFlow({
               <CardContent className="flex flex-col items-center gap-2 py-6 text-center">
                 <FileText className="h-8 w-8 text-text-muted" />
                 <p className="text-sm text-text-muted">No unlinked kill sheets available.</p>
-                <Link href="/dashboard/tools/grid-iq/upload?type=killsheet">
+                <Link href="/dashboard/tools/grid-iq/library?tab=kill-sheets&upload=killsheet">
                   <Button size="sm" variant="teal">
                     <Upload className="mr-1.5 h-3.5 w-3.5" />Upload Kill Sheet
                   </Button>
@@ -210,7 +210,7 @@ export function PostSaleFlow({
           {error && <div className="mt-3 rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-400">{error}</div>}
 
           <div className="mt-4 flex justify-end gap-2">
-            <Link href="/dashboard/tools/grid-iq/upload?type=killsheet">
+            <Link href="/dashboard/tools/grid-iq/library?tab=kill-sheets&upload=killsheet">
               <Button variant="ghost" size="sm"><Upload className="mr-1 h-3 w-3" />Upload New</Button>
             </Link>
             <Button

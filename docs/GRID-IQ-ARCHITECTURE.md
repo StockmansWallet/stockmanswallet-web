@@ -429,10 +429,19 @@ All three tables use user-scoped row-level security:
 | File | Purpose |
 |---|---|
 | app/(app)/dashboard/tools/grid-iq/page.tsx | Landing page - recent analyses, grids, kill sheets |
-| app/(app)/dashboard/tools/grid-iq/upload/page.tsx | Upload page wrapper |
-| app/(app)/dashboard/tools/grid-iq/upload/grid-iq-uploader.tsx | Upload component (extraction disabled) |
-| app/(app)/dashboard/tools/grid-iq/grids/page.tsx | Saved grids listing |
-| app/(app)/dashboard/tools/grid-iq/history/page.tsx | Kill sheet history |
+| app/(app)/dashboard/tools/grid-iq/analyse/ | New Analysis (pre-sale) flow |
+| app/(app)/dashboard/tools/grid-iq/library/page.tsx | Library hub (Analyses, Grids, Kill Sheets, Performance tabs) |
+| app/(app)/dashboard/tools/grid-iq/library/library-tabs.tsx | Client-side tabs and grid/kill-sheet list rendering |
+| app/(app)/dashboard/tools/grid-iq/library/analysis-list.tsx | Analysis list with bulk-select and delete |
+| app/(app)/dashboard/tools/grid-iq/library/performance-view.tsx | Producer performance dashboard |
+| app/(app)/dashboard/tools/grid-iq/library/upload-modal.tsx | Upload modal invoked from Grids and Kill Sheets tabs |
+| app/(app)/dashboard/tools/grid-iq/grids/[id]/ | Grid detail (with analyses-using-this-grid section) |
+| app/(app)/dashboard/tools/grid-iq/kill-sheets/[id]/ | Kill sheet detail (with consignment and analyses back-links) |
+| app/(app)/dashboard/tools/grid-iq/analysis/[id]/ | Analysis detail |
+| app/(app)/dashboard/tools/grid-iq/consignments/[id]/ | Consignment detail with inline post-kill flow |
+| components/grid-iq/uploader.tsx | Shared upload component (used by the upload modal) |
+| components/grid-iq/pre-sale-flow.tsx | Three-step pre-sale wizard |
+| components/grid-iq/post-sale-flow.tsx | Post-kill analysis flow (rendered inline on consignment detail) |
 
 ### Supabase Edge Function
 

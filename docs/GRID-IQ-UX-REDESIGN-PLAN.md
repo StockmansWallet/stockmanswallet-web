@@ -2,7 +2,7 @@
 
 **Author:** Leon (CTO) + Claude
 **Date:** 2026-04-17
-**Status:** Proposal for Luke to review
+**Status:** Delivered 2026-04-17 (all four phases). Legacy routes and redirects removed since the app is pre-release.
 **Scope:** Web app only (iOS untouched)
 
 ---

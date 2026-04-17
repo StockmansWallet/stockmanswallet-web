@@ -14,7 +14,7 @@ import {
   AlertTriangle,
   Upload,
 } from "lucide-react";
-import { AnalysisList } from "../saved/saved-analysis-tabs";
+import { AnalysisList } from "./analysis-list";
 import { UploadModal } from "./upload-modal";
 import { PerformanceView, type PerformanceTrendRow } from "./performance-view";
 import type { ProducerProfile } from "@/lib/grid-iq/producer-profile";
@@ -64,6 +64,7 @@ type TabId = "analyses" | "grids" | "kill-sheets" | "performance";
 
 interface Props {
   defaultTab: string;
+  initialUpload?: "grid" | "killsheet" | null;
   analyses: AnalysisRow[];
   grids: GridRow[];
   killSheets: KillSheetRow[];
@@ -91,6 +92,7 @@ const tabAliases: Record<string, TabId> = {
 
 export function LibraryTabs({
   defaultTab,
+  initialUpload,
   analyses,
   grids,
   killSheets,
@@ -99,7 +101,9 @@ export function LibraryTabs({
 }: Props) {
   const resolved = tabAliases[defaultTab] ?? "analyses";
   const [activeTab, setActiveTab] = useState<TabId>(resolved);
-  const [uploadType, setUploadType] = useState<"grid" | "killsheet" | null>(null);
+  const [uploadType, setUploadType] = useState<"grid" | "killsheet" | null>(
+    initialUpload ?? null
+  );
 
   return (
     <div>

@@ -140,7 +140,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
             <CardContent className="flex flex-col items-center gap-2 py-6 text-center">
               <Grid3x3 className="h-8 w-8 text-text-muted" />
               <p className="text-sm text-text-muted">No processor grids uploaded yet.</p>
-              <Link href="/dashboard/tools/grid-iq/upload">
+              <Link href="/dashboard/tools/grid-iq/library?tab=grids&upload=grid">
                 <Button size="sm" variant="teal">
                   <Upload className="mr-1.5 h-3.5 w-3.5" />
                   Upload Grid

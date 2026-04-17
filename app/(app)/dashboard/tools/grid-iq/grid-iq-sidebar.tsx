@@ -28,13 +28,6 @@ const items = [
       `${BASE}/grids`,
       `${BASE}/kill-sheets`,
       `${BASE}/analysis`,
-      // Legacy prefixes, still covered while redirects remain in place
-      `${BASE}/records`,
-      `${BASE}/history`,
-      `${BASE}/saved`,
-      `${BASE}/analyses`,
-      `${BASE}/performance`,
-      `${BASE}/upload`,
     ],
   },
 ];

@@ -1,7 +1,7 @@
 "use client";
 
 import { Modal } from "@/components/ui/modal";
-import { GridIQUploader } from "../upload/grid-iq-uploader";
+import { GridIQUploader } from "@/components/grid-iq/uploader";
 
 interface Props {
   open: boolean;

@@ -7,9 +7,11 @@ export const metadata = { title: "Library - Grid IQ" };
 export default async function LibraryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; upload?: string }>;
 }) {
-  const { tab } = await searchParams;
+  const { tab, upload } = await searchParams;
+  const initialUpload =
+    upload === "grid" || upload === "killsheet" ? upload : null;
 
   const supabase = await createClient();
   const {
@@ -58,7 +60,8 @@ export default async function LibraryPage({
 
   return (
     <LibraryTabs
-      defaultTab={tab ?? "analyses"}
+      defaultTab={tab ?? (initialUpload === "killsheet" ? "kill-sheets" : "analyses")}
+      initialUpload={initialUpload}
       analyses={analyses ?? []}
       grids={grids ?? []}
       killSheets={killSheets ?? []}

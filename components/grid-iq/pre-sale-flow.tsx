@@ -426,7 +426,7 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
           </p>
 
           <div className="flex items-center justify-end">
-            <Link href="/dashboard/tools/grid-iq/library?tab=grids">
+            <Link href="/dashboard/tools/grid-iq/library?tab=grids&upload=grid">
               <Button size="sm" variant="ghost" className="shrink-0 text-xs">
                 <Upload className="mr-1.5 h-3.5 w-3.5" />
                 Upload Grid
@@ -441,7 +441,7 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
                 <p className="text-sm text-text-muted">
                   No processor grids uploaded yet.
                 </p>
-                <Link href="/dashboard/tools/grid-iq/library?tab=grids">
+                <Link href="/dashboard/tools/grid-iq/library?tab=grids&upload=grid">
                   <Button size="sm" variant="teal">
                     <Upload className="mr-1.5 h-3.5 w-3.5" />
                     Upload Grid
