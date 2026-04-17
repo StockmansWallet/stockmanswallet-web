@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -68,15 +67,8 @@ export default async function AccountSettingsPage() {
     <div className="max-w-4xl">
       <PageHeader
         title="Account"
+        titleClassName="text-4xl font-bold text-brand"
         subtitle="Subscription, security, and account management."
-        actions={
-          <Link
-            href="/dashboard/settings"
-            className="inline-flex h-8 items-center justify-center rounded-full px-3.5 text-[13px] font-semibold text-text-secondary transition-all duration-150 hover:bg-white/8 hover:text-text-primary"
-          >
-            Back
-          </Link>
-        }
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
