@@ -60,20 +60,43 @@ export const toolDefinitions = [
   {
     name: "calculate_freight",
     description:
-      "Calculates exact freight costs using the app's Freight IQ engine. Use this EVERY TIME the user asks about freight costs, transport costs, or trucking costs. Either provide a herd_name to use an existing herd's details, or provide manual parameters.",
+      "Calculates exact freight costs using the app's Freight IQ engine. You MUST call this tool every time the user asks about freight, transport, or trucking costs, even for rough estimates. NEVER calculate freight yourself, NEVER estimate distances in your head, NEVER apply your own rate. The engine handles deck loading density, cow-and-calf pair detection, distance routing via OSRM, and GST. Prefer destination_saleyard (routes real road distance from the property to the saleyard) over distance_km (only a last resort when no saleyard matches). If the user specifies a rate different from the default, pass it via rate_per_deck_per_km. For breeder herds where the user says calves are at foot, set calves_at_foot=true so the engine uses the fixed 18 head/deck cow-calf density.",
     input_schema: {
       type: "object",
       properties: {
         herd_name: {
           type: "string",
-          description: "Name of an existing herd from the portfolio.",
+          description:
+            "Name of an existing herd from the portfolio. For breeders with calves at foot, the engine automatically counts cow-calf pairs (not total head).",
         },
-        head_count: { type: "integer", description: "Number of head to transport." },
+        head_count: {
+          type: "integer",
+          description:
+            "Number of head to transport. For cow-calf pairs, this is the number of PAIRS (cows), not total animals.",
+        },
         average_weight_kg: { type: "number", description: "Average weight per head in kg." },
         category: { type: "string", description: "Livestock category." },
         sex: { type: "string", enum: ["Male", "Female"], description: "Sex of the livestock." },
-        destination_saleyard: { type: "string", description: "Destination saleyard name." },
-        distance_km: { type: "number", description: "Manual distance in km." },
+        destination_saleyard: {
+          type: "string",
+          description:
+            "Destination saleyard name. PREFERRED. The engine routes from the origin property to the saleyard using real road distances via OSRM. Always use this when the destination matches a known saleyard.",
+        },
+        distance_km: {
+          type: "number",
+          description:
+            "Manual one-way road distance in km. Use ONLY as a last resort when no saleyard matches. Never guess this value, only pass a number the user explicitly gave you.",
+        },
+        rate_per_deck_per_km: {
+          type: "number",
+          description:
+            "Optional carrier rate in dollars per deck per km. Use ONLY when the user explicitly specifies a non-default rate (e.g. '$2.75/deck/km', '$3 a k a deck'). If omitted, the engine uses the default rate.",
+        },
+        calves_at_foot: {
+          type: "boolean",
+          description:
+            "Optional. Set to true when transporting breeders with calves at foot - the engine uses the fixed cow-calf density (18 head/deck). Set to false when the breeder herd is dry. Default true for Breeder category, ignored otherwise.",
+        },
       },
       required: [],
     },
@@ -875,6 +898,19 @@ async function executeFreight(input: Record<string, unknown>, store: ChatDataSto
   let category: string;
   let sex: string;
   let distanceKm: number;
+  let calvesAtFoot: boolean | undefined;
+
+  // Optional user-specified overrides validated against sane commercial bounds.
+  const rawRate = input.rate_per_deck_per_km;
+  let ratePerDeckPerKm: number | undefined;
+  if (typeof rawRate === "number" && rawRate > 0 && rawRate <= 100) {
+    ratePerDeckPerKm = rawRate;
+  }
+
+  const rawCalves = input.calves_at_foot;
+  if (typeof rawCalves === "boolean") {
+    calvesAtFoot = rawCalves;
+  }
 
   const herdName = input.herd_name as string | undefined;
   if (herdName) {
@@ -883,23 +919,39 @@ async function executeFreight(input: Record<string, unknown>, store: ChatDataSto
     // For breeders with calves at foot, each cow-calf pair is one loading unit.
     // The 18 HPD cow_calf_units density already accounts for the calf, so count
     // pairs (cows only), not total head.
-    if (herd.category === "Breeder") {
-      const calfData = parseCalvesAtFoot(herd.additional_info);
+    const isBreeder = herd.category === "Breeder";
+    const calfData = isBreeder ? parseCalvesAtFoot(herd.additional_info) : null;
+    if (isBreeder) {
       headCount = calfData ? Math.max(1, herd.head_count - calfData.headCount) : herd.head_count;
     } else {
       headCount = herd.head_count;
+    }
+    // Default calves_at_foot: true if the herd record indicates calves at foot, otherwise let
+    // the engine default apply (Breeder + calves_at_foot=true triggers the 18 HPD cow-calf band).
+    if (calvesAtFoot === undefined && isBreeder) {
+      calvesAtFoot = calfData !== null;
     }
     weightKg = herd.current_weight || herd.initial_weight;
     category = herd.category;
     sex = herd.sex;
 
-    // Resolve distance
+    // Resolve distance - prefer saleyard routing, fall back to manual distance only when no saleyard.
     const destSaleyard = input.destination_saleyard as string | undefined;
     const manualDist = input.distance_km as number | undefined;
-    if (manualDist && manualDist > 0) {
-      distanceKm = manualDist;
-    } else if (destSaleyard) {
+    if (destSaleyard) {
       distanceKm = await resolveDistanceToSaleyard(herd, store.properties, destSaleyard);
+      if (!distanceKm || distanceKm <= 0) {
+        // Routing failed for this saleyard; use the manual value if provided, otherwise saved default.
+        if (manualDist && manualDist > 0) {
+          distanceKm = manualDist;
+        } else {
+          const d = resolveDistance(herd, store.properties);
+          if (!d || d <= 0) return `Could not route to '${destSaleyard}' from ${herd.name}. Provide a distance_km.`;
+          distanceKm = d;
+        }
+      }
+    } else if (manualDist && manualDist > 0) {
+      distanceKm = manualDist;
     } else {
       const d = resolveDistance(herd, store.properties);
       if (!d || d <= 0) return `No distance available for ${herd.name}. Provide a destination_saleyard or distance_km.`;
@@ -912,11 +964,16 @@ async function executeFreight(input: Record<string, unknown>, store: ChatDataSto
     sex = (input.sex as string) ?? "Male";
     const manualDist = input.distance_km as number | undefined;
     const destSaleyard = input.destination_saleyard as string | undefined;
-    if (manualDist && manualDist > 0) {
-      distanceKm = manualDist;
-    } else if (destSaleyard) {
-      // Use first property coords or fallback
+    if (destSaleyard) {
       distanceKm = await resolveDistanceToSaleyardFromProps(store.properties, destSaleyard);
+      if ((!distanceKm || distanceKm <= 0) && manualDist && manualDist > 0) {
+        distanceKm = manualDist;
+      }
+      if (!distanceKm || distanceKm <= 0) {
+        return `Error: Could not route to '${destSaleyard}'. Provide a distance_km.`;
+      }
+    } else if (manualDist && manualDist > 0) {
+      distanceKm = manualDist;
     } else {
       return "Error: Provide either distance_km or destination_saleyard.";
     }
@@ -932,6 +989,8 @@ async function executeFreight(input: Record<string, unknown>, store: ChatDataSto
     averageWeightKg: weightKg,
     headCount,
     distanceKm,
+    ratePerDeckPerKm,
+    calvesAtFoot,
   });
 
   const gst = estimate.totalCost * 0.1;
@@ -942,6 +1001,7 @@ async function executeFreight(input: Record<string, unknown>, store: ChatDataSto
   lines.push(`Loading: ${estimate.headsPerDeck} head/deck`);
   lines.push(`Decks: ${estimate.decksRequired}`);
   lines.push(`Distance: ${Math.round(distanceKm)}km`);
+  lines.push(`Rate: $${estimate.ratePerDeckPerKm.toFixed(2)}/deck/km`);
   lines.push(`Total: $${Math.round(estimate.totalCost).toLocaleString()} (+ $${Math.round(gst)} GST)`);
   lines.push(`Per head: $${estimate.costPerHead.toFixed(2)}`);
   lines.push(`Per deck: $${Math.round(estimate.costPerDeck).toLocaleString()}`);

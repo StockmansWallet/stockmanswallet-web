@@ -153,7 +153,7 @@ export function PortfolioMovementSection({
           <Card>
             <CardContent className="px-5 py-4">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">
-                Like-for-Like <span className="font-normal normal-case tracking-normal text-text-muted/70">(Existing herds only)</span>
+                Like-for-Like <span className="font-normal normal-case tracking-normal text-text-muted/70">(Excludes buy/sell)</span>
               </p>
               <div className="mt-3 grid grid-cols-3 gap-4">
                 <div>
@@ -175,7 +175,7 @@ export function PortfolioMovementSection({
                 </div>
               </div>
               <p className="mt-3 border-t border-white/[0.06] pt-2 text-[11px] leading-snug text-text-muted">
-                Change in value for herds that existed at both the opening and closing date. Excludes herds added or sold during the period, so this isolates organic portfolio growth from composition changes.
+                Excludes herds added or removed during the period and shows how the existing portfolio changed on a comparable basis through market and biological movements.
               </p>
             </CardContent>
           </Card>

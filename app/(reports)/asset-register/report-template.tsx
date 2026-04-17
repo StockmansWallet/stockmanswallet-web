@@ -321,7 +321,7 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
             {/* Like-for-like */}
             <div className="mb-3 break-inside-avoid rounded-xl border border-[#8B7355]/25 px-5 py-3">
               <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">
-                Like-for-Like <span className="font-normal normal-case tracking-normal text-[#8B7355]">(Existing herds only)</span>
+                Like-for-Like <span className="font-normal normal-case tracking-normal text-[#8B7355]">(Excludes buy/sell)</span>
               </p>
               <div className="mt-3 grid grid-cols-3 gap-3">
                 <div>
@@ -341,7 +341,7 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
                 </div>
               </div>
               <p className="mt-3 border-t border-[#8B7355]/20 pt-2 text-[10px] leading-snug text-[#271F16]/55">
-                Change in value for herds that existed at both the opening and closing date. Excludes herds added or sold during the period, so this isolates organic portfolio growth from composition changes.
+                Excludes herds added or removed during the period and shows how the existing portfolio changed on a comparable basis through market and biological movements.
               </p>
             </div>
 

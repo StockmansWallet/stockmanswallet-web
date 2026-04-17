@@ -102,7 +102,7 @@ const FALLBACK_TOOL_INSTRUCTIONS = `YOUR TOOLS:
 You have tools. Use them when the conversation turns to data:
 
 1. lookup_portfolio_data: Gets data from the user's portfolio. Call before citing any number. Query types: portfolio_summary, herd_details, all_herds_summary, property_details, market_prices, seasonal_pricing, sales_history, freight_estimates, yard_book, health_records, property_weather.
-2. calculate_freight: Calculates freight costs via Freight IQ. Always use this for transport costs. Show GST (+10%) alongside the total.
+2. calculate_freight: Calculates freight costs via Freight IQ. YOU MUST CALL THIS TOOL every time the user asks about freight, transport, or trucking costs. You have no freight arithmetic capability - never calculate cost, distance, deck count, or cost-per-head yourself. Always prefer destination_saleyard over distance_km so the engine routes real road distance from the property to the saleyard via OSRM. Only pass distance_km when the user gives you an explicit number and there is no matching saleyard. If the user specifies a carrier rate different from the default (e.g. "$2.75 a deck-km", "$3 per deck-km"), pass it via rate_per_deck_per_km. For breeder herds, set calves_at_foot=true when the user says calves are at foot so the engine applies the fixed cow-calf density. Show GST (+10%) alongside the total returned by the tool.
 3. create_yard_book_event: Creates Yard Book events. Infer category and parse dates naturally. CRITICAL DATE RULE: Always derive the YYYY-MM-DD date from TODAY'S DATE above. If the user says "Monday", count forward from today's day-of-week to find the exact calendar date. Double-check the day-of-week matches before submitting. Never guess or approximate dates.
 4. manage_yard_book_event: Completes or deletes Yard Book events. Complete without asking, confirm before deleting.
 5. lookup_grid_iq_data: Retrieves Grid IQ data - processor grid comparisons, kill sheet results, Kill Score, GCR, and Grid Risk. Query types: grid_iq_summary, analysis_details, kill_history, grid_details, compare_channels.
@@ -299,6 +299,12 @@ export async function sendMessage(
   let rounds = 0;
   let pendingInsights: QuickInsight[] | undefined;
   let autoCards: QuickInsight[] = [];
+  // Guardrail: track whether Brangus actually invoked calculate_freight during this turn.
+  // If the user asked a freight question and we fall through to end_turn without the tool,
+  // we retry once with a nudge. See runFreightGuard below.
+  let freightToolInvoked = false;
+  let freightGuardUsed = false;
+  const userMessageAsksFreight = mentionsFreight(userText);
 
   while (rounds < MAX_TOOL_ROUNDS) {
     rounds++;
@@ -324,6 +330,28 @@ export async function sendMessage(
         .map((b) => b.text ?? "");
       const rawText = textBlocks.join("\n").trim();
       const text = sanitiseResponse(rawText);
+
+      // Guardrail: user asked about freight, response quotes dollar figures, but the tool was
+      // never called. Silently nudge Brangus once to use the tool rather than letting the
+      // fabricated numbers through. This catches the "admitted to fabricating" case from QA.
+      if (
+        userMessageAsksFreight &&
+        !freightToolInvoked &&
+        !freightGuardUsed &&
+        responseQuotesFreightFigures(text)
+      ) {
+        freightGuardUsed = true;
+        currentHistory = [
+          ...currentHistory,
+          { role: "assistant", content: response.content },
+          {
+            role: "user",
+            content:
+              "You just answered a freight question without calling calculate_freight. Those numbers are not from Freight IQ and are unreliable. Redo this properly: call calculate_freight with the user's parameters (prefer destination_saleyard over distance_km, and pass rate_per_deck_per_km only if the user explicitly specified a rate). Do not guess any freight figures.",
+          },
+        ];
+        continue;
+      }
 
       currentHistory = [
         ...currentHistory,
@@ -392,6 +420,7 @@ export async function sendMessage(
       }));
 
       for (const block of executableBlocks) {
+        if (block.name === "calculate_freight") freightToolInvoked = true;
         const result = await executeTool(
           block.name!,
           block.input as Record<string, unknown>,
@@ -494,6 +523,37 @@ async function callBrangusAPI(
   }
 
   return res.json();
+}
+
+// MARK: - Freight Guardrail Helpers
+// Detect whether the user's message is asking about freight/transport costs so we can enforce
+// a calculate_freight tool call. Keep patterns conservative: we want to catch clear freight
+// questions, not every tangential mention of a truck.
+const FREIGHT_INTENT_PATTERNS: RegExp[] = [
+  /\bfreight\b/i,
+  /\btransport(?:ation)?\b/i,
+  /\btrucking\b/i,
+  /\bcartage\b/i,
+  /\bhauling\b/i,
+  /\bcart(?:ing)?\s+(?:cost|fee|rate)/i,
+  /\bcost\s+to\s+(?:truck|cart|transport|haul)/i,
+  /\$[\d.]+\s*(?:\/|per)\s*deck/i,
+  /\bper\s+deck\b/i,
+];
+
+function mentionsFreight(text: string): boolean {
+  if (!text) return false;
+  return FREIGHT_INTENT_PATTERNS.some((rx) => rx.test(text));
+}
+
+// Detect whether the assistant's reply is quoting freight-shaped figures. We use this to decide
+// whether to intervene - if Brangus wrote a pure hedging response ("I don't know, tell me the
+// distance") with no numbers, leave him alone.
+function responseQuotesFreightFigures(text: string): boolean {
+  if (!text) return false;
+  const hasDollar = /\$[\d,]+(?:\.\d+)?/.test(text);
+  if (!hasDollar) return false;
+  return /freight|deck|per\s+head|total|cart|truck/i.test(text);
 }
 
 // MARK: - Response Sanitisation
