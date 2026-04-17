@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useTransition } from "react";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -20,9 +21,16 @@ import {
   Info,
   Navigation,
   ChevronDown,
+  Bookmark,
+  BookmarkCheck,
+  Share2,
+  Check,
+  History,
 } from "lucide-react";
 import { getRoadDistanceKm } from "@/lib/services/distance-service";
 import AddressAutocomplete, { type AddressResult } from "@/components/app/address-autocomplete";
+import { buildFreightShareText } from "@/lib/freight/share-formatter";
+import { saveFreightEstimate } from "./actions";
 
 // --- Types ---
 
@@ -65,6 +73,14 @@ const saleyardOptions = saleyards.map((s) => ({
 
 
 // --- Helpers ---
+
+// Matches the assumptions string shown on screen and written to saved records.
+function buildAssumptionsLine(result: FreightEstimate): string {
+  const weight = Math.round(result.averageWeightKg);
+  const rate = result.ratePerDeckPerKm.toFixed(2);
+  const distance = Math.round(result.distanceKm);
+  return `${result.freightCategory.displayName} · ${result.headsPerDeck} head/deck · ${weight}kg avg weight · $${rate}/deck/km · ${distance} km`;
+}
 
 // --- Sub-components ---
 
@@ -125,8 +141,30 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
   const [attempted, setAttempted] = useState(false);
   const [densityOpen, setDensityOpen] = useState(false);
   const [calvesAtFoot, setCalvesAtFoot] = useState(true);
+  const [didSave, setDidSave] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [shareStatus, setShareStatus] = useState<"idle" | "copied">("idle");
+  const [isSaving, startSaving] = useTransition();
 
   const selectedHerd = herds.find((h) => h.id === selectedHerdId);
+  const selectedProperty = properties.find((p) => p.id === selectedPropertyId);
+
+  // Label for destination (saleyard name, custom address, or manual distance).
+  const destinationLabel = useMemo(() => {
+    if (selectedSaleyard) {
+      const locality = saleyardLocality[selectedSaleyard];
+      const saleyardName = selectedSaleyard.split(",")[0].trim();
+      return locality ? `${locality.split(",")[0].trim()} (${saleyardName})` : saleyardName;
+    }
+    if (customAddress) return customAddress.split(",")[0].trim();
+    return "Manual destination";
+  }, [selectedSaleyard, customAddress]);
+
+  const herdLabel = isCustomJob
+    ? "Custom job"
+    : selectedHerd
+      ? selectedHerd.name
+      : "";
 
   // Build herd options
   const herdOptions = [
@@ -297,6 +335,78 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     });
 
     setResult(estimate);
+    setDidSave(false);
+    setSaveError(null);
+    setShareStatus("idle");
+  }
+
+  function handleSave() {
+    if (!result) return;
+    setSaveError(null);
+    startSaving(async () => {
+      const res = await saveFreightEstimate({
+        originPropertyName: selectedProperty?.property_name ?? "Origin",
+        destinationName: destinationLabel,
+        herdName: herdLabel,
+        categoryName: result.freightCategory.displayName,
+        headCount: result.headCount,
+        averageWeightKg: result.averageWeightKg,
+        headsPerDeck: result.headsPerDeck,
+        decksRequired: result.decksRequired,
+        distanceKm: result.distanceKm,
+        ratePerDeckPerKm: result.ratePerDeckPerKm,
+        totalCost: result.totalCost,
+        costPerHead: result.costPerHead,
+        costPerDeck: result.costPerDeck,
+        costPerKm: result.costPerKm,
+        hasPartialDeck: result.hasPartialDeck,
+        spareSpotsOnLastDeck: result.spareSpotsOnLastDeck,
+        isCustomJob: result.isCustomJob,
+        categoryWarning: result.categoryWarning ?? null,
+        efficiencyPrompt: result.efficiencyPrompt ?? null,
+        breederAutoDetectNotice: result.breederAutoDetectNotice ?? null,
+        shortCartNotice: result.shortCartNotice ?? null,
+        assumptionsSummary: buildAssumptionsLine(result),
+      });
+      if (res.error) {
+        setSaveError(res.error);
+        return;
+      }
+      setDidSave(true);
+    });
+  }
+
+  async function handleShare() {
+    if (!result) return;
+    const text = buildFreightShareText({
+      originName: selectedProperty?.property_name ?? "Origin",
+      destinationName: destinationLabel,
+      herdName: herdLabel,
+      headCount: result.headCount,
+      averageWeightKg: result.averageWeightKg,
+      distanceKm: result.distanceKm,
+      totalCost: result.totalCost,
+      costPerHead: result.costPerHead,
+      costPerDeck: result.costPerDeck,
+      decksRequired: result.decksRequired,
+      assumptions: buildAssumptionsLine(result),
+    });
+    // Prefer native share sheet on mobile browsers; fall back to clipboard copy.
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      try {
+        await navigator.share({ title: "Freight IQ Estimate", text });
+        return;
+      } catch {
+        // Share cancelled or unavailable — fall through to clipboard.
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      setShareStatus("copied");
+      setTimeout(() => setShareStatus("idle"), 2000);
+    } catch {
+      setSaveError("Unable to copy to clipboard");
+    }
   }
 
   function handleReset() {
@@ -315,6 +425,9 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     setCalculatedDistanceLabel("");
     setAttempted(false);
     setCalvesAtFoot(true);
+    setDidSave(false);
+    setSaveError(null);
+    setShareStatus("idle");
   }
 
   return (
@@ -689,6 +802,41 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 )}
               </div>
             )}
+
+            {/* Save & Share */}
+            <div className="flex flex-col gap-2">
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant={didSave ? "ghost" : "sky"}
+                  onClick={handleSave}
+                  disabled={didSave || isSaving}
+                  aria-live="polite"
+                >
+                  {didSave ? (
+                    <><BookmarkCheck className="mr-1.5 h-4 w-4" /> Saved</>
+                  ) : (
+                    <><Bookmark className="mr-1.5 h-4 w-4" /> {isSaving ? "Saving..." : "Save Estimate"}</>
+                  )}
+                </Button>
+                <Button type="button" variant="ghost" onClick={handleShare} aria-live="polite">
+                  {shareStatus === "copied" ? (
+                    <><Check className="mr-1.5 h-4 w-4" /> Copied</>
+                  ) : (
+                    <><Share2 className="mr-1.5 h-4 w-4" /> Share</>
+                  )}
+                </Button>
+              </div>
+              {saveError && (
+                <p className="text-xs text-red-400" role="alert">{saveError}</p>
+              )}
+              <Link
+                href="/dashboard/tools/freight/history"
+                className="mt-1 inline-flex items-center gap-1.5 self-center text-xs font-medium text-text-muted hover:text-text-secondary"
+              >
+                <History className="h-3.5 w-3.5" /> View saved estimates
+              </Link>
+            </div>
           </div>
         ) : (
           <Card className="hidden lg:block">
