@@ -49,9 +49,6 @@ export interface HerdReportData {
   ageMonths: number;
   weight: number;
   pricePerKg: number;
-  minPrice: number;
-  maxPrice: number;
-  avgPrice: number;
   netValue: number;
   breedingAccrual: number | null;
   dailyWeightGain: number;
