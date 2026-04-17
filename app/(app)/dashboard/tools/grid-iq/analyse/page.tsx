@@ -1,9 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { PreSaleFlow } from "@/components/grid-iq/pre-sale-flow";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 
 export const metadata = { title: "New Analysis - Grid IQ" };
 
@@ -54,15 +51,7 @@ export default async function NewAnalysisPage() {
   ]);
 
   return (
-    <div className="max-w-3xl">
-      <div className="mb-4 sm:hidden">
-        <Link href="/dashboard/tools/grid-iq">
-          <Button variant="ghost" size="sm" className="gap-1.5 text-text-secondary hover:text-text-primary">
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Grid IQ
-          </Button>
-        </Link>
-      </div>
+    <div>
       <PageHeader
         title="New Analysis"
         titleClassName="text-2xl font-semibold text-text-primary"
@@ -83,3 +72,4 @@ export default async function NewAnalysisPage() {
     </div>
   );
 }
+

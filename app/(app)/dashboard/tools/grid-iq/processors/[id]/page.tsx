@@ -74,7 +74,7 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
       <div className="mb-4">
         <Link
           href="/dashboard/tools/grid-iq/processors"
-          className="inline-flex items-center gap-1.5 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-text-primary"
+          className="inline-flex items-center gap-1.5 rounded-full bg-surface-lowest px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-text-primary"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
           Processors

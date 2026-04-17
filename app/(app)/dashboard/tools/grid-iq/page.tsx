@@ -93,7 +93,7 @@ export default async function GridIQPage() {
                 </div>
                 <Link
                   href="/dashboard/tools/grid-iq/consignments"
-                  className="inline-flex items-center rounded-lg bg-amber-500/15 px-2.5 py-1 text-xs font-medium text-amber-400 transition-colors hover:bg-amber-500/25"
+                  className="inline-flex items-center rounded-full bg-amber-500/15 px-3 py-1 text-xs font-medium text-amber-400 transition-colors hover:bg-amber-500/25"
                 >
                   View All
                 </Link>
@@ -143,7 +143,7 @@ export default async function GridIQPage() {
               </div>
               <Link
                 href="/dashboard/tools/grid-iq/library?tab=analyses"
-                className="inline-flex items-center rounded-lg border border-white/[0.08] bg-surface-lowest px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-white/[0.14] hover:text-text-primary"
+                className="inline-flex items-center rounded-full border border-white/[0.08] bg-surface-lowest px-3 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-white/[0.14] hover:text-text-primary"
               >
                 View All
               </Link>
@@ -228,7 +228,7 @@ export default async function GridIQPage() {
               </div>
               <Link
                 href="/dashboard/tools/grid-iq/consignments"
-                className="inline-flex items-center rounded-lg border border-white/[0.08] bg-surface-lowest px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-white/[0.14] hover:text-text-primary"
+                className="inline-flex items-center rounded-full border border-white/[0.08] bg-surface-lowest px-3 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-white/[0.14] hover:text-text-primary"
               >
                 View All
               </Link>
@@ -295,14 +295,14 @@ export default async function GridIQPage() {
               <div className="flex items-center gap-2">
                 <Link
                   href="/dashboard/tools/grid-iq/library?tab=grids&upload=grid"
-                  className="inline-flex items-center gap-1 rounded-lg bg-teal-500/15 px-2.5 py-1 text-xs font-medium text-teal-400 transition-colors hover:bg-teal-500/25"
+                  className="inline-flex items-center gap-1 rounded-full bg-teal-500/15 px-3 py-1 text-xs font-medium text-teal-400 transition-colors hover:bg-teal-500/25"
                 >
                   <Upload className="h-3 w-3" />
                   Upload
                 </Link>
                 <Link
                   href="/dashboard/tools/grid-iq/library?tab=grids"
-                  className="inline-flex items-center rounded-lg border border-white/[0.08] bg-surface-lowest px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-white/[0.14] hover:text-text-primary"
+                  className="inline-flex items-center rounded-full border border-white/[0.08] bg-surface-lowest px-3 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-white/[0.14] hover:text-text-primary"
                 >
                   View All
                 </Link>
@@ -386,14 +386,14 @@ export default async function GridIQPage() {
               <div className="flex items-center gap-2">
                 <Link
                   href="/dashboard/tools/grid-iq/library?tab=kill-sheets&upload=killsheet"
-                  className="inline-flex items-center gap-1 rounded-lg bg-teal-500/15 px-2.5 py-1 text-xs font-medium text-teal-400 transition-colors hover:bg-teal-500/25"
+                  className="inline-flex items-center gap-1 rounded-full bg-teal-500/15 px-3 py-1 text-xs font-medium text-teal-400 transition-colors hover:bg-teal-500/25"
                 >
                   <Upload className="h-3 w-3" />
                   Upload
                 </Link>
                 <Link
                   href="/dashboard/tools/grid-iq/library?tab=kill-sheets"
-                  className="inline-flex items-center rounded-lg border border-white/[0.08] bg-surface-lowest px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-white/[0.14] hover:text-text-primary"
+                  className="inline-flex items-center rounded-full border border-white/[0.08] bg-surface-lowest px-3 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-white/[0.14] hover:text-text-primary"
                 >
                   View All
                 </Link>
