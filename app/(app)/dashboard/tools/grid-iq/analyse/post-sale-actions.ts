@@ -121,31 +121,34 @@ export async function runPostSaleAnalysis(consignmentId: string, killSheetId: st
     }
   }
 
-  // Link kill sheet to consignment
-  // If this kill sheet was previously linked to a different (non-completed)
-  // consignment, detach that consignment's kill_sheet_record_id so we don't
-  // leave the graph inconsistent when re-linking.
+  // Link kill sheet to consignment. Every mutation is scoped by user_id so a
+  // caller cannot null out someone else's consignment link even under a
+  // stale/misused killSheetId.
   const { data: priorKS } = await supabase
     .from("kill_sheet_records")
     .select("consignment_id")
     .eq("id", killSheetId)
+    .eq("user_id", user.id)
     .single();
   const priorConsignmentId = priorKS?.consignment_id as string | null;
   if (priorConsignmentId && priorConsignmentId !== consignmentId) {
     await supabase
       .from("consignments")
       .update({ kill_sheet_record_id: null })
-      .eq("id", priorConsignmentId);
+      .eq("id", priorConsignmentId)
+      .eq("user_id", user.id);
   }
 
   await supabase
     .from("consignments")
     .update({ kill_sheet_record_id: killSheetId })
-    .eq("id", consignmentId);
+    .eq("id", consignmentId)
+    .eq("user_id", user.id);
   await supabase
     .from("kill_sheet_records")
     .update({ consignment_id: consignmentId })
-    .eq("id", killSheetId);
+    .eq("id", killSheetId)
+    .eq("user_id", user.id);
 
   // Build kill sheet for scoring
   const rawItems = (killSheetData.line_items ?? []) as Record<string, unknown>[];

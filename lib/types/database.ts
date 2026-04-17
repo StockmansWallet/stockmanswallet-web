@@ -262,6 +262,8 @@ export type Database = {
           branders_count: number | null;
           is_demo_data: boolean;
           linked_yard_book_item_id: string | null;
+          is_deleted: boolean;
+          deleted_at: string | null;
         };
         Insert: {
           id?: string;
@@ -276,6 +278,8 @@ export type Database = {
           branders_count?: number | null;
           is_demo_data?: boolean;
           linked_yard_book_item_id?: string | null;
+          is_deleted?: boolean;
+          deleted_at?: string | null;
         };
         Update: {
           id?: string;
@@ -288,6 +292,8 @@ export type Database = {
           cattle_yard?: string | null;
           weaners_count?: number | null;
           branders_count?: number | null;
+          is_deleted?: boolean;
+          deleted_at?: string | null;
           is_demo_data?: boolean;
           linked_yard_book_item_id?: string | null;
         };
@@ -303,6 +309,8 @@ export type Database = {
           notes: string | null;
           is_demo_data: boolean;
           linked_yard_book_item_id: string | null;
+          is_deleted: boolean;
+          deleted_at: string | null;
         };
         Insert: {
           id?: string;
@@ -314,6 +322,8 @@ export type Database = {
           notes?: string | null;
           is_demo_data?: boolean;
           linked_yard_book_item_id?: string | null;
+          is_deleted?: boolean;
+          deleted_at?: string | null;
         };
         Update: {
           id?: string;
@@ -325,6 +335,8 @@ export type Database = {
           notes?: string | null;
           is_demo_data?: boolean;
           linked_yard_book_item_id?: string | null;
+          is_deleted?: boolean;
+          deleted_at?: string | null;
         };
       };
       sales_records: {
@@ -348,6 +360,8 @@ export type Database = {
           notes: string | null;
           pdf_path: string | null;
           is_demo_data: boolean;
+          is_deleted: boolean;
+          deleted_at: string | null;
         };
         Insert: {
           id?: string;
@@ -369,6 +383,8 @@ export type Database = {
           notes?: string | null;
           pdf_path?: string | null;
           is_demo_data?: boolean;
+          is_deleted?: boolean;
+          deleted_at?: string | null;
         };
         Update: {
           id?: string;
@@ -390,6 +406,8 @@ export type Database = {
           notes?: string | null;
           pdf_path?: string | null;
           is_demo_data?: boolean;
+          is_deleted?: boolean;
+          deleted_at?: string | null;
         };
       };
       yard_book_items: {

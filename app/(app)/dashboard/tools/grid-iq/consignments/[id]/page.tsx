@@ -84,22 +84,28 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
     .select("id, herd_id, head_count, category, average_weight, total_value")
     .eq("consignment_id", id);
 
-  // Get herd names for each allocation
+  // Get herd names for each allocation. Scoped to the signed-in user and
+  // excludes soft-deleted rows.
   const herdIds = (allocations ?? []).map((a) => a.herd_id);
   const { data: herds } = await supabase
     .from("herds")
     .select("id, name, head_count, category, species")
-    .in("id", herdIds.length > 0 ? herdIds : ["__none__"]);
+    .in("id", herdIds.length > 0 ? herdIds : ["__none__"])
+    .eq("user_id", user!.id)
+    .eq("is_deleted", false);
 
   const herdMap = new Map((herds ?? []).map((h) => [h.id, h]));
 
-  // Fetch linked kill sheet if present
+  // Fetch linked kill sheet if present. Scoped to the signed-in user and
+  // excludes soft-deleted rows.
   let killSheet: Record<string, unknown> | null = null;
   if (consignment.kill_sheet_record_id) {
     const { data: ks } = await supabase
       .from("kill_sheet_records")
       .select("id, record_name, processor_name, kill_date, total_head_count, total_gross_value, total_body_weight")
       .eq("id", consignment.kill_sheet_record_id)
+      .eq("user_id", user!.id)
+      .eq("is_deleted", false)
       .single();
     killSheet = ks as Record<string, unknown> | null;
   }

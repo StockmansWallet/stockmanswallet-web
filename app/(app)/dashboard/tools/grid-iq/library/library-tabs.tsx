@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { createClient } from "@/lib/supabase/client";
+import { bulkDeleteProcessorGrids, bulkDeleteKillSheets } from "./actions";
 import {
   BarChart3,
   Grid3x3,
@@ -356,6 +357,7 @@ function BulkDeleteBar({
   pluralNoun,
   isDeleting,
   showConfirm,
+  error,
   onShowConfirm,
   onCancelConfirm,
   onConfirmDelete,
@@ -365,6 +367,7 @@ function BulkDeleteBar({
   pluralNoun: string;
   isDeleting: boolean;
   showConfirm: boolean;
+  error?: string | null;
   onShowConfirm: () => void;
   onCancelConfirm: () => void;
   onConfirmDelete: () => void;
@@ -372,6 +375,11 @@ function BulkDeleteBar({
   if (selectedCount === 0) return null;
   return (
     <div className="mt-4">
+      {error && (
+        <div role="alert" className="mb-2 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">
+          {error}
+        </div>
+      )}
       {showConfirm ? (
         <div className="flex items-center justify-between rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3">
           <span className="text-sm text-red-400">
@@ -430,6 +438,7 @@ function GridsTab({
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const exit = () => {
     setSelecting(false);
@@ -452,20 +461,16 @@ function GridsTab({
   const handleBulkDelete = async () => {
     if (selected.size === 0) return;
     setIsDeleting(true);
-    try {
-      const supabase = createClient();
-      const now = new Date().toISOString();
-      const { error } = await supabase
-        .from("processor_grids")
-        .update({ is_deleted: true, deleted_at: now })
-        .in("id", Array.from(selected));
-      if (error) throw error;
-      exit();
-      router.refresh();
-    } catch {
-      setIsDeleting(false);
-      setShowConfirm(false);
+    setDeleteError(null);
+    const result = await bulkDeleteProcessorGrids(Array.from(selected));
+    setIsDeleting(false);
+    if ("error" in result) {
+      setDeleteError(result.error ?? "Failed to delete");
+      return;
     }
+    setShowConfirm(false);
+    exit();
+    router.refresh();
   };
 
   if (grids.length === 0) {
@@ -591,8 +596,9 @@ function GridsTab({
           pluralNoun="grids"
           isDeleting={isDeleting}
           showConfirm={showConfirm}
+          error={deleteError}
           onShowConfirm={() => setShowConfirm(true)}
-          onCancelConfirm={() => setShowConfirm(false)}
+          onCancelConfirm={() => { setShowConfirm(false); setDeleteError(null); }}
           onConfirmDelete={handleBulkDelete}
         />
       )}
@@ -614,6 +620,7 @@ function KillSheetsTab({
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const exit = () => {
     setSelecting(false);
@@ -636,20 +643,16 @@ function KillSheetsTab({
   const handleBulkDelete = async () => {
     if (selected.size === 0) return;
     setIsDeleting(true);
-    try {
-      const supabase = createClient();
-      const now = new Date().toISOString();
-      const { error } = await supabase
-        .from("kill_sheet_records")
-        .update({ is_deleted: true, deleted_at: now })
-        .in("id", Array.from(selected));
-      if (error) throw error;
-      exit();
-      router.refresh();
-    } catch {
-      setIsDeleting(false);
-      setShowConfirm(false);
+    setDeleteError(null);
+    const result = await bulkDeleteKillSheets(Array.from(selected));
+    setIsDeleting(false);
+    if ("error" in result) {
+      setDeleteError(result.error ?? "Failed to delete");
+      return;
     }
+    setShowConfirm(false);
+    exit();
+    router.refresh();
   };
 
   if (killSheets.length === 0) {
@@ -769,8 +772,9 @@ function KillSheetsTab({
           pluralNoun="kill sheets"
           isDeleting={isDeleting}
           showConfirm={showConfirm}
+          error={deleteError}
           onShowConfirm={() => setShowConfirm(true)}
-          onCancelConfirm={() => setShowConfirm(false)}
+          onCancelConfirm={() => { setShowConfirm(false); setDeleteError(null); }}
           onConfirmDelete={handleBulkDelete}
         />
       )}

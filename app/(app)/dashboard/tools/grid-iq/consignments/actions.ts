@@ -80,14 +80,18 @@ export async function createConsignment(formData: FormData) {
   const totalHead = allocations.reduce((sum, a) => sum + a.headCount, 0);
   if (totalHead <= 0) return { error: "Total head count must be greater than zero" };
 
-  // Validate head counts don't exceed herd availability
+  // Validate head counts don't exceed herd availability. Batched with .in()
+  // instead of N sequential round-trips.
+  const herdIdsForValidation = allocations.map((a) => a.herdGroupId);
+  const { data: herdsForValidation } = await supabase
+    .from("herds")
+    .select("id, head_count, name")
+    .in("id", herdIdsForValidation)
+    .eq("user_id", user.id)
+    .eq("is_deleted", false);
+  const herdMap = new Map((herdsForValidation ?? []).map((h) => [h.id, h]));
   for (const alloc of allocations) {
-    const { data: herd } = await supabase
-      .from("herds")
-      .select("head_count, name")
-      .eq("id", alloc.herdGroupId)
-      .eq("user_id", user.id)
-      .single();
+    const herd = herdMap.get(alloc.herdGroupId);
     if (!herd) return { error: `Herd not found: ${alloc.herdGroupId}` };
     if (alloc.headCount > (herd.head_count ?? 0)) {
       return { error: `Cannot allocate ${alloc.headCount} head from "${herd.name}" - only ${herd.head_count} available` };
@@ -201,44 +205,44 @@ export async function completeSale(consignmentId: string) {
 
   const totalHeadInConsignment = allocations.reduce((sum, a) => sum + a.head_count, 0);
 
-  // Process each allocation: deduct head, create sale record
-  for (const alloc of allocations) {
-    // Fetch current herd
-    const { data: herd } = await supabase
-      .from("herds")
-      .select("id, head_count, current_weight, name")
-      .eq("id", alloc.herd_id)
-      .eq("user_id", user.id)
-      .single();
+  // Batch-read every allocated herd up front so per-allocation processing
+  // doesn't need its own round-trip.
+  const allocHerdIds = allocations.map((a) => a.herd_id);
+  const { data: allocHerds } = await supabase
+    .from("herds")
+    .select("id, head_count, current_weight, name")
+    .in("id", allocHerdIds)
+    .eq("user_id", user.id)
+    .eq("is_deleted", false);
+  const allocHerdMap = new Map((allocHerds ?? []).map((h) => [h.id, h]));
 
+  const nowIso = new Date().toISOString();
+  const killDateIso = consignment.kill_date || nowIso;
+  const herdUpdates: Array<{ id: string; update: Record<string, unknown> }> = [];
+  const saleRows: Record<string, unknown>[] = [];
+
+  for (const alloc of allocations) {
+    const herd = allocHerdMap.get(alloc.herd_id);
     if (!herd) continue;
 
     const remainingHead = (herd.head_count ?? 0) - alloc.head_count;
-
-    // Deduct head from herd
     const herdUpdate: Record<string, unknown> = {
       head_count: Math.max(0, remainingHead),
     };
-    // Mark as sold if all head gone
     if (remainingHead <= 0) {
       herdUpdate.is_sold = true;
-      herdUpdate.sold_date = consignment.kill_date || new Date().toISOString();
+      herdUpdate.sold_date = killDateIso;
     }
+    herdUpdates.push({ id: alloc.herd_id, update: herdUpdate });
 
-    await supabase
-      .from("herds")
-      .update(herdUpdate)
-      .eq("id", alloc.herd_id);
-
-    // Create sale record with prorated values
     const headRatio = totalHeadInConsignment > 0 ? alloc.head_count / totalHeadInConsignment : 0;
     const proratedRevenue = Math.round(totalRevenue * headRatio);
 
-    await supabase.from("sales_records").insert({
+    saleRows.push({
       id: crypto.randomUUID(),
       user_id: user.id,
       herd_id: alloc.herd_id,
-      sale_date: consignment.kill_date || new Date().toISOString(),
+      sale_date: killDateIso,
       head_count: alloc.head_count,
       average_weight: alloc.average_weight ?? herd.current_weight ?? 0,
       price_per_kg: avgPricePerKg,
@@ -254,6 +258,16 @@ export async function completeSale(consignmentId: string) {
     });
   }
 
+  // Fan out herd updates in parallel (each update is per-row so can't be batched in one statement).
+  await Promise.all(
+    herdUpdates.map((h) =>
+      supabase.from("herds").update(h.update).eq("id", h.id).eq("user_id", user.id),
+    ),
+  );
+  if (saleRows.length > 0) {
+    await supabase.from("sales_records").insert(saleRows);
+  }
+
   // Update consignment status
   await supabase
     .from("consignments")
@@ -262,7 +276,8 @@ export async function completeSale(consignmentId: string) {
       total_gross_value: totalRevenue,
       total_net_value: totalRevenue,
     })
-    .eq("id", consignmentId);
+    .eq("id", consignmentId)
+    .eq("user_id", user.id);
 
   revalidatePath("/dashboard/tools/grid-iq");
   revalidatePath("/dashboard/portfolio");
@@ -317,14 +332,17 @@ export async function updateConsignment(formData: FormData) {
   const totalHead = allocations.reduce((sum, a) => sum + a.headCount, 0);
   if (totalHead <= 0) return { error: "Total head count must be greater than zero" };
 
-  // Validate head counts
+  // Validate head counts. Batched with .in() instead of N sequential round-trips.
+  const herdIdsForUpdate = allocations.map((a) => a.herdGroupId);
+  const { data: herdsForUpdate } = await supabase
+    .from("herds")
+    .select("id, head_count, name")
+    .in("id", herdIdsForUpdate)
+    .eq("user_id", user.id)
+    .eq("is_deleted", false);
+  const herdMapForUpdate = new Map((herdsForUpdate ?? []).map((h) => [h.id, h]));
   for (const alloc of allocations) {
-    const { data: herd } = await supabase
-      .from("herds")
-      .select("head_count, name")
-      .eq("id", alloc.herdGroupId)
-      .eq("user_id", user.id)
-      .single();
+    const herd = herdMapForUpdate.get(alloc.herdGroupId);
     if (!herd) return { error: `Herd not found: ${alloc.herdGroupId}` };
     if (alloc.headCount > (herd.head_count ?? 0)) {
       return { error: `Cannot allocate ${alloc.headCount} head from "${herd.name}" - only ${herd.head_count} available` };
@@ -343,9 +361,14 @@ export async function updateConsignment(formData: FormData) {
   if (killDate !== null) updateData.kill_date = killDate || null;
   if (notes !== null) updateData.notes = notes;
 
-  await supabase.from("consignments").update(updateData).eq("id", consignmentId);
+  await supabase
+    .from("consignments")
+    .update(updateData)
+    .eq("id", consignmentId)
+    .eq("user_id", user.id);
 
-  // Replace allocations
+  // Replace allocations. Consignment ownership verified above, so deleting
+  // allocations scoped to consignment_id is safe under the existing RLS.
   await supabase.from("consignment_allocations").delete().eq("consignment_id", consignmentId);
   const allocationRows = allocations.map((a) => ({
     consignment_id: consignmentId,

@@ -9,6 +9,7 @@ import {
   calculateProjectedWeight,
   categoryFallback,
   daysBetween,
+  defaultFallbackPrice,
   type CategoryPriceEntry,
   type HerdForValuation,
 } from "@/lib/engines/valuation-engine";
@@ -446,17 +447,6 @@ const SEASONAL_MULTIPLIERS: Record<number, number> = {
   1: 1.02, 2: 1.05, 3: 1.08, 4: 1.06, 5: 1.03, 6: 0.97,
   7: 0.93, 8: 0.95, 9: 0.98, 10: 1.01, 11: 1.00, 12: 1.01,
 };
-
-function defaultFallbackPrice(category: string): number {
-  if (category.includes("Vealer")) return 4.10;
-  if (category.includes("Yearling") && category.includes("Steer")) return 3.89;
-  if (category.includes("Yearling") && category.includes("Heifer")) return 3.50;
-  if (category.includes("Grown") && category.includes("Steer")) return 3.30;
-  if (category.includes("Grown") && category.includes("Heifer")) return 3.14;
-  if (category.includes("Cow")) return 2.60;
-  if (category.includes("Bull")) return 2.85;
-  return 3.30;
-}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function fetchSeasonalData(mlaCategories: string[], supabase: any): Promise<SeasonalEntry[]> {
