@@ -55,6 +55,12 @@ export async function GET(request: NextRequest) {
     const page = await browser.newPage();
     await page.goto(printURL.toString(), { waitUntil: "networkidle0", timeout: 30000 });
 
+    // Switch to print media BEFORE generating the PDF so @media print rules apply.
+    // Without this, Chromium renders with screen media - the app's dark body background
+    // bleeds into the @page margin area and the PDF shows black bars at the top of each
+    // page and between pages. Print media forces body { background: white !important; }.
+    await page.emulateMediaType("print");
+
     // Hide the print toolbar
     await page.evaluate(() => {
       document.querySelectorAll(".no-print").forEach(el => {

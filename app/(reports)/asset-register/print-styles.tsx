@@ -1,9 +1,16 @@
 export function ReportPrintStyles() {
   return (
     <style>{`
-      /* Override dark theme for report pages */
+      /* Override dark theme for report pages.
+         The report template is always rendered against a white background because
+         it is used both on screen and in PDF export. Forcing html/body white here
+         also makes @page margin areas render white in the PDF (the margin boxes
+         inherit the canvas / body background when Chromium writes the PDF). */
       html.dark .report-root {
         color-scheme: light;
+      }
+      html, body {
+        background: white !important;
       }
       .report-root {
         background: white !important;
