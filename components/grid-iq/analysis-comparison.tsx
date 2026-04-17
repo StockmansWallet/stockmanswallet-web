@@ -2,7 +2,6 @@
 // Used in Grid IQ analysis detail view
 
 import { Card, CardContent } from "@/components/ui/card";
-import { TrendingUp, TrendingDown } from "lucide-react";
 
 interface AnalysisComparisonProps {
   mlaMarketValue: number;
@@ -40,25 +39,22 @@ export function AnalysisComparison({
 }: AnalysisComparisonProps) {
   const isProcessorBetter = gridIQAdvantage > 0;
   const perHeadAdvantage = headCount > 0 ? Math.abs(gridIQAdvantage) / headCount : 0;
-  const winnerColour = isProcessorBetter ? "text-emerald-400" : "text-amber-400";
   const winnerLabel = isProcessorBetter ? "Over-the-Hooks" : "Saleyard";
-  const WinnerIcon = isProcessorBetter ? TrendingUp : TrendingDown;
+  const loserLabel = isProcessorBetter ? "Saleyard" : "Over-the-Hooks";
 
   return (
     <Card>
       <CardContent className="p-5">
         {/* Advantage hero */}
         <div className="text-center">
-          <p className="text-xs font-medium text-text-muted">Grid IQ Advantage</p>
-          <div className="mt-1 flex items-center justify-center gap-2">
-            <WinnerIcon className={`h-5 w-5 ${winnerColour}`} />
-            <span className={`text-3xl font-bold tracking-tight ${winnerColour}`}>
-              {formatDollars(Math.abs(gridIQAdvantage))}
-            </span>
-          </div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-400">
+            {winnerLabel} ahead
+          </p>
+          <p className="mt-1.5 text-4xl font-bold tracking-tight text-text-primary">
+            {formatDollars(Math.abs(gridIQAdvantage))}
+          </p>
           <p className="mt-1 text-xs text-text-secondary">
-            <span className={`font-semibold ${winnerColour}`}>{winnerLabel}</span>
-            <span className="text-text-muted"> wins by {formatDollars(perHeadAdvantage)}/head</span>
+            {formatDollars(perHeadAdvantage)}/head better than {loserLabel.toLowerCase()}
           </p>
         </div>
 
