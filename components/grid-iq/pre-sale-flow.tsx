@@ -856,7 +856,7 @@ export function PreSaleFlow({
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
                   <label className="mb-1 block text-[11px] text-text-muted">
-                    Processor Name
+                    Processor/Buyer Name
                   </label>
                   <input
                     type="text"

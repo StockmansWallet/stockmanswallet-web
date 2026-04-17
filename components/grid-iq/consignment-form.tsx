@@ -157,7 +157,7 @@ export function ConsignmentForm({ herds, grids }: ConsignmentFormProps) {
             <Input
               id="processorName"
               name="processorName"
-              label="Processor Name"
+              label="Processor/Buyer Name"
               placeholder="e.g. JBS Dinmore"
               required
             />

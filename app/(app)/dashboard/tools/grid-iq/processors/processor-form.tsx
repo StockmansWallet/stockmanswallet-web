@@ -129,7 +129,7 @@ export function ProcessorForm({
       <Card>
         <CardContent className="space-y-3 p-4">
           <div>
-            <label className={labelCls}>Processor Name *</label>
+            <label className={labelCls}>Processor/Buyer Name *</label>
             <input
               type="text"
               required
