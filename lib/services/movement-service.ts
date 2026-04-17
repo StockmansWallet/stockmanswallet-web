@@ -262,7 +262,7 @@ export async function calculatePortfolioMovement(
       percentChange: null,
       openingHeadCount: 0,
       closingHeadCount: (herd as { head_count: number }).head_count,
-      mainDriver: "Added",
+      mainDriver: "New Herd",
       marketComponent: 0, weightGainComponent: 0, breedingComponent: 0, mortalityComponent: 0,
       currentBreedPremium: closeCurr.breedPremiumApplied,
     });

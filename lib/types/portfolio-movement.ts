@@ -59,7 +59,7 @@ export function createMovementPeriod(preset: MovementPeriodPreset | "custom", cu
 
 // MARK: - Movement Driver
 export type MovementDriver =
-  | "Added"
+  | "New Herd"
   | "Removed/Sold"
   | "Market"
   | "Weight Gain"

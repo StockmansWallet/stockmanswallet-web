@@ -29,7 +29,7 @@ function changeColor(value: number) {
 
 function driverColour(driver: MovementDriver) {
   const map: Record<MovementDriver, string> = {
-    "Added": "bg-emerald-500/20 text-emerald-400",
+    "New Herd": "bg-emerald-500/20 text-emerald-400",
     "Removed/Sold": "bg-red-500/20 text-red-400",
     "Market": "bg-blue-500/20 text-blue-400",
     "Weight Gain": "bg-orange-500/20 text-orange-400",
@@ -133,7 +133,7 @@ export function PortfolioMovementSection({
               <div className="flex flex-col">
                 <BridgeRow label="Opening Portfolio Value" value={summary.openingValue} isTotal />
                 <div className="my-1 border-t border-white/[0.06]" />
-                <BridgeRow label="Additions" value={summary.additionsValue} positive />
+                <BridgeRow label="New Herds" value={summary.additionsValue} positive />
                 <BridgeRow label="Removals/Sales" value={-summary.removalsValue} />
                 <div className="my-1 border-t border-white/[0.06]" />
                 <BridgeRow label="Market Movement" value={summary.marketMovement} />
@@ -224,7 +224,7 @@ function HerdMovementRow({ detail: m }: { detail: PortfolioMovementSummary["herd
   const premiumLabel = m.currentBreedPremium === 0
     ? null
     : `${m.currentBreedPremium > 0 ? "+" : ""}${m.currentBreedPremium.toFixed(0)}%`;
-  const headLabel = m.mainDriver === "Added"
+  const headLabel = m.mainDriver === "New Herd"
     ? `New · ${m.closingHeadCount} head`
     : m.mainDriver === "Removed/Sold"
       ? `Removed · ${m.openingHeadCount} head`

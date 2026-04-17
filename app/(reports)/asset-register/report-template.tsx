@@ -305,7 +305,7 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
               <div className="px-4 py-2 text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]" style={{ backgroundColor: "rgba(139, 115, 85, 0.10)" }}>Movement Bridge</div>
               <div className="flex flex-col">
                 <BridgeRow label="Opening Portfolio Value" value={movementSummary.openingValue} isTotal />
-                <BridgeRow label="Additions" value={movementSummary.additionsValue} />
+                <BridgeRow label="New Herds" value={movementSummary.additionsValue} />
                 <BridgeRow label="Removals/Sales" value={-movementSummary.removalsValue} />
                 <BridgeRow label="Market Movement" value={movementSummary.marketMovement} />
                 <BridgeRow label="Weight Gain" value={movementSummary.biologicalMovement.weightGain} />
@@ -368,7 +368,7 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
                   <tbody>
                     {movementSummary.herdMovements.map((m) => {
                       const headDelta = m.closingHeadCount - m.openingHeadCount;
-                      const headCell = m.mainDriver === "Added"
+                      const headCell = m.mainDriver === "New Herd"
                         ? `New +${m.closingHeadCount}`
                         : m.mainDriver === "Removed/Sold"
                           ? `-${m.openingHeadCount}`
