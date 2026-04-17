@@ -973,18 +973,19 @@ export function PreSaleFlow({
                 </div>
               )}
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center justify-between gap-3">
                 <Button
                   variant="ghost"
+                  size="sm"
+                  className="border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
                   onClick={() => setStep(2)}
                   disabled={isPending}
                 >
-                  <ChevronLeft className="mr-1 h-4 w-4" />
+                  <ChevronLeft className="mr-1 h-3.5 w-3.5" />
                   Back
                 </Button>
                 <Button
                   variant="indigo"
-                  className="flex-1"
                   disabled={!canGenerate || isPending}
                   onClick={handleGenerate}
                 >
