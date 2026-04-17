@@ -47,9 +47,9 @@ export function AnalysisComparison({
             {isProcessorBetter ? (
               <TrendingUp className="h-5 w-5 text-emerald-400" />
             ) : (
-              <TrendingDown className="h-5 w-5 text-brand" />
+              <TrendingDown className="h-5 w-5 text-amber-400" />
             )}
-            <span className={`text-2xl font-bold ${isProcessorBetter ? "text-emerald-400" : "text-brand"}`}>
+            <span className={`text-2xl font-bold ${isProcessorBetter ? "text-emerald-400" : "text-amber-400"}`}>
               {formatDollars(Math.abs(gridIQAdvantage))}
             </span>
           </div>
@@ -61,7 +61,7 @@ export function AnalysisComparison({
         {/* Side-by-side comparison */}
         <div className="grid grid-cols-2 gap-3">
           {/* Saleyard column */}
-          <div className={`rounded-lg p-3 ${!isProcessorBetter ? "bg-brand/10 ring-1 ring-brand/20" : "bg-white/[0.04]"}`}>
+          <div className={`rounded-lg p-3 ${!isProcessorBetter ? "bg-amber-500/10 ring-1 ring-amber-500/20" : "bg-white/[0.04]"}`}>
             <p className="text-center text-xs font-semibold text-text-primary">Saleyard</p>
             <div className="mt-3 space-y-2">
               <div>

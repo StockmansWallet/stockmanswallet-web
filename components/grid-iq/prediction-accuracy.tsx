@@ -118,10 +118,10 @@ export function PredictionAccuracy({
           {/* Advantage */}
           <div className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-3 rounded-lg border border-white/[0.06] px-3 py-2">
             <span className="text-xs font-semibold text-text-primary">Grid IQ Advantage</span>
-            <span className={`w-24 text-right text-sm font-semibold ${preSaleAdvantage > 0 ? "text-emerald-400" : "text-brand"}`}>
+            <span className={`w-24 text-right text-sm font-semibold ${preSaleAdvantage > 0 ? "text-emerald-400" : "text-amber-400"}`}>
               {preSaleAdvantage > 0 ? "+" : "-"}{formatCurrency(preSaleAdvantage)}
             </span>
-            <span className={`w-24 text-right text-sm font-bold ${actualAdvantage > 0 ? "text-emerald-400" : "text-brand"}`}>
+            <span className={`w-24 text-right text-sm font-bold ${actualAdvantage > 0 ? "text-emerald-400" : "text-amber-400"}`}>
               {actualAdvantage > 0 ? "+" : "-"}{formatCurrency(actualAdvantage)}
             </span>
             <span className={`w-20 text-right text-sm font-medium ${advantageDiff >= 0 ? "text-emerald-400" : "text-red-400"}`}>

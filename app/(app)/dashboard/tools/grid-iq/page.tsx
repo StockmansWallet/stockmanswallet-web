@@ -251,7 +251,7 @@ export default async function GridIQPage() {
                         </span>
                       </div>
                       <p
-                        className={`mt-0.5 text-[11px] font-semibold tabular-nums ${isProcessor ? "text-emerald-400" : "text-red-400"}`}
+                        className={`mt-0.5 text-[11px] font-semibold tabular-nums ${isProcessor ? "text-emerald-400" : "text-amber-400"}`}
                       >
                         {isProcessor ? "+" : "-"}$
                         {Math.abs(Math.round(advantage)).toLocaleString()}

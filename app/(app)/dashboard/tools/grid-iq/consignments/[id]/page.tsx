@@ -356,7 +356,7 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
                     <p className="text-xs text-text-muted">
                       {new Date(preSaleAnalysis.analysis_date).toLocaleDateString("en-AU")}
                       {preSaleAnalysis.grid_iq_advantage != null && (
-                        <span className={preSaleAnalysis.grid_iq_advantage > 0 ? " text-emerald-400" : " text-brand"}>
+                        <span className={preSaleAnalysis.grid_iq_advantage > 0 ? " text-emerald-400" : " text-amber-400"}>
                           {" "}Grid IQ: ${Math.abs(Math.round(preSaleAnalysis.grid_iq_advantage)).toLocaleString()}
                           {preSaleAnalysis.grid_iq_advantage > 0 ? " processor" : " saleyard"}
                         </span>

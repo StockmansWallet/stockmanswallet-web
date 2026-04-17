@@ -497,7 +497,7 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
                     <div className="text-right">
                       <p
                         className={`text-sm font-semibold ${
-                          isProcessor ? "text-emerald-400" : "text-brand"
+                          isProcessor ? "text-emerald-400" : "text-amber-400"
                         }`}
                       >
                         {isProcessor ? "Over-the-Hooks" : "Saleyard"}

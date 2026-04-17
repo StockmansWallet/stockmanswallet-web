@@ -242,7 +242,7 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
                       </p>
                     </div>
                     <span
-                      className={`text-sm font-semibold ${isProcessor ? "text-emerald-400" : "text-brand"}`}
+                      className={`text-sm font-semibold ${isProcessor ? "text-emerald-400" : "text-amber-400"}`}
                     >
                       {isProcessor ? "+" : "-"}$
                       {Math.abs(Math.round(advantage)).toLocaleString()}
