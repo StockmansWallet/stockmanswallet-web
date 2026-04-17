@@ -7,13 +7,12 @@ import { Button } from "@/components/ui/button";
 import { ReportFilters } from "@/components/app/report-filters";
 import { parseReportConfig } from "@/lib/utils/report-config";
 import { ReportPreviewButton } from "@/components/app/report-preview-button";
-import { PortfolioMovementSection } from "@/components/app/portfolio-movement-section";
 import { generateAssetRegisterData } from "@/lib/services/report-service";
 
 import { ExecutiveSummaryCard } from "./_components/executive-summary-card";
 import { ProducerPropertiesCard } from "./_components/producer-properties-card";
 import { HerdCompositionCard } from "./_components/herd-composition-card";
-import { LivestockAssetsSection } from "./_components/livestock-assets-section";
+import { AssetRegisterTabs } from "./_components/asset-register-tabs";
 
 export const revalidate = 0;
 export const metadata = { title: "Asset Register" };
@@ -82,13 +81,12 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
             )}
           </div>
 
-          <PortfolioMovementSection
+          <AssetRegisterTabs
+            herdData={herdData}
             startDate={config.startDate}
             endDate={config.endDate}
-            propertyFilter={config.selectedPropertyIds}
+            selectedPropertyIds={config.selectedPropertyIds}
           />
-
-          <LivestockAssetsSection herdData={herdData} />
         </div>
       )}
     </div>
