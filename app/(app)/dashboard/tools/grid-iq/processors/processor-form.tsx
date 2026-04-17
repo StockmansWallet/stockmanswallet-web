@@ -1,31 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Loader2, Check } from "lucide-react";
+import { Loader2, Check } from "lucide-react";
 import { createProcessor, updateProcessor } from "./actions";
-
-interface NominatimResult {
-  place_id: number;
-  display_name: string;
-  lat: string;
-  lon: string;
-}
-
-async function geocodeAddress(query: string): Promise<NominatimResult[]> {
-  const url = new URL("https://nominatim.openstreetmap.org/search");
-  url.searchParams.set("format", "json");
-  url.searchParams.set("countrycodes", "au");
-  url.searchParams.set("limit", "5");
-  url.searchParams.set("q", query);
-  const res = await fetch(url.toString(), {
-    headers: { Accept: "application/json" },
-  });
-  if (!res.ok) return [];
-  return (await res.json()) as NominatimResult[];
-}
+import AddressAutocomplete from "@/components/app/address-autocomplete";
 
 interface ProcessorFormValues {
   id?: string;
@@ -63,56 +44,30 @@ export function ProcessorForm({
   const [contactEmail, setContactEmail] = useState(initial.contact_email ?? "");
   const [notes, setNotes] = useState(initial.notes ?? "");
 
-  // Address autocomplete
-  const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
-  const skipNextSearch = useRef(false);
-
-  useEffect(() => {
-    if (skipNextSearch.current) {
-      skipNextSearch.current = false;
-      return;
+  // Callback when user picks from Google Places autocomplete dropdown.
+  // Fills address + coords in one go, and name if we're creating a new
+  // processor and the user hasn't typed their own name yet.
+  const handleAddressPick = (result: {
+    address: string;
+    suburb: string;
+    state: string;
+    postcode: string;
+    latitude: number;
+    longitude: number;
+    formattedAddress?: string;
+    name?: string;
+  }) => {
+    const display =
+      result.formattedAddress ||
+      [result.address, result.suburb, result.state, result.postcode]
+        .filter(Boolean)
+        .join(", ");
+    setAddress(display);
+    setLatitude(result.latitude.toFixed(5));
+    setLongitude(result.longitude.toFixed(5));
+    if (mode === "create" && !name.trim() && result.name) {
+      setName(result.name);
     }
-    const trimmed = address.trim();
-    if (trimmed.length < 3) {
-      setSuggestions([]);
-      setHasSearched(false);
-      return;
-    }
-    const handle = setTimeout(async () => {
-      setIsSearching(true);
-      try {
-        // Exact query first. If empty, try a relaxed version with the first
-        // comma-separated chunk stripped (often a street number + street that
-        // OSM does not index) so "37644 Bruce Hwy, Riverview QLD 4811"
-        // falls back to "Riverview QLD 4811".
-        let results = await geocodeAddress(trimmed);
-        if (results.length === 0 && trimmed.includes(",")) {
-          const relaxed = trimmed.split(",").slice(1).join(",").trim();
-          if (relaxed.length >= 3) results = await geocodeAddress(relaxed);
-        }
-        setSuggestions(results);
-        setShowSuggestions(true);
-        setHasSearched(true);
-      } catch {
-        setSuggestions([]);
-        setHasSearched(true);
-      } finally {
-        setIsSearching(false);
-      }
-    }, 400);
-    return () => clearTimeout(handle);
-  }, [address]);
-
-  const pickSuggestion = (s: NominatimResult) => {
-    skipNextSearch.current = true;
-    setAddress(s.display_name);
-    setLatitude(parseFloat(s.lat).toFixed(5));
-    setLongitude(parseFloat(s.lon).toFixed(5));
-    setSuggestions([]);
-    setShowSuggestions(false);
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -168,50 +123,20 @@ export function ProcessorForm({
             />
           </div>
 
-          <div className="relative">
+          <div>
             <label className={labelCls}>
-              Address (type to search, pick a result to auto-fill coords)
+              Address or Business Name (pick a result to auto-fill coords)
             </label>
-            <input
-              type="text"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-              onBlur={() =>
-                setTimeout(() => setShowSuggestions(false), 150)
-              }
-              placeholder="e.g. 123 Example Road, Dinmore QLD 4303"
-              autoComplete="off"
-              className={`${inputCls} pr-9`}
+            <AddressAutocomplete
+              defaultValue={address}
+              onSelect={handleAddressPick}
+              placeholder="e.g. JBS Dinmore, or 37644 Bruce Highway Riverview"
+              searchTypes={[]}
             />
-            {isSearching && (
-              <Loader2 className="absolute right-3 top-[30px] h-4 w-4 animate-spin text-text-muted" />
-            )}
-            {showSuggestions && !isSearching && hasSearched && (
-              <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-lg border border-white/10 bg-[#1a1a1a] shadow-xl">
-                {suggestions.length > 0 ? (
-                  suggestions.map((s) => (
-                    <button
-                      key={s.place_id}
-                      type="button"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => pickSuggestion(s)}
-                      className="flex w-full items-start gap-2 px-3 py-2 text-left transition-colors hover:bg-white/[0.05]"
-                    >
-                      <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-teal-400" />
-                      <span className="text-xs text-text-primary">
-                        {s.display_name}
-                      </span>
-                    </button>
-                  ))
-                ) : (
-                  <div className="px-3 py-2.5 text-xs text-text-muted">
-                    No matches on OpenStreetMap. Try a shorter query
-                    (suburb + state + postcode) or paste coordinates from
-                    Google Maps.
-                  </div>
-                )}
-              </div>
+            {address && (
+              <p className="mt-1 text-[11px] text-text-muted">
+                Saved: {address}
+              </p>
             )}
           </div>
 

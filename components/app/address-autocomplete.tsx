@@ -22,6 +22,10 @@ export interface AddressResult {
   postcode: string;
   latitude: number;
   longitude: number;
+  // Populated when available. formattedAddress is the full Google-formatted
+  // line; name is the business name when the pick is an establishment.
+  formattedAddress?: string;
+  name?: string;
 }
 
 interface AddressAutocompleteProps {
@@ -29,6 +33,10 @@ interface AddressAutocompleteProps {
   onSelect: (result: AddressResult) => void;
   placeholder?: string;
   className?: string;
+  // Google Places type filter. "address" matches street addresses only
+  // (default, good for properties/farms). Pass ["establishment"] to match
+  // businesses by name, or undefined to match both.
+  searchTypes?: string[];
 }
 
 let googleLoaded = false;
@@ -72,6 +80,7 @@ export default function AddressAutocomplete({
   onSelect,
   placeholder = "Start typing an address...",
   className = "",
+  searchTypes = ["address"],
 }: AddressAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
@@ -89,11 +98,19 @@ export default function AddressAutocomplete({
   useEffect(() => {
     if (!loaded || !inputRef.current || autocompleteRef.current) return;
 
-    const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
+    const autocompleteOptions: google.maps.places.AutocompleteOptions = {
       componentRestrictions: { country: "au" },
-      types: ["address"],
-      fields: ["address_components", "geometry", "formatted_address"],
-    });
+      fields: ["address_components", "geometry", "formatted_address", "name"],
+    };
+    // Omit `types` entirely to search both addresses and businesses; only
+    // set it when the caller restricts to specific types.
+    if (searchTypes && searchTypes.length > 0) {
+      autocompleteOptions.types = searchTypes;
+    }
+    const autocomplete = new google.maps.places.Autocomplete(
+      inputRef.current,
+      autocompleteOptions
+    );
 
     autocomplete.addListener("place_changed", () => {
       const place = autocomplete.getPlace();
@@ -127,6 +144,8 @@ export default function AddressAutocomplete({
         postcode,
         latitude: lat,
         longitude: lng,
+        formattedAddress: place.formatted_address || undefined,
+        name: place.name || undefined,
       });
     });
 

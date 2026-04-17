@@ -1,34 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin, Pencil, Loader2, Check, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
-// OpenStreetMap Nominatim search result shape (subset we use).
-interface NominatimResult {
-  place_id: number;
-  display_name: string;
-  lat: string;
-  lon: string;
-  type?: string;
-}
-
-async function geocodeAddress(query: string): Promise<NominatimResult[]> {
-  const url = new URL("https://nominatim.openstreetmap.org/search");
-  url.searchParams.set("format", "json");
-  url.searchParams.set("countrycodes", "au");
-  url.searchParams.set("limit", "5");
-  url.searchParams.set("addressdetails", "0");
-  url.searchParams.set("q", query);
-  const res = await fetch(url.toString(), {
-    headers: { Accept: "application/json" },
-  });
-  if (!res.ok) return [];
-  return (await res.json()) as NominatimResult[];
-}
+import AddressAutocomplete from "@/components/app/address-autocomplete";
 
 interface Props {
   gridId: string;
@@ -55,57 +33,6 @@ export function EditableGridLocation({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Autocomplete state
-  const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
-  const skipNextSearch = useRef(false);
-
-  // Debounced search as user types the address. Skips when the user just
-  // picked a suggestion (so selecting doesn't re-trigger a search).
-  useEffect(() => {
-    if (!isEditing) return;
-    if (skipNextSearch.current) {
-      skipNextSearch.current = false;
-      return;
-    }
-    const trimmed = location.trim();
-    if (trimmed.length < 3) {
-      setSuggestions([]);
-      setHasSearched(false);
-      return;
-    }
-    const handle = setTimeout(async () => {
-      setIsSearching(true);
-      try {
-        let results = await geocodeAddress(trimmed);
-        if (results.length === 0 && trimmed.includes(",")) {
-          const relaxed = trimmed.split(",").slice(1).join(",").trim();
-          if (relaxed.length >= 3) results = await geocodeAddress(relaxed);
-        }
-        setSuggestions(results);
-        setShowSuggestions(true);
-        setHasSearched(true);
-      } catch {
-        setSuggestions([]);
-        setHasSearched(true);
-      } finally {
-        setIsSearching(false);
-      }
-    }, 400);
-    return () => clearTimeout(handle);
-  }, [location, isEditing]);
-
-  const handleSelectSuggestion = (s: NominatimResult) => {
-    skipNextSearch.current = true;
-    setLocation(s.display_name);
-    setLatitude(parseFloat(s.lat).toFixed(5));
-    setLongitude(parseFloat(s.lon).toFixed(5));
-    setSuggestions([]);
-    setShowSuggestions(false);
-  };
-
   const hasCoords = latitude.trim() !== "" && longitude.trim() !== "";
   const latNum = parseFloat(latitude);
   const lonNum = parseFloat(longitude);
@@ -117,6 +44,25 @@ export function EditableGridLocation({
       latNum <= 90 &&
       lonNum >= -180 &&
       lonNum <= 180);
+
+  const handleAddressPick = (result: {
+    address: string;
+    suburb: string;
+    state: string;
+    postcode: string;
+    latitude: number;
+    longitude: number;
+    formattedAddress?: string;
+  }) => {
+    const display =
+      result.formattedAddress ||
+      [result.address, result.suburb, result.state, result.postcode]
+        .filter(Boolean)
+        .join(", ");
+    setLocation(display);
+    setLatitude(result.latitude.toFixed(5));
+    setLongitude(result.longitude.toFixed(5));
+  };
 
   const handleSave = async () => {
     if (!coordsValid) {
@@ -182,56 +128,27 @@ export function EditableGridLocation({
               </p>
             ) : (
               <p className="text-xs text-amber-400">
-                No coordinates set. Freight to processor shows as $0 until you
-                add latitude and longitude.
+                No coordinates set. Freight to processor shows as $0 until
+                you add latitude and longitude.
               </p>
             )}
           </div>
         ) : (
           <div className="space-y-3">
-            <div className="relative">
+            <div>
               <label className="mb-1 block text-[11px] text-text-muted">
-                Address (type to search, pick a result to auto-fill coords)
+                Address or Business Name
               </label>
-              <input
-                type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-                placeholder="e.g. 123 Example Road, Dinmore QLD 4303"
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 pr-9 text-sm text-text-primary placeholder:text-text-muted focus:border-teal-400/50 focus:outline-none focus:ring-1 focus:ring-teal-400/25"
-                disabled={isSaving}
-                autoComplete="off"
+              <AddressAutocomplete
+                defaultValue={location}
+                onSelect={handleAddressPick}
+                placeholder="Start typing an address or business name..."
+                searchTypes={[]}
               />
-              {isSearching && (
-                <Loader2 className="absolute right-3 top-[30px] h-4 w-4 animate-spin text-text-muted" />
-              )}
-              {showSuggestions && !isSearching && hasSearched && (
-                <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-lg border border-white/10 bg-[#1a1a1a] shadow-xl">
-                  {suggestions.length > 0 ? (
-                    suggestions.map((s) => (
-                      <button
-                        key={s.place_id}
-                        type="button"
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={() => handleSelectSuggestion(s)}
-                        className="flex w-full items-start gap-2 px-3 py-2 text-left transition-colors hover:bg-white/[0.05]"
-                      >
-                        <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-teal-400" />
-                        <span className="text-xs text-text-primary">
-                          {s.display_name}
-                        </span>
-                      </button>
-                    ))
-                  ) : (
-                    <div className="px-3 py-2.5 text-xs text-text-muted">
-                      No matches on OpenStreetMap. Try a shorter query
-                      (suburb + state + postcode) or paste coordinates from
-                      Google Maps.
-                    </div>
-                  )}
-                </div>
+              {location && (
+                <p className="mt-1 text-[11px] text-text-muted">
+                  Saved: {location}
+                </p>
               )}
             </div>
 
@@ -267,10 +184,9 @@ export function EditableGridLocation({
             </div>
 
             <p className="text-[11px] text-text-muted">
-              Type the address above and pick a result to auto-fill the
-              coordinates. If the address is not found, you can paste
-              coordinates from Google Maps directly (right-click the pin, the
-              first line of the context menu is latitude, longitude).
+              Pick a search result above to auto-fill coordinates. For
+              addresses Google does not know, paste lat/lng manually
+              (right-click the pin in Google Maps).
             </p>
 
             {error && (
@@ -285,8 +201,12 @@ export function EditableGridLocation({
                 size="sm"
                 onClick={() => {
                   setLocation(initialLocation ?? "");
-                  setLatitude(initialLatitude != null ? String(initialLatitude) : "");
-                  setLongitude(initialLongitude != null ? String(initialLongitude) : "");
+                  setLatitude(
+                    initialLatitude != null ? String(initialLatitude) : ""
+                  );
+                  setLongitude(
+                    initialLongitude != null ? String(initialLongitude) : ""
+                  );
                   setError(null);
                   setIsEditing(false);
                 }}
