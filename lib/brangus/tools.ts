@@ -1,7 +1,7 @@
 // Brangus tool definitions and execution for web
 // Mirrors iOS StockmanIQChatService+ToolUse.swift and +DataLookup.swift
 
-import { calculateHerdValue, calculateHerdValuation, calculateProjectedWeight, parseCalvesAtFoot, type CategoryPriceEntry } from "../engines/valuation-engine";
+import { calculateHerdValuation, parseCalvesAtFoot, type CategoryPriceEntry, type HerdValuationResult } from "../engines/valuation-engine";
 import { calculateFreightEstimate } from "../engines/freight-engine";
 import { saleyardCoordinates } from "../data/reference-data";
 import { resolveMLACategory } from "../data/weight-mapping";
@@ -16,7 +16,7 @@ export const toolDefinitions = [
   {
     name: "lookup_portfolio_data",
     description:
-      "Retrieves specific portfolio, market, weather, and operational data from the app. This is your PRIMARY tool - call it for ANY question about herds, properties, prices, market indices, freight, sales, weather, or the yard book. You MUST call this tool before citing any specific numbers (prices, weights, head counts, values, dates, temperatures) in your response. If the user asks about weather, temperature, rain, forecast, or conditions at a property, use query_type 'property_weather'. Always look up data first. Never rely on the portfolio index alone.",
+      "Retrieves specific portfolio, market, weather, and operational data from the app. This is your PRIMARY tool - call it for ANY question about herds, properties, prices, market indices, freight, sales, weather, or the yard book. You MUST call this tool before citing any specific numbers (prices, weights, head counts, values, dates, temperatures) in your response. Herd valuations returned by this tool come straight from the AMV (Adjusted Market Value) engine and already include breed premium, projected weight (ADG accrual), pre-birth accrual, calves at foot, and mortality deduction. NEVER recompute these figures yourself - quote them as returned. If the user asks about weather, temperature, rain, forecast, or conditions at a property, use query_type 'property_weather'. Always look up data first. Never rely on the portfolio index alone.",
     input_schema: {
       type: "object",
       properties: {
@@ -52,6 +52,10 @@ export const toolDefinitions = [
         location: {
           type: "string",
           description: "Any town, city, or place name for property_weather when not asking about a specific property (e.g. 'Townsville', 'Roma', 'Wagga Wagga')",
+        },
+        saleyard_override: {
+          type: "string",
+          description: "Optional MLA saleyard name (e.g. 'Roma', 'Armidale', 'Charters Towers'). Only use when the user explicitly asks to value a herd at a DIFFERENT saleyard than the one configured on the herd. Applies to query_type 'herd_details', 'all_herds_summary', and 'portfolio_summary'. Recomputes the AMV with that saleyard's price. Omit otherwise.",
         },
       },
       required: ["query_type"],
@@ -307,13 +311,21 @@ async function executeLookup(input: Record<string, unknown>, store: ChatDataStor
   const queryType = input.query_type as string;
   if (!queryType) return "Error: Missing query_type parameter.";
 
+  // Debug: saleyard_override - user can ask for valuations at a non-default saleyard
+  // (fixes BRG-001). Applies to herd_details, all_herds_summary, portfolio_summary.
+  const saleyardOverrideRaw = input.saleyard_override;
+  const saleyardOverride =
+    typeof saleyardOverrideRaw === "string" && saleyardOverrideRaw.trim().length > 0
+      ? saleyardOverrideRaw.trim()
+      : null;
+
   switch (queryType) {
     case "portfolio_summary":
-      return lookupPortfolioSummary(store);
+      return lookupPortfolioSummary(store, saleyardOverride);
     case "herd_details":
-      return lookupHerdDetails(input.herd_name as string, store);
+      return lookupHerdDetails(input.herd_name as string, store, saleyardOverride);
     case "all_herds_summary":
-      return lookupAllHerdsSummary(store);
+      return lookupAllHerdsSummary(store, saleyardOverride);
     case "property_details":
       return lookupPropertyDetails(input.property_name as string, store);
     case "market_prices":
@@ -335,14 +347,77 @@ async function executeLookup(input: Record<string, unknown>, store: ChatDataStor
   }
 }
 
-// MARK: - Portfolio Summary
+// MARK: - Valuation Helper
+// Debug: Runs the AMV engine for a herd so the chat reports the same numbers as the
+// Dashboard. When saleyardOverride is set and differs from the herd's configured
+// saleyard, swaps selected_saleyard on a shallow copy so the engine resolves prices
+// from the override yard. Mirrors iOS valuation(for:saleyardOverride:).
+function valuationForHerd(
+  herd: ChatDataStore["herds"][0],
+  store: ChatDataStore,
+  saleyardOverride: string | null
+): HerdValuationResult {
+  const overrideDiffers =
+    !!saleyardOverride &&
+    saleyardOverride.toLowerCase() !== (herd.selected_saleyard ?? "").toLowerCase();
 
-function lookupPortfolioSummary(store: ChatDataStore): string {
+  const input = overrideDiffers
+    ? { ...herd, selected_saleyard: saleyardOverride }
+    : herd;
+
+  return calculateHerdValuation(
+    input as Parameters<typeof calculateHerdValuation>[0],
+    store.nationalPriceMap,
+    store.premiumMap,
+    undefined,
+    store.saleyardPriceMap
+  );
+}
+
+function fmtDollars(value: number): string {
+  return Math.round(value).toLocaleString("en-AU");
+}
+
+function fmtPremium(herd: ChatDataStore["herds"][0], v: HerdValuationResult): string | null {
+  if (!v.breedPremiumApplied || v.breedPremiumApplied === 0) return null;
+  const sign = v.breedPremiumApplied >= 0 ? "+" : "";
+  return `${sign}${v.breedPremiumApplied.toFixed(1)}% ${herd.breed}`;
+}
+
+// MARK: - Portfolio Summary
+// Debug: Values come straight from the AMV engine (matches Dashboard). Never sum
+// $/kg x weight in the chat layer - that was the root cause of BRG-010.
+function lookupPortfolioSummary(store: ChatDataStore, saleyardOverride: string | null): string {
   const activeHerds = store.herds.filter((h) => !h.is_sold);
   const totalHead = activeHerds.reduce((sum, h) => sum + (h.head_count ?? 0), 0);
 
+  let totalNet = 0;
+  let totalBaseMarket = 0;
+  let totalWeightGain = 0;
+  let totalPreBirth = 0;
+  let totalCalvesAtFoot = 0;
+  let totalMortality = 0;
+
+  for (const herd of activeHerds) {
+    const v = valuationForHerd(herd, store, saleyardOverride);
+    totalNet += v.netValue;
+    totalBaseMarket += v.baseMarketValue;
+    totalWeightGain += v.weightGainAccrual;
+    totalPreBirth += v.preBirthAccrual;
+    totalCalvesAtFoot += v.calvesAtFootValue;
+    totalMortality += v.mortalityDeduction;
+  }
+
   const lines = ["PORTFOLIO SUMMARY:"];
-  lines.push(`Total portfolio value: $${Math.round(store.portfolioValue).toLocaleString()}`);
+  if (saleyardOverride) {
+    lines.push(`Saleyard override applied: ${saleyardOverride} (values recomputed)`);
+  }
+  lines.push(`Total portfolio value (Net Realizable, AMV engine): $${fmtDollars(totalNet)}`);
+  lines.push(`  Base Market Value (initial weight x price): $${fmtDollars(totalBaseMarket)}`);
+  lines.push(`  Weight Gain Accrual (ADG since added): $${fmtDollars(totalWeightGain)}`);
+  if (totalPreBirth > 0) lines.push(`  Pre-Birth Accrual (breeders): $${fmtDollars(totalPreBirth)}`);
+  if (totalCalvesAtFoot > 0) lines.push(`  Calves at Foot: $${fmtDollars(totalCalvesAtFoot)}`);
+  lines.push(`  Mortality Deduction: -$${fmtDollars(totalMortality)}`);
   lines.push(`Active herds: ${activeHerds.length}`);
   lines.push(`Total head: ${totalHead}`);
   lines.push(`Properties: ${store.properties.length}`);
@@ -357,7 +432,13 @@ function lookupPortfolioSummary(store: ChatDataStore): string {
 
 // MARK: - Herd Details
 
-function lookupHerdDetails(name: string | undefined, store: ChatDataStore): string {
+// Debug: Emits the engine's HerdValuationResult directly - Brangus must not recompute
+// it. When saleyardOverride differs from the herd's saleyard, engine is re-run.
+function lookupHerdDetails(
+  name: string | undefined,
+  store: ChatDataStore,
+  saleyardOverride: string | null
+): string {
   if (!name) return "Error: Missing herd_name. Provide the herd name from the portfolio index.";
 
   const herd = findHerd(name, store.herds);
@@ -373,26 +454,40 @@ function lookupHerdDetails(name: string | undefined, store: ChatDataStore): stri
   lines.push(`Category: ${herd.category}`);
   lines.push(`Sex: ${herd.sex}`);
   lines.push(`Age: ${herd.age_months} months`);
-  lines.push(`Current weight: ${Math.round(herd.current_weight)}kg`);
+  lines.push(`Initial weight (as entered): ${Math.round(herd.initial_weight ?? herd.current_weight ?? 0)}kg`);
 
   if (herd.daily_weight_gain > 0) {
-    lines.push(`Daily weight gain: ${herd.daily_weight_gain.toFixed(2)}kg/day`);
-
-    // Calculate projected weight
-    const created = new Date(herd.created_at);
-    const now = new Date();
-    const projected = calculateProjectedWeight(
-      herd.initial_weight,
-      created,
-      herd.dwg_change_date ? new Date(herd.dwg_change_date) : null,
-      now,
-      herd.previous_dwg ?? null,
-      herd.daily_weight_gain
-    );
-    lines.push(`Projected weight: ${Math.round(projected)}kg`);
+    lines.push(`Daily weight gain (DWG): ${herd.daily_weight_gain.toFixed(2)}kg/day`);
   }
 
-  if (herd.selected_saleyard) lines.push(`Saleyard: ${herd.selected_saleyard}`);
+  if (herd.selected_saleyard) lines.push(`Saleyard (configured): ${herd.selected_saleyard}`);
+
+  // Debug: AMV block from the engine - Dashboard-matching numbers.
+  const v = valuationForHerd(herd, store, saleyardOverride);
+  lines.push("");
+  lines.push("VALUATION (from AMV engine, matches Dashboard):");
+  const overrideDiffers =
+    !!saleyardOverride &&
+    saleyardOverride.toLowerCase() !== (herd.selected_saleyard ?? "").toLowerCase();
+  if (overrideDiffers) {
+    lines.push(`Saleyard override applied: ${saleyardOverride} (recomputed, not cached)`);
+  }
+  lines.push(`Projected weight (ADG-adjusted to today): ${Math.round(v.projectedWeight)}kg`);
+  lines.push(`Price (breed-adjusted, $/kg liveweight): $${v.pricePerKg.toFixed(3)}`);
+  lines.push(`Price source: ${v.priceSource}${v.nearestSaleyardUsed ? ` (nearest: ${v.nearestSaleyardUsed})` : ""}`);
+  if (v.dataDate) lines.push(`MLA data date: ${v.dataDate}`);
+  const premium = fmtPremium(herd, v);
+  lines.push(premium ? `Breed premium applied: ${premium}` : "Breed premium applied: none (price already breed-specific or no general base available)");
+  lines.push(`Base Market Value (initial weight x price x head): $${fmtDollars(v.baseMarketValue)}`);
+  lines.push(`Weight Gain Accrual (projected - initial): $${fmtDollars(v.weightGainAccrual)}`);
+  if (v.preBirthAccrual > 0) lines.push(`Pre-Birth Accrual: $${fmtDollars(v.preBirthAccrual)}`);
+  if (v.calvesAtFootValue > 0) lines.push(`Calves at Foot: $${fmtDollars(v.calvesAtFootValue)}`);
+  lines.push(`Mortality Deduction: -$${fmtDollars(v.mortalityDeduction)}`);
+  lines.push(`Net Realizable Value (herd total): $${fmtDollars(v.netValue)}`);
+  if ((herd.head_count ?? 0) > 0) {
+    lines.push(`Per head (Net / Head): $${fmtDollars(v.netValue / (herd.head_count ?? 1))}`);
+  }
+  lines.push("");
 
   if (herd.is_breeder) {
     const calvingPct = (herd.calving_rate > 1 ? herd.calving_rate : herd.calving_rate * 100);
@@ -401,7 +496,6 @@ function lookupHerdDetails(name: string | undefined, store: ChatDataStore): stri
     if (herd.joined_date) lines.push(`Joined date: ${herd.joined_date}`);
   }
 
-  // Property
   if (herd.property_id) {
     const prop = store.properties.find((p) => p.id === herd.property_id);
     if (prop) lines.push(`Property: ${prop.property_name}`);
@@ -410,41 +504,44 @@ function lookupHerdDetails(name: string | undefined, store: ChatDataStore): stri
   if (herd.notes) lines.push(`Notes: ${herd.notes}`);
   lines.push(`Added: ${new Date(herd.created_at).toLocaleDateString("en-AU")}`);
 
-  // Calculate value for this herd
-  const value = calculateHerdValue(
-    herd as Parameters<typeof calculateHerdValue>[0],
-    store.nationalPriceMap,
-    store.premiumMap,
-    undefined,
-    store.saleyardPriceMap
-  );
-  if (value > 0) {
-    lines.push(`Estimated value: $${Math.round(value).toLocaleString()}`);
-    if (herd.head_count > 0) {
-      lines.push(`Value per head: $${Math.round(value / herd.head_count).toLocaleString()}`);
-    }
-  }
-
   return lines.join("\n");
 }
 
 // MARK: - All Herds Summary
-
-function lookupAllHerdsSummary(store: ChatDataStore): string {
+// Debug: Per-herd line now carries engine-sourced valuation (matches Dashboard).
+function lookupAllHerdsSummary(store: ChatDataStore, saleyardOverride: string | null): string {
   const activeHerds = store.herds.filter((h) => !h.is_sold);
   if (activeHerds.length === 0) return "No active herds in portfolio.";
 
   const lines = [`ALL ACTIVE HERDS (${activeHerds.length}):`];
+  if (saleyardOverride) {
+    lines.push(`Saleyard override applied: ${saleyardOverride} (values recomputed)`);
+  }
+  lines.push("Values below come from the AMV engine (include breed premium, projected weight, accruals, mortality). Do not recompute.");
+
+  let runningTotal = 0;
   for (const herd of activeHerds) {
     let line = `- ${herd.name}: ${herd.head_count} head`;
     line += `, ${herd.species} ${herd.breed}, ${herd.category}`;
     line += `, ${herd.sex}, ${herd.age_months} months`;
-    line += `, ${Math.round(herd.current_weight)}kg`;
+    line += `, initial ${Math.round(herd.initial_weight ?? herd.current_weight ?? 0)}kg`;
     if (herd.daily_weight_gain > 0) line += `, DWG ${herd.daily_weight_gain.toFixed(2)}kg/day`;
     if (herd.selected_saleyard) line += `, saleyard: ${herd.selected_saleyard}`;
     if (herd.is_breeder) line += ", breeder";
+
+    const v = valuationForHerd(herd, store, saleyardOverride);
+    const perHead = (herd.head_count ?? 0) > 0 ? v.netValue / (herd.head_count ?? 1) : 0;
+    line += `, projected ${Math.round(v.projectedWeight)}kg`;
+    line += `, $${v.pricePerKg.toFixed(3)}/kg (breed-adj)`;
+    const premium = fmtPremium(herd, v);
+    if (premium) line += ` [${premium}]`;
+    line += `, $${fmtDollars(perHead)}/head, total $${fmtDollars(v.netValue)}`;
+    if (v.dataDate) line += `, MLA ${v.dataDate}`;
+    runningTotal += v.netValue;
+
     lines.push(line);
   }
+  lines.push(`PORTFOLIO NET REALIZABLE TOTAL: $${fmtDollars(runningTotal)}`);
   return lines.join("\n");
 }
 
@@ -1551,52 +1648,71 @@ export function generateAutoCards(
 
 // MARK: - Helpers
 
+// Debug: Fix for BRG-012 - when the query contains a breed name (e.g. "Brahman cross
+// heifers"), the breed token must outweigh the sex/category token. Previously "heifer"
+// matched Gelbvieh heifers before "Brahman" could promote the Brahman Breeder (Heifer)
+// herd. Scoring: breed 10, name 5, sub-type 3, category 2, sex 1. Mirrors iOS findHerd.
 function findHerd(
   name: string,
   herds: ChatDataStore["herds"]
 ): ChatDataStore["herds"][0] | undefined {
-  const lowered = name.toLowerCase();
+  const lowered = name.toLowerCase().trim();
+  if (!lowered) return undefined;
 
-  // Exact match
+  // Exact display-name match wins outright
   const exact = herds.find((h) => h.name.toLowerCase() === lowered);
   if (exact) return exact;
 
-  // Contains match
+  // Whole-string contains match on display name (preserves old behaviour for queries
+  // like "yearling steers" matching "Yearling Steers 1")
   const partial = herds.find(
     (h) => h.name.toLowerCase().includes(lowered) || lowered.includes(h.name.toLowerCase())
   );
   if (partial) return partial;
 
-  // Singular/plural match
-  const singularQuery = lowered.endsWith("s") ? lowered.slice(0, -1) : lowered;
-  const singular = herds.find((h) => {
-    const herdLower = h.name.toLowerCase();
-    const singularHerd = herdLower.endsWith("s") ? herdLower.slice(0, -1) : herdLower;
-    return herdLower.includes(singularQuery) || singularHerd.includes(singularQuery);
-  });
-  if (singular) return singular;
+  // Token-weighted scoring. Letters-only split so punctuation doesn't create empty
+  // tokens, then singularise per token for matching.
+  const tokenize = (text: string): Set<string> =>
+    new Set(
+      text
+        .toLowerCase()
+        .split(/[^a-z]+/i)
+        .filter((t) => t.length > 0)
+    );
 
-  // Category/sex match
-  const byCat = herds.find(
-    (h) =>
-      !h.is_sold &&
-      (h.category.toLowerCase().includes(singularQuery) || h.sex.toLowerCase().includes(singularQuery))
-  );
-  if (byCat) return byCat;
+  const queryTokens = Array.from(tokenize(lowered));
+  if (queryTokens.length === 0) return undefined;
 
-  // Word overlap
-  const queryWords = new Set(lowered.split(" "));
   let bestMatch: ChatDataStore["herds"][0] | undefined;
-  let bestOverlap = 0;
+  let bestScore = 0;
+
   for (const herd of herds) {
-    const herdWords = new Set(herd.name.toLowerCase().split(" "));
-    const overlap = [...queryWords].filter((w) => herdWords.has(w)).length;
-    if (overlap > bestOverlap && overlap >= 1) {
-      bestOverlap = overlap;
+    if (herd.is_sold) continue;
+
+    const nameTokens = tokenize(herd.name);
+    const breedTokens = tokenize(herd.breed ?? "");
+    const categoryTokens = tokenize(herd.category ?? "");
+    const sexTokens = tokenize(herd.sex ?? "");
+    const subTypeTokens = tokenize(herd.breeder_sub_type ?? "");
+
+    let score = 0;
+    for (const token of queryTokens) {
+      const singular = token.length > 2 && token.endsWith("s") ? token.slice(0, -1) : token;
+      const hit = (set: Set<string>) => set.has(token) || set.has(singular);
+      if (hit(breedTokens)) score += 10;
+      if (hit(nameTokens)) score += 5;
+      if (hit(subTypeTokens)) score += 3;
+      if (hit(categoryTokens)) score += 2;
+      if (hit(sexTokens)) score += 1;
+    }
+
+    if (score > bestScore) {
+      bestScore = score;
       bestMatch = herd;
     }
   }
-  return bestMatch;
+
+  return bestScore > 0 ? bestMatch : undefined;
 }
 
 function resolveDistance(

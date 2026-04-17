@@ -113,6 +113,7 @@ export interface HerdRow {
   joined_date: string | null;
   calving_rate: number;
   breeding_program_type: string | null;
+  breeder_sub_type: string | null;
   joining_period_start: string | null;
   joining_period_end: string | null;
   selected_saleyard: string | null;
