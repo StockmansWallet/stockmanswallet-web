@@ -474,7 +474,7 @@ export function PreSaleFlow({
                     variant="ghost"
                     size="sm"
                     onClick={addAllocation}
-                    className="w-full text-xs"
+                    className="w-full rounded-xl border border-dashed border-white/[0.08] bg-white/[0.02] text-xs text-text-muted hover:border-indigo-500/30 hover:bg-white/[0.04] hover:text-indigo-400"
                   >
                     <Plus className="mr-1 h-3 w-3" />
                     Add Herd Group
@@ -825,8 +825,13 @@ export function PreSaleFlow({
           </Card>
 
           <div className="flex justify-between">
-            <Button variant="ghost" onClick={() => setStep(1)}>
-              <ChevronLeft className="mr-1 h-4 w-4" />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
+              onClick={() => setStep(1)}
+            >
+              <ChevronLeft className="mr-1 h-3.5 w-3.5" />
               Back
             </Button>
             <Button

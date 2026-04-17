@@ -313,6 +313,7 @@ export function ConsignmentForm({ herds, grids }: ConsignmentFormProps) {
         <Button
           type="button"
           variant="ghost"
+          className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
           onClick={() => router.push("/dashboard/tools/grid-iq/consignments")}
         >
           Cancel

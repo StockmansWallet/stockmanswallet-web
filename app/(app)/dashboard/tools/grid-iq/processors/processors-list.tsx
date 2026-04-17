@@ -239,6 +239,7 @@ export function ProcessorsList({
                 <Button
                   size="sm"
                   variant="ghost"
+                  className="border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
                   onClick={() => setShowConfirm(false)}
                   disabled={isDeleting}
                 >

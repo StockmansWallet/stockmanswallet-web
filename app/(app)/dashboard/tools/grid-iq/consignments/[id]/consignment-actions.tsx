@@ -166,6 +166,7 @@ export function ConsignmentActions({
               <Button
                 variant="ghost"
                 size="sm"
+                className="border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
                 onClick={() => setShowCompleteConfirm(false)}
               >
                 Cancel
@@ -203,9 +204,8 @@ export function ConsignmentActions({
             </p>
             <div className="mt-3 flex items-center gap-3">
               <Button
-                variant="ghost"
+                variant="destructive"
                 size="sm"
-                className="text-red-400 hover:bg-red-500/10"
                 disabled={isPending}
                 onClick={handleDelete}
               >
@@ -214,6 +214,7 @@ export function ConsignmentActions({
               <Button
                 variant="ghost"
                 size="sm"
+                className="border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
                 onClick={() => setShowDeleteConfirm(false)}
               >
                 Cancel

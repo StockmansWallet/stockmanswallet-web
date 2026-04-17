@@ -199,6 +199,7 @@ export function EditableGridLocation({
               <Button
                 variant="ghost"
                 size="sm"
+                className="border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
                 onClick={() => {
                   setLocation(initialLocation ?? "");
                   setLatitude(

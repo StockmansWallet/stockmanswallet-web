@@ -246,6 +246,7 @@ export function ProcessorForm({
         <Button
           type="button"
           variant="ghost"
+          className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
           onClick={() => router.back()}
           disabled={isPending}
         >

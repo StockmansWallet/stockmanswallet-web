@@ -585,6 +585,7 @@ export function GridIQUploader({
                 )}
                 <Button
                   variant="ghost"
+                  className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
                   onClick={handleClear}
                   disabled={isProcessing || isSaving}
                 >
@@ -677,7 +678,12 @@ function ExtractionResultView({
             >
               Switch to {typeMismatchLabel}
             </Button>
-            <Button variant="ghost" size="sm" onClick={onConfirmTypeMismatch}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
+              onClick={onConfirmTypeMismatch}
+            >
               Keep as {selectedLabel}
             </Button>
           </div>
@@ -782,7 +788,12 @@ function ExtractionResultView({
                   <Button variant="secondary" size="sm" onClick={onRetry}>
                     Retry Upload
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={onConfirmHeadCount}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
+                    onClick={onConfirmHeadCount}
+                  >
                     Use Anyway
                   </Button>
                 </div>
