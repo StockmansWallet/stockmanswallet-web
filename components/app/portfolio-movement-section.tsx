@@ -152,10 +152,9 @@ export function PortfolioMovementSection({
           {/* Like-for-Like */}
           <Card>
             <CardContent className="px-5 py-4">
-              <div className="flex items-center justify-between">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">Like-for-Like</p>
-                <p className="text-[10px] text-text-muted">Existing herds only</p>
-              </div>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">
+                Like-for-Like <span className="font-normal normal-case tracking-normal text-text-muted/70">(Existing herds only)</span>
+              </p>
               <div className="mt-3 grid grid-cols-3 gap-4">
                 <div>
                   <p className="text-[10px] uppercase text-text-muted">Opening</p>
