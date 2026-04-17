@@ -403,8 +403,8 @@ function BulkDeleteBar({
         </div>
       ) : (
         <Button
-          variant="ghost"
-          className="w-full text-red-400 hover:bg-red-500/10 hover:text-red-400"
+          variant="destructive"
+          className="w-full"
           onClick={onShowConfirm}
         >
           <Trash2 className="mr-1.5 h-4 w-4" />

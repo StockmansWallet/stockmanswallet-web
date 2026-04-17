@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { ConsignmentsList } from "./consignments-list";
 
 export const metadata = { title: "Consignments - Grid IQ" };
@@ -27,15 +26,12 @@ export default async function ConsignmentsListPage() {
   return (
     <div>
       <div className="mb-4 sm:hidden">
-        <Link href="/dashboard/tools/grid-iq">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-1.5 text-text-muted hover:text-text-primary"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Grid IQ
-          </Button>
+        <Link
+          href="/dashboard/tools/grid-iq"
+          className="inline-flex items-center gap-1.5 rounded-full bg-surface-lowest px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-text-primary"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          Grid IQ
         </Link>
       </div>
 

@@ -62,7 +62,7 @@ export function GridDeleteButton({ gridId }: { gridId: string }) {
     <Button
       size="sm"
       variant="ghost"
-      className="text-text-muted hover:text-red-400"
+      className="border border-white/[0.08] bg-white/[0.04] text-text-muted hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
       onClick={() => setShowConfirm(true)}
     >
       <Trash2 className="mr-1.5 h-3.5 w-3.5" />

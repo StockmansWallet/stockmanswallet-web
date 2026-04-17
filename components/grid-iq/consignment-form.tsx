@@ -269,8 +269,9 @@ export function ConsignmentForm({ herds, grids }: ConsignmentFormProps) {
                   {allocations.length > 1 && (
                     <button
                       type="button"
+                      aria-label="Remove herd allocation"
                       onClick={() => removeAllocation(alloc.key)}
-                      className="mb-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-red-500/10 hover:text-red-400"
+                      className="mb-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-text-muted transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -283,7 +284,7 @@ export function ConsignmentForm({ herds, grids }: ConsignmentFormProps) {
           <button
             type="button"
             onClick={addAllocation}
-            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/[0.08] py-2.5 text-xs font-medium text-text-muted transition-colors hover:border-indigo-500/30 hover:text-indigo-400"
+            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/[0.08] bg-white/[0.02] py-2.5 text-xs font-medium text-text-muted transition-colors hover:border-indigo-500/30 hover:bg-white/[0.04] hover:text-indigo-400"
           >
             <Plus className="h-3.5 w-3.5" />
             Add another herd

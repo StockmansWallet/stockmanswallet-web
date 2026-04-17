@@ -459,10 +459,11 @@ export function PreSaleFlow({
                           <Button
                             variant="ghost"
                             size="sm"
+                            aria-label="Remove herd allocation"
                             onClick={() => removeAllocation(alloc.key)}
-                            className="shrink-0"
+                            className="shrink-0 border border-white/[0.08] bg-white/[0.04] text-text-muted hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
                           >
-                            <Trash2 className="h-4 w-4 text-red-400" />
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         )}
                       </div>
@@ -577,7 +578,7 @@ export function PreSaleFlow({
             <Button
               size="sm"
               variant="ghost"
-              className="shrink-0 text-xs"
+              className="shrink-0 border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
               onClick={() => setUploadOpen("grid")}
             >
               <Upload className="mr-1.5 h-3.5 w-3.5" />
@@ -788,7 +789,7 @@ export function PreSaleFlow({
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-xs"
+                          className="border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
                           onClick={() => setShowAllKillSheets(true)}
                         >
                           Show all {killSheetCount} kill sheets
@@ -797,7 +798,7 @@ export function PreSaleFlow({
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-xs"
+                          className="border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
                           onClick={() => setShowAllKillSheets(false)}
                         >
                           Show fewer
@@ -809,7 +810,7 @@ export function PreSaleFlow({
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="text-xs"
+                      className="border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
                       onClick={() => setUploadOpen("killsheet")}
                     >
                       <Upload className="mr-1.5 h-3.5 w-3.5" />
