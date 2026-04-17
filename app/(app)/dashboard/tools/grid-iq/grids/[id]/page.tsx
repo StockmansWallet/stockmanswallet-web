@@ -9,7 +9,6 @@ import {
   ArrowLeft,
   Grid3x3,
   Calendar,
-  MapPin,
   User,
   Phone,
   Mail,
@@ -18,6 +17,7 @@ import {
 } from "lucide-react";
 import { GridDeleteButton } from "./grid-delete-button";
 import { EditableProcessorName } from "../../components/editable-processor-name";
+import { EditableGridLocation } from "./editable-grid-location";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -114,9 +114,6 @@ export default async function GridDetailPage({ params }: PageProps) {
                 )}
               />
             ) : null}
-            {(g.location as string | null) ? (
-              <MetaItem icon={MapPin} label="Location" value={String(g.location)} />
-            ) : null}
             {(g.contact_name as string | null) ? (
               <MetaItem icon={User} label="Contact" value={String(g.contact_name)} />
             ) : null}
@@ -137,6 +134,16 @@ export default async function GridDetailPage({ params }: PageProps) {
           ) : null}
         </CardContent>
       </Card>
+
+      {/* Processor Location (editable; drives freight calculations) */}
+      <div className="mt-4">
+        <EditableGridLocation
+          gridId={id}
+          initialLocation={g.location as string | null}
+          initialLatitude={g.location_latitude as number | null}
+          initialLongitude={g.location_longitude as number | null}
+        />
+      </div>
 
       {/* Grid Entries */}
       <div className="mt-4 space-y-4">
