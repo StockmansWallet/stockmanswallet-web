@@ -4,6 +4,7 @@
 
 import { findGridPrice } from "./grid-iq-engine";
 import type { GridEntry, KillSheetLineItem } from "./kill-score-engine";
+import { deriveSexFromCategory, normaliseHerdSex } from "@/lib/grid-iq/category-sex";
 
 // Result of a full payment check across all line items
 export interface PaymentCheckResult {
@@ -51,6 +52,26 @@ export function runPaymentCheck(
     };
   }
 
+  // Filter line items by sex first - a steer consignment's payment audit must
+  // not flag heifer/cow rows as "underpaid" against the steer grid.
+  const target = normaliseHerdSex(sex);
+  const filteredLineItems =
+    target === "Unknown"
+      ? lineItems
+      : lineItems.filter((item) => {
+          const s = item.sex ?? deriveSexFromCategory(item.category);
+          return s === target || s === "Unknown";
+        });
+
+  if (filteredLineItems.length === 0) {
+    return {
+      totalExpectedValue: 0,
+      totalActualValue: 0,
+      matchCount: 0,
+      lineDiscrepancies: [],
+    };
+  }
+
   // Filter entries by gender if specified (mirrors genderedEntries in kill-score-engine)
   const filtered = sex ? filterEntriesBySex(gridEntries, sex) : gridEntries;
 
@@ -59,7 +80,7 @@ export function runPaymentCheck(
   let matchCount = 0;
   const discrepancies: PaymentLineDiscrepancy[] = [];
 
-  for (const item of lineItems) {
+  for (const item of filteredLineItems) {
     const bodyWeight = item.totalBodyWeight;
 
     // Check left side

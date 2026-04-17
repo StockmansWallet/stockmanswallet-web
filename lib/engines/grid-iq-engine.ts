@@ -10,6 +10,7 @@ import {
   genderedEntries,
   calculateFullKillScore,
 } from "./kill-score-engine";
+import { deriveSexFromCategory, normaliseHerdSex } from "@/lib/grid-iq/category-sex";
 
 // Re-export AnalysisMode for convenience
 export type { AnalysisMode } from "./kill-score-engine";
@@ -85,6 +86,38 @@ export interface AnalyseParams {
 
 export const BASELINE_REALISATION_FACTOR = 0.92;
 
+// MARK: - Sex-aware kill sheet filter
+//
+// Kill sheets commonly contain a mix of male (steer/bull) and female
+// (heifer/cow) rows. When the consignment under analysis is single-sex we must
+// exclude non-matching rows so metrics (GCR, RF, processor fit, payment check)
+// reflect only the relevant cattle. `Unknown` herd sex is treated as
+// "no filter" to preserve legacy behaviour; `Unknown` line items are kept so
+// data with blank categories is not silently dropped.
+export function filterKillSheetBySex<T extends KillSheetForScoring & { id?: string }>(
+  ks: T,
+  herdSex: string | null | undefined
+): T {
+  const target = normaliseHerdSex(herdSex);
+  if (target === "Unknown") return ks;
+
+  const filtered = ks.lineItems.filter((item) => {
+    const s = item.sex ?? deriveSexFromCategory(item.category);
+    return s === target || s === "Unknown";
+  });
+
+  if (filtered.length === ks.lineItems.length) return ks;
+
+  const totalGrossValue = filtered.reduce((sum, i) => sum + (i.grossValue || 0), 0);
+
+  return {
+    ...ks,
+    lineItems: filtered,
+    totalHeadCount: filtered.length,
+    totalGrossValue,
+  };
+}
+
 // MARK: - Dressing Percentage Defaults (MLA industry averages)
 
 export function defaultDressingPercentage(category: string): number {
@@ -101,7 +134,15 @@ export function defaultDressingPercentage(category: string): number {
 // MARK: - Main Analysis
 
 export function analyse(params: AnalyseParams): GridIQAnalysisResult {
-  const { herd, grid, killSheet, analysisMode } = params;
+  const { herd, grid, analysisMode } = params;
+
+  // Filter kill sheet rows to the consignment's sex. All downstream
+  // kill-sheet-driven steps (grade estimation, opportunity, processor fit,
+  // kill score, RF) use the filtered view so mixed-sex kill sheets don't
+  // distort single-sex analyses.
+  const killSheet = params.killSheet
+    ? filterKillSheetBySex(params.killSheet, herd.sex)
+    : null;
 
   // Step 3: Headline grid value
   const headlineGridValue = calculateHeadlineGridValue(

@@ -78,6 +78,9 @@ export interface KillSheetLineItemData {
   p8_fat_mm?: number;
   dentition?: number;
   category?: string;
+  // Derived from `category` when the row is saved. Stored so the engine can
+  // filter kill sheet rows by consignment sex without re-deriving every read.
+  sex?: "Male" | "Female" | "Unknown";
   price_per_kg?: number;
   gross_value?: number;
   butt_shape?: string;

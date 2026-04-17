@@ -17,7 +17,8 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { extractDocument } from "@/lib/grid-iq/extraction-service";
-import type { ExtractionResult } from "@/lib/grid-iq/types";
+import type { ExtractionResult, KillSheetLineItemData } from "@/lib/grid-iq/types";
+import { deriveSexFromCategory } from "@/lib/grid-iq/category-sex";
 import { createClient } from "@/lib/supabase/client";
 
 type UploadType = "grid" | "killsheet";
@@ -329,7 +330,12 @@ export function GridIQUploader({
             condemns: ks.condemns,
             category_summaries: addIdsToEntries(ks.categorySummaries || []),
             grade_distribution: addIdsToEntries(ks.gradeDistribution || []),
-            line_items: addIdsToEntries(ks.lineItems || []),
+            line_items: addIdsToEntries(
+              (ks.lineItems || []).map((item: KillSheetLineItemData) => ({
+                ...item,
+                sex: item.sex ?? deriveSexFromCategory(item.category),
+              }))
+            ),
           });
 
         if (insertError) throw new Error(insertError.message);

@@ -18,6 +18,34 @@ import {
 import { ConsignmentActions } from "./consignment-actions";
 import { TrendingUp } from "lucide-react";
 import { PostSaleFlow } from "@/components/grid-iq/post-sale-flow";
+import {
+  deriveSexFromCategory,
+  type Sex,
+} from "@/lib/grid-iq/category-sex";
+
+interface SexBreakdown {
+  male: number;
+  female: number;
+  unknown: number;
+  dominant: Sex; // "Unknown" when no rows or a tied mix
+}
+
+function summariseSex(rows: { head: number; sex: Sex }[]): SexBreakdown {
+  let male = 0;
+  let female = 0;
+  let unknown = 0;
+  for (const r of rows) {
+    if (r.sex === "Male") male += r.head;
+    else if (r.sex === "Female") female += r.head;
+    else unknown += r.head;
+  }
+  let dominant: Sex = "Unknown";
+  if (male > 0 && male >= female) dominant = "Male";
+  else if (female > 0 && female > male) dominant = "Female";
+  // A tied non-zero mix stays Unknown so the banner treats it as "mixed".
+  if (male > 0 && female > 0 && male === female) dominant = "Unknown";
+  return { male, female, unknown, dominant };
+}
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -93,10 +121,12 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
   // consignment (which the user can re-link here), OR linked to a consignment
   // that has been soft-deleted. A kill sheet already tied to a completed sale
   // stays locked to that sale.
+  // line_items is pulled so the sex composition of each sheet can be rendered
+  // in the link-time banner and used to filter the analysis downstream.
   const { data: allKillSheets } = await supabase
     .from("kill_sheet_records")
     .select(
-      "id, record_name, processor_name, kill_date, total_head_count, total_gross_value, consignment_id"
+      "id, record_name, processor_name, kill_date, total_head_count, total_gross_value, consignment_id, line_items"
     )
     .eq("user_id", user!.id)
     .eq("is_deleted", false)
@@ -165,6 +195,36 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
     ...a,
     herdName: herdMap.get(a.herd_id)?.name ?? "Unknown herd",
   }));
+
+  // Derive consignment sex composition from allocations. A consignment can be
+  // single-sex (all steers / all heifers) or mixed. The banner logic uses the
+  // dominant sex; if head counts are tied or both are present we flag it as
+  // "Mixed" and skip the banner warning.
+  const consignmentSex = summariseSex(
+    (allocations ?? []).map((a) => ({
+      head: a.head_count ?? 0,
+      sex: deriveSexFromCategory(a.category),
+    }))
+  );
+
+  // Per-kill-sheet sex breakdown, derived from line_items. Rows with blank or
+  // unrecognised categories fall into the Unknown bucket (counted against
+  // both sexes so the analysis doesn't silently drop them).
+  const killSheetSexMap = new Map<string, SexBreakdown>();
+  for (const ks of availableKillSheets ?? []) {
+    const items = (ks.line_items ?? []) as Array<{ sex?: string; category?: string }>;
+    killSheetSexMap.set(
+      ks.id,
+      summariseSex(
+        items.map((item) => ({
+          head: 1,
+          sex:
+            (item.sex as Sex | undefined) ??
+            deriveSexFromCategory(item.category),
+        }))
+      )
+    );
+  }
 
   return (
     <div>
@@ -412,6 +472,7 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
             totalHead={consignment.total_head_count ?? 0}
             allocations={enrichedAllocations}
             existingAnalysisId={postSaleAnalysis?.id ?? null}
+            consignmentSex={consignmentSex}
             availableKillSheets={(availableKillSheets ?? []).map((ks) => ({
               id: ks.id,
               processorName: ks.record_name || ks.processor_name,
@@ -419,6 +480,12 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
               totalHeadCount: ks.total_head_count ?? 0,
               totalGrossValue: ks.total_gross_value ?? 0,
               isSuggested: suggestedIds.has(ks.id),
+              sexBreakdown: killSheetSexMap.get(ks.id) ?? {
+                male: 0,
+                female: 0,
+                unknown: 0,
+                dominant: "Unknown",
+              },
             }))}
           />
         </div>

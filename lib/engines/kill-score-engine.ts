@@ -38,6 +38,10 @@ export interface WeightBandPrice {
 export interface KillSheetLineItem {
   bodyNumber: number;
   category: string;
+  // Derived/stamped at save time. Used to filter kill sheet rows to the
+  // consignment's sex before feeding into analysis. Optional for legacy rows
+  // without it; fall back to deriving from `category`.
+  sex?: "Male" | "Female" | "Unknown";
   dentition: number;
   p8Fat: number;
   leftSideWeight: number;

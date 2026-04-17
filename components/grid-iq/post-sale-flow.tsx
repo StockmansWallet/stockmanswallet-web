@@ -15,6 +15,15 @@ import { UploadModal } from "@/app/(app)/dashboard/tools/grid-iq/library/upload-
 
 // MARK: - Types
 
+type Sex = "Male" | "Female" | "Unknown";
+
+interface SexBreakdown {
+  male: number;
+  female: number;
+  unknown: number;
+  dominant: Sex;
+}
+
 interface KillSheetOption {
   id: string;
   processorName: string;
@@ -22,6 +31,7 @@ interface KillSheetOption {
   totalHeadCount: number;
   totalGrossValue: number;
   isSuggested: boolean;
+  sexBreakdown: SexBreakdown;
 }
 
 interface AllocationInfo {
@@ -38,6 +48,9 @@ interface PostSaleFlowProps {
   totalHead: number;
   allocations: AllocationInfo[];
   availableKillSheets: KillSheetOption[];
+  // Consignment sex composition derived from allocations. When dominant is
+  // "Unknown" the picker shows no banner (truly mixed or no data).
+  consignmentSex: SexBreakdown;
   // When set, the flow boots straight into the Confirm stage with this analysis
   // already linked, so a page refresh after running post-kill analysis lands
   // the user back on the allocations screen instead of the kill-sheet picker.
@@ -56,6 +69,70 @@ function formatCurrency(value: number): string {
   return `$${Math.round(value).toLocaleString()}`;
 }
 
+function sexLabel(sex: Sex): string {
+  if (sex === "Male") return "male";
+  if (sex === "Female") return "female";
+  return "mixed";
+}
+
+function describeSheetSex(b: SexBreakdown): string | null {
+  const parts: string[] = [];
+  if (b.male > 0) parts.push(`${b.male} male`);
+  if (b.female > 0) parts.push(`${b.female} female`);
+  if (b.unknown > 0) parts.push(`${b.unknown} uncategorised`);
+  return parts.length > 0 ? parts.join(" + ") : null;
+}
+
+interface SexWarning {
+  severity: "info" | "block";
+  title: string;
+  detail: string;
+}
+
+function computeSexWarning(
+  consignmentSex: SexBreakdown,
+  selected: KillSheetOption | null
+): SexWarning | null {
+  if (!selected) return null;
+  if (consignmentSex.dominant === "Unknown") return null;
+
+  const ks = selected.sexBreakdown;
+  const matchingHead =
+    consignmentSex.dominant === "Male" ? ks.male : ks.female;
+  const nonMatchingHead =
+    consignmentSex.dominant === "Male" ? ks.female : ks.male;
+
+  // Kill sheet with zero rows of the consignment's sex (e.g. all-heifer kill
+  // sheet on a steer consignment). Don't let the analysis run.
+  if (matchingHead === 0 && nonMatchingHead > 0) {
+    return {
+      severity: "block",
+      title: "Kill sheet doesn't match this consignment",
+      detail: `This kill sheet only contains ${sexLabel(
+        consignmentSex.dominant === "Male" ? "Female" : "Male"
+      )} rows, but the consignment is ${sexLabel(
+        consignmentSex.dominant
+      )}. Select a different kill sheet or upload the correct one.`,
+    };
+  }
+
+  // Mixed sheet with some matching rows - warn that the rest will be excluded.
+  if (nonMatchingHead > 0) {
+    const breakdown = describeSheetSex(ks);
+    return {
+      severity: "info",
+      title: "Mixed kill sheet",
+      detail: `This kill sheet contains ${breakdown}. Your consignment is ${sexLabel(
+        consignmentSex.dominant
+      )}, so only the ${matchingHead} ${sexLabel(
+        consignmentSex.dominant
+      )} row${matchingHead === 1 ? "" : "s"} will be included in the analysis.`,
+    };
+  }
+
+  return null;
+}
+
 // MARK: - Component
 
 export function PostSaleFlow({
@@ -64,6 +141,7 @@ export function PostSaleFlow({
   totalHead,
   allocations,
   availableKillSheets,
+  consignmentSex,
   existingAnalysisId = null,
 }: PostSaleFlowProps) {
   const router = useRouter();
@@ -91,6 +169,15 @@ export function PostSaleFlow({
     if (!a.isSuggested && b.isSuggested) return 1;
     return 0;
   });
+
+  // Sex-composition warning for the currently selected kill sheet. A consignment
+  // with a dominant sex (Male or Female) will have non-matching rows excluded
+  // from the analysis; surface that so the user knows before they run it. Zero
+  // overlap (e.g. all-heifer sheet on a steer consignment) blocks the run.
+  const selectedKillSheet = selectedKillSheetId
+    ? availableKillSheets.find((k) => k.id === selectedKillSheetId) ?? null
+    : null;
+  const sexWarning = computeSexWarning(consignmentSex, selectedKillSheet);
 
   function handleRunAnalysis() {
     if (!selectedKillSheetId) return;
@@ -187,6 +274,32 @@ export function PostSaleFlow({
             </div>
           )}
 
+          {sexWarning && (
+            <div
+              className={`mt-3 flex items-start gap-2.5 rounded-xl border px-4 py-3 ${
+                sexWarning.severity === "block"
+                  ? "border-red-500/30 bg-red-500/10"
+                  : "border-amber-500/30 bg-amber-500/5"
+              }`}
+            >
+              <AlertTriangle
+                className={`mt-0.5 h-4 w-4 shrink-0 ${
+                  sexWarning.severity === "block" ? "text-red-400" : "text-amber-400"
+                }`}
+              />
+              <div className="min-w-0 flex-1">
+                <p
+                  className={`text-sm font-medium ${
+                    sexWarning.severity === "block" ? "text-red-400" : "text-amber-400"
+                  }`}
+                >
+                  {sexWarning.title}
+                </p>
+                <p className="mt-0.5 text-xs text-text-secondary">{sexWarning.detail}</p>
+              </div>
+            </div>
+          )}
+
           {error && <div className="mt-3 rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-400">{error}</div>}
 
           <div className="mt-4 flex justify-end gap-2">
@@ -200,7 +313,11 @@ export function PostSaleFlow({
             </Button>
             <Button
               variant="indigo"
-              disabled={!selectedKillSheetId || isPending}
+              disabled={
+                !selectedKillSheetId ||
+                isPending ||
+                sexWarning?.severity === "block"
+              }
               onClick={handleRunAnalysis}
             >
               {isPending ? (

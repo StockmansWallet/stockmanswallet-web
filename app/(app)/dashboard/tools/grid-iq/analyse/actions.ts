@@ -283,6 +283,7 @@ export async function createAnalysis(formData: FormData) {
     const lineItems: KillSheetLineItem[] = rawItems.map((item) => ({
       bodyNumber: (item.bodyNumber ?? item.body_number ?? 0) as number,
       category: (item.category ?? "") as string,
+      sex: (item.sex ?? undefined) as "Male" | "Female" | "Unknown" | undefined,
       dentition: (item.dentition ?? 0) as number,
       p8Fat: (item.p8Fat ?? item.p8_fat ?? 0) as number,
       leftSideWeight: (item.leftSideWeight ?? item.left_side_weight ?? 0) as number,

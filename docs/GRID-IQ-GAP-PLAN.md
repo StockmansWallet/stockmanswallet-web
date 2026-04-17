@@ -17,6 +17,7 @@ Luke reviewed Grid IQ and provided a comprehensive design spec covering the full
 - Document upload + AI extraction (Excel, PDF, images via Claude Haiku 4.5)
 - Grid parsing/storage with gender-aware entries (male/female tabs)
 - Kill sheet parsing/storage with line items, category summaries, grade distribution
+- Sex-aware kill sheet filtering: each line item's sex is derived from its category at save time; the analysis engine (opportunity, processor fit, kill score) and payment check audit exclude non-matching rows so a steer consignment's metrics aren't blended with heifer/cow rows on a mixed kill sheet. Link-time banner warns when a selected kill sheet is mixed and blocks link when overlap is zero.
 - Head count reconciliation (summary total vs extracted line items)
 - Analysis engine: headline grid value, realistic outcome, freight comparison, sell window
 - Kill score engine: GCR (40%), Grid Compliance (20%), RF (20%), Fat (10%), Dentition (10%) - matches Luke's spec exactly
@@ -221,6 +222,7 @@ Aggregate historical kill data into a cumulative producer profile:
 - Grade distribution trends, fat score distribution
 - Total head processed
 - Confidence tier: baseline (0 kills), provisional (1-2), personalised (3-5), expert (6+)
+- **Must be stratified by sex.** Aggregates are computed separately for male (steer/bull) and female (heifer/cow) rows so a steer analysis pulls only steer history and a heifer analysis pulls only heifer history. Mixing sexes produces distorted dressing % and RF benchmarks.
 
 Used by:
 - Analysis action for cumulative personalisation (currently only uses individual kill sheets)
