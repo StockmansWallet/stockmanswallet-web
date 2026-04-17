@@ -62,14 +62,14 @@ export async function GET(request: NextRequest) {
       });
     });
 
-    // Debug: 6mm top margin on every page creates white space at the top.
-    // Page 1: 6mm (Puppeteer) + 6mm (CSS .report-page padding) = 12mm total.
-    // Pages 2+: 6mm of white space so content doesn't sit flush against the edge.
-    // @page { margin: 0 } keeps pages flush with no black gap between them.
+    // Page margins are owned by CSS @page in print-styles.tsx (16mm top, 10mm bottom for the
+    // page counter, horizontal handled by .report-page). Zeroing Puppeteer's margins here
+    // prevents it from silently overriding the CSS with defaults.
     const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: true,
-      margin: { top: "16mm", right: "0", bottom: "0", left: "0" },
+      preferCSSPageSize: true,
+      margin: { top: "0", right: "0", bottom: "0", left: "0" },
     });
 
     return new NextResponse(Buffer.from(pdfBuffer), {

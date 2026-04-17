@@ -11,12 +11,16 @@ export function ReportPrintStyles() {
       }
       @page {
         size: A4;
-        margin: 0;
+        /* 16mm top gives the logo clear space on every page.
+           10mm bottom leaves room for the page counter in the @bottom-right margin box.
+           Left/right are 0 here; .report-page owns horizontal padding. */
+        margin: 16mm 0 10mm 0;
         @bottom-right {
           content: "Page " counter(page) " of " counter(pages);
           font-size: 8px;
           color: #9ca3af;
           font-family: sans-serif;
+          margin-right: 16mm;
         }
       }
       @media print {
