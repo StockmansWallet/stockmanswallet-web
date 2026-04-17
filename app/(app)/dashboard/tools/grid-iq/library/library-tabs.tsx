@@ -266,7 +266,7 @@ function AnalysesTab({ analyses }: { analyses: AnalysisRow[] }) {
           <Button
             variant="ghost"
             size="sm"
-            className={selecting ? "text-teal-400" : "text-text-muted"}
+            className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-teal-400/40 text-teal-400 hover:text-teal-400" : "border-white/[0.08] text-text-muted hover:border-white/[0.14]"}`}
             onClick={() => (selecting ? exitSelecting() : setSelecting(true))}
           >
             {selecting ? "Cancel" : "Select"}
@@ -339,7 +339,7 @@ function SelectionToolbar({
           <Button
             variant="ghost"
             size="sm"
-            className={selecting ? "text-teal-400" : "text-text-muted"}
+            className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-teal-400/40 text-teal-400 hover:text-teal-400" : "border-white/[0.08] text-text-muted hover:border-white/[0.14]"}`}
             onClick={onToggle}
           >
             {selecting ? "Cancel" : "Select"}
