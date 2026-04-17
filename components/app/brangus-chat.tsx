@@ -454,7 +454,7 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
     // Use native Web Share API if available (mobile + modern desktop)
     if (navigator.share) {
       try {
-        await navigator.share({ title: "Stockman IQ Chat", text });
+        await navigator.share({ title: "Brangus Chat", text });
         return;
       } catch {
         // User cancelled or share failed - fall through to menu
@@ -466,7 +466,7 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
 
   const handleShareEmail = useCallback(() => {
     const text = getShareText();
-    const subject = encodeURIComponent("Stockman IQ Chat");
+    const subject = encodeURIComponent("Brangus Chat");
     const body = encodeURIComponent(text);
     window.open(`mailto:?subject=${subject}&body=${body}`, "_self");
     setShowShareMenu(false);
@@ -497,7 +497,7 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
           <Brain className="h-5 w-5 text-white" />
         </div>
         <div>
-          <p className="text-lg font-bold text-[#1a1a1a]">Stockman IQ</p>
+          <p className="text-lg font-bold text-[#1a1a1a]">Brangus</p>
           <p className="text-xs text-[#666]">
             {new Date().toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}
           </p>

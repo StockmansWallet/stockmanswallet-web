@@ -186,7 +186,7 @@ export function formatConversationForExport(
   });
 
   const lines: string[] = [
-    `Stockman IQ - ${title ?? "Conversation"}`,
+    `Brangus - ${title ?? "Conversation"}`,
     date,
     "",
   ];

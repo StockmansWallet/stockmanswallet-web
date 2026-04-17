@@ -60,8 +60,8 @@ const featureGuides = [
     icon: <TrendingUp className="h-5 w-5" />,
   },
   {
-    title: "Stockman IQ",
-    description: "AI-powered insights about your operation including market trends, portfolio advice, freight rates, and conditions.",
+    title: "Brangus",
+    description: "Your AI stock agent. Ask about market trends, portfolio advice, freight rates, and conditions.",
     icon: <Brain className="h-5 w-5" />,
   },
   {

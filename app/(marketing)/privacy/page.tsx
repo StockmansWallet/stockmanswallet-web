@@ -31,7 +31,7 @@ export default function PrivacyPolicy() {
               <li><strong className="text-white">Property information:</strong> Property names, locations, and PIC (Property Identification Code) numbers.</li>
               <li><strong className="text-white">Sales records:</strong> Saleyard and private sale transaction details.</li>
               <li><strong className="text-white">Yard book events:</strong> Scheduled tasks, health records, and muster events.</li>
-              <li><strong className="text-white">AI conversations:</strong> Messages you send to our Stockman IQ (Brangus) AI assistant. These are processed in real time and not stored on our servers after the session ends.</li>
+              <li><strong className="text-white">AI conversations:</strong> Messages you send to Brangus, our AI assistant. These are processed in real time and not stored on our servers after the session ends.</li>
             </ul>
             <p className="mt-3">We do not collect location data, contacts, photos, or any information from other apps on your device.</p>
           </section>
@@ -42,7 +42,7 @@ export default function PrivacyPolicy() {
             <ul className="ml-4 mt-2 list-disc space-y-1">
               <li>Provide livestock portfolio valuations using MLA (Meat &amp; Livestock Australia) market data</li>
               <li>Calculate freight cost estimates between locations</li>
-              <li>Power the Stockman IQ AI assistant to answer questions about your portfolio</li>
+              <li>Power Brangus, our AI assistant, to answer questions about your portfolio</li>
               <li>Sync your data between devices via your account</li>
               <li>Send notifications about yard book events you have scheduled</li>
             </ul>
@@ -64,7 +64,7 @@ export default function PrivacyPolicy() {
             <p>We use the following third-party services to operate the app. Each processes only the minimum data required for its function:</p>
             <ul className="ml-4 mt-2 list-disc space-y-1">
               <li><strong className="text-white">Supabase</strong> (backend infrastructure, authentication, database) - stores your account and livestock data</li>
-              <li><strong className="text-white">Anthropic / Claude</strong> (AI processing) - processes your Stockman IQ chat messages. Messages are not retained by Anthropic after processing.</li>
+              <li><strong className="text-white">Anthropic / Claude</strong> (AI processing) - processes your Brangus chat messages. Messages are not retained by Anthropic after processing.</li>
               <li><strong className="text-white">Apple WeatherKit</strong> (weather data) - retrieves weather information for your property locations</li>
               <li><strong className="text-white">MLA (Meat &amp; Livestock Australia)</strong> (market data) - provides livestock market prices. No personal data is sent.</li>
             </ul>
