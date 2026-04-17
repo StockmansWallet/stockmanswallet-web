@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { ChevronLeft } from "lucide-react";
 
 export const metadata = { title: "Notifications" };
 
@@ -23,7 +25,20 @@ const notificationGroups = [
 export default function NotificationsPage() {
   return (
     <div className="max-w-4xl">
-      <PageHeader title="Notifications" subtitle="Manage your alerts and reminders." />
+      <div className="mb-4">
+        <Link
+          href="/dashboard/settings"
+          className="inline-flex items-center gap-1.5 rounded-full bg-surface-lowest px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-text-primary"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          Settings
+        </Link>
+      </div>
+      <PageHeader
+        title="Notifications"
+        titleClassName="text-4xl font-bold text-purple-400"
+        subtitle="Manage your alerts and reminders."
+      />
 
       <div className="space-y-6">
         {notificationGroups.map((group) => (

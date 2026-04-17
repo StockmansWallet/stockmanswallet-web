@@ -1,7 +1,8 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Crown, Lock, LogOut, Trash2, UserCircle } from "lucide-react";
+import { ChevronLeft, Crown, Lock, LogOut, Trash2, UserCircle } from "lucide-react";
 import { PasswordForm } from "../password-form";
 import { DeleteAccountButton } from "../delete-account-button";
 import { SignOutButton } from "../sign-out-button";
@@ -65,9 +66,18 @@ export default async function AccountSettingsPage() {
 
   return (
     <div className="max-w-4xl">
+      <div className="mb-4">
+        <Link
+          href="/dashboard/settings"
+          className="inline-flex items-center gap-1.5 rounded-full bg-surface-lowest px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-text-primary"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          Settings
+        </Link>
+      </div>
       <PageHeader
         title="Account"
-        titleClassName="text-4xl font-bold text-brand"
+        titleClassName="text-4xl font-bold text-amber-400"
         subtitle="Subscription, security, and account management."
       />
 

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { FlaskConical } from "lucide-react";
+import { ChevronLeft, FlaskConical } from "lucide-react";
 import { LoadDemoButton, ClearDataButton } from "../demo-buttons";
 
 export const metadata = { title: "Demo Data - Settings" };
@@ -9,17 +9,19 @@ export const metadata = { title: "Demo Data - Settings" };
 export default function DemoDataPage() {
   return (
     <div className="max-w-3xl">
+      <div className="mb-4">
+        <Link
+          href="/dashboard/settings"
+          className="inline-flex items-center gap-1.5 rounded-full bg-surface-lowest px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-text-primary"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          Settings
+        </Link>
+      </div>
       <PageHeader
         title="Demo Data"
+        titleClassName="text-4xl font-bold text-lime-400"
         subtitle="Load sample herds to explore the app without entering real data."
-        actions={
-          <Link
-            href="/dashboard/settings"
-            className="inline-flex h-8 items-center justify-center rounded-full px-3.5 text-[13px] font-semibold text-text-secondary transition-all duration-150 hover:bg-white/8 hover:text-text-primary"
-          >
-            Back
-          </Link>
-        }
       />
 
       <div className="space-y-6">

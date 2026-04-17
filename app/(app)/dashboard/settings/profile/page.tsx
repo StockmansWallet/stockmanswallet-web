@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { User, Phone, FileText, Eye } from "lucide-react";
+import { ChevronLeft, User, Phone, FileText, Eye } from "lucide-react";
 import { ProfileForm } from "../profile-form";
 import { ContactDetailsForm } from "../contact-details-form";
 import { BioForm } from "../bio-form";
@@ -36,17 +36,19 @@ export default async function ProfileSettingsPage() {
 
   return (
     <div className="max-w-4xl">
+      <div className="mb-4">
+        <Link
+          href="/dashboard/settings"
+          className="inline-flex items-center gap-1.5 rounded-full bg-surface-lowest px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-text-primary"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          Settings
+        </Link>
+      </div>
       <PageHeader
         title="Profile"
+        titleClassName="text-4xl font-bold text-brand"
         subtitle="Your personal information, contact details, and visibility settings."
-        actions={
-          <Link
-            href="/dashboard/settings"
-            className="inline-flex h-8 items-center justify-center rounded-full px-3.5 text-[13px] font-semibold text-text-secondary transition-all duration-150 hover:bg-white/8 hover:text-text-primary"
-          >
-            Back
-          </Link>
-        }
       />
 
       <div className="flex flex-col gap-6 lg:flex-row">

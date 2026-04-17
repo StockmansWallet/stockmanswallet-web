@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Database } from "lucide-react";
+import { ChevronLeft, Database } from "lucide-react";
 import { ClearAllDataButton } from "../demo-buttons";
 
 export const metadata = { title: "Data Management - Settings" };
@@ -31,17 +31,19 @@ function SectionIcon({
 export default function DataManagementPage() {
   return (
     <div className="max-w-3xl">
+      <div className="mb-4">
+        <Link
+          href="/dashboard/settings"
+          className="inline-flex items-center gap-1.5 rounded-full bg-surface-lowest px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-text-primary"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          Settings
+        </Link>
+      </div>
       <PageHeader
         title="Data Management"
+        titleClassName="text-4xl font-bold text-amber-400"
         subtitle="Manage your data."
-        actions={
-          <Link
-            href="/dashboard/settings"
-            className="inline-flex h-8 items-center justify-center rounded-full px-3.5 text-[13px] font-semibold text-text-secondary transition-all duration-150 hover:bg-white/8 hover:text-text-primary"
-          >
-            Back
-          </Link>
-        }
       />
 
       <div className="space-y-6">
