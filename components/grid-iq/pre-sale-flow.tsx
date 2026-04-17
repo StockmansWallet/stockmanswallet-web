@@ -343,7 +343,7 @@ export function PreSaleFlow({ processors, grids, herds, killSheets }: PreSaleFlo
                                 e.target.value
                               )
                             }
-                            className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary focus:border-teal-500/50 focus:outline-none"
+                            className="h-10 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 text-sm text-text-primary focus:border-teal-500/50 focus:outline-none"
                           >
                             <option value="">Select herd...</option>
                             {herds
@@ -375,7 +375,7 @@ export function PreSaleFlow({ processors, grids, herds, killSheets }: PreSaleFlo
                                 parseInt(e.target.value) || 0
                               )
                             }
-                            className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary focus:border-teal-500/50 focus:outline-none"
+                            className="h-10 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 text-sm text-text-primary focus:border-teal-500/50 focus:outline-none"
                             placeholder="0"
                           />
                         </div>
@@ -387,7 +387,7 @@ export function PreSaleFlow({ processors, grids, herds, killSheets }: PreSaleFlo
                             type="text"
                             value={alloc.category}
                             readOnly
-                            className="w-full rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2 text-xs text-text-muted"
+                            className="h-10 w-full rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 text-xs text-text-muted"
                           />
                         </div>
                         {allocations.length > 1 && (
@@ -455,7 +455,7 @@ export function PreSaleFlow({ processors, grids, herds, killSheets }: PreSaleFlo
                       if (g && g.processor_id !== id) setSelectedGridId(null);
                     }
                   }}
-                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary focus:border-teal-500/50 focus:outline-none"
+                  className="h-10 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 text-sm text-text-primary focus:border-teal-500/50 focus:outline-none"
                 >
                   <option value="">All processors</option>
                   {processors.map((p) => (
