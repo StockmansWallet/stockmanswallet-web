@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { isAdminEmail } from "@/lib/data/admin";
 import { resolveMLASaleyardName } from "@/lib/data/reference-data";
 import type { SaleyardStats } from "@/app/(app)/dashboard/admin/valuation/page";
@@ -34,11 +35,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Count herds per saleyard
-  const { data: herds } = await supabase
+  // Count herds per saleyard across ALL users. Admin intent is to see which
+  // saleyards are actually used, so this must not be scoped to the admin's
+  // own herds (the previous .eq("user_id", user.id) was the bug). Uses
+  // service role to bypass RLS since the admin gate is already enforced.
+  const svc = createServiceRoleClient();
+  const { data: herds } = await svc
     .from("herds")
     .select("selected_saleyard")
-    .eq("user_id", user.id)
     .eq("is_sold", false)
     .eq("is_deleted", false)
     .not("selected_saleyard", "is", null);

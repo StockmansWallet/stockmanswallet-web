@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { redirect, notFound } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -65,18 +65,16 @@ export default async function LensDetailPage({
 
   const lensRows = (lensRowsRaw ?? []) as AdvisorLens[];
 
-  // Load herds via service client
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const serviceClient = serviceRoleKey
-    ? createServiceClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceRoleKey)
-    : null;
-
+  // Load herds via service client, scoped to the client's user_id so a forged
+  // advisor_lenses.herd_id pointing at another user's herd cannot surface here.
+  const serviceClient = createServiceRoleClient();
   const herdIds = lensRows.map((l) => l.herd_id).filter(Boolean) as string[];
-  const { data: herdsRaw } = serviceClient && herdIds.length > 0
+  const { data: herdsRaw } = herdIds.length > 0
     ? await serviceClient
         .from("herds")
         .select("id, name, category, breed, head_count, species")
         .in("id", herdIds)
+        .eq("user_id", clientUserId)
         .eq("is_deleted", false)
     : { data: [] };
 

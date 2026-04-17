@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { ConnectionRealtime } from "@/components/app/advisory/connection-realtime";
-import { hasActivePermission, isAdvisorRole, type ConnectionRequest } from "@/lib/types/advisory";
+import { hasActivePermission, canShare, isAdvisorRole, type ConnectionRequest } from "@/lib/types/advisory";
 import { UserCheck, Clock, Shield, Users, MapPin, DollarSign } from "lucide-react";
 import { ClientsByLgaChart } from "@/components/app/advisory/clients-by-lga-chart";
 
@@ -87,26 +87,25 @@ export default async function AdvisorDashboardPage() {
   const pending = allConnections.filter((c) => c.status === "pending").length;
   const recentClients = allConnections.slice(0, 5);
 
-  // Aggregate total livestock value from client portfolio snapshots
-  // Uses service client to bypass RLS on portfolio_snapshots
-  // Resolve the client (other party) ID regardless of who initiated the connection
-  const activeClientIds = allConnections
-    .filter((c) => hasActivePermission(c))
+  // Aggregate total livestock value from client portfolio snapshots.
+  // Only includes clients whose sharing_permissions.valuations is true and
+  // whose connection is both approved and unexpired (canShare handles all three).
+  const valuationClientIds = allConnections
+    .filter((c) => canShare(c, "valuations"))
     .map((c) => c.requester_user_id === user.id ? c.target_user_id : c.requester_user_id);
 
   let totalValue: number | undefined;
   const clientValueMap = new Map<string, number>();
 
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (serviceRoleKey && activeClientIds.length > 0) {
-    const svc = createServiceClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceRoleKey);
+  if (valuationClientIds.length > 0) {
+    const svc = createServiceRoleClient();
     const today = new Date().toISOString().slice(0, 10);
 
     // Get latest snapshot per client (today or most recent)
     const { data: latestSnapshots } = await svc
       .from("portfolio_snapshots")
       .select("user_id, total_value, snapshot_date")
-      .in("user_id", activeClientIds)
+      .in("user_id", valuationClientIds)
       .lte("snapshot_date", today)
       .order("snapshot_date", { ascending: false });
 

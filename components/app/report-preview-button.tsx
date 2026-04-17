@@ -40,11 +40,15 @@ export function ReportPreviewButton({ reportPath }: ReportPreviewButtonProps) {
         return;
       }
 
+      // Send the JWT in the Authorization header, NOT as a ?token= query
+      // string. Query strings leak into logs, history, and Referer headers.
       const params = new URLSearchParams(searchParams.toString());
-      params.set("token", session.access_token);
-      const pdfURL = `/api/report${reportPath}/pdf?${params.toString()}`;
+      const qs = params.toString();
+      const pdfURL = `/api/report${reportPath}/pdf${qs ? `?${qs}` : ""}`;
 
-      const response = await fetch(pdfURL);
+      const response = await fetch(pdfURL, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
       if (!response.ok) throw new Error(`PDF generation failed: ${response.status}`);
 
       const blob = await response.blob();

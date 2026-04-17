@@ -221,13 +221,35 @@ export interface AppNotification {
 // Data access is granted by the producer and stays active until they stop sharing.
 export function hasActivePermission(connection: ConnectionRequest): boolean {
   if (connection.status !== "approved") return false;
-  return connection.permission_granted_at != null;
+  if (connection.permission_granted_at == null) return false;
+  if (connection.permission_expires_at != null
+      && new Date(connection.permission_expires_at).getTime() <= Date.now()) {
+    return false;
+  }
+  return true;
+}
+
+// Returns true only when the connection is active AND the producer has the
+// specified sharing category enabled. Use this before surfacing any PII tied
+// to that category via the service role.
+export function canShare(
+  connection: Pick<ConnectionRequest, "status" | "permission_granted_at" | "permission_expires_at" | "sharing_permissions">,
+  category: SharingCategory,
+): boolean {
+  if (connection.status !== "approved") return false;
+  if (connection.permission_granted_at == null) return false;
+  if (connection.permission_expires_at != null
+      && new Date(connection.permission_expires_at).getTime() <= Date.now()) {
+    return false;
+  }
+  const perms = parseSharingPermissions(connection.sharing_permissions);
+  return perms[category] === true;
 }
 
 // Returns a short label for the sharing state
 export function permissionStatusLabel(connection: ConnectionRequest): string {
   if (connection.status !== "approved") return "Not connected";
-  if (connection.permission_granted_at) return "Sharing";
-  return "Not sharing";
+  if (!hasActivePermission(connection)) return "Not sharing";
+  return "Sharing";
 }
 

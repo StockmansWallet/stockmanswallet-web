@@ -357,11 +357,12 @@ export async function saveLensReport(
   const serviceClient = getServiceClient();
   const herdIds = lensRows.map((l) => l.herd_id).filter(Boolean) as string[];
 
-  // Load herds
+  // Load herds (scoped to this client's user_id to prevent cross-client leaks).
   const { data: herds } = await serviceClient
     .from("herds")
     .select("*")
     .in("id", herdIds)
+    .eq("user_id", ctx.clientUserId)
     .eq("is_deleted", false);
 
   if (!herds || herds.length === 0) return { error: "Herds not found" };
@@ -634,6 +635,7 @@ export async function generateLensReport(
     .from("herds")
     .select("*")
     .in("id", herdIds)
+    .eq("user_id", ctx.clientUserId)
     .eq("is_deleted", false);
 
   // Get client and advisor names

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { redirect } from "next/navigation";
+import { sanitiseSearchQuery } from "@/lib/utils/search-sanitise";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -39,9 +40,10 @@ export default async function AdvisorProducerDirectoryPage({
     query = query.eq("state", stateFilter);
   }
 
-  if (searchQuery) {
+  const sanitisedQuery = sanitiseSearchQuery(searchQuery);
+  if (sanitisedQuery) {
     query = query.or(
-      `display_name.ilike.%${searchQuery}%,company_name.ilike.%${searchQuery}%`
+      `display_name.ilike.%${sanitisedQuery}%,company_name.ilike.%${sanitisedQuery}%`
     );
   }
 
@@ -67,9 +69,8 @@ export default async function AdvisorProducerDirectoryPage({
 
   // Fetch avatar URLs from auth metadata via service client
   const avatarMap = new Map<string, string>();
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (serviceRoleKey && producerIds.length > 0) {
-    const svc = createServiceClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceRoleKey);
+  if (producerIds.length > 0) {
+    const svc = createServiceRoleClient();
     const { data: authList } = await svc.auth.admin.listUsers({
       perPage: 1000,
     });

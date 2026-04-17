@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { createServiceRoleClient } from "@/lib/supabase/service-role";
+import { canShare } from "@/lib/types/advisory";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -42,22 +43,19 @@ export default async function AdvisorHerdDetailPage({
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in");
 
-  // Verify advisor owns this connection
+  // Verify advisor owns this connection AND the producer is sharing herds.
   const { data: conn } = await supabase
     .from("connection_requests")
-    .select("id, requester_user_id, target_user_id")
+    .select("id, requester_user_id, target_user_id, status, permission_granted_at, permission_expires_at, sharing_permissions")
     .eq("id", connectionId)
     .eq("requester_user_id", user.id)
-    .eq("status", "approved")
     .single();
 
   if (!conn) notFound();
+  if (!canShare(conn, "herds")) notFound();
 
-  // Fetch herd via service client (bypasses RLS)
-  const serviceClient = createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  // Fetch herd via service client (bypasses RLS). Scoped to the client's user_id.
+  const serviceClient = createServiceRoleClient();
 
   const { data: herd } = await serviceClient
     .from("herds")

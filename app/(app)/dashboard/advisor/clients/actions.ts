@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createNotification } from "@/lib/advisory/notifications";
 import { DEFAULT_SHARING_PERMISSIONS, ALL_OFF_SHARING_PERMISSIONS } from "@/lib/types/advisory";
+import { sanitiseSearchQuery } from "@/lib/utils/search-sanitise";
 
 const searchQuerySchema = z.object({
   query: z.string().min(2).max(100),
@@ -29,8 +30,7 @@ export async function searchProducers(query: string) {
 
   if (!user) return { producers: [] };
 
-  // Sanitise input - letters, numbers, spaces, hyphens, apostrophes only
-  const sanitised = query.replace(/[^a-zA-Z0-9\s\-']/g, "").trim();
+  const sanitised = sanitiseSearchQuery(query);
   if (!sanitised) return { producers: [] };
 
   // Get existing connections to exclude (both directions)

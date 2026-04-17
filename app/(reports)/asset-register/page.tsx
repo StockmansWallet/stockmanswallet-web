@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { parseReportConfig } from "@/lib/utils/report-config";
@@ -17,26 +18,26 @@ export default async function AssetRegisterReportPage({
 }) {
   const params = await searchParams;
   const config = parseReportConfig(params);
-  const token = typeof params.token === "string" ? params.token : undefined;
 
-  // Debug: Support two auth modes:
-  // 1. Cookie auth (browser users visiting the page normally)
-  // 2. Token auth via ?token= parameter (server-side PDF generation via Puppeteer)
+  // Two auth modes:
+  // 1. Cookie auth for real browser users.
+  // 2. x-pdf-token HTTP header for the server-side PDF generator (Puppeteer).
+  //    The header never leaks into Vercel logs / CDN access logs / Referer the
+  //    way a ?token= query string would.
+  const pdfToken = (await headers()).get("x-pdf-token");
   let supabase;
   let userId: string;
 
-  if (token) {
-    // Token-based auth (from PDF API route's Puppeteer)
+  if (pdfToken) {
     supabase = createSupabaseClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { global: { headers: { Authorization: `Bearer ${token}` } } }
+      { global: { headers: { Authorization: `Bearer ${pdfToken}` } } },
     );
-    const { data: { user }, error } = await supabase.auth.getUser(token);
+    const { data: { user }, error } = await supabase.auth.getUser(pdfToken);
     if (error || !user) redirect("/sign-in");
     userId = user.id;
   } else {
-    // Cookie-based auth (normal browser access)
     supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect("/sign-in");
