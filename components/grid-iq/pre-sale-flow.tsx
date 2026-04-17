@@ -32,6 +32,7 @@ interface ProcessorSummary {
   address: string | null;
   location_latitude: number | null;
   location_longitude: number | null;
+  is_primary?: boolean;
 }
 
 interface GridSummary {
@@ -77,6 +78,9 @@ interface Allocation {
 
 interface PreSaleFlowProps {
   processors: ProcessorSummary[];
+  // Pre-selected processor for Step 2 -- usually the user's primary processor.
+  // User can still switch in the dropdown.
+  defaultProcessorId?: string | null;
   grids: GridSummary[];
   herds: HerdSummary[];
   killSheets: KillSheetSummary[];
@@ -113,13 +117,21 @@ function formatCurrency(value: number | null): string {
 
 // MARK: - Component
 
-export function PreSaleFlow({ processors, grids, herds, killSheets }: PreSaleFlowProps) {
+export function PreSaleFlow({
+  processors,
+  defaultProcessorId,
+  grids,
+  herds,
+  killSheets,
+}: PreSaleFlowProps) {
   const router = useRouter();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [uploadOpen, setUploadOpen] = useState<"grid" | "killsheet" | null>(null);
-  const [selectedProcessorId, setSelectedProcessorId] = useState<string | null>(null);
+  const [selectedProcessorId, setSelectedProcessorId] = useState<string | null>(
+    defaultProcessorId ?? null
+  );
 
   // Step 1: What am I selling? — consignment name + herd allocations
   const [consignmentName, setConsignmentName] = useState("");

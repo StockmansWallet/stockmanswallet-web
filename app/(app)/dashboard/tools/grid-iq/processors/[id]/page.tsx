@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { ProcessorForm } from "../processor-form";
 import { ProcessorDeleteButton } from "./processor-delete-button";
+import { PrimaryToggle } from "./primary-toggle";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -86,7 +87,13 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
           subtitleClassName="text-sm text-text-secondary"
           compact
         />
-        <ProcessorDeleteButton processorId={id} />
+        <div className="flex items-center gap-2">
+          <PrimaryToggle
+            processorId={id}
+            initialIsPrimary={!!processor.is_primary}
+          />
+          <ProcessorDeleteButton processorId={id} />
+        </div>
       </div>
 
       <div className="mt-4">

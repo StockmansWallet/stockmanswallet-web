@@ -22,9 +22,10 @@ export default async function NewAnalysisPage() {
   ] = await Promise.all([
     supabase
       .from("processors")
-      .select("id, name, address, location_latitude, location_longitude")
+      .select("id, name, address, location_latitude, location_longitude, is_primary")
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
+      .order("is_primary", { ascending: false })
       .order("name"),
     supabase
       .from("processor_grids")
@@ -71,6 +72,10 @@ export default async function NewAnalysisPage() {
       />
       <PreSaleFlow
         processors={processors ?? []}
+        defaultProcessorId={
+          (processors ?? []).find((p) => p.is_primary)?.id ??
+          ((processors ?? []).length === 1 ? processors![0].id : null)
+        }
         grids={grids ?? []}
         herds={(herds ?? []).filter((h) => h.species === "Cattle")}
         killSheets={killSheets ?? []}

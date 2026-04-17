@@ -57,9 +57,21 @@ export async function createProcessor(formData: FormData) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
 
+  // If this is the user's first processor, mark it primary so the Analyse
+  // flow has a sensible default without any extra clicks.
+  const { count } = await supabase
+    .from("processors")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .eq("is_deleted", false);
+
   const { data, error } = await supabase
     .from("processors")
-    .insert({ ...parsed.data, user_id: user.id })
+    .insert({
+      ...parsed.data,
+      user_id: user.id,
+      is_primary: (count ?? 0) === 0,
+    })
     .select("id")
     .single();
 
@@ -72,6 +84,53 @@ export async function createProcessor(formData: FormData) {
 
   revalidatePath("/dashboard/tools/grid-iq/processors");
   redirect(`/dashboard/tools/grid-iq/processors/${data!.id}`);
+}
+
+export async function setPrimaryProcessor(id: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  // Unset the current primary first to avoid tripping the unique index,
+  // then promote the chosen row. Two round-trips but both fast and RLS-scoped.
+  const { error: unsetError } = await supabase
+    .from("processors")
+    .update({ is_primary: false })
+    .eq("user_id", user.id)
+    .eq("is_primary", true);
+  if (unsetError) return { error: unsetError.message };
+
+  const { error: setError } = await supabase
+    .from("processors")
+    .update({ is_primary: true, updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("user_id", user.id);
+  if (setError) return { error: setError.message };
+
+  revalidatePath("/dashboard/tools/grid-iq/processors");
+  revalidatePath(`/dashboard/tools/grid-iq/processors/${id}`);
+  return { success: true };
+}
+
+export async function clearPrimaryProcessor(id: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { error } = await supabase
+    .from("processors")
+    .update({ is_primary: false, updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("user_id", user.id);
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/tools/grid-iq/processors");
+  revalidatePath(`/dashboard/tools/grid-iq/processors/${id}`);
+  return { success: true };
 }
 
 export async function updateProcessor(id: string, formData: FormData) {

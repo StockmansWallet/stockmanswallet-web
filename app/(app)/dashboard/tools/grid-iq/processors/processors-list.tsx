@@ -24,6 +24,7 @@ interface ProcessorRow {
   location_longitude: number | null;
   contact_name: string | null;
   contact_phone: string | null;
+  is_primary: boolean;
   grid_count: number;
   kill_sheet_count: number;
   updated_at: string;
@@ -165,9 +166,16 @@ export function ProcessorsList({
                   <Factory className="h-5 w-5 text-teal-400" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-text-primary">
-                    {p.name}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium text-text-primary">
+                      {p.name}
+                    </p>
+                    {p.is_primary && (
+                      <span className="rounded bg-teal-500/15 px-1.5 py-0.5 text-[10px] font-medium text-teal-400">
+                        Primary
+                      </span>
+                    )}
+                  </div>
                   <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-text-muted">
                     {p.address && <span>{p.address}</span>}
                     {hasCoords ? (

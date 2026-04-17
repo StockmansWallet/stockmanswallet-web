@@ -16,10 +16,11 @@ export default async function ProcessorsListPage() {
   const { data: processors } = await supabase
     .from("processors")
     .select(
-      "id, name, address, location_latitude, location_longitude, contact_name, contact_phone, updated_at"
+      "id, name, address, location_latitude, location_longitude, contact_name, contact_phone, is_primary, updated_at"
     )
     .eq("user_id", user!.id)
     .eq("is_deleted", false)
+    .order("is_primary", { ascending: false })
     .order("name", { ascending: true });
 
   // Counts of related records per processor for the list view
