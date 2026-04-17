@@ -9,18 +9,26 @@ import { HerdComposition } from "./herd-composition";
 import { OutlookCard } from "./outlook-card";
 import { calculateHerdValuation, categoryFallback, parseCalvesAtFoot, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
-import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
-import { expandWithNearbySaleyards } from "@/lib/data/saleyard-proximity";
+import { cattleBreedPremiums, resolveMLASaleyardName, saleyardLocality } from "@/lib/data/reference-data";
+import { closestSaleyardsToProperty, expandWithNearbySaleyards } from "@/lib/data/saleyard-proximity";
 import { PortfolioValueCard } from "@/components/app/portfolio-value-card";
 import { ComingUpCard } from "@/components/app/coming-up-card";
 import { GrowthMortalityCard } from "@/components/app/growth-mortality-card";
-import { DashboardSaleyardSelector } from "@/components/app/dashboard-saleyard-selector";
-import { DashboardInsights } from "@/components/app/dashboard-insights";
+import { ClosestSaleyardsCard } from "@/components/app/closest-saleyards-card";
 import { CalvingAccrualCard } from "@/components/app/calving-accrual-card";
 import { MapPinned, Tags, Layers } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
 import { StatCard } from "@/components/ui/stat-card";
-import { evaluateInsights } from "@/lib/stockman-iq/insight-engine";
+
+function shortSaleyardName(name: string): string {
+  return name
+    .replace(/ Livestock (Marketing Centre|Selling Centre|Exchange|Centre)$/i, "")
+    .replace(/ Regional Livestock (Exchange|Market)$/i, "")
+    .replace(/ Central [\w ]+ Livestock Exchange$/i, "")
+    .replace(/ (Dalrymple |Northern Victoria |Great Southern Regional Cattle |Gippsland Regional |South Eastern |Western Victorian |Victorian |Southern |South Australian )?Saleyards?$/i, "")
+    .replace(/ Livestock Exchange$/i, "")
+    .trim();
+}
 
 export const revalidate = 0;
 
@@ -28,8 +36,7 @@ export const metadata = {
   title: "Dashboard",
 };
 
-export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ saleyard?: string }> }) {
-  const { saleyard: saleyardOverride } = await searchParams;
+export default async function DashboardPage() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -91,13 +98,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   ]);
 
   // Fetch only the newest date's prices per saleyard+category via RPC.
-  // When a saleyard override is active (from the dashboard selector), fetch prices for that
-  // saleyard only. Otherwise fetch for each herd's individual saleyard.
-  const resolvedOverride = saleyardOverride ? resolveMLASaleyardName(saleyardOverride) : null;
-  const herdSaleyards = resolvedOverride
-    ? [resolvedOverride]
-    : [...new Set((herds ?? []).map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
-  const saleyards = expandWithNearbySaleyards(herdSaleyards);
+  // Prices are fetched for each herd's individual saleyard plus the 3 closest
+  // saleyards to the primary property (used by the Closest Saleyards card).
+  const primaryProperty = (properties ?? []).find((p) => p.is_default) ?? (properties ?? [])[0] ?? null;
+  const closestYards = closestSaleyardsToProperty(primaryProperty, 3);
+  const herdSaleyards = [...new Set((herds ?? []).map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
+  const saleyards = expandWithNearbySaleyards([...new Set([...herdSaleyards, ...closestYards])]);
   const primaryCategories = [...new Set((herds ?? []).map((h) => resolveMLACategory(h.category, h.initial_weight, h.breeder_sub_type ?? undefined).primaryMLACategory))];
   const mlaCategories = [...new Set([...primaryCategories, ...primaryCategories.map(c => categoryFallback(c)).filter((c): c is string => c !== null)])];
 
@@ -148,19 +154,15 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     premiumMap.set(b.breed, b.premium_percent);
   }
 
-  // Portfolio value using full iOS valuation formula with price source tracking
-  // When saleyard override is active, inject it into each herd so the valuation engine
-  // uses the override saleyard for price resolution (matches iOS DashboardView behaviour).
+  // Portfolio value using full iOS valuation formula with price source tracking.
+  // Each herd uses its own selected_saleyard for price resolution.
   let portfolioValue = 0;
   let fallbackCount = 0;
   let totalPreBirthAccrual = 0;
   let totalCalvesAtFootValue = 0;
   for (const h of activeHerds) {
-    const herdWithOverride = saleyardOverride
-      ? { ...h, selected_saleyard: saleyardOverride }
-      : h;
     const result = calculateHerdValuation(
-      herdWithOverride as Parameters<typeof calculateHerdValuation>[0],
+      h as Parameters<typeof calculateHerdValuation>[0],
       nationalPriceMap, premiumMap, undefined, saleyardPriceMap, saleyardBreedPriceMap
     );
     portfolioValue += result.netValue;
@@ -168,6 +170,28 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     totalCalvesAtFootValue += result.calvesAtFootValue;
     if (result.priceSource !== "saleyard") fallbackCount++;
   }
+
+  // Compute total portfolio value per closest saleyard (override each herd's
+  // saleyard to that yard and sum). Feeds the Closest Saleyards card.
+  const closestYardValues = closestYards.map((yard) => {
+    let total = 0;
+    for (const h of activeHerds) {
+      const result = calculateHerdValuation(
+        { ...h, selected_saleyard: yard } as Parameters<typeof calculateHerdValuation>[0],
+        nationalPriceMap, premiumMap, undefined, saleyardPriceMap, saleyardBreedPriceMap
+      );
+      total += result.netValue;
+    }
+    return {
+      name: yard,
+      shortName: shortSaleyardName(yard),
+      locality: saleyardLocality[yard],
+      value: total,
+    };
+  });
+  const hasPrimaryLocation = !!(primaryProperty && (
+    (primaryProperty.latitude != null && primaryProperty.longitude != null) || primaryProperty.state
+  ));
   const totalBreedingAccrual = totalPreBirthAccrual + totalCalvesAtFootValue;
   const totalCalvesAtFootHead = activeHerds.reduce((sum, h) => {
     const parsed = parseCalvesAtFoot(h.additional_info);
@@ -221,9 +245,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
         if (herdsAtDate.length > 0) {
           const dateVal = herdsAtDate.reduce((sum, h) => {
-            const herdWithOverride = saleyardOverride ? { ...h, selected_saleyard: saleyardOverride } : h;
             return sum + calculateHerdValuation(
-              herdWithOverride as Parameters<typeof calculateHerdValuation>[0],
+              h as Parameters<typeof calculateHerdValuation>[0],
               nationalPriceMap, premiumMap, asOfDate, saleyardPriceMap, saleyardBreedPriceMap
             ).netValue;
           }, 0);
@@ -302,9 +325,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       ? ((todayVal - prevVal) / prevVal) * 100
       : undefined;
 
-  // Evaluate insights
-  const insights = hasData ? await evaluateInsights() : [];
-
   return (
     <>
       <div className="max-w-4xl">
@@ -354,14 +374,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
               <OutlookCard data={chartData} />
             </div>
 
-            {/* Saleyard selector - full width */}
-            <div className="mt-3 lg:mt-4">
-              <DashboardSaleyardSelector
-                currentSaleyard={saleyardOverride ?? null}
-                primaryProperty={(properties ?? []).find((p) => p.is_default) ?? (properties ?? [])[0] ?? null}
-              />
-            </div>
-
             {/* Two columns */}
             <div className="mt-3 grid grid-cols-1 gap-3 lg:mt-4 lg:grid-cols-2 lg:gap-4">
               {/* Left column */}
@@ -409,7 +421,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
               {/* Right column */}
               <div className="flex min-w-0 flex-col gap-3 lg:gap-4">
-              <DashboardInsights insights={insights} />
+              <ClosestSaleyardsCard yards={closestYardValues} hasLocation={hasPrimaryLocation} />
 
               <Card>
                 <CardHeader>
