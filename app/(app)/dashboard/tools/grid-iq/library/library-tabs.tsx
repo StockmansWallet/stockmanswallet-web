@@ -173,7 +173,7 @@ export function LibraryTabs({
               }`}
             >
               <Icon
-                className={`h-4 w-4 ${active ? "text-teal-400" : "text-text-muted"}`}
+                className={`h-4 w-4 ${active ? "text-indigo-400" : "text-text-muted"}`}
               />
               {tab.label}
             </button>
@@ -243,7 +243,7 @@ function AnalysesTab({ analyses }: { analyses: AnalysisRow[] }) {
                   onClick={() => setSubTab(f.id)}
                   className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                     active
-                      ? "border-teal-500/40 bg-teal-500/15 text-teal-400"
+                      ? "border-indigo-500/40 bg-indigo-500/15 text-indigo-400"
                       : "border-white/[0.08] bg-surface-lowest text-text-secondary hover:border-white/[0.14] hover:text-text-primary"
                   }`}
                 >
@@ -251,7 +251,7 @@ function AnalysesTab({ analyses }: { analyses: AnalysisRow[] }) {
                   {f.count > 0 && (
                     <span
                       className={`rounded-full px-1.5 py-[1px] text-[10px] ${
-                        active ? "bg-teal-500/20 text-teal-400" : "bg-white/[0.06] text-text-muted"
+                        active ? "bg-indigo-500/20 text-indigo-400" : "bg-white/[0.06] text-text-muted"
                       }`}
                     >
                       {f.count}
@@ -266,7 +266,7 @@ function AnalysesTab({ analyses }: { analyses: AnalysisRow[] }) {
           <Button
             variant="ghost"
             size="sm"
-            className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-teal-400/40 text-teal-400 hover:text-teal-400" : "border-white/[0.08] text-text-muted hover:border-white/[0.14]"}`}
+            className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-indigo-400/40 text-indigo-400 hover:text-indigo-400" : "border-white/[0.08] text-text-muted hover:border-white/[0.14]"}`}
             onClick={() => (selecting ? exitSelecting() : setSelecting(true))}
           >
             {selecting ? "Cancel" : "Select"}
@@ -316,7 +316,7 @@ function SelectionToolbar({
           <span
             className={`flex h-4 w-4 items-center justify-center rounded border transition-colors ${
               allSelected
-                ? "border-teal-400 bg-teal-400 text-black"
+                ? "border-indigo-400 bg-indigo-400 text-black"
                 : "border-white/20 bg-white/[0.04]"
             }`}
           >
@@ -324,14 +324,14 @@ function SelectionToolbar({
           </span>
           Select All ({total})
           {selected.size > 0 && (
-            <span className="ml-2 text-teal-400">{selected.size} selected</span>
+            <span className="ml-2 text-indigo-400">{selected.size} selected</span>
           )}
         </button>
       ) : (
         <span />
       )}
       <div className="flex items-center gap-2">
-        <Button variant="teal" size="sm" onClick={onUpload}>
+        <Button variant="indigo" size="sm" onClick={onUpload}>
           <Upload className="mr-1.5 h-3.5 w-3.5" />
           {uploadLabel}
         </Button>
@@ -339,7 +339,7 @@ function SelectionToolbar({
           <Button
             variant="ghost"
             size="sm"
-            className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-teal-400/40 text-teal-400 hover:text-teal-400" : "border-white/[0.08] text-text-muted hover:border-white/[0.14]"}`}
+            className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-indigo-400/40 text-indigo-400 hover:text-indigo-400" : "border-white/[0.08] text-text-muted hover:border-white/[0.14]"}`}
             onClick={onToggle}
           >
             {selecting ? "Cancel" : "Select"}
@@ -475,7 +475,7 @@ function GridsTab({
           description="Upload a processor grid photo, PDF, or spreadsheet. Grid IQ extracts the price matrix automatically."
           actionLabel="Upload Grid"
           onAction={onUpload}
-          variant="teal"
+          variant="indigo"
         />
       </Card>
     );
@@ -514,15 +514,15 @@ function GridsTab({
                   <span
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
                       checked
-                        ? "border-teal-400 bg-teal-400 text-black"
+                        ? "border-indigo-400 bg-indigo-400 text-black"
                         : "border-white/20 bg-white/[0.04]"
                     }`}
                   >
                     {checked && <Check className="h-3 w-3" strokeWidth={3} />}
                   </span>
                 )}
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/15">
-                  <Grid3x3 className="h-5 w-5 text-teal-400" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/15">
+                  <Grid3x3 className="h-5 w-5 text-indigo-400" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-text-primary">
@@ -659,7 +659,7 @@ function KillSheetsTab({
           description="Upload kill sheets to start tracking your over-the-hooks performance. Kill history improves Grid IQ accuracy with personalised realisation factors."
           actionLabel="Upload Kill Sheet"
           onAction={onUpload}
-          variant="teal"
+          variant="indigo"
         />
       </Card>
     );
@@ -689,15 +689,15 @@ function KillSheetsTab({
                   <span
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
                       checked
-                        ? "border-teal-400 bg-teal-400 text-black"
+                        ? "border-indigo-400 bg-indigo-400 text-black"
                         : "border-white/20 bg-white/[0.04]"
                     }`}
                   >
                     {checked && <Check className="h-3 w-3" strokeWidth={3} />}
                   </span>
                 )}
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/15">
-                  <FileText className="h-5 w-5 text-teal-400" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/15">
+                  <FileText className="h-5 w-5 text-indigo-400" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-text-primary">

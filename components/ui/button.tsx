@@ -1,6 +1,6 @@
 import { forwardRef, type ButtonHTMLAttributes } from "react";
 
-type ButtonVariant = "primary" | "secondary" | "ghost" | "destructive" | "teal" | "lime" | "sky" | "amber" | "purple" | "advisor" | "simulator";
+type ButtonVariant = "primary" | "secondary" | "ghost" | "destructive" | "teal" | "indigo" | "lime" | "sky" | "amber" | "purple" | "advisor" | "simulator";
 type ButtonSize = "sm" | "md" | "lg";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -19,6 +19,8 @@ const variantClasses: Record<ButtonVariant, string> = {
     "bg-[#8A1316] text-white/80 hover:bg-[#9E1619] active:scale-[0.97] shadow-sm",
   teal:
     "bg-teal-500 text-white hover:bg-teal-600 active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
+  indigo:
+    "bg-indigo-500 text-white hover:bg-indigo-600 active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   lime:
     "bg-lime-600 text-white hover:bg-lime-700 active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   sky:

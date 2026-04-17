@@ -34,7 +34,7 @@ function statusBadge(status: string) {
     case "draft":
       return { label: "Draft", cls: "bg-white/[0.06] text-text-muted" };
     case "confirmed":
-      return { label: "Confirmed", cls: "bg-teal-500/15 text-teal-400" };
+      return { label: "Confirmed", cls: "bg-indigo-500/15 text-indigo-400" };
     case "completed":
       return { label: "Completed", cls: "bg-emerald-500/15 text-emerald-400" };
     default:
@@ -98,7 +98,7 @@ export function ConsignmentsList({ consignments }: Props) {
           description="Create a consignment to track cattle sent to a processor. Allocate herds, link kill sheets, and record sales."
           actionLabel="New Consignment"
           actionHref="/dashboard/tools/grid-iq/consignments/new"
-          variant="teal"
+          variant="indigo"
         />
       </Card>
     );
@@ -118,7 +118,7 @@ export function ConsignmentsList({ consignments }: Props) {
             <span
               className={`flex h-4 w-4 items-center justify-center rounded border transition-colors ${
                 allSelected
-                  ? "border-teal-400 bg-teal-400 text-black"
+                  ? "border-indigo-400 bg-indigo-400 text-black"
                   : "border-white/20 bg-white/[0.04]"
               }`}
             >
@@ -128,7 +128,7 @@ export function ConsignmentsList({ consignments }: Props) {
             </span>
             Select All ({consignments.length})
             {selected.size > 0 && (
-              <span className="ml-2 text-teal-400">
+              <span className="ml-2 text-indigo-400">
                 {selected.size} selected
               </span>
             )}
@@ -138,7 +138,7 @@ export function ConsignmentsList({ consignments }: Props) {
         )}
         <div className="flex items-center gap-2">
           <Link href="/dashboard/tools/grid-iq/consignments/new">
-            <Button variant="teal" size="sm" className="gap-1.5">
+            <Button variant="indigo" size="sm" className="gap-1.5">
               <Plus className="h-3.5 w-3.5" />
               New
             </Button>
@@ -146,7 +146,7 @@ export function ConsignmentsList({ consignments }: Props) {
           <Button
             variant="ghost"
             size="sm"
-            className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-teal-400/40 text-teal-400 hover:text-teal-400" : "border-white/[0.08] text-text-muted hover:border-white/[0.14]"}`}
+            className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-indigo-400/40 text-indigo-400 hover:text-indigo-400" : "border-white/[0.08] text-text-muted hover:border-white/[0.14]"}`}
             onClick={() => (selecting ? exit() : setSelecting(true))}
           >
             {selecting ? "Cancel" : "Select"}
@@ -166,15 +166,15 @@ export function ConsignmentsList({ consignments }: Props) {
                   <span
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
                       checked
-                        ? "border-teal-400 bg-teal-400 text-black"
+                        ? "border-indigo-400 bg-indigo-400 text-black"
                         : "border-white/20 bg-white/[0.04]"
                     }`}
                   >
                     {checked && <Check className="h-3 w-3" strokeWidth={3} />}
                   </span>
                 )}
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/15">
-                  <Truck className="h-5 w-5 text-teal-400" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/15">
+                  <Truck className="h-5 w-5 text-indigo-400" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-text-primary">

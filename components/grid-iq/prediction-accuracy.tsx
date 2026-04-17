@@ -44,13 +44,13 @@ export function PredictionAccuracy({
 
   const accuracyColor =
     overallAccuracy >= 95 ? "text-emerald-400"
-    : overallAccuracy >= 85 ? "text-teal-400"
+    : overallAccuracy >= 85 ? "text-indigo-400"
     : overallAccuracy >= 70 ? "text-amber-400"
     : "text-red-400";
 
   const accuracyBg =
     overallAccuracy >= 95 ? "bg-emerald-500/15"
-    : overallAccuracy >= 85 ? "bg-teal-500/15"
+    : overallAccuracy >= 85 ? "bg-indigo-500/15"
     : overallAccuracy >= 70 ? "bg-amber-500/15"
     : "bg-red-500/15";
 

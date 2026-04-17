@@ -28,7 +28,7 @@ function statusBadge(status: string) {
     case "draft":
       return { label: "Draft", cls: "bg-white/[0.06] text-text-muted" };
     case "confirmed":
-      return { label: "Confirmed", cls: "bg-teal-500/15 text-teal-400" };
+      return { label: "Confirmed", cls: "bg-indigo-500/15 text-indigo-400" };
     case "completed":
       return { label: "Completed", cls: "bg-emerald-500/15 text-emerald-400" };
     default:
@@ -179,7 +179,7 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
       <div className="flex items-start justify-between">
         <PageHeader
           title={consignment.consignment_name || consignment.processor_name}
-          titleClassName="text-2xl font-bold text-teal-400"
+          titleClassName="text-2xl font-bold text-indigo-400"
           subtitle={
             consignment.consignment_name
               ? `${consignment.processor_name}${consignment.plant_location ? ` - ${consignment.plant_location}` : ""}`
@@ -257,8 +257,8 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
       <Card className="mt-4">
         <CardContent className="p-0">
           <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-3">
-            <Users className="h-4 w-4 text-teal-400" />
-            <span className="text-sm font-semibold text-teal-400">
+            <Users className="h-4 w-4 text-indigo-400" />
+            <span className="text-sm font-semibold text-indigo-400">
               Herd Allocations ({(allocations ?? []).length})
             </span>
           </div>
@@ -268,8 +268,8 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
                 const herd = herdMap.get(alloc.herd_id);
                 return (
                   <div key={alloc.id} className="flex items-center gap-4 px-4 py-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-500/10">
-                      <Users className="h-4 w-4 text-teal-400" />
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10">
+                      <Users className="h-4 w-4 text-indigo-400" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-text-primary">
@@ -303,15 +303,15 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
         <Card className="mt-4">
           <CardContent className="p-0">
             <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-3">
-              <FileText className="h-4 w-4 text-teal-400" />
-              <span className="text-sm font-semibold text-teal-400">Linked Kill Sheet</span>
+              <FileText className="h-4 w-4 text-indigo-400" />
+              <span className="text-sm font-semibold text-indigo-400">Linked Kill Sheet</span>
             </div>
             <Link
               href={`/dashboard/tools/grid-iq/kill-sheets/${killSheet.id as string}`}
               className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-white/[0.03]"
             >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-500/10">
-                <FileText className="h-4 w-4 text-teal-400" />
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10">
+                <FileText className="h-4 w-4 text-indigo-400" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-text-primary">
@@ -339,8 +339,8 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
         <Card className="mt-4">
           <CardContent className="p-0">
             <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-3">
-              <TrendingUp className="h-4 w-4 text-teal-400" />
-              <span className="text-sm font-semibold text-teal-400">Analyses</span>
+              <TrendingUp className="h-4 w-4 text-indigo-400" />
+              <span className="text-sm font-semibold text-indigo-400">Analyses</span>
             </div>
             <div className="divide-y divide-white/[0.04]">
               {preSaleAnalysis && (
@@ -348,8 +348,8 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
                   href={`/dashboard/tools/grid-iq/analysis/${preSaleAnalysis.id}`}
                   className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-white/[0.03]"
                 >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-500/10">
-                    <TrendingUp className="h-4 w-4 text-teal-400" />
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10">
+                    <TrendingUp className="h-4 w-4 text-indigo-400" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-text-primary">Pre-Sale Comparison</p>

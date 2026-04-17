@@ -48,7 +48,7 @@ export function PerformanceView({ profile, trend }: Props) {
         <EmptyState
           title="No performance data yet"
           description="Upload kill sheets and run post-sale analyses to build your performance profile. The more data you add, the more accurate your insights become."
-          variant="teal"
+          variant="indigo"
         />
       </Card>
     );
@@ -96,8 +96,8 @@ export function PerformanceView({ profile, trend }: Props) {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-500/15">
-                <TrendingUp className="h-4 w-4 text-teal-400" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/15">
+                <TrendingUp className="h-4 w-4 text-indigo-400" />
               </div>
               <div>
                 <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
@@ -165,8 +165,8 @@ export function PerformanceView({ profile, trend }: Props) {
         <Card>
           <CardContent className="p-4">
             <div className="mb-3 flex items-center gap-2">
-              <Award className="h-4 w-4 text-teal-400" />
-              <p className="text-sm font-semibold text-teal-400">Kill Score Trend</p>
+              <Award className="h-4 w-4 text-indigo-400" />
+              <p className="text-sm font-semibold text-indigo-400">Kill Score Trend</p>
             </div>
             <div className="space-y-2">
               {trend.map((a) => {
@@ -178,7 +178,7 @@ export function PerformanceView({ profile, trend }: Props) {
                   ks >= 85
                     ? "bg-emerald-400"
                     : ks >= 70
-                      ? "bg-teal-400"
+                      ? "bg-indigo-400"
                       : ks >= 50
                         ? "bg-amber-400"
                         : "bg-red-400";
@@ -221,8 +221,8 @@ export function PerformanceView({ profile, trend }: Props) {
         <Card>
           <CardContent className="p-4">
             <div className="mb-3 flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-teal-400" />
-              <p className="text-sm font-semibold text-teal-400">Top Grades</p>
+              <BarChart3 className="h-4 w-4 text-indigo-400" />
+              <p className="text-sm font-semibold text-indigo-400">Top Grades</p>
             </div>
             <div className="space-y-2">
               {profile.topGrades.map((g) => (
@@ -233,7 +233,7 @@ export function PerformanceView({ profile, trend }: Props) {
                   <div className="flex-1">
                     <div className="h-5 w-full overflow-hidden rounded-lg bg-white/[0.04]">
                       <div
-                        className="h-full rounded-lg bg-teal-400/60 transition-all"
+                        className="h-full rounded-lg bg-indigo-400/60 transition-all"
                         style={{ width: `${Math.min(g.percentage, 100)}%` }}
                       />
                     </div>
@@ -256,8 +256,8 @@ export function PerformanceView({ profile, trend }: Props) {
         <Card>
           <CardContent className="p-4">
             <div className="mb-3 flex items-center gap-2">
-              <Scale className="h-4 w-4 text-teal-400" />
-              <p className="text-sm font-semibold text-teal-400">Carcase Averages</p>
+              <Scale className="h-4 w-4 text-indigo-400" />
+              <p className="text-sm font-semibold text-indigo-400">Carcase Averages</p>
             </div>
             <div className="grid grid-cols-3 gap-4 text-center">
               {profile.averageP8Fat != null && (

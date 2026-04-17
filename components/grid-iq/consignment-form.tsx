@@ -140,8 +140,8 @@ export function ConsignmentForm({ herds, grids }: ConsignmentFormProps) {
       <Card>
         <CardContent className="p-5">
           <div className="mb-4 flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-500/15">
-              <Truck className="h-4 w-4 text-teal-400" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/15">
+              <Truck className="h-4 w-4 text-indigo-400" />
             </div>
             <p className="text-sm font-semibold text-text-primary">Processor Details</p>
           </div>
@@ -200,8 +200,8 @@ export function ConsignmentForm({ herds, grids }: ConsignmentFormProps) {
         <CardContent className="p-5">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-500/15">
-                <Users className="h-4 w-4 text-teal-400" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/15">
+                <Users className="h-4 w-4 text-indigo-400" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-text-primary">Herd Allocations</p>
@@ -210,7 +210,7 @@ export function ConsignmentForm({ herds, grids }: ConsignmentFormProps) {
                 </p>
               </div>
             </div>
-            <span className="rounded-lg bg-teal-500/15 px-2.5 py-1 text-xs font-semibold text-teal-400">
+            <span className="rounded-lg bg-indigo-500/15 px-2.5 py-1 text-xs font-semibold text-indigo-400">
               {totalHead} head
             </span>
           </div>
@@ -283,7 +283,7 @@ export function ConsignmentForm({ herds, grids }: ConsignmentFormProps) {
           <button
             type="button"
             onClick={addAllocation}
-            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/[0.08] py-2.5 text-xs font-medium text-text-muted transition-colors hover:border-teal-500/30 hover:text-teal-400"
+            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/[0.08] py-2.5 text-xs font-medium text-text-muted transition-colors hover:border-indigo-500/30 hover:text-indigo-400"
           >
             <Plus className="h-3.5 w-3.5" />
             Add another herd
@@ -316,7 +316,7 @@ export function ConsignmentForm({ herds, grids }: ConsignmentFormProps) {
         >
           Cancel
         </Button>
-        <Button type="submit" variant="teal" disabled={isPending || totalHead === 0}>
+        <Button type="submit" variant="indigo" disabled={isPending || totalHead === 0}>
           {isPending ? "Creating..." : "Create Consignment"}
         </Button>
       </div>

@@ -294,9 +294,9 @@ export function PreSaleFlow({
                       <span
                         className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all ${
                           isActive
-                            ? "bg-teal-500 text-white ring-4 ring-teal-500/20"
+                            ? "bg-indigo-500 text-white ring-4 ring-indigo-500/20"
                             : isComplete
-                              ? "bg-teal-500/20 text-teal-400"
+                              ? "bg-indigo-500/20 text-indigo-400"
                               : "bg-white/[0.08] text-text-muted"
                         }`}
                       >
@@ -317,7 +317,7 @@ export function PreSaleFlow({
                     {idx < 2 && (
                       <div
                         className={`mx-2 h-px flex-1 transition-colors ${
-                          step > s ? "bg-teal-500/40" : "bg-white/[0.08]"
+                          step > s ? "bg-indigo-500/40" : "bg-white/[0.08]"
                         }`}
                       />
                     )}
@@ -351,7 +351,7 @@ export function PreSaleFlow({
                   type="text"
                   value={consignmentName}
                   onChange={(e) => setConsignmentName(e.target.value)}
-                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-teal-500/50 focus:outline-none"
+                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-indigo-500/50 focus:outline-none"
                   placeholder="e.g. Cull Cows - Canal Creek Paddock"
                 />
               </div>
@@ -364,7 +364,7 @@ export function PreSaleFlow({
                 <p className="text-xs font-semibold text-text-primary">
                   Herd Allocations
                 </p>
-                <Badge className="bg-teal-500/15 text-teal-400">
+                <Badge className="bg-indigo-500/15 text-indigo-400">
                   {totalHead} head
                 </Badge>
               </div>
@@ -376,7 +376,7 @@ export function PreSaleFlow({
                     No cattle herds in your portfolio.
                   </p>
                   <Link href="/dashboard/herds">
-                    <Button size="sm" variant="teal">
+                    <Button size="sm" variant="indigo">
                       Add Herd
                     </Button>
                   </Link>
@@ -404,7 +404,7 @@ export function PreSaleFlow({
                                 e.target.value
                               )
                             }
-                            className="h-10 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 text-sm text-text-primary focus:border-teal-500/50 focus:outline-none"
+                            className="h-10 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 text-sm text-text-primary focus:border-indigo-500/50 focus:outline-none"
                           >
                             <option value="">Select herd...</option>
                             {herds
@@ -436,7 +436,7 @@ export function PreSaleFlow({
                                 parseInt(e.target.value) || 0
                               )
                             }
-                            className="h-10 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 text-sm text-text-primary focus:border-teal-500/50 focus:outline-none"
+                            className="h-10 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 text-sm text-text-primary focus:border-indigo-500/50 focus:outline-none"
                             placeholder="0"
                           />
                         </div>
@@ -481,7 +481,7 @@ export function PreSaleFlow({
 
           <div className="flex justify-end">
             <Button
-              variant="teal"
+              variant="indigo"
               disabled={!canAdvanceFromStep1}
               onClick={() => setStep(2)}
             >
@@ -545,7 +545,7 @@ export function PreSaleFlow({
                       if (g && g.processor_id !== id) setSelectedGridId(null);
                     }
                   }}
-                  className="h-10 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 text-sm text-text-primary focus:border-teal-500/50 focus:outline-none"
+                  className="h-10 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 text-sm text-text-primary focus:border-indigo-500/50 focus:outline-none"
                 >
                   <option value="">All processors</option>
                   {processors.map((p) => (
@@ -559,7 +559,7 @@ export function PreSaleFlow({
                   Don&apos;t see yours?{" "}
                   <Link
                     href="/dashboard/tools/grid-iq/processors/new"
-                    className="text-teal-400 hover:underline"
+                    className="text-indigo-400 hover:underline"
                   >
                     Add a processor
                   </Link>
@@ -595,7 +595,7 @@ export function PreSaleFlow({
                     </p>
                     <Button
                       size="sm"
-                      variant="teal"
+                      variant="indigo"
                       onClick={() => setUploadOpen("grid")}
                     >
                       <Upload className="mr-1.5 h-3.5 w-3.5" />
@@ -615,7 +615,7 @@ export function PreSaleFlow({
                     </p>
                     <Button
                       size="sm"
-                      variant="teal"
+                      variant="indigo"
                       onClick={() => setUploadOpen("grid")}
                     >
                       <Upload className="mr-1.5 h-3.5 w-3.5" />
@@ -635,7 +635,7 @@ export function PreSaleFlow({
                     key={grid.id}
                     className={`cursor-pointer transition-all ${
                       selected
-                        ? "border-teal-500/50 bg-teal-500/10"
+                        ? "border-indigo-500/50 bg-indigo-500/10"
                         : "hover:bg-white/[0.04]"
                     }`}
                     onClick={() => handleGridSelect(selected ? null : grid.id)}
@@ -643,11 +643,11 @@ export function PreSaleFlow({
                     <CardContent className="flex items-center gap-3 p-3">
                       <div
                         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                          selected ? "bg-teal-500/20" : "bg-white/[0.06]"
+                          selected ? "bg-indigo-500/20" : "bg-white/[0.06]"
                         }`}
                       >
                         <Grid3x3
-                          className={`h-4 w-4 ${selected ? "text-teal-400" : "text-text-muted"}`}
+                          className={`h-4 w-4 ${selected ? "text-indigo-400" : "text-text-muted"}`}
                         />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -669,7 +669,7 @@ export function PreSaleFlow({
                         </Badge>
                       )}
                       {selected && (
-                        <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-500">
+                        <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-500">
                           <Check className="h-3 w-3 text-white" />
                         </div>
                       )}
@@ -682,16 +682,16 @@ export function PreSaleFlow({
           })()}
 
           {/* Optional refinement: use past kills to personalise */}
-          <Card className="border-teal-500/20">
+          <Card className="border-indigo-500/20">
             <CardContent className="p-0">
               <button
                 type="button"
                 onClick={() => setShowKillSheetPicker((v) => !v)}
                 className="flex w-full items-center gap-2.5 px-4 py-3 text-left transition-colors hover:bg-white/[0.03]"
               >
-                <Info className="h-4 w-4 shrink-0 text-teal-400" />
+                <Info className="h-4 w-4 shrink-0 text-indigo-400" />
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-teal-400">
+                  <p className="text-sm font-medium text-indigo-400">
                     Use my past kills to improve accuracy
                   </p>
                   <p className="mt-0.5 text-xs text-text-secondary">
@@ -717,7 +717,7 @@ export function PreSaleFlow({
                       </p>
                       <Button
                         size="sm"
-                        variant="teal"
+                        variant="indigo"
                         onClick={() => setUploadOpen("killsheet")}
                       >
                         <Upload className="mr-1.5 h-3.5 w-3.5" />
@@ -738,7 +738,7 @@ export function PreSaleFlow({
                           key={ks.id}
                           className={`cursor-pointer transition-all ${
                             isSelected
-                              ? "border-teal-500/50 bg-teal-500/10"
+                              ? "border-indigo-500/50 bg-indigo-500/10"
                               : "hover:bg-white/[0.04]"
                           }`}
                           onClick={() => toggleKillSheet(ks.id)}
@@ -747,7 +747,7 @@ export function PreSaleFlow({
                             <div
                               className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border ${
                                 isSelected
-                                  ? "border-teal-500 bg-teal-500"
+                                  ? "border-indigo-500 bg-indigo-500"
                                   : "border-white/[0.15] bg-white/[0.04]"
                               }`}
                             >
@@ -757,7 +757,7 @@ export function PreSaleFlow({
                             </div>
                             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.06]">
                               <FileText
-                                className={`h-4 w-4 ${isSelected ? "text-teal-400" : "text-text-muted"}`}
+                                className={`h-4 w-4 ${isSelected ? "text-indigo-400" : "text-text-muted"}`}
                               />
                             </div>
                             <div className="min-w-0 flex-1">
@@ -825,7 +825,7 @@ export function PreSaleFlow({
               Back
             </Button>
             <Button
-              variant="teal"
+              variant="indigo"
               disabled={!canAdvanceFromStep2}
               onClick={() => setStep(3)}
             >
@@ -857,7 +857,7 @@ export function PreSaleFlow({
                     type="text"
                     value={processorName}
                     onChange={(e) => setProcessorName(e.target.value)}
-                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-teal-500/50 focus:outline-none"
+                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-indigo-500/50 focus:outline-none"
                     placeholder="e.g. JBS Dinmore"
                   />
                 </div>
@@ -869,7 +869,7 @@ export function PreSaleFlow({
                     type="text"
                     value={plantLocation}
                     onChange={(e) => setPlantLocation(e.target.value)}
-                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-teal-500/50 focus:outline-none"
+                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-indigo-500/50 focus:outline-none"
                     placeholder="e.g. Dinmore, QLD"
                   />
                 </div>
@@ -881,7 +881,7 @@ export function PreSaleFlow({
                     type="text"
                     value={bookingReference}
                     onChange={(e) => setBookingReference(e.target.value)}
-                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-teal-500/50 focus:outline-none"
+                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-indigo-500/50 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -892,7 +892,7 @@ export function PreSaleFlow({
                     type="date"
                     value={killDate}
                     onChange={(e) => setKillDate(e.target.value)}
-                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary focus:border-teal-500/50 focus:outline-none"
+                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary focus:border-indigo-500/50 focus:outline-none"
                   />
                 </div>
               </div>
@@ -909,14 +909,14 @@ export function PreSaleFlow({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={2}
-                className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-teal-500/50 focus:outline-none"
+                className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-indigo-500/50 focus:outline-none"
                 placeholder="Any additional notes about this consignment..."
               />
             </CardContent>
           </Card>
 
           {/* Summary + Generate */}
-          <Card className="border-teal-500/20">
+          <Card className="border-indigo-500/20">
             <CardContent className="p-4">
               <p className="mb-3 text-xs font-semibold text-text-primary">
                 Analysis Summary
@@ -956,7 +956,7 @@ export function PreSaleFlow({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-text-muted">Mode</span>
-                  <Badge className="bg-teal-500/15 text-teal-400">
+                  <Badge className="bg-indigo-500/15 text-indigo-400">
                     Pre-sale comparison
                   </Badge>
                 </div>
@@ -978,7 +978,7 @@ export function PreSaleFlow({
                   Back
                 </Button>
                 <Button
-                  variant="teal"
+                  variant="indigo"
                   className="flex-1"
                   disabled={!canGenerate || isPending}
                   onClick={handleGenerate}

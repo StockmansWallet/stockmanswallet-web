@@ -24,7 +24,7 @@ export default async function GridIQLayout({ children }: { children: React.React
       <PageHeader
         title="Grid IQ"
         titleHref="/dashboard/tools/grid-iq"
-        titleClassName="text-4xl font-bold text-teal-400"
+        titleClassName="text-4xl font-bold text-indigo-400"
         subtitle="Processor grid analysis and kill sheet comparison."
         subtitleClassName="text-sm font-medium text-text-secondary"
       />

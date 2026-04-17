@@ -121,7 +121,7 @@ export function GridIQNav({ pendingConsignments = 0 }: GridIQNavProps = {}) {
             }`}
           >
             <Icon
-              className={`h-4 w-4 ${active ? "text-teal-400" : "text-text-muted"}`}
+              className={`h-4 w-4 ${active ? "text-indigo-400" : "text-text-muted"}`}
             />
             {item.label}
             {item.label === "Dashboard" && pendingConsignments > 0 && (

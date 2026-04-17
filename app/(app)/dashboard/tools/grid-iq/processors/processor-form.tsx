@@ -107,7 +107,7 @@ export function ProcessorForm({
   };
 
   const inputCls =
-    "w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-teal-400/50 focus:outline-none focus:ring-1 focus:ring-teal-400/25";
+    "w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-indigo-400/50 focus:outline-none focus:ring-1 focus:ring-indigo-400/25";
   const labelCls = "mb-1 block text-[11px] text-text-muted";
 
   return (
@@ -237,7 +237,7 @@ export function ProcessorForm({
         >
           Cancel
         </Button>
-        <Button type="submit" variant="teal" disabled={isPending}>
+        <Button type="submit" variant="indigo" disabled={isPending}>
           {isPending ? (
             <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
           ) : (

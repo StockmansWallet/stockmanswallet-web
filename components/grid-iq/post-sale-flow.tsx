@@ -159,7 +159,7 @@ export function PostSaleFlow({
                 <FileText className="h-8 w-8 text-text-muted" />
                 <p className="text-sm text-text-muted">No unlinked kill sheets available.</p>
                 <Link href="/dashboard/tools/grid-iq/library?tab=kill-sheets&upload=killsheet">
-                  <Button size="sm" variant="teal">
+                  <Button size="sm" variant="indigo">
                     <Upload className="mr-1.5 h-3.5 w-3.5" />Upload Kill Sheet
                   </Button>
                 </Link>
@@ -214,7 +214,7 @@ export function PostSaleFlow({
               <Button variant="ghost" size="sm"><Upload className="mr-1 h-3 w-3" />Upload New</Button>
             </Link>
             <Button
-              variant="teal"
+              variant="indigo"
               disabled={!selectedKillSheetId || isPending}
               onClick={handleRunAnalysis}
             >
@@ -248,7 +248,7 @@ export function PostSaleFlow({
           </div>
 
           <div className="mt-4 flex justify-end">
-            <Button variant="teal" onClick={() => setStep(3)}>
+            <Button variant="indigo" onClick={() => setStep(3)}>
               Continue to Confirm Sale <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
@@ -326,7 +326,7 @@ export function PostSaleFlow({
               <ChevronLeft className="mr-1 h-4 w-4" />Back
             </Button>
             <Button
-              variant="teal"
+              variant="indigo"
               disabled={isPending || adjustedAllocations.every((a) => a.headCount <= 0)}
               onClick={handleConfirmSale}
               className="bg-emerald-600 hover:bg-emerald-700"

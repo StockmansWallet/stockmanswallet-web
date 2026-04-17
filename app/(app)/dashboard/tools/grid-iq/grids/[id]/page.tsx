@@ -194,8 +194,8 @@ export default async function GridDetailPage({ params }: PageProps) {
                 : `Grade Entries (${entries.length})`
             }
             entries={unisexEntries}
-            color="text-teal-400"
-            bg="bg-teal-500/15"
+            color="text-indigo-400"
+            bg="bg-indigo-500/15"
           />
         )}
       </div>
@@ -205,8 +205,8 @@ export default async function GridDetailPage({ params }: PageProps) {
         <Card className="mt-4">
           <CardContent className="p-0">
             <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
-              <TrendingUp className="h-4 w-4 text-teal-400" />
-              <span className="text-sm font-semibold text-teal-400">
+              <TrendingUp className="h-4 w-4 text-indigo-400" />
+              <span className="text-sm font-semibold text-indigo-400">
                 Analyses using this grid
               </span>
               <span className="text-xs text-text-muted">
@@ -248,7 +248,7 @@ export default async function GridDetailPage({ params }: PageProps) {
                               ks >= 85
                                 ? "text-emerald-400"
                                 : ks >= 70
-                                  ? "text-teal-400"
+                                  ? "text-indigo-400"
                                   : ks >= 50
                                     ? "text-amber-400"
                                     : "text-red-400"
@@ -281,7 +281,7 @@ export default async function GridDetailPage({ params }: PageProps) {
               <div className="border-t border-white/[0.06] px-4 py-2.5 text-center">
                 <Link
                   href="/dashboard/tools/grid-iq/library?tab=analyses"
-                  className="text-xs font-medium text-teal-400 hover:underline"
+                  className="text-xs font-medium text-indigo-400 hover:underline"
                 >
                   Showing latest 25. View all in Library →
                 </Link>
@@ -388,7 +388,7 @@ function EntrySection({
                             <span className="text-text-muted">
                               {String(p.weightBandLabel || p.weightBandKg)}
                             </span>
-                            <span className="font-mono font-medium text-teal-400">
+                            <span className="font-mono font-medium text-indigo-400">
                               ${Number(p.pricePerKg).toFixed(2)}
                             </span>
                           </span>

@@ -175,10 +175,10 @@ export default async function GridIQPage() {
           <CardHeader className="border-b border-white/[0.06]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-teal-400" />
+                <TrendingUp className="h-4 w-4 text-indigo-400" />
                 <CardTitle>Grid Analysis</CardTitle>
                 {safeAnalyses.length > 0 && (
-                  <Badge className="bg-teal-500/15 text-teal-400">{safeAnalyses.length}</Badge>
+                  <Badge className="bg-indigo-500/15 text-indigo-400">{safeAnalyses.length}</Badge>
                 )}
               </div>
               <Link
@@ -221,7 +221,7 @@ export default async function GridIQPage() {
                         {killScore !== null && (
                           <span
                             title="Kill Score: 85+ Excellent, 70-84 Good, 50-69 Fair, <50 Poor"
-                            className={`text-[10px] font-medium ${killScore >= 85 ? "text-emerald-400" : killScore >= 70 ? "text-teal-400" : killScore >= 50 ? "text-amber-400" : "text-red-400"}`}
+                            className={`text-[10px] font-medium ${killScore >= 85 ? "text-emerald-400" : killScore >= 70 ? "text-indigo-400" : killScore >= 50 ? "text-amber-400" : "text-red-400"}`}
                           >
                             KS {killScore.toFixed(0)}
                           </span>
@@ -260,10 +260,10 @@ export default async function GridIQPage() {
           <CardHeader className="border-b border-white/[0.06]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Truck className="h-4 w-4 text-teal-400" />
+                <Truck className="h-4 w-4 text-indigo-400" />
                 <CardTitle>Consignments</CardTitle>
                 {safeConsignments.length > 0 && (
-                  <Badge className="bg-teal-500/15 text-teal-400">{safeConsignments.length}</Badge>
+                  <Badge className="bg-indigo-500/15 text-indigo-400">{safeConsignments.length}</Badge>
                 )}
               </div>
               <Link
@@ -281,7 +281,7 @@ export default async function GridIQPage() {
                 const badgeCls = status === "completed"
                   ? "bg-emerald-500/15 text-emerald-400"
                   : status === "confirmed"
-                    ? "bg-teal-500/15 text-teal-400"
+                    ? "bg-indigo-500/15 text-indigo-400"
                     : "bg-white/[0.06] text-text-muted";
                 return (
                   <Link
@@ -326,16 +326,16 @@ export default async function GridIQPage() {
           <CardHeader className="border-b border-white/[0.06]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Grid3x3 className="h-4 w-4 text-teal-400" />
+                <Grid3x3 className="h-4 w-4 text-indigo-400" />
                 <CardTitle>Grids</CardTitle>
                 {safeGrids.length > 0 && (
-                  <Badge className="bg-teal-500/15 text-teal-400">{safeGrids.length}</Badge>
+                  <Badge className="bg-indigo-500/15 text-indigo-400">{safeGrids.length}</Badge>
                 )}
               </div>
               <div className="flex items-center gap-2">
                 <Link
                   href="/dashboard/tools/grid-iq/library?tab=grids&upload=grid"
-                  className="inline-flex items-center gap-1 rounded-full bg-teal-500/15 px-3 py-1 text-xs font-medium text-teal-400 transition-colors hover:bg-teal-500/25"
+                  className="inline-flex items-center gap-1 rounded-full bg-indigo-500/15 px-3 py-1 text-xs font-medium text-indigo-400 transition-colors hover:bg-indigo-500/25"
                 >
                   <Upload className="h-3 w-3" />
                   Upload
@@ -417,16 +417,16 @@ export default async function GridIQPage() {
           <CardHeader className="border-b border-white/[0.06]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-teal-400" />
+                <FileText className="h-4 w-4 text-indigo-400" />
                 <CardTitle>Kill Sheets</CardTitle>
                 {safeKillSheets.length > 0 && (
-                  <Badge className="bg-teal-500/15 text-teal-400">{safeKillSheets.length}</Badge>
+                  <Badge className="bg-indigo-500/15 text-indigo-400">{safeKillSheets.length}</Badge>
                 )}
               </div>
               <div className="flex items-center gap-2">
                 <Link
                   href="/dashboard/tools/grid-iq/library?tab=kill-sheets&upload=killsheet"
-                  className="inline-flex items-center gap-1 rounded-full bg-teal-500/15 px-3 py-1 text-xs font-medium text-teal-400 transition-colors hover:bg-teal-500/25"
+                  className="inline-flex items-center gap-1 rounded-full bg-indigo-500/15 px-3 py-1 text-xs font-medium text-indigo-400 transition-colors hover:bg-indigo-500/25"
                 >
                   <Upload className="h-3 w-3" />
                   Upload

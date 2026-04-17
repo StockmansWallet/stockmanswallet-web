@@ -22,7 +22,7 @@ function labelConfig(label: KillScoreLabel) {
     case "Excellent":
       return { color: "text-emerald-400", bg: "bg-emerald-500/15", icon: Star };
     case "Good":
-      return { color: "text-teal-400", bg: "bg-teal-500/15", icon: CheckCircle };
+      return { color: "text-indigo-400", bg: "bg-indigo-500/15", icon: CheckCircle };
     case "Fair":
       return { color: "text-amber-400", bg: "bg-amber-500/15", icon: MinusCircle };
     case "Poor":
@@ -93,7 +93,7 @@ export function KillScoreCard({
             85+ Excellent
           </span>
           <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-teal-400" />
+            <span className="h-2 w-2 rounded-full bg-indigo-400" />
             70-84 Good
           </span>
           <span className="flex items-center gap-1">

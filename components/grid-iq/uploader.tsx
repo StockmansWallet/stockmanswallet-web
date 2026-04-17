@@ -377,7 +377,7 @@ export function GridIQUploader({
             onClick={() => setUploadType("grid")}
             className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
               uploadType === "grid"
-                ? "bg-teal-500/15 text-teal-400"
+                ? "bg-indigo-500/15 text-indigo-400"
                 : "text-text-muted hover:text-text-primary"
             }`}
           >
@@ -389,7 +389,7 @@ export function GridIQUploader({
             onClick={() => setUploadType("killsheet")}
             className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
               uploadType === "killsheet"
-                ? "bg-teal-500/15 text-teal-400"
+                ? "bg-indigo-500/15 text-indigo-400"
                 : "text-text-muted hover:text-text-primary"
             }`}
           >
@@ -410,12 +410,12 @@ export function GridIQUploader({
               onClick={() => inputRef.current?.click()}
               className={`flex cursor-pointer flex-col items-center rounded-xl border-2 border-dashed py-14 transition-all ${
                 isDragging
-                  ? "border-teal-400/50 bg-teal-500/5"
-                  : "border-white/10 hover:border-teal-400/30 hover:bg-teal-500/[0.02]"
+                  ? "border-indigo-400/50 bg-indigo-500/5"
+                  : "border-white/10 hover:border-indigo-400/30 hover:bg-indigo-500/[0.02]"
               }`}
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-teal-500/10">
-                <Upload className="h-6 w-6 text-teal-400" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-500/10">
+                <Upload className="h-6 w-6 text-indigo-400" />
               </div>
               <p className="mt-4 text-sm font-medium text-text-primary">
                 {isDragging
@@ -467,7 +467,7 @@ export function GridIQUploader({
                     {formatFileSize(file.size)} .{" "}
                     {file.name.split(".").pop()?.toUpperCase() || "File"}
                   </p>
-                  <p className="mt-1 text-xs text-teal-400">
+                  <p className="mt-1 text-xs text-indigo-400">
                     {uploadType === "grid"
                       ? "Processor Grid"
                       : "Kill Sheet"}
@@ -512,7 +512,7 @@ export function GridIQUploader({
                     {processors.length === 0 && (
                       <Link
                         href="/dashboard/tools/grid-iq/processors/new"
-                        className="text-[11px] text-teal-400 hover:underline"
+                        className="text-[11px] text-indigo-400 hover:underline"
                       >
                         + Add processor
                       </Link>
@@ -524,7 +524,7 @@ export function GridIQUploader({
                       onChange={(e) =>
                         setSelectedProcessorId(e.target.value || null)
                       }
-                      className="mt-1.5 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary focus:border-teal-500/50 focus:outline-none"
+                      className="mt-1.5 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary focus:border-indigo-500/50 focus:outline-none"
                     >
                       <option value="">Not linked (set later)</option>
                       {processors.map((p) => (
@@ -825,7 +825,7 @@ function EditField({
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-56 rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-sm font-medium text-text-primary text-right outline-none focus:border-teal-400/50 focus:ring-1 focus:ring-teal-400/25"
+        className="w-56 rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-sm font-medium text-text-primary text-right outline-none focus:border-indigo-400/50 focus:ring-1 focus:ring-indigo-400/25"
       />
     </div>
   );

@@ -97,15 +97,15 @@ export function EditableGridLocation({
       <CardContent className="p-4">
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-teal-400" />
-            <p className="text-sm font-semibold text-teal-400">
+            <MapPin className="h-4 w-4 text-indigo-400" />
+            <p className="text-sm font-semibold text-indigo-400">
               Processor Location
             </p>
           </div>
           {!isEditing && (
             <button
               onClick={() => setIsEditing(true)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-xs text-text-secondary transition-colors hover:border-teal-400/40 hover:bg-teal-500/10 hover:text-teal-400"
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-xs text-text-secondary transition-colors hover:border-indigo-400/40 hover:bg-indigo-500/10 hover:text-indigo-400"
             >
               <Pencil className="h-3 w-3" />
               Edit
@@ -163,7 +163,7 @@ export function EditableGridLocation({
                   value={latitude}
                   onChange={(e) => setLatitude(e.target.value)}
                   placeholder="-27.59842"
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-mono text-sm text-text-primary placeholder:text-text-muted focus:border-teal-400/50 focus:outline-none focus:ring-1 focus:ring-teal-400/25"
+                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-mono text-sm text-text-primary placeholder:text-text-muted focus:border-indigo-400/50 focus:outline-none focus:ring-1 focus:ring-indigo-400/25"
                   disabled={isSaving}
                 />
               </div>
@@ -177,7 +177,7 @@ export function EditableGridLocation({
                   value={longitude}
                   onChange={(e) => setLongitude(e.target.value)}
                   placeholder="152.86914"
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-mono text-sm text-text-primary placeholder:text-text-muted focus:border-teal-400/50 focus:outline-none focus:ring-1 focus:ring-teal-400/25"
+                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-mono text-sm text-text-primary placeholder:text-text-muted focus:border-indigo-400/50 focus:outline-none focus:ring-1 focus:ring-indigo-400/25"
                   disabled={isSaving}
                 />
               </div>
@@ -216,7 +216,7 @@ export function EditableGridLocation({
                 Cancel
               </Button>
               <Button
-                variant="teal"
+                variant="indigo"
                 size="sm"
                 onClick={handleSave}
                 disabled={isSaving || !coordsValid}

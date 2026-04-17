@@ -85,7 +85,7 @@ export function ConsignmentActions({
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-3">
-              <Link2 className="h-4 w-4 text-teal-400" />
+              <Link2 className="h-4 w-4 text-indigo-400" />
               <p className="text-sm font-semibold text-text-primary">Link Kill Sheet</p>
             </div>
             <div className="flex items-end gap-3">
@@ -103,7 +103,7 @@ export function ConsignmentActions({
                 />
               </div>
               <Button
-                variant="teal"
+                variant="indigo"
                 size="sm"
                 disabled={!selectedKillSheetId || isPending}
                 onClick={handleLinkKillSheet}
@@ -120,7 +120,7 @@ export function ConsignmentActions({
       {!showCompleteConfirm ? (
         <div className="flex items-center gap-3">
           <Button
-            variant="teal"
+            variant="indigo"
             className="flex-1"
             disabled={isPending}
             onClick={() => setShowCompleteConfirm(true)}
@@ -148,7 +148,7 @@ export function ConsignmentActions({
             </p>
             <div className="mt-3 flex items-center gap-3">
               <Button
-                variant="teal"
+                variant="indigo"
                 size="sm"
                 disabled={isPending}
                 onClick={handleCompleteSale}

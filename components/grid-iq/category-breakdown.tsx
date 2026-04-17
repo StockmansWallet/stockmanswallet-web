@@ -37,7 +37,7 @@ function sellWindowIcon(status: string) {
     case "ON_TARGET":
       return { icon: CheckCircle, color: "text-emerald-400" };
     case "EARLY":
-      return { icon: TrendingUp, color: "text-teal-400" };
+      return { icon: TrendingUp, color: "text-indigo-400" };
     case "RISK_OF_OVERWEIGHT":
       return { icon: AlertTriangle, color: "text-amber-400" };
     default:
@@ -58,9 +58,9 @@ export function CategoryBreakdown({
     <Card>
       <CardContent className="p-0">
         <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-3">
-          <Users className="h-4 w-4 text-teal-400" />
-          <span className="text-sm font-semibold text-teal-400">Per-Category Breakdown</span>
-          <Badge className="ml-auto bg-teal-500/15 text-teal-400">
+          <Users className="h-4 w-4 text-indigo-400" />
+          <span className="text-sm font-semibold text-indigo-400">Per-Category Breakdown</span>
+          <Badge className="ml-auto bg-indigo-500/15 text-indigo-400">
             {categoryResults.length} allocations
           </Badge>
         </div>

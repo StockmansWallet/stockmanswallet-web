@@ -121,13 +121,13 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
 
       {/* Next-step banner: pre-sale analysis with a consignment but no post-kill yet. */}
       {!isPostSale && consignmentId && !siblingAnalysis && (
-        <div className="mt-4 rounded-xl border border-teal-500/30 bg-teal-500/[0.06] p-4">
+        <div className="mt-4 rounded-xl border border-indigo-500/30 bg-indigo-500/[0.06] p-4">
           <div className="flex items-start gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-500/20">
-              <Truck className="h-4 w-4 text-teal-400" />
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-500/20">
+              <Truck className="h-4 w-4 text-indigo-400" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-semibold text-teal-400">
+              <p className="text-sm font-semibold text-indigo-400">
                 Next step: post-kill analysis
               </p>
               <p className="mt-0.5 text-xs text-text-secondary">
@@ -138,7 +138,7 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
                 <Link
                   href={`/dashboard/tools/grid-iq/consignments/${consignmentId}`}
                 >
-                  <Button variant="teal" size="sm">
+                  <Button variant="indigo" size="sm">
                     <Truck className="mr-1.5 h-3.5 w-3.5" />
                     Go to consignment
                   </Button>
@@ -275,8 +275,8 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-500/15">
-                    <Target className="h-5 w-5 text-teal-400" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/15">
+                    <Target className="h-5 w-5 text-indigo-400" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-text-primary">Processor Fit</p>
@@ -285,7 +285,7 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
                     </p>
                   </div>
                 </div>
-                <span className="text-lg font-bold text-teal-400">
+                <span className="text-lg font-bold text-indigo-400">
                   {(a.processor_fit_score as number).toFixed(0)}/100
                 </span>
               </div>
@@ -399,7 +399,7 @@ function BrangusCommentarySection({
           <ul className="mt-3 space-y-1.5">
             {commentary.bullets.map((bullet, i) => (
               <li key={i} className="flex items-start gap-2 text-xs leading-relaxed text-text-secondary">
-                <span className="mt-0.5 text-teal-400">-</span>
+                <span className="mt-0.5 text-indigo-400">-</span>
                 {bullet}
               </li>
             ))}
@@ -431,8 +431,8 @@ function getSellWindowConfig(status: string) {
     case "EARLY":
       return {
         label: "Early",
-        color: "text-teal-400",
-        bg: "bg-teal-500/15",
+        color: "text-indigo-400",
+        bg: "bg-indigo-500/15",
         icon: TrendingUp,
       };
     case "RISK_OF_OVERWEIGHT":

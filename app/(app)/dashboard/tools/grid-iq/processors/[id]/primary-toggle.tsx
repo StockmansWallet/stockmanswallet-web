@@ -34,7 +34,7 @@ export function PrimaryToggle({ processorId, initialIsPrimary }: Props) {
       disabled={isPending}
       className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all disabled:opacity-60 ${
         isPrimary
-          ? "bg-teal-500/15 text-teal-400 hover:bg-teal-500/25"
+          ? "bg-indigo-500/15 text-indigo-400 hover:bg-indigo-500/25"
           : "bg-white/[0.04] text-text-muted hover:bg-white/[0.08] hover:text-text-primary"
       }`}
       title={
@@ -44,7 +44,7 @@ export function PrimaryToggle({ processorId, initialIsPrimary }: Props) {
       }
     >
       <Star
-        className={`h-3.5 w-3.5 ${isPrimary ? "fill-teal-400" : ""}`}
+        className={`h-3.5 w-3.5 ${isPrimary ? "fill-indigo-400" : ""}`}
       />
       {isPrimary ? "Primary" : "Set as Primary"}
     </button>
