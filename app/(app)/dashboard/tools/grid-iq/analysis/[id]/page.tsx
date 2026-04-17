@@ -121,13 +121,13 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
 
       {/* Next-step banner: pre-sale analysis with a consignment but no post-kill yet. */}
       {!isPostSale && consignmentId && !siblingAnalysis && (
-        <div className="mt-4 rounded-xl border border-indigo-500/30 bg-indigo-500/[0.06] p-4">
+        <div className="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/[0.04] p-4">
           <div className="flex items-start gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-500/20">
-              <Truck className="h-4 w-4 text-indigo-400" />
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/15">
+              <Truck className="h-4 w-4 text-amber-400" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-semibold text-indigo-400">
+              <p className="text-sm font-semibold text-amber-400">
                 Next step: post-kill analysis
               </p>
               <p className="mt-0.5 text-xs text-text-secondary">
@@ -137,11 +137,10 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
               <div className="mt-3">
                 <Link
                   href={`/dashboard/tools/grid-iq/consignments/${consignmentId}`}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-full bg-amber-500 px-4 py-2 text-xs font-semibold text-black transition-colors hover:bg-amber-400"
                 >
-                  <Button variant="indigo" size="sm">
-                    <Truck className="mr-1.5 h-3.5 w-3.5" />
-                    Go to consignment
-                  </Button>
+                  <Truck className="h-3.5 w-3.5" />
+                  Go to consignment
                 </Link>
               </div>
             </div>
@@ -358,8 +357,13 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
           {consignmentId && (
             <Link href={`/dashboard/tools/grid-iq/consignments/${consignmentId}`}>
               <Button
-                variant={!isPostSale && !siblingAnalysis ? "teal" : "ghost"}
+                variant={!isPostSale && !siblingAnalysis ? "indigo" : "ghost"}
                 size="sm"
+                className={
+                  !isPostSale && !siblingAnalysis
+                    ? undefined
+                    : "border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
+                }
               >
                 <Truck className="mr-1.5 h-3.5 w-3.5" />
                 View Consignment
@@ -367,7 +371,11 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
             </Link>
           )}
           <Link href="/dashboard/tools/grid-iq/library?tab=analyses">
-            <Button variant="ghost" size="sm">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
+            >
               Done
             </Button>
           </Link>
