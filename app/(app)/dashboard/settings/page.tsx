@@ -51,7 +51,7 @@ export default async function SettingsPage() {
   const isAdmin = isAdminEmail(user?.email);
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-4xl">
       <PageHeader
         title="Settings"
         titleClassName="text-4xl font-bold text-brand"

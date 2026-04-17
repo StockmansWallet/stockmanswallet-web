@@ -30,7 +30,7 @@ function SectionIcon({
 
 export default function DataManagementPage() {
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-4xl">
       <div className="mb-4 sm:hidden">
         <Link
           href="/dashboard/settings"

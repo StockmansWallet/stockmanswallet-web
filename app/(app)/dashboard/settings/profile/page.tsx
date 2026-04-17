@@ -35,7 +35,7 @@ export default async function ProfileSettingsPage() {
   const isAdvisor = profile?.role ? isAdvisorRole(profile.role) : false;
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-4xl">
       <div className="mb-4 sm:hidden">
         <Link
           href="/dashboard/settings"
