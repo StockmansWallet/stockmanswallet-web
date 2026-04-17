@@ -259,11 +259,14 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
         {/* PORTFOLIO MOVEMENT */}
         {movementSummary && (
           <section className="mt-5">
-            <h2 className="mb-2 text-base font-bold text-[#271F16]">Portfolio Movement</h2>
-            <p className="mb-3 text-xs text-[#6B5B45]">{fmtDate(movementSummary.openingDate)} to {fmtDate(movementSummary.closingDate)}</p>
+            {/* Keep the section heading, date range, and the exec stat card as one unit
+                so a page break cannot clip the card away from its own label. */}
+            <div className="break-inside-avoid">
+              <h2 className="mb-2 text-base font-bold text-[#271F16]">Portfolio Movement</h2>
+              <p className="mb-3 text-xs text-[#6B5B45]">{fmtDate(movementSummary.openingDate)} to {fmtDate(movementSummary.closingDate)}</p>
 
-            {/* Executive movement stats */}
-            <div className="mb-3 grid grid-cols-4 gap-3 rounded-xl border border-[#8B7355]/25 px-5 py-3">
+              {/* Executive movement stats */}
+              <div className="mb-3 grid grid-cols-4 gap-3 rounded-xl border border-[#8B7355]/25 px-5 py-3">
               <div>
                 <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Opening Value</p>
                 <p className="mt-0.5 text-base font-semibold tabular-nums text-[#271F16]">{fmt(movementSummary.openingValue)}</p>
@@ -283,10 +286,11 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
                 <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Head Count</p>
                 <p className="mt-0.5 text-sm tabular-nums text-[#271F16]">{movementSummary.openingHeadCount} → {movementSummary.closingHeadCount}</p>
               </div>
+              </div>
             </div>
 
             {/* Movement bridge */}
-            <div className="mb-3 rounded-xl border border-[#8B7355]/25">
+            <div className="mb-3 break-inside-avoid rounded-xl border border-[#8B7355]/25">
               <div className="px-4 py-2 text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]" style={{ backgroundColor: "rgba(139, 115, 85, 0.10)" }}>Movement Bridge</div>
               <div className="flex flex-col">
                 <BridgeRow label="Opening Portfolio Value" value={movementSummary.openingValue} isTotal />
@@ -304,7 +308,7 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
             </div>
 
             {/* Like-for-like */}
-            <div className="mb-3 grid grid-cols-3 gap-3 rounded-xl border border-[#8B7355]/25 px-5 py-3">
+            <div className="mb-3 grid break-inside-avoid grid-cols-3 gap-3 rounded-xl border border-[#8B7355]/25 px-5 py-3">
               <div>
                 <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Like-for-Like Opening</p>
                 <p className="mt-0.5 text-sm font-semibold tabular-nums text-[#271F16]">{fmt(movementSummary.likeForLikeOpeningValue)}</p>

@@ -30,13 +30,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 
-  // 2. Build the print template URL with the token for auth
+  // 2. Build the print template URL with the token for auth.
+  // Forward every filter param the UI set (range, start, end, properties) so the PDF
+  // reflects the user's chosen date range and property selection. parseReportConfig
+  // on the print template reads start / end / properties directly.
   const sp = request.nextUrl.searchParams;
   const printURL = new URL("/asset-register", "https://stockmanswallet.com.au");
+  for (const [key, value] of sp.entries()) {
+    if (key === "token") continue; // Set explicitly below
+    printURL.searchParams.set(key, value);
+  }
   printURL.searchParams.set("token", jwt);
-  if (sp.get("startDate")) printURL.searchParams.set("startDate", sp.get("startDate")!);
-  if (sp.get("endDate")) printURL.searchParams.set("endDate", sp.get("endDate")!);
-  if (sp.get("propertyIds")) printURL.searchParams.set("propertyIds", sp.get("propertyIds")!);
 
   // 3. Launch Puppeteer, navigate to the actual print template, generate PDF
   let browser;
