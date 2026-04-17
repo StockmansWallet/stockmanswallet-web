@@ -395,7 +395,11 @@ export async function runPostSaleAnalysis(consignmentId: string, killSheetId: st
     result,
   }).catch((e) => console.error("Commentary generation failed:", e));
 
-  revalidatePath("/dashboard/tools/grid-iq");
+  // Deliberately no revalidatePath here. The client flips to the Confirm stage
+  // via setStage after this resolves; revalidating would remount the parent
+  // consignment page, unmount PostSaleFlow (canRunPostKill flips to false once
+  // postSaleAnalysis exists), and swallow the transition. confirmSale
+  // revalidates when the sale is finalised.
   return { analysisId };
 }
 
