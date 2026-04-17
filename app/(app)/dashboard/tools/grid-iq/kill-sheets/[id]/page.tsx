@@ -354,13 +354,20 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
                         ).toFixed(1)}
                       </td>
                       <td className="px-3 py-1.5 text-right text-text-muted">
-                        {numVal(item, "p8_fat_mm") || numVal(item, "p8Fat") || "-"}
+                        {numVal(item, "p8_fat_mm", "p8_fat", "p8Fat") || "-"}
                       </td>
                       <td className="px-3 py-1.5 text-right text-text-muted">
                         {numVal(item, "dentition") || "-"}
                       </td>
                       <td className="px-3 py-1.5 text-right text-text-secondary">
-                        ${(Number(item.price_per_kg ?? item.leftPricePerKg ?? 0)).toFixed(2)}
+                        ${(
+                          Number(
+                            item.price_per_kg ??
+                              item.leftPricePerKg ??
+                              item.left_price_per_kg ??
+                              0
+                          )
+                        ).toFixed(2)}
                       </td>
                       <td className="px-3 py-1.5 text-right font-semibold text-teal-400">
                         ${Math.round(Number(item.gross_value ?? item.grossValue ?? 0)).toLocaleString()}

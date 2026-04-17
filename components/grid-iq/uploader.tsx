@@ -97,7 +97,17 @@ function getFileIcon(type: string, name: string) {
   return <FileSpreadsheet className="h-5 w-5 text-emerald-400" />;
 }
 
-export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadType }) {
+interface GridIQUploaderProps {
+  initialType?: UploadType;
+  // Called after a successful save. Receives the new record id and type so the
+  // caller can close a surrounding modal and navigate to the detail page.
+  onSaved?: (id: string, type: UploadType) => void;
+}
+
+export function GridIQUploader({
+  initialType = "grid",
+  onSaved,
+}: GridIQUploaderProps) {
   const router = useRouter();
   const [uploadType, setUploadType] = useState<UploadType>(initialType);
   const [file, setFile] = useState<File | null>(null);
@@ -213,10 +223,11 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
       if (result.documentType === "grid" && result.gridData) {
         const grid = result.gridData;
         const effectiveProcessor = grid.processorName || "Unknown Processor";
+        const newId = crypto.randomUUID();
         const { error: insertError } = await supabase
           .from("processor_grids")
           .insert({
-            id: crypto.randomUUID(),
+            id: newId,
             user_id: session.user.id,
             processor_name: effectiveProcessor,
             grid_name: gridNameOverride || `${effectiveProcessor} - Grid`,
@@ -233,14 +244,16 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
           });
 
         if (insertError) throw new Error(insertError.message);
-        router.push("/dashboard/tools/grid-iq/library?tab=grids");
+        if (onSaved) onSaved(newId, "grid");
+        router.push(`/dashboard/tools/grid-iq/grids/${newId}`);
       } else if (result.documentType === "killsheet" && result.killSheetData) {
         const ks = result.killSheetData;
         const effectiveProcessor = ks.processorName || "Unknown Processor";
+        const newId = crypto.randomUUID();
         const { error: insertError } = await supabase
           .from("kill_sheet_records")
           .insert({
-            id: crypto.randomUUID(),
+            id: newId,
             user_id: session.user.id,
             processor_name: effectiveProcessor,
             record_name: gridNameOverride || `${effectiveProcessor} - Kill Sheet`,
@@ -275,7 +288,8 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
           });
 
         if (insertError) throw new Error(insertError.message);
-        router.push("/dashboard/tools/grid-iq/library?tab=kill-sheets");
+        if (onSaved) onSaved(newId, "killsheet");
+        router.push(`/dashboard/tools/grid-iq/kill-sheets/${newId}`);
       }
     } catch (err) {
       const message =

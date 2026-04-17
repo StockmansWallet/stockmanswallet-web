@@ -17,7 +17,7 @@ export function UploadModal({ open, initialType, onClose }: Props) {
       title={initialType === "grid" ? "Upload Grid" : "Upload Kill Sheet"}
       size="lg"
     >
-      <GridIQUploader initialType={initialType} />
+      <GridIQUploader initialType={initialType} onSaved={onClose} />
     </Modal>
   );
 }
