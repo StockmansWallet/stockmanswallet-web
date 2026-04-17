@@ -320,9 +320,6 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
                 <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Like-for-Like</p>
                 <p className="text-[9px] text-[#6B5B45]">Existing herds only</p>
               </div>
-              <p className="mt-1 text-[10px] leading-snug text-[#271F16]/60">
-                Change in value for herds that existed at both the opening and closing date. Excludes herds added or sold during the period, so this isolates organic portfolio growth from composition changes.
-              </p>
               <div className="mt-3 grid grid-cols-3 gap-3">
                 <div>
                   <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Opening</p>
@@ -340,6 +337,9 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
                   </p>
                 </div>
               </div>
+              <p className="mt-3 border-t border-[#8B7355]/20 pt-2 text-[10px] leading-snug text-[#271F16]/55">
+                Change in value for herds that existed at both the opening and closing date. Excludes herds added or sold during the period, so this isolates organic portfolio growth from composition changes.
+              </p>
             </div>
 
             {/* Movement by herd - per-driver breakdown */}

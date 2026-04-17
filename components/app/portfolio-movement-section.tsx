@@ -156,9 +156,6 @@ export function PortfolioMovementSection({
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">Like-for-Like</p>
                 <p className="text-[10px] text-text-muted">Existing herds only</p>
               </div>
-              <p className="mt-1 text-[11px] leading-snug text-text-muted">
-                Change in value for herds that existed at both the opening and closing date. Excludes herds added or sold during the period, so this isolates organic portfolio growth from composition changes.
-              </p>
               <div className="mt-3 grid grid-cols-3 gap-4">
                 <div>
                   <p className="text-[10px] uppercase text-text-muted">Opening</p>
@@ -178,6 +175,9 @@ export function PortfolioMovementSection({
                   </p>
                 </div>
               </div>
+              <p className="mt-3 border-t border-white/[0.06] pt-2 text-[11px] leading-snug text-text-muted">
+                Change in value for herds that existed at both the opening and closing date. Excludes herds added or sold during the period, so this isolates organic portfolio growth from composition changes.
+              </p>
             </CardContent>
           </Card>
 
