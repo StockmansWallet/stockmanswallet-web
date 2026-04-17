@@ -36,6 +36,20 @@ export function ReportPrintStyles() {
           margin-right: 16mm;
         }
       }
+      /* Break-avoidance rules apply in all media so they take effect whether the
+         page is rendered for screen preview or for Puppeteer print-to-PDF. */
+      .break-inside-avoid {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+        /* Chromium can ignore break-inside on elements with overflow:hidden.
+           contain: paint isolates the element without the overflow side-effect. */
+        contain: paint;
+      }
+      /* Table rows never split mid-row, but the table itself can break between rows. */
+      tr { break-inside: avoid; page-break-inside: avoid; }
+      table { border-collapse: collapse; }
+      thead { display: table-header-group; }
+
       @media print {
         html, body {
           background: white !important;
@@ -50,14 +64,6 @@ export function ReportPrintStyles() {
         .no-print {
           display: none !important;
         }
-        .break-inside-avoid {
-          break-inside: avoid;
-          page-break-inside: avoid;
-        }
-        /* Tables: allow natural page breaks but keep header repeating */
-        table { border-collapse: collapse; }
-        thead { display: table-header-group; }
-        tr { break-inside: avoid; page-break-inside: avoid; }
         .report-page {
           padding: 0 16mm 12mm 16mm;
           max-width: none;
