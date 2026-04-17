@@ -175,9 +175,11 @@ export function ConsignmentActions({
         </Card>
       )}
 
-      {/* Delete-only path when a grid is attached (PostSaleFlow owns complete). */}
+      {/* Delete-only path when a grid is attached (PostSaleFlow owns complete).
+          Sits below a divider and left-aligned so it doesn't visually compete
+          with the primary Run Post-Kill Analysis / Confirm Sale CTA above. */}
       {hasGrid && (
-        <div className="flex justify-end">
+        <div className="mt-8 flex border-t border-white/[0.06] pt-4">
           <Button
             variant="ghost"
             size="sm"
