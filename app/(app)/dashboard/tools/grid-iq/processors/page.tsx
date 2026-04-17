@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { PageHeader } from "@/components/ui/page-header";
 import { ChevronLeft } from "lucide-react";
 import { ProcessorsList } from "./processors-list";
 
@@ -69,14 +68,6 @@ export default async function ProcessorsListPage() {
           Grid IQ
         </Link>
       </div>
-
-      <PageHeader
-        title="Processors"
-        titleClassName="text-2xl font-semibold text-text-primary"
-        subtitle="Your processor directory, reused across grids and analyses"
-        subtitleClassName="text-sm text-text-muted"
-        compact
-      />
 
       <ProcessorsList processors={rows} />
     </div>

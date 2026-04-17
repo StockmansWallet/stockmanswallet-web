@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { PageHeader } from "@/components/ui/page-header";
 import { ChevronLeft } from "lucide-react";
 import { ConsignmentsList } from "./consignments-list";
 
@@ -34,14 +33,6 @@ export default async function ConsignmentsListPage() {
           Grid IQ
         </Link>
       </div>
-
-      <PageHeader
-        title="Consignments"
-        titleClassName="text-2xl font-semibold text-text-primary"
-        subtitle="Processor bookings and kill records"
-        subtitleClassName="text-sm text-text-muted"
-        compact
-      />
 
       <ConsignmentsList consignments={consignments ?? []} />
     </div>

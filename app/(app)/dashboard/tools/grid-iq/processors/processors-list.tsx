@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/client";
 import {
   Factory,
@@ -79,17 +80,51 @@ export function ProcessorsList({
     }
   };
 
+  const headerActions = (
+    <>
+      <Link href="/dashboard/tools/grid-iq/processors/new">
+        <Button variant="indigo" size="sm" className="gap-1.5">
+          <Plus className="h-3.5 w-3.5" />
+          New
+        </Button>
+      </Link>
+      <Button
+        variant="ghost"
+        size="sm"
+        className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-indigo-400/40 text-indigo-400 hover:text-indigo-400" : "border-white/[0.08] text-text-muted hover:border-white/[0.14]"}`}
+        onClick={() => (selecting ? exit() : setSelecting(true))}
+        disabled={processors.length === 0}
+      >
+        {selecting ? "Cancel" : "Select"}
+      </Button>
+    </>
+  );
+
+  const header = (
+    <PageHeader
+      title="Processors"
+      titleClassName="text-2xl font-semibold text-text-primary"
+      subtitle="Your processor directory, reused across grids and analyses"
+      subtitleClassName="text-sm text-text-muted"
+      compact
+      actions={headerActions}
+    />
+  );
+
   if (processors.length === 0) {
     return (
-      <Card>
-        <EmptyState
-          title="No processors yet"
-          description="Add the processors you work with. Each processor stores a single copy of the address and contact details, and is reused every time you upload a grid or run an analysis."
-          actionLabel="Add Processor"
-          actionHref="/dashboard/tools/grid-iq/processors/new"
-          variant="indigo"
-        />
-      </Card>
+      <div>
+        {header}
+        <Card>
+          <EmptyState
+            title="No processors yet"
+            description="Add the processors you work with. Each processor stores a single copy of the address and contact details, and is reused every time you upload a grid or run an analysis."
+            actionLabel="Add Processor"
+            actionHref="/dashboard/tools/grid-iq/processors/new"
+            variant="indigo"
+          />
+        </Card>
+      </div>
     );
   }
 
@@ -98,8 +133,9 @@ export function ProcessorsList({
 
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between">
-        {selecting ? (
+      {header}
+      {selecting && (
+        <div className="mb-3">
           <button
             onClick={toggleAll}
             className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs text-text-muted transition-colors hover:border-white/[0.14] hover:bg-white/[0.06] hover:text-text-primary"
@@ -122,26 +158,8 @@ export function ProcessorsList({
               </span>
             )}
           </button>
-        ) : (
-          <span />
-        )}
-        <div className="flex items-center gap-2">
-          <Link href="/dashboard/tools/grid-iq/processors/new">
-            <Button variant="indigo" size="sm" className="gap-1.5">
-              <Plus className="h-3.5 w-3.5" />
-              New
-            </Button>
-          </Link>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-indigo-400/40 text-indigo-400 hover:text-indigo-400" : "border-white/[0.08] text-text-muted hover:border-white/[0.14]"}`}
-            onClick={() => (selecting ? exit() : setSelecting(true))}
-          >
-            {selecting ? "Cancel" : "Select"}
-          </Button>
         </div>
-      </div>
+      )}
 
       <Card>
         <CardContent className="divide-y divide-white/[0.06] p-0">
