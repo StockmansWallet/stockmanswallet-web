@@ -83,6 +83,16 @@ export async function createProcessor(formData: FormData) {
   }
 
   revalidatePath("/dashboard/tools/grid-iq/processors");
+
+  // Allow the caller to come back to where they started (e.g. the Analyse
+  // flow). Only accept safe same-origin paths under /dashboard/ to prevent
+  // open-redirect abuse from a crafted query string.
+  const rawReturnTo = formData.get("returnTo");
+  const returnTo = typeof rawReturnTo === "string" ? rawReturnTo : null;
+  if (returnTo && /^\/dashboard\//.test(returnTo) && !returnTo.includes("//")) {
+    redirect(returnTo);
+  }
+
   redirect(`/dashboard/tools/grid-iq/processors/${data!.id}`);
 }
 

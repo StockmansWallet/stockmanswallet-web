@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Check } from "lucide-react";
@@ -28,6 +28,8 @@ export function ProcessorForm({
   initial: ProcessorFormValues;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams?.get("returnTo") ?? null;
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -83,6 +85,7 @@ export function ProcessorForm({
     fd.set("contact_phone", contactPhone);
     fd.set("contact_email", contactEmail);
     fd.set("notes", notes);
+    if (returnTo) fd.set("returnTo", returnTo);
 
     startTransition(async () => {
       try {

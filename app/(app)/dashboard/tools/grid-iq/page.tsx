@@ -12,6 +12,7 @@ import {
   Truck,
   ArrowRight,
   Upload,
+  Factory,
 } from "lucide-react";
 
 export const metadata = { title: "Grid IQ" };
@@ -23,7 +24,7 @@ export default async function GridIQPage() {
   } = await supabase.auth.getUser();
 
   // Fetch saved grids and kill sheets in parallel
-  const [{ data: grids }, { data: killSheets }, { data: analyses }, { data: consignments }, { data: pendingConsignments }] =
+  const [{ data: grids }, { data: killSheets }, { data: analyses }, { data: consignments }, { data: pendingConsignments }, { count: processorCount }] =
     await Promise.all([
       supabase
         .from("processor_grids")
@@ -71,6 +72,11 @@ export default async function GridIQPage() {
         .in("status", ["draft", "confirmed"])
         .order("updated_at", { ascending: false })
         .limit(3),
+      supabase
+        .from("processors")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user!.id)
+        .eq("is_deleted", false),
     ]);
 
   const safeGrids = grids ?? [];
@@ -79,8 +85,42 @@ export default async function GridIQPage() {
   const safeConsignments = consignments ?? [];
   const safePending = pendingConsignments ?? [];
 
+  const needsProcessor = (processorCount ?? 0) === 0;
+
   return (
     <div className="space-y-4">
+      {/* First-run nudge: user has no processors yet. Without a processor
+          address we can't calculate freight accurately, so getting them to
+          add one first gives every future analysis correct distance costs. */}
+      {needsProcessor && (
+        <Card className="border-amber-500/20 bg-amber-500/[0.04]">
+          <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/15">
+                <Factory className="h-4 w-4 text-amber-400" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-amber-400">
+                  Add your first processor to get started
+                </p>
+                <p className="mt-0.5 text-xs text-text-secondary">
+                  Grid IQ needs a processor address to calculate freight
+                  accurately. Add one now and it will be reused by every grid,
+                  kill sheet, and analysis.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/dashboard/tools/grid-iq/processors/new"
+              className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-amber-500 px-4 py-2 text-xs font-semibold text-black transition-colors hover:bg-amber-400"
+            >
+              <Factory className="h-3.5 w-3.5" />
+              Add Processor
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Pending Consignments - Action Needed (full width) */}
       {safePending.length > 0 && (
         <Card className="border-amber-500/20">
