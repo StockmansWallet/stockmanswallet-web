@@ -141,7 +141,7 @@ export default async function GridIQPage() {
                 )}
               </div>
               <Link
-                href="/dashboard/tools/grid-iq/saved"
+                href="/dashboard/tools/grid-iq/library?tab=analyses"
                 className="text-xs font-medium text-teal-400 hover:underline"
               >
                 View All
@@ -223,7 +223,7 @@ export default async function GridIQPage() {
                 )}
               </div>
               <Link
-                href="/dashboard/tools/grid-iq/records?tab=grids"
+                href="/dashboard/tools/grid-iq/library?tab=grids"
                 className="text-xs font-medium text-teal-400 hover:underline"
               >
                 View All
@@ -305,7 +305,7 @@ export default async function GridIQPage() {
                 )}
               </div>
               <Link
-                href="/dashboard/tools/grid-iq/records?tab=killsheets"
+                href="/dashboard/tools/grid-iq/library?tab=kill-sheets"
                 className="text-xs font-medium text-teal-400 hover:underline"
               >
                 View All
@@ -317,7 +317,7 @@ export default async function GridIQPage() {
               safeKillSheets.map((ks: Record<string, unknown>) => (
                 <Link
                   key={ks.id as string}
-                  href={`/dashboard/tools/grid-iq/history/${ks.id}`}
+                  href={`/dashboard/tools/grid-iq/kill-sheets/${ks.id}`}
                   className="group flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-white/[0.04]"
                 >
                   <div className="min-w-0 flex-1">

@@ -21,7 +21,7 @@ export function AnalysisDeleteButton({ analysisId }: { analysisId: string }) {
         .eq("id", analysisId);
 
       if (error) throw error;
-      router.push("/dashboard/tools/grid-iq/saved");
+      router.push("/dashboard/tools/grid-iq/library?tab=analyses");
       router.refresh();
     } catch {
       setIsDeleting(false);

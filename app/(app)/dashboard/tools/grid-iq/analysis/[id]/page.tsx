@@ -332,7 +332,7 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
               </Button>
             </Link>
           )}
-          <Link href="/dashboard/tools/grid-iq/saved">
+          <Link href="/dashboard/tools/grid-iq/library?tab=analyses">
             <Button variant="teal" size="sm">
               Done
             </Button>

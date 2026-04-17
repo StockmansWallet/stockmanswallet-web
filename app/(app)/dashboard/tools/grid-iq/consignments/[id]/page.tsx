@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { ConsignmentActions } from "./consignment-actions";
 import { TrendingUp } from "lucide-react";
+import { PostSaleFlow } from "@/components/grid-iq/post-sale-flow";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -87,18 +88,43 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
   const preSaleAnalysis = (linkedAnalyses ?? []).find((a) => a.analysis_mode === "pre_sale");
   const postSaleAnalysis = (linkedAnalyses ?? []).find((a) => a.analysis_mode === "post_sale");
 
-  // Fetch unlinked kill sheets for linking
+  // Fetch unlinked kill sheets for linking and post-sale flow
   const { data: availableKillSheets } = await supabase
     .from("kill_sheet_records")
-    .select("id, record_name, processor_name, kill_date, total_head_count")
+    .select("id, record_name, processor_name, kill_date, total_head_count, total_gross_value")
     .eq("user_id", user!.id)
     .eq("is_deleted", false)
     .is("consignment_id", null)
     .order("created_at", { ascending: false })
-    .limit(20);
+    .limit(50);
 
   const badge = statusBadge(consignment.status);
   const isCompleted = consignment.status === "completed";
+
+  // Show inline post-kill analysis when consignment is ready to be reconciled.
+  // Conditions: not completed, no post-sale analysis yet, and a grid is attached.
+  const canRunPostKill =
+    !isCompleted && !postSaleAnalysis && !!consignment.processor_grid_id;
+
+  // Auto-match: suggest kill sheets by processor name or head count proximity
+  const suggestedIds = new Set<string>();
+  if (canRunPostKill) {
+    for (const ks of availableKillSheets ?? []) {
+      const nameMatch =
+        ks.processor_name?.toLowerCase() ===
+        consignment.processor_name?.toLowerCase();
+      const headMatch =
+        ks.total_head_count &&
+        consignment.total_head_count &&
+        Math.abs(ks.total_head_count - consignment.total_head_count) <= 5;
+      if (nameMatch || headMatch) suggestedIds.add(ks.id);
+    }
+  }
+
+  const enrichedAllocations = (allocations ?? []).map((a) => ({
+    ...a,
+    herdName: herdMap.get(a.herd_id)?.name ?? "Unknown herd",
+  }));
 
   return (
     <div className="max-w-3xl">
@@ -217,7 +243,7 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
               <span className="text-sm font-semibold text-teal-400">Linked Kill Sheet</span>
             </div>
             <Link
-              href={`/dashboard/tools/grid-iq/history/${killSheet.id as string}`}
+              href={`/dashboard/tools/grid-iq/kill-sheets/${killSheet.id as string}`}
               className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-white/[0.03]"
             >
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-500/10">
@@ -299,21 +325,34 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
         </Card>
       )}
 
-      {/* Post-sale flow entry */}
-      {!isCompleted && !postSaleAnalysis && consignment.processor_grid_id && (
-        <Card className="mt-4 border-amber-500/20">
-          <CardContent className="p-4 text-center">
-            <p className="mb-2 text-sm font-medium text-text-primary">Ready for post-kill analysis?</p>
-            <p className="mb-3 text-xs text-text-muted">
-              Upload the actual kill sheet from the processor to run the post-kill analysis and confirm the sale.
-            </p>
-            <Link href={`/dashboard/tools/grid-iq/consignments/${id}/post-sale`}>
-              <Button variant="teal" size="sm">
-                Start Post-Kill Analysis
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+      {/* Inline post-kill analysis */}
+      {canRunPostKill && (
+        <div id="post-sale" className="mt-6 space-y-3">
+          <div className="flex items-center gap-2 border-b border-white/[0.06] pb-2">
+            <TrendingUp className="h-4 w-4 text-amber-400" />
+            <h3 className="text-sm font-semibold text-amber-400">
+              Post-Kill Analysis
+            </h3>
+          </div>
+          <p className="text-xs text-text-muted">
+            Upload the actual kill sheet from the processor to reconcile the sale
+            and generate the post-kill analysis.
+          </p>
+          <PostSaleFlow
+            consignmentId={id}
+            processorName={consignment.processor_name}
+            totalHead={consignment.total_head_count ?? 0}
+            allocations={enrichedAllocations}
+            availableKillSheets={(availableKillSheets ?? []).map((ks) => ({
+              id: ks.id,
+              processorName: ks.record_name || ks.processor_name,
+              killDate: ks.kill_date,
+              totalHeadCount: ks.total_head_count ?? 0,
+              totalGrossValue: ks.total_gross_value ?? 0,
+              isSuggested: suggestedIds.has(ks.id),
+            }))}
+          />
+        </div>
       )}
 
       {/* Notes */}

@@ -19,14 +19,13 @@ export function KillSheetDeleteButton({
     setIsDeleting(true);
     try {
       const supabase = createClient();
-      // Soft delete - set is_deleted flag
       const { error } = await supabase
         .from("kill_sheet_records")
         .update({ is_deleted: true, deleted_at: new Date().toISOString() })
         .eq("id", killSheetId);
 
       if (error) throw error;
-      router.push("/dashboard/tools/grid-iq/records?tab=killsheets");
+      router.push("/dashboard/tools/grid-iq/library?tab=kill-sheets");
       router.refresh();
     } catch {
       setIsDeleting(false);

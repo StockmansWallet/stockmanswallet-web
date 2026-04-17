@@ -5,7 +5,17 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Grid3x3, Calendar, MapPin, User, Phone, Mail } from "lucide-react";
+import {
+  ArrowLeft,
+  Grid3x3,
+  Calendar,
+  MapPin,
+  User,
+  Phone,
+  Mail,
+  TrendingUp,
+  ChevronRight,
+} from "lucide-react";
 import { GridDeleteButton } from "./grid-delete-button";
 import { EditableProcessorName } from "../../components/editable-processor-name";
 
@@ -33,6 +43,18 @@ export default async function GridDetailPage({ params }: PageProps) {
   const g = grid as Record<string, unknown>;
   const entries = (g.entries as Record<string, unknown>[]) || [];
 
+  // Analyses that reference this grid
+  const { data: relatedAnalyses } = await supabase
+    .from("grid_iq_analyses")
+    .select(
+      "id, herd_name, analysis_date, analysis_mode, grid_iq_advantage, head_count, kill_score"
+    )
+    .eq("user_id", user!.id)
+    .eq("is_deleted", false)
+    .eq("processor_grid_id", id)
+    .order("analysis_date", { ascending: false })
+    .limit(25);
+
   // Group entries by gender
   const maleEntries = entries.filter((e) => e.gender === "male");
   const femaleEntries = entries.filter((e) => e.gender === "female");
@@ -43,14 +65,14 @@ export default async function GridDetailPage({ params }: PageProps) {
   return (
     <div className="max-w-4xl">
       <div className="mb-4">
-        <Link href="/dashboard/tools/grid-iq/records?tab=grids">
+        <Link href="/dashboard/tools/grid-iq/library?tab=grids">
           <Button
             variant="ghost"
             size="sm"
             className="gap-1.5 text-text-muted hover:text-text-primary"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            Processor Records
+            Library
           </Button>
         </Link>
       </div>
@@ -147,6 +169,86 @@ export default async function GridDetailPage({ params }: PageProps) {
           />
         )}
       </div>
+
+      {/* Analyses using this grid */}
+      {relatedAnalyses && relatedAnalyses.length > 0 && (
+        <Card className="mt-4">
+          <CardContent className="p-0">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
+              <TrendingUp className="h-4 w-4 text-teal-400" />
+              <span className="text-sm font-semibold text-teal-400">
+                Analyses using this grid
+              </span>
+              <span className="text-xs text-text-muted">
+                ({relatedAnalyses.length})
+              </span>
+            </div>
+            <div className="divide-y divide-white/[0.06]">
+              {relatedAnalyses.map((a: Record<string, unknown>) => {
+                const advantage = (a.grid_iq_advantage as number) ?? 0;
+                const isProcessor = advantage > 0;
+                const mode = a.analysis_mode as string | null;
+                const ks = a.kill_score as number | null;
+                return (
+                  <Link
+                    key={a.id as string}
+                    href={`/dashboard/tools/grid-iq/analysis/${a.id}`}
+                    className="group flex items-center gap-4 px-4 py-3 transition-colors hover:bg-white/[0.03]"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-text-primary">
+                        {(a.herd_name as string | null) ?? "Multi-herd"}
+                      </p>
+                      <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-text-muted">
+                        {typeof a.analysis_date === "string" && (
+                          <span>
+                            {new Date(a.analysis_date).toLocaleDateString("en-AU")}
+                          </span>
+                        )}
+                        <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px]">
+                          {mode === "post_sale" ? "Post-Sale" : "Pre-Sale"}
+                        </span>
+                        {typeof a.head_count === "number" && a.head_count > 0 ? (
+                          <span>{a.head_count} head</span>
+                        ) : null}
+                        {ks !== null && ks !== undefined && (
+                          <span
+                            className={`text-[10px] font-medium ${
+                              ks >= 85
+                                ? "text-emerald-400"
+                                : ks >= 70
+                                  ? "text-teal-400"
+                                  : ks >= 50
+                                    ? "text-amber-400"
+                                    : "text-red-400"
+                            }`}
+                          >
+                            KS {ks.toFixed(0)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p
+                        className={`text-sm font-semibold ${
+                          isProcessor ? "text-emerald-400" : "text-brand"
+                        }`}
+                      >
+                        {isProcessor ? "Over-the-Hooks" : "Saleyard"}
+                      </p>
+                      <p className="text-xs text-text-muted">
+                        {isProcessor ? "+" : ""}$
+                        {Math.abs(Math.round(advantage)).toLocaleString()}
+                      </p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
+                  </Link>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

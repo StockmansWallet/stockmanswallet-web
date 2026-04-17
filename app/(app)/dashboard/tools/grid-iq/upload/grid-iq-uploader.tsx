@@ -233,7 +233,7 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
           });
 
         if (insertError) throw new Error(insertError.message);
-        router.push("/dashboard/tools/grid-iq/records?tab=grids");
+        router.push("/dashboard/tools/grid-iq/library?tab=grids");
       } else if (result.documentType === "killsheet" && result.killSheetData) {
         const ks = result.killSheetData;
         const effectiveProcessor = ks.processorName || "Unknown Processor";
@@ -275,7 +275,7 @@ export function GridIQUploader({ initialType = "grid" }: { initialType?: UploadT
           });
 
         if (insertError) throw new Error(insertError.message);
-        router.push("/dashboard/tools/grid-iq/records?tab=killsheets");
+        router.push("/dashboard/tools/grid-iq/library?tab=kill-sheets");
       }
     } catch (err) {
       const message =

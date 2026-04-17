@@ -131,7 +131,7 @@ interface AnalysisListProps {
   onDone: () => void;
 }
 
-function AnalysisList({ analyses, tab, selecting, selected, onSelectedChange, onDone }: AnalysisListProps) {
+export function AnalysisList({ analyses, tab, selecting, selected, onSelectedChange, onDone }: AnalysisListProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);

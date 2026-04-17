@@ -2,34 +2,40 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Target, Grid3x3, BarChart3, TrendingUp } from "lucide-react";
+import { Target, ClipboardList, Library } from "lucide-react";
 
 const BASE = "/dashboard/tools/grid-iq";
 
 const items = [
   {
-    label: "New Analysis",
+    label: "Analyse",
     href: `${BASE}/analyse`,
     icon: Target,
     matchPrefixes: [`${BASE}/analyse`],
   },
   {
-    label: "Processor Records",
-    href: `${BASE}/records`,
-    icon: Grid3x3,
-    matchPrefixes: [`${BASE}/records`, `${BASE}/grids`, `${BASE}/history`, `${BASE}/upload`],
+    label: "Consignments",
+    href: `${BASE}/consignments`,
+    icon: ClipboardList,
+    matchPrefixes: [`${BASE}/consignments`],
   },
   {
-    label: "Saved Analysis",
-    href: `${BASE}/saved`,
-    icon: BarChart3,
-    matchPrefixes: [`${BASE}/saved`, `${BASE}/analyses`, `${BASE}/analysis`],
-  },
-  {
-    label: "Historic Results",
-    href: `${BASE}/performance`,
-    icon: TrendingUp,
-    matchPrefixes: [`${BASE}/performance`],
+    label: "Library",
+    href: `${BASE}/library`,
+    icon: Library,
+    matchPrefixes: [
+      `${BASE}/library`,
+      `${BASE}/grids`,
+      `${BASE}/kill-sheets`,
+      `${BASE}/analysis`,
+      // Legacy prefixes, still covered while redirects remain in place
+      `${BASE}/records`,
+      `${BASE}/history`,
+      `${BASE}/saved`,
+      `${BASE}/analyses`,
+      `${BASE}/performance`,
+      `${BASE}/upload`,
+    ],
   },
 ];
 
