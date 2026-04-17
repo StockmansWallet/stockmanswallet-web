@@ -241,6 +241,7 @@ export async function calculatePortfolioMovement(
       weightGainComponent: wg,
       breedingComponent: br,
       mortalityComponent: mort,
+      currentBreedPremium: closeCurr.breedPremiumApplied,
     });
   }
 
@@ -263,6 +264,7 @@ export async function calculatePortfolioMovement(
       closingHeadCount: (herd as { head_count: number }).head_count,
       mainDriver: "Added",
       marketComponent: 0, weightGainComponent: 0, breedingComponent: 0, mortalityComponent: 0,
+      currentBreedPremium: closeCurr.breedPremiumApplied,
     });
   }
 
@@ -285,6 +287,7 @@ export async function calculatePortfolioMovement(
       closingHeadCount: 0,
       mainDriver: "Removed/Sold",
       marketComponent: 0, weightGainComponent: 0, breedingComponent: 0, mortalityComponent: 0,
+      currentBreedPremium: openHist.breedPremiumApplied,
     });
   }
 

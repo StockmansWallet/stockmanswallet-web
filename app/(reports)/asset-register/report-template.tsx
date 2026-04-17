@@ -308,48 +308,79 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
             </div>
 
             {/* Like-for-like */}
-            <div className="mb-3 grid break-inside-avoid grid-cols-3 gap-3 rounded-xl border border-[#8B7355]/25 px-5 py-3">
-              <div>
-                <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Like-for-Like Opening</p>
-                <p className="mt-0.5 text-sm font-semibold tabular-nums text-[#271F16]">{fmt(movementSummary.likeForLikeOpeningValue)}</p>
+            <div className="mb-3 break-inside-avoid rounded-xl border border-[#8B7355]/25 px-5 py-3">
+              <div className="flex items-center justify-between">
+                <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Like-for-Like</p>
+                <p className="text-[9px] text-[#6B5B45]">Existing herds only</p>
               </div>
-              <div>
-                <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Like-for-Like Closing</p>
-                <p className="mt-0.5 text-sm font-semibold tabular-nums text-[#271F16]">{fmt(movementSummary.likeForLikeClosingValue)}</p>
-              </div>
-              <div>
-                <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Like-for-Like Change</p>
-                <p className={`mt-0.5 text-sm font-bold tabular-nums ${movementSummary.likeForLikeChangeDollars >= 0 ? "text-emerald-700" : "text-red-700"}`}>
-                  {fmt(movementSummary.likeForLikeChangeDollars)}
-                  {movementSummary.likeForLikeChangePercent != null && <span className="ml-1 text-xs font-medium">({movementSummary.likeForLikeChangePercent >= 0 ? "+" : ""}{movementSummary.likeForLikeChangePercent.toFixed(1)}%)</span>}
-                </p>
+              <p className="mt-1 text-[10px] leading-snug text-[#271F16]/60">
+                Change in value for herds that existed at both the opening and closing date. Excludes herds added or sold during the period, so this isolates organic portfolio growth from composition changes.
+              </p>
+              <div className="mt-3 grid grid-cols-3 gap-3">
+                <div>
+                  <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Opening</p>
+                  <p className="mt-0.5 text-sm font-semibold tabular-nums text-[#271F16]">{fmt(movementSummary.likeForLikeOpeningValue)}</p>
+                </div>
+                <div>
+                  <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Closing</p>
+                  <p className="mt-0.5 text-sm font-semibold tabular-nums text-[#271F16]">{fmt(movementSummary.likeForLikeClosingValue)}</p>
+                </div>
+                <div>
+                  <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Change</p>
+                  <p className={`mt-0.5 text-sm font-bold tabular-nums ${movementSummary.likeForLikeChangeDollars >= 0 ? "text-emerald-700" : "text-red-700"}`}>
+                    {fmt(movementSummary.likeForLikeChangeDollars)}
+                    {movementSummary.likeForLikeChangePercent != null && <span className="ml-1 text-xs font-medium">({movementSummary.likeForLikeChangePercent >= 0 ? "+" : ""}{movementSummary.likeForLikeChangePercent.toFixed(1)}%)</span>}
+                  </p>
+                </div>
               </div>
             </div>
 
-            {/* Movement by herd table */}
+            {/* Movement by herd - per-driver breakdown */}
             {movementSummary.herdMovements.length > 0 && (
-              <div className="overflow-hidden rounded-xl border border-[#8B7355]/25 break-inside-avoid">
-                <div className="px-4 py-2 text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]" style={{ backgroundColor: "rgba(139, 115, 85, 0.10)" }}>Movement by Herd</div>
+              <div className="overflow-hidden rounded-xl border border-[#8B7355]/25">
+                <div className="flex items-center justify-between px-4 py-2 text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]" style={{ backgroundColor: "rgba(139, 115, 85, 0.10)" }}>
+                  <span>Movement by Herd</span>
+                  <span className="font-normal normal-case tracking-normal text-[9px]">Per-driver breakdown</span>
+                </div>
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="border-b border-[#8B7355]/20 text-left text-[8px] font-semibold uppercase tracking-wider text-[#6B5B45]">
                       <th className="px-4 py-1.5">Herd</th>
-                      <th className="px-2 py-1.5">Opening</th>
-                      <th className="px-2 py-1.5">Closing</th>
-                      <th className="px-2 py-1.5">Change</th>
-                      <th className="px-4 py-1.5 text-right">Driver</th>
+                      <th className="px-2 py-1.5 text-right">Market</th>
+                      <th className="px-2 py-1.5 text-right">DWG</th>
+                      <th className="px-2 py-1.5 text-right">Breeding</th>
+                      <th className="px-2 py-1.5 text-right">Mortality</th>
+                      <th className="px-2 py-1.5 text-right">Head Δ</th>
+                      <th className="px-2 py-1.5 text-right">Premium</th>
+                      <th className="px-4 py-1.5 text-right">Net Change</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {movementSummary.herdMovements.map((m) => (
-                      <tr key={m.id} className="border-b border-[#8B7355]/10">
-                        <td className="px-4 py-1.5 font-medium text-[#271F16]">{m.herdName}</td>
-                        <td className="px-2 py-1.5 tabular-nums text-[#271F16]/70">{m.openingValue != null ? fmt(m.openingValue) : "New"}</td>
-                        <td className="px-2 py-1.5 tabular-nums text-[#271F16]/70">{m.closingValue != null ? fmt(m.closingValue) : "Removed"}</td>
-                        <td className={`px-2 py-1.5 font-semibold tabular-nums ${m.dollarChange >= 0 ? "text-emerald-700" : "text-red-700"}`}>{fmt(m.dollarChange)}</td>
-                        <td className="px-4 py-1.5 text-right text-[#6B5B45]">{m.mainDriver}</td>
-                      </tr>
-                    ))}
+                    {movementSummary.herdMovements.map((m) => {
+                      const headDelta = m.closingHeadCount - m.openingHeadCount;
+                      const headCell = m.mainDriver === "Added"
+                        ? `New +${m.closingHeadCount}`
+                        : m.mainDriver === "Removed/Sold"
+                          ? `-${m.openingHeadCount}`
+                          : headDelta === 0
+                            ? `${m.openingHeadCount}`
+                            : `${m.openingHeadCount}→${m.closingHeadCount}`;
+                      const premiumCell = m.currentBreedPremium === 0
+                        ? "-"
+                        : `${m.currentBreedPremium > 0 ? "+" : ""}${m.currentBreedPremium.toFixed(0)}%`;
+                      return (
+                        <tr key={m.id} className="break-inside-avoid border-b border-[#8B7355]/10">
+                          <td className="px-4 py-1.5 font-medium text-[#271F16]">{m.herdName}</td>
+                          <td className={`px-2 py-1.5 text-right tabular-nums ${driverTone(m.marketComponent)}`}>{driverCellText(m.marketComponent)}</td>
+                          <td className={`px-2 py-1.5 text-right tabular-nums ${driverTone(m.weightGainComponent)}`}>{driverCellText(m.weightGainComponent)}</td>
+                          <td className={`px-2 py-1.5 text-right tabular-nums ${driverTone(m.breedingComponent)}`}>{driverCellText(m.breedingComponent)}</td>
+                          <td className={`px-2 py-1.5 text-right tabular-nums ${driverTone(m.mortalityComponent)}`}>{driverCellText(m.mortalityComponent)}</td>
+                          <td className="px-2 py-1.5 text-right tabular-nums text-[#271F16]/70">{headCell}</td>
+                          <td className="px-2 py-1.5 text-right tabular-nums text-[#271F16]/70">{premiumCell}</td>
+                          <td className={`px-4 py-1.5 text-right font-semibold tabular-nums ${m.dollarChange >= 0 ? "text-emerald-700" : "text-red-700"}`}>{fmt(m.dollarChange)}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -428,5 +459,16 @@ function PrintStat({ label, value, accent }: { label: string; value: string; acc
       <p className={`text-xs font-semibold tabular-nums ${accent ? "text-[#FFAA00]" : "text-[#271F16]"}`}>{value}</p>
     </div>
   );
+}
+
+function driverCellText(value: number) {
+  if (value === 0) return "-";
+  return `${value > 0 ? "+" : ""}${fmt(value)}`;
+}
+
+function driverTone(value: number) {
+  if (value > 0) return "text-emerald-700";
+  if (value < 0) return "text-red-700";
+  return "text-[#271F16]/40";
 }
 

@@ -156,6 +156,9 @@ export function PortfolioMovementSection({
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">Like-for-Like</p>
                 <p className="text-[10px] text-text-muted">Existing herds only</p>
               </div>
+              <p className="mt-1 text-[11px] leading-snug text-text-muted">
+                Change in value for herds that existed at both the opening and closing date. Excludes herds added or sold during the period, so this isolates organic portfolio growth from composition changes.
+              </p>
               <div className="mt-3 grid grid-cols-3 gap-4">
                 <div>
                   <p className="text-[10px] uppercase text-text-muted">Opening</p>
@@ -178,32 +181,17 @@ export function PortfolioMovementSection({
             </CardContent>
           </Card>
 
-          {/* Movement by Herd */}
+          {/* Movement by Herd - per-herd breakdown by driver so users can compare contributions */}
           {summary.herdMovements.length > 0 && (
             <Card>
               <CardContent className="px-5 py-4">
-                <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-text-muted">Movement by Herd</p>
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">Movement by Herd</p>
+                  <p className="text-[10px] text-text-muted">Per-driver breakdown</p>
+                </div>
                 <div className="flex flex-col divide-y divide-white/[0.06]">
                   {summary.herdMovements.map((m) => (
-                    <div key={m.id} className="py-2.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-text-primary">{m.herdName}</span>
-                        <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-medium", driverColour(m.mainDriver))}>
-                          {m.mainDriver}
-                        </span>
-                      </div>
-                      <div className="mt-1 flex items-center justify-between text-xs">
-                        <span className="tabular-nums text-text-muted">
-                          {m.openingValue != null ? fmt(m.openingValue) : "New"} → {m.closingValue != null ? fmt(m.closingValue) : "Removed"}
-                        </span>
-                        <span className={cn("font-semibold tabular-nums", changeColor(m.dollarChange))}>
-                          {fmt(m.dollarChange)}
-                          {m.percentChange != null && (
-                            <span className="ml-1 font-normal">({m.percentChange >= 0 ? "+" : ""}{m.percentChange.toFixed(1)}%)</span>
-                          )}
-                        </span>
-                      </div>
-                    </div>
+                    <HerdMovementRow key={m.id} detail={m} />
                   ))}
                 </div>
               </CardContent>
@@ -226,6 +214,73 @@ function BridgeRow({ label, value, isTotal, positive }: { label: string; value: 
       <span className={cn("text-sm tabular-nums", isTotal ? "font-semibold" : "font-medium", color)}>
         {prefix}{fmt(Math.abs(value))}
       </span>
+    </div>
+  );
+}
+
+// MARK: - Herd Movement Row
+// Single herd card showing net change + a grid of per-driver components.
+function HerdMovementRow({ detail: m }: { detail: PortfolioMovementSummary["herdMovements"][number] }) {
+  const headDelta = m.closingHeadCount - m.openingHeadCount;
+  const premiumLabel = m.currentBreedPremium === 0
+    ? null
+    : `${m.currentBreedPremium > 0 ? "+" : ""}${m.currentBreedPremium.toFixed(0)}%`;
+  const headLabel = m.mainDriver === "Added"
+    ? `New · ${m.closingHeadCount} head`
+    : m.mainDriver === "Removed/Sold"
+      ? `Removed · ${m.openingHeadCount} head`
+      : headDelta !== 0
+        ? `${m.openingHeadCount} → ${m.closingHeadCount} head (${headDelta > 0 ? "+" : ""}${headDelta})`
+        : `${m.closingHeadCount} head`;
+
+  return (
+    <div className="py-3">
+      <div className="mb-2 flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-text-primary">{m.herdName}</span>
+            <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium", driverColour(m.mainDriver))}>
+              {m.mainDriver}
+            </span>
+          </div>
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11px] text-text-muted">
+            <span className="tabular-nums">{headLabel}</span>
+            {premiumLabel && (
+              <>
+                <span className="text-white/20">·</span>
+                <span className="tabular-nums">Breed premium {premiumLabel}</span>
+              </>
+            )}
+          </div>
+        </div>
+        <div className="shrink-0 text-right">
+          <p className={cn("text-sm font-semibold tabular-nums", changeColor(m.dollarChange))}>
+            {fmt(m.dollarChange)}
+          </p>
+          {m.percentChange != null && (
+            <p className={cn("text-[10px] tabular-nums", changeColor(m.dollarChange))}>
+              ({m.percentChange >= 0 ? "+" : ""}{m.percentChange.toFixed(1)}%)
+            </p>
+          )}
+        </div>
+      </div>
+      <div className="grid grid-cols-4 gap-x-3">
+        <DriverCell label="Market" value={m.marketComponent} />
+        <DriverCell label="DWG" value={m.weightGainComponent} />
+        <DriverCell label="Breeding" value={m.breedingComponent} />
+        <DriverCell label="Mortality" value={m.mortalityComponent} />
+      </div>
+    </div>
+  );
+}
+
+function DriverCell({ label, value }: { label: string; value: number }) {
+  return (
+    <div>
+      <p className="text-[9px] font-medium uppercase tracking-wider text-text-muted">{label}</p>
+      <p className={cn("mt-0.5 text-xs font-semibold tabular-nums", value === 0 ? "text-text-muted" : changeColor(value))}>
+        {value === 0 ? "-" : `${value > 0 ? "+" : ""}${fmt(value)}`}
+      </p>
     </div>
   );
 }

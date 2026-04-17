@@ -84,6 +84,9 @@ export interface HerdMovementDetail {
   weightGainComponent: number;
   breedingComponent: number;
   mortalityComponent: number;
+  // Effective breed premium applied in the closing valuation (base or custom override).
+  // Surfaced in the Movement by Herd table so users can compare premium assumptions per herd.
+  currentBreedPremium: number;
 }
 
 // MARK: - Biological Movement Breakdown

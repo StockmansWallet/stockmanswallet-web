@@ -39,9 +39,14 @@ export function LivestockAssetsSection({ herdData }: { herdData: HerdReportData[
 function PropertyGroup({ propertyName, herds }: { propertyName: string; herds: HerdReportData[] }) {
   const propertyHead = herds.reduce((s, h) => s + h.headCount, 0);
   const propertyValue = herds.reduce((s, h) => s + h.netValue, 0);
+  const livestockOwner = herds[0]?.livestockOwner;
 
   return (
     <div>
+      {/* Livestock owner (shown above the property name when set) */}
+      {livestockOwner && (
+        <p className="mb-1 px-4 text-[10px] font-medium uppercase tracking-wider text-text-muted">{livestockOwner}</p>
+      )}
       {/* Property header - dark bar */}
       <div className="mb-2 flex items-center justify-between rounded-full bg-white/[0.06] px-4 py-2.5">
         <h4 className="text-sm font-semibold text-white">{propertyName}</h4>
