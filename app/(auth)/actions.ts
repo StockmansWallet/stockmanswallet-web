@@ -148,7 +148,7 @@ export async function resendConfirmation(email: string) {
 export async function signInWithApple() {
   const origin = process.env.NEXT_PUBLIC_SITE_URL || "https://stockmanswallet.com.au";
 
-  // Generate nonce — Apple will embed the hash in the ID token,
+  // Generate nonce  -  Apple will embed the hash in the ID token,
   // and we carry the raw value back via the state parameter.
   const rawNonce = crypto.randomUUID();
   const encoder = new TextEncoder();

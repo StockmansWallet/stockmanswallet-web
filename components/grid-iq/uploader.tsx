@@ -482,9 +482,10 @@ export function GridIQUploader({
                 <button
                   onClick={handleClear}
                   disabled={isProcessing || isSaving}
+                  aria-label={`Remove ${file.name}`}
                   className="rounded-lg p-1.5 text-text-muted transition-colors hover:bg-white/10 hover:text-text-primary disabled:opacity-50"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
 

@@ -1,4 +1,4 @@
-// Report types — mirrors iOS ReportData.swift and ReportConfiguration.swift
+// Report types  -  mirrors iOS ReportData.swift and ReportConfiguration.swift
 
 // MARK: - Report Configuration
 

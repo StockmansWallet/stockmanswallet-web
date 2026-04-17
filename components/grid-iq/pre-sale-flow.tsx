@@ -137,13 +137,13 @@ export function PreSaleFlow({
     defaultProcessorId ?? null
   );
 
-  // Step 1: What am I selling? — consignment name + herd allocations
+  // Step 1: What am I selling?  -  consignment name + herd allocations
   const [consignmentName, setConsignmentName] = useState("");
   const [allocations, setAllocations] = useState<Allocation[]>([
     { key: crypto.randomUUID(), herdGroupId: "", headCount: 0, category: "" },
   ]);
 
-  // Step 2: Who's buying? — grid + optional historical kill sheets
+  // Step 2: Who's buying?  -  grid + optional historical kill sheets
   const [selectedGridId, setSelectedGridId] = useState<string | null>(null);
   const selectedGrid = grids.find((g) => g.id === selectedGridId);
 
@@ -163,7 +163,7 @@ export function PreSaleFlow({
     });
   }
 
-  // Step 3: Review — optional processor-booking details + notes
+  // Step 3: Review  -  optional processor-booking details + notes
   const [processorName, setProcessorName] = useState("");
   const [plantLocation, setPlantLocation] = useState("");
   const [bookingReference, setBookingReference] = useState("");
@@ -337,7 +337,7 @@ export function PreSaleFlow({
         );
       })()}
 
-      {/* Step 1: What you're selling — herds + consignment name */}
+      {/* Step 1: What you're selling  -  herds + consignment name */}
       {step === 1 && (
         <section className="flex flex-col gap-4">
           <p className="text-xs text-text-muted">
@@ -496,7 +496,7 @@ export function PreSaleFlow({
         </section>
       )}
 
-      {/* Step 2: Who's buying — grid + optional historical kill sheets */}
+      {/* Step 2: Who's buying  -  grid + optional historical kill sheets */}
       {step === 2 && (
         <section className="flex flex-col gap-4">
           <p className="text-xs text-text-muted">

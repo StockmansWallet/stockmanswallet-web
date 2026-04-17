@@ -127,7 +127,7 @@ function DataTable<T extends Record<string, unknown>>({
                 >
                   {columns.map((col) => (
                     <td key={col.key} className={`px-4 py-3 text-text-primary ${col.className || ""}`}>
-                      {col.render ? col.render(row) : (row[col.key as keyof T] as ReactNode) ?? "—"}
+                      {col.render ? col.render(row) : (row[col.key as keyof T] as ReactNode) ?? "-"}
                     </td>
                   ))}
                 </tr>

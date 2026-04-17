@@ -1,4 +1,4 @@
-// Portfolio movement calculation service — mirrors iOS PortfolioMovementService.swift
+// Portfolio movement calculation service  -  mirrors iOS PortfolioMovementService.swift
 // Uses three-valuation decomposition: Opening/Historical, Opening/Current, Closing/Current
 
 import { SupabaseClient } from "@supabase/supabase-js";

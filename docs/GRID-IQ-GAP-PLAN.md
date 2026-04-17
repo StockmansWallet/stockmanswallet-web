@@ -104,11 +104,11 @@ The database field exists (`brangus_commentary` JSONB on `grid_iq_analyses`) and
 
 **This is the biggest gap in the current implementation.**
 
-**From Luke's spec:** Grid IQ should operate around consignments rather than individual herd groups. A processor booking may contain cattle from several mobs. Example:
+**From Luke's spec:** Grid IQ should operate around consignments rather than individual herd groups. A processor booking may contain cattle from several herds. Example:
 - 40 steers from one herd group
 - 15 steers from another herd group
-- 10 bulls from a bull mob
-- 18 dry cows from a cull cow mob
+- 10 bulls from a bull herd
+- 18 dry cows from a cull cow herd
 
 After a kill sheet is uploaded, the user allocates animals back to herd groups. Once confirmed, the consignment becomes the official sale record, animals are marked as sold, herd group numbers update automatically, and portfolio totals update.
 

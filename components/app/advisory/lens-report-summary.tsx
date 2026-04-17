@@ -126,7 +126,7 @@ export function LensReportSummary({
                         </Badge>
                       </td>
                       <td className="py-2.5 text-xs text-text-muted max-w-[200px] truncate">
-                        {lens.advisor_notes || "—"}
+                        {lens.advisor_notes || "-"}
                       </td>
                     </tr>
                   );

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { BrangusChat } from "@/components/app/brangus-chat";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Chat - Brangus" };
@@ -31,9 +31,9 @@ export default async function StockmanIQChatPage() {
         actions={
           <Link
             href="/dashboard/brangus"
-            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-text-secondary transition-colors hover:bg-white/[0.05] hover:text-text-primary"
+            className="flex items-center gap-1.5 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-sm text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4" />
             Back
           </Link>
         }

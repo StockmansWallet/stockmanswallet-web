@@ -1,11 +1,11 @@
-// Freight transport capacity library — 11 categories with weight-based loading rates
+// Freight transport capacity library  -  11 categories with weight-based loading rates
 // Ported from iOS FreightCapacityCategory.swift
 
 import type { FreightCapacityCategory } from "../types/models";
 
-// All 11 transport categories — source of truth for deck calculations
+// All 11 transport categories  -  source of truth for deck calculations
 export const freightCategoryLibrary: FreightCapacityCategory[] = [
-  // Male — Steers
+  // Male  -  Steers
   {
     id: "weaner_steers",
     displayName: "Weaner Steers",
@@ -47,7 +47,7 @@ export const freightCategoryLibrary: FreightCapacityCategory[] = [
     sexFilter: "male",
   },
 
-  // Male — Bulls
+  // Male  -  Bulls
   {
     id: "yearling_bulls",
     displayName: "Yearling Bulls",
@@ -69,7 +69,7 @@ export const freightCategoryLibrary: FreightCapacityCategory[] = [
     sexFilter: "male",
   },
 
-  // Female — Heifers
+  // Female  -  Heifers
   {
     id: "weaner_heifers",
     displayName: "Weaner Heifers",
@@ -101,7 +101,7 @@ export const freightCategoryLibrary: FreightCapacityCategory[] = [
     sexFilter: "female",
   },
 
-  // Female — Cows
+  // Female  -  Cows
   {
     id: "cows",
     displayName: "Cows",
@@ -142,7 +142,7 @@ const weightBands: { maxWeight: number; headsPerDeck: number }[] = [
   { maxWeight: 650, headsPerDeck: 20 },
 ];
 
-// Primary heads-per-deck resolver — uses weight bands instead of category-fixed values
+// Primary heads-per-deck resolver  -  uses weight bands instead of category-fixed values
 export function headsPerDeckForWeight(weightKg: number): number {
   for (const band of weightBands) {
     if (weightKg < band.maxWeight) {

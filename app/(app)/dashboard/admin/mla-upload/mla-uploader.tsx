@@ -372,7 +372,7 @@ export function MlaUploader({ userEmail }: { userEmail: string }) {
       updateFile(pf.id, {
         status: "error",
         chunkProgress: null,
-        errorMessage: `All ${chunks.length} chunks failed${firstError ? ` — ${firstError}` : ""}`,
+        errorMessage: `All ${chunks.length} chunks failed${firstError ? `: ${firstError}` : ""}`,
       });
     }
   }

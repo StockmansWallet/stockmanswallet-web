@@ -77,9 +77,10 @@ function AddPropertyModal({
         <button
           type="button"
           onClick={onCancel}
+          aria-label="Cancel adding property"
           className="text-text-muted hover:text-text-primary"
         >
-          <X className="h-4 w-4" />
+          <X className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
 

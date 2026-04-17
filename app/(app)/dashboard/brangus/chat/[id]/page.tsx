@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { fetchConversationsServer, fetchMessagesServer } from "@/lib/brangus/conversation-service-server";
 import { BrangusChat } from "@/components/app/brangus-chat";
 
@@ -31,9 +31,9 @@ export default async function StockmanIQConversationPage({
         actions={
           <Link
             href="/dashboard/brangus"
-            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-text-secondary transition-colors hover:bg-white/[0.05] hover:text-text-primary"
+            className="flex items-center gap-1.5 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-sm text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4" />
             Back
           </Link>
         }

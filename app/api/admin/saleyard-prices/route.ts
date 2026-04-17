@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "saleyard parameter required" }, { status: 400 });
   }
 
-  // Use the same RPC as the main valuation page — returns only newest-date rows
+  // Use the same RPC as the main valuation page  -  returns only newest-date rows
   // per saleyard+category, avoiding PostgREST row limits and stale data.
   const allCategories = [
     "Weaner Steer", "Yearling Steer", "Grown Steer",

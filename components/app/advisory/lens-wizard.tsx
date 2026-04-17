@@ -11,7 +11,7 @@ import {
   Save,
   Loader2,
   ArrowRight,
-  ArrowLeft,
+  ChevronLeft,
   FileText,
 } from "lucide-react";
 import {
@@ -247,7 +247,7 @@ export function LensWizard({
                     </option>
                     {availableHerds.map((h) => (
                       <option key={h.id} value={h.id}>
-                        {h.name || "Unnamed"} — {h.head_count} head · {h.breed}{" "}
+                        {h.name || "Unnamed"} - {h.head_count} head · {h.breed}{" "}
                         {h.category} · ${(herdValues[h.id] ?? 0).toLocaleString("en-AU", { maximumFractionDigits: 0 })}
                       </option>
                     ))}
@@ -299,7 +299,7 @@ export function LensWizard({
             className="border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
             onClick={() => setStep("select")}
           >
-            <ArrowLeft className="mr-1.5 h-3.5 w-3.5" />
+            <ChevronLeft className="mr-1.5 h-3.5 w-3.5" />
             Back to editing
           </Button>
 
@@ -418,7 +418,7 @@ export function LensWizard({
               className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
               onClick={() => setStep("select")}
             >
-              <ArrowLeft className="mr-1.5 h-4 w-4" />
+              <ChevronLeft className="mr-1.5 h-4 w-4" />
               Back
             </Button>
             <Button

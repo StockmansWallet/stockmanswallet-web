@@ -1,4 +1,4 @@
-// Supabase database types — Row, Insert, Update for each table
+// Supabase database types  -  Row, Insert, Update for each table
 // Matches supabase/migrations/20260304100001_user_data_sync_tables.sql
 
 export type Database = {

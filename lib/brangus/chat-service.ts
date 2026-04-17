@@ -600,8 +600,8 @@ export function sanitiseResponse(text: string): string {
 
   // Strip em-dashes and en-dashes
   result = result
-    .replace(/ — /g, ", ")
-    .replace(/—/g, " - ")
+    .replace(/  -  /g, ", ")
+    .replace(/ - /g, " - ")
     .replace(/ – /g, ", ")
     .replace(/–/g, " - ");
 

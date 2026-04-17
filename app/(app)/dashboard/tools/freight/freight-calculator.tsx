@@ -397,7 +397,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
         await navigator.share({ title: "Freight IQ Estimate", text });
         return;
       } catch {
-        // Share cancelled or unavailable — fall through to clipboard.
+        // Share cancelled or unavailable  -  fall through to clipboard.
       }
     }
     try {

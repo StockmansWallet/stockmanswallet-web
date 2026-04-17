@@ -303,9 +303,10 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
     <Modal open={open} onClose={handleClose} size="lg">
       <button
         onClick={handleClose}
+        aria-label="Close"
         className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full text-text-muted transition-colors hover:bg-white/[0.08] hover:text-text-primary cursor-pointer"
       >
-        <X className="h-4 w-4" />
+        <X className="h-4 w-4" aria-hidden="true" />
       </button>
 
       <div className="max-h-[80vh] overflow-y-auto overscroll-contain -mx-6 px-6 pb-1">
@@ -320,7 +321,7 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Role — Apple segmented control (hidden when only one option) */}
+          {/* Role  -  Apple segmented control (hidden when only one option) */}
           {ROLE_OPTIONS.length > 1 ? (
             <div>
               <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-text-muted">

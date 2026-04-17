@@ -1,4 +1,4 @@
-// Parse report configuration from URL searchParams — shared by server components
+// Parse report configuration from URL searchParams  -  shared by server components
 
 const DATE_PRESETS = [
   { value: "1m", months: 1 },

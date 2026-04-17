@@ -1,6 +1,6 @@
 // Core freight calculation engine
 // Ported from iOS FreightEngine.swift
-// Pure functions — no classes or singletons
+// Pure functions  -  no classes or singletons
 
 import type { FreightCapacityCategory, FreightEstimate, BindingConstraint, CapacitySource } from "../types/models";
 import { freightCategoryLibrary, findFreightCategory, headsPerDeckForWeight } from "../data/freight-categories";
@@ -62,7 +62,7 @@ export function calculateFreightEstimate(options: {
     breederAutoDetectNotice = mapping.breederNotice;
   }
 
-  // Calculate deck requirements — priority: user override > cow-calf fixed > weight-band lookup
+  // Calculate deck requirements  -  priority: user override > cow-calf fixed > weight-band lookup
   let headsPerDeck: number;
   if (headsPerDeckOverride !== undefined) {
     headsPerDeck = headsPerDeckOverride;

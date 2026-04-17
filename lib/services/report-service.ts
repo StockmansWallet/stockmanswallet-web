@@ -1,4 +1,4 @@
-// Report data service — port of iOS ReportDataGenerator.swift
+// Report data service  -  port of iOS ReportDataGenerator.swift
 // Fetches data from Supabase and aggregates for each report type
 
 import { SupabaseClient } from "@supabase/supabase-js";

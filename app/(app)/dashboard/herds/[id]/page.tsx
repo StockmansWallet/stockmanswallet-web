@@ -162,7 +162,7 @@ export default async function HerdDetailPage({
   const herdValue = valuation.netValue;
   const isFallback = valuation.priceSource !== "saleyard";
 
-  // Debug: Stale data warning (6-8 weeks old) — amber indicators
+  // Debug: Stale data warning (6-8 weeks old)  -  amber indicators
   const dataAgeDays = valuation.dataDate
     ? Math.floor((Date.now() - new Date(valuation.dataDate).getTime()) / (1000 * 60 * 60 * 24))
     : 0;

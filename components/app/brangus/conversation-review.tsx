@@ -5,7 +5,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, Copy, Download, Check } from "lucide-react";
+import { ChevronLeft, Copy, Download, Check } from "lucide-react";
 import { ChatBubble } from "@/components/app/chat/chat-bubble";
 import { formatConversationForExport } from "@/lib/brangus/conversation-service";
 import type { BrangusConversationRow, BrangusMessageRow } from "@/lib/brangus/conversation-service";
@@ -61,9 +61,9 @@ export function ConversationReview({ conversation, messages }: ConversationRevie
       <div className="flex items-center gap-2 px-4 py-2 border-b border-white/6">
         <Link
           href="/dashboard/brangus"
-          className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.05] hover:text-text-primary"
+          className="flex items-center gap-1.5 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary"
         >
-          <ArrowLeft className="h-3.5 w-3.5" />
+          <ChevronLeft className="h-3.5 w-3.5" />
           Back
         </Link>
         <div className="flex-1" />

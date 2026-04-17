@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.redirect(`${origin}/sign-in`, 303);
   }
 
-  // 303 See Other — switches from POST to GET for the redirect
+  // 303 See Other  -  switches from POST to GET for the redirect
   const response = NextResponse.redirect(`${origin}/dashboard`, 303);
 
   const supabase = createServerClient(

@@ -1,4 +1,4 @@
-// Portfolio movement types — mirrors iOS PortfolioMovement.swift
+// Portfolio movement types  -  mirrors iOS PortfolioMovement.swift
 
 // MARK: - Movement Period
 export type MovementPeriodPreset = "1D" | "1W" | "1M" | "6M" | "1Y";

@@ -1,6 +1,6 @@
-// Core valuation engine — Adjusted Market Value calculations
+// Core valuation engine  -  Adjusted Market Value calculations
 // Ported from iOS ValuationEngine.swift + extensions
-// Pure functions — pricing/caching will be added when Supabase data layer is wired up
+// Pure functions  -  pricing/caching will be added when Supabase data layer is wired up
 
 import { resolveMLASaleyardName, saleyardToState } from "../data/reference-data";
 import { parseLocalDate as parseLocal } from "../dates";
@@ -20,8 +20,8 @@ export function categoryFallback(mlaCategory: string): string | null {
 // MARK: - Constants
 
 export const BREEDING_ACCRUAL_CYCLE_DAYS = 365;
-const STALE_DATA_THRESHOLD_DAYS = 56;   // 8 weeks — auto-switch to nearest saleyard
-export const STALE_WARNING_THRESHOLD_DAYS = 42; // 6 weeks — amber UI warning
+const STALE_DATA_THRESHOLD_DAYS = 56;   // 8 weeks  -  auto-switch to nearest saleyard
+export const STALE_WARNING_THRESHOLD_DAYS = 42; // 6 weeks  -  amber UI warning
 
 // MARK: - Valuation Result
 
@@ -530,7 +530,7 @@ export function calculateHerdValuation(
     const saleyardKey = `${mlaCategory}|${resolvedSaleyard}`;
     const saleyardEntries = saleyardPriceMap.get(saleyardKey) ?? [];
     resolved = resolvePriceFromEntries(saleyardEntries, initialWeight);
-    // Debug: Skip stale saleyard data (>8 weeks) — fall through to nearest saleyard
+    // Debug: Skip stale saleyard data (>8 weeks)  -  fall through to nearest saleyard
     if (resolved && isDataStale(resolved.dataDate, STALE_DATA_THRESHOLD_DAYS)) {
       resolved = null;
     }

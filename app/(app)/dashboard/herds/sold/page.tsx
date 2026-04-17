@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatCard } from "@/components/ui/stat-card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, DollarSign, Tags, TrendingUp, Calendar } from "lucide-react";
+import { ChevronLeft, DollarSign, Tags, TrendingUp, Calendar } from "lucide-react";
 
 export const revalidate = 0;
 
@@ -65,7 +65,7 @@ export default async function SoldHerdsPage() {
         actions={
           <Link href="/dashboard/herds">
             <Button variant="secondary" size="sm">
-              <ArrowLeft className="mr-1.5 h-3.5 w-3.5" />
+              <ChevronLeft className="mr-1.5 h-3.5 w-3.5" />
               Back to Herds
             </Button>
           </Link>
