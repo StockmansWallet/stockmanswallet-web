@@ -9,8 +9,8 @@ export const metadata = { title: "Sale Locations" };
 
 export default function SaleLocationsPage() {
   return (
-    <div className="max-w-4xl">
-      <div className="mb-4">
+    <div className="max-w-3xl">
+      <div className="mb-4 sm:hidden">
         <Link
           href="/dashboard/settings"
           className="inline-flex items-center gap-1.5 rounded-full bg-surface-lowest px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-text-primary"

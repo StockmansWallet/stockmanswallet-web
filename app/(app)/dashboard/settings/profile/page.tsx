@@ -35,8 +35,8 @@ export default async function ProfileSettingsPage() {
   const isAdvisor = profile?.role ? isAdvisorRole(profile.role) : false;
 
   return (
-    <div className="max-w-4xl">
-      <div className="mb-4">
+    <div className="max-w-3xl">
+      <div className="mb-4 sm:hidden">
         <Link
           href="/dashboard/settings"
           className="inline-flex items-center gap-1.5 rounded-full bg-surface-lowest px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-text-primary"
