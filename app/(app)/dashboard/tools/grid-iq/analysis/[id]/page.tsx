@@ -119,35 +119,6 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
         </p>
       </div>
 
-      {/* Next-step banner: pre-sale analysis with a consignment but no post-kill yet. */}
-      {!isPostSale && consignmentId && !siblingAnalysis && (
-        <div className="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/[0.04] p-4">
-          <div className="flex items-start gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/15">
-              <Truck className="h-4 w-4 text-amber-400" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-amber-400">
-                Next step: post-kill analysis
-              </p>
-              <p className="mt-0.5 text-xs text-text-secondary">
-                When the processor sends you the kill sheet, come back to this
-                consignment to compare actual returns against this prediction.
-              </p>
-              <div className="mt-3">
-                <Link
-                  href={`/dashboard/tools/grid-iq/consignments/${consignmentId}`}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-full bg-amber-500 px-4 py-2 text-xs font-semibold text-black transition-colors hover:bg-amber-400"
-                >
-                  <Truck className="h-3.5 w-3.5" />
-                  Go to consignment
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Value Comparison */}
       <div className="mt-4">
         <AnalysisComparison
@@ -161,6 +132,9 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
           netProcessorValue={a.net_processor_value as number}
           gridIQAdvantage={advantage}
           headCount={a.head_count as number}
+          carcaseWeight={a.estimated_carcase_weight as number}
+          dressingPercentage={a.dressing_percentage as number}
+          isUsingPersonalisedData={a.is_using_personalised_data as boolean}
         />
       </div>
 
@@ -205,38 +179,6 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
           />
         </div>
       )}
-
-      {/* Herd Details Row */}
-      <div className="mt-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="grid grid-cols-4 gap-3 text-center">
-              <div>
-                <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Head</p>
-                <p className="mt-0.5 text-sm font-bold text-text-primary">{a.head_count as number}</p>
-              </div>
-              <div>
-                <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Carcase Wt</p>
-                <p className="mt-0.5 text-sm font-bold text-text-primary">
-                  {(a.estimated_carcase_weight as number).toFixed(0)}kg
-                </p>
-              </div>
-              <div>
-                <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Dressing</p>
-                <p className="mt-0.5 text-sm font-bold text-text-primary">
-                  {((a.dressing_percentage as number) * 100).toFixed(1)}%
-                </p>
-              </div>
-              <div>
-                <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Data</p>
-                <p className="mt-0.5 text-sm font-bold text-text-primary">
-                  {(a.is_using_personalised_data as boolean) ? "Personal" : "Baseline"}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Sell Window */}
       <div className="mt-4">
