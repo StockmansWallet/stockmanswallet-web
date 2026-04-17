@@ -62,43 +62,28 @@ export function AnalysisComparison({
           </p>
         </div>
 
-        {/* Aligned comparison table */}
-        <div className="mt-5 overflow-hidden rounded-xl border border-white/[0.06]">
-          {/* Column headers */}
-          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] border-b border-white/[0.06] bg-white/[0.02]">
-            <div className="px-3 py-2" />
-            <ColumnHeader label="Saleyard" isWinner={!isProcessorBetter} />
-            <ColumnHeader label="Over-the-Hooks" isWinner={isProcessorBetter} />
-          </div>
-
-          <Row
-            label="Gross"
-            left={{ value: formatDollars(mlaMarketValue), caption: "MLA value" }}
-            right={{
-              value: formatDollars(realisticGridOutcome),
-              caption: `Grid · RF ${(realisationFactor * 100).toFixed(1)}%`,
-            }}
-            winner={isProcessorBetter ? "right" : "left"}
+        {/* Side-by-side comparison */}
+        <div className="mt-5 grid grid-cols-2 gap-3">
+          <ComparisonColumn
+            title="Saleyard"
+            isWinner={!isProcessorBetter}
+            grossValue={formatDollars(mlaMarketValue)}
+            grossCaption="MLA value"
+            freightValue={`−${formatDollars(freightToSaleyard)}`}
+            netValue={formatDollars(netSaleyardValue)}
           />
-
-          <Row
-            label="Freight"
-            left={{ value: `−${formatDollars(freightToSaleyard)}`, valueClass: "text-red-400" }}
-            right={{ value: `−${formatDollars(freightToProcessor)}`, valueClass: "text-red-400" }}
-            winner={isProcessorBetter ? "right" : "left"}
-          />
-
-          <Row
-            label="Net"
-            left={{ value: formatDollars(netSaleyardValue) }}
-            right={{ value: formatDollars(netProcessorValue) }}
-            winner={isProcessorBetter ? "right" : "left"}
-            emphasised
+          <ComparisonColumn
+            title="Over-the-Hooks"
+            isWinner={isProcessorBetter}
+            grossValue={formatDollars(realisticGridOutcome)}
+            grossCaption={`Grid · RF ${(realisationFactor * 100).toFixed(1)}%`}
+            freightValue={`−${formatDollars(freightToProcessor)}`}
+            netValue={formatDollars(netProcessorValue)}
           />
         </div>
 
         {/* Consignment summary strip */}
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-text-muted">
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-text-muted">
           <SummaryItem value={`${headCount}`} label="head" />
           <Dot />
           <SummaryItem value={`${carcaseWeight.toFixed(0)} kg`} label="carcase" />
@@ -112,81 +97,71 @@ export function AnalysisComparison({
   );
 }
 
-function ColumnHeader({ label, isWinner }: { label: string; isWinner: boolean }) {
+function ComparisonColumn({
+  title,
+  isWinner,
+  grossValue,
+  grossCaption,
+  freightValue,
+  netValue,
+}: {
+  title: string;
+  isWinner: boolean;
+  grossValue: string;
+  grossCaption: string;
+  freightValue: string;
+  netValue: string;
+}) {
+  const containerClass = isWinner
+    ? "border border-emerald-500/20 bg-emerald-500/[0.04]"
+    : "border border-white/[0.06] bg-white/[0.02]";
+  const titleClass = isWinner ? "text-emerald-400" : "text-text-secondary";
+  const netValueClass = isWinner ? "text-emerald-400" : "text-text-primary";
+
   return (
-    <div className="relative px-3 py-2 text-center">
-      {isWinner && (
-        <span className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-full bg-emerald-400/70" />
-      )}
-      <p className={`text-xs font-semibold ${isWinner ? "text-emerald-400" : "text-text-secondary"}`}>
-        {label}
+    <div className={`rounded-xl ${containerClass} p-4`}>
+      <p className={`text-center text-xs font-semibold uppercase tracking-wider ${titleClass}`}>
+        {title}
       </p>
+
+      <div className="mt-3 space-y-2.5">
+        <LineItem label="Gross" value={grossValue} caption={grossCaption} />
+        <LineItem label="Freight" value={freightValue} valueClass="text-red-400" />
+      </div>
+
+      <div className="mt-3 border-t border-white/[0.06] pt-3">
+        <div className="flex items-baseline justify-between">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+            Net
+          </span>
+          <span className={`text-lg font-bold ${netValueClass}`}>{netValue}</span>
+        </div>
+      </div>
     </div>
   );
 }
 
-interface RowCell {
+function LineItem({
+  label,
+  value,
+  caption,
+  valueClass,
+}: {
+  label: string;
   value: string;
   caption?: string;
   valueClass?: string;
-}
-
-function Row({
-  label,
-  left,
-  right,
-  winner,
-  emphasised,
-}: {
-  label: string;
-  left: RowCell;
-  right: RowCell;
-  winner: "left" | "right";
-  emphasised?: boolean;
 }) {
-  const labelClass = emphasised
-    ? "text-xs font-semibold uppercase tracking-wider text-text-secondary"
-    : "text-[11px] uppercase tracking-wider text-text-muted";
-  const valueBase = emphasised ? "text-lg font-bold" : "text-sm font-semibold";
-
   return (
-    <div
-      className={`grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] items-center ${
-        emphasised ? "border-t border-white/[0.06] bg-white/[0.02]" : ""
-      }`}
-    >
-      <div className="px-3 py-2.5">
-        <p className={labelClass}>{label}</p>
+    <div>
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="text-[11px] uppercase tracking-wider text-text-muted">{label}</span>
+        <span className={`text-sm font-semibold ${valueClass ?? "text-text-primary"}`}>
+          {value}
+        </span>
       </div>
-      <Cell cell={left} isWinner={winner === "left"} emphasised={emphasised} valueBase={valueBase} />
-      <Cell cell={right} isWinner={winner === "right"} emphasised={emphasised} valueBase={valueBase} />
-    </div>
-  );
-}
-
-function Cell({
-  cell,
-  isWinner,
-  emphasised,
-  valueBase,
-}: {
-  cell: RowCell;
-  isWinner: boolean;
-  emphasised?: boolean;
-  valueBase: string;
-}) {
-  const winnerValueClass = emphasised ? "text-emerald-400" : "text-text-primary";
-  const defaultValueClass = emphasised ? "text-text-primary" : "text-text-secondary";
-  const valueClass = cell.valueClass ?? (isWinner ? winnerValueClass : defaultValueClass);
-
-  return (
-    <div className="relative px-3 py-2.5 text-center">
-      {isWinner && (
-        <span className="absolute left-0 top-2 bottom-2 w-[2px] rounded-full bg-emerald-400/70" />
-      )}
-      <p className={`${valueBase} ${valueClass}`}>{cell.value}</p>
-      {cell.caption && (
-        <p className="mt-0.5 text-[10px] text-text-muted">{cell.caption}</p>
+      {caption && (
+        <p className="mt-0.5 text-right text-[10px] text-text-muted">{caption}</p>
       )}
     </div>
   );
