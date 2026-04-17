@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Target, ClipboardList, Library } from "lucide-react";
+import { Target, ClipboardList, Library, Factory } from "lucide-react";
 
 const BASE = "/dashboard/tools/grid-iq";
 
@@ -18,6 +18,12 @@ const items = [
     href: `${BASE}/consignments`,
     icon: ClipboardList,
     matchPrefixes: [`${BASE}/consignments`],
+  },
+  {
+    label: "Processors",
+    href: `${BASE}/processors`,
+    icon: Factory,
+    matchPrefixes: [`${BASE}/processors`],
   },
   {
     label: "Library",

@@ -13,11 +13,24 @@ export default async function NewAnalysisPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Parallel fetch: grids, herds, kill sheets
-  const [{ data: grids }, { data: herds }, { data: killSheets }] = await Promise.all([
+  // Parallel fetch: processors, grids, herds, kill sheets
+  const [
+    { data: processors },
+    { data: grids },
+    { data: herds },
+    { data: killSheets },
+  ] = await Promise.all([
+    supabase
+      .from("processors")
+      .select("id, name, address, location_latitude, location_longitude")
+      .eq("user_id", user!.id)
+      .eq("is_deleted", false)
+      .order("name"),
     supabase
       .from("processor_grids")
-      .select("id, grid_name, processor_name, grid_code, grid_date, expiry_date, entries, location_latitude, location_longitude, created_at")
+      .select(
+        "id, grid_name, processor_name, processor_id, grid_code, grid_date, expiry_date, entries, location_latitude, location_longitude, created_at"
+      )
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
       .order("created_at", { ascending: false }),
@@ -31,7 +44,9 @@ export default async function NewAnalysisPage() {
       .order("name"),
     supabase
       .from("kill_sheet_records")
-      .select("id, record_name, processor_name, grid_code, kill_date, total_head_count, total_gross_value")
+      .select(
+        "id, record_name, processor_name, grid_code, kill_date, total_head_count, total_gross_value"
+      )
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
       .order("created_at", { ascending: false }),
@@ -55,6 +70,7 @@ export default async function NewAnalysisPage() {
         compact
       />
       <PreSaleFlow
+        processors={processors ?? []}
         grids={grids ?? []}
         herds={(herds ?? []).filter((h) => h.species === "Cattle")}
         killSheets={killSheets ?? []}

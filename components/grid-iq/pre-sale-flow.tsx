@@ -26,10 +26,19 @@ import { UploadModal } from "@/app/(app)/dashboard/tools/grid-iq/library/upload-
 
 // MARK: - Types
 
+interface ProcessorSummary {
+  id: string;
+  name: string;
+  address: string | null;
+  location_latitude: number | null;
+  location_longitude: number | null;
+}
+
 interface GridSummary {
   id: string;
   grid_name: string | null;
   processor_name: string;
+  processor_id: string | null;
   grid_code: string | null;
   grid_date: string | null;
   expiry_date: string | null;
@@ -67,6 +76,7 @@ interface Allocation {
 }
 
 interface PreSaleFlowProps {
+  processors: ProcessorSummary[];
   grids: GridSummary[];
   herds: HerdSummary[];
   killSheets: KillSheetSummary[];
@@ -103,12 +113,13 @@ function formatCurrency(value: number | null): string {
 
 // MARK: - Component
 
-export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
+export function PreSaleFlow({ processors, grids, herds, killSheets }: PreSaleFlowProps) {
   const router = useRouter();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [uploadOpen, setUploadOpen] = useState<"grid" | "killsheet" | null>(null);
+  const [selectedProcessorId, setSelectedProcessorId] = useState<string | null>(null);
 
   // Step 1: What am I selling? — consignment name + herd allocations
   const [consignmentName, setConsignmentName] = useState("");
@@ -423,9 +434,50 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
       {step === 2 && (
         <section className="flex flex-col gap-4">
           <p className="text-xs text-text-muted">
-            Pick the processor grid this consignment will be analysed against.
-            Only one grid is used per analysis.
+            Pick the processor and grid this consignment will be analysed
+            against. Only one grid is used per analysis.
           </p>
+
+          {processors.length > 0 && (
+            <Card>
+              <CardContent className="p-3">
+                <label className="mb-1 block text-[11px] text-text-muted">
+                  Processor (filters grids below)
+                </label>
+                <select
+                  value={selectedProcessorId ?? ""}
+                  onChange={(e) => {
+                    const id = e.target.value || null;
+                    setSelectedProcessorId(id);
+                    // If current grid is not from the picked processor, clear selection.
+                    if (id && selectedGridId) {
+                      const g = grids.find((x) => x.id === selectedGridId);
+                      if (g && g.processor_id !== id) setSelectedGridId(null);
+                    }
+                  }}
+                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary focus:border-teal-500/50 focus:outline-none"
+                >
+                  <option value="">All processors</option>
+                  {processors.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                      {p.location_latitude == null ? " (no coords)" : ""}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1.5 text-[11px] text-text-muted">
+                  Don&apos;t see yours?{" "}
+                  <Link
+                    href="/dashboard/tools/grid-iq/processors/new"
+                    className="text-teal-400 hover:underline"
+                  >
+                    Add a processor
+                  </Link>
+                  {" "}- its address and coordinates will be reused for every future analysis.
+                </p>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="flex items-center justify-end">
             <Button
@@ -439,26 +491,53 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
             </Button>
           </div>
 
-          {grids.length === 0 ? (
-            <Card className="border-dashed">
-              <CardContent className="flex flex-col items-center gap-2 py-6 text-center">
-                <Grid3x3 className="h-8 w-8 text-text-muted" />
-                <p className="text-sm text-text-muted">
-                  No processor grids uploaded yet.
-                </p>
-                <Button
-                  size="sm"
-                  variant="teal"
-                  onClick={() => setUploadOpen("grid")}
-                >
-                  <Upload className="mr-1.5 h-3.5 w-3.5" />
-                  Upload Grid
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
+          {(() => {
+            const visibleGrids = selectedProcessorId
+              ? grids.filter((g) => g.processor_id === selectedProcessorId)
+              : grids;
+            if (grids.length === 0) {
+              return (
+                <Card className="border-dashed">
+                  <CardContent className="flex flex-col items-center gap-2 py-6 text-center">
+                    <Grid3x3 className="h-8 w-8 text-text-muted" />
+                    <p className="text-sm text-text-muted">
+                      No processor grids uploaded yet.
+                    </p>
+                    <Button
+                      size="sm"
+                      variant="teal"
+                      onClick={() => setUploadOpen("grid")}
+                    >
+                      <Upload className="mr-1.5 h-3.5 w-3.5" />
+                      Upload Grid
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            }
+            if (visibleGrids.length === 0) {
+              return (
+                <Card className="border-dashed">
+                  <CardContent className="flex flex-col items-center gap-2 py-6 text-center">
+                    <Grid3x3 className="h-8 w-8 text-text-muted" />
+                    <p className="text-sm text-text-muted">
+                      No grids yet for this processor.
+                    </p>
+                    <Button
+                      size="sm"
+                      variant="teal"
+                      onClick={() => setUploadOpen("grid")}
+                    >
+                      <Upload className="mr-1.5 h-3.5 w-3.5" />
+                      Upload Grid
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            }
+            return (
             <div className="flex flex-col gap-2">
-              {grids.map((grid) => {
+              {visibleGrids.map((grid) => {
                 const expired = isExpired(grid.expiry_date);
                 const selected = selectedGridId === grid.id;
                 return (
@@ -509,7 +588,8 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
                 );
               })}
             </div>
-          )}
+            );
+          })()}
 
           {/* Optional refinement: use past kills to personalise */}
           <Card className="border-teal-500/20">

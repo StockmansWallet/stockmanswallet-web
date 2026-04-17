@@ -130,7 +130,7 @@ export async function createPreSaleAnalysis(formData: FormData) {
   // 1. Fetch grid
   const { data: grid } = await supabase
     .from("processor_grids")
-    .select("id, processor_name, grid_code, entries, location_latitude, location_longitude")
+    .select("id, processor_name, processor_id, grid_code, entries, location_latitude, location_longitude")
     .eq("id", gridId)
     .eq("user_id", user.id)
     .single();
@@ -138,6 +138,24 @@ export async function createPreSaleAnalysis(formData: FormData) {
 
   const gridEntries = (grid.entries ?? []) as GridEntry[];
   const resolvedProcessorName = processorName || grid.processor_name;
+
+  // Prefer processor record's coords (canonical) over grid-local coords.
+  let processorLat: number | null = grid.location_latitude ?? null;
+  let processorLon: number | null = grid.location_longitude ?? null;
+  const processorId = grid.processor_id as string | null;
+  if (processorId) {
+    const { data: processorRow } = await supabase
+      .from("processors")
+      .select("location_latitude, location_longitude")
+      .eq("id", processorId)
+      .maybeSingle();
+    if (processorRow) {
+      if (processorRow.location_latitude != null)
+        processorLat = processorRow.location_latitude;
+      if (processorRow.location_longitude != null)
+        processorLon = processorRow.location_longitude;
+    }
+  }
 
   // 2. Fetch breed premiums + producer profile in parallel
   const [{ data: breedPremiumData }, profile] = await Promise.all([
@@ -313,8 +331,8 @@ export async function createPreSaleAnalysis(formData: FormData) {
           }).totalCost;
         }
       }
-      if (grid.location_latitude && grid.location_longitude) {
-        const distKm = haversineKm(property.latitude, property.longitude, grid.location_latitude, grid.location_longitude) * 1.3;
+      if (processorLat != null && processorLon != null) {
+        const distKm = haversineKm(property.latitude, property.longitude, processorLat, processorLon) * 1.3;
         if (distKm > 0) {
           freightToProcessor = calculateFreightEstimate({
             appCategory: herd.category,
@@ -416,6 +434,7 @@ export async function createPreSaleAnalysis(formData: FormData) {
     status: "draft",
     total_head_count: totalHead,
     processor_grid_id: gridId,
+    processor_id: processorId,
     notes,
   });
   if (consignmentError) return { error: `Failed to create consignment: ${consignmentError.message}` };
@@ -440,6 +459,7 @@ export async function createPreSaleAnalysis(formData: FormData) {
     herd_id: null,
     consignment_id: consignmentId,
     processor_grid_id: grid.id,
+    processor_id: processorId,
     kill_sheet_record_id: null,
     analysis_date: now,
     updated_at: now,

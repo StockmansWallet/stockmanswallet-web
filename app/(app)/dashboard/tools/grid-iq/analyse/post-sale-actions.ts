@@ -94,13 +94,32 @@ export async function runPostSaleAnalysis(consignmentId: string, killSheetId: st
   // Fetch grid
   const { data: grid } = await supabase
     .from("processor_grids")
-    .select("id, processor_name, grid_code, entries, location_latitude, location_longitude")
+    .select("id, processor_name, processor_id, grid_code, entries, location_latitude, location_longitude")
     .eq("id", consignment.processor_grid_id)
     .eq("user_id", user.id)
     .single();
   if (!grid) return { error: "Linked processor grid not found" };
 
   const gridEntries = (grid.entries ?? []) as GridEntry[];
+
+  // Resolve processor coordinates: prefer the processor record, fall back to
+  // coords stored directly on the grid for legacy rows.
+  let processorLat: number | null = grid.location_latitude ?? null;
+  let processorLon: number | null = grid.location_longitude ?? null;
+  const processorId = grid.processor_id as string | null;
+  if (processorId) {
+    const { data: processorRow } = await supabase
+      .from("processors")
+      .select("location_latitude, location_longitude")
+      .eq("id", processorId)
+      .maybeSingle();
+    if (processorRow) {
+      if (processorRow.location_latitude != null)
+        processorLat = processorRow.location_latitude;
+      if (processorRow.location_longitude != null)
+        processorLon = processorRow.location_longitude;
+    }
+  }
 
   // Link kill sheet to consignment
   await supabase
@@ -239,8 +258,8 @@ export async function runPostSaleAnalysis(consignmentId: string, killSheetId: st
         const d = haversineKm(prop.latitude, prop.longitude, sc.lat, sc.lon) * 1.3;
         if (d > 0) aggFreightToSaleyard += calculateFreightEstimate({ appCategory: herd.category, sex: herd.sex ?? "Male", averageWeightKg: projLW, headCount: alloc.head_count, distanceKm: d }).totalCost;
       }
-      if (grid.location_latitude && grid.location_longitude) {
-        const d = haversineKm(prop.latitude, prop.longitude, grid.location_latitude, grid.location_longitude) * 1.3;
+      if (processorLat != null && processorLon != null) {
+        const d = haversineKm(prop.latitude, prop.longitude, processorLat, processorLon) * 1.3;
         if (d > 0) aggFreightToProcessor += calculateFreightEstimate({ appCategory: herd.category, sex: herd.sex ?? "Male", averageWeightKg: projLW, headCount: alloc.head_count, distanceKm: d }).totalCost;
       }
     }
@@ -300,6 +319,7 @@ export async function runPostSaleAnalysis(consignmentId: string, killSheetId: st
     herd_id: null,
     consignment_id: consignmentId,
     processor_grid_id: grid.id,
+    processor_id: processorId,
     kill_sheet_record_id: killSheetId,
     analysis_date: now,
     updated_at: now,

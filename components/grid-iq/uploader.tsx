@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -122,6 +123,41 @@ export function GridIQUploader({
   const [gridNameOverride, setGridNameOverride] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Processor picker: load once, auto-match on extraction, manual override.
+  interface ProcessorOption {
+    id: string;
+    name: string;
+  }
+  const [processors, setProcessors] = useState<ProcessorOption[]>([]);
+  const [selectedProcessorId, setSelectedProcessorId] = useState<string | null>(
+    null
+  );
+
+  useEffect(() => {
+    const supabase = createClient();
+    void supabase
+      .from("processors")
+      .select("id, name")
+      .eq("is_deleted", false)
+      .order("name")
+      .then(({ data }) => {
+        if (data) setProcessors(data as ProcessorOption[]);
+      });
+  }, []);
+
+  // Auto-match when extraction returns a processor_name that exists in the
+  // user's directory (case-insensitive exact match).
+  useEffect(() => {
+    if (!result || processors.length === 0) return;
+    const extractedName =
+      result.gridData?.processorName || result.killSheetData?.processorName;
+    if (!extractedName) return;
+    const match = processors.find(
+      (p) => p.name.trim().toLowerCase() === extractedName.trim().toLowerCase()
+    );
+    if (match) setSelectedProcessorId(match.id);
+  }, [result, processors]);
+
   const handleFile = useCallback((f: File) => {
     setError(null);
     setResult(null);
@@ -229,6 +265,7 @@ export function GridIQUploader({
           .insert({
             id: newId,
             user_id: session.user.id,
+            processor_id: selectedProcessorId,
             processor_name: effectiveProcessor,
             grid_name: gridNameOverride || `${effectiveProcessor} - Grid`,
             source_file_name: file?.name || null,
@@ -255,6 +292,7 @@ export function GridIQUploader({
           .insert({
             id: newId,
             user_id: session.user.id,
+            processor_id: selectedProcessorId,
             processor_name: effectiveProcessor,
             record_name: gridNameOverride || `${effectiveProcessor} - Kill Sheet`,
             source_file_name: file?.name || null,
@@ -455,6 +493,50 @@ export function GridIQUploader({
                   onGridNameChange={setGridNameOverride}
                   fileName={file?.name || ""}
                 />
+              )}
+
+              {/* Processor link: auto-matched on extraction, user can override */}
+              {result && (
+                <div className="rounded-xl bg-white/[0.03] p-3 ring-1 ring-inset ring-white/[0.06]">
+                  <div className="flex items-center justify-between gap-2">
+                    <label className="text-xs font-medium text-text-primary">
+                      Link to processor
+                    </label>
+                    {processors.length === 0 && (
+                      <Link
+                        href="/dashboard/tools/grid-iq/processors/new"
+                        className="text-[11px] text-teal-400 hover:underline"
+                      >
+                        + Add processor
+                      </Link>
+                    )}
+                  </div>
+                  {processors.length > 0 ? (
+                    <select
+                      value={selectedProcessorId ?? ""}
+                      onChange={(e) =>
+                        setSelectedProcessorId(e.target.value || null)
+                      }
+                      className="mt-1.5 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary focus:border-teal-500/50 focus:outline-none"
+                    >
+                      <option value="">Not linked (set later)</option>
+                      {processors.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <p className="mt-1.5 text-[11px] text-text-muted">
+                      No processors in your directory yet. Add one so freight
+                      calculations work correctly.
+                    </p>
+                  )}
+                  <p className="mt-1.5 text-[11px] text-text-muted">
+                    Linking lets future analyses reuse the processor&apos;s
+                    address and coordinates.
+                  </p>
+                </div>
               )}
 
               {/* Action Buttons */}
