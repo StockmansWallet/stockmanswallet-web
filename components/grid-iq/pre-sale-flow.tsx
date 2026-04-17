@@ -186,7 +186,15 @@ export function PreSaleFlow({ processors, grids, herds, killSheets }: PreSaleFlo
         const updated = { ...a, [field]: value };
         if (field === "herdGroupId") {
           const herd = herds.find((h) => h.id === value);
-          if (herd) updated.category = herd.category;
+          if (herd) {
+            updated.category = herd.category;
+            // Default the head count to the full herd. User can still edit
+            // down if they're only sending part of the herd.
+            updated.headCount = herd.head_count ?? 0;
+          } else {
+            updated.category = "";
+            updated.headCount = 0;
+          }
         }
         return updated;
       })
