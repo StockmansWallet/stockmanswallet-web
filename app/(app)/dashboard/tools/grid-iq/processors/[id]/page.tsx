@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  ChevronLeft,
   ChevronRight,
   Grid3x3,
   FileText,
@@ -71,16 +70,6 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
 
   return (
     <div>
-      <div className="mb-4">
-        <Link
-          href="/dashboard/tools/grid-iq/processors"
-          className="inline-flex items-center gap-1.5 rounded-full bg-surface-lowest px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-text-primary"
-        >
-          <ChevronLeft className="h-3.5 w-3.5" />
-          Processors
-        </Link>
-      </div>
-
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <PageHeader
           title={processor.name}

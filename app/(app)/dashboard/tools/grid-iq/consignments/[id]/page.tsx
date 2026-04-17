@@ -7,7 +7,6 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  ChevronLeft,
   Truck,
   Users,
   Calendar,
@@ -228,16 +227,6 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
 
   return (
     <div>
-      <div className="mb-4">
-        <Link
-          href="/dashboard/tools/grid-iq/consignments"
-          className="inline-flex items-center gap-1.5 rounded-full bg-surface-lowest px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-text-primary"
-        >
-          <ChevronLeft className="h-3.5 w-3.5" />
-          Consignments
-        </Link>
-      </div>
-
       <div className="flex items-start justify-between">
         <PageHeader
           title={consignment.consignment_name || consignment.processor_name}
