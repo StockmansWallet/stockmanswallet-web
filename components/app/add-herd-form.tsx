@@ -162,10 +162,12 @@ export interface Property {
 
 interface AddHerdFormProps {
   properties: Property[];
+  /** Previously-used livestock owner names for the typeahead datalist. */
+  existingOwners?: string[];
   action: (formData: FormData) => Promise<{ error: string } | void>;
 }
 
-export function AddHerdForm({ properties, action }: AddHerdFormProps) {
+export function AddHerdForm({ properties, existingOwners = [], action }: AddHerdFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -204,9 +206,10 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
   const [joiningStart, setJoiningStart] = useState("");
   const [joiningEnd, setJoiningEnd] = useState("");
 
-  // Section 6 - Property (dropdown, default = is_default or first)
+  // Section 6 - Property (dropdown, default = is_default or first) + optional livestock owner
   const defaultProperty = properties.find((p) => p.is_default) ?? properties[0];
   const [propertyId, setPropertyId] = useState(defaultProperty?.id ?? "");
+  const [livestockOwner, setLivestockOwner] = useState("");
 
   // Section 7 - Saleyard (dropdown)
   const [saleyard, setSaleyard] = useState("");
@@ -452,6 +455,7 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
     formData.set("paddock_name", paddock.trim());
     formData.set("property_id", propertyId);
     formData.set("selected_saleyard", saleyard);
+    if (livestockOwner.trim()) formData.set("livestock_owner", livestockOwner.trim());
     if (breedPremiumOverride) {
       formData.set("breed_premium_override", breedPremiumOverride);
       if (breedPremiumJustification.trim()) formData.set("breed_premium_justification", breedPremiumJustification.trim());
@@ -1030,15 +1034,15 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
       </Section>
 
       {/* ----------------------------------------------------------------- */}
-      {/* Section 6: Property (dropdown)                                     */}
+      {/* Section 6: Property (dropdown) + Livestock Owner                   */}
       {/* ----------------------------------------------------------------- */}
       <Section show={showSection6}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Property</CardTitle>
-            <p className="mt-1 text-sm text-text-secondary">Assign this herd to a property.</p>
+            <CardTitle className="text-base">Property & Ownership</CardTitle>
+            <p className="mt-1 text-sm text-text-secondary">Where this herd is running, and who owns the livestock.</p>
           </CardHeader>
-          <CardContent className="px-5 pb-5">
+          <CardContent className="space-y-4 px-5 pb-5">
             {properties.length === 0 ? (
               <p className="flex items-start gap-2 text-xs text-text-muted">
                 <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
@@ -1047,12 +1051,27 @@ export function AddHerdForm({ properties, action }: AddHerdFormProps) {
             ) : (
               <Select
                 id="property"
+                label="Property"
                 custom
                 options={propertyOptions}
                 value={propertyId}
                 onChange={(e) => setPropertyId(e.target.value)}
               />
             )}
+            <Input
+              id="livestock_owner"
+              label="Livestock Owner (optional)"
+              value={livestockOwner}
+              onChange={(e) => setLivestockOwner(e.target.value)}
+              placeholder="e.g. Smith Family Trust"
+              helperText="Who owns these animals? Useful when agisting on another producer's property."
+              list="livestock-owner-suggestions"
+            />
+            <datalist id="livestock-owner-suggestions">
+              {existingOwners.map((owner) => (
+                <option key={owner} value={owner} />
+              ))}
+            </datalist>
           </CardContent>
         </Card>
       </Section>

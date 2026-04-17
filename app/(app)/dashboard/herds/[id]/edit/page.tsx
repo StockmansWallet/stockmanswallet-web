@@ -21,7 +21,7 @@ export default async function EditHerdPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: herd }, { data: properties }, { data: musterRecords }, { data: healthRecords }] = await Promise.all([
+  const [{ data: herd }, { data: properties }, { data: musterRecords }, { data: healthRecords }, { data: ownerRows }] = await Promise.all([
     supabase
       .from("herds")
       .select("*")
@@ -49,11 +49,26 @@ export default async function EditHerdPage({
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
       .order("date", { ascending: false }),
+    supabase
+      .from("herds")
+      .select("livestock_owner")
+      .eq("user_id", user!.id)
+      .eq("is_deleted", false)
+      .not("livestock_owner", "is", null),
   ]);
 
   if (!herd) notFound();
 
   const boundUpdate = updateHerd.bind(null, id);
+
+  // Distinct list of previously-used livestock owners to power the typeahead.
+  const existingOwners = [
+    ...new Set(
+      (ownerRows ?? [])
+        .map((r: { livestock_owner: string | null }) => (r.livestock_owner ?? "").trim())
+        .filter((s: string) => s.length > 0)
+    ),
+  ].sort((a, b) => a.localeCompare(b));
 
   return (
     <div className="max-w-4xl pb-24">
@@ -64,6 +79,7 @@ export default async function EditHerdPage({
       <HerdForm
         herd={herd}
         properties={properties ?? []}
+        existingOwners={existingOwners}
         action={boundUpdate}
         submitLabel="Save Changes"
         cancelHref={`/dashboard/herds/${id}`}

@@ -354,6 +354,7 @@ export default async function HerdDetailPage({
               </div>
             )}
             <InfoRow label="Paddock" value={herd.paddock_name} />
+            <InfoRow label="Livestock Owner" value={herd.livestock_owner} />
             <div className="flex items-center justify-between py-3 text-sm">
               <span className="text-text-muted">Saleyard</span>
               <span className="flex items-center gap-2 font-medium text-text-primary">

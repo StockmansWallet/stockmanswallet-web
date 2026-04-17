@@ -39,14 +39,9 @@ export function LivestockAssetsSection({ herdData }: { herdData: HerdReportData[
 function PropertyGroup({ propertyName, herds }: { propertyName: string; herds: HerdReportData[] }) {
   const propertyHead = herds.reduce((s, h) => s + h.headCount, 0);
   const propertyValue = herds.reduce((s, h) => s + h.netValue, 0);
-  const livestockOwner = herds[0]?.livestockOwner;
 
   return (
     <div>
-      {/* Livestock owner (shown above the property name when set) */}
-      {livestockOwner && (
-        <p className="mb-1 px-4 text-[10px] font-medium uppercase tracking-wider text-text-muted">{livestockOwner}</p>
-      )}
       {/* Property header - dark bar */}
       <div className="mb-2 flex items-center justify-between rounded-full bg-white/[0.06] px-4 py-2.5">
         <h4 className="text-sm font-semibold text-white">{propertyName}</h4>
@@ -100,11 +95,19 @@ function HerdCard({ herd: h }: { herd: HerdReportData }) {
     <Card className="overflow-hidden">
       {/* Header: tinted row with name + category inline | value */}
       <div className="flex items-center justify-between bg-white/[0.04] px-4 py-2.5">
-        <div className="flex items-center gap-2">
-          <h5 className="text-sm font-semibold text-text-primary">{h.name}</h5>
-          <p className="text-xs text-text-muted">{h.category}</p>
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <h5 className="truncate text-sm font-semibold text-text-primary">{h.name}</h5>
+            <p className="shrink-0 text-xs text-text-muted">{h.category}</p>
+          </div>
+          {h.livestockOwner && (
+            <p className="mt-0.5 text-[11px] text-text-muted">
+              <span className="text-text-muted/70">Livestock Owner:</span>{" "}
+              <span className="text-text-secondary">{h.livestockOwner}</span>
+            </p>
+          )}
         </div>
-        <p className="shrink-0 text-base font-bold tabular-nums text-text-primary">{fmtFull(h.netValue)}</p>
+        <p className="ml-3 shrink-0 text-base font-bold tabular-nums text-text-primary">{fmtFull(h.netValue)}</p>
       </div>
 
       {/* Core metrics: 4-column grid */}

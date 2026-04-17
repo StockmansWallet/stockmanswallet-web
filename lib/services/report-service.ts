@@ -58,7 +58,7 @@ const HERD_SELECT = `id, name, species, breed, category, head_count,
   breeding_program_type, joining_period_start, joining_period_end,
   breed_premium_override, breed_premium_justification, mortality_rate, is_sold, selected_saleyard,
   additional_info, calf_weight_recorded_date, updated_at,
-  breeder_sub_type, sub_category, property_id`;
+  breeder_sub_type, sub_category, property_id, livestock_owner`;
 
 // MARK: - Price Row type from RPC
 
@@ -167,7 +167,7 @@ export async function generateAssetRegisterData(
       .order("name"),
     supabase
       .from("properties")
-      .select("id, property_name, property_pic, state, acreage, is_default, default_saleyard, region, livestock_owner")
+      .select("id, property_name, property_pic, state, acreage, is_default, default_saleyard, region")
       .eq("user_id", userId)
       .eq("is_deleted", false)
       .order("property_name"),
@@ -189,8 +189,8 @@ export async function generateAssetRegisterData(
   // Build price maps
   const { nationalPriceMap, saleyardPriceMap, saleyardBreedPriceMap } = await buildPriceMaps(supabase, filteredHerds);
 
-  // Build property lookup (name + livestock owner)
-  const propertyMap = new Map(allProperties.map((p: { id: string; property_name: string; livestock_owner: string | null }) => [p.id, { name: p.property_name, owner: p.livestock_owner }]));
+  // Build property lookup (name only; livestock_owner is now a herd-level attribute).
+  const propertyMap = new Map(allProperties.map((p: { id: string; property_name: string }) => [p.id, { name: p.property_name }]));
 
   // Calculate valuations
   const herdDataArray: HerdReportData[] = [];
@@ -210,7 +210,8 @@ export async function generateAssetRegisterData(
     const currentPrice = valuation.pricePerKg;
     const propertyInfo = herd.property_id ? (propertyMap.get(herd.property_id) ?? null) : null;
     const propertyName = propertyInfo?.name ?? null;
-    const livestockOwner = propertyInfo?.owner ?? null;
+    // Livestock owner is attributed to the herd, not the property (agistment is common).
+    const livestockOwner = herd.livestock_owner ?? null;
 
     herdDataArray.push({
       id: herd.id,
@@ -282,9 +283,8 @@ export async function generateAssetRegisterData(
   const activePropertyIds = new Set(herdDataArray.map((h) => h.propertyId).filter(Boolean));
   const reportProperties: ReportPropertyDetails[] = allProperties
     .filter((p: { id: string }) => activePropertyIds.has(p.id))
-    .map((p: { property_name: string; livestock_owner: string | null; property_pic: string | null; state: string | null }) => ({
+    .map((p: { property_name: string; property_pic: string | null; state: string | null }) => ({
       name: p.property_name,
-      livestockOwner: p.livestock_owner ?? null,
       picCode: p.property_pic ?? null,
       state: p.state ?? null,
     }));

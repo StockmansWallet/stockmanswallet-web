@@ -20,12 +20,9 @@ export function ProducerPropertiesCard({
             <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-text-muted">
               {properties.length > 1 ? "Properties" : "Property"}
             </p>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1">
               {properties.map((p) => (
                 <div key={p.name} className="text-sm">
-                  {p.livestockOwner && (
-                    <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">{p.livestockOwner}</p>
-                  )}
                   <span className="font-medium text-text-primary">{p.name}</span>
                   {p.picCode && <span className="ml-2 text-xs text-text-muted">PIC: {p.picCode}</span>}
                   {p.state && <span className="ml-2 text-xs text-text-muted">{p.state}</span>}

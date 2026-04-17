@@ -150,13 +150,6 @@ export function PropertyForm({ property, action, submitLabel, cancelHref, delete
               placeholder="e.g. QABC1234"
             />
             <Input
-              id="livestock_owner"
-              name="livestock_owner"
-              label="Livestock Owner"
-              defaultValue={property?.livestock_owner ?? ""}
-              placeholder="e.g. Smith Family Trust"
-            />
-            <Input
               id="region"
               name="region"
               label="Region"

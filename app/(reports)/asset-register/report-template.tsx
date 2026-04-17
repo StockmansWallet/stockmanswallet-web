@@ -107,9 +107,17 @@ function HerdCard({ herd }: { herd: HerdReportData }) {
     <div className="break-inside-avoid overflow-hidden rounded-xl border border-[#8B7355]/25">
       {/* Header: name + value with background */}
       <div className="flex items-center justify-between px-4 py-2.5" style={{ backgroundColor: "rgba(139, 115, 85, 0.25)" }}>
-        <div className="flex items-baseline gap-2">
-          <h4 className="text-sm font-bold text-[#271F16]">{herd.name}</h4>
-          <p className="text-xs text-[#271F16]/60">{herd.category}</p>
+        <div className="min-w-0">
+          <div className="flex items-baseline gap-2">
+            <h4 className="text-sm font-bold text-[#271F16]">{herd.name}</h4>
+            <p className="text-xs text-[#271F16]/60">{herd.category}</p>
+          </div>
+          {herd.livestockOwner && (
+            <p className="text-[10px] text-[#271F16]/60">
+              <span className="text-[#271F16]/45">Livestock Owner:</span>{" "}
+              <span>{herd.livestockOwner}</span>
+            </p>
+          )}
         </div>
         <p className="ml-4 shrink-0 text-base font-bold tabular-nums text-[#271F16]">
           {fmtFull(herd.netValue)}
@@ -223,7 +231,6 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
                   <div className="flex flex-col gap-1">
                     {properties.map((p) => (
                       <div key={p.name} className="text-sm">
-                        {p.livestockOwner && <p className="text-[10px] font-medium text-[#6B5B45]">{p.livestockOwner}</p>}
                         <span className="font-medium text-[#271F16]">{p.name}</span>
                         {p.picCode && <span className="ml-2 text-xs text-[#271F16]/50">PIC: {p.picCode}</span>}
                         {p.state && <span className="ml-2 text-xs text-[#271F16]/50">{p.state}</span>}
@@ -392,13 +399,8 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
         <section className="mt-5">
           <h2 className="mb-2 text-base font-bold text-[#271F16]">Livestock Assets</h2>
 
-          {[...grouped.entries()].map(([propertyName, herds]) => {
-            const livestockOwner = herds[0]?.livestockOwner;
-            return (
+          {[...grouped.entries()].map(([propertyName, herds]) => (
             <div key={propertyName} className="mb-4">
-              {livestockOwner && (
-                <p className="mb-0.5 px-4 text-[10px] font-medium text-[#6B5B45]">{livestockOwner}</p>
-              )}
               <div className="mb-1.5 flex items-center justify-between px-4 py-2" style={{ backgroundColor: "#271F16", borderRadius: "9999px" }}>
                 <h3 className="text-sm font-semibold text-white">{propertyName}</h3>
                 <p className="text-xs tabular-nums text-white/60">
@@ -412,8 +414,7 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
                 ))}
               </div>
             </div>
-            );
-          })}
+          ))}
 
           {/* Grand total */}
           <div className="mt-3 flex items-center justify-between pt-2">

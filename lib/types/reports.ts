@@ -114,7 +114,6 @@ export interface UserReportDetails {
 
 export interface ReportPropertyDetails {
   name: string;
-  livestockOwner: string | null;
   picCode: string | null;
   state: string | null;
 }

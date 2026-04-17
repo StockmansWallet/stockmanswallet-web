@@ -41,9 +41,6 @@ export default async function PropertyDetailPage({
           <MapPinned className="h-7 w-7 text-brand" />
         </div>
         <div className="min-w-0 flex-1">
-          {property.livestock_owner && (
-            <p className="text-xs font-medium text-text-muted">{property.livestock_owner}</p>
-          )}
           <h1 className="text-2xl font-bold text-text-primary">{property.property_name}</h1>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-3 text-sm text-text-secondary">
             {property.state && <span>{property.state}</span>}

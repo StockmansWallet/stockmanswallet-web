@@ -13,12 +13,29 @@ export default async function NewHerdPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: properties } = await supabase
-    .from("properties")
-    .select("id, property_name, is_default, latitude, longitude, state")
-    .eq("user_id", user!.id)
-    .eq("is_deleted", false)
-    .order("property_name");
+  const [{ data: properties }, { data: ownerRows }] = await Promise.all([
+    supabase
+      .from("properties")
+      .select("id, property_name, is_default, latitude, longitude, state")
+      .eq("user_id", user!.id)
+      .eq("is_deleted", false)
+      .order("property_name"),
+    supabase
+      .from("herds")
+      .select("livestock_owner")
+      .eq("user_id", user!.id)
+      .eq("is_deleted", false)
+      .not("livestock_owner", "is", null),
+  ]);
+
+  // Distinct list of previously-used livestock owners to power the typeahead.
+  const existingOwners = [
+    ...new Set(
+      (ownerRows ?? [])
+        .map((r: { livestock_owner: string | null }) => (r.livestock_owner ?? "").trim())
+        .filter((s: string) => s.length > 0)
+    ),
+  ].sort((a, b) => a.localeCompare(b));
 
   return (
     <div className="max-w-3xl">
@@ -29,6 +46,7 @@ export default async function NewHerdPage() {
       />
       <AddHerdForm
         properties={properties ?? []}
+        existingOwners={existingOwners}
         action={createHerd}
       />
     </div>

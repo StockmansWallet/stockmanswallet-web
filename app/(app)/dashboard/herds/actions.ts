@@ -55,6 +55,7 @@ const herdFormSchema = z.object({
   sub_category: optionalString,
   breeder_sub_type: optionalString,
   calf_weight_recorded_date: optionalString,
+  livestock_owner: optionalString,
 });
 
 const idSchema = z.string().uuid();
@@ -130,6 +131,7 @@ export async function createHerd(formData: FormData) {
     breed_premium_justification: breedPremiumOverride ? (v.breed_premium_justification || null) : null,
     sub_category: v.sub_category || null,
     breeder_sub_type: v.breeder_sub_type || null,
+    livestock_owner: v.livestock_owner || null,
     updated_at: new Date().toISOString(),
   });
 
@@ -246,6 +248,7 @@ export async function updateHerd(id: string, formData: FormData) {
       breed_premium_justification: updatePremiumOverride ? (v.breed_premium_justification || null) : null,
       sub_category: v.sub_category || null,
       breeder_sub_type: v.breeder_sub_type || null,
+      livestock_owner: v.livestock_owner || null,
       updated_at: new Date().toISOString(),
     })
     .eq("id", idResult.data)

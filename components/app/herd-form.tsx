@@ -57,12 +57,14 @@ function SectionIcon({ icon: Icon }: { icon: React.ComponentType<{ className?: s
 interface HerdFormProps {
   herd?: HerdRow;
   properties: { id: string; property_name: string }[];
+  /** Previously-used livestock owner names for the typeahead datalist. */
+  existingOwners?: string[];
   action: (formData: FormData) => Promise<{ error: string } | void>;
   submitLabel?: string;
   cancelHref?: string;
 }
 
-export function HerdForm({ herd, properties, action, submitLabel = "Save", cancelHref }: HerdFormProps) {
+export function HerdForm({ herd, properties, existingOwners = [], action, submitLabel = "Save", cancelHref }: HerdFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [species, setSpecies] = useState<string>(herd?.species ?? "Cattle");
@@ -601,6 +603,20 @@ export function HerdForm({ herd, properties, action, submitLabel = "Save", cance
               defaultValue={herd?.paddock_name ?? ""}
               placeholder="e.g. River Paddock"
             />
+            <Input
+              id="livestock_owner"
+              name="livestock_owner"
+              label="Livestock Owner"
+              defaultValue={herd?.livestock_owner ?? ""}
+              placeholder="e.g. Smith Family Trust"
+              helperText="Optional. Who owns these animals? Useful when agisting on another property."
+              list="livestock-owner-suggestions"
+            />
+            <datalist id="livestock-owner-suggestions">
+              {existingOwners.map((owner) => (
+                <option key={owner} value={owner} />
+              ))}
+            </datalist>
             <Select
               id="selected_saleyard"
               name="selected_saleyard"

@@ -17,7 +17,6 @@ export type Database = {
           state: string;
           region: string | null;
           lga: string | null;
-          livestock_owner: string | null;
           address: string | null;
           suburb: string | null;
           postcode: string | null;
@@ -47,7 +46,6 @@ export type Database = {
           state: string;
           region?: string | null;
           lga?: string | null;
-          livestock_owner?: string | null;
           address?: string | null;
           suburb?: string | null;
           postcode?: string | null;
@@ -77,7 +75,6 @@ export type Database = {
           state?: string;
           region?: string | null;
           lga?: string | null;
-          livestock_owner?: string | null;
           address?: string | null;
           suburb?: string | null;
           postcode?: string | null;
@@ -140,6 +137,7 @@ export type Database = {
           breed_premium_justification: string | null;
           additional_info: string | null;
           notes: string | null;
+          livestock_owner: string | null;
           mortality_rate: number | null;
           calf_weight_recorded_date: string | null;
           is_demo_data: boolean;
@@ -190,6 +188,7 @@ export type Database = {
           breed_premium_justification?: string | null;
           additional_info?: string | null;
           notes?: string | null;
+          livestock_owner?: string | null;
           mortality_rate?: number | null;
           calf_weight_recorded_date?: string | null;
           is_demo_data?: boolean;
@@ -240,6 +239,7 @@ export type Database = {
           breed_premium_justification?: string | null;
           additional_info?: string | null;
           notes?: string | null;
+          livestock_owner?: string | null;
           mortality_rate?: number | null;
           calf_weight_recorded_date?: string | null;
           is_demo_data?: boolean;
