@@ -1,16 +1,19 @@
 export function ReportPrintStyles() {
   return (
     <style>{`
-      /* Override dark theme for report pages.
-         The report template is always rendered against a white background because
-         it is used both on screen and in PDF export. Forcing html/body white here
-         also makes @page margin areas render white in the PDF (the margin boxes
-         inherit the canvas / body background when Chromium writes the PDF). */
+      /* The report template is a light document even when the rest of the app runs
+         in dark mode. We force html, body, and :root to white with !important so the
+         app's dark global body background does not bleed into the @page margin area
+         (Chromium fills the PDF canvas from the root element background). */
       html.dark .report-root {
         color-scheme: light;
       }
-      html, body {
+      :root, html, body {
         background: white !important;
+        background-color: white !important;
+      }
+      html {
+        color-scheme: light !important;
       }
       .report-root {
         background: white !important;
@@ -20,8 +23,11 @@ export function ReportPrintStyles() {
         size: A4;
         /* 16mm top gives the logo clear space on every page.
            10mm bottom leaves room for the page counter in the @bottom-right margin box.
-           Left/right are 0 here; .report-page owns horizontal padding. */
+           Left/right are 0 here; .report-page owns horizontal padding.
+           background: white keeps the margin boxes paper-white instead of inheriting
+           any dark root background if CSS overrides fail. */
         margin: 16mm 0 10mm 0;
+        background: white;
         @bottom-right {
           content: "Page " counter(page) " of " counter(pages);
           font-size: 8px;
