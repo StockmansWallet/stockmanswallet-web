@@ -38,6 +38,10 @@ interface PostSaleFlowProps {
   totalHead: number;
   allocations: AllocationInfo[];
   availableKillSheets: KillSheetOption[];
+  // When set, the flow boots straight into the Confirm stage with this analysis
+  // already linked, so a page refresh after running post-kill analysis lands
+  // the user back on the allocations screen instead of the kill-sheet picker.
+  existingAnalysisId?: string | null;
 }
 
 function formatDate(dateStr: string | null): string {
@@ -60,9 +64,12 @@ export function PostSaleFlow({
   totalHead,
   allocations,
   availableKillSheets,
+  existingAnalysisId = null,
 }: PostSaleFlowProps) {
   const router = useRouter();
-  const [stage, setStage] = useState<"select" | "confirm">("select");
+  const [stage, setStage] = useState<"select" | "confirm">(
+    existingAnalysisId ? "confirm" : "select"
+  );
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -73,7 +80,7 @@ export function PostSaleFlow({
       : null
   );
 
-  const [analysisId, setAnalysisId] = useState<string | null>(null);
+  const [analysisId, setAnalysisId] = useState<string | null>(existingAnalysisId);
 
   const [adjustedAllocations, setAdjustedAllocations] = useState(
     allocations.map((a) => ({ herdGroupId: a.herd_id, headCount: a.head_count, herdName: a.herdName, category: a.category }))

@@ -18,6 +18,9 @@ interface ConsignmentActionsProps {
   consignmentId: string;
   status: string;
   hasKillSheet: boolean;
+  // When a processor grid is attached, PostSaleFlow owns the link + complete
+  // path; this component collapses to just the delete button.
+  hasGrid: boolean;
   availableKillSheets: { id: string; label: string }[];
 }
 
@@ -25,6 +28,7 @@ export function ConsignmentActions({
   consignmentId,
   status,
   hasKillSheet,
+  hasGrid,
   availableKillSheets,
 }: ConsignmentActionsProps) {
   const router = useRouter();
@@ -80,8 +84,11 @@ export function ConsignmentActions({
         </div>
       )}
 
-      {/* Link Kill Sheet */}
-      {!hasKillSheet && availableKillSheets.length > 0 && (
+      {/* Link Kill Sheet + Complete Sale only render on legacy consignments
+          without a grid attached. When a grid is attached, PostSaleFlow handles
+          kill-sheet selection, analysis, allocation adjustment, and sale
+          completion as one flow. */}
+      {!hasGrid && !hasKillSheet && availableKillSheets.length > 0 && (
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-3">
@@ -116,8 +123,7 @@ export function ConsignmentActions({
         </Card>
       )}
 
-      {/* Complete Sale */}
-      {!showCompleteConfirm ? (
+      {!hasGrid && !showCompleteConfirm && (
         <div className="flex items-center gap-3">
           <Button
             variant="indigo"
@@ -138,7 +144,9 @@ export function ConsignmentActions({
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
-      ) : (
+      )}
+
+      {!hasGrid && showCompleteConfirm && (
         <Card>
           <CardContent className="p-4">
             <p className="text-sm font-semibold text-text-primary">Confirm Complete Sale</p>
@@ -165,6 +173,22 @@ export function ConsignmentActions({
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Delete-only path when a grid is attached (PostSaleFlow owns complete). */}
+      {hasGrid && (
+        <div className="flex justify-end">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="border border-white/[0.08] bg-white/[0.04] text-text-muted hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
+            onClick={() => setShowDeleteConfirm(true)}
+            aria-label="Delete consignment"
+          >
+            <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+            Delete Consignment
+          </Button>
+        </div>
       )}
 
       {/* Delete Confirmation */}

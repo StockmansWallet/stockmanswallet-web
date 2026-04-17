@@ -138,11 +138,13 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
 
   const badge = statusBadge(consignment.status);
   const isCompleted = consignment.status === "completed";
+  const hasGrid = !!consignment.processor_grid_id;
 
-  // Show inline post-kill analysis when consignment is ready to be reconciled.
-  // Conditions: not completed, no post-sale analysis yet, and a grid is attached.
-  const canRunPostKill =
-    !isCompleted && !postSaleAnalysis && !!consignment.processor_grid_id;
+  // PostSaleFlow owns the whole post-kill -> confirm-sale path whenever a grid
+  // is attached. It picks its own stage: "confirm" if an analysis already
+  // exists, otherwise "select".
+  const showPostSaleFlow = !isCompleted && hasGrid;
+  const canRunPostKill = showPostSaleFlow && !postSaleAnalysis;
 
   // Auto-match: suggest kill sheets by processor name or head count proximity
   const suggestedIds = new Set<string>();
@@ -389,24 +391,27 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
         </Card>
       )}
 
-      {/* Inline post-kill analysis */}
-      {canRunPostKill && (
+      {/* Inline post-kill / confirm-sale flow */}
+      {showPostSaleFlow && (
         <div id="post-sale" className="mt-6 space-y-3">
           <div className="flex items-center gap-2 border-b border-white/[0.06] pb-2">
             <TrendingUp className="h-4 w-4 text-amber-400" />
             <h3 className="text-sm font-semibold text-amber-400">
-              Post-Kill Analysis
+              {postSaleAnalysis ? "Confirm Sale" : "Post-Kill Analysis"}
             </h3>
           </div>
-          <p className="text-xs text-text-muted">
-            Upload the actual kill sheet from the processor to reconcile the sale
-            and generate the post-kill analysis.
-          </p>
+          {!postSaleAnalysis && (
+            <p className="text-xs text-text-muted">
+              Upload the actual kill sheet from the processor to reconcile the sale
+              and generate the post-kill analysis.
+            </p>
+          )}
           <PostSaleFlow
             consignmentId={id}
             processorName={consignment.processor_name}
             totalHead={consignment.total_head_count ?? 0}
             allocations={enrichedAllocations}
+            existingAnalysisId={postSaleAnalysis?.id ?? null}
             availableKillSheets={(availableKillSheets ?? []).map((ks) => ({
               id: ks.id,
               processorName: ks.record_name || ks.processor_name,
@@ -431,12 +436,17 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
         </Card>
       )}
 
-      {/* Actions (client component for interactivity) */}
+      {/* Actions (client component for interactivity).
+          When a grid is attached, PostSaleFlow owns link + complete. This
+          component collapses to just the delete button. When no grid is
+          attached (legacy/manual consignment), the full Link + Complete Sale
+          path stays available. */}
       {!isCompleted && (
         <ConsignmentActions
           consignmentId={id}
           status={consignment.status}
           hasKillSheet={!!consignment.kill_sheet_record_id}
+          hasGrid={hasGrid}
           availableKillSheets={(availableKillSheets ?? []).map((ks) => ({
             id: ks.id,
             label: `${ks.record_name || ks.processor_name}${ks.kill_date ? ` - ${new Date(ks.kill_date).toLocaleDateString("en-AU")}` : ""} (${ks.total_head_count} head)`,
