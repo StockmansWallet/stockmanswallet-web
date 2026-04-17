@@ -84,6 +84,9 @@ interface PreSaleFlowProps {
   grids: GridSummary[];
   herds: HerdSummary[];
   killSheets: KillSheetSummary[];
+  // Optional starting step, used when returning from the Add Processor flow
+  // so the user lands back on Step 2 rather than restarting.
+  initialStep?: 1 | 2 | 3;
 }
 
 // MARK: - Helpers
@@ -123,9 +126,10 @@ export function PreSaleFlow({
   grids,
   herds,
   killSheets,
+  initialStep,
 }: PreSaleFlowProps) {
   const router = useRouter();
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(initialStep ?? 1);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [uploadOpen, setUploadOpen] = useState<"grid" | "killsheet" | null>(null);
@@ -518,7 +522,7 @@ export function PreSaleFlow({
                   </div>
                 </div>
                 <Link
-                  href="/dashboard/tools/grid-iq/processors/new?returnTo=/dashboard/tools/grid-iq/analyse"
+                  href={`/dashboard/tools/grid-iq/processors/new?returnTo=${encodeURIComponent("/dashboard/tools/grid-iq/analyse?step=2")}`}
                   className="inline-flex items-center justify-center gap-1.5 rounded-full bg-amber-500 px-4 py-2 text-xs font-semibold text-black transition-colors hover:bg-amber-400"
                 >
                   <Plus className="h-3.5 w-3.5" />

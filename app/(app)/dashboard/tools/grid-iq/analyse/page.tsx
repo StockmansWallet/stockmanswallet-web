@@ -4,7 +4,16 @@ import { PreSaleFlow } from "@/components/grid-iq/pre-sale-flow";
 
 export const metadata = { title: "New Analysis - Grid IQ" };
 
-export default async function NewAnalysisPage() {
+export default async function NewAnalysisPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ step?: string }>;
+}) {
+  const { step: stepParam } = await searchParams;
+  const parsedStep = stepParam ? Number(stepParam) : NaN;
+  const initialStep: 1 | 2 | 3 | undefined =
+    parsedStep === 2 || parsedStep === 3 ? parsedStep : undefined;
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -68,6 +77,7 @@ export default async function NewAnalysisPage() {
         grids={grids ?? []}
         herds={(herds ?? []).filter((h) => h.species === "Cattle")}
         killSheets={killSheets ?? []}
+        initialStep={initialStep}
       />
     </div>
   );

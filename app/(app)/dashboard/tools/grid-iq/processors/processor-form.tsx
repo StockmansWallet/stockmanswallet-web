@@ -101,6 +101,20 @@ export function ProcessorForm({
           }
         }
       } catch (err) {
+        // A successful create/update calls redirect() on the server, which
+        // throws NEXT_REDIRECT. That's intended behaviour, not a save error,
+        // so let it propagate for Next.js to handle rather than flashing a
+        // red alert just before the page navigates.
+        if (
+          err &&
+          typeof err === "object" &&
+          "digest" in err &&
+          typeof (err as { digest: unknown }).digest === "string" &&
+          ((err as { digest: string }).digest.startsWith("NEXT_REDIRECT") ||
+            (err as { digest: string }).digest.startsWith("NEXT_NOT_FOUND"))
+        ) {
+          throw err;
+        }
         setError(err instanceof Error ? err.message : "Save failed");
       }
     });
