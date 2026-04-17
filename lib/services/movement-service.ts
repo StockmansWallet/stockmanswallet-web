@@ -128,6 +128,7 @@ export async function calculatePortfolioMovement(
   }
 
   // Classify herds
+  // Debug: A herd belongs to a set when it existed and was active on that date.
   const openingHerds = allHerds.filter((h: { created_at: string; is_sold: boolean; sold_date: string | null }) => {
     const created = h.created_at.split("T")[0];
     if (created > openingDate) return false;
@@ -148,6 +149,18 @@ export async function calculatePortfolioMovement(
 
   const openingIds = new Set(openingHerds.map((h: { id: string }) => h.id));
   const closingIds = new Set(closingHerds.map((h: { id: string }) => h.id));
+
+  // Debug: Herds traded entirely within the period (created AND sold between opening and closing)
+  // are in NEITHER opening nor closing, but still represent real activity. Surface them as
+  // both an addition and a removal so the user sees the transaction.
+  const tradedHerds = allHerds.filter((h: { id: string; created_at: string; is_sold: boolean; sold_date: string | null }) => {
+    if (openingIds.has(h.id) || closingIds.has(h.id)) return false;
+    const created = h.created_at.split("T")[0];
+    const createdInPeriod = created > openingDate && created <= closingDate;
+    const soldInPeriod = h.is_sold && h.sold_date != null &&
+      h.sold_date.split("T")[0] > openingDate && h.sold_date.split("T")[0] <= closingDate;
+    return createdInPeriod && soldInPeriod;
+  });
 
   const continuingHerds = allHerds.filter((h: { id: string }) => openingIds.has(h.id) && closingIds.has(h.id));
   const addedHerds = closingHerds.filter((h: { id: string }) => !openingIds.has(h.id));
@@ -291,6 +304,35 @@ export async function calculatePortfolioMovement(
     });
   }
 
+  // Debug: Traded herds (created AND sold within the period). They contribute to both
+  // additionsValue and removalsValue using their sale-date valuation, so the two cancel
+  // out in the bridge math while the transaction is still surfaced to the user.
+  for (const herd of tradedHerds) {
+    const h = herd as HerdForValuation;
+    const soldDateObj = (herd as { sold_date: string | null }).sold_date
+      ? new Date((herd as { sold_date: string }).sold_date)
+      : closingDateObj;
+    const saleVal = valuateHerd(h, soldDateObj, false);
+
+    additionsValue += saleVal.netValue;
+    removalsValue += saleVal.netValue;
+
+    herdMovements.push({
+      id: (herd as { id: string }).id,
+      herdName: (herd as { name: string }).name,
+      category: `${(herd as { breed: string }).breed} ${(herd as { category: string }).category}`,
+      openingValue: null,
+      closingValue: null,
+      dollarChange: 0,
+      percentChange: null,
+      openingHeadCount: 0,
+      closingHeadCount: 0,
+      mainDriver: "Removed/Sold",
+      marketComponent: 0, weightGainComponent: 0, breedingComponent: 0, mortalityComponent: 0,
+      currentBreedPremium: saleVal.breedPremiumApplied,
+    });
+  }
+
   // Sort by absolute dollar change
   herdMovements.sort((a, b) => Math.abs(b.dollarChange) - Math.abs(a.dollarChange));
 
@@ -326,9 +368,13 @@ export async function calculatePortfolioMovement(
     closingHeadCount,
     netHeadCountChange: closingHeadCount - openingHeadCount,
     additionsValue,
-    additionsHeadCount: addedHerds.reduce((s: number, h: { head_count: number }) => s + (h.head_count ?? 0), 0),
+    additionsHeadCount:
+      addedHerds.reduce((s: number, h: { head_count: number }) => s + (h.head_count ?? 0), 0) +
+      tradedHerds.reduce((s: number, h: { head_count: number }) => s + (h.head_count ?? 0), 0),
     removalsValue,
-    removalsHeadCount: removedHerds.reduce((s: number, h: { head_count: number }) => s + (h.head_count ?? 0), 0),
+    removalsHeadCount:
+      removedHerds.reduce((s: number, h: { head_count: number }) => s + (h.head_count ?? 0), 0) +
+      tradedHerds.reduce((s: number, h: { head_count: number }) => s + (h.head_count ?? 0), 0),
     marketMovement,
     biologicalMovement,
     assumptionChanges,
