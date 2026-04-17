@@ -127,20 +127,36 @@ export function ScenarioPicker({ connectionId, scenarios, activeLensScenarioId, 
                       <Button
                         variant="ghost"
                         size="sm"
+                        className="border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
                         onClick={() => handleLoad(scenario.id)}
                         disabled={loading === scenario.id}
                         title="Load into lens"
+                        aria-label="Load scenario into lens"
                       >
                         <Upload className="h-3.5 w-3.5" />
                       </Button>
                     )}
                     {!scenario.is_locked && (
                       <>
-                        <Button variant="ghost" size="sm" onClick={() => handleLock(scenario.id)} title="Lock scenario">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
+                          onClick={() => handleLock(scenario.id)}
+                          title="Lock scenario"
+                          aria-label="Lock scenario"
+                        >
                           <Lock className="h-3.5 w-3.5" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDelete(scenario.id)} title="Delete scenario">
-                          <Trash2 className="h-3.5 w-3.5 text-red-400" />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="border border-white/[0.08] bg-white/[0.04] text-xs text-text-muted hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
+                          onClick={() => handleDelete(scenario.id)}
+                          title="Delete scenario"
+                          aria-label="Delete scenario"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </>
                     )}
@@ -178,7 +194,13 @@ export function ScenarioPicker({ connectionId, scenarios, activeLensScenarioId, 
             </select>
           </div>
           <div className="flex items-center justify-end gap-3 pt-2">
-            <Button variant="ghost" onClick={() => setShowCreate(false)}>Cancel</Button>
+            <Button
+              variant="ghost"
+              className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
+              onClick={() => setShowCreate(false)}
+            >
+              Cancel
+            </Button>
             <Button onClick={handleCreate} disabled={creating || !name.trim()}>
               {creating ? "Creating..." : "Create"}
             </Button>

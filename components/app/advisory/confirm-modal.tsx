@@ -28,7 +28,13 @@ export function ConfirmModal({
     <Modal open={open} onClose={onClose} title={title} size="sm">
       <p className="text-sm text-text-secondary">{description}</p>
       <div className="mt-5 flex justify-end gap-2">
-        <Button variant="ghost" size="sm" onClick={onClose} disabled={loading}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
+          onClick={onClose}
+          disabled={loading}
+        >
           Cancel
         </Button>
         <Button

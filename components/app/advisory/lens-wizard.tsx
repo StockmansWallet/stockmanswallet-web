@@ -270,7 +270,11 @@ export function LensWizard({
 
           {/* Bottom actions */}
           <div className="flex items-center justify-between">
-            <Button variant="ghost" onClick={onCancel}>
+            <Button
+              variant="ghost"
+              className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
+              onClick={onCancel}
+            >
               Cancel
             </Button>
             {selectedHerds.length > 0 && (
@@ -292,6 +296,7 @@ export function LensWizard({
           <Button
             variant="ghost"
             size="sm"
+            className="border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
             onClick={() => setStep("select")}
           >
             <ArrowLeft className="mr-1.5 h-3.5 w-3.5" />
@@ -408,7 +413,11 @@ export function LensWizard({
 
           {/* Save actions */}
           <div className="flex items-center justify-between">
-            <Button variant="ghost" onClick={() => setStep("select")}>
+            <Button
+              variant="ghost"
+              className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
+              onClick={() => setStep("select")}
+            >
               <ArrowLeft className="mr-1.5 h-4 w-4" />
               Back
             </Button>

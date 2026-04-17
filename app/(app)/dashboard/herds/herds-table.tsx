@@ -537,7 +537,11 @@ export function HerdsTable({
           all associated muster, health, and sales records.
         </p>
         <div className="flex items-center justify-end gap-3">
-          <Button variant="ghost" onClick={() => setShowDeleteConfirm(false)}>
+          <Button
+            variant="ghost"
+            className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
+            onClick={() => setShowDeleteConfirm(false)}
+          >
             Cancel
           </Button>
           <Button

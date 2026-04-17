@@ -367,7 +367,12 @@ export function YardBookForm({
         <Button type="submit" variant="lime" disabled={submitting}>
           {submitting ? "Saving..." : submitLabel}
         </Button>
-        <Button type="button" variant="ghost" onClick={() => router.back()}>
+        <Button
+          type="button"
+          variant="ghost"
+          className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
+          onClick={() => router.back()}
+        >
           Cancel
         </Button>
       </div>

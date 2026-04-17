@@ -319,7 +319,12 @@ export function SellStockForm({ herd, suggestedPricePerKg, projectedWeight, pric
       {/* Action buttons */}
       <div className="flex items-center justify-end gap-3 pb-8">
         <Link href={`/dashboard/herds/${herd.id}`}>
-          <Button variant="ghost">Cancel</Button>
+          <Button
+            variant="ghost"
+            className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
+          >
+            Cancel
+          </Button>
         </Link>
         <Button
           onClick={() => setShowConfirm(true)}
@@ -347,7 +352,11 @@ export function SellStockForm({ herd, suggestedPricePerKg, projectedWeight, pric
           )}
         </div>
         <div className="mt-6 flex items-center justify-end gap-3">
-          <Button variant="ghost" onClick={() => setShowConfirm(false)}>
+          <Button
+            variant="ghost"
+            className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
+            onClick={() => setShowConfirm(false)}
+          >
             Cancel
           </Button>
           <Button onClick={handleConfirmSale} disabled={submitting}>

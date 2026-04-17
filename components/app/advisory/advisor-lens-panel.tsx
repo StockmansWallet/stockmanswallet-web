@@ -229,7 +229,12 @@ export function AdvisorLensPanel({
 
           {/* Action buttons */}
           <div className="flex items-center justify-between pb-4">
-            <Button variant="ghost" onClick={handleReset} disabled={saving}>
+            <Button
+              variant="ghost"
+              className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
+              onClick={handleReset}
+              disabled={saving}
+            >
               <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
               Reset
             </Button>

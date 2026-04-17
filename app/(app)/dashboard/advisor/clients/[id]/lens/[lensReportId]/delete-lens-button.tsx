@@ -28,15 +28,15 @@ export function DeleteLensButton({
         <Button
           variant="ghost"
           size="sm"
+          className="border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
           onClick={() => setConfirming(false)}
           disabled={isPending}
         >
           Cancel
         </Button>
         <Button
-          variant="ghost"
+          variant="destructive"
           size="sm"
-          className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
           disabled={isPending}
           onClick={() => {
             startTransition(async () => {
@@ -60,7 +60,7 @@ export function DeleteLensButton({
     <Button
       variant="ghost"
       size="sm"
-      className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
+      className="border border-white/[0.08] bg-white/[0.04] text-text-muted hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
       onClick={() => setConfirming(true)}
     >
       <Trash2 className="mr-1 h-3.5 w-3.5" />

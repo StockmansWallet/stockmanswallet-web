@@ -93,7 +93,15 @@ function MusterForm({
       />
       <div className="flex items-center gap-2">
         <Button type="submit" size="sm" disabled={saving}>{saving ? "Saving..." : record ? "Update" : "Add Record"}</Button>
-        <Button type="button" size="sm" variant="ghost" onClick={onClose}>Cancel</Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          className="border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
+          onClick={onClose}
+        >
+          Cancel
+        </Button>
       </div>
     </form>
   );

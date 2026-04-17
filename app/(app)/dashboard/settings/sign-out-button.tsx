@@ -26,7 +26,7 @@ export function SignOutButton() {
       variant="ghost"
       onClick={handleSignOut}
       disabled={pending}
-      className="w-full justify-start gap-2.5 text-text-secondary hover:text-text-primary"
+      className="w-full justify-start gap-2.5 border border-white/[0.08] bg-white/[0.04] text-text-secondary hover:bg-white/[0.06] hover:text-text-primary"
     >
       <LogOut className="h-4 w-4" />
       {pending ? "Signing out..." : "Sign Out"}

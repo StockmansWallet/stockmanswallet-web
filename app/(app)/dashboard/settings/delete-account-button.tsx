@@ -31,7 +31,7 @@ export function DeleteAccountButton() {
       <Button
         variant="ghost"
         onClick={() => setOpen(true)}
-        className="w-full justify-start gap-2.5 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+        className="w-full justify-start gap-2.5 border border-red-500/30 bg-red-500/10 text-red-400 hover:border-red-500/40 hover:bg-red-500/15 hover:text-red-300"
       >
         <Trash2 className="h-4 w-4" />
         Delete Account

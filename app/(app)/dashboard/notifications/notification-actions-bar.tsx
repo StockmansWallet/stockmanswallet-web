@@ -36,7 +36,13 @@ export function NotificationActionsBar({
   return (
     <div className="flex items-center gap-2">
       {hasUnread && (
-        <Button variant="ghost" size="sm" onClick={handleMarkAllRead} disabled={markingRead}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
+          onClick={handleMarkAllRead}
+          disabled={markingRead}
+        >
           <CheckCheck className="mr-1.5 h-3.5 w-3.5" />
           {markingRead ? "..." : "Mark all read"}
         </Button>
@@ -45,6 +51,7 @@ export function NotificationActionsBar({
         <Button
           variant={confirmClear ? "destructive" : "ghost"}
           size="sm"
+          className={confirmClear ? "" : "border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"}
           onClick={handleClearAll}
           onBlur={() => setConfirmClear(false)}
           disabled={clearing}

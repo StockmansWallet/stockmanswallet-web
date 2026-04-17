@@ -157,7 +157,12 @@ export function SavedEstimatesList({ estimates }: { estimates: SavedEstimate[] }
                   )}
 
                   <div className="flex flex-wrap items-center gap-2">
-                    <Button type="button" variant="ghost" onClick={() => handleShare(estimate)}>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
+                      onClick={() => handleShare(estimate)}
+                    >
                       {isCopied ? (
                         <><Check className="mr-1.5 h-4 w-4" /> Copied</>
                       ) : (

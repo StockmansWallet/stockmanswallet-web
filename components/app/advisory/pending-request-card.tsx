@@ -95,9 +95,9 @@ export function PendingRequestCard({
             <Button
               variant="ghost"
               size="sm"
+              className="border border-white/[0.08] bg-white/[0.04] text-xs text-text-muted hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
               onClick={handleDecline}
               disabled={loading}
-              className="text-text-muted hover:text-red-400"
             >
               Decline
             </Button>

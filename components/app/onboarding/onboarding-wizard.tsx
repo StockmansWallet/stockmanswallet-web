@@ -213,7 +213,12 @@ export function OnboardingWizard({ userName }: { userName: string }) {
 
             <div className="mt-8 flex items-center justify-between">
               {step > 0 && step < TOTAL_STEPS - 1 ? (
-                <Button variant="ghost" onClick={back} disabled={submitting}>
+                <Button
+                  variant="ghost"
+                  className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
+                  onClick={back}
+                  disabled={submitting}
+                >
                   Back
                 </Button>
               ) : (

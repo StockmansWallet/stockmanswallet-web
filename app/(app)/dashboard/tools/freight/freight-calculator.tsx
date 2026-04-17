@@ -730,7 +730,12 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
               Calculate Freight
             </Button>
             {(result || selectedHerdId) && (
-              <Button type="button" variant="ghost" onClick={handleReset}>
+              <Button
+                type="button"
+                variant="ghost"
+                className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
+                onClick={handleReset}
+              >
                 Reset
               </Button>
             )}
@@ -819,7 +824,13 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                     <><Bookmark className="mr-1.5 h-4 w-4" /> {isSaving ? "Saving..." : "Save Estimate"}</>
                   )}
                 </Button>
-                <Button type="button" variant="ghost" onClick={handleShare} aria-live="polite">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
+                  onClick={handleShare}
+                  aria-live="polite"
+                >
                   {shareStatus === "copied" ? (
                     <><Check className="mr-1.5 h-4 w-4" /> Copied</>
                   ) : (

@@ -30,7 +30,11 @@ export function DeletePropertyButton({ id, name }: { id: string; name: string })
           assigned to this property will be unlinked but not deleted.
         </p>
         <div className="flex items-center justify-end gap-3">
-          <Button variant="ghost" onClick={() => setOpen(false)}>
+          <Button
+            variant="ghost"
+            className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
+            onClick={() => setOpen(false)}
+          >
             Cancel
           </Button>
           <Button

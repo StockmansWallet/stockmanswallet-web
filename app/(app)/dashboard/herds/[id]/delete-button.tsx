@@ -30,7 +30,11 @@ export function DeleteHerdButton({ id, name }: { id: string; name: string }) {
           also remove all associated muster, health, and sales records.
         </p>
         <div className="flex items-center justify-end gap-3">
-          <Button variant="ghost" onClick={() => setOpen(false)}>
+          <Button
+            variant="ghost"
+            className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
+            onClick={() => setOpen(false)}
+          >
             Cancel
           </Button>
           <Button

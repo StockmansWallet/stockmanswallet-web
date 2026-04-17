@@ -138,6 +138,7 @@ export function ConnectionRequestButton({
         </Button>
         <Button
           variant="ghost"
+          className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
           onClick={() => setShowToggles(false)}
           disabled={loading}
         >

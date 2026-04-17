@@ -655,7 +655,12 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
           <div className="mx-auto flex max-w-6xl items-center justify-end gap-3 px-6 py-3 lg:px-8">
             {cancelHref && (
               <Link href={cancelHref}>
-                <Button type="button" variant="ghost" size="md">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="md"
+                  className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
+                >
                   Cancel
                 </Button>
               </Link>
