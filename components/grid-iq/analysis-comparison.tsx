@@ -61,8 +61,8 @@ export function AnalysisComparison({
         {/* Side-by-side comparison */}
         <div className="grid grid-cols-2 gap-3">
           {/* Saleyard column */}
-          <div className={`rounded-lg p-3 ${!isProcessorBetter ? "bg-amber-500/10 ring-1 ring-amber-500/20" : "bg-white/[0.04]"}`}>
-            <p className="text-center text-xs font-semibold text-text-primary">Saleyard</p>
+          <div className={`rounded-lg p-3 ${!isProcessorBetter ? "bg-emerald-500/10 ring-1 ring-emerald-500/20" : "bg-white/[0.04]"}`}>
+            <p className={`text-center text-base font-bold ${!isProcessorBetter ? "text-emerald-400" : "text-text-primary"}`}>Saleyard</p>
             <div className="mt-3 space-y-2">
               <div>
                 <p className="text-[10px] text-text-muted">MLA Value</p>
@@ -82,7 +82,7 @@ export function AnalysisComparison({
 
           {/* Processor column */}
           <div className={`rounded-lg p-3 ${isProcessorBetter ? "bg-emerald-500/10 ring-1 ring-emerald-500/20" : "bg-white/[0.04]"}`}>
-            <p className="text-center text-xs font-semibold text-text-primary">Over-the-Hooks</p>
+            <p className={`text-center text-base font-bold ${isProcessorBetter ? "text-emerald-400" : "text-text-primary"}`}>Over-the-Hooks</p>
             <div className="mt-3 space-y-2">
               <div>
                 <p className="text-[10px] text-text-muted">Grid Value</p>
