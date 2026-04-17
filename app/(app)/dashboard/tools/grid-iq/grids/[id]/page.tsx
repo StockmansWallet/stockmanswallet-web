@@ -235,7 +235,7 @@ export default async function GridDetailPage({ params }: PageProps) {
                             {new Date(a.analysis_date).toLocaleDateString("en-AU")}
                           </span>
                         )}
-                        <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px]">
+                        <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px]">
                           {mode === "post_sale" ? "Post-Sale" : "Pre-Sale"}
                         </span>
                         {typeof a.head_count === "number" && a.head_count > 0 ? (
@@ -383,7 +383,7 @@ function EntrySection({
                         {prices.map((p, j) => (
                           <span
                             key={j}
-                            className="inline-flex items-center gap-1 rounded-md bg-white/[0.06] px-1.5 py-0.5"
+                            className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2 py-0.5"
                           >
                             <span className="text-text-muted">
                               {String(p.weightBandLabel || p.weightBandKg)}

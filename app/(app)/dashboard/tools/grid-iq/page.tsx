@@ -116,7 +116,7 @@ export default async function GridIQPage() {
                         <span>{new Date(c.kill_date as string).toLocaleDateString("en-AU")}</span>
                       )}
                       <span>{c.total_head_count as number ?? 0} head</span>
-                      <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-400">
+                      <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-medium text-amber-400">
                         {(c.processor_grid_id as string | null) ? "Ready for post-kill" : "Draft"}
                       </span>
                     </div>
@@ -174,7 +174,7 @@ export default async function GridIQPage() {
                           ).toLocaleDateString("en-AU")}
                         </p>
                         {mode === "post_sale" && (
-                          <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-text-muted">
+                          <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] text-text-muted">
                             Post-Sale
                           </span>
                         )}
@@ -259,7 +259,7 @@ export default async function GridIQPage() {
                           <span>{new Date(c.kill_date as string).toLocaleDateString("en-AU")}</span>
                         )}
                         <span>{c.total_head_count as number ?? 0} head</span>
-                        <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${badgeCls}`}>
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${badgeCls}`}>
                           {status.charAt(0).toUpperCase() + status.slice(1)}
                         </span>
                       </div>

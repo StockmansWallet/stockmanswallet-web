@@ -113,7 +113,7 @@ export function ConsignmentsList({ consignments }: Props) {
         {selecting ? (
           <button
             onClick={toggleAll}
-            className="flex items-center gap-2 text-xs text-text-muted hover:text-text-primary"
+            className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs text-text-muted transition-colors hover:border-white/[0.14] hover:bg-white/[0.06] hover:text-text-primary"
           >
             <span
               className={`flex h-4 w-4 items-center justify-center rounded border transition-colors ${
@@ -189,7 +189,7 @@ export function ConsignmentsList({ consignments }: Props) {
                     {c.booking_reference && <span>Ref: {c.booking_reference}</span>}
                     <span>{c.total_head_count ?? 0} head</span>
                     <span
-                      className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${badge.cls}`}
+                      className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${badge.cls}`}
                     >
                       {badge.label}
                     </span>

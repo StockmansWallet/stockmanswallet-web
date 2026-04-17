@@ -412,7 +412,7 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
                     `${parentConsignment.processor_name as string} consignment`}
                 </p>
                 <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-text-muted">
-                  <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px] capitalize">
+                  <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] capitalize">
                     {String(parentConsignment.status ?? "draft")}
                   </span>
                   {parentConsignment.kill_date && (
@@ -470,7 +470,7 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
                             {new Date(a.analysis_date).toLocaleDateString("en-AU")}
                           </span>
                         )}
-                        <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px]">
+                        <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px]">
                           {mode === "post_sale" ? "Post-Sale" : "Pre-Sale"}
                         </span>
                         {typeof a.head_count === "number" && a.head_count > 0 ? (

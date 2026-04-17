@@ -102,7 +102,7 @@ export function ProcessorsList({
         {selecting ? (
           <button
             onClick={toggleAll}
-            className="flex items-center gap-2 text-xs text-text-muted hover:text-text-primary"
+            className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs text-text-muted transition-colors hover:border-white/[0.14] hover:bg-white/[0.06] hover:text-text-primary"
           >
             <span
               className={`flex h-4 w-4 items-center justify-center rounded border transition-colors ${
@@ -172,7 +172,7 @@ export function ProcessorsList({
                       {p.name}
                     </p>
                     {p.is_primary && (
-                      <span className="rounded bg-teal-500/15 px-1.5 py-0.5 text-[10px] font-medium text-teal-400">
+                      <span className="rounded-full bg-teal-500/15 px-2 py-0.5 text-[10px] font-medium text-teal-400">
                         Primary
                       </span>
                     )}

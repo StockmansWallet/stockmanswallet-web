@@ -105,7 +105,7 @@ export function EditableGridLocation({
           {!isEditing && (
             <button
               onClick={() => setIsEditing(true)}
-              className="flex items-center gap-1 text-xs text-text-muted hover:text-teal-400"
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-xs text-text-secondary transition-colors hover:border-teal-400/40 hover:bg-teal-500/10 hover:text-teal-400"
             >
               <Pencil className="h-3 w-3" />
               Edit
