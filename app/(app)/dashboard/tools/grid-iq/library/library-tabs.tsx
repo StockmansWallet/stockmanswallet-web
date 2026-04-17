@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { createClient } from "@/lib/supabase/client";
 import {
   BarChart3,
   Grid3x3,
@@ -13,6 +15,8 @@ import {
   ChevronRight,
   AlertTriangle,
   Upload,
+  Trash2,
+  Loader2,
 } from "lucide-react";
 import { AnalysisList } from "./analysis-list";
 import { UploadModal } from "./upload-modal";
@@ -238,6 +242,135 @@ function AnalysesTab({ analyses }: { analyses: AnalysisRow[] }) {
   );
 }
 
+// MARK: - Shared selection controls
+
+function SelectionToolbar({
+  total,
+  selecting,
+  selected,
+  onToggle,
+  onSelectAll,
+  onUpload,
+  uploadLabel,
+}: {
+  total: number;
+  selecting: boolean;
+  selected: Set<string>;
+  onToggle: () => void;
+  onSelectAll: () => void;
+  onUpload: () => void;
+  uploadLabel: string;
+}) {
+  const allSelected = total > 0 && selected.size === total;
+  return (
+    <div className="mb-3 flex items-center justify-between">
+      {selecting ? (
+        <button
+          onClick={onSelectAll}
+          className="flex items-center gap-2 text-xs text-text-muted hover:text-text-primary"
+        >
+          <span
+            className={`flex h-4 w-4 items-center justify-center rounded border transition-colors ${
+              allSelected
+                ? "border-teal-400 bg-teal-400 text-black"
+                : "border-white/20 bg-white/[0.04]"
+            }`}
+          >
+            {allSelected && <span className="text-[10px] font-bold">&#10003;</span>}
+          </span>
+          Select All ({total})
+          {selected.size > 0 && (
+            <span className="ml-2 text-teal-400">{selected.size} selected</span>
+          )}
+        </button>
+      ) : (
+        <span />
+      )}
+      <div className="flex items-center gap-2">
+        <Button variant="secondary" size="sm" onClick={onUpload}>
+          <Upload className="mr-1.5 h-3.5 w-3.5" />
+          {uploadLabel}
+        </Button>
+        {total > 0 && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className={selecting ? "text-teal-400" : "text-text-muted"}
+            onClick={onToggle}
+          >
+            {selecting ? "Cancel" : "Select"}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function BulkDeleteBar({
+  selectedCount,
+  noun,
+  pluralNoun,
+  isDeleting,
+  showConfirm,
+  onShowConfirm,
+  onCancelConfirm,
+  onConfirmDelete,
+}: {
+  selectedCount: number;
+  noun: string;
+  pluralNoun: string;
+  isDeleting: boolean;
+  showConfirm: boolean;
+  onShowConfirm: () => void;
+  onCancelConfirm: () => void;
+  onConfirmDelete: () => void;
+}) {
+  if (selectedCount === 0) return null;
+  return (
+    <div className="mt-4">
+      {showConfirm ? (
+        <div className="flex items-center justify-between rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3">
+          <span className="text-sm text-red-400">
+            Delete {selectedCount} {selectedCount === 1 ? noun : pluralNoun}?
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={onCancelConfirm}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={onConfirmDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+              )}
+              Confirm
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <Button
+          variant="ghost"
+          className="w-full text-red-400 hover:bg-red-500/10 hover:text-red-400"
+          onClick={onShowConfirm}
+        >
+          <Trash2 className="mr-1.5 h-4 w-4" />
+          Delete Selected ({selectedCount})
+        </Button>
+      )}
+    </div>
+  );
+}
+
 // MARK: - Grids
 
 function GridsTab({
@@ -247,6 +380,49 @@ function GridsTab({
   grids: GridRow[];
   onUpload: () => void;
 }) {
+  const router = useRouter();
+  const [selecting, setSelecting] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const exit = () => {
+    setSelecting(false);
+    setSelected(new Set());
+    setShowConfirm(false);
+  };
+
+  const toggleOne = (id: string) => {
+    const next = new Set(selected);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelected(next);
+  };
+
+  const toggleAll = () => {
+    if (selected.size === grids.length) setSelected(new Set());
+    else setSelected(new Set(grids.map((g) => g.id)));
+  };
+
+  const handleBulkDelete = async () => {
+    if (selected.size === 0) return;
+    setIsDeleting(true);
+    try {
+      const supabase = createClient();
+      const now = new Date().toISOString();
+      const { error } = await supabase
+        .from("processor_grids")
+        .update({ is_deleted: true, deleted_at: now })
+        .in("id", Array.from(selected));
+      if (error) throw error;
+      exit();
+      router.refresh();
+    } catch {
+      setIsDeleting(false);
+      setShowConfirm(false);
+    }
+  };
+
   if (grids.length === 0) {
     return (
       <Card>
@@ -263,12 +439,16 @@ function GridsTab({
 
   return (
     <div>
-      <div className="mb-3 flex justify-end">
-        <Button variant="secondary" size="sm" onClick={onUpload}>
-          <Upload className="mr-1.5 h-3.5 w-3.5" />
-          Upload Grid
-        </Button>
-      </div>
+      <SelectionToolbar
+        total={grids.length}
+        selecting={selecting}
+        selected={selected}
+        onToggle={() => (selecting ? exit() : setSelecting(true))}
+        onSelectAll={toggleAll}
+        onUpload={onUpload}
+        uploadLabel="Upload Grid"
+      />
+
       <Card>
         <CardContent className="divide-y divide-white/[0.06] p-0">
           {grids.map((g) => {
@@ -282,13 +462,21 @@ function GridsTab({
               daysUntilExpiry !== null &&
               daysUntilExpiry >= 0 &&
               daysUntilExpiry <= 7;
+            const checked = selected.has(g.id);
 
-            return (
-              <Link
-                key={g.id}
-                href={`/dashboard/tools/grid-iq/grids/${g.id}`}
-                className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/[0.03]"
-              >
+            const content = (
+              <>
+                {selecting && (
+                  <span
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
+                      checked
+                        ? "border-teal-400 bg-teal-400 text-black"
+                        : "border-white/20 bg-white/[0.04]"
+                    }`}
+                  >
+                    {checked && <span className="text-xs font-bold">&#10003;</span>}
+                  </span>
+                )}
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/15">
                   <Grid3x3 className="h-5 w-5 text-teal-400" />
                 </div>
@@ -320,12 +508,49 @@ function GridsTab({
                     {isExpired ? "Expired" : `${daysUntilExpiry}d left`}
                   </div>
                 )}
-                <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
+                {!selecting && (
+                  <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
+                )}
+              </>
+            );
+
+            if (selecting) {
+              return (
+                <button
+                  key={g.id}
+                  onClick={() => toggleOne(g.id)}
+                  className="group flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-white/[0.03]"
+                >
+                  {content}
+                </button>
+              );
+            }
+
+            return (
+              <Link
+                key={g.id}
+                href={`/dashboard/tools/grid-iq/grids/${g.id}`}
+                className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/[0.03]"
+              >
+                {content}
               </Link>
             );
           })}
         </CardContent>
       </Card>
+
+      {selecting && (
+        <BulkDeleteBar
+          selectedCount={selected.size}
+          noun="grid"
+          pluralNoun="grids"
+          isDeleting={isDeleting}
+          showConfirm={showConfirm}
+          onShowConfirm={() => setShowConfirm(true)}
+          onCancelConfirm={() => setShowConfirm(false)}
+          onConfirmDelete={handleBulkDelete}
+        />
+      )}
     </div>
   );
 }
@@ -339,6 +564,49 @@ function KillSheetsTab({
   killSheets: KillSheetRow[];
   onUpload: () => void;
 }) {
+  const router = useRouter();
+  const [selecting, setSelecting] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const exit = () => {
+    setSelecting(false);
+    setSelected(new Set());
+    setShowConfirm(false);
+  };
+
+  const toggleOne = (id: string) => {
+    const next = new Set(selected);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelected(next);
+  };
+
+  const toggleAll = () => {
+    if (selected.size === killSheets.length) setSelected(new Set());
+    else setSelected(new Set(killSheets.map((k) => k.id)));
+  };
+
+  const handleBulkDelete = async () => {
+    if (selected.size === 0) return;
+    setIsDeleting(true);
+    try {
+      const supabase = createClient();
+      const now = new Date().toISOString();
+      const { error } = await supabase
+        .from("kill_sheet_records")
+        .update({ is_deleted: true, deleted_at: now })
+        .in("id", Array.from(selected));
+      if (error) throw error;
+      exit();
+      router.refresh();
+    } catch {
+      setIsDeleting(false);
+      setShowConfirm(false);
+    }
+  };
+
   if (killSheets.length === 0) {
     return (
       <Card>
@@ -355,22 +623,35 @@ function KillSheetsTab({
 
   return (
     <div>
-      <div className="mb-3 flex justify-end">
-        <Button variant="secondary" size="sm" onClick={onUpload}>
-          <Upload className="mr-1.5 h-3.5 w-3.5" />
-          Upload Kill Sheet
-        </Button>
-      </div>
+      <SelectionToolbar
+        total={killSheets.length}
+        selecting={selecting}
+        selected={selected}
+        onToggle={() => (selecting ? exit() : setSelecting(true))}
+        onSelectAll={toggleAll}
+        onUpload={onUpload}
+        uploadLabel="Upload Kill Sheet"
+      />
+
       <Card>
         <CardContent className="divide-y divide-white/[0.06] p-0">
           {killSheets.map((ks) => {
             const rf = ks.realisation_factor;
-            return (
-              <Link
-                key={ks.id}
-                href={`/dashboard/tools/grid-iq/kill-sheets/${ks.id}`}
-                className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/[0.03]"
-              >
+            const checked = selected.has(ks.id);
+
+            const content = (
+              <>
+                {selecting && (
+                  <span
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
+                      checked
+                        ? "border-teal-400 bg-teal-400 text-black"
+                        : "border-white/20 bg-white/[0.04]"
+                    }`}
+                  >
+                    {checked && <span className="text-xs font-bold">&#10003;</span>}
+                  </span>
+                )}
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/15">
                   <FileText className="h-5 w-5 text-teal-400" />
                 </div>
@@ -405,12 +686,49 @@ function KillSheetsTab({
                     {rf != null && rf > 0 ? ` . ${Math.round(rf * 100)}% RF` : ""}
                   </p>
                 </div>
-                <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
+                {!selecting && (
+                  <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
+                )}
+              </>
+            );
+
+            if (selecting) {
+              return (
+                <button
+                  key={ks.id}
+                  onClick={() => toggleOne(ks.id)}
+                  className="group flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-white/[0.03]"
+                >
+                  {content}
+                </button>
+              );
+            }
+
+            return (
+              <Link
+                key={ks.id}
+                href={`/dashboard/tools/grid-iq/kill-sheets/${ks.id}`}
+                className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/[0.03]"
+              >
+                {content}
               </Link>
             );
           })}
         </CardContent>
       </Card>
+
+      {selecting && (
+        <BulkDeleteBar
+          selectedCount={selected.size}
+          noun="kill sheet"
+          pluralNoun="kill sheets"
+          isDeleting={isDeleting}
+          showConfirm={showConfirm}
+          onShowConfirm={() => setShowConfirm(true)}
+          onCancelConfirm={() => setShowConfirm(false)}
+          onConfirmDelete={handleBulkDelete}
+        />
+      )}
     </div>
   );
 }

@@ -245,7 +245,7 @@ export function GridIQUploader({
 
         if (insertError) throw new Error(insertError.message);
         if (onSaved) onSaved(newId, "grid");
-        router.push(`/dashboard/tools/grid-iq/grids/${newId}`);
+        router.refresh();
       } else if (result.documentType === "killsheet" && result.killSheetData) {
         const ks = result.killSheetData;
         const effectiveProcessor = ks.processorName || "Unknown Processor";
@@ -289,7 +289,7 @@ export function GridIQUploader({
 
         if (insertError) throw new Error(insertError.message);
         if (onSaved) onSaved(newId, "killsheet");
-        router.push(`/dashboard/tools/grid-iq/kill-sheets/${newId}`);
+        router.refresh();
       }
     } catch (err) {
       const message =
