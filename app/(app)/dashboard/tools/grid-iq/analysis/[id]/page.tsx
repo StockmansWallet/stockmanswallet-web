@@ -87,7 +87,7 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
   const sellWindowConfig = getSellWindowConfig(sellWindowStatus);
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <div className="mb-4">
         <Link
           href="/dashboard/tools/grid-iq/library?tab=analyses"

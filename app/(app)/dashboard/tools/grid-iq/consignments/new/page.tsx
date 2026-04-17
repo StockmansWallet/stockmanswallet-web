@@ -31,7 +31,7 @@ export default async function NewConsignmentPage() {
     .order("updated_at", { ascending: false });
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <div className="mb-4">
         <Link
           href="/dashboard/tools/grid-iq/consignments"

@@ -165,7 +165,7 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
   }));
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <div className="mb-4">
         <Link
           href="/dashboard/tools/grid-iq/consignments"

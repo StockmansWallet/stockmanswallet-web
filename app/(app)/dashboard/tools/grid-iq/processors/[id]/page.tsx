@@ -70,7 +70,7 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
   const analyses = (analysesRaw ?? []).slice(0, 25);
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <div className="mb-4">
         <Link
           href="/dashboard/tools/grid-iq/processors"

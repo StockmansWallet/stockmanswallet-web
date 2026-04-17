@@ -7,7 +7,7 @@ export const metadata = { title: "New Processor - Grid IQ" };
 
 export default function NewProcessorPage() {
   return (
-    <div className="max-w-3xl">
+    <div>
       <div className="mb-4">
         <Link
           href="/dashboard/tools/grid-iq/processors"

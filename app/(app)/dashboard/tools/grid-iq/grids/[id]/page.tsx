@@ -65,7 +65,7 @@ export default async function GridDetailPage({ params }: PageProps) {
   );
 
   return (
-    <div className="max-w-4xl">
+    <div>
       <div className="mb-4">
         <Link
           href="/dashboard/tools/grid-iq/library?tab=grids"

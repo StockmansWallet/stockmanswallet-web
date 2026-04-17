@@ -79,7 +79,7 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
   const totalValue = ks.total_gross_value as number;
 
   return (
-    <div className="max-w-4xl">
+    <div>
       <div className="mb-4">
         <Link
           href="/dashboard/tools/grid-iq/library?tab=kill-sheets"
