@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { isAdminEmail } from "@/lib/data/admin";
 
 export async function DELETE(request: Request) {
@@ -12,21 +13,22 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Unauthorised" }, { status: 403 });
   }
 
-  const { ids } = await request.json();
+  const body = (await request.json().catch(() => null)) as { ids?: unknown } | null;
+  const ids = Array.isArray(body?.ids) ? body!.ids : [];
+  const validIds = ids.filter((id): id is string => typeof id === "string" && id.length > 0);
 
-  if (!Array.isArray(ids) || ids.length === 0) {
-    return NextResponse.json({ error: "No IDs provided" }, { status: 400 });
+  if (validIds.length === 0) {
+    return NextResponse.json({ error: "No valid IDs provided" }, { status: 400 });
   }
 
-  const { error } = await supabase
-    .from("waitlist")
-    .delete()
-    .in("id", ids);
+  // Waitlist RLS is service-role-only; admin gate enforced above.
+  const svc = createServiceRoleClient();
+  const { error } = await svc.from("waitlist").delete().in("id", validIds);
 
   if (error) {
     console.error("Waitlist delete error:", error.message);
     return NextResponse.json({ error: "Failed to delete" }, { status: 500 });
   }
 
-  return NextResponse.json({ success: true, deleted: ids.length });
+  return NextResponse.json({ success: true, deleted: validIds.length });
 }
