@@ -43,8 +43,10 @@ export default async function AssetRegisterReportPage({
     userId = user.id;
   }
 
-  // Fetch report data and movement data in parallel
-  const period = createMovementPeriod("1M");
+  // Fetch report data and movement data in parallel.
+  // Movement window matches the top filter's date range (config.startDate to config.endDate)
+  // so the PDF reflects whatever the user selected in the UI.
+  const period = createMovementPeriod("custom", config.startDate, config.endDate);
   const [reportData, movementData] = await Promise.all([
     generateAssetRegisterData(supabase, userId, {
       reportType: "asset-register",

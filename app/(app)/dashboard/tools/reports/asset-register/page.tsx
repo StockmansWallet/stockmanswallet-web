@@ -82,7 +82,11 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
             )}
           </div>
 
-          <PortfolioMovementSection propertyFilter={config.selectedPropertyIds} />
+          <PortfolioMovementSection
+            startDate={config.startDate}
+            endDate={config.endDate}
+            propertyFilter={config.selectedPropertyIds}
+          />
 
           <LivestockAssetsSection herdData={herdData} />
         </div>

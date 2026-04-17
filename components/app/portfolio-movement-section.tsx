@@ -1,17 +1,16 @@
 "use client";
 
-// Portfolio Movement Section - client component with period selection and bridge display
-// Fetches movement data on period change via server action
+// Portfolio Movement Section - client component that renders the bridge for a given date range.
+// Fetches movement data whenever the parent supplies a new startDate / endDate / property filter.
 
 import { useState, useEffect, useTransition } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import type { PortfolioMovementSummary, MovementPeriodPreset, MovementDriver } from "@/lib/types/portfolio-movement";
+import type { PortfolioMovementSummary, MovementDriver } from "@/lib/types/portfolio-movement";
 
 // Simple class name joiner (project does not use a cn utility)
 function cn(...classes: (string | false | undefined | null)[]) {
   return classes.filter(Boolean).join(" ");
 }
-import { MOVEMENT_PRESETS, createMovementPeriod } from "@/lib/types/portfolio-movement";
 import { getMovementData } from "@/app/(app)/dashboard/tools/reports/asset-register/movement-action";
 
 function fmt(v: number) {
@@ -41,39 +40,27 @@ function driverColour(driver: MovementDriver) {
   return map[driver] ?? "bg-gray-500/20 text-gray-400";
 }
 
-export function PortfolioMovementSection({ propertyFilter }: { propertyFilter: string[] }) {
-  const [selectedPreset, setSelectedPreset] = useState<MovementPeriodPreset>("1M");
+export function PortfolioMovementSection({
+  startDate,
+  endDate,
+  propertyFilter,
+}: {
+  startDate: string;
+  endDate: string;
+  propertyFilter: string[];
+}) {
   const [summary, setSummary] = useState<PortfolioMovementSummary | null>(null);
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
-    const period = createMovementPeriod(selectedPreset);
     startTransition(async () => {
-      const data = await getMovementData(period.startDate, period.endDate, propertyFilter);
+      const data = await getMovementData(startDate, endDate, propertyFilter);
       setSummary(data);
     });
-  }, [selectedPreset, propertyFilter]);
+  }, [startDate, endDate, propertyFilter]);
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Period Picker */}
-      <div className="flex items-center gap-1 rounded-full bg-white/[0.04] p-1">
-        {MOVEMENT_PRESETS.map((preset) => (
-          <button
-            key={preset}
-            onClick={() => setSelectedPreset(preset)}
-            className={cn(
-              "flex-1 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
-              selectedPreset === preset
-                ? "bg-[#FFAA00]/15 text-[#FFAA00] font-semibold"
-                : "text-text-muted hover:text-text-secondary"
-            )}
-          >
-            {preset}
-          </button>
-        ))}
-      </div>
-
       {/* Initial load (no prior data): inline spinner occupies the date-label slot */}
       {!summary && isPending && (
         <p className="flex items-center justify-center gap-2 text-center text-xs text-text-muted">
