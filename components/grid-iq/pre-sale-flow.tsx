@@ -263,34 +263,75 @@ export function PreSaleFlow({
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Step indicators */}
-      <div className="flex items-center gap-2">
-        {([1, 2, 3] as const).map((s) => (
-          <button
-            key={s}
-            onClick={() => {
-              // Only allow jumping forward if prior step valid
-              if (s === 2 && !canAdvanceFromStep1) return;
-              if (s === 3 && (!canAdvanceFromStep1 || !canAdvanceFromStep2)) return;
-              setStep(s);
-            }}
-            className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all ${
-              step === s
-                ? "bg-teal-500 text-white"
-                : step > s
-                  ? "bg-teal-500/20 text-teal-400"
-                  : "bg-white/[0.08] text-text-muted"
-            }`}
-          >
-            {step > s ? <Check className="h-3.5 w-3.5" /> : s}
-          </button>
-        ))}
-        <div className="ml-2 text-sm font-medium text-text-primary">
-          {step === 1 && "What you're selling"}
-          {step === 2 && "Who's buying"}
-          {step === 3 && "Review and generate"}
-        </div>
-      </div>
+      {/* Stepper */}
+      {(() => {
+        const stepLabels = {
+          1: "What you're selling",
+          2: "Who's buying",
+          3: "Review and generate",
+        } as const;
+        const canJumpTo = (s: 1 | 2 | 3) => {
+          if (s === 1) return true;
+          if (s === 2) return canAdvanceFromStep1;
+          return canAdvanceFromStep1 && canAdvanceFromStep2;
+        };
+        return (
+          <div>
+            <div className="flex items-center gap-0">
+              {([1, 2, 3] as const).map((s, idx) => {
+                const isActive = step === s;
+                const isComplete = step > s;
+                const reachable = canJumpTo(s);
+                return (
+                  <div key={s} className="flex flex-1 items-center">
+                    <button
+                      onClick={() => reachable && setStep(s)}
+                      disabled={!reachable}
+                      className={`flex items-center gap-2 transition-opacity ${
+                        reachable ? "" : "cursor-not-allowed opacity-60"
+                      }`}
+                    >
+                      <span
+                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all ${
+                          isActive
+                            ? "bg-teal-500 text-white ring-4 ring-teal-500/20"
+                            : isComplete
+                              ? "bg-teal-500/20 text-teal-400"
+                              : "bg-white/[0.08] text-text-muted"
+                        }`}
+                      >
+                        {isComplete ? <Check className="h-3.5 w-3.5" /> : s}
+                      </span>
+                      <span
+                        className={`hidden text-xs font-medium transition-colors sm:block ${
+                          isActive
+                            ? "text-text-primary"
+                            : isComplete
+                              ? "text-text-secondary"
+                              : "text-text-muted"
+                        }`}
+                      >
+                        {stepLabels[s]}
+                      </span>
+                    </button>
+                    {idx < 2 && (
+                      <div
+                        className={`mx-2 h-px flex-1 transition-colors ${
+                          step > s ? "bg-teal-500/40" : "bg-white/[0.08]"
+                        }`}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-3 flex items-center justify-between sm:hidden">
+              <p className="text-sm font-medium text-text-primary">{stepLabels[step]}</p>
+              <p className="text-xs text-text-muted">Step {step} of 3</p>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Step 1: What you're selling — herds + consignment name */}
       {step === 1 && (

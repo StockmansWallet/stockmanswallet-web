@@ -14,7 +14,7 @@ import { CategoryBreakdown } from "@/components/grid-iq/category-breakdown";
 import { PredictionAccuracy } from "@/components/grid-iq/prediction-accuracy";
 import type { PaymentCheckResult } from "@/lib/engines/grid-iq-payment-check";
 import {
-  ArrowLeft,
+  ChevronLeft,
   Target,
   Clock,
   AlertTriangle,
@@ -88,12 +88,13 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
 
   return (
     <div className="max-w-3xl">
-      <div className="mb-4 sm:hidden">
-        <Link href="/dashboard/tools/grid-iq">
-          <Button variant="ghost" size="sm" className="gap-1.5 text-text-muted hover:text-text-primary">
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Grid IQ
-          </Button>
+      <div className="mb-4">
+        <Link
+          href="/dashboard/tools/grid-iq/library?tab=analyses"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-text-primary"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          Library
         </Link>
       </div>
 

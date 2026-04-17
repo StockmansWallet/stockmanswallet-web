@@ -14,6 +14,7 @@ import {
   Trash2,
   Loader2,
   MapPin,
+  Check,
 } from "lucide-react";
 
 interface ProcessorRow {
@@ -111,7 +112,7 @@ export function ProcessorsList({
               }`}
             >
               {allSelected && (
-                <span className="text-[10px] font-bold">&#10003;</span>
+                <Check className="h-3 w-3" strokeWidth={3} />
               )}
             </span>
             Select All ({processors.length})
@@ -159,7 +160,7 @@ export function ProcessorsList({
                         : "border-white/20 bg-white/[0.04]"
                     }`}
                   >
-                    {checked && <span className="text-xs font-bold">&#10003;</span>}
+                    {checked && <Check className="h-3 w-3" strokeWidth={3} />}
                   </span>
                 )}
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/15">

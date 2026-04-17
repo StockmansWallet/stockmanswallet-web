@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +17,7 @@ import {
   Upload,
   Trash2,
   Loader2,
+  Check,
 } from "lucide-react";
 import { AnalysisList } from "./analysis-list";
 import { UploadModal } from "./upload-modal";
@@ -109,6 +110,31 @@ export function LibraryTabs({
     initialUpload ?? null
   );
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRefs = useRef<Map<TabId, HTMLButtonElement>>(new Map());
+  const [indicator, setIndicator] = useState({ left: 0, width: 0 });
+  const [indicatorReady, setIndicatorReady] = useState(false);
+
+  const measure = useCallback(() => {
+    const container = containerRef.current;
+    const btn = buttonRefs.current.get(activeTab);
+    if (!container || !btn) return;
+    const cRect = container.getBoundingClientRect();
+    const bRect = btn.getBoundingClientRect();
+    setIndicator({ left: bRect.left - cRect.left, width: bRect.width });
+    setIndicatorReady(true);
+  }, [activeTab]);
+
+  useEffect(() => {
+    measure();
+  }, [measure]);
+
+  useEffect(() => {
+    const observer = new ResizeObserver(measure);
+    if (containerRef.current) observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, [measure]);
+
   return (
     <div>
       {/* Heading */}
@@ -120,21 +146,35 @@ export function LibraryTabs({
       </div>
 
       {/* Primary tab bar */}
-      <div className="mb-5 flex gap-1 rounded-xl bg-white/[0.03] p-1">
+      <div
+        ref={containerRef}
+        className="relative mb-5 flex gap-1 rounded-full bg-surface p-1"
+      >
+        <div
+          className={`absolute top-1 bottom-1 rounded-full bg-surface-high shadow-sm ${
+            indicatorReady ? "transition-all duration-250 ease-out" : ""
+          }`}
+          style={{ left: indicator.left, width: indicator.width }}
+        />
         {tabs.map((tab) => {
           const active = activeTab === tab.id;
           const Icon = tab.icon;
           return (
             <button
               key={tab.id}
+              ref={(el) => {
+                if (el) buttonRefs.current.set(tab.id, el);
+              }}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+              className={`relative z-10 flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-150 ${
                 active
-                  ? "bg-teal-500/15 text-teal-400"
+                  ? "text-text-primary"
                   : "text-text-muted hover:text-text-secondary"
               }`}
             >
-              <Icon className="h-3.5 w-3.5" />
+              <Icon
+                className={`h-4 w-4 ${active ? "text-teal-400" : "text-text-muted"}`}
+              />
               {tab.label}
             </button>
           );
@@ -182,41 +222,45 @@ function AnalysesTab({ analyses }: { analyses: AnalysisRow[] }) {
     setSelected(new Set());
   };
 
+  const filters: { id: "pre-sale" | "post-kill"; label: string; count: number }[] = [
+    { id: "pre-sale", label: "Pre-Sale", count: preSale.length },
+    { id: "post-kill", label: "Post-Kill", count: postKill.length },
+  ];
+
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between">
-        {/* Secondary pill toggle */}
-        <div className="flex gap-1 rounded-xl bg-white/[0.03] p-1">
-          <button
-            onClick={() => setSubTab("pre-sale")}
-            className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-medium transition-all ${
-              subTab === "pre-sale"
-                ? "bg-teal-500/15 text-teal-400"
-                : "text-text-muted hover:text-text-secondary"
-            }`}
-          >
-            Pre-Sale
-            {preSale.length > 0 && (
-              <span className={subTab === "pre-sale" ? "text-teal-400/60" : "text-text-muted"}>
-                ({preSale.length})
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => setSubTab("post-kill")}
-            className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-medium transition-all ${
-              subTab === "post-kill"
-                ? "bg-teal-500/15 text-teal-400"
-                : "text-text-muted hover:text-text-secondary"
-            }`}
-          >
-            Post-Kill
-            {postKill.length > 0 && (
-              <span className={subTab === "post-kill" ? "text-teal-400/60" : "text-text-muted"}>
-                ({postKill.length})
-              </span>
-            )}
-          </button>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-medium uppercase tracking-wide text-text-muted">
+            Filter
+          </span>
+          <div className="flex gap-1.5">
+            {filters.map((f) => {
+              const active = subTab === f.id;
+              return (
+                <button
+                  key={f.id}
+                  onClick={() => setSubTab(f.id)}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                    active
+                      ? "border-teal-500/40 bg-teal-500/15 text-teal-400"
+                      : "border-white/[0.08] bg-surface-lowest text-text-secondary hover:border-white/[0.14] hover:text-text-primary"
+                  }`}
+                >
+                  {f.label}
+                  {f.count > 0 && (
+                    <span
+                      className={`rounded-full px-1.5 py-[1px] text-[10px] ${
+                        active ? "bg-teal-500/20 text-teal-400" : "bg-white/[0.06] text-text-muted"
+                      }`}
+                    >
+                      {f.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
         {displayed.length > 0 && (
           <Button
@@ -276,7 +320,7 @@ function SelectionToolbar({
                 : "border-white/20 bg-white/[0.04]"
             }`}
           >
-            {allSelected && <span className="text-[10px] font-bold">&#10003;</span>}
+            {allSelected && <Check className="h-3 w-3" strokeWidth={3} />}
           </span>
           Select All ({total})
           {selected.size > 0 && (
@@ -287,7 +331,7 @@ function SelectionToolbar({
         <span />
       )}
       <div className="flex items-center gap-2">
-        <Button variant="secondary" size="sm" onClick={onUpload}>
+        <Button variant="teal" size="sm" onClick={onUpload}>
           <Upload className="mr-1.5 h-3.5 w-3.5" />
           {uploadLabel}
         </Button>
@@ -474,7 +518,7 @@ function GridsTab({
                         : "border-white/20 bg-white/[0.04]"
                     }`}
                   >
-                    {checked && <span className="text-xs font-bold">&#10003;</span>}
+                    {checked && <Check className="h-3 w-3" strokeWidth={3} />}
                   </span>
                 )}
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/15">
@@ -649,7 +693,7 @@ function KillSheetsTab({
                         : "border-white/20 bg-white/[0.04]"
                     }`}
                   >
-                    {checked && <span className="text-xs font-bold">&#10003;</span>}
+                    {checked && <Check className="h-3 w-3" strokeWidth={3} />}
                   </span>
                 )}
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/15">

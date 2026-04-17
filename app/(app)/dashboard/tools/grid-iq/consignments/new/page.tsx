@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
-import { Button } from "@/components/ui/button";
 import { ConsignmentForm } from "@/components/grid-iq/consignment-form";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 
 export const metadata = { title: "New Consignment - Grid IQ" };
 
@@ -33,12 +32,13 @@ export default async function NewConsignmentPage() {
 
   return (
     <div className="max-w-3xl">
-      <div className="mb-4 sm:hidden">
-        <Link href="/dashboard/tools/grid-iq/consignments">
-          <Button variant="ghost" size="sm" className="gap-1.5 text-text-muted hover:text-text-primary">
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Consignments
-          </Button>
+      <div className="mb-4">
+        <Link
+          href="/dashboard/tools/grid-iq/consignments"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-text-primary"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          Consignments
         </Link>
       </div>
 

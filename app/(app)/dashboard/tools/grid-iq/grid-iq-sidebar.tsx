@@ -2,11 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Target, ClipboardList, Library, Factory } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { LayoutDashboard, Target, ClipboardList, Library, Factory } from "lucide-react";
 
 const BASE = "/dashboard/tools/grid-iq";
 
 const items = [
+  {
+    label: "Dashboard",
+    href: BASE,
+    icon: LayoutDashboard,
+    matchPrefixes: [BASE],
+    exact: true,
+  },
   {
     label: "Analyse",
     href: `${BASE}/analyse`,
@@ -38,30 +46,89 @@ const items = [
   },
 ];
 
-export function GridIQNav() {
-  const pathname = usePathname();
+interface GridIQNavProps {
+  pendingConsignments?: number;
+}
 
-  function isActive(matchPrefixes: string[]) {
-    return matchPrefixes.some((p) => pathname === p || pathname.startsWith(p + "/"));
-  }
+export function GridIQNav({ pendingConsignments = 0 }: GridIQNavProps = {}) {
+  const pathname = usePathname();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const linkRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
+  const [indicator, setIndicator] = useState({ left: 0, width: 0 });
+  const [ready, setReady] = useState(false);
+
+  const activeHref =
+    items.find((item) =>
+      item.matchPrefixes.some((p) =>
+        item.exact ? pathname === p : pathname === p || pathname.startsWith(p + "/")
+      )
+    )?.href ?? null;
+
+  const measure = useCallback(() => {
+    const container = containerRef.current;
+    if (!container || !activeHref) {
+      setReady(false);
+      return;
+    }
+    const link = linkRefs.current.get(activeHref);
+    if (!link) return;
+    const containerRect = container.getBoundingClientRect();
+    const linkRect = link.getBoundingClientRect();
+    setIndicator({
+      left: linkRect.left - containerRect.left,
+      width: linkRect.width,
+    });
+    setReady(true);
+  }, [activeHref]);
+
+  useEffect(() => {
+    measure();
+  }, [measure]);
+
+  useEffect(() => {
+    const observer = new ResizeObserver(measure);
+    if (containerRef.current) observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, [measure]);
 
   return (
-    <nav className="mb-4 flex gap-1.5 overflow-x-auto">
+    <nav
+      ref={containerRef}
+      className="relative mb-4 flex gap-1 overflow-x-auto rounded-full bg-surface p-1"
+    >
+      {activeHref && (
+        <div
+          className={`absolute top-1 bottom-1 rounded-full bg-surface-high shadow-sm ${
+            ready ? "transition-all duration-250 ease-out" : ""
+          }`}
+          style={{ left: indicator.left, width: indicator.width }}
+        />
+      )}
       {items.map((item) => {
-        const active = isActive(item.matchPrefixes);
+        const active = item.href === activeHref;
         const Icon = item.icon;
         return (
           <Link
             key={item.href}
             href={item.href}
-            className={`flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-medium transition-all ${
+            ref={(el) => {
+              if (el) linkRefs.current.set(item.href, el);
+            }}
+            className={`relative z-10 flex shrink-0 flex-1 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-150 ${
               active
-                ? "bg-teal-500/15 text-teal-400"
-                : "text-text-secondary hover:bg-white/[0.05] hover:text-text-primary"
+                ? "text-text-primary"
+                : "text-text-muted hover:text-text-secondary"
             }`}
           >
-            <Icon className={`h-4 w-4 ${active ? "text-teal-400" : "text-text-muted"}`} />
+            <Icon
+              className={`h-4 w-4 ${active ? "text-teal-400" : "text-text-muted"}`}
+            />
             {item.label}
+            {item.label === "Dashboard" && pendingConsignments > 0 && (
+              <span className="ml-0.5 inline-flex min-w-[18px] items-center justify-center rounded-full bg-amber-500/20 px-1.5 text-[10px] font-semibold text-amber-400">
+                {pendingConsignments}
+              </span>
+            )}
           </Link>
         );
       })}

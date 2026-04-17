@@ -86,6 +86,26 @@ export function KillScoreCard({
           </div>
         </div>
 
+        {/* Legend */}
+        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-text-muted">
+          <span className="flex items-center gap-1">
+            <span className="h-2 w-2 rounded-full bg-emerald-400" />
+            85+ Excellent
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="h-2 w-2 rounded-full bg-teal-400" />
+            70-84 Good
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="h-2 w-2 rounded-full bg-amber-400" />
+            50-69 Fair
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="h-2 w-2 rounded-full bg-red-400" />
+            &lt;50 Poor
+          </span>
+        </div>
+
         {/* GCR and Grid Risk highlight */}
         {(gcr !== null || gridRisk !== null) && (
           <div className="mt-4 grid grid-cols-2 gap-3">

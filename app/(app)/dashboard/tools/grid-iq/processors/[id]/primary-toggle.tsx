@@ -32,7 +32,7 @@ export function PrimaryToggle({ processorId, initialIsPrimary }: Props) {
       type="button"
       onClick={handleToggle}
       disabled={isPending}
-      className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all ${
+      className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all disabled:opacity-60 ${
         isPrimary
           ? "bg-teal-500/15 text-teal-400 hover:bg-teal-500/25"
           : "bg-white/[0.04] text-text-muted hover:bg-white/[0.08] hover:text-text-primary"

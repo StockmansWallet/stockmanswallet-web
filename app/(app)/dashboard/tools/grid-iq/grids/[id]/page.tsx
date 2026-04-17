@@ -4,9 +4,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
-  ArrowLeft,
+  ChevronLeft,
   Grid3x3,
   Calendar,
   User,
@@ -14,6 +13,7 @@ import {
   Mail,
   TrendingUp,
   ChevronRight,
+  AlertTriangle,
 } from "lucide-react";
 import { GridDeleteButton } from "./grid-delete-button";
 import { EditableProcessorName } from "../../components/editable-processor-name";
@@ -43,8 +43,8 @@ export default async function GridDetailPage({ params }: PageProps) {
   const g = grid as Record<string, unknown>;
   const entries = (g.entries as Record<string, unknown>[]) || [];
 
-  // Analyses that reference this grid
-  const { data: relatedAnalyses } = await supabase
+  // Analyses that reference this grid (fetch one extra to detect overflow)
+  const { data: relatedAnalysesRaw } = await supabase
     .from("grid_iq_analyses")
     .select(
       "id, herd_name, analysis_date, analysis_mode, grid_iq_advantage, head_count, kill_score"
@@ -53,7 +53,9 @@ export default async function GridDetailPage({ params }: PageProps) {
     .eq("is_deleted", false)
     .eq("processor_grid_id", id)
     .order("analysis_date", { ascending: false })
-    .limit(25);
+    .limit(26);
+  const hasMoreAnalyses = (relatedAnalysesRaw?.length ?? 0) > 25;
+  const relatedAnalyses = (relatedAnalysesRaw ?? []).slice(0, 25);
 
   // Group entries by gender
   const maleEntries = entries.filter((e) => e.gender === "male");
@@ -65,32 +67,53 @@ export default async function GridDetailPage({ params }: PageProps) {
   return (
     <div className="max-w-4xl">
       <div className="mb-4">
-        <Link href="/dashboard/tools/grid-iq/library?tab=grids">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-1.5 text-text-muted hover:text-text-primary"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Library
-          </Button>
+        <Link
+          href="/dashboard/tools/grid-iq/library?tab=grids"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-text-primary"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          Library
         </Link>
       </div>
 
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <EditableProcessorName
-            recordId={id}
-            table="processor_grids"
-            initialName={String((g.grid_name as string | null) || g.processor_name)}
-          />
-          <p className="mt-0.5 text-sm font-medium text-text-secondary">
-            {String(g.processor_name)}
-            {(g.grid_code as string | null) ? ` - ${String(g.grid_code)}` : ""}
-          </p>
-        </div>
-        <GridDeleteButton gridId={id} />
+      <div>
+        <EditableProcessorName
+          recordId={id}
+          table="processor_grids"
+          initialName={String((g.grid_name as string | null) || g.processor_name)}
+        />
+        <p className="mt-0.5 text-sm font-medium text-text-secondary">
+          {String(g.processor_name)}
+          {(g.grid_code as string | null) ? ` - ${String(g.grid_code)}` : ""}
+        </p>
       </div>
+
+      {/* Expiry status banner */}
+      {(() => {
+        const expiryStr = g.expiry_date as string | null;
+        if (!expiryStr) return null;
+        const expiry = new Date(expiryStr);
+        const now = new Date();
+        const daysLeft = Math.ceil(
+          (expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        const expired = daysLeft < 0;
+        const expiringSoon = daysLeft >= 0 && daysLeft <= 7;
+        if (!expired && !expiringSoon) return null;
+        const tone = expired
+          ? "border-red-500/30 bg-red-500/[0.08] text-red-400"
+          : "border-amber-500/30 bg-amber-500/[0.08] text-amber-400";
+        return (
+          <div className={`mt-4 flex items-center gap-2 rounded-xl border px-4 py-2.5 ${tone}`}>
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <span className="text-sm font-medium">
+              {expired
+                ? `Expired ${Math.abs(daysLeft)} day${Math.abs(daysLeft) === 1 ? "" : "s"} ago (${expiry.toLocaleDateString("en-AU")}).`
+                : `Expires in ${daysLeft} day${daysLeft === 1 ? "" : "s"} (${expiry.toLocaleDateString("en-AU")}).`}
+            </span>
+          </div>
+        );
+      })()}
 
       {/* Metadata */}
       <Card className="mt-4">
@@ -220,6 +243,7 @@ export default async function GridDetailPage({ params }: PageProps) {
                         ) : null}
                         {ks !== null && ks !== undefined && (
                           <span
+                            title="Kill Score: 85+ Excellent, 70-84 Good, 50-69 Fair, <50 Poor"
                             className={`text-[10px] font-medium ${
                               ks >= 85
                                 ? "text-emerald-400"
@@ -253,9 +277,24 @@ export default async function GridDetailPage({ params }: PageProps) {
                 );
               })}
             </div>
+            {hasMoreAnalyses && (
+              <div className="border-t border-white/[0.06] px-4 py-2.5 text-center">
+                <Link
+                  href="/dashboard/tools/grid-iq/library?tab=analyses"
+                  className="text-xs font-medium text-teal-400 hover:underline"
+                >
+                  Showing latest 25. View all in Library →
+                </Link>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
+
+      {/* Destructive action */}
+      <div className="mt-6 flex justify-start">
+        <GridDeleteButton gridId={id} />
+      </div>
     </div>
   );
 }

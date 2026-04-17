@@ -93,7 +93,7 @@ export default async function GridIQPage() {
                 </div>
                 <Link
                   href="/dashboard/tools/grid-iq/consignments"
-                  className="text-xs font-medium text-amber-400 hover:underline"
+                  className="inline-flex items-center rounded-lg bg-amber-500/15 px-2.5 py-1 text-xs font-medium text-amber-400 transition-colors hover:bg-amber-500/25"
                 >
                   View All
                 </Link>
@@ -143,7 +143,7 @@ export default async function GridIQPage() {
               </div>
               <Link
                 href="/dashboard/tools/grid-iq/library?tab=analyses"
-                className="text-xs font-medium text-teal-400 hover:underline"
+                className="inline-flex items-center rounded-lg border border-white/[0.08] bg-surface-lowest px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-white/[0.14] hover:text-text-primary"
               >
                 View All
               </Link>
@@ -179,7 +179,10 @@ export default async function GridIQPage() {
                           </span>
                         )}
                         {killScore !== null && (
-                          <span className={`text-[10px] font-medium ${killScore >= 85 ? "text-emerald-400" : killScore >= 70 ? "text-teal-400" : killScore >= 50 ? "text-amber-400" : "text-red-400"}`}>
+                          <span
+                            title="Kill Score: 85+ Excellent, 70-84 Good, 50-69 Fair, <50 Poor"
+                            className={`text-[10px] font-medium ${killScore >= 85 ? "text-emerald-400" : killScore >= 70 ? "text-teal-400" : killScore >= 50 ? "text-amber-400" : "text-red-400"}`}
+                          >
                             KS {killScore.toFixed(0)}
                           </span>
                         )}
@@ -225,7 +228,7 @@ export default async function GridIQPage() {
               </div>
               <Link
                 href="/dashboard/tools/grid-iq/consignments"
-                className="text-xs font-medium text-teal-400 hover:underline"
+                className="inline-flex items-center rounded-lg border border-white/[0.08] bg-surface-lowest px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-white/[0.14] hover:text-text-primary"
               >
                 View All
               </Link>
@@ -289,17 +292,17 @@ export default async function GridIQPage() {
                   <Badge className="bg-teal-500/15 text-teal-400">{safeGrids.length}</Badge>
                 )}
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <Link
                   href="/dashboard/tools/grid-iq/library?tab=grids&upload=grid"
-                  className="flex items-center gap-1 text-xs font-medium text-teal-400 hover:underline"
+                  className="inline-flex items-center gap-1 rounded-lg bg-teal-500/15 px-2.5 py-1 text-xs font-medium text-teal-400 transition-colors hover:bg-teal-500/25"
                 >
                   <Upload className="h-3 w-3" />
                   Upload
                 </Link>
                 <Link
                   href="/dashboard/tools/grid-iq/library?tab=grids"
-                  className="text-xs font-medium text-teal-400 hover:underline"
+                  className="inline-flex items-center rounded-lg border border-white/[0.08] bg-surface-lowest px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-white/[0.14] hover:text-text-primary"
                 >
                   View All
                 </Link>
@@ -380,17 +383,17 @@ export default async function GridIQPage() {
                   <Badge className="bg-teal-500/15 text-teal-400">{safeKillSheets.length}</Badge>
                 )}
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <Link
                   href="/dashboard/tools/grid-iq/library?tab=kill-sheets&upload=killsheet"
-                  className="flex items-center gap-1 text-xs font-medium text-teal-400 hover:underline"
+                  className="inline-flex items-center gap-1 rounded-lg bg-teal-500/15 px-2.5 py-1 text-xs font-medium text-teal-400 transition-colors hover:bg-teal-500/25"
                 >
                   <Upload className="h-3 w-3" />
                   Upload
                 </Link>
                 <Link
                   href="/dashboard/tools/grid-iq/library?tab=kill-sheets"
-                  className="text-xs font-medium text-teal-400 hover:underline"
+                  className="inline-flex items-center rounded-lg border border-white/[0.08] bg-surface-lowest px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-white/[0.14] hover:text-text-primary"
                 >
                   View All
                 </Link>

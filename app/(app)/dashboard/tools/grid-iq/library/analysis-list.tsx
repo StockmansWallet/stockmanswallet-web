@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { createClient } from "@/lib/supabase/client";
-import { TrendingUp, ChevronRight, Trash2, Loader2 } from "lucide-react";
+import { TrendingUp, ChevronRight, Trash2, Loader2, Check } from "lucide-react";
 
 export interface AnalysisRow {
   id: string;
@@ -122,7 +122,7 @@ export function AnalysisList({
               }`}
             >
               {allSelected && (
-                <span className="text-[10px] font-bold">&#10003;</span>
+                <Check className="h-3 w-3" strokeWidth={3} />
               )}
             </span>
             Select All ({analyses.length})
@@ -154,7 +154,7 @@ export function AnalysisList({
                         : "border-white/20 bg-white/[0.04]"
                     }`}
                   >
-                    {checked && <span className="text-xs font-bold">&#10003;</span>}
+                    {checked && <Check className="h-3 w-3" strokeWidth={3} />}
                   </span>
                 )}
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/15">
@@ -172,6 +172,7 @@ export function AnalysisList({
                     )}
                     {killScore !== null && (
                       <span
+                        title="Kill Score: 85+ Excellent, 70-84 Good, 50-69 Fair, <50 Poor"
                         className={`text-[10px] font-medium ${
                           killScore >= 85
                             ? "text-emerald-400"

@@ -4,9 +4,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
-  ArrowLeft,
+  ChevronLeft,
   FileText,
   Hash,
   Scale,
@@ -41,7 +40,7 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
   if (!killSheet) notFound();
 
   // Related records: parent consignment and analyses that reference this kill sheet
-  const [{ data: parentConsignment }, { data: relatedAnalyses }] =
+  const [{ data: parentConsignment }, { data: relatedAnalysesRaw }] =
     await Promise.all([
       supabase
         .from("consignments")
@@ -61,8 +60,10 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
         .eq("is_deleted", false)
         .eq("kill_sheet_record_id", id)
         .order("analysis_date", { ascending: false })
-        .limit(25),
+        .limit(26),
     ]);
+  const hasMoreAnalyses = (relatedAnalysesRaw?.length ?? 0) > 25;
+  const relatedAnalyses = (relatedAnalysesRaw ?? []).slice(0, 25);
 
   const ks = killSheet as Record<string, unknown>;
   const categorySummaries =
@@ -80,31 +81,25 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
   return (
     <div className="max-w-4xl">
       <div className="mb-4">
-        <Link href="/dashboard/tools/grid-iq/library?tab=kill-sheets">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-1.5 text-text-muted hover:text-text-primary"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Library
-          </Button>
+        <Link
+          href="/dashboard/tools/grid-iq/library?tab=kill-sheets"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-text-primary"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          Library
         </Link>
       </div>
 
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <EditableProcessorName
-            recordId={id}
-            table="kill_sheet_records"
-            initialName={String((ks.record_name as string | null) || ks.processor_name)}
-          />
-          <p className="mt-0.5 text-sm font-medium text-text-secondary">
-            {String(ks.processor_name)}
-            {(ks.kill_date as string | null) ? ` - ${new Date(ks.kill_date as string).toLocaleDateString("en-AU")}` : ""}
-          </p>
-        </div>
-        <KillSheetDeleteButton killSheetId={id} />
+      <div>
+        <EditableProcessorName
+          recordId={id}
+          table="kill_sheet_records"
+          initialName={String((ks.record_name as string | null) || ks.processor_name)}
+        />
+        <p className="mt-0.5 text-sm font-medium text-text-secondary">
+          {String(ks.processor_name)}
+          {(ks.kill_date as string | null) ? ` - ${new Date(ks.kill_date as string).toLocaleDateString("en-AU")}` : ""}
+        </p>
       </div>
 
       {/* Summary Stats */}
@@ -483,6 +478,7 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
                         ) : null}
                         {killScore !== null && killScore !== undefined && (
                           <span
+                            title="Kill Score: 85+ Excellent, 70-84 Good, 50-69 Fair, <50 Poor"
                             className={`text-[10px] font-medium ${
                               killScore >= 85
                                 ? "text-emerald-400"
@@ -516,9 +512,24 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
                 );
               })}
             </div>
+            {hasMoreAnalyses && (
+              <div className="border-t border-white/[0.06] px-4 py-2.5 text-center">
+                <Link
+                  href="/dashboard/tools/grid-iq/library?tab=analyses"
+                  className="text-xs font-medium text-teal-400 hover:underline"
+                >
+                  Showing latest 25. View all in Library →
+                </Link>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
+
+      {/* Destructive action */}
+      <div className="mt-6 flex justify-start">
+        <KillSheetDeleteButton killSheetId={id} />
+      </div>
     </div>
   );
 }

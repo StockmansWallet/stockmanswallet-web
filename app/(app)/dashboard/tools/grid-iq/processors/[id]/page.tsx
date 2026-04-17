@@ -3,9 +3,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
-  ArrowLeft,
+  ChevronLeft,
   ChevronRight,
   Grid3x3,
   FileText,
@@ -36,7 +35,7 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
 
   if (!processor) notFound();
 
-  const [{ data: grids }, { data: killSheets }, { data: analyses }] =
+  const [{ data: gridsRaw }, { data: killSheetsRaw }, { data: analysesRaw }] =
     await Promise.all([
       supabase
         .from("processor_grids")
@@ -45,7 +44,7 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
         .eq("is_deleted", false)
         .eq("processor_id", id)
         .order("grid_date", { ascending: false })
-        .limit(25),
+        .limit(26),
       supabase
         .from("kill_sheet_records")
         .select("id, record_name, processor_name, kill_date, total_head_count")
@@ -53,7 +52,7 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
         .eq("is_deleted", false)
         .eq("processor_id", id)
         .order("kill_date", { ascending: false })
-        .limit(25),
+        .limit(26),
       supabase
         .from("grid_iq_analyses")
         .select("id, herd_name, analysis_mode, analysis_date, grid_iq_advantage")
@@ -61,25 +60,28 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
         .eq("is_deleted", false)
         .eq("processor_id", id)
         .order("analysis_date", { ascending: false })
-        .limit(25),
+        .limit(26),
     ]);
+  const hasMoreGrids = (gridsRaw?.length ?? 0) > 25;
+  const hasMoreKillSheets = (killSheetsRaw?.length ?? 0) > 25;
+  const hasMoreAnalyses = (analysesRaw?.length ?? 0) > 25;
+  const grids = (gridsRaw ?? []).slice(0, 25);
+  const killSheets = (killSheetsRaw ?? []).slice(0, 25);
+  const analyses = (analysesRaw ?? []).slice(0, 25);
 
   return (
     <div className="max-w-3xl">
       <div className="mb-4">
-        <Link href="/dashboard/tools/grid-iq/processors">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-1.5 text-text-muted hover:text-text-primary"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Processors
-          </Button>
+        <Link
+          href="/dashboard/tools/grid-iq/processors"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-text-primary"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          Processors
         </Link>
       </div>
 
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <PageHeader
           title={processor.name}
           titleClassName="text-2xl font-bold text-teal-400"
@@ -87,12 +89,11 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
           subtitleClassName="text-sm text-text-secondary"
           compact
         />
-        <div className="flex items-center gap-2">
+        <div className="shrink-0 self-start">
           <PrimaryToggle
             processorId={id}
             initialIsPrimary={!!processor.is_primary}
           />
-          <ProcessorDeleteButton processorId={id} />
         </div>
       </div>
 
@@ -144,6 +145,16 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
                 </Link>
               ))}
             </div>
+            {hasMoreGrids && (
+              <div className="border-t border-white/[0.06] px-4 py-2.5 text-center">
+                <Link
+                  href="/dashboard/tools/grid-iq/library?tab=grids"
+                  className="text-xs font-medium text-teal-400 hover:underline"
+                >
+                  Showing latest 25. View all in Library →
+                </Link>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
@@ -182,6 +193,16 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
                 </Link>
               ))}
             </div>
+            {hasMoreKillSheets && (
+              <div className="border-t border-white/[0.06] px-4 py-2.5 text-center">
+                <Link
+                  href="/dashboard/tools/grid-iq/library?tab=kill-sheets"
+                  className="text-xs font-medium text-teal-400 hover:underline"
+                >
+                  Showing latest 25. View all in Library →
+                </Link>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
@@ -231,9 +252,24 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
                 );
               })}
             </div>
+            {hasMoreAnalyses && (
+              <div className="border-t border-white/[0.06] px-4 py-2.5 text-center">
+                <Link
+                  href="/dashboard/tools/grid-iq/library?tab=analyses"
+                  className="text-xs font-medium text-teal-400 hover:underline"
+                >
+                  Showing latest 25. View all in Library →
+                </Link>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
+
+      {/* Destructive action */}
+      <div className="mt-6 flex justify-start">
+        <ProcessorDeleteButton processorId={id} />
+      </div>
     </div>
   );
 }
