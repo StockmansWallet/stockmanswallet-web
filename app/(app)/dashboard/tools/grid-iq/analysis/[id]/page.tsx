@@ -118,6 +118,36 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
         </p>
       </div>
 
+      {/* Next-step banner: pre-sale analysis with a consignment but no post-kill yet. */}
+      {!isPostSale && consignmentId && !siblingAnalysis && (
+        <div className="mt-4 rounded-xl border border-teal-500/30 bg-teal-500/[0.06] p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-500/20">
+              <Truck className="h-4 w-4 text-teal-400" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-teal-400">
+                Next step: post-kill analysis
+              </p>
+              <p className="mt-0.5 text-xs text-text-secondary">
+                When the processor sends you the kill sheet, come back to this
+                consignment to compare actual returns against this prediction.
+              </p>
+              <div className="mt-3">
+                <Link
+                  href={`/dashboard/tools/grid-iq/consignments/${consignmentId}`}
+                >
+                  <Button variant="teal" size="sm">
+                    <Truck className="mr-1.5 h-3.5 w-3.5" />
+                    Go to consignment
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Value Comparison */}
       <div className="mt-4">
         <AnalysisComparison
@@ -326,14 +356,17 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
         <div className="flex items-center gap-2">
           {consignmentId && (
             <Link href={`/dashboard/tools/grid-iq/consignments/${consignmentId}`}>
-              <Button variant="ghost" size="sm">
+              <Button
+                variant={!isPostSale && !siblingAnalysis ? "teal" : "ghost"}
+                size="sm"
+              >
                 <Truck className="mr-1.5 h-3.5 w-3.5" />
                 View Consignment
               </Button>
             </Link>
           )}
           <Link href="/dashboard/tools/grid-iq/library?tab=analyses">
-            <Button variant="teal" size="sm">
+            <Button variant="ghost" size="sm">
               Done
             </Button>
           </Link>

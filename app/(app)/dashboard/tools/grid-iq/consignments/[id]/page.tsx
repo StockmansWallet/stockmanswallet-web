@@ -154,6 +154,31 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
         </span>
       </div>
 
+      {/* Awaiting-kill-sheet banner: once pre-sale analysis exists and we are
+          ready to run post-kill, surface the next action at the top of the page. */}
+      {canRunPostKill && preSaleAnalysis && (
+        <a
+          href="#post-sale"
+          className="mt-4 flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/[0.06] p-4 transition-colors hover:bg-amber-500/[0.1]"
+        >
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/20">
+            <FileText className="h-4 w-4 text-amber-400" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-amber-400">
+              Awaiting kill sheet
+            </p>
+            <p className="mt-0.5 text-xs text-text-secondary">
+              Pre-sale analysis is done. When the processor sends the kill sheet,
+              upload it in the Post-Kill Analysis section below to reconcile.
+            </p>
+          </div>
+          <span className="mt-1 text-xs font-medium text-amber-400">
+            Jump to section -&gt;
+          </span>
+        </a>
+      )}
+
       {/* Booking Info */}
       <Card className="mt-4">
         <CardContent className="p-4">

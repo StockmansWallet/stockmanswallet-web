@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { createPreSaleAnalysis } from "@/app/(app)/dashboard/tools/grid-iq/analyse/pre-sale-actions";
+import { UploadModal } from "@/app/(app)/dashboard/tools/grid-iq/library/upload-modal";
 
 // MARK: - Types
 
@@ -107,6 +108,7 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [uploadOpen, setUploadOpen] = useState<"grid" | "killsheet" | null>(null);
 
   // Step 1: What am I selling? — consignment name + herd allocations
   const [consignmentName, setConsignmentName] = useState("");
@@ -426,12 +428,15 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
           </p>
 
           <div className="flex items-center justify-end">
-            <Link href="/dashboard/tools/grid-iq/library?tab=grids&upload=grid">
-              <Button size="sm" variant="ghost" className="shrink-0 text-xs">
-                <Upload className="mr-1.5 h-3.5 w-3.5" />
-                Upload Grid
-              </Button>
-            </Link>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="shrink-0 text-xs"
+              onClick={() => setUploadOpen("grid")}
+            >
+              <Upload className="mr-1.5 h-3.5 w-3.5" />
+              Upload Grid
+            </Button>
           </div>
 
           {grids.length === 0 ? (
@@ -441,12 +446,14 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
                 <p className="text-sm text-text-muted">
                   No processor grids uploaded yet.
                 </p>
-                <Link href="/dashboard/tools/grid-iq/library?tab=grids&upload=grid">
-                  <Button size="sm" variant="teal">
-                    <Upload className="mr-1.5 h-3.5 w-3.5" />
-                    Upload Grid
-                  </Button>
-                </Link>
+                <Button
+                  size="sm"
+                  variant="teal"
+                  onClick={() => setUploadOpen("grid")}
+                >
+                  <Upload className="mr-1.5 h-3.5 w-3.5" />
+                  Upload Grid
+                </Button>
               </CardContent>
             </Card>
           ) : (
@@ -530,8 +537,26 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
                 />
               </button>
 
-              {showKillSheetPicker && killSheetCount > 0 && (
+              {showKillSheetPicker && (
                 <div className="border-t border-white/[0.06] px-4 py-3">
+                  {killSheetCount === 0 && (
+                    <div className="mb-3 flex flex-col items-center gap-2 py-4 text-center">
+                      <FileText className="h-8 w-8 text-text-muted" />
+                      <p className="text-sm text-text-muted">
+                        No kill sheets uploaded yet.
+                      </p>
+                      <Button
+                        size="sm"
+                        variant="teal"
+                        onClick={() => setUploadOpen("killsheet")}
+                      >
+                        <Upload className="mr-1.5 h-3.5 w-3.5" />
+                        Upload Kill Sheet
+                      </Button>
+                    </div>
+                  )}
+                  {killSheetCount > 0 && (
+                  <>
                   <div className="flex flex-col gap-2">
                     {(showAllKillSheets
                       ? killSheets
@@ -605,6 +630,19 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
                         </Button>
                       )}
                     </div>
+                  )}
+                  <div className="mt-3 flex justify-end">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-xs"
+                      onClick={() => setUploadOpen("killsheet")}
+                    >
+                      <Upload className="mr-1.5 h-3.5 w-3.5" />
+                      Upload Kill Sheet
+                    </Button>
+                  </div>
+                  </>
                   )}
                 </div>
               )}
@@ -795,6 +833,15 @@ export function PreSaleFlow({ grids, herds, killSheets }: PreSaleFlowProps) {
           </Card>
         </section>
       )}
+
+      {/* Inline upload modal for grids and kill sheets.
+          On save it closes the modal and router.refresh() reloads the server
+          component so the new record appears in the selector above. */}
+      <UploadModal
+        open={uploadOpen !== null}
+        initialType={uploadOpen ?? "grid"}
+        onClose={() => setUploadOpen(null)}
+      />
     </div>
   );
 }
