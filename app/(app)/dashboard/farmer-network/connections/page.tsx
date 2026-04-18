@@ -8,6 +8,7 @@ import { FarmerRequestCard } from "@/components/app/farmer-network/farmer-reques
 import { FarmerPeerCard } from "@/components/app/farmer-network/farmer-peer-card";
 import { FarmerProducerSearch } from "@/components/app/farmer-network/farmer-producer-search";
 import { FarmerConnectionsRealtime } from "@/components/app/farmer-network/farmer-connections-realtime";
+import { BroadcastButton } from "@/components/app/farmer-network/broadcast-button";
 import type { ConnectionRequest } from "@/lib/types/advisory";
 
 export const revalidate = 0;
@@ -174,11 +175,16 @@ export default async function FarmerConnectionsPage() {
 
       {approved.length > 0 && (
         <div className="mb-6">
-          {(incomingRequests.length > 0 || outgoingPending.length > 0) && (
-            <h2 className="mb-3 text-sm font-semibold text-text-secondary">
-              Connected ({approved.length})
-            </h2>
-          )}
+          <div className="mb-3 flex items-center justify-between">
+            {(incomingRequests.length > 0 || outgoingPending.length > 0) ? (
+              <h2 className="text-sm font-semibold text-text-secondary">
+                Connected ({approved.length})
+              </h2>
+            ) : (
+              <span />
+            )}
+            {approved.length >= 2 && <BroadcastButton recipientCount={approved.length} />}
+          </div>
           <div className="flex flex-col gap-3">
             {approved.map((c) => {
               const otherId = otherIdFor(c);
