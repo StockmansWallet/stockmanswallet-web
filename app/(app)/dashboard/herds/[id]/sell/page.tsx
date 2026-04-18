@@ -5,6 +5,7 @@ import { SellStockForm } from "@/components/app/sell-stock-form";
 import { calculateProjectedWeight, calculateHerdValuation, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
+import { centsToDollars } from "@/lib/types/money";
 
 export const revalidate = 0;
 
@@ -85,7 +86,7 @@ export default async function SellStockPage({
   }
 
   for (const p of allPrices ?? []) {
-    const priceEntry = { price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date };
+    const priceEntry = { price_per_kg: centsToDollars(p.price_per_kg), weight_range: p.weight_range, data_date: p.data_date };
     if (p.saleyard === "National" && p.breed === null) {
       const entries = nationalPriceMap.get(p.category) ?? [];
       entries.push(priceEntry);

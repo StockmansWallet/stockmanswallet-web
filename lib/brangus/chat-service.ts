@@ -9,6 +9,7 @@ import { cattleBreedPremiums } from "../data/reference-data";
 import { toolDefinitions, executeTool, DISPLAY_ONLY_TOOLS, generateAutoCards } from "./tools";
 import { fetchAllPropertyWeather } from "../services/weather-service";
 import { fetchUserMemories } from "./tools";
+import { centsToDollars } from "../types/money";
 import type {
   ChatMessage,
   AnthropicMessage,
@@ -733,7 +734,7 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
 
   for (const p of categoryPricesRaw) {
     const entries = nationalPriceMap.get(p.category) ?? [];
-    entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date });
+    entries.push({ price_per_kg: centsToDollars(p.price_per_kg), weight_range: p.weight_range, data_date: p.data_date });
     nationalPriceMap.set(p.category, entries);
   }
 
@@ -753,12 +754,12 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
       if (p.breed === null) {
         const key = `${p.category}|${p.saleyard}`;
         const entries = saleyardPriceMap.get(key) ?? [];
-        entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date });
+        entries.push({ price_per_kg: centsToDollars(p.price_per_kg), weight_range: p.weight_range, data_date: p.data_date });
         saleyardPriceMap.set(key, entries);
       } else {
         const key = `${p.category}|${p.breed}|${p.saleyard}`;
         const entries = saleyardBreedPriceMap.get(key) ?? [];
-        entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date });
+        entries.push({ price_per_kg: centsToDollars(p.price_per_kg), weight_range: p.weight_range, data_date: p.data_date });
         saleyardBreedPriceMap.set(key, entries);
       }
     }

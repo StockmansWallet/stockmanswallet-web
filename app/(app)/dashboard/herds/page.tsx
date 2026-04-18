@@ -12,6 +12,7 @@ import { calculateHerdValuation, categoryFallback, type CategoryPriceEntry } fro
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 import { expandWithNearbySaleyards } from "@/lib/data/saleyard-proximity";
+import { centsToDollars } from "@/lib/types/money";
 
 export const revalidate = 0;
 
@@ -82,7 +83,7 @@ export default async function HerdsPage() {
   const saleyardPriceMap = new Map<string, CategoryPriceEntry[]>();
   const saleyardBreedPriceMap = new Map<string, CategoryPriceEntry[]>();
   for (const p of (allPrices ?? [])) {
-    const priceEntry = { price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date };
+    const priceEntry = { price_per_kg: centsToDollars(p.price_per_kg), weight_range: p.weight_range, data_date: p.data_date };
     if (p.saleyard === "National" && p.breed === null) {
       const entries = nationalPriceMap.get(p.category) ?? [];
       entries.push(priceEntry);

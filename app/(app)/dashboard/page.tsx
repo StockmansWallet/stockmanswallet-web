@@ -11,6 +11,7 @@ import { calculateHerdValuation, categoryFallback, parseCalvesAtFoot, type Categ
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName, saleyardLocality } from "@/lib/data/reference-data";
 import { closestSaleyardsToProperty, expandWithNearbySaleyards } from "@/lib/data/saleyard-proximity";
+import { centsToDollars } from "@/lib/types/money";
 import { PortfolioValueCard } from "@/components/app/portfolio-value-card";
 import { ComingUpCard } from "@/components/app/coming-up-card";
 import { GrowthMortalityCard } from "@/components/app/growth-mortality-card";
@@ -129,7 +130,7 @@ export default async function DashboardPage() {
   const saleyardPriceMap = new Map<string, CategoryPriceEntry[]>();
   const saleyardBreedPriceMap = new Map<string, CategoryPriceEntry[]>();
   for (const p of (allPrices ?? [])) {
-    const priceEntry = { price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date };
+    const priceEntry = { price_per_kg: centsToDollars(p.price_per_kg), weight_range: p.weight_range, data_date: p.data_date };
     if (p.saleyard === "National" && p.breed === null) {
       const entries = nationalPriceMap.get(p.category) ?? [];
       entries.push(priceEntry);

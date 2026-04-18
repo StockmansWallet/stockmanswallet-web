@@ -13,6 +13,7 @@ import {
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName, saleyards as allSaleyards, saleyardToState } from "@/lib/data/reference-data";
 import { expandWithNearbySaleyards } from "@/lib/data/saleyard-proximity";
+import { centsToDollars, type Cents } from "@/lib/types/money";
 import type {
   ReportConfiguration,
   ReportData,
@@ -64,7 +65,10 @@ const HERD_SELECT = `id, name, species, breed, category, head_count,
 
 type PriceRow = {
   category: string;
-  price_per_kg: number;
+  // Supabase stores final_price_per_kg in cents; the RPC aliases the column
+  // as `price_per_kg` but the unit is still cents. Use centsToDollars() to
+  // convert before pushing into CategoryPriceEntry.
+  price_per_kg: Cents;
   weight_range: string | null;
   saleyard: string;
   breed: string | null;
@@ -110,7 +114,7 @@ export async function buildPriceMaps(
 
   for (const p of rpcPrices ?? []) {
     const priceEntry: CategoryPriceEntry = {
-      price_per_kg: p.price_per_kg / 100,
+      price_per_kg: centsToDollars(p.price_per_kg),
       weight_range: p.weight_range,
       data_date: p.data_date,
     };
@@ -453,7 +457,7 @@ export async function generateSaleyardComparisonData(
   for (const p of allPrices) {
     if (p.saleyard === "National" && p.breed === null && p.price_per_kg > 0) {
       const entries = nationalPriceMap.get(p.category) ?? [];
-      entries.push({ price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date });
+      entries.push({ price_per_kg: centsToDollars(p.price_per_kg), weight_range: p.weight_range, data_date: p.data_date });
       nationalPriceMap.set(p.category, entries);
     }
   }
@@ -520,7 +524,7 @@ export async function generateSaleyardComparisonData(
     const priceValues: number[] = [];
 
     for (const p of latestPrices) {
-      const pricePerKg = p.price_per_kg / 100;
+      const pricePerKg = centsToDollars(p.price_per_kg);
       if (pricePerKg <= 0) continue;
       priceValues.push(pricePerKg);
 

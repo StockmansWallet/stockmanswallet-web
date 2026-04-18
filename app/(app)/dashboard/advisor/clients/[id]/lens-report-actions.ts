@@ -16,6 +16,7 @@ import {
   resolveMLASaleyardName,
 } from "@/lib/data/reference-data";
 import { expandWithNearbySaleyards } from "@/lib/data/saleyard-proximity";
+import { centsToDollars } from "@/lib/types/money";
 import { applyShadingTo } from "@/lib/types/advisor-lens";
 import type {
   LensHerdSummary,
@@ -294,7 +295,7 @@ export async function fetchRegionalData(
     .map((p) => ({
       category: p.category,
       saleyard: p.saleyard,
-      price_per_kg: p.price_per_kg / 100,
+      price_per_kg: centsToDollars(p.price_per_kg),
       weight_range: p.weight_range,
       data_date: p.data_date,
     }));
@@ -303,7 +304,7 @@ export async function fetchRegionalData(
     .filter((p) => p.saleyard === "National" && p.breed === null)
     .map((p) => ({
       category: p.category,
-      price_per_kg: p.price_per_kg / 100,
+      price_per_kg: centsToDollars(p.price_per_kg),
       weight_range: p.weight_range,
       data_date: p.data_date,
     }));
@@ -423,7 +424,7 @@ export async function saveLensReport(
 
   for (const p of rpcPrices ?? []) {
     const priceEntry = {
-      price_per_kg: p.price_per_kg / 100,
+      price_per_kg: centsToDollars(p.price_per_kg),
       weight_range: p.weight_range,
       data_date: p.data_date,
     };

@@ -12,6 +12,7 @@ import {
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName, saleyardCoordinates } from "@/lib/data/reference-data";
 import { calculateFreightEstimate } from "@/lib/engines/freight-engine";
+import { centsToDollars } from "@/lib/types/money";
 import {
   analyse,
   defaultDressingPercentage,
@@ -259,7 +260,7 @@ export async function runPostSaleAnalysis(consignmentId: string, killSheetId: st
     const spm = new Map<string, CategoryPriceEntry[]>();
     const sbpm = new Map<string, CategoryPriceEntry[]>();
     for (const p of allPrices) {
-      const pe = { price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date };
+      const pe = { price_per_kg: centsToDollars(p.price_per_kg), weight_range: p.weight_range, data_date: p.data_date };
       if (p.saleyard === "National" && !p.breed) { const e = npm.get(p.category) ?? []; e.push(pe); npm.set(p.category, e); }
       else if (p.saleyard !== "National") {
         if (!p.breed) { const k = `${p.category}|${p.saleyard}`; const e = spm.get(k) ?? []; e.push(pe); spm.set(k, e); }

@@ -8,6 +8,7 @@ import { resolveMLACategory } from "../data/weight-mapping";
 import { fetchWeatherForLocation } from "../services/weather-service";
 import { getRoadDistanceKm } from "../services/distance-service";
 import { createClient } from "../supabase/client";
+import { centsToDollars } from "../types/money";
 import type { ChatDataStore, QuickInsight } from "./types";
 
 // MARK: - Tool Definitions (Anthropic tool_use format)
@@ -644,7 +645,7 @@ function lookupMarketPrices(category: string | undefined, store: ChatDataStore):
       const grouped = new Map<string, { price: number; range: string | null; date: string }[]>();
       for (const p of filtered) {
         const entries = grouped.get(p.category) ?? [];
-        entries.push({ price: p.price_per_kg / 100, range: p.weight_range, date: p.data_date });
+        entries.push({ price: centsToDollars(p.price_per_kg), range: p.weight_range, date: p.data_date });
         grouped.set(p.category, entries);
       }
       for (const [cat, entries] of grouped) {

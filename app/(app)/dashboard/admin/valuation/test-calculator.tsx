@@ -17,6 +17,7 @@ import {
 import { cattleMasterCategories } from "@/lib/data/weight-mapping";
 import { categoryFallback } from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
+import { centsToDollars } from "@/lib/types/money";
 
 interface Props {
   priceMaps: SerializedPriceMaps;
@@ -152,7 +153,7 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
         const syMap = new Map<string, CategoryPriceEntry[]>();
         const syBreed = new Map<string, CategoryPriceEntry[]>();
         for (const p of rows) {
-          const entry: CategoryPriceEntry = { price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date };
+          const entry: CategoryPriceEntry = { price_per_kg: centsToDollars(p.price_per_kg), weight_range: p.weight_range, data_date: p.data_date };
           if (p.saleyard === "National" && !p.breed) {
             const arr = national.get(p.category) ?? [];
             arr.push(entry);

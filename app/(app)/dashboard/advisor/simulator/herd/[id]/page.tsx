@@ -11,6 +11,7 @@ import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 import { expandWithNearbySaleyards } from "@/lib/data/saleyard-proximity";
 import { getEffectiveJoinedDate } from "@/lib/data/breeding";
+import { centsToDollars } from "@/lib/types/money";
 import { Pencil, Info, Scale, Heart, MapPin, DollarSign, AlertTriangle, BarChart3, Clock, FlaskConical } from "lucide-react";
 import { SimulatorDeleteHerdButton } from "./delete-button";
 
@@ -95,7 +96,7 @@ export default async function SimulatorHerdDetailPage({
   const saleyardBreedPriceMap = new Map<string, CategoryPriceEntry[]>();
 
   for (const p of (allPrices ?? [])) {
-    const priceEntry = { price_per_kg: p.price_per_kg / 100, weight_range: p.weight_range, data_date: p.data_date };
+    const priceEntry = { price_per_kg: centsToDollars(p.price_per_kg), weight_range: p.weight_range, data_date: p.data_date };
     if (p.saleyard === "National" && p.breed === null) {
       const entries = nationalPriceMap.get(p.category) ?? [];
       entries.push(priceEntry);
