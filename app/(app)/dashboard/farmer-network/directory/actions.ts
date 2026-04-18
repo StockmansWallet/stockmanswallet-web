@@ -9,6 +9,10 @@ const targetUserIdSchema = z.object({
   targetUserId: z.string().uuid(),
 });
 
+const connectionIdSchema = z.object({
+  connectionId: z.string().uuid(),
+});
+
 export async function sendFarmerConnectionRequest(targetUserId: string) {
   const parsed = targetUserIdSchema.safeParse({ targetUserId });
   if (!parsed.success) return { error: "Invalid input" };
@@ -63,5 +67,47 @@ export async function sendFarmerConnectionRequest(targetUserId: string) {
   await notifyFarmerConnectionRequest(supabase, targetUserId, requesterName, conn.id);
 
   revalidatePath("/dashboard/farmer-network");
+  return { success: true };
+}
+
+/**
+ * Cancels a pending connection request that the signed-in user sent.
+ * Sets status to 'removed' (the DB trigger allows the requester to do this
+ * but NOT to self-approve). Target is not notified, since the request never
+ * reached a relationship.
+ */
+export async function cancelFarmerConnectionRequest(connectionId: string) {
+  const parsed = connectionIdSchema.safeParse({ connectionId });
+  if (!parsed.success) return { error: "Invalid input" };
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { data: connection } = await supabase
+    .from("connection_requests")
+    .select("id, requester_user_id, status")
+    .eq("id", connectionId)
+    .eq("connection_type", "farmer_peer")
+    .single();
+
+  if (!connection) return { error: "Request not found" };
+  if (connection.requester_user_id !== user.id) {
+    return { error: "Only the requester can cancel this request" };
+  }
+  if (connection.status !== "pending") {
+    return { error: "Only pending requests can be cancelled" };
+  }
+
+  const { error } = await supabase
+    .from("connection_requests")
+    .update({ status: "removed", updated_at: new Date().toISOString() })
+    .eq("id", connectionId)
+    .eq("requester_user_id", user.id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dashboard/farmer-network");
+  revalidatePath(`/dashboard/farmer-network/directory/${connection.requester_user_id}`);
   return { success: true };
 }

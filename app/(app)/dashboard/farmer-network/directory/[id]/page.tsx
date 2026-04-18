@@ -33,7 +33,7 @@ export default async function FarmerProfilePage({
   // Check for existing farmer_peer connection (either direction)
   const { data: existingConnections } = await supabase
     .from("connection_requests")
-    .select("id, status")
+    .select("id, status, requester_user_id")
     .eq("connection_type", "farmer_peer")
     .or(
       `and(requester_user_id.eq.${user.id},target_user_id.eq.${id}),and(requester_user_id.eq.${id},target_user_id.eq.${user.id})`
@@ -47,6 +47,11 @@ export default async function FarmerProfilePage({
     (c) => c.status === "denied" || c.status === "expired"
   );
   const existingStatus = activeOrPending?.status ?? deniedOrExpired?.status ?? null;
+  // Only the requester can cancel a pending request; the target approves or denies instead.
+  const pendingRequestIdIfSent =
+    activeOrPending?.status === "pending" && activeOrPending.requester_user_id === user.id
+      ? activeOrPending.id
+      : null;
 
   return (
     <div className="max-w-4xl">
@@ -98,6 +103,7 @@ export default async function FarmerProfilePage({
             <FarmerConnectButton
               targetUserId={id}
               existingStatus={existingStatus}
+              pendingRequestIdIfSent={pendingRequestIdIfSent}
             />
           </div>
         </CardContent>
