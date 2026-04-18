@@ -2,9 +2,23 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
-import { MapPin, Building2, Handshake } from "lucide-react";
+import { MapPin, Building2, Handshake, Home } from "lucide-react";
 import { FarmerConnectButton } from "@/components/app/farmer-network/farmer-connect-button";
 import { FarmerConnectionStatusBadge } from "@/components/app/farmer-network/farmer-connection-status-badge";
+import { enrichProducers } from "@/lib/data/producer-enrichment";
+
+const SPECIES_EMOJI: Record<string, string> = {
+  Cattle: "\uD83D\uDC04",
+  Sheep: "\uD83D\uDC0F",
+  Pig: "\uD83D\uDC16",
+  Goat: "\uD83D\uDC10",
+};
+
+const HERD_SIZE_LABEL: Record<string, string> = {
+  small: "Small (< 100 head)",
+  medium: "Medium (100-999 head)",
+  large: "Large (1,000+ head)",
+};
 
 export const metadata = {
   title: "Producer Profile",
@@ -30,6 +44,10 @@ export default async function FarmerProfilePage({
     .single();
 
   if (!farmer) notFound();
+
+  // Enrich with species + herd-size bucket + property count for the profile.
+  const enrichmentMap = await enrichProducers(supabase, [id]);
+  const enrichment = enrichmentMap.get(id);
 
   // Check for existing farmer_peer connection (either direction)
   const { data: existingConnections } = await supabase
@@ -88,13 +106,35 @@ export default async function FarmerProfilePage({
         </div>
 
         <CardContent className="space-y-5 px-6 pb-6">
-          {(farmer.state || farmer.region) && (
-            <div className="flex items-center gap-2 text-sm text-text-secondary">
-              <MapPin className="h-4 w-4 text-text-muted" aria-hidden="true" />
-              {farmer.state}
-              {farmer.region ? `, ${farmer.region}` : ""}
-            </div>
-          )}
+          {/* Operation facts row: location, primary species, herd size, properties.
+              Each field hides if unavailable so the row scales cleanly for
+              producers who haven't filled out much yet. */}
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-text-secondary">
+            {(farmer.state || farmer.region) && (
+              <span className="flex items-center gap-1.5">
+                <MapPin className="h-4 w-4 text-text-muted" aria-hidden="true" />
+                {farmer.state}
+                {farmer.region ? `, ${farmer.region}` : ""}
+              </span>
+            )}
+            {enrichment?.primary_species && (
+              <span className="flex items-center gap-1.5">
+                <span aria-hidden="true">{SPECIES_EMOJI[enrichment.primary_species] ?? ""}</span>
+                {enrichment.primary_species}
+              </span>
+            )}
+            {enrichment?.herd_size_bucket && (
+              <span className="flex items-center gap-1.5 text-text-muted">
+                {HERD_SIZE_LABEL[enrichment.herd_size_bucket]}
+              </span>
+            )}
+            {enrichment && enrichment.property_count > 0 && (
+              <span className="flex items-center gap-1.5 text-text-muted">
+                <Home className="h-4 w-4" aria-hidden="true" />
+                {enrichment.property_count === 1 ? "1 property" : `${enrichment.property_count} properties`}
+              </span>
+            )}
+          </div>
 
           {farmer.bio && (
             <div>

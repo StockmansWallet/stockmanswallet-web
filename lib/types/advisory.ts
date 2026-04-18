@@ -78,6 +78,23 @@ export interface DirectoryFarmer {
   state: string;
   region: string;
   bio: string;
+  /**
+   * Primary livestock species derived from the producer's active herds
+   * (Cattle, Sheep, Pig, Goat). Null when the producer has no herds.
+   * Populated by the directory page for card display and species filtering.
+   */
+  primary_species?: "Cattle" | "Sheep" | "Pig" | "Goat" | null;
+  /**
+   * Herd-size bucket based on total head across active herds. Null when
+   * the producer has no herds. Currently only used on the profile page,
+   * not the card, so bite-sized head counts aren't leaked in the directory.
+   */
+  herd_size_bucket?: "small" | "medium" | "large" | null;
+  /**
+   * Number of properties (excluding deleted / simulated) owned by the
+   * producer. Used on the profile page to hint at operation scale.
+   */
+  property_count?: number | null;
 }
 
 // Advisor profile from user_profiles (for directory and cards)
