@@ -5,58 +5,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { syncBreedingMilestonesForHerd } from "@/app/(app)/dashboard/tools/yard-book/actions";
-
-// Debug: Master categories (Steer, Bull = Male; Heifer, Breeder, Dry Cow = Female)
-function deriveSexFromCategory(category: string): "Male" | "Female" {
-  if (category === "Steer" || category === "Bull") return "Male";
-  if (category === "Heifer" || category === "Breeder" || category === "Dry Cow") return "Female";
-  // Legacy fallback for non-master categories
-  const MALE_KEYWORDS = ["Bull", "Steer", "Barrow", "Buck", "Wether"];
-  return MALE_KEYWORDS.some((k) => category.includes(k)) ? "Male" : "Female";
-}
-
-// Debug: Helper to treat empty strings from form inputs as null.
-// HTML form elements always submit strings, so optional fields send "" not null.
-const emptyToNull = z.string().transform((v) => (v === "" ? null : v));
-const optionalString = emptyToNull.nullable().optional();
-const optionalEnum = <T extends [string, ...string[]]>(values: T) =>
-  emptyToNull
-    .nullable()
-    .optional()
-    .pipe(z.enum(values).nullable().optional());
-
-const herdFormSchema = z.object({
-  name: z.string().min(1),
-  species: z.enum(["Cattle", "Sheep", "Pig", "Goat"]),
-  breed: z.string().min(1),
-  category: z.string().min(1),
-  age_months: z.coerce.number().int().min(0).default(0),
-  head_count: z.coerce.number().int().min(1).default(1),
-  initial_weight: z.coerce.number().min(0).default(0),
-  current_weight: z.coerce.number().min(0).optional(),
-  daily_weight_gain: z.coerce.number().min(0).default(0),
-  mortality_rate: z.coerce.number().min(0).max(100).default(0),
-  is_breeder: z.string().optional(),
-  is_pregnant: z.string().optional(),
-  calving_rate: z.coerce.number().min(0).max(100).optional(),
-  breeding_program_type: optionalEnum(["ai", "controlled", "uncontrolled"]),
-  joining_period_start: optionalString,
-  joining_period_end: optionalString,
-  joined_date: optionalString,
-  selected_saleyard: optionalString,
-  paddock_name: optionalString,
-  property_id: emptyToNull.nullable().optional().pipe(z.string().uuid().nullable().optional()),
-  additional_info: optionalString,
-  notes: optionalString,
-  animal_id_number: optionalString,
-  breed_premium_override: optionalString,
-  breed_premium_justification: optionalString,
-  lactation_status: optionalString,
-  sub_category: optionalString,
-  breeder_sub_type: optionalString,
-  calf_weight_recorded_date: optionalString,
-  livestock_owner: optionalString,
-});
+import {
+  fullHerdFormSchema as herdFormSchema,
+  deriveSexFromCategory,
+} from "@/lib/validation/herd-schema";
 
 const idSchema = z.string().uuid();
 

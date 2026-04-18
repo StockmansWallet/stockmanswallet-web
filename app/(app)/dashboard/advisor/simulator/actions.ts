@@ -1,7 +1,6 @@
 "use server";
 
 import { randomUUID } from "crypto";
-import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -186,44 +185,13 @@ export async function createSandboxHerd(
   return { success: true };
 }
 
-// Shared helpers for FormData-based herd creation (matches herds/actions.ts schema)
-function deriveSexFromCategory(category: string): "Male" | "Female" {
-  if (category === "Steer" || category === "Bull") return "Male";
-  if (category === "Heifer" || category === "Breeder" || category === "Dry Cow") return "Female";
-  const MALE_KEYWORDS = ["Bull", "Steer", "Barrow", "Buck", "Wether"];
-  return MALE_KEYWORDS.some((k) => category.includes(k)) ? "Male" : "Female";
-}
-
-const emptyToNull = z.string().transform((v) => (v === "" ? null : v));
-const optionalString = emptyToNull.nullable().optional();
-const optionalEnum = <T extends [string, ...string[]]>(values: T) =>
-  emptyToNull.nullable().optional().pipe(z.enum(values).nullable().optional());
-
-const herdFormSchema = z.object({
-  name: z.string().min(1),
-  species: z.enum(["Cattle", "Sheep", "Pig", "Goat"]),
-  breed: z.string().min(1),
-  category: z.string().min(1),
-  age_months: z.coerce.number().int().min(0).default(0),
-  head_count: z.coerce.number().int().min(1).default(1),
-  initial_weight: z.coerce.number().min(0).default(0),
-  current_weight: z.coerce.number().min(0).optional(),
-  daily_weight_gain: z.coerce.number().min(0).default(0),
-  mortality_rate: z.coerce.number().min(0).max(100).default(0),
-  is_breeder: z.string().optional(),
-  calving_rate: z.coerce.number().min(0).max(100).optional(),
-  breeding_program_type: optionalEnum(["ai", "controlled", "uncontrolled"]),
-  joining_period_start: optionalString,
-  joining_period_end: optionalString,
-  selected_saleyard: optionalString,
-  paddock_name: optionalString,
-  property_id: emptyToNull.nullable().optional().pipe(z.string().uuid().nullable().optional()),
-  additional_info: optionalString,
-  breed_premium_override: optionalString,
-  sub_category: optionalString,
-  breeder_sub_type: optionalString,
-  calf_weight_recorded_date: optionalString,
-});
+// FormData-based simulator herd creation reuses the producer form schema so
+// the two validation shapes stay in lock-step. The simulator variant only
+// consumes the base fields; any additional producer-only fields are ignored.
+import {
+  baseHerdFormSchema as herdFormSchema,
+  deriveSexFromCategory,
+} from "@/lib/validation/herd-schema";
 
 // FormData-based herd creation for the Simulator add herd form.
 // Uses the same schema and insert logic as the producer createHerd action,
