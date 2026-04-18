@@ -2,23 +2,25 @@
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { CalendarCheck, X } from "lucide-react";
+import { AlertTriangle, CalendarCheck, X } from "lucide-react";
+
+type YardBookAction = "created" | "updated" | "error";
 
 /**
- * Shows a confirmation banner when breeding milestones are synced to Yard Book.
- * Reads ?yardbook=created|updated from the URL and auto-dismisses after 8 seconds.
- * Cleans up the URL param without a full page reload.
+ * Shows a confirmation or warning banner after breeding milestones are synced
+ * to Yard Book. Reads ?yardbook=created|updated|error from the URL and
+ * auto-dismisses after 8 seconds (error banner is persistent until dismissed).
  */
 export function YardBookBanner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const [visible, setVisible] = useState(false);
-  const [action, setAction] = useState<"created" | "updated" | null>(null);
+  const [action, setAction] = useState<YardBookAction | null>(null);
 
   useEffect(() => {
     const yb = searchParams.get("yardbook");
-    if (yb === "created" || yb === "updated") {
+    if (yb === "created" || yb === "updated" || yb === "error") {
       setAction(yb);
       setVisible(true);
 
@@ -30,13 +32,38 @@ export function YardBookBanner() {
         : pathname;
       router.replace(cleanUrl, { scroll: false });
 
-      // Debug: Auto-dismiss after 8 seconds
-      const timer = setTimeout(() => setVisible(false), 8000);
-      return () => clearTimeout(timer);
+      // Success banners self-dismiss; error stays visible until acknowledged.
+      if (yb !== "error") {
+        const timer = setTimeout(() => setVisible(false), 8000);
+        return () => clearTimeout(timer);
+      }
     }
   }, [searchParams, router, pathname]);
 
   if (!visible || !action) return null;
+
+  if (action === "error") {
+    return (
+      <div className="mb-4 flex items-start gap-3 rounded-xl border border-red-700/40 bg-red-900/25 px-4 py-3 text-sm text-red-200">
+        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+        <div className="flex-1">
+          <p className="font-medium">Yard Book sync failed</p>
+          <p className="mt-0.5 text-red-300/80">
+            The herd was saved, but breeding milestones could not be scheduled
+            in Yard Book. Open the Yard Book tab and check your reminders, or
+            edit the herd to retry.
+          </p>
+        </div>
+        <button
+          onClick={() => setVisible(false)}
+          className="shrink-0 rounded p-0.5 text-red-300/60 hover:text-red-200"
+          aria-label="Dismiss"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+    );
+  }
 
   const message =
     action === "created"

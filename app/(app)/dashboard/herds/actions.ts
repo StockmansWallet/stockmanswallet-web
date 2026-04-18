@@ -150,8 +150,9 @@ export async function createHerd(formData: FormData) {
   })();
   const didCreateMilestones =
     isBreeder && !!(v.joining_period_start || derivedJoinedDate);
+  let milestoneSyncFailed = false;
   if (didCreateMilestones) {
-    await syncBreedingMilestonesForHerd(herdId, {
+    const result = await syncBreedingMilestonesForHerd(herdId, {
       name: v.name,
       species: v.species,
       joined_date: derivedJoinedDate,
@@ -161,15 +162,18 @@ export async function createHerd(formData: FormData) {
       is_breeder: true,
       property_id: v.property_id || null,
     });
+    milestoneSyncFailed = !result.ok;
   }
 
   revalidatePath("/dashboard/herds");
-  // Debug: Add yardbook flag so the herds page can show a confirmation banner
-  redirect(
-    didCreateMilestones
-      ? "/dashboard/herds?yardbook=created"
-      : "/dashboard/herds"
-  );
+  // yardbook=created shows the success banner; yardbook=error surfaces a partial
+  // failure where the herd was saved but the milestones could not be scheduled.
+  const flag = milestoneSyncFailed
+    ? "?yardbook=error"
+    : didCreateMilestones
+      ? "?yardbook=created"
+      : "";
+  redirect(`/dashboard/herds${flag}`);
 }
 
 export async function updateHerd(id: string, formData: FormData) {
@@ -268,7 +272,7 @@ export async function updateHerd(id: string, formData: FormData) {
   })();
   const didSyncMilestones =
     v.is_breeder === "on" && !!(v.joining_period_start || updateDerivedJoinedDate);
-  await syncBreedingMilestonesForHerd(idResult.data, {
+  const milestoneResult = await syncBreedingMilestonesForHerd(idResult.data, {
     name: v.name,
     species: v.species,
     joined_date: updateDerivedJoinedDate,
@@ -281,12 +285,12 @@ export async function updateHerd(id: string, formData: FormData) {
 
   revalidatePath("/dashboard/herds");
   revalidatePath(`/dashboard/herds/${idResult.data}`);
-  // Debug: Add yardbook flag so the detail page can show a confirmation banner
-  redirect(
-    didSyncMilestones
-      ? `/dashboard/herds/${idResult.data}?yardbook=updated`
-      : `/dashboard/herds/${idResult.data}`
-  );
+  const flag = !milestoneResult.ok
+    ? "?yardbook=error"
+    : didSyncMilestones
+      ? "?yardbook=updated"
+      : "";
+  redirect(`/dashboard/herds/${idResult.data}${flag}`);
 }
 
 export async function deleteHerd(id: string) {

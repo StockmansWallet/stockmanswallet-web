@@ -4,7 +4,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { KillScoreCard } from "@/components/grid-iq/kill-score-card";
@@ -13,6 +12,7 @@ import { AnalysisComparison } from "@/components/grid-iq/analysis-comparison";
 import { CategoryBreakdown } from "@/components/grid-iq/category-breakdown";
 import { PredictionAccuracy } from "@/components/grid-iq/prediction-accuracy";
 import type { PaymentCheckResult } from "@/lib/engines/grid-iq-payment-check";
+import type { GridIQAnalysisRow } from "@/lib/types/grid-iq";
 import {
   Target,
   Clock,
@@ -29,6 +29,12 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+// Sibling-row projection used for pre/post prediction-accuracy comparisons.
+type SiblingAnalysis = Pick<
+  GridIQAnalysisRow,
+  "id" | "analysis_mode" | "analysis_date" | "net_saleyard_value" | "net_processor_value" | "grid_iq_advantage"
+>;
+
 export default async function AnalysisDetailPage({ params }: PageProps) {
   const { id } = await params;
   const supabase = await createClient();
@@ -43,7 +49,7 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
     .eq("id", id)
     .eq("user_id", user!.id)
     .eq("is_deleted", false)
-    .single();
+    .single<GridIQAnalysisRow>();
 
   if (!analysis) notFound();
 
@@ -54,14 +60,14 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
       .from("kill_sheet_records")
       .select("payment_check_result")
       .eq("id", analysis.kill_sheet_record_id)
-      .single();
+      .single<{ payment_check_result: PaymentCheckResult | null }>();
     if (ksRecord?.payment_check_result) {
-      paymentCheck = ksRecord.payment_check_result as PaymentCheckResult;
+      paymentCheck = ksRecord.payment_check_result;
     }
   }
 
   // Fetch sibling analysis for prediction accuracy (post-sale vs pre-sale)
-  let siblingAnalysis: Record<string, unknown> | null = null;
+  let siblingAnalysis: SiblingAnalysis | null = null;
   if (analysis.consignment_id) {
     const siblingMode = analysis.analysis_mode === "post_sale" ? "pre_sale" : "post_sale";
     const { data: sibling } = await supabase
@@ -71,19 +77,16 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
       .eq("analysis_mode", siblingMode)
       .eq("is_deleted", false)
       .limit(1)
-      .single();
-    if (sibling) siblingAnalysis = sibling as Record<string, unknown>;
+      .single<SiblingAnalysis>();
+    if (sibling) siblingAnalysis = sibling;
   }
 
-  const a = analysis as Record<string, unknown>;
-  const mode = (a.analysis_mode as string) ?? "pre_sale";
-  const isPostSale = mode === "post_sale";
-  const advantage = (a.grid_iq_advantage as number) ?? 0;
-  const categoryResults = (a.category_results ?? []) as Array<Record<string, unknown>>;
-  const consignmentId = a.consignment_id as string | null;
+  const isPostSale = analysis.analysis_mode === "post_sale";
+  const advantage = analysis.grid_iq_advantage ?? 0;
+  const categoryResults = analysis.category_results ?? [];
+  const consignmentId = analysis.consignment_id;
 
-  const sellWindowStatus = a.sell_window_status_raw as string;
-  const sellWindowConfig = getSellWindowConfig(sellWindowStatus);
+  const sellWindowConfig = getSellWindowConfig(analysis.sell_window_status_raw);
 
   return (
     <div>
@@ -93,37 +96,37 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
             recordId={id}
             table="grid_iq_analyses"
             column="herd_name"
-            initialName={(a.herd_name as string) ?? "Untitled"}
+            initialName={analysis.herd_name || "Untitled"}
           />
           <span className="text-2xl font-bold text-text-muted">vs</span>
           <EditableProcessorName
             recordId={id}
             table="grid_iq_analyses"
             column="processor_name"
-            initialName={(a.processor_name as string) ?? "Unknown"}
+            initialName={analysis.processor_name || "Unknown"}
           />
         </div>
         <p className="mt-1 text-sm text-text-secondary">
-          {new Date(a.analysis_date as string).toLocaleDateString("en-AU")} - {isPostSale ? "Post-Sale Audit" : "Pre-Sale Planning"}
+          {new Date(analysis.analysis_date).toLocaleDateString("en-AU")} - {isPostSale ? "Post-Sale Audit" : "Pre-Sale Planning"}
         </p>
       </div>
 
       {/* Value Comparison */}
       <div className="mt-4">
         <AnalysisComparison
-          mlaMarketValue={a.mla_market_value as number}
-          headlineGridValue={a.headline_grid_value as number}
-          realisticGridOutcome={a.realistic_grid_outcome as number}
-          realisationFactor={a.realisation_factor as number}
-          freightToSaleyard={a.freight_to_saleyard as number}
-          freightToProcessor={a.freight_to_processor as number}
-          netSaleyardValue={a.net_saleyard_value as number}
-          netProcessorValue={a.net_processor_value as number}
+          mlaMarketValue={analysis.mla_market_value}
+          headlineGridValue={analysis.headline_grid_value}
+          realisticGridOutcome={analysis.realistic_grid_outcome}
+          realisationFactor={analysis.realisation_factor}
+          freightToSaleyard={analysis.freight_to_saleyard}
+          freightToProcessor={analysis.freight_to_processor}
+          netSaleyardValue={analysis.net_saleyard_value}
+          netProcessorValue={analysis.net_processor_value}
           gridIQAdvantage={advantage}
-          headCount={a.head_count as number}
-          carcaseWeight={a.estimated_carcase_weight as number}
-          dressingPercentage={a.dressing_percentage as number}
-          isUsingPersonalisedData={a.is_using_personalised_data as boolean}
+          headCount={analysis.head_count}
+          carcaseWeight={analysis.estimated_carcase_weight}
+          dressingPercentage={analysis.dressing_percentage}
+          isUsingPersonalisedData={analysis.is_using_personalised_data}
         />
       </div>
 
@@ -131,23 +134,10 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
       {categoryResults.length > 1 && (
         <div className="mt-4">
           <CategoryBreakdown
-            categoryResults={categoryResults.map((r) => ({
-              herdGroupId: r.herdGroupId as string,
-              herdName: r.herdName as string,
-              category: r.category as string,
-              headCount: r.headCount as number,
-              netSaleyardValue: r.netSaleyardValue as number,
-              netProcessorValue: r.netProcessorValue as number,
-              gridIQAdvantage: r.gridIQAdvantage as number,
-              sellWindowStatus: r.sellWindowStatus as string,
-              daysToTarget: r.daysToTarget as number | null,
-              dressingPercentage: r.dressingPercentage as number,
-              realisationFactor: r.realisationFactor as number,
-              isUsingPersonalisedData: r.isUsingPersonalisedData as boolean,
-            }))}
-            totalHead={a.head_count as number}
-            totalNetSaleyard={a.net_saleyard_value as number}
-            totalNetProcessor={a.net_processor_value as number}
+            categoryResults={categoryResults}
+            totalHead={analysis.head_count}
+            totalNetSaleyard={analysis.net_saleyard_value}
+            totalNetProcessor={analysis.net_processor_value}
             totalAdvantage={advantage}
           />
         </div>
@@ -157,14 +147,14 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
       {isPostSale && siblingAnalysis && (
         <div className="mt-4">
           <PredictionAccuracy
-            preSaleNetProcessor={siblingAnalysis.net_processor_value as number}
-            preSaleNetSaleyard={siblingAnalysis.net_saleyard_value as number}
-            preSaleAdvantage={siblingAnalysis.grid_iq_advantage as number}
-            actualNetProcessor={a.net_processor_value as number}
-            actualNetSaleyard={a.net_saleyard_value as number}
+            preSaleNetProcessor={siblingAnalysis.net_processor_value}
+            preSaleNetSaleyard={siblingAnalysis.net_saleyard_value}
+            preSaleAdvantage={siblingAnalysis.grid_iq_advantage}
+            actualNetProcessor={analysis.net_processor_value}
+            actualNetSaleyard={analysis.net_saleyard_value}
             actualAdvantage={advantage}
-            preSaleDate={siblingAnalysis.analysis_date as string}
-            postSaleDate={a.analysis_date as string}
+            preSaleDate={siblingAnalysis.analysis_date}
+            postSaleDate={analysis.analysis_date}
           />
         </div>
       )}
@@ -182,15 +172,15 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
                   <p className={`text-sm font-semibold ${sellWindowConfig.color}`}>
                     {sellWindowConfig.label}
                   </p>
-                  {(a.days_to_target as number | null) !== null && (
+                  {analysis.days_to_target !== null && (
                     <span className="flex items-center gap-1 text-xs text-text-muted">
                       <Clock className="h-3 w-3" />
-                      {a.days_to_target as number} days
+                      {analysis.days_to_target} days
                     </span>
                   )}
                 </div>
                 <p className="mt-0.5 text-xs text-text-secondary">
-                  {a.sell_window_detail as string}
+                  {analysis.sell_window_detail}
                 </p>
               </div>
             </div>
@@ -199,7 +189,7 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
       </div>
 
       {/* Processor Fit */}
-      {(a.processor_fit_score as number | null) !== null && (
+      {analysis.processor_fit_score !== null && (
         <div className="mt-4">
           <Card>
             <CardContent className="p-4">
@@ -211,12 +201,12 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
                   <div>
                     <p className="text-sm font-semibold text-text-primary">Processor Fit</p>
                     <p className="text-xs text-text-muted">
-                      {a.processor_fit_label_raw as string}
+                      {analysis.processor_fit_label_raw}
                     </p>
                   </div>
                 </div>
                 <span className="text-lg font-bold text-indigo-400">
-                  {(a.processor_fit_score as number).toFixed(0)}/100
+                  {analysis.processor_fit_score.toFixed(0)}/100
                 </span>
               </div>
             </CardContent>
@@ -225,7 +215,7 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
       )}
 
       {/* Opportunity Insight */}
-      {(a.opportunity_value as number | null) !== null && (
+      {analysis.opportunity_value !== null && (
         <div className="mt-4">
           <Card>
             <CardContent className="p-4">
@@ -237,12 +227,12 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-semibold text-text-primary">Opportunity</p>
                     <span className="text-sm font-bold text-amber-400">
-                      ${Math.round(a.opportunity_value as number).toLocaleString()}
+                      ${Math.round(analysis.opportunity_value).toLocaleString()}
                     </span>
                   </div>
-                  {(a.opportunity_driver as string | null) && (
+                  {analysis.opportunity_driver && (
                     <p className="mt-0.5 text-xs text-text-secondary">
-                      {a.opportunity_driver as string}
+                      {analysis.opportunity_driver}
                     </p>
                   )}
                 </div>
@@ -253,16 +243,16 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
       )}
 
       {/* Kill Score / Post-Sale Scorecard */}
-      {isPostSale && (a.kill_score as number | null) !== null && (
+      {isPostSale && analysis.kill_score !== null && (
         <div className="mt-4">
           <KillScoreCard
-            killScore={a.kill_score as number}
-            gcr={a.gcr as number | null}
-            gridRisk={a.grid_risk as number | null}
-            gridCompliance={a.grid_compliance_score as number | null}
-            fatCompliance={a.fat_compliance_score as number | null}
-            dentitionCompliance={a.dentition_compliance_score as number | null}
-            realisationFactor={a.realisation_factor as number}
+            killScore={analysis.kill_score}
+            gcr={analysis.gcr}
+            gridRisk={analysis.grid_risk}
+            gridCompliance={analysis.grid_compliance_score}
+            fatCompliance={analysis.fat_compliance_score}
+            dentitionCompliance={analysis.dentition_compliance_score}
+            realisationFactor={analysis.realisation_factor}
           />
         </div>
       )}
@@ -275,9 +265,9 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
       )}
 
       {/* Brangus Commentary */}
-      {(a.brangus_commentary as Record<string, unknown> | null) !== null && (
+      {analysis.brangus_commentary && (
         <div className="mt-4">
-          <BrangusCommentarySection commentary={a.brangus_commentary as { bullets?: string[]; narrative?: string }} />
+          <BrangusCommentarySection commentary={analysis.brangus_commentary} />
         </div>
       )}
 

@@ -248,6 +248,8 @@ function addDays(dateStr: string, days: number): string {
 // Debug: Auto-create Yard Book breeding milestone items when herd joining dates are set.
 // Uses packId "breeding-milestones-{herdId}" for grouping and deduplication.
 // Delete-and-recreate strategy: soft-deletes uncompleted items, preserves completed ones.
+export type MilestoneSyncResult = { ok: true } | { ok: false; error: string };
+
 export async function syncBreedingMilestonesForHerd(
   herdId: string,
   herd: {
@@ -260,17 +262,17 @@ export async function syncBreedingMilestonesForHerd(
     is_breeder: boolean;
     property_id: string | null;
   }
-) {
+): Promise<MilestoneSyncResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return;
+  if (!user) return { ok: false, error: "Not authenticated" };
 
   const packId = `breeding-milestones-${herdId}`;
 
   // Step 1: Soft-delete existing uncompleted milestone items
-  await supabase
+  const { error: softDeleteError } = await supabase
     .from("yard_book_items")
     .update({
       is_deleted: true,
@@ -282,6 +284,11 @@ export async function syncBreedingMilestonesForHerd(
     .eq("is_deleted", false)
     .eq("is_completed", false);
 
+  if (softDeleteError) {
+    console.error("syncBreedingMilestonesForHerd soft-delete failed:", softDeleteError);
+    return { ok: false, error: softDeleteError.message };
+  }
+
   // Step 2: Derive effective joined date (mirrors iOS Herd.effectiveJoinedDate)
   const effectiveJoinedDateObj = getEffectiveJoinedDate(herd);
   const effectiveJoinedDate = effectiveJoinedDateObj
@@ -290,17 +297,22 @@ export async function syncBreedingMilestonesForHerd(
 
   if (!herd.is_breeder || !effectiveJoinedDate) {
     revalidatePath("/dashboard/tools/yard-book");
-    return;
+    return { ok: true };
   }
 
   // Step 3: Check which milestones are already completed (don't recreate those)
-  const { data: completedItems } = await supabase
+  const { data: completedItems, error: completedFetchError } = await supabase
     .from("yard_book_items")
     .select("title")
     .eq("user_id", user.id)
     .eq("pack_id", packId)
     .eq("is_completed", true)
     .eq("is_deleted", false);
+
+  if (completedFetchError) {
+    console.error("syncBreedingMilestonesForHerd completed-fetch failed:", completedFetchError);
+    return { ok: false, error: completedFetchError.message };
+  }
 
   const completedPrefixes = new Set(
     (completedItems ?? []).map((item) => {
@@ -421,8 +433,15 @@ export async function syncBreedingMilestonesForHerd(
 
   // Step 5: Batch insert
   if (items.length > 0) {
-    await supabase.from("yard_book_items").insert(items);
+    const { error: insertError } = await supabase
+      .from("yard_book_items")
+      .insert(items);
+    if (insertError) {
+      console.error("syncBreedingMilestonesForHerd insert failed:", insertError);
+      return { ok: false, error: insertError.message };
+    }
   }
 
   revalidatePath("/dashboard/tools/yard-book");
+  return { ok: true };
 }
