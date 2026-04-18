@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { MoreHorizontal, Ban, Flag, ShieldOff } from "lucide-react";
+import { MoreHorizontal, Ban, Flag, ShieldOff, UserMinus } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/app/advisory/confirm-modal";
@@ -11,14 +11,22 @@ import {
   unblockUser,
   reportUser,
 } from "./moderation-actions";
+import { disconnectFarmer } from "@/app/(app)/dashboard/farmer-network/connections/[id]/actions";
 
 interface ModerationMenuProps {
   targetUserId: string;
   targetName: string;
   alreadyBlocked: boolean;
+  /**
+   * When provided, the menu includes a Disconnect option that calls
+   * disconnectFarmer on this connection id. Only makes sense on the
+   * chat page (where a connection exists); omit on the directory
+   * profile page where the viewer may not even be connected.
+   */
+  connectionIdForDisconnect?: string;
 }
 
-type Panel = "closed" | "root" | "block-confirm" | "report" | "unblock-confirm";
+type Panel = "closed" | "root" | "block-confirm" | "report" | "unblock-confirm" | "disconnect-confirm";
 
 const REPORT_REASONS: Array<{ value: "spam" | "abusive" | "impersonation" | "other"; label: string }> = [
   { value: "spam", label: "Spam or unwanted contact" },
@@ -27,7 +35,12 @@ const REPORT_REASONS: Array<{ value: "spam" | "abusive" | "impersonation" | "oth
   { value: "other", label: "Other" },
 ];
 
-export function ModerationMenu({ targetUserId, targetName, alreadyBlocked }: ModerationMenuProps) {
+export function ModerationMenu({
+  targetUserId,
+  targetName,
+  alreadyBlocked,
+  connectionIdForDisconnect,
+}: ModerationMenuProps) {
   const router = useRouter();
   const [panel, setPanel] = useState<Panel>("closed");
   const [loading, setLoading] = useState(false);
@@ -75,6 +88,21 @@ export function ModerationMenu({ targetUserId, targetName, alreadyBlocked }: Mod
     router.refresh();
   };
 
+  const handleDisconnect = async () => {
+    if (!connectionIdForDisconnect) return;
+    setLoading(true);
+    setError(null);
+    const result = await disconnectFarmer(connectionIdForDisconnect);
+    setLoading(false);
+    if ("error" in result && result.error) {
+      setError(result.error);
+      return;
+    }
+    setPanel("closed");
+    router.push("/dashboard/farmer-network/connections");
+    router.refresh();
+  };
+
   const handleReport = async () => {
     setLoading(true);
     setError(null);
@@ -110,6 +138,16 @@ export function ModerationMenu({ targetUserId, targetName, alreadyBlocked }: Mod
 
         {panel === "root" && (
           <div className="absolute right-0 top-full z-20 mt-1 w-56 overflow-hidden rounded-xl border border-white/10 bg-bg-alt shadow-xl">
+            {connectionIdForDisconnect && (
+              <button
+                type="button"
+                onClick={() => setPanel("disconnect-confirm")}
+                className="flex w-full items-center gap-2 border-b border-white/[0.06] px-3 py-2.5 text-left text-sm text-text-primary transition-colors hover:bg-white/[0.04]"
+              >
+                <UserMinus className="h-4 w-4 text-text-muted" aria-hidden="true" />
+                Disconnect
+              </button>
+            )}
             {alreadyBlocked ? (
               <button
                 type="button"
@@ -140,6 +178,16 @@ export function ModerationMenu({ targetUserId, targetName, alreadyBlocked }: Mod
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        open={panel === "disconnect-confirm"}
+        onClose={() => setPanel("closed")}
+        onConfirm={handleDisconnect}
+        title="Disconnect from producer"
+        description={`Disconnect from ${targetName}? Chat access ends for both of you. You can reconnect later by sending a new connection request.`}
+        confirmLabel="Disconnect"
+        loading={loading}
+      />
 
       <ConfirmModal
         open={panel === "block-confirm"}

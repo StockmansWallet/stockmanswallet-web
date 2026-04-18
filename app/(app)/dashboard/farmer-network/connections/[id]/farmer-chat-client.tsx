@@ -120,6 +120,7 @@ export function FarmerChatClient({
             currentUserId={currentUserId}
             participants={participants}
             animatedMessageIds={animatedIds}
+            hideSenderName
           />
           {peerIsTyping && <TypingIndicator bgColor={OTHER_BG} dotClass="bg-white/50" />}
           <div ref={messagesEndRef} />

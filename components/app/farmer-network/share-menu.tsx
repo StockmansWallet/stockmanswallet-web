@@ -112,14 +112,19 @@ export function ShareMenu({ onAttach, disabled }: ShareMenuProps) {
           type="button"
           onClick={() => setMode(mode === "root" ? "closed" : "root")}
           disabled={disabled}
-          aria-label="Attach to message"
+          aria-label="Attach a herd or market price"
           aria-expanded={mode === "root"}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-raised text-text-secondary transition-colors hover:bg-surface-lowest hover:text-text-primary disabled:opacity-40"
+          title="Attach a herd or market price"
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-all disabled:opacity-40 ${
+            mode === "root"
+              ? "border-orange-500/30 bg-orange-500/20 text-orange-300"
+              : "border-orange-500/25 bg-orange-500/15 text-orange-400 hover:bg-orange-500/25 hover:text-orange-300"
+          }`}
         >
           {mode === "root" ? (
-            <X className="h-4 w-4" aria-hidden="true" />
+            <X className="h-5 w-5" aria-hidden="true" strokeWidth={2.5} />
           ) : (
-            <Plus className="h-4 w-4" aria-hidden="true" />
+            <Plus className="h-5 w-5" aria-hidden="true" strokeWidth={2.5} />
           )}
         </button>
 

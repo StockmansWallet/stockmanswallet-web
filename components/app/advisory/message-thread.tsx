@@ -15,6 +15,12 @@ interface MessageThreadProps {
   currentUserId: string;
   participants: Record<string, Participant>;
   animatedMessageIds?: Set<string>;
+  /**
+   * Hide the sender-name label inside each bubble. Producer-peer chat is
+   * always 1:1 so the name is redundant; advisor flows keep it on by
+   * default because the chat can include automated agent notes.
+   */
+  hideSenderName?: boolean;
 }
 
 const messageTypeLabels: Record<MessageType, { label: string; variant: "warning" | "info" | "brand" | "default" }> = {
@@ -73,6 +79,7 @@ export function MessageThread({
   currentUserId,
   participants,
   animatedMessageIds,
+  hideSenderName = false,
 }: MessageThreadProps) {
   if (messages.length === 0) {
     return (
@@ -104,7 +111,7 @@ export function MessageThread({
               bgClass={isOwn ? "bg-[#31243C]" : "bg-[#2A2929]"}
               tailColor={isOwn ? OWN_BG : OTHER_BG}
               animate={!!shouldAnimate}
-              senderName={!isOwn ? sender?.name : undefined}
+              senderName={!isOwn && !hideSenderName ? sender?.name : undefined}
             >
               {msg.message_type !== "general_note" && (
                 <Badge variant={typeConfig.variant} className="mb-1">
