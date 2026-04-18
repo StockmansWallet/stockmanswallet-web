@@ -195,3 +195,32 @@ export async function notifyFarmerRequestApproved(
     connectionId,
   });
 }
+
+/**
+ * Produces a denial or disconnect notification for a producer-peer
+ * connection. Routes to the Producer Network connections list (not the
+ * advisor-flow path used by notifyDenial) because the detail page is
+ * gated on an approved connection and would 404 after the disconnect.
+ */
+export async function notifyFarmerRequestDenied(
+  supabase: SupabaseClient,
+  toUserId: string,
+  fromName: string,
+  connectionId: string,
+  reason: "denied" | "disconnected"
+) {
+  await createNotification(supabase, {
+    userId: toUserId,
+    type: "request_denied",
+    title:
+      reason === "disconnected"
+        ? `${fromName} disconnected`
+        : `${fromName} declined your request`,
+    body:
+      reason === "disconnected"
+        ? "Your producer connection has ended. You can send a new request later."
+        : undefined,
+    link: "/dashboard/farmer-network/connections",
+    connectionId,
+  });
+}

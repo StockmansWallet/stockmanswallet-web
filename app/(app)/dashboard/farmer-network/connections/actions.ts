@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import {
   notifyFarmerRequestApproved,
-  notifyDenial,
+  notifyFarmerRequestDenied,
 } from "@/lib/advisory/notifications";
 
 const requestIdSchema = z.object({
@@ -74,7 +74,7 @@ export async function denyFarmerRequest(requestId: string) {
     .single();
   const name = profile?.display_name || "A farmer";
 
-  await notifyDenial(supabase, conn.requester_user_id, name, conn.id, "producer");
+  await notifyFarmerRequestDenied(supabase, conn.requester_user_id, name, conn.id, "denied");
 
   revalidatePath("/dashboard/farmer-network");
   return { success: true };

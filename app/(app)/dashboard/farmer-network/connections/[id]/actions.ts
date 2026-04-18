@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import { createNotification, notifyDenial } from "@/lib/advisory/notifications";
+import { createNotification, notifyFarmerRequestDenied } from "@/lib/advisory/notifications";
 import type { AdvisoryMessage, MessageType } from "@/lib/types/advisory";
 
 const connectionIdSchema = z.object({
@@ -154,7 +154,7 @@ export async function disconnectFarmer(connectionId: string) {
     .single();
   const name = profile?.display_name ?? "A farmer";
 
-  await notifyDenial(supabase, recipientId, name, connectionId, "producer");
+  await notifyFarmerRequestDenied(supabase, recipientId, name, connectionId, "disconnected");
 
   revalidatePath("/dashboard/farmer-network");
   return { success: true };
