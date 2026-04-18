@@ -4,6 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { notifyFarmerConnectionRequest } from "@/lib/advisory/notifications";
+import { sanitiseSearchQuery } from "@/lib/utils/search-sanitise";
 
 const targetUserIdSchema = z.object({
   targetUserId: z.string().uuid(),
@@ -12,6 +13,55 @@ const targetUserIdSchema = z.object({
 const connectionIdSchema = z.object({
   connectionId: z.string().uuid(),
 });
+
+const searchQuerySchema = z.object({
+  query: z.string().min(2).max(100),
+});
+
+/**
+ * Search for producers to offer as quick-connect candidates inside the
+ * Producer Network's My Connections page. Excludes the caller and any
+ * producer they already have an active / pending peer connection with.
+ */
+export async function searchProducersForPeer(query: string) {
+  const parsed = searchQuerySchema.safeParse({ query: query?.trim() });
+  if (!parsed.success) return { producers: [] };
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { producers: [] };
+
+  const sanitised = sanitiseSearchQuery(query);
+  if (!sanitised) return { producers: [] };
+
+  // Exclude self and producers already in an active / pending peer connection.
+  const { data: existingConns } = await supabase
+    .from("connection_requests")
+    .select("requester_user_id, target_user_id")
+    .eq("connection_type", "farmer_peer")
+    .or(`requester_user_id.eq.${user.id},target_user_id.eq.${user.id}`)
+    .in("status", ["pending", "approved"]);
+
+  const excludeIds = [
+    user.id,
+    ...(existingConns ?? []).map((c) =>
+      c.requester_user_id === user.id ? c.target_user_id : c.requester_user_id,
+    ),
+  ];
+
+  const { data: producers } = await supabase
+    .from("user_profiles")
+    .select("user_id, display_name, company_name, state, region, bio")
+    .eq("role", "producer")
+    .not("user_id", "in", `(${excludeIds.join(",")})`)
+    .or(
+      `display_name.ilike.%${sanitised}%,company_name.ilike.%${sanitised}%,property_name.ilike.%${sanitised}%`,
+    )
+    .order("display_name")
+    .limit(8);
+
+  return { producers: producers ?? [] };
+}
 
 export async function sendFarmerConnectionRequest(targetUserId: string) {
   const parsed = targetUserIdSchema.safeParse({ targetUserId });
