@@ -1,6 +1,6 @@
-// Stockman IQ Insight Engine - server-side evaluation
-// Computes real insights from portfolio data for the Stockman IQ hub page
-// Runs as a server component data loader (no client JS)
+// Brangus Insight Engine - server-side evaluation.
+// Computes real insights from portfolio data for the insights hub page.
+// Runs as a server component data loader (no client JS).
 
 import { createClient } from "@/lib/supabase/server";
 import { getEffectiveJoinedDate } from "@/lib/data/breeding";

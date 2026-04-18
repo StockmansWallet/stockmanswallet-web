@@ -1,8 +1,8 @@
 import { Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
-import { InsightCard } from "@/components/app/stockman-iq/insight-card";
-import { evaluateInsights } from "@/lib/stockman-iq/insight-engine";
+import { InsightCard } from "@/components/app/brangus/insight-card";
+import { evaluateInsights } from "@/lib/brangus/insight-engine";
 
 export const metadata = { title: "Insights" };
 

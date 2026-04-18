@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { InsightCard } from "@/components/app/stockman-iq/insight-card";
-import type { StockmanIQInsight } from "@/lib/stockman-iq/insight-engine";
+import { InsightCard } from "@/components/app/brangus/insight-card";
+import type { StockmanIQInsight } from "@/lib/brangus/insight-engine";
 import { Lightbulb } from "lucide-react";
 
 export function DashboardInsights({ insights }: { insights: StockmanIQInsight[] }) {

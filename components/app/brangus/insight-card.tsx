@@ -1,5 +1,5 @@
-// Stockman IQ Insight Card - displays a single data-driven insight
-// Matches iOS StockmanIQCardView layout: icon, title, key figure, narrative
+// Brangus Insight Card - displays a single data-driven insight
+// Layout matches the iOS insight card: icon, title, key figure, narrative.
 
 import Link from "next/link";
 import {
@@ -12,7 +12,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import type { StockmanIQInsight } from "@/lib/stockman-iq/insight-engine";
+import type { StockmanIQInsight } from "@/lib/brangus/insight-engine";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   wallet: Wallet,
