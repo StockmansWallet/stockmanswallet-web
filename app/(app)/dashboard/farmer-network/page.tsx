@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Handshake, Search, MessageSquare, ArrowRight, MapPin } from "lucide-react";
 import { FarmerConnectionsRealtime } from "@/components/app/farmer-network/farmer-connections-realtime";
 import { FarmerCard } from "@/components/app/farmer-network/farmer-card";
+import { loadOutgoingBlocks } from "@/lib/data/user-blocks";
 import type { DirectoryFarmer } from "@/lib/types/advisory";
 
 export const revalidate = 0;
@@ -51,11 +52,13 @@ export default async function FarmerNetworkPage() {
       .eq("connection_type", "farmer_peer")
       .or(`requester_user_id.eq.${user.id},target_user_id.eq.${user.id}`);
 
+    const blockedIds = await loadOutgoingBlocks(supabase, user.id);
     const excludeIds = [
       user.id,
       ...(peerConns ?? []).map((c) =>
         c.requester_user_id === user.id ? c.target_user_id : c.requester_user_id,
       ),
+      ...blockedIds,
     ];
 
     const { data: nearby } = await supabase

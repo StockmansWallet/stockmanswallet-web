@@ -1,11 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { redirect, notFound } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
-import { MapPin, Building2, Handshake, Home } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Building2, Handshake, Home, Ban } from "lucide-react";
 import { FarmerConnectButton } from "@/components/app/farmer-network/farmer-connect-button";
 import { FarmerConnectionStatusBadge } from "@/components/app/farmer-network/farmer-connection-status-badge";
+import { ModerationMenu } from "./moderation-menu";
 import { enrichProducers } from "@/lib/data/producer-enrichment";
+import { isBlockedBy } from "@/lib/data/user-blocks";
 
 const SPECIES_EMOJI: Record<string, string> = {
   Cattle: "\uD83D\uDC04",
@@ -44,6 +48,23 @@ export default async function FarmerProfilePage({
     .single();
 
   if (!farmer) notFound();
+
+  // Moderation: is the viewer blocked BY this producer? Hides their details
+  // as if the producer doesn't exist. Uses service role because the
+  // user_blocks RLS policy deliberately doesn't let the blocked side read
+  // who blocked them, so the check has to run out-of-band.
+  const svc = createServiceRoleClient();
+  const blockedByViewedProducer = await isBlockedBy(svc, user.id, id);
+  if (blockedByViewedProducer) notFound();
+
+  // Have WE blocked THEM? Surface an unblock state instead of connect.
+  const { data: ownBlockRows } = await supabase
+    .from("user_blocks")
+    .select("id")
+    .eq("blocker_user_id", user.id)
+    .eq("blocked_user_id", id)
+    .limit(1);
+  const viewerBlockedThem = (ownBlockRows?.length ?? 0) > 0;
 
   // Enrich with species + herd-size bucket + property count for the profile.
   const enrichmentMap = await enrichProducers(supabase, [id]);
@@ -99,8 +120,20 @@ export default async function FarmerProfilePage({
                 </span>
               )}
             </div>
-            <div className="shrink-0 self-start">
-              <FarmerConnectionStatusBadge status={existingStatus} />
+            <div className="flex shrink-0 items-center gap-2 self-start">
+              {viewerBlockedThem ? (
+                <Badge variant="default">
+                  <Ban className="mr-1 h-3 w-3" aria-hidden="true" />
+                  Blocked
+                </Badge>
+              ) : (
+                <FarmerConnectionStatusBadge status={existingStatus} />
+              )}
+              <ModerationMenu
+                targetUserId={id}
+                targetName={farmer.display_name}
+                alreadyBlocked={viewerBlockedThem}
+              />
             </div>
           </div>
         </div>
@@ -143,13 +176,21 @@ export default async function FarmerProfilePage({
             </div>
           )}
 
-          {existingStatus !== "approved" && (
+          {!viewerBlockedThem && existingStatus !== "approved" && (
             <div className="flex justify-end border-t border-white/5 pt-4">
               <FarmerConnectButton
                 targetUserId={id}
                 existingStatus={existingStatus}
                 pendingRequestIdIfSent={pendingRequestIdIfSent}
               />
+            </div>
+          )}
+          {viewerBlockedThem && (
+            <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-surface-lowest p-4">
+              <Ban className="h-5 w-5 shrink-0 text-text-muted" aria-hidden="true" />
+              <p className="text-sm text-text-muted">
+                You have blocked this producer. Use the menu above to unblock and restore access.
+              </p>
             </div>
           )}
         </CardContent>

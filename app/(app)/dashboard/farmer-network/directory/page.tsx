@@ -8,6 +8,7 @@ import { FarmerCard } from "@/components/app/farmer-network/farmer-card";
 import { FarmerDirectorySearch } from "./farmer-directory-search";
 import { sanitiseSearchQuery } from "@/lib/utils/search-sanitise";
 import { enrichProducers, type PrimarySpecies } from "@/lib/data/producer-enrichment";
+import { loadOutgoingBlocks } from "@/lib/data/user-blocks";
 import type { DirectoryFarmer } from "@/lib/types/advisory";
 
 export const revalidate = 0;
@@ -37,11 +38,18 @@ export default async function FarmerDirectoryPage({
     ? (params.species as PrimarySpecies)
     : ("" as "");
 
+  // Producers the viewer has blocked shouldn't appear in the directory.
+  const blockedIds = await loadOutgoingBlocks(supabase, user.id);
+
   let query = supabase
     .from("user_profiles")
     .select("user_id, display_name, company_name, role, state, region, bio")
     .eq("role", "producer")
     .neq("user_id", user.id);
+
+  if (blockedIds.size > 0) {
+    query = query.not("user_id", "in", `(${Array.from(blockedIds).join(",")})`);
+  }
 
   if (stateFilter) {
     query = query.eq("state", stateFilter);

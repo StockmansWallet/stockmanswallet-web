@@ -34,19 +34,30 @@ export async function searchProducersForPeer(query: string) {
   const sanitised = sanitiseSearchQuery(query);
   if (!sanitised) return { producers: [] };
 
-  // Exclude self and producers already in an active / pending peer connection.
-  const { data: existingConns } = await supabase
-    .from("connection_requests")
-    .select("requester_user_id, target_user_id")
-    .eq("connection_type", "farmer_peer")
-    .or(`requester_user_id.eq.${user.id},target_user_id.eq.${user.id}`)
-    .in("status", ["pending", "approved"]);
+  // Exclude self, producers already in an active / pending peer connection,
+  // and any producer the caller has blocked.
+  const [
+    { data: existingConns },
+    { data: blocks },
+  ] = await Promise.all([
+    supabase
+      .from("connection_requests")
+      .select("requester_user_id, target_user_id")
+      .eq("connection_type", "farmer_peer")
+      .or(`requester_user_id.eq.${user.id},target_user_id.eq.${user.id}`)
+      .in("status", ["pending", "approved"]),
+    supabase
+      .from("user_blocks")
+      .select("blocked_user_id")
+      .eq("blocker_user_id", user.id),
+  ]);
 
   const excludeIds = [
     user.id,
     ...(existingConns ?? []).map((c) =>
       c.requester_user_id === user.id ? c.target_user_id : c.requester_user_id,
     ),
+    ...(blocks ?? []).map((b) => b.blocked_user_id as string),
   ];
 
   const { data: producers } = await supabase
