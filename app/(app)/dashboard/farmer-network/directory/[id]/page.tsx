@@ -49,7 +49,7 @@ export default async function FarmerProfilePage({
   const existingStatus = activeOrPending?.status ?? deniedOrExpired?.status ?? null;
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-4xl">
       <PageHeader
         title="Producer Profile"
         titleClassName="text-4xl font-bold text-orange-400"

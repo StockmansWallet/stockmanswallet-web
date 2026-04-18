@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { FarmerChatClient } from "./farmer-chat-client";
+import { DisconnectButton } from "./disconnect-button";
 import type { ConnectionRequest, AdvisoryMessage } from "@/lib/types/advisory";
 
 export const metadata = {
@@ -78,7 +79,7 @@ export default async function FarmerConnectionDetailPage({
   };
 
   return (
-    <div className="flex h-[calc(100vh-6rem)] max-w-3xl flex-col pb-4">
+    <div className="flex h-[calc(100vh-6rem)] max-w-4xl flex-col pb-4">
       <PageHeader
         title={otherName}
         titleClassName="text-4xl font-bold text-orange-400"
@@ -103,6 +104,10 @@ export default async function FarmerConnectionDetailPage({
           />
         </CardContent>
       </Card>
+
+      <div className="mt-4">
+        <DisconnectButton connectionId={id} otherName={otherName} />
+      </div>
     </div>
   );
 }

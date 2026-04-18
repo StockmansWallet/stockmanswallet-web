@@ -57,9 +57,8 @@ export function FarmerRequestCard({ request }: FarmerRequestCardProps) {
             </div>
             <div className="flex items-center gap-2">
               <Button
-                variant="ghost"
+                variant="destructive"
                 size="sm"
-                className="border border-white/[0.08] bg-white/[0.04] text-xs text-text-muted hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
                 onClick={() => setShowDenyConfirm(true)}
                 disabled={loading !== null}
               >

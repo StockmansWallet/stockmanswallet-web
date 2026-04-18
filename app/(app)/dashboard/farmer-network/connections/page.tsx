@@ -74,7 +74,7 @@ export default async function FarmerConnectionsPage() {
   const hasContent = pendingRequests.length > 0 || approved.length > 0;
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-4xl">
       <PageHeader
         title="My Connections"
         titleClassName="text-4xl font-bold text-orange-400"
