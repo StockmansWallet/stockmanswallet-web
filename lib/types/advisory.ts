@@ -199,6 +199,40 @@ export function getCategoryConfig(role: string): AdvisorCategoryConfig | undefin
 // Message types for advisory notes thread
 export type MessageType = "general_note" | "access_request" | "renewal_request" | "review_request";
 
+/**
+ * Frozen snapshot of a shared herd. Taken at send time, not a live link,
+ * so the receiver sees what was true when the sender shared it.
+ */
+export interface HerdAttachment {
+  type: "herd";
+  herd_id: string;
+  name: string;
+  species: string;
+  breed: string;
+  category: string;
+  head_count: number;
+  current_weight: number | null;
+  initial_weight: number | null;
+  estimated_value: number | null;
+}
+
+/**
+ * Frozen snapshot of a market price. category + saleyard + data_date are
+ * sufficient to re-look-up the price, but the scalar is included so the
+ * chat remains readable even if the source row is archived.
+ */
+export interface PriceAttachment {
+  type: "price";
+  category: string;
+  saleyard: string;
+  price_per_kg: number;
+  weight_range: string | null;
+  breed: string | null;
+  data_date: string;
+}
+
+export type MessageAttachment = HerdAttachment | PriceAttachment;
+
 export interface AdvisoryMessage {
   id: string;
   connection_id: string;
@@ -206,6 +240,7 @@ export interface AdvisoryMessage {
   message_type: MessageType;
   content: string;
   created_at: string;
+  attachment?: MessageAttachment | null;
 }
 
 // Notification types

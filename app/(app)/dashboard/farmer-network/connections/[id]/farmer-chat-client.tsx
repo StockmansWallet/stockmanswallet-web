@@ -4,9 +4,11 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { MessageThread } from "@/components/app/advisory/message-thread";
 import { ChatInput } from "@/components/app/chat/chat-input";
 import { TypingIndicator } from "@/components/app/chat/typing-indicator";
+import { ShareMenu } from "@/components/app/farmer-network/share-menu";
+import { ShareAttachmentCard } from "@/components/app/farmer-network/share-attachment-card";
 import { useTypingIndicator } from "@/hooks/use-typing-indicator";
 import { sendFarmerMessage, fetchFarmerMessages } from "./actions";
-import type { AdvisoryMessage } from "@/lib/types/advisory";
+import type { AdvisoryMessage, MessageAttachment } from "@/lib/types/advisory";
 
 const POLL_INTERVAL = 5000;
 const OTHER_BG = "#2A2929";
@@ -26,11 +28,12 @@ export function FarmerChatClient({
 }: FarmerChatClientProps) {
   const [messages, setMessages] = useState<AdvisoryMessage[]>(initialMessages);
   const [animatedIds, setAnimatedIds] = useState<Set<string>>(new Set());
+  const [pendingAttachment, setPendingAttachment] = useState<MessageAttachment | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { peerIsTyping, notifyTyping } = useTypingIndicator(
     `chat:${connectionId}`,
-    currentUserId
+    currentUserId,
   );
 
   // Auto-scroll to bottom on new messages
@@ -64,37 +67,52 @@ export function FarmerChatClient({
     return () => clearInterval(interval);
   }, [connectionId]);
 
-  const handleSend = useCallback(async (text: string) => {
-    // Optimistic add
-    const optimisticMsg: AdvisoryMessage = {
-      id: `optimistic-${Date.now()}`,
-      connection_id: connectionId,
-      sender_user_id: currentUserId,
-      message_type: "general_note",
-      content: text,
-      created_at: new Date().toISOString(),
-    };
+  const handleSend = useCallback(
+    async (text: string) => {
+      // The ChatInput invokes onSend with empty string when only an attachment
+      // is queued. That's legal here because the action accepts content OR
+      // attachment.
+      const attachmentForThisSend = pendingAttachment;
+      if (!text.trim() && !attachmentForThisSend) return;
 
-    setMessages((prev) => [...prev, optimisticMsg]);
-    setAnimatedIds((ids) => new Set(ids).add(optimisticMsg.id));
+      const optimisticMsg: AdvisoryMessage = {
+        id: `optimistic-${Date.now()}`,
+        connection_id: connectionId,
+        sender_user_id: currentUserId,
+        message_type: "general_note",
+        content: text,
+        created_at: new Date().toISOString(),
+        attachment: attachmentForThisSend,
+      };
 
-    const result = await sendFarmerMessage(connectionId, text, "general_note");
+      setMessages((prev) => [...prev, optimisticMsg]);
+      setAnimatedIds((ids) => new Set(ids).add(optimisticMsg.id));
+      setPendingAttachment(null);
 
-    if (result?.error) {
-      setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
-      return;
-    }
+      const result = await sendFarmerMessage(
+        connectionId,
+        text,
+        "general_note",
+        attachmentForThisSend,
+      );
 
-    // Fetch real messages to replace optimistic
-    const refreshed = await fetchFarmerMessages(connectionId);
-    if (refreshed.messages) {
-      setMessages(refreshed.messages);
-    }
-  }, [connectionId, currentUserId]);
+      if (result?.error) {
+        setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
+        // Give the attachment back so the sender can retry or edit.
+        if (attachmentForThisSend) setPendingAttachment(attachmentForThisSend);
+        return;
+      }
+
+      const refreshed = await fetchFarmerMessages(connectionId);
+      if (refreshed.messages) {
+        setMessages(refreshed.messages);
+      }
+    },
+    [connectionId, currentUserId, pendingAttachment],
+  );
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      {/* Messages area - starts at top, scrolls down */}
       <div className="flex-1 overflow-y-auto px-1 pt-2 pb-2">
         <div className="space-y-3">
           <MessageThread
@@ -108,14 +126,41 @@ export function FarmerChatClient({
         </div>
       </div>
 
-      {/* Input area */}
       <div className="shrink-0 border-t border-white/6 pt-3">
-        <ChatInput
-          onSend={handleSend}
-          onTyping={notifyTyping}
-          placeholder="Write a message..."
-          accentClass="bg-purple-500 hover:bg-purple-600"
-        />
+        {/* Pending-attachment preview sits above the input so the sender
+            can see what's queued and remove it before hitting send. */}
+        {pendingAttachment && (
+          <div className="mb-2 flex items-start gap-2 rounded-xl border border-white/5 bg-surface-lowest p-2 pr-2">
+            <div className="flex-1">
+              <ShareAttachmentCard attachment={pendingAttachment} />
+            </div>
+            <button
+              type="button"
+              onClick={() => setPendingAttachment(null)}
+              aria-label="Remove attachment"
+              className="mt-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-white/10 hover:text-text-primary"
+            >
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+        )}
+
+        <div className="flex items-end gap-2">
+          <ShareMenu onAttach={setPendingAttachment} />
+          <div className="flex-1">
+            <ChatInput
+              onSend={handleSend}
+              onTyping={notifyTyping}
+              placeholder={
+                pendingAttachment
+                  ? "Add a note (optional), then send..."
+                  : "Write a message..."
+              }
+              accentClass="bg-purple-500 hover:bg-purple-600"
+              allowEmpty={pendingAttachment != null}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

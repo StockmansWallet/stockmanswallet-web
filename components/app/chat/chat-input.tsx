@@ -19,6 +19,12 @@ interface ChatInputProps {
   micSupported?: boolean;
   /** Live transcript to display while listening */
   liveTranscript?: string;
+  /**
+   * When true, the Send button stays visible and can fire even without
+   * typed text. Used by the Producer chat when an attachment is queued,
+   * so the sender can share a herd or price with no extra note.
+   */
+  allowEmpty?: boolean;
 }
 
 export function ChatInput({
@@ -32,11 +38,13 @@ export function ChatInput({
   onMicTap,
   micSupported = false,
   liveTranscript,
+  allowEmpty = false,
 }: ChatInputProps) {
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const hasText = value.trim().length > 0;
+  const canSend = hasText || allowEmpty;
 
   const resetHeight = useCallback(() => {
     if (textareaRef.current) {
@@ -46,12 +54,12 @@ export function ChatInput({
 
   const handleSubmit = useCallback(async () => {
     const trimmed = value.trim();
-    if (!trimmed || disabled || loading) return;
+    if (!canSend || disabled || loading) return;
 
     setValue("");
     resetHeight();
     await onSend(trimmed);
-  }, [value, disabled, loading, onSend, resetHeight]);
+  }, [value, canSend, disabled, loading, onSend, resetHeight]);
 
   // Display live transcript in the textarea while listening
   const displayValue = isListening && liveTranscript ? liveTranscript : value;
@@ -82,13 +90,13 @@ export function ChatInput({
           className="max-h-[120px] flex-1 resize-none bg-transparent py-2.5 text-sm leading-5 text-text-primary placeholder:text-text-muted outline-none disabled:opacity-50"
         />
 
-        {/* Send button - only visible when there is text */}
+        {/* Send button - visible when there is text or an attachment is queued */}
         <button
           type="button"
           onClick={handleSubmit}
-          disabled={disabled || loading || !hasText}
+          disabled={disabled || loading || !canSend}
           className={`ml-2 flex h-8 shrink-0 items-center justify-center rounded-full px-4 text-white transition-all ${accentClass} ${
-            hasText ? "opacity-100 scale-100" : "opacity-0 scale-75 pointer-events-none"
+            canSend ? "opacity-100 scale-100" : "opacity-0 scale-75 pointer-events-none"
           }`}
           aria-label="Send message"
         >

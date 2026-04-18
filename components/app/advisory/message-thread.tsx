@@ -2,6 +2,7 @@
 
 import { ChatBubble } from "@/components/app/chat/chat-bubble";
 import { Badge } from "@/components/ui/badge";
+import { ShareAttachmentCard } from "@/components/app/farmer-network/share-attachment-card";
 import type { AdvisoryMessage, MessageType } from "@/lib/types/advisory";
 
 interface Participant {
@@ -110,7 +111,8 @@ export function MessageThread({
                   {typeConfig.label}
                 </Badge>
               )}
-              {msg.content}
+              {msg.content && <div>{msg.content}</div>}
+              {msg.attachment && <ShareAttachmentCard attachment={msg.attachment} />}
             </ChatBubble>
           </div>
         );
