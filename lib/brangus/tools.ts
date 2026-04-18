@@ -1,5 +1,5 @@
 // Brangus tool definitions and execution for web
-// Mirrors iOS StockmanIQChatService+ToolUse.swift and +DataLookup.swift
+// Mirrors iOS BrangusChatService+ToolUse.swift and +DataLookup.swift
 
 import { calculateHerdValuation, parseCalvesAtFoot, type CategoryPriceEntry, type HerdValuationResult } from "../engines/valuation-engine";
 import { calculateFreightEstimate } from "../engines/freight-engine";

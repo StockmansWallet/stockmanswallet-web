@@ -281,7 +281,7 @@
 * Full `sw-logo.svg`, sticky positioning, no background
 
 ### Icon Updates
-* Properties: `MapPinned`, Stockman IQ: `Brain`, cattle tags SVG updated
+* Properties: `MapPinned`, Brangus: `Brain`, cattle tags SVG updated
 
 ### Properties Query Fix
 * `is_demo_data` corrected to `is_simulated` on dashboard

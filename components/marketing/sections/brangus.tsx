@@ -93,7 +93,7 @@ function ContextCard({ card, index }: { card: ChatExample['contextCards'][0]; in
 
 const HOLD_DURATION = 18000
 
-export default function StockmanIQ() {
+export default function Brangus() {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: '-100px' })
   const [currentIndex, setCurrentIndex] = useState(0)

@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Chat - Brangus" };
 
-export default async function StockmanIQChatPage() {
+export default async function BrangusChatPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 

@@ -88,9 +88,9 @@ Two-way connection system allowing advisors to request access to farmer portfoli
 - Values: `"farmer"` | `"advisor"`
 - Default: `"farmer"`
 
-**Farmer sidebar:** Dashboard, Herds, Properties, Stockman IQ, Markets, Yard Book, Reports, Freight IQ, Grid IQ, Advisory Hub, Farmer Network
+**Farmer sidebar:** Dashboard, Herds, Properties, Brangus, Markets, Yard Book, Reports, Freight IQ, Grid IQ, Advisory Hub, Farmer Network
 
-**Advisor sidebar:** Dashboard, Clients, Markets, Stockman IQ, Reports, Freight IQ
+**Advisor sidebar:** Dashboard, Clients, Markets, Brangus, Reports, Freight IQ
 
 Navigation config lives in `lib/navigation/nav-config.tsx`. View mode toggle in sidebar header.
 

@@ -12,7 +12,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import type { StockmanIQInsight } from "@/lib/brangus/insight-engine";
+import type { BrangusInsight } from "@/lib/brangus/insight-engine";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   wallet: Wallet,
@@ -41,7 +41,7 @@ const sentimentIconColor: Record<string, string> = {
   neutral: "text-brand",
 };
 
-export function InsightCard({ insight }: { insight: StockmanIQInsight }) {
+export function InsightCard({ insight }: { insight: BrangusInsight }) {
   const Icon = iconMap[insight.icon] ?? Wallet;
 
   const content = (

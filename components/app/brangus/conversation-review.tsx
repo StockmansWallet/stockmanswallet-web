@@ -10,7 +10,7 @@ import { ChatBubble } from "@/components/app/chat/chat-bubble";
 import { formatConversationForExport } from "@/lib/brangus/conversation-service";
 import type { BrangusConversationRow, BrangusMessageRow } from "@/lib/brangus/conversation-service";
 
-// Brangus brand brown (matches Theme+StockmanIQ.swift)
+// Brangus brand brown (matches Theme+Brangus.swift)
 const BRANGUS_BG = "#4D331F";
 const USER_BG = "var(--color-brand)";
 

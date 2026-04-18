@@ -1,4 +1,4 @@
-export function IconStockmanIQ({ className = "h-5 w-5" }: { className?: string }) {
+export function IconBrangus({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 992 844" fill="currentColor" className={className}>
       <g>

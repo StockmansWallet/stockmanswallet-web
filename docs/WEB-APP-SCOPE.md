@@ -46,7 +46,7 @@ All need: `user_id` FK, RLS policies (`auth.uid() = user_id`), proper indexes.
 
 **Portfolio/Herds** - Herd list (sort/filter/search), add herd wizard, herd detail (valuation breakdown, market pulse, saleyard comparison, breeding details, records), edit herd, sell stock flow, CSV import
 
-**Stockman IQ** - Chat interface (reuse existing Edge Functions), tool call display, conversation history, insight cards feed (9 template types)
+**Brangus** - Chat interface (reuse existing Edge Functions), tool call display, conversation history, insight cards feed (9 template types)
 
 **Tools** - Yard Book (CRUD, NLP, recurring events), Freight IQ (calculator + saved estimates), Grid IQ (OCR upload, analysis, sell window), Reports (PDF generation), Market View (live MLA data, physical sales)
 
@@ -79,7 +79,7 @@ Claude Code dramatically accelerates certain work. Here's how each area breaks d
 | UI component library | 1-2 weeks | **2-3 days** | Shadcn/ui or Radix provides primitives. Claude generates themed wrappers matching existing design tokens in `globals.css`. |
 | Dashboard + Portfolio (core) | 3-4 weeks | **1-1.5 weeks** | Pages are data-fetch + render. Claude scaffolds fast. Chart integration and polish needs iteration. |
 | Tools (Yard Book, Freight, Market, Reports) | 3-4 weeks | **1-1.5 weeks** | CRUD pages are Claude Code's sweet spot. PDF generation needs more iteration. |
-| Stockman IQ (chat + cards) | 2-3 weeks | **4-6 days** | Chat UI is standard. Edge Functions already exist. Template engine port is mechanical (9 templates with defined data shapes). |
+| Brangus (chat + cards) | 2-3 weeks | **4-6 days** | Chat UI is standard. Edge Functions already exist. Template engine port is mechanical (9 templates with defined data shapes). |
 | Grid IQ | 2 weeks | **3-5 days** | File upload + API call + results display. Extraction logic already lives in Edge Functions. |
 | Settings + Profile | 1 week | **2-3 days** | Form-heavy CRUD pages. Fast. |
 | Advisory features | 3-4 weeks | **1-1.5 weeks** | Complex but well-defined. Lens calculations are pure math. Client flows are CRUD. |
@@ -137,7 +137,7 @@ Neither "finish iOS first" nor "build both in parallel" is the right answer. Her
 
 **Then iterate web features in priority order:**
 1. Market View (read-only, no user data dependency - could even start before sync)
-2. Stockman IQ chat (Edge Functions already exist)
+2. Brangus chat (Edge Functions already exist)
 3. Freight IQ
 4. Yard Book
 5. Reports
@@ -169,7 +169,7 @@ The Supabase data migration is the critical path for BOTH platforms. Do it now. 
 - **Valuation engine** — TypeScript port of iOS `calculateHerdValue` with MLA category prices, breed premiums, weight-range bracket matching, 4-tier saleyard pricing (general+premium → breed-specific → national+premium → fallback), breed premium double-application guard, price source tracking with `calculateHerdValuation`, local breed premium fallback, saleyard name resolution, and iOS-parity price resolution (last-wins for range, max for fallback)
 - **Herd detail page** — shows estimated herd value with per-head breakdown, red price source indicators when using national avg or fallback pricing
 - **Yard Book** — full implementation matching iOS: run sheet with horizon grouping (Overdue/Today/Next 7/30/90/Later), 5 colour-coded categories with filter pills, countdown badges, herd linking (multi-select), reminder offsets, recurrence rules, mark complete/incomplete, show/hide completed, stat cards, soft-delete. Data syncs bidirectionally with iOS via shared Supabase table
-- **Stockman IQ (Brangus chat)** — interactive AI chat component with message display, input handling, suggested prompts, chat service layer, and tool definitions in `lib/brangus/`
+- **Brangus (Brangus chat)** — interactive AI chat component with message display, input handling, suggested prompts, chat service layer, and tool definitions in `lib/brangus/`
 - **Demo data seeder** — Doongara Station with 20 herds, flagged as demo data, safe clear that uses soft-delete
 - **Clear All Data** — settings option to permanently delete all user data via Edge Function (double confirmation, affects both web and iOS)
 - **iOS sync** — all create/update/delete mutations set `updated_at` for iOS sync detection
@@ -191,5 +191,5 @@ The Supabase data migration is the critical path for BOTH platforms. Do it now. 
 | What's blocking it? | User data isn't in Supabase yet |
 | Should we start now? | Yes - start with the Supabase data tables and iOS sync layer |
 | What comes first? | Data foundation, then business logic port, then web MVP |
-| Full feature parity? | Not needed at launch. Ship Dashboard + Portfolio + Stockman IQ first |
+| Full feature parity? | Not needed at launch. Ship Dashboard + Portfolio + Brangus first |
 | Cost? | ~$25-45/month (Vercel free/Pro + Supabase Pro) |

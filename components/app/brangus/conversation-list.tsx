@@ -1,6 +1,6 @@
 "use client";
 
-// Conversation list for the Stockman IQ hub page
+// Conversation list for the Brangus hub page
 // Shows past Brangus conversations with title, preview, and relative time
 // Supports bulk selection and deletion
 

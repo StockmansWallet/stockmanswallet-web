@@ -19,7 +19,7 @@ import { expandWithNearbySaleyards } from "@/lib/data/saleyard-proximity";
 
 // MARK: - Types
 
-export interface StockmanIQInsight {
+export interface BrangusInsight {
   id: string;
   templateId: string;
   title: string;
@@ -87,7 +87,7 @@ const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Se
 
 // MARK: - Main Evaluation
 
-export async function evaluateInsights(): Promise<StockmanIQInsight[]> {
+export async function evaluateInsights(): Promise<BrangusInsight[]> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
@@ -178,7 +178,7 @@ export async function evaluateInsights(): Promise<StockmanIQInsight[]> {
   }));
 
   // Evaluate all templates
-  const insights: StockmanIQInsight[] = [];
+  const insights: BrangusInsight[] = [];
 
   insights.push(...evaluatePortfolio(valuations));
   insights.push(...evaluateSellVsHold(valuations, nationalPriceMap, premiumMap, saleyardPriceMap, saleyardBreedPriceMap));
@@ -195,7 +195,7 @@ export async function evaluateInsights(): Promise<StockmanIQInsight[]> {
 
 function evaluatePortfolio(
   valuations: { herd: HerdRow; result: { netValue: number } }[]
-): StockmanIQInsight[] {
+): BrangusInsight[] {
   const totalValue = valuations.reduce((sum, v) => sum + v.result.netValue, 0);
   const totalHead = valuations.reduce((sum, v) => sum + v.herd.head_count, 0);
   const herdCount = valuations.length;
@@ -222,8 +222,8 @@ function evaluateSellVsHold(
   premiumMap: Map<string, number>,
   saleyardPriceMap: Map<string, CategoryPriceEntry[]>,
   saleyardBreedPriceMap: Map<string, CategoryPriceEntry[]>,
-): StockmanIQInsight[] {
-  const insights: StockmanIQInsight[] = [];
+): BrangusInsight[] {
+  const insights: BrangusInsight[] = [];
   const now = new Date();
 
   // Only herds with meaningful DWG
@@ -289,8 +289,8 @@ function evaluateSellVsHold(
 function evaluateBestMonth(
   valuations: { herd: HerdRow; result: { netValue: number; pricePerKg: number } }[],
   seasonalData: SeasonalEntry[],
-): StockmanIQInsight[] {
-  const insights: StockmanIQInsight[] = [];
+): BrangusInsight[] {
+  const insights: BrangusInsight[] = [];
   const now = new Date();
   const currentMonth = now.getMonth() + 1;
 
@@ -350,8 +350,8 @@ function evaluateBestMonth(
 
 function evaluateBreeding(
   valuations: { herd: HerdRow; result: { netValue: number; pricePerKg: number } }[]
-): StockmanIQInsight[] {
-  const insights: StockmanIQInsight[] = [];
+): BrangusInsight[] {
+  const insights: BrangusInsight[] = [];
   const now = new Date();
   const BREEDING_CYCLE_DAYS = 365;
 
@@ -394,8 +394,8 @@ function evaluateBreeding(
 
 // MARK: - Yard Book Alerts
 
-function evaluateYardBook(items: YardBookRow[]): StockmanIQInsight[] {
-  const insights: StockmanIQInsight[] = [];
+function evaluateYardBook(items: YardBookRow[]): BrangusInsight[] {
+  const insights: BrangusInsight[] = [];
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   const week = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7);

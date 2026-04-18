@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Hero from '@/components/marketing/sections/hero'
 import Features from '@/components/marketing/sections/features'
-import StockmanIQ from '@/components/marketing/sections/stockman-iq'
+import Brangus from '@/components/marketing/sections/brangus'
 import { ADVISOR_ENABLED } from '@/lib/feature-flags'
 import ForAdvisors from '@/components/marketing/sections/for-advisors'
 import Pricing from '@/components/marketing/sections/pricing'
@@ -27,7 +27,7 @@ export default function HomePage() {
     <>
       <Hero />
       <Features />
-      <StockmanIQ />
+      <Brangus />
       {ADVISOR_ENABLED && <ForAdvisors />}
       <Pricing />
       <About />

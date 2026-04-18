@@ -1,11 +1,11 @@
 # Brangus AI Chat Check
 
-Audit the web Brangus (Stockman IQ) chat system for correctness, safety, and alignment with iOS.
+Audit the web Brangus (Brangus) chat system for correctness, safety, and alignment with iOS.
 
 ## Key Files
 - `lib/brangus/chat-service.ts` - System prompt, API calls, tool loop
 - `lib/brangus/tools.ts` - Tool definitions and execution
-- `app/(app)/dashboard/stockman-iq/chat/page.tsx` - Chat UI
+- `app/(app)/dashboard/brangus/chat/page.tsx` - Chat UI
 
 ## Check
 1. System prompt matches iOS persona and rules (no fabrication, no "mob", mandatory data lookup)

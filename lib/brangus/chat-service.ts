@@ -1,5 +1,5 @@
 // Brangus chat service for web
-// Mirrors iOS StockmanIQChatService - handles API calls, tool loop, system prompt
+// Mirrors iOS BrangusChatService - handles API calls, tool loop, system prompt
 // Debug: Prompt sections fetched from brangus_config table (shared with iOS)
 
 import { createClient } from "../supabase/client";
@@ -811,7 +811,7 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
   };
 }
 
-// MARK: - Seasonal Data (mirrors iOS StockmanIQHistoricalPricing + fallback)
+// MARK: - Seasonal Data (mirrors iOS BrangusHistoricalPricing + fallback)
 
 // Monthly seasonal multipliers - based on typical QLD cattle market patterns (matches iOS)
 const SEASONAL_MULTIPLIERS: Record<number, number> = {
@@ -836,7 +836,7 @@ async function fetchSeasonalData(
   if (mlaCategories.length === 0) return [];
 
   try {
-    // Try historical_market_prices table (same as iOS StockmanIQHistoricalPricing)
+    // Try historical_market_prices table (same as iOS BrangusHistoricalPricing)
     const { data: rows, error } = await supabase
       .from("historical_market_prices")
       .select("category, price_per_kg, price_date")

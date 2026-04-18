@@ -8,7 +8,7 @@ import { BrangusChat } from "@/components/app/brangus-chat";
 
 export const metadata = { title: "Chat - Brangus" };
 
-export default async function StockmanIQConversationPage({
+export default async function BrangusConversationPage({
   params,
 }: {
   params: Promise<{ id: string }>;

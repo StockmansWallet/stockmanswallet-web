@@ -216,7 +216,7 @@ This fix affects both the iOS and web apps since they share the same Supabase ca
 
 ### Brangus Chat Bubbles - Warm Brown Colour
 
-Updated the Brangus chat assistant message bubbles from `bg-white/5` to warm brown (`bg-[#4D331F]`), matching the iOS app's `Theme.StockmanIQ.chatBubbleAI` colour. Also applied to the typing indicator. Added a spring-like slide-up entrance animation matching the iOS chat bubble transition.
+Updated the Brangus chat assistant message bubbles from `bg-white/5` to warm brown (`bg-[#4D331F]`), matching the iOS app's `Theme.Brangus.chatBubbleAI` colour. Also applied to the typing indicator. Added a spring-like slide-up entrance animation matching the iOS chat bubble transition.
 
 **Files changed:**
 - `components/app/brangus-chat.tsx` - Bubble background colour and animate-bubble-in class
@@ -414,7 +414,7 @@ You can now chat with Brangus on the web app, the same AI livestock advisor from
 - `lib/brangus/chat-service.ts` - Chat API service layer with system prompt, tool loop, sanitisation
 - `lib/brangus/tools.ts` - 4 tool definitions: lookup_portfolio_data, calculate_freight, create_yard_book_event, manage_yard_book_event
 - `lib/brangus/types.ts` - Chat message and conversation types
-- `app/(app)/dashboard/stockman-iq/chat/page.tsx` - Replaced placeholder with BrangusChat component
+- `app/(app)/dashboard/brangus/chat/page.tsx` - Replaced placeholder with BrangusChat component
 
 ### Herd Value Now Shown on Individual Pages
 
@@ -551,7 +551,7 @@ Added weight-range bracket matching to the valuation engine, matching the iOS `m
 
 ### Premium UI Redesign
 
-Complete visual refresh across the entire web app. Stat cards, species pill filters, sortable table, responsive column hiding on herds page. Same premium treatment applied to all other pages: properties, tools, reports, market, settings, Stockman IQ, chat, yard book, Grid IQ, and freight calculator.
+Complete visual refresh across the entire web app. Stat cards, species pill filters, sortable table, responsive column hiding on herds page. Same premium treatment applied to all other pages: properties, tools, reports, market, settings, Brangus, chat, yard book, Grid IQ, and freight calculator.
 
 **Files changed:**
 - `components/ui/card.tsx` - Added ring border
@@ -655,7 +655,7 @@ Expanded from 7 to 10 top-level nav items. Added bottom section with Plan indica
 
 ### Icon Updates
 
-Replaced custom icons with Lucide equivalents. Properties: `MapPinned`. Stockman IQ: `Brain`. Updated cattle tags SVG to filled evenOdd style.
+Replaced custom icons with Lucide equivalents. Properties: `MapPinned`. Brangus: `Brain`. Updated cattle tags SVG to filled evenOdd style.
 
 **Files changed:**
 - `components/icons/icon-cattle-tags.tsx` - Updated SVG

@@ -104,8 +104,8 @@ summary {
   --color-accent-quinary: #472105;
 
   /* Feature accent colours */
-  --color-stockman-iq: #FF8000;
-  --color-stockman-iq-light: #FFa333;
+  --color-brangus: #FF8000;
+  --color-brangus-light: #FFa333;
   --color-freight-iq: #1399EC;
   --color-freight-iq-light: #64BBF5;
   --color-yard-book: #87B11B;
@@ -289,7 +289,7 @@ select option {
     page-break-inside: avoid;
   }
 
-  /* Hide the Stockman IQ tabs header and conversation sidebar */
+  /* Hide the Brangus tabs header and conversation sidebar */
   [role="tablist"],
   .w-96 {
     display: none !important;

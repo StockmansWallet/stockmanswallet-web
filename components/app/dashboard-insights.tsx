@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { InsightCard } from "@/components/app/brangus/insight-card";
-import type { StockmanIQInsight } from "@/lib/brangus/insight-engine";
+import type { BrangusInsight } from "@/lib/brangus/insight-engine";
 import { Lightbulb } from "lucide-react";
 
-export function DashboardInsights({ insights }: { insights: StockmanIQInsight[] }) {
+export function DashboardInsights({ insights }: { insights: BrangusInsight[] }) {
   if (insights.length === 0) return null;
 
   const topInsights = insights.slice(0, 2);
