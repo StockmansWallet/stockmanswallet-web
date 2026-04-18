@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { MlaUploader } from "./mla-uploader";
-import { isAdminEmail } from "@/lib/data/admin";
+import { isAdminUser } from "@/lib/data/admin";
 
 export const metadata = { title: "MLA CSV Upload - Admin" };
 
@@ -16,7 +16,7 @@ export default async function MlaUploadPage() {
     redirect("/sign-in");
   }
 
-  if (!isAdminEmail(user.email)) {
+  if (!(await isAdminUser(supabase, user.id))) {
     redirect("/dashboard");
   }
 

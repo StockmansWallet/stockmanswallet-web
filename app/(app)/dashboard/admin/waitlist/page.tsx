@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { PageHeader } from "@/components/ui/page-header";
-import { isAdminEmail } from "@/lib/data/admin";
+import { isAdminUser } from "@/lib/data/admin";
 import { WaitlistTable } from "./waitlist-table";
 
 export const metadata = { title: "Waitlist - Admin" };
@@ -14,7 +14,7 @@ export default async function WaitlistPage() {
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/sign-in");
-  if (!isAdminEmail(user.email)) redirect("/dashboard");
+  if (!(await isAdminUser(supabase, user.id))) redirect("/dashboard");
 
   // Waitlist RLS is service-role-only (admin gate enforced above).
   const svc = createServiceRoleClient();

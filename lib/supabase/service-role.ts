@@ -4,7 +4,7 @@ import { createClient } from "@supabase/supabase-js";
  * Returns a Supabase client authenticated with the service-role key.
  *
  * Use this only for admin and advisor flows where the caller's identity has
- * already been verified at the app layer (e.g. `isAdminEmail` or an approved
+ * already been verified at the app layer (e.g. `isAdminUser` or an approved
  * advisor connection). Bypasses RLS entirely.
  */
 export function createServiceRoleClient() {

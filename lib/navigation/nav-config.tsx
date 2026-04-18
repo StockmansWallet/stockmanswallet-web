@@ -73,7 +73,7 @@ export const advisorToolItems: NavItem[] = [
   { label: "Freight IQ", href: "/dashboard/tools/freight", icon: <Truck className="h-5 w-5" />, activeClass: "bg-sky-500/15 text-sky-400" },
 ];
 
-// Admin section (visible in both modes, gated by isAdminEmail)
+// Admin section (visible in both modes, gated by user_profiles.is_admin)
 export const adminItems: NavItem[] = [
   { label: "Waitlist", href: "/dashboard/admin/waitlist", icon: <ClipboardList className="h-5 w-5" />, activeClass: "bg-cyan-500/15 text-cyan-400" },
   { label: "Valuation Lab", href: "/dashboard/admin/valuation", icon: <FlaskConical className="h-5 w-5" />, activeClass: "bg-rose-500/15 text-rose-400" },

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
-import { isAdminEmail } from "@/lib/data/admin";
+import { isAdminUser } from "@/lib/data/admin";
 import {
   calculateHerdValuation,
   categoryFallback,
@@ -77,7 +77,7 @@ export default async function ValuationPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) redirect("/sign-in");
-  if (!isAdminEmail(user.email)) redirect("/dashboard");
+  if (!(await isAdminUser(supabase, user.id))) redirect("/dashboard");
 
   // Fetch herds (same query as dashboard)
   const { data: herds } = await supabase

@@ -11,7 +11,7 @@ import {
   FlaskConical,
   CreditCard,
 } from "lucide-react";
-import { isAdminEmail } from "@/lib/data/admin";
+import { isAdminUser } from "@/lib/data/admin";
 
 export const revalidate = 0;
 
@@ -48,7 +48,7 @@ export default async function SettingsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const isAdmin = isAdminEmail(user?.email);
+  const isAdmin = await isAdminUser(supabase, user?.id);
 
   return (
     <div className="max-w-4xl">

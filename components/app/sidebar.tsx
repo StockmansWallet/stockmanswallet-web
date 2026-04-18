@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/app/(auth)/actions";
-import { isAdminEmail } from "@/lib/data/admin";
 import { Bell, Crown, LogOut } from "lucide-react";
 import { NotificationBadge } from "@/components/app/notification-badge";
 import { tierDisplayName, type SubscriptionTier } from "@/lib/subscriptions/tiers";
@@ -35,7 +34,7 @@ function NavLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
   );
 }
 
-export function Sidebar({ userEmail, subscriptionTier = "stockman", isAdvisor = false }: { userEmail?: string; subscriptionTier?: string; isAdvisor?: boolean }) {
+export function Sidebar({ isAdmin = false, subscriptionTier = "stockman", isAdvisor = false }: { isAdmin?: boolean; subscriptionTier?: string; isAdvisor?: boolean }) {
   const pathname = usePathname();
 
   const checkActive = (href: string) => {
@@ -84,7 +83,7 @@ export function Sidebar({ userEmail, subscriptionTier = "stockman", isAdvisor = 
         )}
 
         {/* Admin */}
-        {isAdminEmail(userEmail) && (
+        {isAdmin && (
           <div className="mx-0 mt-4 border-t border-white/5 pt-4">
             <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-text-muted/60">Admin</p>
             <div className="space-y-0.5">

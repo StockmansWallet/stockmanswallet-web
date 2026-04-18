@@ -23,12 +23,14 @@ export default async function AppLayout({
     redirect("/sign-in");
   }
 
-  // Fetch user role, subscription tier, and onboarding status
+  // Fetch user role, subscription tier, onboarding status, admin flag
   const { data: profile, error: profileError } = await supabase
     .from("user_profiles")
-    .select("role, subscription_tier, onboarding_completed")
+    .select("role, subscription_tier, onboarding_completed, is_admin")
     .eq("user_id", user.id)
     .maybeSingle();
+
+  const isAdmin = profile?.is_admin === true;
 
   // Redirect new users to onboarding wizard
   // Fallback: if profile exists but onboarding_completed is false, check for existing herds.
@@ -85,7 +87,7 @@ export default async function AppLayout({
       <div className="flex flex-1">
         <div className="hidden lg:block">
           <div className="sticky top-20 h-[calc(100vh-5rem)] py-4 pl-6">
-            <Sidebar userEmail={user.email} subscriptionTier={profile?.subscription_tier || "stockman"} isAdvisor={isAdvisor} />
+            <Sidebar isAdmin={isAdmin} subscriptionTier={profile?.subscription_tier || "stockman"} isAdvisor={isAdvisor} />
           </div>
         </div>
 

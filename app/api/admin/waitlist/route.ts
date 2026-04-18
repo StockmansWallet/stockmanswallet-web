@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
-import { isAdminEmail } from "@/lib/data/admin";
+import { isAdminUser } from "@/lib/data/admin";
 
 export async function DELETE(request: Request) {
   const supabase = await createClient();
@@ -9,7 +9,7 @@ export async function DELETE(request: Request) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user || !isAdminEmail(user.email)) {
+  if (!user || !(await isAdminUser(supabase, user.id))) {
     return NextResponse.json({ error: "Unauthorised" }, { status: 403 });
   }
 
