@@ -17,52 +17,14 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { extractDocument } from "@/lib/grid-iq/extraction-service";
-import type { ExtractionResult, KillSheetLineItemData } from "@/lib/grid-iq/types";
-import { deriveSexFromCategory } from "@/lib/grid-iq/category-sex";
+import type { ExtractionResult } from "@/lib/grid-iq/types";
 import { createClient } from "@/lib/supabase/client";
+import {
+  saveProcessorGrid,
+  saveKillSheet,
+} from "@/app/(app)/dashboard/tools/grid-iq/upload-actions";
 
 type UploadType = "grid" | "killsheet";
-
-// Normalise date strings to YYYY-MM-DD for PostgreSQL.
-// Handles DD/MM/YYYY (Australian), MM/DD/YYYY, and YYYY-MM-DD.
-function normaliseDate(raw: string | null | undefined): string | null {
-  if (!raw) return null;
-  const s = raw.trim();
-  // Already ISO format
-  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.split("T")[0];
-  // DD/MM/YYYY or D/M/YYYY (Australian)
-  const slashParts = s.match(/^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})$/);
-  if (slashParts) {
-    const a = parseInt(slashParts[1], 10);
-    const b = parseInt(slashParts[2], 10);
-    const year = slashParts[3];
-    // If first part > 12, it must be DD/MM/YYYY
-    if (a > 12) return `${year}-${String(b).padStart(2, "0")}-${String(a).padStart(2, "0")}`;
-    // If second part > 12, it must be MM/DD/YYYY
-    if (b > 12) return `${year}-${String(a).padStart(2, "0")}-${String(b).padStart(2, "0")}`;
-    // Ambiguous - assume Australian DD/MM/YYYY
-    return `${year}-${String(b).padStart(2, "0")}-${String(a).padStart(2, "0")}`;
-  }
-  return s;
-}
-
-// Add UUID ids to nested JSONB entries so iOS Codable can decode them.
-// iOS ProcessorGridEntry, WeightBandPrice, KillSheetCategorySummary, etc.
-// all expect an `id: UUID` field.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function addIdsToEntries(entries: any[]): any[] {
-  return entries.map((entry) => {
-    const withId = { id: crypto.randomUUID(), ...entry };
-    // Also add ids to nested weightBandPrices if present
-    if (Array.isArray(withId.weightBandPrices)) {
-      withId.weightBandPrices = withId.weightBandPrices.map(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (wbp: any) => ({ id: crypto.randomUUID(), ...wbp })
-      );
-    }
-    return withId;
-  });
-}
 
 const ACCEPTED_TYPES = [
   "image/jpeg",
@@ -258,88 +220,25 @@ export function GridIQUploader({
     setError(null);
 
     try {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session?.user?.id) throw new Error("Not authenticated.");
-
       if (result.documentType === "grid" && result.gridData) {
-        const grid = result.gridData;
-        const effectiveProcessor = grid.processorName || "Unknown Processor";
-        const newId = crypto.randomUUID();
-        const { error: insertError } = await supabase
-          .from("processor_grids")
-          .insert({
-            id: newId,
-            user_id: session.user.id,
-            processor_id: selectedProcessorId,
-            processor_name: effectiveProcessor,
-            grid_name: gridNameOverride || `${effectiveProcessor} - Grid`,
-            source_file_name: file?.name || null,
-            grid_code: grid.gridCode,
-            grid_date: normaliseDate(grid.gridDate) || new Date().toISOString().split("T")[0],
-            expiry_date: normaliseDate(grid.expiryDate),
-            contact_name: grid.contactName,
-            contact_phone: grid.contactPhone,
-            contact_email: grid.contactEmail,
-            location: grid.location,
-            notes: grid.notes,
-            entries: addIdsToEntries(grid.entries),
-          });
-
-        if (insertError) throw new Error(insertError.message);
-        if (onSaved) onSaved(newId, "grid");
+        const saveResult = await saveProcessorGrid({
+          recordName: gridNameOverride,
+          sourceFileName: file?.name ?? null,
+          processorId: selectedProcessorId,
+          gridData: result.gridData,
+        });
+        if (!saveResult.ok) throw new Error(saveResult.error);
+        if (onSaved) onSaved(saveResult.id, "grid");
         router.refresh();
       } else if (result.documentType === "killsheet" && result.killSheetData) {
-        const ks = result.killSheetData;
-        const effectiveProcessor = ks.processorName || "Unknown Processor";
-        const newId = crypto.randomUUID();
-        const { error: insertError } = await supabase
-          .from("kill_sheet_records")
-          .insert({
-            id: newId,
-            user_id: session.user.id,
-            processor_id: selectedProcessorId,
-            processor_name: effectiveProcessor,
-            record_name: gridNameOverride || `${effectiveProcessor} - Kill Sheet`,
-            source_file_name: file?.name || null,
-            kill_date: normaliseDate(ks.killDate) || new Date().toISOString().split("T")[0],
-            vendor_code: ks.vendorCode,
-            pic: ks.pic,
-            property_name: ks.propertyName,
-            booking_reference: ks.bookingReference,
-            booking_type: ks.bookingType,
-            total_head_count: ks.totalHeadCount,
-            total_body_weight: ks.totalBodyWeight,
-            total_gross_value: ks.totalGrossValue,
-            average_body_weight:
-              ks.averageBodyWeight ||
-              (ks.totalHeadCount > 0
-                ? ks.totalBodyWeight / ks.totalHeadCount
-                : 0),
-            average_price_per_kg:
-              ks.averagePricePerKg ||
-              (ks.totalBodyWeight > 0
-                ? ks.totalGrossValue / ks.totalBodyWeight
-                : 0),
-            average_value_per_head:
-              ks.totalHeadCount > 0
-                ? ks.totalGrossValue / ks.totalHeadCount
-                : 0,
-            condemns: ks.condemns,
-            category_summaries: addIdsToEntries(ks.categorySummaries || []),
-            grade_distribution: addIdsToEntries(ks.gradeDistribution || []),
-            line_items: addIdsToEntries(
-              (ks.lineItems || []).map((item: KillSheetLineItemData) => ({
-                ...item,
-                sex: item.sex ?? deriveSexFromCategory(item.category),
-              }))
-            ),
-          });
-
-        if (insertError) throw new Error(insertError.message);
-        if (onSaved) onSaved(newId, "killsheet");
+        const saveResult = await saveKillSheet({
+          recordName: gridNameOverride,
+          sourceFileName: file?.name ?? null,
+          processorId: selectedProcessorId,
+          killSheetData: result.killSheetData,
+        });
+        if (!saveResult.ok) throw new Error(saveResult.error);
+        if (onSaved) onSaved(saveResult.id, "killsheet");
         router.refresh();
       }
     } catch (err) {
