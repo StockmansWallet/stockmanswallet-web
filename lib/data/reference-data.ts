@@ -547,3 +547,58 @@ export { cattleMasterCategories, categoriesForSpecies } from "./weight-mapping";
 export const priceSources = [
   "Private Sales", "Saleyard", "Feedlot", "Processor", "Restocker",
 ];
+
+// MARK: - Fallback Prices
+//
+// Used by defaultFallbackPrice() in lib/engines/valuation-engine.ts when no
+// Supabase market data is available. Kept here so the constants live with
+// the rest of the reference data and can later be moved to a Supabase
+// fallback_prices table without touching the engine. Values are AUD per kg.
+
+/**
+ * Exact-match cattle fallback prices keyed by canonical MLA category name.
+ * Covers the categories that iOS and web resolve to via
+ * ReferenceData.resolveMLACategory. Missing keys fall through to
+ * cattleDefaultFallbackPrice below.
+ */
+export const cattleFallbackPrices: Record<string, number> = {
+  "Weaner Steer": 3.89,
+  "Yearling Steer": 4.10,
+  "Grown Steer": 3.30,
+  Heifer: 3.89,
+  "Yearling Heifer": 4.10,
+  "Grown Heifer": 3.30,
+  Cows: 3.80,
+  "Grown Bull": 3.30,
+};
+
+/** Cattle default when no exact-match key is hit. */
+export const cattleDefaultFallbackPrice = 3.30;
+
+/** Sheep fallback prices keyed by any-of substring match. */
+export const sheepFallbackPrices: ReadonlyArray<{ match: readonly string[]; price: number }> = [
+  { match: ["Breeding Ewe", "Maiden Ewe", "Dry Ewe"], price: 10.56 },
+  { match: ["Cull Ewe", "Slaughter Ewe"], price: 9.24 },
+  { match: ["Wether Lamb", "Weaner Lamb", "Feeder Lamb"], price: 11.55 },
+  { match: ["Slaughter Lamb", "Lambs"], price: 10.89 },
+];
+
+/** Breeding / dry sow needs both a category token AND 'Sow' to match, so it lives outside the list. */
+export const pigBreederSowFallbackPrice = 2.18;
+
+/** Other pig fallbacks, any-of substring match. */
+export const pigFallbackPrices: ReadonlyArray<{ match: readonly string[]; price: number }> = [
+  { match: ["Cull Sow"], price: 1.98 },
+  { match: ["Weaner Pig", "Feeder Pig"], price: 2.31 },
+  { match: ["Grower", "Finisher"], price: 2.15 },
+  { match: ["Porker", "Baconer"], price: 2.18 },
+];
+
+export const goatFallbackPrices: ReadonlyArray<{ match: readonly string[]; price: number }> = [
+  { match: ["Breeder Doe", "Dry Doe"], price: 4.29 },
+  { match: ["Cull Doe"], price: 3.96 },
+  { match: ["Breeder Buck", "Sale Buck"], price: 4.46 },
+  { match: ["Mature Wether", "Rangeland Goat"], price: 4.29 },
+  { match: ["Capretto"], price: 5.05 },
+  { match: ["Chevon"], price: 4.13 },
+];

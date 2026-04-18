@@ -2,7 +2,16 @@
 // Ported from iOS ValuationEngine.swift + extensions
 // Pure functions  -  pricing/caching will be added when Supabase data layer is wired up
 
-import { resolveMLASaleyardName, saleyardToState } from "../data/reference-data";
+import {
+  resolveMLASaleyardName,
+  saleyardToState,
+  cattleFallbackPrices,
+  cattleDefaultFallbackPrice,
+  sheepFallbackPrices,
+  pigFallbackPrices,
+  pigBreederSowFallbackPrice,
+  goatFallbackPrices,
+} from "../data/reference-data";
 import { parseLocalDate as parseLocal } from "../dates";
 import { resolveMLACategory, defaultMappingRules } from "../data/weight-mapping";
 import { nearestSaleyards as nearestSaleyardsFn } from "../data/saleyard-proximity";
@@ -249,68 +258,39 @@ export function matchWeightRange(weight: number, availableRanges: string[]): str
 // MARK: - Default Fallback Prices
 
 /**
- * Category-specific default prices based on realistic market rates.
- * Used when no Supabase market data is available.
+ * Category-specific default prices used when no Supabase market data is
+ * available. Values live in lib/data/reference-data.ts so they can be
+ * edited alongside the rest of the reference tables (and eventually
+ * moved to a Supabase fallback_prices table without touching this file).
  */
 export function defaultFallbackPrice(category: string): number {
-  // Sheep categories
-  if (category.includes("Breeding Ewe") || category.includes("Maiden Ewe") || category.includes("Dry Ewe")) {
-    return 10.56;
-  } else if (category.includes("Cull Ewe") || category.includes("Slaughter Ewe")) {
-    return 9.24;
-  } else if (category.includes("Wether Lamb") || category.includes("Weaner Lamb") || category.includes("Feeder Lamb")) {
-    return 11.55;
-  } else if (category.includes("Slaughter Lamb") || category.includes("Lambs")) {
-    return 10.89;
-  }
-  // Pig categories
-  else if ((category.includes("Breeder") || category.includes("Dry Sow")) && category.includes("Sow")) {
-    return 2.18;
-  } else if (category.includes("Cull Sow")) {
-    return 1.98;
-  } else if (category.includes("Weaner Pig") || category.includes("Feeder Pig")) {
-    return 2.31;
-  } else if (category.includes("Grower") || category.includes("Finisher")) {
-    return 2.15;
-  } else if (category.includes("Porker") || category.includes("Baconer")) {
-    return 2.18;
-  }
-  // Goat categories
-  else if (category.includes("Breeder Doe") || category.includes("Dry Doe")) {
-    return 4.29;
-  } else if (category.includes("Cull Doe")) {
-    return 3.96;
-  } else if (category.includes("Breeder Buck") || category.includes("Sale Buck")) {
-    return 4.46;
-  } else if (category.includes("Mature Wether") || category.includes("Rangeland Goat")) {
-    return 4.29;
-  } else if (category.includes("Capretto")) {
-    return 5.05;
-  } else if (category.includes("Chevon")) {
-    return 4.13;
-  }
-  // Cattle categories (receives resolved MLA category names from DB)
-  // DB canonical names: Weaner Steer, Yearling Steer, Grown Steer, Heifer, Yearling Heifer, Grown Heifer, Cows, Grown Bull
-  else if (category === "Weaner Steer") {
-    return 3.89;
-  } else if (category === "Yearling Steer") {
-    return 4.10;
-  } else if (category === "Grown Steer") {
-    return 3.30;
-  } else if (category === "Heifer") {
-    return 3.89;
-  } else if (category === "Yearling Heifer") {
-    return 4.10;
-  } else if (category === "Grown Heifer") {
-    return 3.30;
-  } else if (category === "Cows") {
-    return 3.80;
-  } else if (category === "Grown Bull") {
-    return 3.30;
+  for (const entry of sheepFallbackPrices) {
+    if (entry.match.some((m) => category.includes(m))) return entry.price;
   }
 
-  // Default fallback
-  return 3.30;
+  // Breeding / dry sows require both tokens; this is why it lives outside
+  // the list-based pig table.
+  if (
+    (category.includes("Breeder") || category.includes("Dry Sow")) &&
+    category.includes("Sow")
+  ) {
+    return pigBreederSowFallbackPrice;
+  }
+  for (const entry of pigFallbackPrices) {
+    if (entry.match.some((m) => category.includes(m))) return entry.price;
+  }
+
+  for (const entry of goatFallbackPrices) {
+    if (entry.match.some((m) => category.includes(m))) return entry.price;
+  }
+
+  // Cattle receives canonical MLA category names from DB (Weaner Steer,
+  // Yearling Steer, Grown Steer, Heifer, Yearling Heifer, Grown Heifer,
+  // Cows, Grown Bull).
+  const cattle = cattleFallbackPrices[category];
+  if (cattle !== undefined) return cattle;
+
+  return cattleDefaultFallbackPrice;
 }
 
 // MARK: - Helper: Days Between Dates
