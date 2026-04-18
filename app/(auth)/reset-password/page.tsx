@@ -71,8 +71,9 @@ export default function ResetPasswordPage() {
             name="password"
             type="password"
             required
-            minLength={6}
-            placeholder="At least 6 characters"
+            minLength={12}
+            maxLength={128}
+            placeholder="At least 12 characters"
             autoComplete="new-password"
             className="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-white/10 dark:bg-white/5"
           />
@@ -90,7 +91,8 @@ export default function ResetPasswordPage() {
             name="confirm"
             type="password"
             required
-            minLength={6}
+            minLength={12}
+            maxLength={128}
             placeholder="Re-enter your password"
             autoComplete="new-password"
             className="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-white/10 dark:bg-white/5"

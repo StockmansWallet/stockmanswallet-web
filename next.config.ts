@@ -7,10 +7,14 @@ const nextConfig: NextConfig = {
     "/api/report/asset-register/pdf": ["./node_modules/@sparticuz/chromium/bin/**"],
   },
   images: {
+    // Pin to the exact Supabase project subdomain. The previous wildcard
+    // (*.supabase.co) would let next/image optimise and proxy images from
+    // any Supabase project - an attacker controlling any public Supabase
+    // project could serve tracking beacons or malicious SVGs via our origin.
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "*.supabase.co",
+        hostname: "glxnmljnuzigyqydsxhc.supabase.co",
       },
       {
         protocol: "https",
@@ -42,6 +46,20 @@ const nextConfig: NextConfig = {
           {
             key: "Strict-Transport-Security",
             value: "max-age=63072000; includeSubDomains; preload",
+          },
+          {
+            // Isolates this origin from same-origin popups opened by other
+            // origins. Prevents XS-Leaks and tab-napping against Supabase
+            // auth flows.
+            key: "Cross-Origin-Opener-Policy",
+            value: "same-origin",
+          },
+          {
+            // Blocks other origins from embedding our responses as no-cors
+            // subresources. Stops a malicious page from fetching our assets
+            // and using Spectre-style side channels to read them.
+            key: "Cross-Origin-Resource-Policy",
+            value: "same-origin",
           },
           {
             key: "Content-Security-Policy",

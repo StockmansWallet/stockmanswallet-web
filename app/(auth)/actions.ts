@@ -10,17 +10,23 @@ const signInSchema = z.object({
   password: z.string().min(1),
 });
 
+// Password policy: 12 chars minimum, 128 max. Existing users with
+// shorter passwords still sign in (signInSchema stays permissive at min(1));
+// this only applies when a password is being created or changed.
+const PASSWORD_MIN = 12;
+const PASSWORD_MAX = 128;
+
 const signUpSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
+  email: z.string().email().max(254),
+  password: z.string().min(PASSWORD_MIN).max(PASSWORD_MAX),
 });
 
 const forgotPasswordSchema = z.object({
-  email: z.string().email(),
+  email: z.string().email().max(254),
 });
 
 const updatePasswordSchema = z.object({
-  password: z.string().min(8),
+  password: z.string().min(PASSWORD_MIN).max(PASSWORD_MAX),
 });
 
 export async function signIn(formData: FormData) {
@@ -98,7 +104,10 @@ export async function forgotPassword(formData: FormData) {
   cookieStore.set("sw-password-recovery", "true", {
     httpOnly: true,
     secure: true,
-    sameSite: "lax",
+    // Strict: only sent on same-site top-level navigation. Recovery
+    // callback is always entered via our own link, not cross-site
+    // redirects, so Strict is correct.
+    sameSite: "strict",
     maxAge: 3600, // 1 hour - matches Supabase OTP expiry
     path: "/",
   });

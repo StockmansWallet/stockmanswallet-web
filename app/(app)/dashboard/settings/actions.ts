@@ -40,8 +40,8 @@ const updateProfileSettingsSchema = z.object({
 });
 
 const updatePasswordSchema = z.object({
-  new_password: z.string().min(8),
-  confirm_password: z.string().min(8),
+  new_password: z.string().min(12).max(128),
+  confirm_password: z.string().min(12).max(128),
 });
 
 type SupabaseClient = Awaited<ReturnType<typeof createClient>>;

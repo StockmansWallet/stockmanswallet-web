@@ -155,8 +155,9 @@ export default function SignUpPage() {
             name="password"
             type="password"
             required
-            minLength={8}
-            placeholder="At least 8 characters"
+            minLength={12}
+            maxLength={128}
+            placeholder="At least 12 characters"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-white/10 dark:bg-white/5"
@@ -175,7 +176,8 @@ export default function SignUpPage() {
             name="confirmPassword"
             type="password"
             required
-            minLength={8}
+            minLength={12}
+            maxLength={128}
             placeholder="Re-enter your password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
