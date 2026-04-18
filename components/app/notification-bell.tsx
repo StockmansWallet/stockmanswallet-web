@@ -71,9 +71,13 @@ export function NotificationBell() {
 
       if (!userIdRef.current) return;
 
-      // Realtime subscription with user_id filter
+      // Realtime subscription. The channel name includes the user id so
+      // Strict Mode double-mount and multi-tab sessions don't collide on a
+      // single "notifications-bell" channel. The INSERT handler refetches
+      // from the server instead of mutating local state directly so the
+      // badge count can't drift if an event is missed or duplicated.
       channel = supabase
-        .channel("notifications-bell")
+        .channel(`notifications-bell-${userIdRef.current.slice(0, 8)}`)
         .on(
           "postgres_changes",
           {
@@ -82,11 +86,17 @@ export function NotificationBell() {
             table: "notifications",
             filter: `user_id=eq.${userIdRef.current}`,
           },
-          (payload) => {
-            const row = payload.new as AppNotification;
-            setNotifications((prev) => [row, ...prev].slice(0, 10));
-            setUnreadCount((c) => c + 1);
-          }
+          () => { fetchNotifications(); }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "notifications",
+            filter: `user_id=eq.${userIdRef.current}`,
+          },
+          () => { fetchNotifications(); }
         )
         .subscribe();
     }
