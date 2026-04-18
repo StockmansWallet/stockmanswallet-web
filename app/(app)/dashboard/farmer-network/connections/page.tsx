@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Handshake } from "lucide-react";
 import { FarmerConnectionCard } from "@/components/app/farmer-network/farmer-connection-card";
 import { FarmerRequestCard } from "@/components/app/farmer-network/farmer-request-card";
+import { FarmerConnectionsRealtime } from "@/components/app/farmer-network/farmer-connections-realtime";
 import type { ConnectionRequest } from "@/lib/types/advisory";
 
 export const metadata = {
@@ -75,6 +76,7 @@ export default async function FarmerConnectionsPage() {
 
   return (
     <div className="max-w-4xl">
+      <FarmerConnectionsRealtime userId={user.id} />
       <PageHeader
         title="My Connections"
         titleClassName="text-4xl font-bold text-orange-400"

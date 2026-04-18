@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Handshake, Search, MessageSquare, ArrowRight } from "lucide-react";
+import { FarmerConnectionsRealtime } from "@/components/app/farmer-network/farmer-connections-realtime";
 
 export const metadata = {
   title: "Producer Network",
@@ -32,6 +33,7 @@ export default async function FarmerNetworkPage() {
 
   return (
     <div className="max-w-4xl">
+      <FarmerConnectionsRealtime userId={user.id} />
       <PageHeader
         title="Producer Network"
         titleClassName="text-4xl font-bold text-orange-400"

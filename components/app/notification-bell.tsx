@@ -71,11 +71,22 @@ export function NotificationBell() {
 
       if (!userIdRef.current) return;
 
-      // Realtime subscription. The channel name includes the user id so
-      // Strict Mode double-mount and multi-tab sessions don't collide on a
-      // single "notifications-bell" channel. The INSERT handler refetches
-      // from the server instead of mutating local state directly so the
-      // badge count can't drift if an event is missed or duplicated.
+      // Supabase Realtime websocket defaults to the anon key when the
+      // browser client is built from cookies (@supabase/ssr). Postgres
+      // Changes subscriptions evaluate the caller's RLS policies, so the
+      // socket needs the user JWT to see rows filtered by user_id.
+      // setAuth is safe to call repeatedly and is what fixes 'subscribed
+      // but events never arrive' on cookie-auth clients.
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        supabase.realtime.setAuth(session.access_token);
+      }
+
+      // Realtime subscription. Channel name is per-user so Strict Mode
+      // double-mount and multi-tab sessions don't collide on a single
+      // "notifications-bell" channel. The INSERT/UPDATE handler refetches
+      // from the server instead of mutating local state so the badge
+      // count can't drift if an event is missed or duplicated.
       channel = supabase
         .channel(`notifications-bell-${userIdRef.current.slice(0, 8)}`)
         .on(
@@ -111,8 +122,8 @@ export function NotificationBell() {
     }
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    // Periodic refetch every 30s as safety net
-    const interval = setInterval(fetchNotifications, 30000);
+    // Periodic refetch every 15s as a safety net when realtime is quiet
+    const interval = setInterval(fetchNotifications, 15000);
 
     return () => {
       if (channel) supabase.removeChannel(channel);
