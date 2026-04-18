@@ -28,6 +28,17 @@ const updateVisibilityToggleSchema = z.object({
   value: z.boolean(),
 });
 
+const updateProfileSettingsSchema = z.object({
+  first_name: z.string().min(1).max(100),
+  last_name: z.string().max(100).default(""),
+  role: z.string().min(1),
+  contact_email: z.string().email().or(z.literal("")).default(""),
+  contact_phone: z.string().max(30).default(""),
+  company_name: z.string().max(200).default(""),
+  property_name: z.string().max(200).default(""),
+  bio: z.string().max(1000).default(""),
+});
+
 const updatePasswordSchema = z.object({
   new_password: z.string().min(8),
   confirm_password: z.string().min(8),
@@ -193,6 +204,62 @@ export async function updateVisibilityToggle(field: string, value: boolean) {
 
   revalidatePath("/dashboard/settings");
   return { success: true };
+}
+
+/**
+ * Unified save for the Profile settings page. One Supabase round-trip
+ * writes every editable profile field at once. The Profile page no
+ * longer has per-section save buttons - one Save at the bottom
+ * covers Name + Contact Details + Bio.
+ */
+export async function updateProfileSettings(formData: FormData) {
+  const parsed = updateProfileSettingsSchema.safeParse({
+    first_name: formData.get("first_name"),
+    last_name: formData.get("last_name") ?? "",
+    role: formData.get("role"),
+    contact_email: formData.get("contact_email") ?? "",
+    contact_phone: formData.get("contact_phone") ?? "",
+    company_name: formData.get("company_name") ?? "",
+    property_name: formData.get("property_name") ?? "",
+    bio: formData.get("bio") ?? "",
+  });
+
+  if (!parsed.success) return { error: "Invalid input" };
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const d = parsed.data;
+  const displayName = [d.first_name, d.last_name].filter(Boolean).join(" ") || user.email || "";
+
+  // Auth metadata carries the name. Must write this before the upsert so
+  // the display_name in user_profiles reflects the new value.
+  const { error: authError } = await supabase.auth.updateUser({
+    data: { first_name: d.first_name, last_name: d.last_name },
+  });
+  if (authError) return { error: authError.message };
+
+  const fields: Record<string, unknown> = {
+    contact_email: d.contact_email || null,
+    contact_phone: d.contact_phone || null,
+    bio: d.bio || null,
+  };
+  // Producer keeps property_name; advisor keeps company_name. We write
+  // whichever is populated; blank strings clear the column.
+  if (d.company_name !== undefined) fields.company_name = d.company_name || null;
+  if (d.property_name !== undefined) fields.property_name = d.property_name || null;
+
+  const err = await upsertProfile(
+    supabase,
+    { user_id: user.id, display_name: displayName, role: roleToSnakeCase(d.role) },
+    fields,
+  );
+  if (err) return { error: err };
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/settings");
+  return { success: "Profile saved." };
 }
 
 export async function updatePassword(formData: FormData) {

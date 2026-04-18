@@ -4,19 +4,21 @@ import { useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { updateVisibilityToggle } from "./actions";
 
+/**
+ * Discoverability controls for producers. The "Visible to Advisors" toggle
+ * has been removed while advisor features are disabled for MVP; it will
+ * return alongside the advisor re-enable flip (FeatureFlags.advisorEnabled).
+ */
 export function VisibilityForm({
   isAdvisor,
-  isDiscoverable,
   isDiscoverableToFarmers,
   isListedInDirectory,
 }: {
   isAdvisor: boolean;
-  isDiscoverable: boolean;
   isDiscoverableToFarmers: boolean;
   isListedInDirectory: boolean;
 }) {
   const [values, setValues] = useState({
-    is_discoverable: isDiscoverable,
     is_discoverable_to_farmers: isDiscoverableToFarmers,
     is_listed_in_directory: isListedInDirectory,
   });
@@ -40,7 +42,7 @@ export function VisibilityForm({
   return (
     <div className="space-y-5">
       {error && (
-        <div className="rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm text-red-400">
+        <div role="alert" className="rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm text-red-400">
           {error}
         </div>
       )}
@@ -56,33 +58,21 @@ export function VisibilityForm({
           color="blue"
         />
       ) : (
-        <>
-          <Switch
-            id="is_discoverable"
-            checked={values.is_discoverable}
-            onChange={(c) => handleToggle("is_discoverable", c)}
-            disabled={saving === "is_discoverable"}
-            label="Visible to Advisors"
-            description="Your accountant, banker, or agent can find you by name or property."
-            color="blue"
-          />
-
-          <Switch
-            id="is_discoverable_to_farmers"
-            checked={values.is_discoverable_to_farmers}
-            onChange={(c) => handleToggle("is_discoverable_to_farmers", c)}
-            disabled={saving === "is_discoverable_to_farmers"}
-            label="Visible to Producers"
-            description="Other producers on Stockman's Wallet can find you in the Producer Network."
-            color="green"
-          />
-        </>
+        <Switch
+          id="is_discoverable_to_farmers"
+          checked={values.is_discoverable_to_farmers}
+          onChange={(c) => handleToggle("is_discoverable_to_farmers", c)}
+          disabled={saving === "is_discoverable_to_farmers"}
+          label="Visible to Producers"
+          description="Other producers on Stockman's Wallet can find you in the Producer Network."
+          color="green"
+        />
       )}
 
-      <p className="text-xs text-text-muted leading-relaxed">
+      <p className="text-xs leading-relaxed text-text-muted">
         {isAdvisor
           ? "Control whether producers can find you in the advisor directory."
-          : "Control who can find you on Stockman's Wallet. You can turn these off at any time."}
+          : "Control whether other producers can find you on Stockman's Wallet. You can turn this off at any time."}
       </p>
     </div>
   );
