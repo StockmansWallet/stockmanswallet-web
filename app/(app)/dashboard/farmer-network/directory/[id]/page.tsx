@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Building2, Handshake } from "lucide-react";
 import { FarmerConnectButton } from "@/components/app/farmer-network/farmer-connect-button";
+import { FarmerConnectionStatusBadge } from "@/components/app/farmer-network/farmer-connection-status-badge";
 
 export const metadata = {
   title: "Producer Profile",
@@ -67,18 +68,21 @@ export default async function FarmerProfilePage({
         <div className="bg-gradient-to-br from-orange-500/10 via-transparent to-transparent p-6">
           <div className="flex items-start gap-4">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-orange-500/15">
-              <Handshake className="h-7 w-7 text-orange-400" />
+              <Handshake className="h-7 w-7 text-orange-400" aria-hidden="true" />
             </div>
-            <div className="flex-1">
+            <div className="min-w-0 flex-1">
               <h2 className="text-xl font-bold text-text-primary">
                 {farmer.display_name}
               </h2>
               {farmer.company_name && (
                 <span className="mt-1 flex items-center gap-1 text-sm text-text-secondary">
-                  <Building2 className="h-3.5 w-3.5" />
+                  <Building2 className="h-3.5 w-3.5" aria-hidden="true" />
                   {farmer.company_name}
                 </span>
               )}
+            </div>
+            <div className="shrink-0 self-start">
+              <FarmerConnectionStatusBadge status={existingStatus} />
             </div>
           </div>
         </div>
@@ -86,7 +90,7 @@ export default async function FarmerProfilePage({
         <CardContent className="space-y-5 px-6 pb-6">
           {(farmer.state || farmer.region) && (
             <div className="flex items-center gap-2 text-sm text-text-secondary">
-              <MapPin className="h-4 w-4 text-text-muted" />
+              <MapPin className="h-4 w-4 text-text-muted" aria-hidden="true" />
               {farmer.state}
               {farmer.region ? `, ${farmer.region}` : ""}
             </div>
@@ -99,13 +103,15 @@ export default async function FarmerProfilePage({
             </div>
           )}
 
-          <div className="border-t border-white/5 pt-4">
-            <FarmerConnectButton
-              targetUserId={id}
-              existingStatus={existingStatus}
-              pendingRequestIdIfSent={pendingRequestIdIfSent}
-            />
-          </div>
+          {existingStatus !== "approved" && (
+            <div className="flex justify-end border-t border-white/5 pt-4">
+              <FarmerConnectButton
+                targetUserId={id}
+                existingStatus={existingStatus}
+                pendingRequestIdIfSent={pendingRequestIdIfSent}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

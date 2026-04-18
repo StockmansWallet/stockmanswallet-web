@@ -3,9 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ConfirmModal } from "@/components/app/advisory/confirm-modal";
-import { Handshake, Check, Clock, X } from "lucide-react";
+import { Handshake, X } from "lucide-react";
 import {
   sendFarmerConnectionRequest,
   cancelFarmerConnectionRequest,
@@ -16,13 +15,19 @@ interface FarmerConnectButtonProps {
   existingStatus: string | null;
   /**
    * ID of a pending connection this user sent. When non-null, the button
-   * surface offers a "Cancel request" action alongside the pending badge.
-   * Null when there is no pending request, or when the pending request was
-   * sent BY the other party (only the target can approve/deny those).
+   * offers a "Cancel Request" action. Null when there is no pending request,
+   * or when the pending request was sent BY the other party (only the target
+   * can approve/deny those, on the Connections page).
    */
   pendingRequestIdIfSent: string | null;
 }
 
+/**
+ * Action row for the Producer Profile page. Renders the appropriate
+ * Connect / Cancel Request / Re-request button based on current connection
+ * state. The status badge itself lives in the header via
+ * FarmerConnectionStatusBadge, so this component focuses on the action.
+ */
 export function FarmerConnectButton({
   targetUserId,
   existingStatus,
@@ -35,14 +40,10 @@ export function FarmerConnectButton({
   const [error, setError] = useState<string | null>(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
-  if (status === "approved") {
-    return (
-      <Badge variant="success">
-        <Check className="mr-1 h-3 w-3" />
-        Connected
-      </Badge>
-    );
-  }
+  // Nothing to act on once we're connected; the badge in the header
+  // communicates the state. Keeping this branch avoids rendering an
+  // action row with no button.
+  if (status === "approved") return null;
 
   const handleRequest = async () => {
     setLoading(true);
@@ -77,11 +78,7 @@ export function FarmerConnectButton({
   if (status === "pending") {
     return (
       <>
-        <div className="flex flex-col items-start gap-2">
-          <Badge variant="warning">
-            <Clock className="mr-1 h-3 w-3" />
-            Request Pending
-          </Badge>
+        <div className="flex flex-col items-end gap-2">
           {activePendingId ? (
             <Button
               variant="destructive"
@@ -119,13 +116,13 @@ export function FarmerConnectButton({
   const isRemoved = status === "removed";
 
   return (
-    <div>
+    <div className="flex flex-col items-end gap-1.5">
       <Button
         variant="primary"
         onClick={handleRequest}
         disabled={loading}
       >
-        <Handshake className="mr-1.5 h-4 w-4" />
+        <Handshake className="mr-1.5 h-4 w-4" aria-hidden="true" />
         {loading
           ? "Sending..."
           : isDeniedOrExpired || isRemoved
@@ -133,17 +130,17 @@ export function FarmerConnectButton({
           : "Connect"}
       </Button>
       {isDeniedOrExpired && (
-        <p className="mt-1 text-xs text-text-muted">
+        <p className="text-xs text-text-muted">
           Previous request was {status}. You can send a new one.
         </p>
       )}
       {isRemoved && (
-        <p className="mt-1 text-xs text-text-muted">
+        <p className="text-xs text-text-muted">
           Previous connection was removed. You can send a new request.
         </p>
       )}
       {error && (
-        <p className="mt-2 text-xs text-red-400">{error}</p>
+        <p role="alert" className="text-xs text-red-400">{error}</p>
       )}
     </div>
   );
