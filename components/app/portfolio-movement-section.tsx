@@ -35,9 +35,9 @@ function driverColour(driver: MovementDriver) {
     "Weight Gain": "bg-orange-500/20 text-orange-400",
     "Calf Accrual": "bg-purple-500/20 text-purple-400",
     "Mortality": "bg-red-500/20 text-red-400",
-    "Assumption": "bg-gray-500/20 text-gray-400",
+    "Assumption": "bg-white/[0.06] text-text-muted",
   };
-  return map[driver] ?? "bg-gray-500/20 text-gray-400";
+  return map[driver] ?? "bg-white/[0.06] text-text-muted";
 }
 
 export function PortfolioMovementSection({
