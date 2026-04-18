@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useCallback } from "react";
 import { Search, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface FarmerDirectorySearchProps {
   currentSearch: string;
@@ -108,17 +109,19 @@ export function FarmerDirectorySearch({
       </div>
 
       {anyFilterActive && (
-        <button
-          type="button"
-          onClick={() => {
-            setSearchValue("");
-            pushParams({ q: null, state: null, species: null });
-          }}
-          className="inline-flex items-center gap-1 text-xs font-medium text-text-muted transition-colors hover:text-text-primary"
-        >
-          <X className="h-3 w-3" aria-hidden="true" />
-          Clear filters
-        </button>
+        <div>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              setSearchValue("");
+              pushParams({ q: null, state: null, species: null });
+            }}
+          >
+            <X className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+            Clear filters
+          </Button>
+        </div>
       )}
     </div>
   );

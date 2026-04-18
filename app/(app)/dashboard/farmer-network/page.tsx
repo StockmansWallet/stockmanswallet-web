@@ -169,11 +169,13 @@ export default async function FarmerNetworkPage() {
               See all
             </Link>
           </div>
-          <div className="flex flex-col gap-3">
-            {nearbyProducers.map((p) => (
-              <FarmerCard key={p.user_id} farmer={p} />
-            ))}
-          </div>
+          <Card>
+            <div className="divide-y divide-white/[0.06]">
+              {nearbyProducers.map((p) => (
+                <FarmerCard key={p.user_id} farmer={p} />
+              ))}
+            </div>
+          </Card>
         </div>
       )}
     </div>

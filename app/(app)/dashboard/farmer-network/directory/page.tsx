@@ -117,11 +117,13 @@ export default async function FarmerDirectoryPage({
           />
         </Card>
       ) : (
-        <div className="flex flex-col gap-3">
-          {filteredFarmers.map((farmer) => (
-            <FarmerCard key={farmer.user_id} farmer={farmer} />
-          ))}
-        </div>
+        <Card>
+          <div className="divide-y divide-white/[0.06]">
+            {filteredFarmers.map((farmer) => (
+              <FarmerCard key={farmer.user_id} farmer={farmer} />
+            ))}
+          </div>
+        </Card>
       )}
     </div>
   );
