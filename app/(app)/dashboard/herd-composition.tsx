@@ -1,13 +1,14 @@
-// Category colour mapping (warm earth tones for 5 master categories)
+// Each herd category maps to one of the categorical chart tokens so the
+// composition donut stays in sync with the wider palette.
 export const categoryColours: Record<string, string> = {
-  "Steer": "#F87171",
-  "Heifer": "#7CA749",
-  "Breeder": "#FF8000",
-  "Dry Cow": "#8B5E3C",
-  "Bull": "#60A5FA",
+  "Steer": "var(--color-chart-7)",
+  "Heifer": "var(--color-chart-3)",
+  "Breeder": "var(--color-chart-1)",
+  "Dry Cow": "var(--color-chart-5)",
+  "Bull": "var(--color-chart-2)",
 };
 
-export const fallbackColour = "#6B7280";
+export const fallbackColour = "var(--color-chart-neutral)";
 
 interface HerdCompositionProps {
   herds: { category: string; head_count: number | null }[];

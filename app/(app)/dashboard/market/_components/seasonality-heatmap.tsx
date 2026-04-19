@@ -23,8 +23,10 @@ export function SeasonalityHeatmap({ years, cells }: SeasonalityHeatmapProps) {
   const max = Math.max(...values);
   const range = max - min || 1;
 
+  // Gradient derived from the brand orange (#FF8000). t=0 is dim warm brown,
+  // t=1 is saturated orange. No-data cells fall back to the lowest surface tint.
   const colorFor = (v: number | null) => {
-    if (v == null) return "rgba(255,255,255,0.03)";
+    if (v == null) return "var(--color-surface-lowest)";
     const t = (v - min) / range;
     const r = Math.round(255 - (1 - t) * 80);
     const g = Math.round(128 + t * 40);

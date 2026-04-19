@@ -75,7 +75,7 @@ function CustomTooltip({
   const isToday = label === "Today";
 
   return (
-    <div className="rounded-lg bg-[#1A1A1A] px-3 py-2 text-xs shadow-lg ring-1 ring-white/10">
+    <div className="rounded-lg bg-chart-tooltip-bg px-3 py-2 text-xs shadow-lg ring-1 ring-chart-tooltip-border">
       <div className="flex items-center gap-1.5">
         <span className="text-text-muted">{label}</span>
         {isToday && (
@@ -248,8 +248,8 @@ export function PortfolioChart({ data, range }: PortfolioChartProps & { range?: 
         >
           <defs>
             <linearGradient id="valueGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#FF8000" stopOpacity={0.25} />
-              <stop offset="100%" stopColor="#FF8000" stopOpacity={0.02} />
+              <stop offset="0%" stopColor="var(--color-brand)" stopOpacity={0.25} />
+              <stop offset="100%" stopColor="var(--color-brand)" stopOpacity={0.02} />
             </linearGradient>
           </defs>
           <XAxis
@@ -273,7 +273,7 @@ export function PortfolioChart({ data, range }: PortfolioChartProps & { range?: 
                 <text
                   x={x}
                   y={y + 12}
-                  fill="rgba(255,255,255,0.38)"
+                  fill="var(--color-chart-axis)"
                   fontSize={11}
                   textAnchor={isFirst ? "start" : isLast ? "end" : "middle"}
                 >
@@ -286,24 +286,24 @@ export function PortfolioChart({ data, range }: PortfolioChartProps & { range?: 
             tickFormatter={formatCurrency}
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "rgba(255,255,255,0.38)", fontSize: 11 }}
+            tick={{ fill: "var(--color-chart-axis)", fontSize: 11 }}
             width={60}
           />
           <Tooltip content={<CustomTooltip />} />
           {minVal !== maxVal && (
             <>
-              <ReferenceLine y={maxVal} stroke="rgba(255,255,255,0.08)" strokeDasharray="4 4" />
-              <ReferenceLine y={minVal} stroke="rgba(255,255,255,0.08)" strokeDasharray="4 4" />
+              <ReferenceLine y={maxVal} stroke="var(--color-chart-grid)" strokeDasharray="4 4" />
+              <ReferenceLine y={minVal} stroke="var(--color-chart-grid)" strokeDasharray="4 4" />
             </>
           )}
           <Area
             type="monotone"
             dataKey="value"
-            stroke="#FF8000"
+            stroke="var(--color-brand)"
             strokeWidth={2.5}
             fill="url(#valueGrad)"
             dot={false}
-            activeDot={{ r: 4, fill: "#FF8000", strokeWidth: 0 }}
+            activeDot={{ r: 4, fill: "var(--color-brand)", strokeWidth: 0 }}
             connectNulls
             isAnimationActive
             animationDuration={1200}

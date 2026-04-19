@@ -4,8 +4,9 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import type { HerdCompositionItem } from "@/lib/types/reports";
 
 const COLORS = [
-  "#FFAA00", "#3b82f6", "#10b981", "#8b5cf6", "#ef4444",
-  "#06b6d4", "#f97316", "#ec4899", "#14b8a6", "#a855f7",
+  "var(--color-chart-1)", "var(--color-chart-2)", "var(--color-chart-3)", "var(--color-chart-4)",
+  "var(--color-chart-5)", "var(--color-chart-6)", "var(--color-chart-7)", "var(--color-chart-8)",
+  "var(--color-orange-light)", "var(--color-sky-light)",
 ];
 
 function formatCurrency(v: number) {
@@ -36,9 +37,9 @@ export function ReportCompositionChart({ data }: { data: HerdCompositionItem[] }
             </Pie>
             <Tooltip
               formatter={(value) => formatCurrency(value as number)}
-              contentStyle={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", fontSize: "12px" }}
-              labelStyle={{ color: "#fff" }}
-              itemStyle={{ color: "#d4d4d4" }}
+              contentStyle={{ background: "var(--color-chart-tooltip-bg)", border: "1px solid var(--color-chart-tooltip-border)", borderRadius: "8px", fontSize: "12px" }}
+              labelStyle={{ color: "var(--color-text-primary)" }}
+              itemStyle={{ color: "var(--color-text-secondary)" }}
             />
           </PieChart>
         </ResponsiveContainer>

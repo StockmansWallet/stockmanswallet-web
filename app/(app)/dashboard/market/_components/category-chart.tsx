@@ -48,7 +48,7 @@ function CustomTooltip({
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg bg-[#1A1A1A] px-3 py-2 text-xs shadow-lg ring-1 ring-white/10">
+    <div className="rounded-lg bg-chart-tooltip-bg px-3 py-2 text-xs shadow-lg ring-1 ring-chart-tooltip-border">
       <p className="text-text-muted">{label}</p>
       {payload.map((p, i) => (
         p.value != null ? (
@@ -152,11 +152,11 @@ export function CategoryChart({
         <AreaChart data={chartData} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id="mkt-value-grad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#FF8000" stopOpacity={0.28} />
-              <stop offset="100%" stopColor="#FF8000" stopOpacity={0.02} />
+              <stop offset="0%" stopColor="var(--color-brand)" stopOpacity={0.28} />
+              <stop offset="100%" stopColor="var(--color-brand)" stopOpacity={0.02} />
             </linearGradient>
           </defs>
-          <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} />
+          <CartesianGrid stroke="var(--color-chart-grid)" vertical={false} />
           {showSeasonalBand && (
             <>
               <Area
@@ -172,7 +172,7 @@ export function CategoryChart({
                 dataKey="seasonalRange"
                 stackId="band"
                 stroke="transparent"
-                fill="rgba(148, 163, 184, 0.12)"
+                fill="color-mix(in srgb, var(--color-chart-neutral) 20%, transparent)"
                 isAnimationActive={false}
                 name="5yr band"
               />
@@ -184,13 +184,13 @@ export function CategoryChart({
             tickLine={false}
             interval="preserveStartEnd"
             minTickGap={40}
-            tick={{ fill: "rgba(255,255,255,0.38)", fontSize: 11 }}
+            tick={{ fill: "var(--color-chart-axis)", fontSize: 11 }}
           />
           <YAxis
             tickFormatter={(v: number) => `$${v.toFixed(2)}`}
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "rgba(255,255,255,0.38)", fontSize: 11 }}
+            tick={{ fill: "var(--color-chart-axis)", fontSize: 11 }}
             width={56}
             domain={["auto", "auto"]}
           />
@@ -200,20 +200,20 @@ export function CategoryChart({
           }} />
           {min !== max && (
             <>
-              <ReferenceLine y={max} stroke="rgba(255,255,255,0.1)" strokeDasharray="4 4" label={{ value: `High $${max.toFixed(2)}`, position: "insideTopRight", fill: "rgba(255,255,255,0.4)", fontSize: 10 }} />
-              <ReferenceLine y={min} stroke="rgba(255,255,255,0.1)" strokeDasharray="4 4" label={{ value: `Low $${min.toFixed(2)}`, position: "insideBottomRight", fill: "rgba(255,255,255,0.4)", fontSize: 10 }} />
+              <ReferenceLine y={max} stroke="var(--color-chart-reference)" strokeDasharray="4 4" label={{ value: `High $${max.toFixed(2)}`, position: "insideTopRight", fill: "var(--color-chart-axis)", fontSize: 10 }} />
+              <ReferenceLine y={min} stroke="var(--color-chart-reference)" strokeDasharray="4 4" label={{ value: `Low $${min.toFixed(2)}`, position: "insideBottomRight", fill: "var(--color-chart-axis)", fontSize: 10 }} />
             </>
           )}
           {herdReferencePrice != null && (
             <ReferenceLine
               y={herdReferencePrice}
-              stroke="#2F8CD9"
+              stroke="var(--color-indigo)"
               strokeWidth={1.5}
               strokeDasharray="3 3"
               label={{
                 value: herdReferenceLabel ?? `Your herd $${herdReferencePrice.toFixed(2)}`,
                 position: "insideLeft",
-                fill: "#2F8CD9",
+                fill: "var(--color-indigo)",
                 fontSize: 11,
                 fontWeight: 600,
               }}
@@ -223,11 +223,11 @@ export function CategoryChart({
             type="monotone"
             dataKey="value"
             name="Avg $/kg"
-            stroke="#FF8000"
+            stroke="var(--color-brand)"
             strokeWidth={2.25}
             fill="url(#mkt-value-grad)"
             dot={false}
-            activeDot={{ r: 4, fill: "#FF8000", strokeWidth: 0 }}
+            activeDot={{ r: 4, fill: "var(--color-brand)", strokeWidth: 0 }}
             isAnimationActive
             animationDuration={700}
           />

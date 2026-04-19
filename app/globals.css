@@ -160,7 +160,7 @@ summary {
   /* Chart chrome */
   --color-chart-grid: rgba(255, 255, 255, 0.06);
   --color-chart-axis: rgba(255, 255, 255, 0.35);
-  --color-chart-tooltip-bg: #271F16;
+  --color-chart-tooltip-bg: #1A1A1A;
   --color-chart-tooltip-border: rgba(255, 255, 255, 0.08);
   --color-chart-reference: rgba(255, 255, 255, 0.25);
 

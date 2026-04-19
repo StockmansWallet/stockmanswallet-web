@@ -3,8 +3,9 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 const COLOURS = [
-  "#34D399", "#60A5FA", "#F472B6", "#A78BFA", "#FBBF24",
-  "#F87171", "#2DD4BF", "#818CF8", "#FB923C", "#E879F9",
+  "var(--color-chart-3)", "var(--color-chart-2)", "var(--color-chart-4)", "var(--color-chart-8)",
+  "var(--color-chart-5)", "var(--color-chart-7)", "var(--color-chart-6)", "var(--color-indigo-light)",
+  "var(--color-orange-light)", "var(--color-violet-light)",
 ];
 
 interface LgaData {
@@ -48,13 +49,13 @@ export function ClientsByLgaChart({ data, total }: { data: LgaData[]; total: num
             <Tooltip
               formatter={(value) => [`${value} client${value === 1 ? "" : "s"}`, ""]}
               contentStyle={{
-                background: "#1a1a1a",
-                border: "1px solid rgba(255,255,255,0.1)",
+                background: "var(--color-chart-tooltip-bg)",
+                border: "1px solid var(--color-chart-tooltip-border)",
                 borderRadius: "8px",
                 fontSize: "12px",
               }}
-              labelStyle={{ color: "#fff" }}
-              itemStyle={{ color: "#d4d4d4" }}
+              labelStyle={{ color: "var(--color-text-primary)" }}
+              itemStyle={{ color: "var(--color-text-secondary)" }}
             />
           </PieChart>
         </ResponsiveContainer>

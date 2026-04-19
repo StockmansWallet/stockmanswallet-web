@@ -3,8 +3,9 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 const COLORS = [
-  "#8b5cf6", "#10b981", "#3b82f6", "#f59e0b", "#ef4444",
-  "#06b6d4", "#f97316", "#ec4899", "#14b8a6", "#a855f7",
+  "var(--color-chart-4)", "var(--color-chart-3)", "var(--color-chart-2)", "var(--color-chart-5)",
+  "var(--color-chart-7)", "var(--color-chart-6)", "var(--color-chart-1)", "var(--color-chart-8)",
+  "var(--color-teal-light)", "var(--color-violet-light)",
 ];
 
 interface RegionData {
@@ -47,13 +48,13 @@ export function ClientsByRegionChart({ data }: { data: RegionData[] }) {
             <Tooltip
               formatter={(value) => [`${value} client${value === 1 ? "" : "s"}`, ""]}
               contentStyle={{
-                background: "#1a1a1a",
-                border: "1px solid rgba(255,255,255,0.1)",
+                background: "var(--color-chart-tooltip-bg)",
+                border: "1px solid var(--color-chart-tooltip-border)",
                 borderRadius: "8px",
                 fontSize: "12px",
               }}
-              labelStyle={{ color: "#fff" }}
-              itemStyle={{ color: "#d4d4d4" }}
+              labelStyle={{ color: "var(--color-text-primary)" }}
+              itemStyle={{ color: "var(--color-text-secondary)" }}
             />
           </PieChart>
         </ResponsiveContainer>

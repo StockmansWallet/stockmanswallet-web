@@ -14,17 +14,18 @@ import {
 import { RangePicker, sliceToRange, type RangeValue } from "./range-picker";
 import { MLA_CATEGORIES, type CategoryTimelineRow } from "../_constants";
 
-// Distinct palette that reads well on the dark surface. Order matches
-// MLA_CATEGORIES so the legend reads naturally from lighter to heavier stock.
+// Maps each MLA category to one of the 8 categorical chart tokens.
+// Orange is reserved for the primary series on single-line charts, so here
+// we skip chart-1 and start from chart-2 for the first category.
 const CATEGORY_COLOURS: Record<string, string> = {
-  "Grown Steer": "#3B82F6",
-  "Grown Heifer": "#F472B6",
-  "Grown Bull": "#EF4444",
-  "Yearling Steer": "#06B6D4",
-  "Yearling Heifer": "#A855F7",
-  "Weaner Steer": "#22C55E",
-  "Heifer": "#EC4899",
-  "Cows": "#EAB308",
+  "Grown Steer": "var(--color-chart-2)",
+  "Grown Heifer": "var(--color-chart-4)",
+  "Grown Bull": "var(--color-chart-7)",
+  "Yearling Steer": "var(--color-chart-6)",
+  "Yearling Heifer": "var(--color-chart-8)",
+  "Weaner Steer": "var(--color-chart-3)",
+  "Heifer": "var(--color-violet-light)",
+  "Cows": "var(--color-chart-5)",
 };
 
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -59,7 +60,7 @@ function Tip({
     .sort((a, b) => (b.value as number) - (a.value as number));
   if (rows.length === 0) return null;
   return (
-    <div className="rounded-lg bg-[#1A1A1A] px-3 py-2 text-xs shadow-lg ring-1 ring-white/10">
+    <div className="rounded-lg bg-chart-tooltip-bg px-3 py-2 text-xs shadow-lg ring-1 ring-chart-tooltip-border">
       <p className="text-text-muted">{label ? formatFullDate(label) : ""}</p>
       {rows.map((p, i) => (
         <p key={i} className="mt-0.5 font-semibold tabular-nums" style={{ color: p.color }}>
@@ -99,12 +100,12 @@ export function CategoryTimelineChart({ data, height = 240 }: Props) {
       </div>
       <ResponsiveContainer width="100%" height={height}>
         <LineChart data={chartData} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-          <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} />
+          <CartesianGrid stroke="var(--color-chart-grid)" vertical={false} />
           <XAxis
             dataKey="week_date"
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "rgba(255,255,255,0.38)", fontSize: 11 }}
+            tick={{ fill: "var(--color-chart-axis)", fontSize: 11 }}
             interval="preserveStartEnd"
             minTickGap={40}
             tickFormatter={(iso: string) => formatAxisDate(iso, showYearOnAxis)}
@@ -113,7 +114,7 @@ export function CategoryTimelineChart({ data, height = 240 }: Props) {
             tickFormatter={(v: number) => `$${v.toFixed(2)}`}
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "rgba(255,255,255,0.38)", fontSize: 11 }}
+            tick={{ fill: "var(--color-chart-axis)", fontSize: 11 }}
             width={56}
             domain={["auto", "auto"]}
           />
@@ -123,7 +124,7 @@ export function CategoryTimelineChart({ data, height = 240 }: Props) {
             align="center"
             height={32}
             iconType="plainline"
-            wrapperStyle={{ fontSize: 11, color: "rgba(255,255,255,0.7)", paddingTop: 8 }}
+            wrapperStyle={{ fontSize: 11, color: "var(--color-text-secondary)", paddingTop: 8 }}
           />
           {MLA_CATEGORIES.map((cat) => (
             <Line
@@ -131,10 +132,10 @@ export function CategoryTimelineChart({ data, height = 240 }: Props) {
               type="monotone"
               dataKey={cat}
               name={cat}
-              stroke={CATEGORY_COLOURS[cat] ?? "#FF8000"}
+              stroke={CATEGORY_COLOURS[cat] ?? "var(--color-brand)"}
               strokeWidth={1.75}
               dot={false}
-              activeDot={{ r: 3.5, fill: CATEGORY_COLOURS[cat] ?? "#FF8000", strokeWidth: 0 }}
+              activeDot={{ r: 3.5, fill: CATEGORY_COLOURS[cat] ?? "var(--color-brand)", strokeWidth: 0 }}
               connectNulls
               isAnimationActive
               animationDuration={600}

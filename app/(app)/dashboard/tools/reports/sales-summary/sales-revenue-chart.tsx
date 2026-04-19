@@ -11,21 +11,21 @@ export function SalesRevenueChart({ data }: { data: { month: string; value: numb
     <div className="h-56">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-          <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#a1a1aa" }} axisLine={false} tickLine={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-chart-grid)" />
+          <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--color-chart-axis)" }} axisLine={false} tickLine={false} />
           <YAxis
-            tick={{ fontSize: 11, fill: "#a1a1aa" }}
+            tick={{ fontSize: 11, fill: "var(--color-chart-axis)" }}
             axisLine={false}
             tickLine={false}
             tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
           />
           <Tooltip
             formatter={(value) => [formatCurrency(value as number), "Revenue"]}
-            contentStyle={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", fontSize: "12px" }}
-            labelStyle={{ color: "#fff" }}
-            itemStyle={{ color: "#f59e0b" }}
+            contentStyle={{ background: "var(--color-chart-tooltip-bg)", border: "1px solid var(--color-chart-tooltip-border)", borderRadius: "8px", fontSize: "12px" }}
+            labelStyle={{ color: "var(--color-text-primary)" }}
+            itemStyle={{ color: "var(--color-reports)" }}
           />
-          <Bar dataKey="value" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="value" fill="var(--color-reports)" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

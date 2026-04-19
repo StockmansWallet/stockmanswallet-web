@@ -17,9 +17,13 @@ const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Se
 // Approximate week number of the first day of each month (non-leap year).
 const MONTH_START_WEEKS = [1, 5, 9, 14, 18, 22, 27, 31, 35, 40, 44, 48];
 
-// Colour ramp: older years fade back, the current year pops.
-// Matches Luke's sketch (grey / red / green) while staying readable on a dark surface.
-const YEAR_COLOURS = ["rgba(148, 163, 184, 0.85)", "#EF4444", "#22C55E"];
+// Older years fade back, current year pops.
+// Grey (muted) for history, red + emerald for mid + current year.
+const YEAR_COLOURS = [
+  "var(--color-chart-neutral)",
+  "var(--color-red)",
+  "var(--color-emerald)",
+];
 
 type Row = {
   week: number;
@@ -53,7 +57,7 @@ function Tip({
   const rows = payload.filter((p) => p.value != null);
   if (rows.length === 0) return null;
   return (
-    <div className="rounded-lg bg-[#1A1A1A] px-3 py-2 text-xs shadow-lg ring-1 ring-white/10">
+    <div className="rounded-lg bg-chart-tooltip-bg px-3 py-2 text-xs shadow-lg ring-1 ring-chart-tooltip-border">
       <p className="text-text-muted">{typeof label === "number" ? weekToMonthLabel(label) : ""}</p>
       {rows.map((p, i) => (
         <p key={i} className="mt-0.5 font-semibold tabular-nums" style={{ color: p.color }}>
@@ -99,7 +103,7 @@ export function YearOverlayChart({ series, height = 240 }: Props) {
   return (
     <ResponsiveContainer width="100%" height={height}>
       <LineChart data={chartData} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-        <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} />
+        <CartesianGrid stroke="var(--color-chart-grid)" vertical={false} />
         <XAxis
           dataKey="week"
           type="number"
@@ -111,13 +115,13 @@ export function YearOverlayChart({ series, height = 240 }: Props) {
           }}
           axisLine={false}
           tickLine={false}
-          tick={{ fill: "rgba(255,255,255,0.38)", fontSize: 11 }}
+          tick={{ fill: "var(--color-chart-axis)", fontSize: 11 }}
         />
         <YAxis
           tickFormatter={(v: number) => `$${v.toFixed(2)}`}
           axisLine={false}
           tickLine={false}
-          tick={{ fill: "rgba(255,255,255,0.38)", fontSize: 11 }}
+          tick={{ fill: "var(--color-chart-axis)", fontSize: 11 }}
           width={56}
           domain={["auto", "auto"]}
         />
@@ -127,11 +131,11 @@ export function YearOverlayChart({ series, height = 240 }: Props) {
           align="right"
           height={28}
           iconType="plainline"
-          wrapperStyle={{ fontSize: 11, color: "rgba(255,255,255,0.6)" }}
+          wrapperStyle={{ fontSize: 11, color: "var(--color-text-secondary)" }}
         />
         {orderedYears.map((year, idx) => {
           const isCurrent = idx === orderedYears.length - 1;
-          const colour = YEAR_COLOURS[idx] ?? "#FF8000";
+          const colour = YEAR_COLOURS[idx] ?? "var(--color-brand)";
           return (
             <Line
               key={year}

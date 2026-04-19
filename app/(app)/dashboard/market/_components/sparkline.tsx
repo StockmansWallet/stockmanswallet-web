@@ -27,8 +27,10 @@ export function Sparkline({ points, width = 120, height = 36, positive }: Sparkl
   const area = `${path} L${coords[coords.length - 1].x.toFixed(2)},${height} L0,${height} Z`;
 
   const isPositive = positive ?? values[values.length - 1] >= values[0];
-  const stroke = isPositive ? "#34d399" : "#f87171";
-  const fill = isPositive ? "rgba(52,211,153,0.14)" : "rgba(248,113,113,0.14)";
+  const stroke = isPositive ? "var(--color-chart-positive)" : "var(--color-chart-negative)";
+  const fill = isPositive
+    ? "color-mix(in srgb, var(--color-chart-positive) 20%, transparent)"
+    : "color-mix(in srgb, var(--color-chart-negative) 20%, transparent)";
 
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="overflow-visible" aria-hidden>
