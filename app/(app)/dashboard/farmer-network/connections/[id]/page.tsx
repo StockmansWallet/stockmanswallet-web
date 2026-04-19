@@ -51,7 +51,7 @@ export default async function FarmerConnectionDetailPage({
 
   const { data: otherProfile } = await supabase
     .from("user_profiles")
-    .select("display_name, company_name")
+    .select("display_name, company_name, property_name")
     .eq("user_id", otherUserId)
     .single();
 
@@ -93,8 +93,10 @@ export default async function FarmerConnectionDetailPage({
         />
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-xl font-bold text-text-primary">{otherName}</h1>
-          {otherProfile?.company_name && (
-            <p className="truncate text-sm text-text-secondary">{otherProfile.company_name}</p>
+          {(otherProfile?.property_name || otherProfile?.company_name) && (
+            <p className="truncate text-sm text-text-secondary">
+              {otherProfile?.property_name ?? otherProfile?.company_name}
+            </p>
           )}
         </div>
         <div className="shrink-0">

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { MoreHorizontal, Ban, Flag, ShieldOff, UserMinus } from "lucide-react";
+import { Info, Ban, Flag, ShieldOff, UserMinus } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/app/advisory/confirm-modal";
@@ -129,11 +129,11 @@ export function ModerationMenu({
         <button
           type="button"
           onClick={() => setPanel(panel === "root" ? "closed" : "root")}
-          aria-label="More actions"
+          aria-label="Profile actions"
           aria-expanded={panel === "root"}
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-white/[0.06] hover:text-text-primary"
+          className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-lowest text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary"
         >
-          <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
+          <Info className="h-4 w-4" aria-hidden="true" />
         </button>
 
         {panel === "root" && (

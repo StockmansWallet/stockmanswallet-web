@@ -57,16 +57,17 @@ export default async function FarmerNetworkPage() {
     new Set([...otherIds, ...incomingRequests.map((r) => r.requester_user_id)]),
   );
 
-  const profileMap = new Map<string, { display_name: string; company_name: string | null; state: string | null; region: string | null }>();
+  const profileMap = new Map<string, { display_name: string; company_name: string | null; property_name: string | null; state: string | null; region: string | null }>();
   if (otherIds.length > 0) {
     const { data: profiles } = await supabase
       .from("user_profiles")
-      .select("user_id, display_name, company_name, state, region")
+      .select("user_id, display_name, company_name, property_name, state, region")
       .in("user_id", otherIds);
     for (const p of profiles ?? []) {
       profileMap.set(p.user_id, {
         display_name: p.display_name,
         company_name: p.company_name,
+        property_name: p.property_name,
         state: p.state,
         region: p.region,
       });
@@ -263,7 +264,7 @@ export default async function FarmerNetworkPage() {
                   href={`/dashboard/farmer-network/connections/${c.id}`}
                   profileHref={`/dashboard/farmer-network/directory/${otherId}`}
                   name={profile?.display_name ?? c.requester_name}
-                  company={profile?.company_name}
+                  company={profile?.property_name ?? profile?.company_name}
                   status="approved"
                   lastMessage={lastMessages.get(c.id)?.content}
                   unreadCount={unreadByConnection.get(c.id) ?? 0}
@@ -292,7 +293,7 @@ export default async function FarmerNetworkPage() {
                   key={c.id}
                   href={`/dashboard/farmer-network/directory/${otherId}`}
                   name={profile?.display_name ?? c.requester_name}
-                  company={profile?.company_name}
+                  company={profile?.property_name ?? profile?.company_name}
                   status="pending"
                   avatarUrl={avatarMap.get(otherId) ?? null}
                 />
