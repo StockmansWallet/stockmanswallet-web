@@ -53,10 +53,8 @@ export function FarmerCard({ farmer, avatarUrl }: { farmer: DirectoryFarmer; ava
               {farmer.primary_species}
             </span>
           )}
+          {farmer.bio && <span className="truncate">{farmer.bio}</span>}
         </div>
-        {farmer.bio && (
-          <p className="mt-1 line-clamp-1 text-xs text-text-muted">{farmer.bio}</p>
-        )}
       </div>
 
       <ArrowRight
