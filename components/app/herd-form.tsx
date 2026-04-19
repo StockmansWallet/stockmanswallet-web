@@ -83,6 +83,14 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
   const [calvesHeadCount, setCalvesHeadCount] = useState(parsedCalves?.headCount?.toString() ?? "");
   const [calvesAgeMonths, setCalvesAgeMonths] = useState(parsedCalves?.ageMonths?.toString() ?? "");
   const [calvesWeight, setCalvesWeight] = useState(parsedCalves?.averageWeight?.toString() ?? "");
+  // User-editable CaF DWG anchor. Seed from the existing stamp, falling back to
+  // the herd creation date so backfilled calves accrue over the full ownership
+  // window. Dates are persisted as yyyy-MM-dd to match <input type="date"> format.
+  const [calvesWeighedOn, setCalvesWeighedOn] = useState(() => {
+    const existing = (herd as Record<string, unknown>)?.calf_weight_recorded_date as string | null | undefined;
+    const seed = existing ?? herd?.created_at ?? new Date().toISOString();
+    return new Date(seed).toISOString().slice(0, 10);
+  });
 
   const needsBreederSubType = category === "Breeder";
 
@@ -128,16 +136,15 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
     return otherParts.length > 0 ? otherParts.join(" | ") : "";
   }, [calvesHeadCount, calvesAgeMonths, calvesWeight, herd?.additional_info]);
 
-  // Track if calf weight changed (for DWG tracking)
+  // CaF DWG anchor sent to the server: uses the user-selected Weighed-on date
+  // rather than auto-stamping on weight change. Returns null when no calf weight
+  // is entered so the server clears the field.
   const calfWeightRecordedDate = useMemo(() => {
     const newWeight = Number(calvesWeight);
     if (!newWeight || newWeight <= 0) return null;
-    const originalWeight = parsedCalves?.averageWeight;
-    if (originalWeight == null || originalWeight !== newWeight) {
-      return new Date().toISOString();
-    }
-    return (herd as Record<string, unknown>)?.calf_weight_recorded_date as string ?? null;
-  }, [calvesWeight, parsedCalves?.averageWeight, herd]);
+    if (!calvesWeighedOn) return new Date().toISOString();
+    return new Date(calvesWeighedOn).toISOString();
+  }, [calvesWeight, calvesWeighedOn]);
 
   const autoPremium = species === "Cattle" ? cattleBreedPremiums[breed] ?? null : null;
 
@@ -552,6 +559,21 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
                     value={calvesWeight}
                     onChange={(e) => setCalvesWeight(e.target.value)}
                     placeholder="Weight in kg"
+                  />
+                </div>
+                {/* Weighed-on anchors the CaF DWG accrual. Seeded from the stored
+                    stamp (or creation date). Bounded to [created_at, today] so the
+                    user cannot pick a future date or one before the herd existed. */}
+                <div className="mt-4">
+                  <Input
+                    id="calves_weighed_on"
+                    label="Weighed on"
+                    type="date"
+                    min={herd?.created_at ? new Date(herd.created_at).toISOString().slice(0, 10) : undefined}
+                    max={new Date().toISOString().slice(0, 10)}
+                    value={calvesWeighedOn}
+                    onChange={(e) => setCalvesWeighedOn(e.target.value)}
+                    helperText="Leave as today unless backfilling historical data."
                   />
                 </div>
                 <p className="flex items-start gap-2 text-xs text-text-muted mt-2">

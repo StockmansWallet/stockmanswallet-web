@@ -199,6 +199,10 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
   const [calvesHeadCount, setCalvesHeadCount] = useState("");
   const [calvesAgeMonths, setCalvesAgeMonths] = useState("");
   const [calvesWeight, setCalvesWeight] = useState("");
+  // User-selected date the calves were weighed. Drives the CaF DWG anchor on save.
+  // Defaults to today (equal to creation for fresh Add); user can backdate when
+  // entering historical data so growth accrues over the correct period.
+  const [calvesWeighedOn, setCalvesWeighedOn] = useState(() => new Date().toISOString().slice(0, 10));
 
   // Section 5 - Breeding Details (breeder only, yes/no gate)
   const [breedingDetailsAnswer, setBreedingDetailsAnswer] = useState<"" | "yes" | "no">("");
@@ -477,7 +481,10 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
         if (calvesWeight) parts.push(`${calvesWeight} kg`);
         formData.set("additional_info", parts.join(", "));
         if (calvesWeight && Number(calvesWeight) > 0) {
-          formData.set("calf_weight_recorded_date", new Date().toISOString());
+          // Persist the user-selected Weighed-on date (yyyy-MM-dd) as an ISO string,
+          // not the auto-stamped moment of save. Falls back to today if somehow empty.
+          const iso = (calvesWeighedOn ? new Date(calvesWeighedOn) : new Date()).toISOString();
+          formData.set("calf_weight_recorded_date", iso);
         }
       }
     }
@@ -934,6 +941,19 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
                 placeholder="Weight in kg"
               />
             </div>
+
+            {/* Weighed-on anchors the CaF DWG accrual. Default today; backdate only
+                when entering historical data, so the 0.9 kg/day gain runs over the
+                correct window. Capped at today so users cannot pick a future date. */}
+            <Input
+              id="calves_weighed_on"
+              label="Weighed on"
+              type="date"
+              max={new Date().toISOString().slice(0, 10)}
+              value={calvesWeighedOn}
+              onChange={(e) => setCalvesWeighedOn(e.target.value)}
+              helperText="Leave as today unless backfilling historical data."
+            />
 
             <p className="flex items-start gap-2 text-xs text-text-muted">
               <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
