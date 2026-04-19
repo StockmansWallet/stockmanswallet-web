@@ -4,7 +4,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Handshake, UserCheck, Clock, Users2, MapPin } from "lucide-react";
+import { Handshake, UserCheck, Clock, Users2, MapPin, ChevronRight } from "lucide-react";
 import { FarmerRequestCard } from "@/components/app/farmer-network/farmer-request-card";
 import { FarmerPeerCard } from "@/components/app/farmer-network/farmer-peer-card";
 import { FarmerProducerSearch } from "@/components/app/farmer-network/farmer-producer-search";
@@ -313,9 +313,10 @@ export default async function FarmerNetworkPage() {
             </h2>
             <Link
               href={`/dashboard/farmer-network/directory?state=${encodeURIComponent(myState)}`}
-              className="text-xs font-medium text-producer-network-light transition-colors hover:text-producer-network-light"
+              className="inline-flex items-center gap-1 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-xs font-medium text-producer-network-light transition-colors hover:bg-surface-raised"
             >
               See all
+              <ChevronRight className="h-3 w-3" aria-hidden="true" />
             </Link>
           </div>
           <Card>
