@@ -32,7 +32,7 @@ function NavLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
       {item.icon}
       <span>{item.label}</span>
       {item.notificationTypes && item.notificationTypes.length > 0 && (
-        <SidebarBadge types={item.notificationTypes} />
+        <SidebarBadge types={item.notificationTypes} suppressed={isActive} />
       )}
     </Link>
   );

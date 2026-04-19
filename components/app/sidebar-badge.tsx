@@ -8,11 +8,17 @@ interface SidebarBadgeProps {
   // Notification types this badge represents. Counts for the types are
   // summed and shown as a single pill.
   types: string[];
+  // When true (user is already on this feature's route), the badge is
+  // hidden. Stops a flicker-in-flicker-out loop: a new notification
+  // arrives, the sidebar pops, and MarkNotificationsRead clears it in
+  // the same tick. The user is already reading the thread; no alert needed.
+  suppressed?: boolean;
 }
 
-export function SidebarBadge({ types }: SidebarBadgeProps) {
+export function SidebarBadge({ types, suppressed = false }: SidebarBadgeProps) {
   const { counts } = useSidebarNotifications();
-  const total = types.reduce((sum, t) => sum + (counts[t] ?? 0), 0);
+  const rawTotal = types.reduce((sum, t) => sum + (counts[t] ?? 0), 0);
+  const total = suppressed ? 0 : rawTotal;
 
   const controls = useAnimationControls();
   const prevTotal = useRef(0);
