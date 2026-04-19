@@ -69,14 +69,18 @@ export function FarmerPeerCard({
         }
         className="absolute inset-0 z-0 rounded-lg"
       />
-      <CardContent className="relative p-4">
+      {/* Content layer ignores pointer events so clicks on whitespace and
+          text fall through to the overlay Link behind it. Any child that
+          should be independently clickable (the avatar) opts back in with
+          pointer-events-auto and a higher z-index. */}
+      <CardContent className="pointer-events-none relative p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             {profileHref ? (
               <Link
                 href={profileHref}
                 aria-label={`View ${name}'s profile`}
-                className="relative z-10"
+                className="pointer-events-auto relative z-10"
               >
                 {avatarBlock}
               </Link>
