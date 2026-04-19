@@ -74,7 +74,7 @@ export default async function AdvisorClientsPage() {
   return (
     <div className="max-w-4xl">
       <ConnectionRealtime userId={user.id} />
-      <PageHeader
+      <PageHeader feature="advisor"
         title="Clients"
         titleClassName="text-4xl font-bold text-advisor"
         subtitle="Manage your client connections"

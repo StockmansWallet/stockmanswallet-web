@@ -141,7 +141,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
               <Grid3x3 className="h-8 w-8 text-text-muted" />
               <p className="text-sm text-text-muted">No processor grids uploaded yet.</p>
               <Link href="/dashboard/tools/grid-iq/library?tab=grids&upload=grid">
-                <Button size="sm" variant="indigo">
+                <Button size="sm" variant="teal">
                   <Upload className="mr-1.5 h-3.5 w-3.5" />
                   Upload Grid
                 </Button>
@@ -218,7 +218,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
               <Target className="h-8 w-8 text-text-muted" />
               <p className="text-sm text-text-muted">No cattle herds in your portfolio.</p>
               <Link href="/dashboard/herds">
-                <Button size="sm" variant="indigo">
+                <Button size="sm" variant="teal">
                   Add Herd
                 </Button>
               </Link>
@@ -392,7 +392,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
         )}
 
         <Button
-          variant="indigo"
+          variant="teal"
           className="w-full"
           disabled={!canAnalyse || isPending}
           onClick={handleSubmit}

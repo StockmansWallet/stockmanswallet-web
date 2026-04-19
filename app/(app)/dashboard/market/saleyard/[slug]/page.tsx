@@ -115,7 +115,7 @@ export default async function SaleyardDetailPage({ params }: Props) {
   return (
     <div className="max-w-4xl">
       <BackLink href="/dashboard/market/pulse" label="All saleyards" />
-      <PageHeader
+      <PageHeader feature="markets"
         title={saleyard}
         subtitle={state ? `${state} - weekly history by category` : "Weekly history by category"}
         actions={

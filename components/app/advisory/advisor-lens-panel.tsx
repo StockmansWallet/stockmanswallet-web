@@ -40,7 +40,7 @@ function OverrideField({ label, currentValue, value, onChange, suffix = "", step
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="--"
-        className="w-24 rounded-lg bg-white/5 px-2.5 py-1.5 text-right text-sm tabular-nums text-text-primary outline-none focus:border-brand"
+        className="w-24 rounded-lg bg-white/5 px-2.5 py-1.5 text-right text-sm tabular-nums text-text-primary outline-none focus:border-advisor"
       />
     </div>
   );
@@ -142,9 +142,9 @@ export function AdvisorLensPanel({
                 <p className="text-[10px] font-medium uppercase tracking-wider text-advisor">Adjusted</p>
                 <p className="mt-1 text-lg font-bold tabular-nums text-advisor">${Math.round(adjustedValue).toLocaleString()}</p>
               </div>
-              <div className="rounded-lg bg-brand/10 p-3 text-center">
-                <p className="text-[10px] font-medium uppercase tracking-wider text-brand">Shaded</p>
-                <p className="mt-1 text-lg font-bold tabular-nums text-brand">${Math.round(shadedValue).toLocaleString()}</p>
+              <div className="rounded-lg bg-advisor/10 p-3 text-center">
+                <p className="text-[10px] font-medium uppercase tracking-wider text-advisor">Shaded</p>
+                <p className="mt-1 text-lg font-bold tabular-nums text-advisor">${Math.round(shadedValue).toLocaleString()}</p>
               </div>
             </div>
           )}
@@ -177,8 +177,8 @@ export function AdvisorLensPanel({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
-                    <DollarSign className="h-3.5 w-3.5 text-brand" />
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-advisor/15">
+                    <DollarSign className="h-3.5 w-3.5 text-advisor" />
                   </div>
                   <CardTitle>Shading</CardTitle>
                 </div>
@@ -214,7 +214,7 @@ export function AdvisorLensPanel({
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Reasoning for adjustments..."
                 rows={3}
-                className="w-full rounded-lg bg-white/5 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand"
+                className="w-full rounded-lg bg-white/5 px-3 py-2 text-sm text-text-primary outline-none focus:border-advisor"
               />
             </CardContent>
           </Card>

@@ -42,7 +42,7 @@ export default async function SimulatorNewHerdPage() {
 
   return (
     <div className="max-w-3xl">
-      <PageHeader
+      <PageHeader feature="advisor"
         title="Add Herd"
         subtitle="Add a herd to your simulator sandbox."
       />

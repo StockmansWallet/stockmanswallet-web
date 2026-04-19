@@ -31,13 +31,13 @@ function formatDate(iso: string): string {
 export function ShareAttachmentCard({ attachment }: { attachment: MessageAttachment }) {
   if (attachment.type === "herd") {
     return (
-      <div className="mt-2 flex min-w-0 items-start gap-3 rounded-xl border border-orange-500/20 bg-orange-500/[0.04] p-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-500/15">
-          <Beef className="h-4 w-4 text-orange-400" aria-hidden="true" />
+      <div className="mt-2 flex min-w-0 items-start gap-3 rounded-xl border border-producer-network/20 bg-producer-network/[0.04] p-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-producer-network/15">
+          <Beef className="h-4 w-4 text-producer-network-light" aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-orange-400">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-producer-network-light">
               Shared herd
             </span>
             <span aria-hidden="true" className="text-xs">

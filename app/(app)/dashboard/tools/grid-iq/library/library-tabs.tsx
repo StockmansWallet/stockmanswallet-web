@@ -332,7 +332,7 @@ function SelectionToolbar({
         <span />
       )}
       <div className="flex items-center gap-2">
-        <Button variant="indigo" size="sm" onClick={onUpload}>
+        <Button variant="teal" size="sm" onClick={onUpload}>
           <Upload className="mr-1.5 h-3.5 w-3.5" />
           {uploadLabel}
         </Button>
@@ -481,7 +481,7 @@ function GridsTab({
           description="Upload a processor grid photo, PDF, or spreadsheet. Grid IQ extracts the price matrix automatically."
           actionLabel="Upload Grid"
           onAction={onUpload}
-          variant="indigo"
+          variant="teal"
         />
       </Card>
     );
@@ -663,7 +663,7 @@ function KillSheetsTab({
           description="Upload kill sheets to start tracking your over-the-hooks performance. Kill history improves Grid IQ accuracy with personalised realisation factors."
           actionLabel="Upload Kill Sheet"
           onAction={onUpload}
-          variant="indigo"
+          variant="teal"
         />
       </Card>
     );

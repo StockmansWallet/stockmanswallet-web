@@ -18,7 +18,7 @@ export default function NewProcessorPage() {
         </Link>
       </div>
 
-      <PageHeader
+      <PageHeader feature="grid-iq"
         title="New Processor"
         titleClassName="text-2xl font-semibold text-text-primary"
         subtitle="Add a processor you work with. Address and contact details are stored once and reused by every grid, kill sheet, and analysis."

@@ -42,7 +42,7 @@ export default async function NewConsignmentPage() {
         </Link>
       </div>
 
-      <PageHeader
+      <PageHeader feature="grid-iq"
         title="New Consignment"
         titleClassName="text-2xl font-semibold text-text-primary"
         subtitle="Create a processor booking and allocate cattle from your herds"

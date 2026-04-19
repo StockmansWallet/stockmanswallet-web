@@ -86,7 +86,7 @@ export function BroadcastButton({ recipientCount }: BroadcastButtonProps) {
               rows={5}
               maxLength={5000}
               placeholder="Write your broadcast message..."
-              className="w-full resize-none rounded-xl border border-white/10 bg-surface-lowest p-3 text-sm text-text-primary placeholder:text-text-muted focus:border-orange-500/40 focus:outline-none focus:ring-1 focus:ring-orange-500/20"
+              className="w-full resize-none rounded-xl border border-white/10 bg-surface-lowest p-3 text-sm text-text-primary placeholder:text-text-muted focus:border-producer-network/40 focus:outline-none focus:ring-1 focus:ring-producer-network/20"
             />
             <p className="text-[11px] text-text-muted">
               {content.length} / 5000

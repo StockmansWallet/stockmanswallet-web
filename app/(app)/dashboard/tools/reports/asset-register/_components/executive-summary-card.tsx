@@ -15,7 +15,7 @@ export function ExecutiveSummaryCard({
     <div className="overflow-hidden rounded-xl">
       <div className="bg-white/[0.06] px-5 py-4">
         <p className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">Executive Summary</p>
-        <p className="mt-1 text-3xl font-bold tabular-nums tracking-tight text-brand">
+        <p className="mt-1 text-3xl font-bold tabular-nums tracking-tight text-reports">
           {fmt(summary.totalPortfolioValue)}
         </p>
       </div>

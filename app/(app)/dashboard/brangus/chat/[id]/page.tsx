@@ -24,7 +24,7 @@ export default async function BrangusConversationPage({
 
   return (
     <div className="flex max-w-3xl flex-col" style={{ height: "calc(100vh - 8rem)" }}>
-      <PageHeader
+      <PageHeader feature="brangus"
         title="Brangus"
         subtitle="Your personal livestock advisor, and new best mate."
         subtitleClassName="mt-1 text-base text-text-muted"

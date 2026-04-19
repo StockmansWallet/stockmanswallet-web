@@ -65,7 +65,7 @@ export default async function SalesSummaryPage({ searchParams }: { searchParams:
 
   return (
     <div className="max-w-4xl">
-      <PageHeader
+      <PageHeader feature="reports"
         title="Sales Summary"
         titleClassName="text-4xl font-bold text-warning"
         subtitle="Transaction history and performance metrics."

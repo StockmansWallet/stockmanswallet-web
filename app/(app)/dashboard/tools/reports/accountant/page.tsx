@@ -69,7 +69,7 @@ export default function AccountantReportPage() {
 
   return (
     <div className="max-w-3xl">
-      <PageHeader
+      <PageHeader feature="reports"
         title="Accountant Report"
         titleClassName="text-4xl font-bold text-warning"
         subtitle="Financial year reconciliation statement for your accountant."

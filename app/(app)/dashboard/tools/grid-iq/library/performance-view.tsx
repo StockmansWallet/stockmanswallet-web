@@ -48,7 +48,7 @@ export function PerformanceView({ profile, trend }: Props) {
         <EmptyState
           title="No performance data yet"
           description="Upload kill sheets and run post-sale analyses to build your performance profile. The more data you add, the more accurate your insights become."
-          variant="indigo"
+          variant="teal"
         />
       </Card>
     );

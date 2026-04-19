@@ -71,7 +71,7 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
   return (
     <div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-        <PageHeader
+        <PageHeader feature="grid-iq"
           title={processor.name}
           titleClassName="text-2xl font-bold text-teal"
           subtitle={processor.address || "No address set"}

@@ -89,9 +89,9 @@ export default async function FarmerDirectoryPage({
 
   return (
     <div className="max-w-4xl">
-      <PageHeader
+      <PageHeader feature="producer-network"
         title="Producer Directory"
-        titleClassName="text-4xl font-bold text-orange-400"
+        titleClassName="text-4xl font-bold text-producer-network-light"
         titleHref="/dashboard/farmer-network"
         subtitle="Back to Producer Network"
         subtitleClassName="text-sm font-medium text-text-secondary"
@@ -106,7 +106,7 @@ export default async function FarmerDirectoryPage({
       {filteredFarmers.length === 0 ? (
         <Card>
           <EmptyState
-            icon={<Search className="h-6 w-6 text-orange-400" />}
+            icon={<Search className="h-6 w-6 text-producer-network-light" />}
             title="No producers found"
             description={
               searchQuery || stateFilter || speciesFilter

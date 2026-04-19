@@ -52,7 +52,7 @@ export default async function AdvisorDirectoryPage({
 
   return (
     <div className="max-w-4xl">
-      <PageHeader
+      <PageHeader feature="advisor"
         title="Advisor Directory"
         titleClassName="text-4xl font-bold text-advisor"
         titleHref="/dashboard/advisory-hub"

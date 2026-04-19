@@ -94,7 +94,7 @@ export function ConsignmentsList({ consignments }: Props) {
   const headerActions = (
     <>
       <Link href="/dashboard/tools/grid-iq/consignments/new">
-        <Button variant="indigo" size="sm" className="gap-1.5">
+        <Button variant="teal" size="sm" className="gap-1.5">
           <Plus className="h-3.5 w-3.5" />
           New
         </Button>
@@ -112,7 +112,7 @@ export function ConsignmentsList({ consignments }: Props) {
   );
 
   const header = (
-    <PageHeader
+    <PageHeader feature="grid-iq"
       title="Consignments"
       titleClassName="text-2xl font-semibold text-text-primary"
       subtitle="Processor bookings and kill records"
@@ -132,7 +132,7 @@ export function ConsignmentsList({ consignments }: Props) {
             description="Create a consignment to track cattle sent to a processor. Allocate herds, link kill sheets, and record sales."
             actionLabel="New Consignment"
             actionHref="/dashboard/tools/grid-iq/consignments/new"
-            variant="indigo"
+            variant="teal"
           />
         </Card>
       </div>

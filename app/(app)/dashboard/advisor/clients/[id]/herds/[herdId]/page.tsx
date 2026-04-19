@@ -28,8 +28,8 @@ function InfoRow({ label, value, valueClassName }: { label: string; value: strin
 
 function SectionIcon({ icon: Icon }: { icon: React.ComponentType<{ className?: string }> }) {
   return (
-    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
-      <Icon className="h-3.5 w-3.5 text-brand" />
+    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-advisor/15">
+      <Icon className="h-3.5 w-3.5 text-advisor" />
     </div>
   );
 }
@@ -146,7 +146,7 @@ export default async function AdvisorHerdDetailPage({
 
   return (
     <div className="max-w-4xl">
-      <PageHeader
+      <PageHeader feature="advisor"
         title={herd.name}
         subtitle={[herd.species, herd.breed, categoryDisplay].filter(Boolean).join(" \u00B7 ")}
       />
@@ -164,8 +164,8 @@ export default async function AdvisorHerdDetailPage({
           {herdValue > 0 && (
             <div className="rounded-2xl bg-white/5 p-5">
               <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${isFallback ? "bg-error/15" : isStale ? "bg-warning/15" : "bg-brand/15"}`}>
-                  {isFallback ? <AlertTriangle className="h-5 w-5 text-error" /> : isStale ? <Clock className="h-5 w-5 text-warning" /> : <DollarSign className="h-5 w-5 text-brand" />}
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${isFallback ? "bg-error/15" : isStale ? "bg-warning/15" : "bg-advisor/15"}`}>
+                  {isFallback ? <AlertTriangle className="h-5 w-5 text-error" /> : isStale ? <Clock className="h-5 w-5 text-warning" /> : <DollarSign className="h-5 w-5 text-advisor" />}
                 </div>
                 <div>
                   <p className="text-xs font-medium text-text-muted">Estimated Herd Value</p>

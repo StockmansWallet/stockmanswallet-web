@@ -70,7 +70,7 @@ export default async function ConnectedClientsPage() {
   return (
     <div className="max-w-4xl">
       <ConnectionRealtime userId={user.id} />
-      <PageHeader
+      <PageHeader feature="advisor"
         title="My Clients"
         titleClassName="text-4xl font-bold text-advisor"
         subtitle="Manage your client connections"

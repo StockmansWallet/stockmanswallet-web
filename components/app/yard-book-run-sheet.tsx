@@ -33,9 +33,9 @@ const CATEGORY_CONFIG: Record<
   Livestock: {
     label: "Livestock",
     icon: IconCattleTags,
-    bg: "bg-orange-500/15",
-    text: "text-orange-400",
-    iconBg: "bg-orange-500/20",
+    bg: "bg-yard-book/15",
+    text: "text-yard-book-light",
+    iconBg: "bg-yard-book/20",
   },
   Operations: {
     label: "Operations",

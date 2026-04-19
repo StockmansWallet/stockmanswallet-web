@@ -148,9 +148,9 @@ export default async function FarmerNetworkPage() {
   return (
     <div className="max-w-4xl">
       <FarmerConnectionsRealtime userId={user.id} />
-      <PageHeader
+      <PageHeader feature="producer-network"
         title="Producer Network"
-        titleClassName="text-4xl font-bold text-orange-400"
+        titleClassName="text-4xl font-bold text-producer-network-light"
         subtitle="Connect and chat with other producers"
         subtitleClassName="text-sm font-medium text-text-secondary"
       />
@@ -190,7 +190,7 @@ export default async function FarmerNetworkPage() {
       {!hasAnything && (
         <Card className="mb-6">
           <EmptyState
-            icon={<Users2 className="h-6 w-6 text-orange-400" />}
+            icon={<Users2 className="h-6 w-6 text-producer-network-light" />}
             title="No connections yet"
             description="Search above, or browse the full directory to find other producers."
             actionLabel="Browse Directory"
@@ -284,12 +284,12 @@ export default async function FarmerNetworkPage() {
         <div className="mb-6">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-sm font-semibold text-text-primary">
-              <MapPin className="h-4 w-4 text-orange-400" aria-hidden="true" />
+              <MapPin className="h-4 w-4 text-producer-network-light" aria-hidden="true" />
               In your region ({myState})
             </h2>
             <Link
               href={`/dashboard/farmer-network/directory?state=${encodeURIComponent(myState)}`}
-              className="text-xs font-medium text-orange-400 transition-colors hover:text-orange-300"
+              className="text-xs font-medium text-producer-network-light transition-colors hover:text-producer-network-light"
             >
               See all
             </Link>
@@ -304,9 +304,9 @@ export default async function FarmerNetworkPage() {
         </div>
       )}
 
-      <Card className="bg-orange-500/[0.03]">
+      <Card className="bg-producer-network/[0.03]">
         <CardContent className="flex items-start gap-3 p-4">
-          <Handshake className="mt-0.5 h-5 w-5 shrink-0 text-orange-400" aria-hidden="true" />
+          <Handshake className="mt-0.5 h-5 w-5 shrink-0 text-producer-network-light" aria-hidden="true" />
           <p className="text-xs leading-relaxed text-text-muted">
             Connect with other producers to share insights and chat directly. You can disconnect at any time, and no portfolio data is shared unless you choose to attach it to a message.
           </p>

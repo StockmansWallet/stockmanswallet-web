@@ -36,7 +36,7 @@ export default async function MarketPulsePage({ searchParams }: Props) {
   return (
     <div className="max-w-4xl">
       <BackLink href="/dashboard/market" />
-      <PageHeader
+      <PageHeader feature="markets"
         title="Market Pulse"
         subtitle="Physical saleyard prices with 1-week and 4-week deltas. Click a saleyard for its full history."
       />

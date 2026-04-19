@@ -11,7 +11,7 @@ export default async function InsightsPage() {
 
   return (
     <div className="max-w-4xl">
-      <PageHeader
+      <PageHeader feature="insights"
         title="Insights"
         titleClassName="text-4xl font-bold text-insights"
         subtitle="AI-powered intelligence for your operation."

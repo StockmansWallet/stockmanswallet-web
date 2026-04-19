@@ -110,7 +110,7 @@ export function ConsignmentActions({
                 />
               </div>
               <Button
-                variant="indigo"
+                variant="teal"
                 size="sm"
                 disabled={!selectedKillSheetId || isPending}
                 onClick={handleLinkKillSheet}
@@ -126,7 +126,7 @@ export function ConsignmentActions({
       {!hasGrid && !showCompleteConfirm && (
         <div className="flex items-center gap-3">
           <Button
-            variant="indigo"
+            variant="teal"
             className="flex-1"
             disabled={isPending}
             onClick={() => setShowCompleteConfirm(true)}
@@ -156,7 +156,7 @@ export function ConsignmentActions({
             </p>
             <div className="mt-3 flex items-center gap-3">
               <Button
-                variant="indigo"
+                variant="teal"
                 size="sm"
                 disabled={isPending}
                 onClick={handleCompleteSale}

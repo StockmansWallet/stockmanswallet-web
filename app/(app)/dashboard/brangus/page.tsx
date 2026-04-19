@@ -9,7 +9,7 @@ export default async function BrangusPage() {
 
   return (
     <div className="max-w-4xl">
-      <PageHeader
+      <PageHeader feature="brangus"
         title="Brangus"
         titleClassName="text-4xl font-bold text-brand"
         subtitle="Your personal livestock advisor, and new best mate."

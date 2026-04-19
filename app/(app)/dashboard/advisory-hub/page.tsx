@@ -43,7 +43,7 @@ export default async function AdvisoryHubPage() {
   return (
     <div className="max-w-4xl">
       <ConnectionRealtime userId={user.id} />
-      <PageHeader
+      <PageHeader feature="advisor"
         title="Advisory Hub"
         titleClassName="text-4xl font-bold text-advisor"
         subtitle="Connect with your advisory team"

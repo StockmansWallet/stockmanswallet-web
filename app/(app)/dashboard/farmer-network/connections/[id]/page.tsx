@@ -94,10 +94,10 @@ export default async function FarmerConnectionDetailPage({
       {/* Header: avatar + name + company inline, moderation menu on the right. */}
       <div className="mb-4 flex items-center gap-3">
         <div
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-orange-500/15"
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-producer-network/15"
           aria-hidden="true"
         >
-          <span className="text-base font-bold text-orange-400">{initial}</span>
+          <span className="text-base font-bold text-producer-network-light">{initial}</span>
         </div>
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-xl font-bold text-text-primary">{otherName}</h1>

@@ -25,7 +25,7 @@ const CATEGORIES: {
   bg: string;
   text: string;
 }[] = [
-  { value: "Livestock", label: "Livestock", icon: IconCattleTags, bg: "bg-orange-500/15", text: "text-orange-400" },
+  { value: "Livestock", label: "Livestock", icon: IconCattleTags, bg: "bg-yard-book/15", text: "text-yard-book-light" },
   { value: "Operations", label: "Operations", icon: Wrench, bg: "bg-amber-700/15", text: "text-warning" },
   { value: "Finance", label: "Finance", icon: DollarSign, bg: "bg-info/15", text: "text-info" },
   { value: "Family", label: "Family", icon: Home, bg: "bg-violet/15", text: "text-violet" },

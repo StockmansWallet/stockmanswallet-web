@@ -66,7 +66,7 @@ export function AdvisorConnectButton({
   return (
     <div>
       <button
-        className={`${base} ${sizeClass} bg-brand text-white shadow-sm hover:bg-brand-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none`}
+        className={`${base} ${sizeClass} bg-advisor text-white shadow-sm hover:bg-advisor-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none`}
         onClick={handleRequest}
         disabled={loading}
       >

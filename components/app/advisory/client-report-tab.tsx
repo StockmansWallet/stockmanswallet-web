@@ -75,7 +75,7 @@ export function ClientReportTab({ reportData, clientName }: ClientReportTabProps
         <Card>
           <CardContent className="px-5 py-4">
             <p className="text-xs text-text-muted">Portfolio Value</p>
-            <p className="mt-1 text-xl font-bold tabular-nums text-brand">{fmt(totalValue)}</p>
+            <p className="mt-1 text-xl font-bold tabular-nums text-advisor">{fmt(totalValue)}</p>
           </CardContent>
         </Card>
         <Card>
@@ -154,7 +154,7 @@ export function ClientReportTab({ reportData, clientName }: ClientReportTabProps
                     <td className="px-3 py-3 text-right tabular-nums text-text-primary">{totalHead}</td>
                     <td className="px-3 py-3" />
                     <td className="px-3 py-3" />
-                    <td className="px-5 py-3 text-right tabular-nums text-brand">{fmt(totalValue)}</td>
+                    <td className="px-5 py-3 text-right tabular-nums text-advisor">{fmt(totalValue)}</td>
                   </tr>
                 </tfoot>
               </table>
@@ -211,7 +211,7 @@ export function ClientReportTab({ reportData, clientName }: ClientReportTabProps
                     <td className="px-3 py-3" />
                     <td className="px-3 py-3 text-right tabular-nums text-text-primary">{fmt(salesData.reduce((s, r) => s + r.grossValue, 0))}</td>
                     <td className="px-3 py-3 text-right tabular-nums text-text-primary">{fmt(salesData.reduce((s, r) => s + r.freightCost, 0))}</td>
-                    <td className="px-5 py-3 text-right tabular-nums text-brand">{fmt(totalSales)}</td>
+                    <td className="px-5 py-3 text-right tabular-nums text-advisor">{fmt(totalSales)}</td>
                   </tr>
                 </tfoot>
               </table>

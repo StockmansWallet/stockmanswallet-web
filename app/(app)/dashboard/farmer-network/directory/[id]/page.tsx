@@ -95,19 +95,19 @@ export default async function FarmerProfilePage({
 
   return (
     <div className="max-w-4xl">
-      <PageHeader
+      <PageHeader feature="producer-network"
         title="Producer Profile"
-        titleClassName="text-4xl font-bold text-orange-400"
+        titleClassName="text-4xl font-bold text-producer-network-light"
         titleHref="/dashboard/farmer-network/directory"
         subtitle="Back to directory"
         subtitleClassName="text-sm font-medium text-text-secondary"
       />
 
       <Card className="mb-6 overflow-hidden">
-        <div className="bg-gradient-to-br from-orange-500/10 via-transparent to-transparent p-6">
+        <div className="bg-gradient-to-br from-producer-network/10 via-transparent to-transparent p-6">
           <div className="flex items-start gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-orange-500/15">
-              <Handshake className="h-7 w-7 text-orange-400" aria-hidden="true" />
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-producer-network/15">
+              <Handshake className="h-7 w-7 text-producer-network-light" aria-hidden="true" />
             </div>
             <div className="min-w-0 flex-1">
               <h2 className="text-xl font-bold text-text-primary">

@@ -58,8 +58,8 @@ export function FarmerPeerCard({
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
               <div className="relative shrink-0" aria-hidden="true">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/15">
-                  <span className="text-sm font-bold text-orange-400">{initial}</span>
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-producer-network/15">
+                  <span className="text-sm font-bold text-producer-network-light">{initial}</span>
                 </div>
                 {hasUnread && (
                   <span

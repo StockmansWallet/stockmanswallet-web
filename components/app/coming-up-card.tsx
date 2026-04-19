@@ -42,7 +42,7 @@ export function ComingUpCard({ items, limit = 3 }: { items: YardBookItem[]; limi
           </div>
           <Link
             href="/dashboard/tools/yard-book"
-            className="text-xs font-medium text-brand hover:underline"
+            className="text-xs font-medium text-yard-book hover:underline"
           >
             View all
           </Link>
@@ -50,7 +50,7 @@ export function ComingUpCard({ items, limit = 3 }: { items: YardBookItem[]; limi
       </CardHeader>
       {items.length === 0 ? (
         <EmptyState
-          icon={<BookOpen className="h-6 w-6 text-brand" />}
+          icon={<BookOpen className="h-6 w-6 text-yard-book" />}
           title="Nothing coming up"
           description="Add events to your Yard Book to see them here."
           actionLabel="Open Yard Book"

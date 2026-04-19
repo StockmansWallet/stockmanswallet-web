@@ -62,7 +62,7 @@ export function AnalysisList({
           }
           actionLabel="New Analysis"
           actionHref="/dashboard/tools/grid-iq/analyse"
-          variant="indigo"
+          variant="teal"
         />
       </Card>
     );

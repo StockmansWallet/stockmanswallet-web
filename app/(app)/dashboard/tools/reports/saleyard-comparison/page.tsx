@@ -57,9 +57,9 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
 
   return (
     <div className="max-w-5xl">
-      <PageHeader
+      <PageHeader feature="reports"
         title="Saleyard Comparison"
-        titleClassName="text-4xl font-bold text-brand"
+        titleClassName="text-4xl font-bold text-reports"
         subtitle="Compare how your portfolio values across saleyards."
       />
 
@@ -87,7 +87,7 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
             <Card>
               <CardContent className="px-5 py-4">
                 <p className="text-xs text-text-muted">Best Saleyard</p>
-                <p className="mt-1 text-xl font-bold tabular-nums text-brand">{fmtValue(best!.totalPortfolioValue)}</p>
+                <p className="mt-1 text-xl font-bold tabular-nums text-reports">{fmtValue(best!.totalPortfolioValue)}</p>
                 <p className="mt-0.5 truncate text-xs text-text-secondary">{shortSaleyardName(best!.saleyardName)}</p>
               </CardContent>
             </Card>
@@ -160,12 +160,12 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
                       const showFull = short !== s.saleyardName;
                       return (
                         <tr key={s.saleyardName} className="transition-colors hover:bg-white/[0.02]">
-                          <td className={`px-5 py-2.5 tabular-nums ${isFirst ? "font-semibold text-brand" : "text-text-muted"}`}>{s.rank}</td>
+                          <td className={`px-5 py-2.5 tabular-nums ${isFirst ? "font-semibold text-reports" : "text-text-muted"}`}>{s.rank}</td>
                           <td className="px-3 py-2.5">
                             <p className={`${isFirst ? "font-semibold text-text-primary" : "text-text-primary"}`}>{short}</p>
                             {showFull && <p className="text-[10px] text-text-muted">{s.saleyardName}</p>}
                           </td>
-                          <td className={`px-3 py-2.5 text-right tabular-nums ${isFirst ? "font-semibold text-brand" : "text-text-primary"}`}>{fmtValue(s.totalPortfolioValue)}</td>
+                          <td className={`px-3 py-2.5 text-right tabular-nums ${isFirst ? "font-semibold text-reports" : "text-text-primary"}`}>{fmtValue(s.totalPortfolioValue)}</td>
                           <td className="px-3 py-2.5 text-right tabular-nums text-text-secondary">{fmtPrice(s.avgPrice)}</td>
                           <td className="px-3 py-2.5 text-right tabular-nums text-text-secondary">{fmtValue(s.avgPerHead)}</td>
                           <td className="hidden px-3 py-2.5 text-right tabular-nums text-text-muted sm:table-cell">{fmtPrice(s.spread)}</td>

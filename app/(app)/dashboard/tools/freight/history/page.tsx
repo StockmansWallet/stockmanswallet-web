@@ -61,7 +61,7 @@ export default async function FreightHistoryPage() {
         <ChevronLeft className="h-4 w-4" /> Freight IQ
       </Link>
 
-      <PageHeader
+      <PageHeader feature="freight-iq"
         title="Saved Estimates"
         titleClassName="text-4xl font-bold text-info"
         subtitle="Freight calculations you've bookmarked from iOS or web"

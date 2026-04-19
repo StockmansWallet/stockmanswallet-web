@@ -111,7 +111,7 @@ export default async function LensDetailPage({
 
   return (
     <div className="max-w-[1800px] space-y-6">
-      <PageHeader
+      <PageHeader feature="advisor"
         title={report.name}
         titleClassName="text-4xl font-bold text-advisor"
         titleHref={`/dashboard/advisor/clients/${connectionId}`}

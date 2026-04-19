@@ -51,7 +51,7 @@ export default async function MarketPage({ searchParams }: Props) {
 
   return (
     <div className="max-w-4xl">
-      <PageHeader
+      <PageHeader feature="markets"
         title="Market"
         titleClassName="text-4xl font-bold text-markets"
         subtitle="Live livestock market intelligence and price indicators."

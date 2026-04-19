@@ -178,7 +178,7 @@ export function ScenarioPicker({ connectionId, scenarios, activeLensScenarioId, 
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Conservative Q2 2026"
-              className="w-full rounded-lg bg-white/5 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand"
+              className="w-full rounded-lg bg-white/5 px-3 py-2 text-sm text-text-primary outline-none focus:border-advisor"
             />
           </div>
           <div>
@@ -186,7 +186,7 @@ export function ScenarioPicker({ connectionId, scenarios, activeLensScenarioId, 
             <select
               value={scenarioType}
               onChange={(e) => setScenarioType(e.target.value as ScenarioType)}
-              className="w-full rounded-lg bg-white/5 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand"
+              className="w-full rounded-lg bg-white/5 px-3 py-2 text-sm text-text-primary outline-none focus:border-advisor"
             >
               {Object.entries(SCENARIO_TYPE_CONFIG).map(([key, config]) => (
                 <option key={key} value={key}>{config.label}</option>

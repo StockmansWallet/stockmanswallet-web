@@ -253,7 +253,7 @@ export function ModerationMenu({
                 rows={3}
                 maxLength={1000}
                 placeholder="Describe what happened..."
-                className="w-full resize-none rounded-xl border border-white/10 bg-surface-lowest p-3 text-sm text-text-primary placeholder:text-text-muted focus:border-orange-500/40 focus:outline-none focus:ring-1 focus:ring-orange-500/20"
+                className="w-full resize-none rounded-xl border border-white/10 bg-surface-lowest p-3 text-sm text-text-primary placeholder:text-text-muted focus:border-producer-network/40 focus:outline-none focus:ring-1 focus:ring-producer-network/20"
               />
             </div>
             {error && (

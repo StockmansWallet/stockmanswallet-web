@@ -234,7 +234,7 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
   return (
     <div>
       <div className="flex items-start justify-between">
-        <PageHeader
+        <PageHeader feature="grid-iq"
           title={consignment.consignment_name || consignment.processor_name}
           titleClassName="text-2xl font-bold text-teal"
           subtitle={

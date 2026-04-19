@@ -117,8 +117,8 @@ export function ShareMenu({ onAttach, disabled }: ShareMenuProps) {
           title="Attach a herd or market price"
           className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-all disabled:opacity-40 ${
             mode === "root"
-              ? "border-orange-500/30 bg-orange-500/20 text-orange-300"
-              : "border-orange-500/25 bg-orange-500/15 text-orange-400 hover:bg-orange-500/25 hover:text-orange-300"
+              ? "border-producer-network/30 bg-producer-network/20 text-producer-network-light"
+              : "border-producer-network/25 bg-producer-network/15 text-producer-network-light hover:bg-producer-network/25 hover:text-producer-network-light"
           }`}
         >
           {mode === "root" ? (
@@ -135,8 +135,8 @@ export function ShareMenu({ onAttach, disabled }: ShareMenuProps) {
               onClick={openHerdPicker}
               className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-white/[0.04]"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/15">
-                <Beef className="h-4 w-4 text-orange-400" aria-hidden="true" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-producer-network/15">
+                <Beef className="h-4 w-4 text-producer-network-light" aria-hidden="true" />
               </div>
               <div>
                 <p className="text-sm font-medium text-text-primary">Share a herd</p>
@@ -173,8 +173,8 @@ export function ShareMenu({ onAttach, disabled }: ShareMenuProps) {
                     onClick={() => shareHerd(h)}
                     className="flex w-full items-center gap-3 px-4 py-3 text-left"
                   >
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-500/15">
-                      <Beef className="h-4 w-4 text-orange-400" aria-hidden="true" />
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-producer-network/15">
+                      <Beef className="h-4 w-4 text-producer-network-light" aria-hidden="true" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-text-primary">{h.name}</p>

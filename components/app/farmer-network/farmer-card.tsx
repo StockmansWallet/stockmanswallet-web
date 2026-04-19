@@ -23,8 +23,8 @@ export function FarmerCard({ farmer }: { farmer: DirectoryFarmer }) {
       className="group flex items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-white/[0.03]"
     >
       {/* Avatar: first initial inside an orange tile. */}
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-500/15">
-        <span className="text-sm font-bold text-orange-400">{initial}</span>
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-producer-network/15">
+        <span className="text-sm font-bold text-producer-network-light">{initial}</span>
       </div>
 
       <div className="min-w-0 flex-1">

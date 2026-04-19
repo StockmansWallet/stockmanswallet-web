@@ -252,7 +252,7 @@ export function ProcessorForm({
         >
           Cancel
         </Button>
-        <Button type="submit" variant="indigo" disabled={isPending}>
+        <Button type="submit" variant="teal" disabled={isPending}>
           {isPending ? (
             <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
           ) : (

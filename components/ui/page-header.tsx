@@ -1,6 +1,29 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 
+type FeatureHue =
+  | "brangus"
+  | "insights"
+  | "markets"
+  | "yard-book"
+  | "reports"
+  | "freight-iq"
+  | "grid-iq"
+  | "producer-network"
+  | "advisor";
+
+const FEATURE_TITLE: Record<FeatureHue, string> = {
+  brangus: "text-4xl font-bold text-brangus",
+  insights: "text-4xl font-bold text-insights",
+  markets: "text-4xl font-bold text-markets",
+  "yard-book": "text-4xl font-bold text-yard-book",
+  reports: "text-4xl font-bold text-reports",
+  "freight-iq": "text-4xl font-bold text-freight-iq",
+  "grid-iq": "text-4xl font-bold text-grid-iq",
+  "producer-network": "text-4xl font-bold text-producer-network",
+  advisor: "text-4xl font-bold text-advisor",
+};
+
 interface PageHeaderProps {
   title: string;
   titleHref?: string;
@@ -10,6 +33,8 @@ interface PageHeaderProps {
   subtitleClassName?: string;
   inline?: boolean;
   compact?: boolean;
+  /** Feature hue to tint the title with. Overridden by an explicit titleClassName. */
+  feature?: FeatureHue;
 }
 
 function PageHeader({
@@ -21,9 +46,13 @@ function PageHeader({
   subtitleClassName,
   inline: inlineProp,
   compact,
+  feature,
 }: PageHeaderProps) {
   const inline = inlineProp ?? !!subtitle;
-  const titleEl = <h1 className={titleClassName ?? "text-4xl font-bold text-text-primary"}>{title}</h1>;
+  const defaultTitleClass = feature
+    ? FEATURE_TITLE[feature]
+    : "text-4xl font-bold text-text-primary";
+  const titleEl = <h1 className={titleClassName ?? defaultTitleClass}>{title}</h1>;
 
   if (compact) {
     return (
@@ -59,4 +88,4 @@ function PageHeader({
 }
 
 export { PageHeader };
-export type { PageHeaderProps };
+export type { PageHeaderProps, FeatureHue };

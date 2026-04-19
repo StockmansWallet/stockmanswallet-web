@@ -303,7 +303,7 @@ export function ConsignmentForm({ herds, grids }: ConsignmentFormProps) {
             name="notes"
             rows={3}
             placeholder="Any additional notes about this consignment..."
-            className="w-full rounded-xl bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all ring-1 ring-inset ring-ring-subtle focus:ring-brand/60 focus:bg-surface-raised"
+            className="w-full rounded-xl bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all ring-1 ring-inset ring-ring-subtle focus:ring-grid-iq/60 focus:bg-surface-raised"
           />
         </CardContent>
       </Card>
@@ -318,7 +318,7 @@ export function ConsignmentForm({ herds, grids }: ConsignmentFormProps) {
         >
           Cancel
         </Button>
-        <Button type="submit" variant="indigo" disabled={isPending || totalHead === 0}>
+        <Button type="submit" variant="teal" disabled={isPending || totalHead === 0}>
           {isPending ? "Creating..." : "Create Consignment"}
         </Button>
       </div>

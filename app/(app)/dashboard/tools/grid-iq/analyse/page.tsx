@@ -61,7 +61,7 @@ export default async function NewAnalysisPage({
 
   return (
     <div>
-      <PageHeader
+      <PageHeader feature="grid-iq"
         title="New Analysis"
         titleClassName="text-2xl font-semibold text-text-primary"
         subtitle="Build a consignment and compare processor vs saleyard returns"

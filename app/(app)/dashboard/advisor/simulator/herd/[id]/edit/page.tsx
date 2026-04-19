@@ -49,7 +49,7 @@ export default async function SimulatorEditHerdPage({
 
   return (
     <div className="max-w-4xl pb-24">
-      <PageHeader
+      <PageHeader feature="advisor"
         title={`Edit: ${herd.name}`}
         subtitle={[herd.species, herd.breed].join(" \u00B7 ")}
       />

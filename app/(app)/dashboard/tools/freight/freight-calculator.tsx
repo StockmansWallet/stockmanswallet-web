@@ -531,7 +531,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                     defaultValue={customAddress}
                     onSelect={handleAddressSelect}
                     placeholder="Search address..."
-                    className="rounded-xl border-0 bg-surface py-3 pl-9 pr-4 ring-0 focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
+                    className="rounded-xl border-0 bg-surface py-3 pl-9 pr-4 ring-0 focus:ring-1 focus:ring-inset focus:ring-freight-iq/60 focus:bg-surface-raised"
                   />
                 </div>
               </div>

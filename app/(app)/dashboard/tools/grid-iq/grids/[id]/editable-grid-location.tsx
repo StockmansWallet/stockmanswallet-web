@@ -217,7 +217,7 @@ export function EditableGridLocation({
                 Cancel
               </Button>
               <Button
-                variant="indigo"
+                variant="teal"
                 size="sm"
                 onClick={handleSave}
                 disabled={isSaving || !coordsValid}

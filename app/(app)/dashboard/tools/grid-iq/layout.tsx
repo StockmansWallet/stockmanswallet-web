@@ -21,7 +21,7 @@ export default async function GridIQLayout({ children }: { children: React.React
 
   return (
     <div className="max-w-4xl">
-      <PageHeader
+      <PageHeader feature="grid-iq"
         title="Grid IQ"
         titleHref="/dashboard/tools/grid-iq"
         titleClassName="text-4xl font-bold text-teal"

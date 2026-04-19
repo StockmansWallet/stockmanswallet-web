@@ -40,8 +40,8 @@ export function FarmerRequestCard({ request }: FarmerRequestCardProps) {
         <CardContent className="p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-500/15">
-                <Handshake className="h-5 w-5 text-orange-400" />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-producer-network/15">
+                <Handshake className="h-5 w-5 text-producer-network-light" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-text-primary">

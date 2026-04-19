@@ -36,10 +36,10 @@ export function SaleyardComparisonChart({ data }: { data: { name: string; portfo
             radius={[999, 999, 999, 999]}
             barSize={22}
             name="Portfolio Value"
-            activeBar={{ fill: "var(--color-brand)", fillOpacity: 1 }}
+            activeBar={{ fill: "var(--color-reports)", fillOpacity: 1 }}
           >
             {displayData.map((_, i) => (
-              <Cell key={i} fill="var(--color-brand)" fillOpacity={opacityFor(i)} />
+              <Cell key={i} fill="var(--color-reports)" fillOpacity={opacityFor(i)} />
             ))}
             <LabelList
               dataKey="name"

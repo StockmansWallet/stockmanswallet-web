@@ -31,7 +31,7 @@ const CATEGORY_CONFIG: Record<
   YardBookCategory,
   { icon: IconComponent; bg: string; text: string; label: string }
 > = {
-  Livestock: { icon: IconCattleTags, bg: "bg-orange-500/15", text: "text-orange-400", label: "Livestock" },
+  Livestock: { icon: IconCattleTags, bg: "bg-yard-book/15", text: "text-yard-book-light", label: "Livestock" },
   Operations: { icon: Wrench, bg: "bg-amber-700/15", text: "text-warning", label: "Operations" },
   Finance: { icon: DollarSign, bg: "bg-info/15", text: "text-info", label: "Finance" },
   Family: { icon: Home, bg: "bg-violet/15", text: "text-violet", label: "Family" },
@@ -170,7 +170,7 @@ export default async function YardBookItemPage({
 
   return (
     <div className="max-w-4xl">
-      <PageHeader
+      <PageHeader feature="yard-book"
         title={item.title}
         subtitle={catConfig.label}
         actions={

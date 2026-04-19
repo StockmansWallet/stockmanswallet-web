@@ -32,7 +32,7 @@ export default async function IndicatorsPage({ searchParams }: Props) {
   return (
     <div className="max-w-4xl">
       <BackLink href="/dashboard/market" />
-      <PageHeader
+      <PageHeader feature="markets"
         title="National Categories"
         subtitle="Weighted saleyard averages by MLA category, with change over 1, 4, 12, and 52 weeks."
       />

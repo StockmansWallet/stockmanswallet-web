@@ -83,7 +83,7 @@ export function ProcessorsList({
   const headerActions = (
     <>
       <Link href="/dashboard/tools/grid-iq/processors/new">
-        <Button variant="indigo" size="sm" className="gap-1.5">
+        <Button variant="teal" size="sm" className="gap-1.5">
           <Plus className="h-3.5 w-3.5" />
           New
         </Button>
@@ -101,7 +101,7 @@ export function ProcessorsList({
   );
 
   const header = (
-    <PageHeader
+    <PageHeader feature="grid-iq"
       title="Processors"
       titleClassName="text-2xl font-semibold text-text-primary"
       subtitle="Your processor directory, reused across grids and analyses"
@@ -121,7 +121,7 @@ export function ProcessorsList({
             description="Add the processors you work with. Each processor stores a single copy of the address and contact details, and is reused every time you upload a grid or run an analysis."
             actionLabel="Add Processor"
             actionHref="/dashboard/tools/grid-iq/processors/new"
-            variant="indigo"
+            variant="teal"
           />
         </Card>
       </div>

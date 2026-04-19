@@ -35,7 +35,7 @@ const reports = [
 export default function ReportsPage() {
   return (
     <div className="max-w-4xl">
-      <PageHeader
+      <PageHeader feature="reports"
         title="Reports"
         titleClassName="text-4xl font-bold text-warning"
         subtitle="Generate and export reports"

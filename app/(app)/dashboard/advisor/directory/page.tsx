@@ -85,7 +85,7 @@ export default async function AdvisorProducerDirectoryPage({
 
   return (
     <div className="max-w-4xl">
-      <PageHeader
+      <PageHeader feature="advisor"
         title="Producer Directory"
         titleClassName="text-4xl font-bold text-advisor"
         subtitle="Search for producers to connect with"

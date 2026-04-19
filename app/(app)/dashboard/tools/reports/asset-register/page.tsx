@@ -42,9 +42,9 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
 
   return (
     <div className="max-w-4xl">
-      <PageHeader
+      <PageHeader feature="reports"
         title="Asset Register"
-        titleClassName="text-4xl font-bold text-brand"
+        titleClassName="text-4xl font-bold text-reports"
         subtitle="Complete herd listing with current valuations."
       />
 

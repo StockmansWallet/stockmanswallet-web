@@ -49,8 +49,9 @@ export default async function EditYardBookItemPage({
 
   return (
     <div className="max-w-4xl">
-      <PageHeader
+      <PageHeader feature="yard-book"
         title={`Edit: ${item.title}`}
+        titleClassName="text-4xl font-bold text-yard-book"
         subtitle={item.category_raw}
       />
       <YardBookForm

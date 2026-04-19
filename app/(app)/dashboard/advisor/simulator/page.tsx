@@ -41,7 +41,7 @@ export default async function SimulatorPage() {
   if ("error" in result) {
     return (
       <div>
-        <PageHeader
+        <PageHeader feature="advisor"
           title="Livestock Simulator"
           subtitle="Sandbox environment for what-if scenarios"
           titleClassName="text-4xl font-bold text-red"
@@ -138,7 +138,7 @@ export default async function SimulatorPage() {
 
   return (
     <div className="max-w-[1800px]">
-      <PageHeader
+      <PageHeader feature="advisor"
         title="Livestock Simulator"
         titleClassName="text-4xl font-bold text-red"
         subtitle="Sandbox environment for what-if scenarios"

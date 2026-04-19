@@ -380,7 +380,7 @@ export function PreSaleFlow({
                     No cattle herds in your portfolio.
                   </p>
                   <Link href="/dashboard/herds">
-                    <Button size="sm" variant="indigo">
+                    <Button size="sm" variant="teal">
                       Add Herd
                     </Button>
                   </Link>
@@ -486,7 +486,7 @@ export function PreSaleFlow({
 
           <div className="flex justify-end">
             <Button
-              variant="indigo"
+              variant="teal"
               disabled={!canAdvanceFromStep1}
               onClick={() => setStep(2)}
             >
@@ -600,7 +600,7 @@ export function PreSaleFlow({
                     </p>
                     <Button
                       size="sm"
-                      variant="indigo"
+                      variant="teal"
                       onClick={() => setUploadOpen("grid")}
                     >
                       <Upload className="mr-1.5 h-3.5 w-3.5" />
@@ -620,7 +620,7 @@ export function PreSaleFlow({
                     </p>
                     <Button
                       size="sm"
-                      variant="indigo"
+                      variant="teal"
                       onClick={() => setUploadOpen("grid")}
                     >
                       <Upload className="mr-1.5 h-3.5 w-3.5" />
@@ -722,7 +722,7 @@ export function PreSaleFlow({
                       </p>
                       <Button
                         size="sm"
-                        variant="indigo"
+                        variant="teal"
                         onClick={() => setUploadOpen("killsheet")}
                       >
                         <Upload className="mr-1.5 h-3.5 w-3.5" />
@@ -835,7 +835,7 @@ export function PreSaleFlow({
               Back
             </Button>
             <Button
-              variant="indigo"
+              variant="teal"
               disabled={!canAdvanceFromStep2}
               onClick={() => setStep(3)}
             >
@@ -990,7 +990,7 @@ export function PreSaleFlow({
                   Back
                 </Button>
                 <Button
-                  variant="indigo"
+                  variant="teal"
                   disabled={!canGenerate || isPending}
                   onClick={handleGenerate}
                 >

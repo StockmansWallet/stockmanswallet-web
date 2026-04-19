@@ -177,7 +177,7 @@ function ClientDataView({ data, baselineValue }: { data: ClientData; baselineVal
             <Card key={stat.label}>
               <CardContent className="px-4 py-3 text-center">
                 <p className="text-xs text-text-muted">{stat.label}</p>
-                <p className={`text-xl font-bold tabular-nums ${stat.isCurrency ? "text-brand" : "text-text-primary"}`}>
+                <p className={`text-xl font-bold tabular-nums ${stat.isCurrency ? "text-advisor" : "text-text-primary"}`}>
                   {stat.value}
                 </p>
               </CardContent>
