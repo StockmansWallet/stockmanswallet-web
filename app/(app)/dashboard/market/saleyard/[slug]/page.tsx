@@ -17,6 +17,7 @@ import { ChangeChip } from "../../_components/change-chip";
 import { Sparkline } from "../../_components/sparkline";
 import { CsvExportButton } from "../../_components/csv-export-button";
 import { BackLink } from "../../_components/back-link";
+import { AskBrangusButton } from "../../_components/ask-brangus-button";
 
 export const revalidate = 0;
 
@@ -72,6 +73,30 @@ export default async function SaleyardDetailPage({ params }: Props) {
     })
     .sort((a, b) => b.latest_price - a.latest_price);
 
+  // Build a natural-language prefill for the Ask Brangus button.
+  const brangusPrefill = (() => {
+    if (!latest) return null;
+    const parts: string[] = [];
+    const where = state ? `${saleyard} (${state})` : saleyard;
+    parts.push(`Mate, ${where} is averaging $${latest.avg_price.toFixed(2)}/kg as of ${formatAUDate(latest.week_date)}.`);
+
+    if (summary4wPct !== null) {
+      parts.push(`Overall it's ${summary4wPct >= 0 ? "up" : "down"} ${Math.abs(summary4wPct).toFixed(1)}% over the past 4 weeks.`);
+    }
+
+    const topCats = categoryRows.slice(0, 3);
+    if (topCats.length > 0) {
+      const list = topCats
+        .map((r) => `${r.category} at $${r.latest_price.toFixed(2)}/kg`)
+        .join(", ");
+      parts.push(`The strongest categories right now are ${list}.`);
+    }
+
+    parts.push(`Categories traded here in the past 2 years: ${categoriesPresent.length}.`);
+    parts.push("What's this yard telling us? Is it a good option to send stock to, and which classes are performing best?");
+    return parts.join(" ");
+  })();
+
   // CSV: all weekly rows per category
   const csvRows: Array<Record<string, string | number>> = [];
   for (const cat of categoriesPresent) {
@@ -93,7 +118,12 @@ export default async function SaleyardDetailPage({ params }: Props) {
       <PageHeader
         title={saleyard}
         subtitle={state ? `${state} - weekly history by category` : "Weekly history by category"}
-        actions={<CsvExportButton rows={csvRows} filename={`saleyard-${slug}.csv`} />}
+        actions={
+          <div className="flex items-center gap-2">
+            {brangusPrefill && <AskBrangusButton prefill={brangusPrefill} />}
+            <CsvExportButton rows={csvRows} filename={`saleyard-${slug}.csv`} />
+          </div>
+        }
       />
 
       {all.length === 0 ? (

@@ -21,6 +21,7 @@ import { ChangeChip } from "../../_components/change-chip";
 import { CsvExportButton } from "../../_components/csv-export-button";
 import { StateFilter } from "../../_components/state-filter";
 import { BackLink } from "../../_components/back-link";
+import { AskBrangusButton } from "../../_components/ask-brangus-button";
 
 export const revalidate = 0;
 
@@ -123,13 +124,55 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
     sales: p.sales,
   }));
 
+  // Build a natural-language prefill for the Ask Brangus button.
+  // Uses the same metrics already on screen, phrased like a user's question.
+  const brangusPrefill = (() => {
+    if (!latest) return null;
+    const scope = stateFilter ? `${category} in ${stateFilter}` : `${category} across the country`;
+    const parts: string[] = [];
+    parts.push(`Mate, ${scope} is sitting at $${latest.avg_price.toFixed(2)}/kg as of ${formatAUDate(latest.week_date)}.`);
+
+    const pct4w = pickPct(4);
+    const pct12w = pickPct(12);
+    const pct52w = pickPct(52);
+    const changeBits: string[] = [];
+    if (pct4w !== null) {
+      changeBits.push(`${pct4w >= 0 ? "up" : "down"} ${Math.abs(pct4w).toFixed(1)}% over the past month`);
+    }
+    if (pct12w !== null) {
+      changeBits.push(`${pct12w >= 0 ? "up" : "down"} ${Math.abs(pct12w).toFixed(1)}% over 12 weeks`);
+    }
+    if (pct52w !== null) {
+      changeBits.push(`${pct52w >= 0 ? "up" : "down"} ${Math.abs(pct52w).toFixed(1)}% year-on-year`);
+    }
+    if (changeBits.length > 0) {
+      parts.push(`It's ${changeBits.join(", ")}.`);
+    }
+
+    if (allTimeHigh && allTimeLow) {
+      parts.push(`All-time high was $${allTimeHigh.avg_price.toFixed(2)} back in ${formatAUDate(allTimeHigh.week_date)}, low $${allTimeLow.avg_price.toFixed(2)} on ${formatAUDate(allTimeLow.week_date)}.`);
+    }
+
+    if (exposure) {
+      parts.push(`I've got ${exposure.head_count} head in this category across ${exposure.herd_count} herd${exposure.herd_count === 1 ? "" : "s"}.`);
+    }
+
+    parts.push("What's driving this? Worth selling now or is there more upside to wait for?");
+    return parts.join(" ");
+  })();
+
   return (
     <div className="max-w-4xl">
       <BackLink href="/dashboard/market" />
       <PageHeader
         title={category}
         subtitle={`Weighted saleyard average for ${category.toLowerCase()}${stateFilter ? ` in ${stateFilter}` : ""}.`}
-        actions={<CsvExportButton rows={csvRows} filename={`market-${slug}${stateFilter ? `-${stateFilter.toLowerCase()}` : ""}.csv`} />}
+        actions={
+          <div className="flex items-center gap-2">
+            {brangusPrefill && <AskBrangusButton prefill={brangusPrefill} />}
+            <CsvExportButton rows={csvRows} filename={`market-${slug}${stateFilter ? `-${stateFilter.toLowerCase()}` : ""}.csv`} />
+          </div>
+        }
       />
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">

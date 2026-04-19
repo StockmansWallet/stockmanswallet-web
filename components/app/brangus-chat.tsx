@@ -97,6 +97,8 @@ interface BrangusChatProps {
   onConversationUpdated?: (id: string, updates: Partial<BrangusConversationRow>) => void;
   /** Portal container for the export toolbar (rendered outside the chat card) */
   toolbarContainer?: HTMLElement | null;
+  /** Pre-filled first user message. Auto-sent once the portfolio store has loaded. */
+  prefill?: string;
 }
 
 // Restore QuickInsight cards from saved cards_json
@@ -121,7 +123,7 @@ function hydrateCards(messages: SavedMessage[]): QuickInsight[] {
   return cards;
 }
 
-export function BrangusChat({ conversationId: existingConvId, initialMessages, pastConversationCount = 0, onConversationCreated, onConversationUpdated, toolbarContainer }: BrangusChatProps = {}) {
+export function BrangusChat({ conversationId: existingConvId, initialMessages, pastConversationCount = 0, onConversationCreated, onConversationUpdated, toolbarContainer, prefill }: BrangusChatProps = {}) {
   // Hydrate UI messages from saved conversation (if resuming)
   const hydratedMessages: ChatMessage[] = (initialMessages ?? []).map((m) => ({
     id: m.id,
@@ -165,6 +167,7 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
   const conversationIdRef = useRef<string | null>(existingConvId ?? null);
   const userIdRef = useRef<string | null>(null);
   const hasRequestedTitleRef = useRef(!!existingConvId);
+  const prefillSentRef = useRef(false);
 
   // Voice input via Web Speech API (en-AU, livestock term corrections)
   const { isListening, transcript, finalTranscript, startListening, stopListening, isSupported: micSupported } = useSpeechRecognition();
@@ -401,6 +404,17 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
 
   // Keep handleSendRef current so the speech effect can call it without stale closure
   handleSendRef.current = handleSend;
+
+  // Auto-send prefill once the portfolio store has loaded.
+  // Only fires for new conversations (no existing id, no hydrated messages) and only once.
+  useEffect(() => {
+    if (prefillSentRef.current) return;
+    if (!prefill || !store || isInitialising) return;
+    if (existingConvId) return;
+    if ((initialMessages?.length ?? 0) > 0) return;
+    prefillSentRef.current = true;
+    handleSend(prefill);
+  }, [prefill, store, isInitialising, existingConvId, initialMessages, handleSend]);
 
   // Auto-send when speech recognition commits a final transcript
   useEffect(() => {
