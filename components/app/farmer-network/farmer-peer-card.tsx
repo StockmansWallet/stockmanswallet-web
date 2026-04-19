@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, MapPin, Clock, MessageSquare } from "lucide-react";
+import { UserAvatar } from "@/components/app/user-avatar";
+import { AnimatedUnreadPill } from "@/components/app/animated-unread-pill";
 
 interface FarmerPeerCardProps {
   /**
@@ -25,6 +27,8 @@ interface FarmerPeerCardProps {
    * Messages inbox language.
    */
   unreadCount?: number;
+  /** Avatar URL from auth metadata for the other party. Optional. */
+  avatarUrl?: string | null;
 }
 
 function formatConnectedSince(iso: string): string {
@@ -46,8 +50,8 @@ export function FarmerPeerCard({
   lastMessage,
   connectedSince,
   unreadCount = 0,
+  avatarUrl,
 }: FarmerPeerCardProps) {
-  const initial = (name?.trim().charAt(0) || "?").toUpperCase();
   const location = [state, region].filter(Boolean).join(", ");
   const hasUnread = status === "approved" && unreadCount > 0;
 
@@ -57,18 +61,12 @@ export function FarmerPeerCard({
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
-              <div className="relative shrink-0" aria-hidden="true">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-producer-network/15">
-                  <span className="text-sm font-bold text-producer-network-light">{initial}</span>
-                </div>
-                {hasUnread && (
-                  <span
-                    className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[10px] font-bold text-white"
-                    aria-hidden="true"
-                  >
-                    {unreadCount > 9 ? "9+" : unreadCount}
-                  </span>
-                )}
+              <div className="relative shrink-0">
+                <UserAvatar name={name} avatarUrl={avatarUrl} />
+                <AnimatedUnreadPill
+                  count={hasUnread ? unreadCount : 0}
+                  className="-right-1 -top-1 h-4 min-w-4 px-1 text-[10px]"
+                />
               </div>
               <div className="min-w-0">
                 <p className={`truncate text-sm ${hasUnread ? "font-bold text-text-primary" : "font-semibold text-text-primary"}`}>

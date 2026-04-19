@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Handshake, MapPin } from "lucide-react";
 import { ConfirmModal } from "@/components/app/advisory/confirm-modal";
+import { UserAvatar } from "@/components/app/user-avatar";
 import { approveFarmerRequest, denyFarmerRequest } from "@/app/(app)/dashboard/farmer-network/connections/actions";
 
 interface FarmerRequestCardProps {
@@ -15,9 +15,11 @@ interface FarmerRequestCardProps {
     requester_company: string;
     created_at: string;
   };
+  /** Avatar URL for the requester, fetched from auth metadata. */
+  avatarUrl?: string | null;
 }
 
-export function FarmerRequestCard({ request }: FarmerRequestCardProps) {
+export function FarmerRequestCard({ request, avatarUrl }: FarmerRequestCardProps) {
   const [loading, setLoading] = useState<"approve" | "deny" | null>(null);
   const [showDenyConfirm, setShowDenyConfirm] = useState(false);
 
@@ -40,9 +42,7 @@ export function FarmerRequestCard({ request }: FarmerRequestCardProps) {
         <CardContent className="p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-producer-network/15">
-                <Handshake className="h-5 w-5 text-producer-network-light" />
-              </div>
+              <UserAvatar name={request.requester_name} avatarUrl={avatarUrl} />
               <div>
                 <p className="text-sm font-semibold text-text-primary">
                   {request.requester_name}

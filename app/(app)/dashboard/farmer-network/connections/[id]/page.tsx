@@ -6,6 +6,8 @@ import { ChevronLeft } from "lucide-react";
 import { FarmerChatClient } from "./farmer-chat-client";
 import { ModerationMenu } from "@/app/(app)/dashboard/farmer-network/directory/[id]/moderation-menu";
 import { MarkConnectionNotificationsRead } from "@/components/app/mark-connection-notifications-read";
+import { UserAvatar } from "@/components/app/user-avatar";
+import { fetchUserAvatars } from "@/lib/auth/fetch-user-avatars";
 import type { ConnectionRequest, AdvisoryMessage } from "@/lib/types/advisory";
 
 export const metadata = {
@@ -62,7 +64,8 @@ export default async function FarmerConnectionDetailPage({
     .single();
 
   const otherName = otherProfile?.display_name ?? conn.requester_name;
-  const initial = (otherName?.trim().charAt(0) || "?").toUpperCase();
+  const avatarMap = await fetchUserAvatars([otherUserId]);
+  const otherAvatarUrl = avatarMap.get(otherUserId) ?? null;
 
   // Is this peer blocked by the viewer? Show the block state inside the
   // moderation menu so they can toggle it without leaving the chat.
@@ -95,12 +98,12 @@ export default async function FarmerConnectionDetailPage({
 
       {/* Header: avatar + name + company inline, moderation menu on the right. */}
       <div className="mb-4 flex items-center gap-3">
-        <div
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-producer-network/15"
-          aria-hidden="true"
-        >
-          <span className="text-base font-bold text-producer-network-light">{initial}</span>
-        </div>
+        <UserAvatar
+          name={otherName}
+          avatarUrl={otherAvatarUrl}
+          sizeClass="h-12 w-12"
+          initialClass="text-base font-bold"
+        />
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-xl font-bold text-text-primary">{otherName}</h1>
           {otherProfile?.company_name && (

@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/app/(auth)/actions";
-import { Bell, Crown, LogOut } from "lucide-react";
-import { NotificationBadge } from "@/components/app/notification-badge";
+import { Crown, LogOut } from "lucide-react";
 import { SidebarBadge } from "@/components/app/sidebar-badge";
 import { tierDisplayName, type SubscriptionTier } from "@/lib/subscriptions/tiers";
 import {
@@ -101,22 +100,10 @@ export function Sidebar({ isAdmin = false, subscriptionTier = "stockman", isAdvi
           </div>
         )}
 
-        {/* Notifications + Help & Settings */}
+        {/* Help & Settings. Per-feature badges on the nav items above
+            (Producer Network, Yard Book) replaced the old aggregate
+            Notifications entry. */}
         <div className="mt-4 border-t border-white/5 pt-4">
-          <Link
-            href="/dashboard/notifications"
-            className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 ${
-              checkActive("/dashboard/notifications")
-                ? "bg-brand/15 text-brand"
-                : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
-            }`}
-          >
-            <div className="relative">
-              <Bell className="h-4 w-4" />
-              <NotificationBadge />
-            </div>
-            Notifications
-          </Link>
           {bottomNavItems.map((item) => (
             <Link
               key={item.href}

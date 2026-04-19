@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, MapPin } from "lucide-react";
+import { UserAvatar } from "@/components/app/user-avatar";
 import type { DirectoryFarmer } from "@/lib/types/advisory";
 
 const SPECIES_EMOJI: Record<string, string> = {
@@ -15,17 +16,17 @@ const SPECIES_EMOJI: Record<string, string> = {
  * CLAUDE.md). The wrapping Card provides the surface tone; this component
  * only provides the row contents and hover state.
  */
-export function FarmerCard({ farmer }: { farmer: DirectoryFarmer }) {
-  const initial = (farmer.display_name?.trim().charAt(0) || "?").toUpperCase();
+export function FarmerCard({ farmer, avatarUrl }: { farmer: DirectoryFarmer; avatarUrl?: string | null }) {
   return (
     <Link
       href={`/dashboard/farmer-network/directory/${farmer.user_id}`}
       className="group flex items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-white/[0.03]"
     >
-      {/* Avatar: first initial inside an orange tile. */}
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-producer-network/15">
-        <span className="text-sm font-bold text-producer-network-light">{initial}</span>
-      </div>
+      <UserAvatar
+        name={farmer.display_name}
+        avatarUrl={avatarUrl}
+        sizeClass="h-11 w-11"
+      />
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">

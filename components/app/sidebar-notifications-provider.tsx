@@ -58,7 +58,7 @@ export function SidebarNotificationsProvider({ children }: { children: React.Rea
 
       if (!userIdRef.current) return;
 
-      // Same setAuth fix as NotificationBell: cookie-auth clients default the
+      // setAuth is required on cookie-auth clients: they default the
       // websocket to the anon key, so RLS-filtered postgres_changes won't
       // deliver events without the user JWT.
       const { data: { session } } = await supabase.auth.getSession();

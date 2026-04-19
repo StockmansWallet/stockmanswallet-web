@@ -9,6 +9,7 @@ import { FarmerDirectorySearch } from "./farmer-directory-search";
 import { sanitiseSearchQuery } from "@/lib/utils/search-sanitise";
 import { enrichProducers, type PrimarySpecies } from "@/lib/data/producer-enrichment";
 import { loadOutgoingBlocks } from "@/lib/data/user-blocks";
+import { fetchUserAvatars } from "@/lib/auth/fetch-user-avatars";
 import type { DirectoryFarmer } from "@/lib/types/advisory";
 
 export const revalidate = 0;
@@ -87,6 +88,8 @@ export default async function FarmerDirectoryPage({
     ? enrichedFarmers.filter((f) => f.primary_species === speciesFilter)
     : enrichedFarmers;
 
+  const avatarMap = await fetchUserAvatars(filteredFarmers.map((f) => f.user_id));
+
   return (
     <div className="max-w-4xl">
       <PageHeader feature="producer-network"
@@ -120,7 +123,11 @@ export default async function FarmerDirectoryPage({
         <Card>
           <div className="divide-y divide-white/[0.06]">
             {filteredFarmers.map((farmer) => (
-              <FarmerCard key={farmer.user_id} farmer={farmer} />
+              <FarmerCard
+                key={farmer.user_id}
+                farmer={farmer}
+                avatarUrl={avatarMap.get(farmer.user_id) ?? null}
+              />
             ))}
           </div>
         </Card>

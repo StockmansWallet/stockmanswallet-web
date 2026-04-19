@@ -13,6 +13,7 @@ import { FarmerCard } from "@/components/app/farmer-network/farmer-card";
 import { BroadcastButton } from "@/components/app/farmer-network/broadcast-button";
 import { MarkNotificationsRead } from "@/components/app/mark-notifications-read";
 import { loadOutgoingBlocks } from "@/lib/data/user-blocks";
+import { fetchUserAvatars } from "@/lib/auth/fetch-user-avatars";
 import type { ConnectionRequest, DirectoryFarmer } from "@/lib/types/advisory";
 
 export const revalidate = 0;
@@ -49,6 +50,11 @@ export default async function FarmerNetworkPage() {
     c.requester_user_id === user.id ? c.target_user_id : c.requester_user_id;
   const otherIds = Array.from(
     new Set([...approved.map(otherIdFor), ...outgoingPending.map(otherIdFor)]),
+  );
+  // Incoming requests reference the requester directly, not a shared
+  // "other party"; include them so their avatar renders too.
+  const avatarIds = Array.from(
+    new Set([...otherIds, ...incomingRequests.map((r) => r.requester_user_id)]),
   );
 
   const profileMap = new Map<string, { display_name: string; company_name: string | null; state: string | null; region: string | null }>();
@@ -146,6 +152,15 @@ export default async function FarmerNetworkPage() {
     nearbyProducers = (nearby ?? []) as DirectoryFarmer[];
   }
 
+  // Avatar URLs live on auth.users.user_metadata, not user_profiles, so
+  // we go through the service-role client. Fetched for every user shown
+  // on this page: connections, outgoing pending, incoming requests, and
+  // nearby-producer preview rows.
+  const avatarFetchIds = Array.from(
+    new Set([...avatarIds, ...nearbyProducers.map((p) => p.user_id)]),
+  );
+  const avatarMap = await fetchUserAvatars(avatarFetchIds);
+
   return (
     <div className="max-w-4xl">
       <FarmerConnectionsRealtime userId={user.id} />
@@ -216,7 +231,11 @@ export default async function FarmerNetworkPage() {
           </h2>
           <div className="flex flex-col gap-3">
             {incomingRequests.map((req) => (
-              <FarmerRequestCard key={req.id} request={req} />
+              <FarmerRequestCard
+                key={req.id}
+                request={req}
+                avatarUrl={avatarMap.get(req.requester_user_id) ?? null}
+              />
             ))}
           </div>
         </div>
@@ -250,6 +269,7 @@ export default async function FarmerNetworkPage() {
                   lastMessage={lastMessages.get(c.id)?.content}
                   connectedSince={c.permission_granted_at ?? c.created_at}
                   unreadCount={unreadByConnection.get(c.id) ?? 0}
+                  avatarUrl={avatarMap.get(otherId) ?? null}
                 />
               );
             })}
@@ -278,6 +298,7 @@ export default async function FarmerNetworkPage() {
                   state={profile?.state}
                   region={profile?.region}
                   status="pending"
+                  avatarUrl={avatarMap.get(otherId) ?? null}
                 />
               );
             })}
@@ -304,7 +325,11 @@ export default async function FarmerNetworkPage() {
           <Card>
             <div className="divide-y divide-white/[0.06]">
               {nearbyProducers.map((p) => (
-                <FarmerCard key={p.user_id} farmer={p} />
+                <FarmerCard
+                  key={p.user_id}
+                  farmer={p}
+                  avatarUrl={avatarMap.get(p.user_id) ?? null}
+                />
               ))}
             </div>
           </Card>

@@ -24,9 +24,9 @@ export function FarmerConnectionsRealtime({ userId }: { userId: string }) {
     const supabase = supabaseRef.current;
     let cancelled = false;
 
-    // See the notification-bell component for why setAuth is needed here.
-    // Without it, the realtime websocket uses the anon key and Postgres
-    // Changes events filtered by user_id never arrive.
+    // setAuth is required on cookie-auth clients: without it, the
+    // realtime websocket uses the anon key and Postgres Changes events
+    // filtered by user_id never arrive.
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!cancelled && session?.access_token) {
         supabase.realtime.setAuth(session.access_token);

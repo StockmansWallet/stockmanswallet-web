@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation";
 import { signOut } from "@/app/(auth)/actions";
 import { Menu, X, Crown, HelpCircle, Settings, LogOut } from "lucide-react";
 import { tierDisplayName, type SubscriptionTier } from "@/lib/subscriptions/tiers";
-import { NotificationBell } from "@/components/app/notification-bell";
 import {
   farmerMobileItems,
   advisorMobileItems,
@@ -37,15 +36,12 @@ export function MobileNav({ userEmail, subscriptionTier = "stockman", isAdvisor 
             className="opacity-90"
           />
         </Link>
-        <div className="flex items-center gap-2">
-          <NotificationBell />
-          <button
-            onClick={() => setOpen(!open)}
-            className="rounded-xl p-2 text-text-secondary hover:bg-white/8"
-          >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-        </div>
+        <button
+          onClick={() => setOpen(!open)}
+          className="rounded-xl p-2 text-text-secondary hover:bg-white/8"
+        >
+          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
       </header>
 
       {/* Mobile menu overlay */}
