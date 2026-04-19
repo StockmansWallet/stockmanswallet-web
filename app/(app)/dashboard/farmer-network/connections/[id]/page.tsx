@@ -81,7 +81,7 @@ export default async function FarmerConnectionDetailPage({
   };
 
   return (
-    <div className="flex h-[calc(100vh-6rem)] max-w-4xl flex-col pb-4 pt-4">
+    <div className="flex h-[calc(100vh-6rem)] max-w-4xl flex-col pb-4 pt-8">
       <MarkConnectionNotificationsRead connectionId={id} />
       {/* Header: avatar + name + company inline, moderation menu on the right. */}
       <div className="mb-4 flex items-center gap-3">
