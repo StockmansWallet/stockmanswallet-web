@@ -8,10 +8,8 @@ import { resolveMLACategory } from "../data/weight-mapping";
 import { cattleBreedPremiums } from "../data/reference-data";
 import { toolDefinitions, executeTool, DISPLAY_ONLY_TOOLS, generateAutoCards } from "./tools";
 import { fetchAllPropertyWeather } from "../services/weather-service";
-import { fetchUserMemories } from "./tools";
 import { centsToDollars } from "../types/money";
 import type {
-  ChatMessage,
   AnthropicMessage,
   AnthropicContentBlock,
   AnthropicResponse,
@@ -336,7 +334,7 @@ export async function sendMessage(
   let currentHistory = history;
   let rounds = 0;
   let pendingInsights: QuickInsight[] | undefined;
-  let autoCards: QuickInsight[] = [];
+  const autoCards: QuickInsight[] = [];
   // Guardrail: track whether Brangus actually invoked calculate_freight during this turn.
   // If the user asked a freight question and we fall through to end_turn without the tool,
   // we retry once with a nudge. See runFreightGuard below.

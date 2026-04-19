@@ -1,7 +1,7 @@
 // Brangus tool definitions and execution for web
 // Mirrors iOS BrangusChatService+ToolUse.swift and +DataLookup.swift
 
-import { calculateHerdValuation, parseCalvesAtFoot, type CategoryPriceEntry, type HerdValuationResult } from "../engines/valuation-engine";
+import { calculateHerdValuation, parseCalvesAtFoot, type HerdValuationResult } from "../engines/valuation-engine";
 import { calculateFreightEstimate } from "../engines/freight-engine";
 import { saleyardCoordinates } from "../data/reference-data";
 import { resolveMLACategory } from "../data/weight-mapping";
