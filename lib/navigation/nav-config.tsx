@@ -41,7 +41,7 @@ export const farmerNavItems: NavItem[] = [
 
 // Farmer mode - intelligence section
 export const farmerIntelItems: NavItem[] = [
-  { label: "Ask Brangus", href: "/dashboard/brangus", icon: <MessageCircle className="h-5 w-5" />, activeClass: "bg-brand/15 text-brand", inactiveClass: "text-brand/80 hover:bg-brand/10 hover:text-brand hover:drop-shadow-[0_0_6px_rgba(255,128,0,0.4)]" },
+  { label: "Brangus", href: "/dashboard/brangus", icon: <MessageCircle className="h-5 w-5" /> },
   { label: "Insights", href: "/dashboard/insights", icon: <Lightbulb className="h-5 w-5" /> },
   { label: "Markets", href: "/dashboard/market", icon: <TrendingUp className="h-5 w-5" /> },
 ];
@@ -66,7 +66,7 @@ export const advisorNavItems: NavItem[] = [
 
 // Advisor mode - intelligence section
 export const advisorIntelItems: NavItem[] = [
-  { label: "Ask Brangus", href: "/dashboard/brangus", icon: <MessageCircle className="h-5 w-5" />, activeClass: "bg-brand/15 text-brand", inactiveClass: "text-brand/80 hover:bg-brand/10 hover:text-brand hover:drop-shadow-[0_0_6px_rgba(255,128,0,0.4)]" },
+  { label: "Brangus", href: "/dashboard/brangus", icon: <MessageCircle className="h-5 w-5" /> },
   { label: "Insights", href: "/dashboard/insights", icon: <Lightbulb className="h-5 w-5" /> },
   { label: "Markets", href: "/dashboard/market", icon: <TrendingUp className="h-5 w-5" /> },
 ];
