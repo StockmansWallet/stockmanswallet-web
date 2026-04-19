@@ -103,8 +103,8 @@ export default async function LensDetailPage({
   const advisorName = advisorProfile?.display_name ?? "Advisor";
 
   const statusConfig: Record<string, { label: string; className: string }> = {
-    draft: { label: "Draft", className: "bg-amber-500/15 text-amber-600" },
-    saved: { label: "Saved", className: "bg-[#2F8CD9]/15 text-[#2F8CD9]" },
+    draft: { label: "Draft", className: "bg-warning/15 text-warning" },
+    saved: { label: "Saved", className: "bg-advisor/15 text-advisor" },
     report_generated: { label: "Report Ready", className: "bg-success/15 text-success" },
   };
   const status = statusConfig[report.status] ?? statusConfig.draft;
@@ -113,7 +113,7 @@ export default async function LensDetailPage({
     <div className="max-w-[1800px] space-y-6">
       <PageHeader
         title={report.name}
-        titleClassName="text-4xl font-bold text-[#2F8CD9]"
+        titleClassName="text-4xl font-bold text-advisor"
         titleHref={`/dashboard/advisor/clients/${connectionId}`}
         actions={
           <div className="flex items-center gap-2">

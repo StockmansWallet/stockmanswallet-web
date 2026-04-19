@@ -121,11 +121,11 @@ export function GridIQNav({ pendingConsignments = 0 }: GridIQNavProps = {}) {
             }`}
           >
             <Icon
-              className={`h-4 w-4 ${active ? "text-indigo-400" : "text-text-muted"}`}
+              className={`h-4 w-4 ${active ? "text-teal" : "text-text-muted"}`}
             />
             {item.label}
             {item.label === "Dashboard" && pendingConsignments > 0 && (
-              <span className="ml-0.5 inline-flex min-w-[18px] items-center justify-center rounded-full bg-amber-500/20 px-1.5 text-[10px] font-semibold text-amber-400">
+              <span className="ml-0.5 inline-flex min-w-[18px] items-center justify-center rounded-full bg-warning/20 px-1.5 text-[10px] font-semibold text-warning">
                 {pendingConsignments}
               </span>
             )}

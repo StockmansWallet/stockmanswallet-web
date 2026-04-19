@@ -543,7 +543,7 @@ export function MlaUploader({ userEmail }: { userEmail: string }) {
                         : ""}
                   </p>
                   {pf.status === "uploading" && pf.chunkProgress && (
-                    <p className="mt-0.5 text-xs text-blue-400">
+                    <p className="mt-0.5 text-xs text-info">
                       {pf.chunkProgress}
                     </p>
                   )}
@@ -565,7 +565,7 @@ export function MlaUploader({ userEmail }: { userEmail: string }) {
                     </span>
                   )}
                   {pf.status === "uploading" && (
-                    <Loader2 className="h-4 w-4 animate-spin text-blue-400" />
+                    <Loader2 className="h-4 w-4 animate-spin text-info" />
                   )}
                   {pf.status === "success" && (
                     <CheckCircle className="h-4 w-4 text-success" />

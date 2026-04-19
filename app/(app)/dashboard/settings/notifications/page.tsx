@@ -36,7 +36,7 @@ export default function NotificationsPage() {
       </div>
       <PageHeader
         title="Notifications"
-        titleClassName="text-4xl font-bold text-purple-400"
+        titleClassName="text-4xl font-bold text-violet"
         subtitle="Manage your alerts and reminders."
       />
 

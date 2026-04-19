@@ -457,8 +457,8 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
           </div>
 
           {/* Formula walkthrough */}
-          <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.04] px-4 py-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-400/70 mb-2">
+          <div className="rounded-xl border border-warning/20 bg-warning/[0.04] px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-warning/70 mb-2">
               Formula Walkthrough
             </p>
             <div className="space-y-1.5 font-mono text-[11px] text-amber-200/80">
@@ -482,10 +482,10 @@ export function TestCalculator({ priceMaps, saleyardCoverage, herds, prefillHerd
               {result.preBirthAccrual > 0 && result.calvesAtFootValue > 0 && (
                 <p>BreedingAccrual = {fmtDollar(result.preBirthAccrual)} + {fmtDollar(result.calvesAtFootValue)} = <strong>{fmtDollar(result.breedingAccrual)}</strong></p>
               )}
-              <p className="pt-1 border-t border-amber-500/10">
-                NetValue = {fmtDollar(result.physicalValue)} - {fmtDollar(result.mortalityDeduction)} + {fmtDollar(result.breedingAccrual)} = <strong className="text-amber-300">{fmtDollar(result.netValue)}</strong>
+              <p className="pt-1 border-t border-warning/10">
+                NetValue = {fmtDollar(result.physicalValue)} - {fmtDollar(result.mortalityDeduction)} + {fmtDollar(result.breedingAccrual)} = <strong className="text-warning">{fmtDollar(result.netValue)}</strong>
               </p>
-              <div className="pt-1.5 mt-1 border-t border-amber-500/10 space-y-0.5 text-amber-200/50 text-[10px]">
+              <div className="pt-1.5 mt-1 border-t border-warning/10 space-y-0.5 text-amber-200/50 text-[10px]">
                 <p>Price Data Source = ({result.priceSource === "saleyard" ? "Saleyard" : result.priceSource === "national" ? "National" : "Fallback"}){result.matchedWeightRange ? `, ${result.matchedWeightRange} bracket` : ""}</p>
                 <p>Latest Data Source Date = {result.dataDate ?? "fallback"}</p>
                 <p>Category Mapping: {category} → {result.mlaCategory}</p>
@@ -531,11 +531,11 @@ function MiniCard({ label, value, color, badge }: { label: string; value: string
   const colorMap: Record<string, string> = {
     emerald: "text-success",
     red: "text-error",
-    sky: "text-sky-400",
+    sky: "text-info",
   };
   const sourceColors: Record<string, string> = {
     saleyard: "bg-success/15 text-success",
-    national: "bg-amber-500/15 text-amber-400",
+    national: "bg-warning/15 text-warning",
     fallback: "bg-error/15 text-error",
   };
 

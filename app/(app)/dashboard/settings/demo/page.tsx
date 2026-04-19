@@ -20,7 +20,7 @@ export default function DemoDataPage() {
       </div>
       <PageHeader
         title="Demo Data"
-        titleClassName="text-4xl font-bold text-lime-400"
+        titleClassName="text-4xl font-bold text-emerald"
         subtitle="Load sample herds to explore the app without entering real data."
       />
 
@@ -28,8 +28,8 @@ export default function DemoDataPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-lime-500/15">
-                <FlaskConical className="h-3.5 w-3.5 text-lime-400" />
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald/15">
+                <FlaskConical className="h-3.5 w-3.5 text-emerald" />
               </div>
               <div>
                 <CardTitle>Doongara Station</CardTitle>

@@ -44,8 +44,8 @@ export default async function AdvisorProfilePage({
 
   const existingConnection = existingConnections?.[0] ?? null;
   const categoryConfig = getCategoryConfig(advisor.role);
-  const categoryBg = categoryConfig?.bgClass ?? "bg-[#2F8CD9]/15";
-  const categoryColour = categoryConfig?.colorClass ?? "text-[#2F8CD9]";
+  const categoryBg = categoryConfig?.bgClass ?? "bg-advisor/15";
+  const categoryColour = categoryConfig?.colorClass ?? "text-advisor";
 
   return (
     <div className="max-w-2xl">
@@ -71,7 +71,7 @@ export default async function AdvisorProfilePage({
               {categoryConfig ? (
                 <categoryConfig.icon className={`h-8 w-8 ${categoryColour}`} />
               ) : (
-                <span className="text-xl font-bold text-[#2F8CD9]">{advisor.display_name?.charAt(0)}</span>
+                <span className="text-xl font-bold text-advisor">{advisor.display_name?.charAt(0)}</span>
               )}
             </div>
             <div className="flex-1">
@@ -116,7 +116,7 @@ export default async function AdvisorProfilePage({
                 {advisor.contact_email && (
                   <a
                     href={`mailto:${advisor.contact_email}`}
-                    className="flex items-center gap-2.5 rounded-lg bg-white/[0.03] px-3.5 py-2.5 text-sm text-[#2F8CD9] transition-colors hover:bg-white/[0.06]"
+                    className="flex items-center gap-2.5 rounded-lg bg-white/[0.03] px-3.5 py-2.5 text-sm text-advisor transition-colors hover:bg-white/[0.06]"
                   >
                     <Mail className="h-4 w-4" />
                     {advisor.contact_email}
@@ -125,7 +125,7 @@ export default async function AdvisorProfilePage({
                 {advisor.contact_phone && (
                   <a
                     href={`tel:${advisor.contact_phone.replace(/\s/g, "")}`}
-                    className="flex items-center gap-2.5 rounded-lg bg-white/[0.03] px-3.5 py-2.5 text-sm text-[#2F8CD9] transition-colors hover:bg-white/[0.06]"
+                    className="flex items-center gap-2.5 rounded-lg bg-white/[0.03] px-3.5 py-2.5 text-sm text-advisor transition-colors hover:bg-white/[0.06]"
                   >
                     <Phone className="h-4 w-4" />
                     {advisor.contact_phone}

@@ -240,21 +240,21 @@ export function PostSaleFlow({
                   <Card
                     key={ks.id}
                     className={`cursor-pointer transition-all ${
-                      selected ? "border-amber-500/50 bg-amber-500/10"
-                        : ks.isSuggested ? "border-amber-500/20 hover:bg-white/[0.04]"
+                      selected ? "border-warning/50 bg-warning/10"
+                        : ks.isSuggested ? "border-warning/20 hover:bg-white/[0.04]"
                         : "hover:bg-white/[0.04]"
                     }`}
                     onClick={() => setSelectedKillSheetId(selected ? null : ks.id)}
                   >
                     <CardContent className="flex items-center gap-3 p-3">
-                      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${selected ? "bg-amber-500/20" : "bg-white/[0.06]"}`}>
-                        <FileText className={`h-4 w-4 ${selected ? "text-amber-400" : "text-text-muted"}`} />
+                      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${selected ? "bg-warning/20" : "bg-white/[0.06]"}`}>
+                        <FileText className={`h-4 w-4 ${selected ? "text-warning" : "text-text-muted"}`} />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
                           <p className="truncate text-sm font-medium text-text-primary">{ks.processorName}</p>
                           {ks.isSuggested && !selected && (
-                            <Badge className="shrink-0 bg-amber-500/15 text-[9px] text-amber-400">Suggested</Badge>
+                            <Badge className="shrink-0 bg-warning/15 text-[9px] text-warning">Suggested</Badge>
                           )}
                         </div>
                         <p className="text-xs text-text-muted">
@@ -263,7 +263,7 @@ export function PostSaleFlow({
                         </p>
                       </div>
                       {selected && (
-                        <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500">
+                        <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-warning">
                           <Check className="h-3 w-3 text-white" />
                         </div>
                       )}
@@ -279,18 +279,18 @@ export function PostSaleFlow({
               className={`mt-3 flex items-start gap-2.5 rounded-xl border px-4 py-3 ${
                 sexWarning.severity === "block"
                   ? "border-error/30 bg-error/10"
-                  : "border-amber-500/30 bg-amber-500/5"
+                  : "border-warning/30 bg-warning/5"
               }`}
             >
               <AlertTriangle
                 className={`mt-0.5 h-4 w-4 shrink-0 ${
-                  sexWarning.severity === "block" ? "text-error" : "text-amber-400"
+                  sexWarning.severity === "block" ? "text-error" : "text-warning"
                 }`}
               />
               <div className="min-w-0 flex-1">
                 <p
                   className={`text-sm font-medium ${
-                    sexWarning.severity === "block" ? "text-error" : "text-amber-400"
+                    sexWarning.severity === "block" ? "text-error" : "text-warning"
                   }`}
                 >
                   {sexWarning.title}
@@ -350,10 +350,10 @@ export function PostSaleFlow({
             </div>
           )}
 
-          <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-            <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+          <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-warning/20 bg-warning/5 px-4 py-3">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
             <div>
-              <p className="text-sm font-medium text-amber-400">Confirm herd allocations</p>
+              <p className="text-sm font-medium text-warning">Confirm herd allocations</p>
               <p className="mt-0.5 text-xs text-text-secondary">
                 Adjust the head counts below if the actual sale differs from the original consignment.
                 Once confirmed, cattle will be marked as sold and removed from herd totals.
@@ -364,17 +364,17 @@ export function PostSaleFlow({
           <Card className="mb-4">
             <CardContent className="p-0">
               <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-3">
-                <Users className="h-4 w-4 text-amber-400" />
-                <span className="text-sm font-semibold text-amber-400">Sale Allocations</span>
-                <Badge className="ml-auto bg-amber-500/15 text-amber-400">
+                <Users className="h-4 w-4 text-warning" />
+                <span className="text-sm font-semibold text-warning">Sale Allocations</span>
+                <Badge className="ml-auto bg-warning/15 text-warning">
                   {adjustedAllocations.reduce((s, a) => s + a.headCount, 0)} head
                 </Badge>
               </div>
               <div className="divide-y divide-white/[0.04]">
                 {adjustedAllocations.map((alloc, idx) => (
                   <div key={alloc.herdGroupId} className="flex items-center gap-4 px-4 py-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
-                      <Users className="h-4 w-4 text-amber-400" />
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-warning/10">
+                      <Users className="h-4 w-4 text-warning" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-text-primary">{alloc.herdName}</p>
@@ -390,7 +390,7 @@ export function PostSaleFlow({
                           updated[idx] = { ...updated[idx], headCount: parseInt(e.target.value) || 0 };
                           setAdjustedAllocations(updated);
                         }}
-                        className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-center text-sm text-text-primary focus:border-amber-500/50 focus:outline-none"
+                        className="w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-center text-sm text-text-primary focus:border-warning/50 focus:outline-none"
                       />
                     </div>
                     <span className="text-xs text-text-muted">head</span>
@@ -401,9 +401,9 @@ export function PostSaleFlow({
           </Card>
 
           {adjustedAllocations.reduce((s, a) => s + a.headCount, 0) !== totalHead && (
-            <div className="mb-4 flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
-              <p className="text-xs text-amber-400">
+            <div className="mb-4 flex items-start gap-2 rounded-xl border border-warning/30 bg-warning/5 px-4 py-3">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+              <p className="text-xs text-warning">
                 Total head count has changed from {totalHead} to {adjustedAllocations.reduce((s, a) => s + a.headCount, 0)}.
                 This will update the final sale record.
               </p>

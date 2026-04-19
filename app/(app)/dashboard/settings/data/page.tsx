@@ -42,7 +42,7 @@ export default function DataManagementPage() {
       </div>
       <PageHeader
         title="Data Management"
-        titleClassName="text-4xl font-bold text-amber-400"
+        titleClassName="text-4xl font-bold text-warning"
         subtitle="Manage your data."
       />
 

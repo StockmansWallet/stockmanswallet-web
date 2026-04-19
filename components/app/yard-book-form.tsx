@@ -26,9 +26,9 @@ const CATEGORIES: {
   text: string;
 }[] = [
   { value: "Livestock", label: "Livestock", icon: IconCattleTags, bg: "bg-orange-500/15", text: "text-orange-400" },
-  { value: "Operations", label: "Operations", icon: Wrench, bg: "bg-amber-700/15", text: "text-amber-600" },
-  { value: "Finance", label: "Finance", icon: DollarSign, bg: "bg-blue-500/15", text: "text-blue-400" },
-  { value: "Family", label: "Family", icon: Home, bg: "bg-purple-500/15", text: "text-purple-400" },
+  { value: "Operations", label: "Operations", icon: Wrench, bg: "bg-amber-700/15", text: "text-warning" },
+  { value: "Finance", label: "Finance", icon: DollarSign, bg: "bg-info/15", text: "text-info" },
+  { value: "Family", label: "Family", icon: Home, bg: "bg-violet/15", text: "text-violet" },
   { value: "Me", label: "Me", icon: User, bg: "bg-success/15", text: "text-success" },
 ];
 
@@ -187,7 +187,7 @@ export function YardBookForm({
                     name="is_all_day"
                     checked={isAllDay}
                     onChange={(e) => setIsAllDay(e.target.checked)}
-                    className="h-4 w-4 rounded border-black/20 text-lime-500 accent-lime-500"
+                    className="h-4 w-4 rounded border-black/20 text-emerald accent-lime-500"
                   />
                   All day event
                 </label>
@@ -243,7 +243,7 @@ export function YardBookForm({
               rows={3}
               defaultValue={item?.notes ?? ""}
               placeholder="Any additional notes..."
-              className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:ring-1 focus:ring-inset focus:ring-lime-500/60 focus:bg-white/8"
+              className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:ring-1 focus:ring-inset focus:ring-emerald/60 focus:bg-white/8"
             />
           </section>
         </div>
@@ -260,7 +260,7 @@ export function YardBookForm({
                 type="checkbox"
                 checked={enableReminders}
                 onChange={(e) => setEnableReminders(e.target.checked)}
-                className="h-4 w-4 rounded border-black/20 text-lime-500 accent-lime-500"
+                className="h-4 w-4 rounded border-black/20 text-emerald accent-lime-500"
               />
               Enable reminders
             </label>
@@ -275,7 +275,7 @@ export function YardBookForm({
                       onClick={() => toggleOffset(opt.value)}
                       className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                         isActive
-                          ? "bg-lime-500/15 text-lime-400"
+                          ? "bg-emerald/15 text-emerald"
                           : "bg-white/5 text-text-muted hover:bg-white/8 hover:text-text-secondary"
                       }`}
                     >
@@ -298,7 +298,7 @@ export function YardBookForm({
                 name="is_recurring"
                 checked={isRecurring}
                 onChange={(e) => setIsRecurring(e.target.checked)}
-                className="h-4 w-4 rounded border-black/20 text-lime-500 accent-lime-500"
+                className="h-4 w-4 rounded border-black/20 text-emerald accent-lime-500"
               />
               Recurring event
             </label>
@@ -330,7 +330,7 @@ export function YardBookForm({
                       onClick={() => toggleHerd(herd.id)}
                       className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                         isActive
-                          ? "bg-lime-500/15 text-lime-400"
+                          ? "bg-emerald/15 text-emerald"
                           : "bg-white/5 text-text-muted hover:bg-white/8 hover:text-text-secondary"
                       }`}
                     >

@@ -173,7 +173,7 @@ export function LensWizard({
         <>
           {/* Running totals bar */}
           {selectedHerds.length > 0 && (
-            <Card className="bg-[#2F8CD9]/5 border-[#2F8CD9]/20">
+            <Card className="bg-advisor/5 border-advisor/20">
               <CardContent className="py-3 px-5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4 text-sm">
@@ -233,7 +233,7 @@ export function LensWizard({
                 <div className="flex items-center gap-3">
                   <select
                     id="herd-select"
-                    className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary outline-none focus:border-[#2F8CD9]/40"
+                    className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary outline-none focus:border-advisor/40"
                     defaultValue=""
                     onChange={(e) => {
                       if (e.target.value) {
@@ -321,7 +321,7 @@ export function LensWizard({
           <Card>
             <CardContent className="py-4 px-5">
               <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
-                <FileText className="h-4 w-4 text-[#2F8CD9]" />
+                <FileText className="h-4 w-4 text-advisor" />
                 Herd Summary
               </h3>
               <div className="overflow-x-auto">
@@ -366,7 +366,7 @@ export function LensWizard({
                             <Badge
                               className={
                                 o.shading_percentage !== 100
-                                  ? "bg-amber-500/15 text-amber-600"
+                                  ? "bg-warning/15 text-warning"
                                   : "bg-surface-raised text-text-muted"
                               }
                             >
@@ -375,7 +375,7 @@ export function LensWizard({
                           </td>
                           <td className="py-2 text-center">
                             {overrideCount > 0 ? (
-                              <Badge className="bg-[#2F8CD9]/15 text-[#2F8CD9]">
+                              <Badge className="bg-advisor/15 text-advisor">
                                 {overrideCount} override{overrideCount !== 1 ? "s" : ""}
                               </Badge>
                             ) : (
@@ -456,9 +456,9 @@ function StepIndicator({
       <div
         className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-colors ${
           active
-            ? "bg-[#2F8CD9] text-white"
+            ? "bg-advisor text-white"
             : complete
-              ? "bg-[#2F8CD9]/20 text-[#2F8CD9]"
+              ? "bg-advisor/20 text-advisor"
               : "bg-surface-raised text-text-muted"
         }`}
       >
@@ -466,7 +466,7 @@ function StepIndicator({
       </div>
       <span
         className={`text-xs font-medium ${
-          active ? "text-[#2F8CD9]" : "text-text-muted"
+          active ? "text-advisor" : "text-text-muted"
         }`}
       >
         {label}

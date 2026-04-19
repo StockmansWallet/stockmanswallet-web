@@ -128,7 +128,7 @@ export default async function AdvisorDashboardPage() {
       <ConnectionRealtime userId={user.id} />
       <PageHeader
         title={`Welcome, ${firstName}`}
-        titleClassName="text-4xl font-bold text-[#2F8CD9]"
+        titleClassName="text-4xl font-bold text-advisor"
         subtitle="Your advisor workspace overview."
       />
 
@@ -136,8 +136,8 @@ export default async function AdvisorDashboardPage() {
       <div className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:mb-4 lg:gap-4">
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#2F8CD9]/10">
-              <DollarSign className="h-5 w-5 text-[#2F8CD9]" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-advisor/10">
+              <DollarSign className="h-5 w-5 text-advisor" />
             </div>
             <div>
               <p className="text-2xl font-bold tabular-nums text-text-primary">
@@ -164,8 +164,8 @@ export default async function AdvisorDashboardPage() {
 
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#2F8CD9]/10">
-              <Shield className="h-5 w-5 text-[#2F8CD9]" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-advisor/10">
+              <Shield className="h-5 w-5 text-advisor" />
             </div>
             <div>
               <p className="text-2xl font-bold text-text-primary">{activePerms}</p>
@@ -176,11 +176,11 @@ export default async function AdvisorDashboardPage() {
 
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
-              <Clock className="h-5 w-5 text-amber-400" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning/10">
+              <Clock className="h-5 w-5 text-warning" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-amber-400">{pending}</p>
+              <p className="text-2xl font-bold text-warning">{pending}</p>
               <p className="text-[11px] text-text-muted">Pending</p>
             </div>
           </CardContent>
@@ -194,14 +194,14 @@ export default async function AdvisorDashboardPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#2F8CD9]/15">
-                  <Users className="h-3.5 w-3.5 text-[#2F8CD9]" />
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-advisor/15">
+                  <Users className="h-3.5 w-3.5 text-advisor" />
                 </div>
                 <CardTitle>Recent Clients</CardTitle>
               </div>
               <Link
                 href="/dashboard/advisor/clients/connected"
-                className="text-xs font-medium text-[#2F8CD9] hover:underline"
+                className="text-xs font-medium text-advisor hover:underline"
               >
                 View all
               </Link>
@@ -272,8 +272,8 @@ export default async function AdvisorDashboardPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#2F8CD9]/15">
-                <MapPin className="h-3.5 w-3.5 text-[#2F8CD9]" />
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-advisor/15">
+                <MapPin className="h-3.5 w-3.5 text-advisor" />
               </div>
               <CardTitle>Clients by Local Govt Area</CardTitle>
             </div>

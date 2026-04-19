@@ -83,7 +83,7 @@ export function ReportPreviewButton({ reportPath }: ReportPreviewButtonProps) {
           onClick={handleExportPDF}
           disabled={isLoading}
           aria-label="Download report as PDF"
-          className="flex items-center gap-1.5 rounded-full bg-amber-500/15 px-3.5 py-2 text-xs font-semibold text-amber-400 transition-colors hover:bg-amber-500/25 disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-full bg-warning/15 px-3.5 py-2 text-xs font-semibold text-warning transition-colors hover:bg-warning/25 disabled:opacity-50"
         >
           {isLoading ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />

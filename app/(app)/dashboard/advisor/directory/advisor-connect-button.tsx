@@ -36,7 +36,7 @@ export function AdvisorConnectButton({
 
   if (status === "pending") {
     return (
-      <span className={`${base} ${sizeClass} bg-amber-500/15 text-amber-400`}>
+      <span className={`${base} ${sizeClass} bg-warning/15 text-warning`}>
         <Clock className="mr-1.5 h-4 w-4" />
         Pending
       </span>

@@ -195,8 +195,8 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/15">
-                    <Target className="h-5 w-5 text-indigo-400" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal/15">
+                    <Target className="h-5 w-5 text-teal" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-text-primary">Processor Fit</p>
@@ -205,7 +205,7 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
                     </p>
                   </div>
                 </div>
-                <span className="text-lg font-bold text-indigo-400">
+                <span className="text-lg font-bold text-teal">
                   {analysis.processor_fit_score.toFixed(0)}/100
                 </span>
               </div>
@@ -220,13 +220,13 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/15">
-                  <Zap className="h-5 w-5 text-amber-400" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning/15">
+                  <Zap className="h-5 w-5 text-warning" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-semibold text-text-primary">Opportunity</p>
-                    <span className="text-sm font-bold text-amber-400">
+                    <span className="text-sm font-bold text-warning">
                       ${Math.round(analysis.opportunity_value).toLocaleString()}
                     </span>
                   </div>
@@ -328,7 +328,7 @@ function BrangusCommentarySection({
           <ul className="mt-3 space-y-1.5">
             {commentary.bullets.map((bullet, i) => (
               <li key={i} className="flex items-start gap-2 text-xs leading-relaxed text-text-secondary">
-                <span className="mt-0.5 text-indigo-400">-</span>
+                <span className="mt-0.5 text-teal">-</span>
                 {bullet}
               </li>
             ))}
@@ -360,15 +360,15 @@ function getSellWindowConfig(status: string) {
     case "EARLY":
       return {
         label: "Early",
-        color: "text-indigo-400",
-        bg: "bg-indigo-500/15",
+        color: "text-teal",
+        bg: "bg-teal/15",
         icon: TrendingUp,
       };
     case "RISK_OF_OVERWEIGHT":
       return {
         label: "Risk of Overweight",
-        color: "text-amber-400",
-        bg: "bg-amber-500/15",
+        color: "text-warning",
+        bg: "bg-warning/15",
         icon: AlertTriangle,
       };
     default:

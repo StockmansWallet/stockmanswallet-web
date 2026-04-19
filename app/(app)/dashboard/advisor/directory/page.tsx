@@ -87,7 +87,7 @@ export default async function AdvisorProducerDirectoryPage({
     <div className="max-w-4xl">
       <PageHeader
         title="Producer Directory"
-        titleClassName="text-4xl font-bold text-[#2F8CD9]"
+        titleClassName="text-4xl font-bold text-advisor"
         subtitle="Search for producers to connect with"
         subtitleClassName="text-sm font-medium text-text-secondary"
       />
@@ -97,7 +97,7 @@ export default async function AdvisorProducerDirectoryPage({
       {(producers ?? []).length === 0 ? (
         <Card>
           <EmptyState
-            icon={<Search className="h-6 w-6 text-[#2F8CD9]" />}
+            icon={<Search className="h-6 w-6 text-advisor" />}
             title="No producers found"
             description={
               searchQuery

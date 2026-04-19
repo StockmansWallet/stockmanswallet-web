@@ -109,11 +109,11 @@ export default async function FarmerConnectionsPage() {
         </Card>
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
-              <Clock className="h-5 w-5 text-amber-400" aria-hidden="true" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning/10">
+              <Clock className="h-5 w-5 text-warning" aria-hidden="true" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-amber-400">{pendingCount}</p>
+              <p className="text-2xl font-bold text-warning">{pendingCount}</p>
               <p className="text-[11px] text-text-muted">Pending</p>
             </div>
           </CardContent>
@@ -137,7 +137,7 @@ export default async function FarmerConnectionsPage() {
 
       {incomingRequests.length > 0 && (
         <div className="mb-6">
-          <h2 className="mb-3 text-sm font-semibold text-amber-400">
+          <h2 className="mb-3 text-sm font-semibold text-warning">
             Incoming Requests ({incomingRequests.length})
           </h2>
           <div className="flex flex-col gap-3">

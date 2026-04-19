@@ -346,7 +346,7 @@ export function SellStockForm({ herd, suggestedPricePerKg, projectedWeight, pric
             {freight > 0 ? ` (net $${netValue.toLocaleString()} after freight)` : ""}
           </p>
           {isFullSale && (
-            <p className="text-amber-400">
+            <p className="text-warning">
               This herd will be marked as sold and moved to your sold herds list.
             </p>
           )}

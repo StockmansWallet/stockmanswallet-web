@@ -28,13 +28,13 @@ function SectionIcon({
     variant === "danger"
       ? "bg-error/15"
       : variant === "accent"
-        ? "bg-amber-500/15"
+        ? "bg-warning/15"
         : "bg-brand/15";
   const text =
     variant === "danger"
       ? "text-error"
       : variant === "accent"
-        ? "text-amber-400"
+        ? "text-warning"
         : "text-brand";
 
   return (
@@ -77,7 +77,7 @@ export default async function AccountSettingsPage() {
       </div>
       <PageHeader
         title="Account"
-        titleClassName="text-4xl font-bold text-amber-400"
+        titleClassName="text-4xl font-bold text-warning"
         subtitle="Subscription, security, and account management."
       />
 
@@ -101,7 +101,7 @@ export default async function AccountSettingsPage() {
                 </p>
               </div>
               <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                isAdvisor ? "bg-[#2F8CD9]/10 text-[#2F8CD9]" : "bg-brand/10 text-brand"
+                isAdvisor ? "bg-advisor/10 text-advisor" : "bg-brand/10 text-brand"
               }`}>
                 {isAdvisor ? "Advisor" : "Producer"}
               </span>

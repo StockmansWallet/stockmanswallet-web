@@ -157,7 +157,7 @@ export function FarmerChatClient({
                   ? "Add a note (optional), then send..."
                   : "Write a message..."
               }
-              accentClass="bg-purple-500 hover:bg-purple-600"
+              accentClass="bg-violet hover:bg-violet"
               allowEmpty={pendingAttachment != null}
             />
           </div>

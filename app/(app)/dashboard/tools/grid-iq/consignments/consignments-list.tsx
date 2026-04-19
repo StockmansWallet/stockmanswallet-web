@@ -35,7 +35,7 @@ function statusBadge(status: string) {
     case "draft":
       return { label: "Draft", cls: "bg-white/[0.06] text-text-muted" };
     case "confirmed":
-      return { label: "Confirmed", cls: "bg-indigo-500/15 text-indigo-400" };
+      return { label: "Confirmed", cls: "bg-teal/15 text-teal" };
     case "completed":
       return { label: "Completed", cls: "bg-success/15 text-success" };
     default:
@@ -102,7 +102,7 @@ export function ConsignmentsList({ consignments }: Props) {
       <Button
         variant="ghost"
         size="sm"
-        className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-indigo-400/40 text-indigo-400 hover:text-indigo-400" : "border-white/[0.08] text-text-muted hover:border-white/[0.14]"}`}
+        className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-teal/40 text-teal hover:text-teal" : "border-white/[0.08] text-text-muted hover:border-white/[0.14]"}`}
         onClick={() => (selecting ? exit() : setSelecting(true))}
         disabled={consignments.length === 0}
       >
@@ -154,7 +154,7 @@ export function ConsignmentsList({ consignments }: Props) {
             <span
               className={`flex h-4 w-4 items-center justify-center rounded border transition-colors ${
                 allSelected
-                  ? "border-indigo-400 bg-indigo-400 text-black"
+                  ? "border-teal bg-teal text-black"
                   : "border-white/20 bg-white/[0.04]"
               }`}
             >
@@ -164,7 +164,7 @@ export function ConsignmentsList({ consignments }: Props) {
             </span>
             Select All ({consignments.length})
             {selected.size > 0 && (
-              <span className="ml-2 text-indigo-400">
+              <span className="ml-2 text-teal">
                 {selected.size} selected
               </span>
             )}
@@ -184,15 +184,15 @@ export function ConsignmentsList({ consignments }: Props) {
                   <span
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
                       checked
-                        ? "border-indigo-400 bg-indigo-400 text-black"
+                        ? "border-teal bg-teal text-black"
                         : "border-white/20 bg-white/[0.04]"
                     }`}
                   >
                     {checked && <Check className="h-3 w-3" strokeWidth={3} />}
                   </span>
                 )}
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/15">
-                  <Truck className="h-5 w-5 text-indigo-400" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal/15">
+                  <Truck className="h-5 w-5 text-teal" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-text-primary">

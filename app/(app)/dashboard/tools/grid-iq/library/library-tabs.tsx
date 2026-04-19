@@ -174,7 +174,7 @@ export function LibraryTabs({
               }`}
             >
               <Icon
-                className={`h-4 w-4 ${active ? "text-indigo-400" : "text-text-muted"}`}
+                className={`h-4 w-4 ${active ? "text-teal" : "text-text-muted"}`}
               />
               {tab.label}
             </button>
@@ -244,7 +244,7 @@ function AnalysesTab({ analyses }: { analyses: AnalysisRow[] }) {
                   onClick={() => setSubTab(f.id)}
                   className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                     active
-                      ? "border-indigo-500/40 bg-indigo-500/15 text-indigo-400"
+                      ? "border-teal/40 bg-teal/15 text-teal"
                       : "border-white/[0.08] bg-surface-lowest text-text-secondary hover:border-white/[0.14] hover:text-text-primary"
                   }`}
                 >
@@ -252,7 +252,7 @@ function AnalysesTab({ analyses }: { analyses: AnalysisRow[] }) {
                   {f.count > 0 && (
                     <span
                       className={`rounded-full px-1.5 py-[1px] text-[10px] ${
-                        active ? "bg-indigo-500/20 text-indigo-400" : "bg-white/[0.06] text-text-muted"
+                        active ? "bg-teal/20 text-teal" : "bg-white/[0.06] text-text-muted"
                       }`}
                     >
                       {f.count}
@@ -267,7 +267,7 @@ function AnalysesTab({ analyses }: { analyses: AnalysisRow[] }) {
           <Button
             variant="ghost"
             size="sm"
-            className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-indigo-400/40 text-indigo-400 hover:text-indigo-400" : "border-white/[0.08] text-text-muted hover:border-white/[0.14]"}`}
+            className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-teal/40 text-teal hover:text-teal" : "border-white/[0.08] text-text-muted hover:border-white/[0.14]"}`}
             onClick={() => (selecting ? exitSelecting() : setSelecting(true))}
           >
             {selecting ? "Cancel" : "Select"}
@@ -317,7 +317,7 @@ function SelectionToolbar({
           <span
             className={`flex h-4 w-4 items-center justify-center rounded border transition-colors ${
               allSelected
-                ? "border-indigo-400 bg-indigo-400 text-black"
+                ? "border-teal bg-teal text-black"
                 : "border-white/20 bg-white/[0.04]"
             }`}
           >
@@ -325,7 +325,7 @@ function SelectionToolbar({
           </span>
           Select All ({total})
           {selected.size > 0 && (
-            <span className="ml-2 text-indigo-400">{selected.size} selected</span>
+            <span className="ml-2 text-teal">{selected.size} selected</span>
           )}
         </button>
       ) : (
@@ -340,7 +340,7 @@ function SelectionToolbar({
           <Button
             variant="ghost"
             size="sm"
-            className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-indigo-400/40 text-indigo-400 hover:text-indigo-400" : "border-white/[0.08] text-text-muted hover:border-white/[0.14]"}`}
+            className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-teal/40 text-teal hover:text-teal" : "border-white/[0.08] text-text-muted hover:border-white/[0.14]"}`}
             onClick={onToggle}
           >
             {selecting ? "Cancel" : "Select"}
@@ -520,15 +520,15 @@ function GridsTab({
                   <span
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
                       checked
-                        ? "border-indigo-400 bg-indigo-400 text-black"
+                        ? "border-teal bg-teal text-black"
                         : "border-white/20 bg-white/[0.04]"
                     }`}
                   >
                     {checked && <Check className="h-3 w-3" strokeWidth={3} />}
                   </span>
                 )}
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/15">
-                  <Grid3x3 className="h-5 w-5 text-indigo-400" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal/15">
+                  <Grid3x3 className="h-5 w-5 text-teal" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-text-primary">
@@ -551,7 +551,7 @@ function GridsTab({
                     className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
                       isExpired
                         ? "bg-error/15 text-error"
-                        : "bg-amber-500/15 text-amber-400"
+                        : "bg-warning/15 text-warning"
                     }`}
                   >
                     <AlertTriangle className="h-3 w-3" />
@@ -693,15 +693,15 @@ function KillSheetsTab({
                   <span
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
                       checked
-                        ? "border-indigo-400 bg-indigo-400 text-black"
+                        ? "border-teal bg-teal text-black"
                         : "border-white/20 bg-white/[0.04]"
                     }`}
                   >
                     {checked && <Check className="h-3 w-3" strokeWidth={3} />}
                   </span>
                 )}
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/15">
-                  <FileText className="h-5 w-5 text-indigo-400" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal/15">
+                  <FileText className="h-5 w-5 text-teal" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-text-primary">

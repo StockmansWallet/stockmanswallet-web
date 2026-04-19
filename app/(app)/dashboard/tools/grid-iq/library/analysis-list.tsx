@@ -117,7 +117,7 @@ export function AnalysisList({
             <span
               className={`flex h-4 w-4 items-center justify-center rounded border transition-colors ${
                 allSelected
-                  ? "border-indigo-400 bg-indigo-400 text-black"
+                  ? "border-teal bg-teal text-black"
                   : "border-white/20 bg-white/[0.04]"
               }`}
             >
@@ -128,7 +128,7 @@ export function AnalysisList({
             Select All ({analyses.length})
           </button>
           {selected.size > 0 && (
-            <span className="text-xs text-indigo-400">
+            <span className="text-xs text-teal">
               {selected.size} selected
             </span>
           )}
@@ -154,15 +154,15 @@ export function AnalysisList({
                   <span
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
                       checked
-                        ? "border-indigo-400 bg-indigo-400 text-black"
+                        ? "border-teal bg-teal text-black"
                         : "border-white/20 bg-white/[0.04]"
                     }`}
                   >
                     {checked && <Check className="h-3 w-3" strokeWidth={3} />}
                   </span>
                 )}
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/15">
-                  <TrendingUp className="h-5 w-5 text-indigo-400" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal/15">
+                  <TrendingUp className="h-5 w-5 text-teal" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-text-primary">
@@ -181,9 +181,9 @@ export function AnalysisList({
                           killScore >= 85
                             ? "text-success"
                             : killScore >= 70
-                              ? "text-indigo-400"
+                              ? "text-teal"
                               : killScore >= 50
-                                ? "text-amber-400"
+                                ? "text-warning"
                                 : "text-error"
                         }`}
                       >
@@ -209,7 +209,7 @@ export function AnalysisList({
                     </span>
                   </div>
                   <p
-                    className={`mt-0.5 text-[11px] font-semibold tabular-nums ${isProcessor ? "text-success" : "text-amber-400"}`}
+                    className={`mt-0.5 text-[11px] font-semibold tabular-nums ${isProcessor ? "text-success" : "text-warning"}`}
                   >
                     {isProcessor ? "+" : "-"}$
                     {Math.abs(Math.round(advantage)).toLocaleString()}

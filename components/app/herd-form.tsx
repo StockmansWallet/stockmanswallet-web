@@ -378,7 +378,7 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
             </div>
           )}
           {weightValidation && weightValidation.status === "warning" && (
-            <div className="flex items-start gap-2 rounded-lg border border-amber-800 bg-amber-900/20 px-3 py-2 text-xs text-amber-400 mt-2">
+            <div className="flex items-start gap-2 rounded-lg border border-amber-800 bg-amber-900/20 px-3 py-2 text-xs text-warning mt-2">
               <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
               <span>{weightValidation.message}</span>
             </div>

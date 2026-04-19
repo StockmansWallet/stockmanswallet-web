@@ -30,8 +30,8 @@ function InfoRow({ label, value, valueClassName }: { label: string; value: strin
 
 function SectionIcon({ icon: Icon }: { icon: React.ComponentType<{ className?: string }> }) {
   return (
-    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#ff4021]/15">
-      <Icon className="h-3.5 w-3.5 text-[#ff4021]" />
+    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-red/15">
+      <Icon className="h-3.5 w-3.5 text-red" />
     </div>
   );
 }
@@ -195,7 +195,7 @@ export default async function SimulatorHerdDetailPage({
 
       {/* Sandbox badge */}
       <div className="mb-4 flex items-center gap-2">
-        <FlaskConical className="h-4 w-4 text-[#ff4021]" />
+        <FlaskConical className="h-4 w-4 text-red" />
         <span className="text-xs font-medium text-text-muted">Sandbox herd. Changes do not affect real data.</span>
       </div>
 
@@ -206,22 +206,22 @@ export default async function SimulatorHerdDetailPage({
           {herdValue > 0 && (
             <div className="rounded-2xl bg-white/5 p-5">
               <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isFallback ? "bg-error/15" : isStale ? "bg-amber-500/15" : "bg-[#ff4021]/15"}`}>
-                  {isFallback ? <AlertTriangle className="h-5 w-5 text-error" /> : isStale ? <Clock className="h-5 w-5 text-amber-400" /> : <DollarSign className="h-5 w-5 text-[#ff4021]" />}
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isFallback ? "bg-error/15" : isStale ? "bg-warning/15" : "bg-red/15"}`}>
+                  {isFallback ? <AlertTriangle className="h-5 w-5 text-error" /> : isStale ? <Clock className="h-5 w-5 text-warning" /> : <DollarSign className="h-5 w-5 text-red" />}
                 </div>
                 <div>
                   <p className="text-xs font-medium text-text-muted">Estimated Herd Value</p>
-                  <p className={`mt-0.5 text-2xl font-bold tabular-nums ${isFallback ? "text-error" : isStale ? "text-amber-400" : "text-text-primary"}`}>
+                  <p className={`mt-0.5 text-2xl font-bold tabular-nums ${isFallback ? "text-error" : isStale ? "text-warning" : "text-text-primary"}`}>
                     ${Math.round(herdValue).toLocaleString()}
                   </p>
                   <div className="flex items-center gap-2">
                     {(herd.head_count ?? 0) > 0 && (
-                      <p className={`text-xs ${isFallback ? "text-error/70" : isStale ? "text-amber-400/70" : "text-text-muted"}`}>
+                      <p className={`text-xs ${isFallback ? "text-error/70" : isStale ? "text-warning/70" : "text-text-muted"}`}>
                         ${Math.round(herdValue / herd.head_count).toLocaleString()} per head
                       </p>
                     )}
                     {isFallback && <span className="inline-flex items-center rounded-md bg-error/15 px-1.5 py-0.5 text-[10px] font-medium text-error">{valuation.priceSource === "national" ? "National Avg" : "Est. Fallback"}</span>}
-                    {isStale && <span className="inline-flex items-center rounded-md bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-400">Stale - {staleWeeks}w</span>}
+                    {isStale && <span className="inline-flex items-center rounded-md bg-warning/15 px-1.5 py-0.5 text-[10px] font-medium text-warning">Stale - {staleWeeks}w</span>}
                   </div>
                 </div>
               </div>
@@ -233,7 +233,7 @@ export default async function SimulatorHerdDetailPage({
             <Card>
               <CardHeader><div className="flex items-center gap-2.5"><SectionIcon icon={BarChart3} /><CardTitle>Key Metrics</CardTitle></div></CardHeader>
               <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
-                <InfoRow label="Price (Per Kilogram)" value={`$${valuation.pricePerKg.toFixed(2)}/kg`} valueClassName={isFallback ? "text-error" : isStale ? "text-amber-400" : undefined} />
+                <InfoRow label="Price (Per Kilogram)" value={`$${valuation.pricePerKg.toFixed(2)}/kg`} valueClassName={isFallback ? "text-error" : isStale ? "text-warning" : undefined} />
                 <InfoRow label="Average Weight" value={`${Math.round(projectedWeight ?? herd.current_weight ?? herd.initial_weight ?? 0)} kg`} />
                 <InfoRow label="Value Per Head" value={`$${Math.round(herdValue / (herd.head_count || 1)).toLocaleString()}`} />
               </CardContent>

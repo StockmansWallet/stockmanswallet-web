@@ -55,7 +55,7 @@ function getFileIcon(type: string, name: string) {
   if (ext === "xlsx" || ext === "xls")
     return <FileSpreadsheet className="h-5 w-5 text-success" />;
   if (type.startsWith("image/"))
-    return <FileImage className="h-5 w-5 text-blue-400" />;
+    return <FileImage className="h-5 w-5 text-info" />;
   if (type === "application/pdf")
     return <FileText className="h-5 w-5 text-error" />;
   return <FileSpreadsheet className="h-5 w-5 text-success" />;
@@ -282,7 +282,7 @@ export function GridIQUploader({
             onClick={() => setUploadType("grid")}
             className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
               uploadType === "grid"
-                ? "bg-indigo-500/15 text-indigo-400"
+                ? "bg-teal/15 text-teal"
                 : "text-text-muted hover:text-text-primary"
             }`}
           >
@@ -294,7 +294,7 @@ export function GridIQUploader({
             onClick={() => setUploadType("killsheet")}
             className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
               uploadType === "killsheet"
-                ? "bg-indigo-500/15 text-indigo-400"
+                ? "bg-teal/15 text-teal"
                 : "text-text-muted hover:text-text-primary"
             }`}
           >
@@ -315,12 +315,12 @@ export function GridIQUploader({
               onClick={() => inputRef.current?.click()}
               className={`flex cursor-pointer flex-col items-center rounded-xl border-2 border-dashed py-14 transition-all ${
                 isDragging
-                  ? "border-indigo-400/50 bg-indigo-500/5"
-                  : "border-white/10 hover:border-indigo-400/30 hover:bg-indigo-500/[0.02]"
+                  ? "border-teal/50 bg-teal/5"
+                  : "border-white/10 hover:border-teal/30 hover:bg-teal/[0.02]"
               }`}
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-500/10">
-                <Upload className="h-6 w-6 text-indigo-400" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-teal/10">
+                <Upload className="h-6 w-6 text-teal" />
               </div>
               <p className="mt-4 text-sm font-medium text-text-primary">
                 {isDragging
@@ -372,7 +372,7 @@ export function GridIQUploader({
                     {formatFileSize(file.size)} .{" "}
                     {file.name.split(".").pop()?.toUpperCase() || "File"}
                   </p>
-                  <p className="mt-1 text-xs text-indigo-400">
+                  <p className="mt-1 text-xs text-teal">
                     {uploadType === "grid"
                       ? "Processor Grid"
                       : "Kill Sheet"}
@@ -418,7 +418,7 @@ export function GridIQUploader({
                     {processors.length === 0 && (
                       <Link
                         href="/dashboard/tools/grid-iq/processors/new"
-                        className="text-[11px] text-indigo-400 hover:underline"
+                        className="text-[11px] text-teal hover:underline"
                       >
                         + Add processor
                       </Link>
@@ -430,7 +430,7 @@ export function GridIQUploader({
                       onChange={(e) =>
                         setSelectedProcessorId(e.target.value || null)
                       }
-                      className="mt-1.5 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary focus:border-indigo-500/50 focus:outline-none"
+                      className="mt-1.5 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary focus:border-teal/50 focus:outline-none"
                     >
                       <option value="">Not linked (set later)</option>
                       {processors.map((p) => (
@@ -502,8 +502,8 @@ export function GridIQUploader({
           )}
 
           {error && (
-            <div className="mt-4 rounded-xl bg-amber-500/10 p-4 ring-1 ring-inset ring-amber-500/20">
-              <p className="text-sm text-amber-400">{error}</p>
+            <div className="mt-4 rounded-xl bg-warning/10 p-4 ring-1 ring-inset ring-warning/20">
+              <p className="text-sm text-warning">{error}</p>
             </div>
           )}
         </CardContent>
@@ -564,16 +564,16 @@ function ExtractionResultView({
     <div className="space-y-3">
       {/* Document type mismatch warning */}
       {result.typeMismatch && !typeMismatchConfirmed && (
-        <div className="rounded-xl bg-amber-500/10 p-4 ring-1 ring-inset ring-amber-500/20">
+        <div className="rounded-xl bg-warning/10 p-4 ring-1 ring-inset ring-warning/20">
           <div className="flex items-center gap-2 mb-2">
-            <AlertTriangle className="h-4 w-4 text-amber-400" />
-            <span className="text-sm font-medium text-amber-400">
+            <AlertTriangle className="h-4 w-4 text-warning" />
+            <span className="text-sm font-medium text-warning">
               Document Type Mismatch
             </span>
           </div>
-          <p className="text-sm text-amber-300/80 mb-3">
-            This file looks like a <span className="font-medium text-amber-300">{typeMismatchLabel}</span>,
-            {" "}but you selected <span className="font-medium text-amber-300">{selectedLabel}</span>.
+          <p className="text-sm text-warning/80 mb-3">
+            This file looks like a <span className="font-medium text-warning">{typeMismatchLabel}</span>,
+            {" "}but you selected <span className="font-medium text-warning">{selectedLabel}</span>.
             Please confirm the correct type before saving.
           </p>
           <div className="flex gap-2">
@@ -598,14 +598,14 @@ function ExtractionResultView({
 
       {/* Truncation warning */}
       {result.wasTruncated && (
-        <div className="rounded-xl bg-amber-500/10 p-4 ring-1 ring-inset ring-amber-500/20">
+        <div className="rounded-xl bg-warning/10 p-4 ring-1 ring-inset ring-warning/20">
           <div className="flex items-center gap-2 mb-2">
-            <AlertTriangle className="h-4 w-4 text-amber-400" />
-            <span className="text-sm font-medium text-amber-400">
+            <AlertTriangle className="h-4 w-4 text-warning" />
+            <span className="text-sm font-medium text-warning">
               Incomplete Extraction
             </span>
           </div>
-          <p className="text-sm text-amber-300/80">
+          <p className="text-sm text-warning/80">
             The AI response was cut short due to document size. Some data may be missing.
             Try uploading a clearer image, or split a large PDF into smaller sections.
           </p>
@@ -681,14 +681,14 @@ function ExtractionResultView({
 
           {/* Head count reconciliation warning */}
           {result.reconciliation && !result.reconciliation.isMatched && (
-            <div className="rounded-xl bg-amber-500/10 p-4 ring-1 ring-inset ring-amber-500/20">
+            <div className="rounded-xl bg-warning/10 p-4 ring-1 ring-inset ring-warning/20">
               <div className="flex items-center gap-2 mb-2">
-                <AlertTriangle className="h-4 w-4 text-amber-400" />
-                <span className="text-sm font-medium text-amber-400">
+                <AlertTriangle className="h-4 w-4 text-warning" />
+                <span className="text-sm font-medium text-warning">
                   Head Count Mismatch
                 </span>
               </div>
-              <p className="text-sm text-amber-300/80 mb-3">{result.reconciliation.message}</p>
+              <p className="text-sm text-warning/80 mb-3">{result.reconciliation.message}</p>
               {!headCountConfirmed ? (
                 <div className="flex gap-2">
                   <Button variant="secondary" size="sm" onClick={onRetry}>
@@ -742,7 +742,7 @@ function EditField({
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-56 rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-sm font-medium text-text-primary text-right outline-none focus:border-indigo-400/50 focus:ring-1 focus:ring-indigo-400/25"
+        className="w-56 rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-sm font-medium text-text-primary text-right outline-none focus:border-teal/50 focus:ring-1 focus:ring-teal/25"
       />
     </div>
   );

@@ -65,7 +65,7 @@ export default async function YardBookPage() {
     <div className="max-w-4xl">
       <PageHeader
         title="Yard Book"
-        titleClassName="text-4xl font-bold text-lime-400"
+        titleClassName="text-4xl font-bold text-emerald"
         subtitle="Top Pocket Stuff"
         subtitleClassName="text-sm font-medium text-text-secondary"
       />

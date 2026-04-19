@@ -51,7 +51,7 @@ export function ClientReportTab({ reportData, clientName }: ClientReportTabProps
   return (
     <div className="flex flex-col gap-4">
       {/* Report header */}
-      <Card className="border-[#2F8CD9]/20">
+      <Card className="border-advisor/20">
         <CardContent className="p-6">
           <div className="flex items-start justify-between">
             <div>
@@ -65,7 +65,7 @@ export function ClientReportTab({ reportData, clientName }: ClientReportTabProps
                 Generated {new Date().toLocaleDateString("en-AU", { day: "2-digit", month: "long", year: "numeric" })}
               </p>
             </div>
-            <Badge className="bg-[#2F8CD9]/15 text-[#2F8CD9]">Read-only</Badge>
+            <Badge className="bg-advisor/15 text-advisor">Read-only</Badge>
           </div>
         </CardContent>
       </Card>

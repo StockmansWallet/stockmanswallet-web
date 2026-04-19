@@ -25,7 +25,7 @@ function DashboardPanel() {
   const statusStyles = {
     active: { bg: 'bg-success/15', text: 'text-success', label: 'Active' },
     pending: { bg: 'bg-[#2F8CD9]/15', text: 'text-[#2F8CD9]', label: 'Pending' },
-    expired: { bg: 'bg-amber-500/15', text: 'text-amber-400', label: 'Expired' },
+    expired: { bg: 'bg-warning/15', text: 'text-warning', label: 'Expired' },
   }
   const regions = [
     { name: 'Charters Towers Regional Council', count: 56, pct: 40, value: '$85.6M', colour: '#34D399' },
@@ -59,7 +59,7 @@ function DashboardPanel() {
         {[
           { label: 'Total Clients', value: '141', dot: 'bg-[#2F8CD9]' },
           { label: 'Sharing Data', value: '132', dot: 'bg-success' },
-          { label: 'Pending', value: '9', dot: 'bg-amber-400' },
+          { label: 'Pending', value: '9', dot: 'bg-warning' },
         ].map((stat) => (
           <div key={stat.label} className="rounded-xl bg-white/[0.04] p-3">
             <div className="flex items-center gap-2">
@@ -216,7 +216,7 @@ function LensPanel() {
         {[
           { label: 'Baseline', value: '$1,842,500', sub: "Client's value", colour: 'text-white' },
           { label: 'Adjusted', value: '$1,716,200', sub: '-6.9%', colour: 'text-[#2F8CD9]' },
-          { label: 'Shaded', value: '$1,544,580', sub: '10% shading', colour: 'text-amber-400' },
+          { label: 'Shaded', value: '$1,544,580', sub: '10% shading', colour: 'text-warning' },
         ].map((card) => (
           <div key={card.label} className="rounded-xl bg-white/[0.04] p-3 text-center">
             <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">{card.label}</p>
@@ -258,11 +258,11 @@ function LensPanel() {
         <span className="text-xs text-text-secondary">Shading</span>
         <div className="relative flex-1">
           <div className="h-1.5 rounded-full bg-white/[0.06]">
-            <div className="h-full w-[90%] rounded-full bg-amber-500" />
+            <div className="h-full w-[90%] rounded-full bg-warning" />
           </div>
-          <div className="absolute left-[90%] top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-amber-500 bg-surface-primary" />
+          <div className="absolute left-[90%] top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-warning bg-surface-primary" />
         </div>
-        <span className="rounded-md bg-amber-500/15 px-2 py-0.5 text-xs font-semibold tabular-nums text-amber-400">90%</span>
+        <span className="rounded-md bg-warning/15 px-2 py-0.5 text-xs font-semibold tabular-nums text-warning">90%</span>
       </div>
     </div>
   )
@@ -384,7 +384,7 @@ function ReportsPanel() {
         </div>
         <div className="rounded-xl bg-white/[0.04] p-3 text-center">
           <p className="text-[10px] text-text-muted">Variance</p>
-          <p className="mt-1 text-sm font-bold tabular-nums text-amber-400">-16.2%</p>
+          <p className="mt-1 text-sm font-bold tabular-nums text-warning">-16.2%</p>
         </div>
       </div>
 
@@ -416,7 +416,7 @@ function ReportsPanel() {
                   <td className="px-4 py-2 font-medium">{row.assumption}</td>
                   <td className="px-2 py-2 text-right tabular-nums">{row.producer}</td>
                   <td className="px-2 py-2 text-right tabular-nums text-[#2F8CD9]">{row.advisor}</td>
-                  <td className="px-4 py-2 text-right font-semibold tabular-nums text-amber-400">{row.impact}</td>
+                  <td className="px-4 py-2 text-right font-semibold tabular-nums text-warning">{row.impact}</td>
                 </tr>
               ))}
             </tbody>

@@ -40,12 +40,12 @@ export function LensReportView({
   return (
     <div className="space-y-6">
       {/* Report header */}
-      <Card className="border-[#2F8CD9]/20 bg-[#2F8CD9]/5">
+      <Card className="border-advisor/20 bg-advisor/5">
         <CardContent className="py-5 px-6">
           <div className="flex items-start justify-between">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <FileText className="h-5 w-5 text-[#2F8CD9]" />
+                <FileText className="h-5 w-5 text-advisor" />
                 <h2 className="text-lg font-bold text-text-primary">
                   Valuation Assessment Report
                 </h2>
@@ -73,7 +73,7 @@ export function LensReportView({
           </div>
 
           {/* Value summary row */}
-          <div className="grid grid-cols-3 gap-4 mt-5 pt-4 border-t border-[#2F8CD9]/20">
+          <div className="grid grid-cols-3 gap-4 mt-5 pt-4 border-t border-advisor/20">
             <div>
               <p className="text-xs text-text-muted">Client Portfolio</p>
               <p className="text-lg font-bold text-text-secondary">
@@ -88,7 +88,7 @@ export function LensReportView({
             </div>
             <div>
               <p className="text-xs text-text-muted">Shaded Value (Lending)</p>
-              <p className="text-lg font-bold text-[#2F8CD9]">
+              <p className="text-lg font-bold text-advisor">
                 ${(report.total_shaded_value ?? 0).toLocaleString("en-AU", { maximumFractionDigits: 0 })}
               </p>
             </div>

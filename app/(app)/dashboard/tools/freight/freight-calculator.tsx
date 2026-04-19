@@ -86,8 +86,8 @@ function buildAssumptionsLine(result: FreightEstimate): string {
 
 function SectionIcon({ icon: Icon }: { icon: React.ComponentType<{ className?: string }> }) {
   return (
-    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sky-500/15">
-      <Icon className="h-3.5 w-3.5 text-sky-400" />
+    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-info/15">
+      <Icon className="h-3.5 w-3.5 text-info" />
     </div>
   );
 }
@@ -104,8 +104,8 @@ function StatCard({ label, value, sub }: { label: string; value: string; sub?: s
 
 function AlertCard({ type, message }: { type: "warning" | "info" | "success"; message: string }) {
   const styles = {
-    warning: { bg: "bg-amber-500/10 ring-amber-500/20", icon: <AlertTriangle className="h-4 w-4 text-amber-400" /> },
-    info: { bg: "bg-blue-500/10 ring-blue-500/20", icon: <Info className="h-4 w-4 text-blue-400" /> },
+    warning: { bg: "bg-warning/10 ring-warning/20", icon: <AlertTriangle className="h-4 w-4 text-warning" /> },
+    info: { bg: "bg-info/10 ring-info/20", icon: <Info className="h-4 w-4 text-info" /> },
     success: { bg: "bg-success/10 ring-success/20", icon: <CheckCircle2 className="h-4 w-4 text-success" /> },
   };
   const s = styles[type];
@@ -484,10 +484,10 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                     type="checkbox"
                     checked={isCustomJob}
                     onChange={(e) => handleCustomJobToggle(e.target.checked)}
-                    className="mt-1 h-4 w-4 shrink-0 rounded border-white/20 bg-white/[0.04] text-sky-500 focus:ring-sky-500/50"
+                    className="mt-1 h-4 w-4 shrink-0 rounded border-white/20 bg-white/[0.04] text-info focus:ring-info/50"
                   />
                   <span>
-                    <span className="text-sm font-medium text-sky-400">Custom Job</span>
+                    <span className="text-sm font-medium text-info">Custom Job</span>
                     <br />
                     <span className="text-xs text-text-muted">(enter weight and head count manually)</span>
                   </span>
@@ -649,7 +649,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
               <button
                 type="button"
                 onClick={() => setDensityOpen(!densityOpen)}
-                className="mt-3 flex items-center gap-1.5 text-xs font-medium text-sky-400 transition-colors hover:text-sky-300"
+                className="mt-3 flex items-center gap-1.5 text-xs font-medium text-info transition-colors hover:text-info"
               >
                 <ChevronDown className={`h-3.5 w-3.5 transition-transform ${densityOpen ? "rotate-180" : ""}`} />
                 Loading Density Reference
@@ -706,7 +706,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                         setHeadPerDeck(headsPerDeckForWeight(w).toString());
                       }
                     }}
-                    className="mt-1 h-4 w-4 shrink-0 rounded border-white/20 bg-white/[0.04] text-sky-500 focus:ring-sky-500/50"
+                    className="mt-1 h-4 w-4 shrink-0 rounded border-white/20 bg-white/[0.04] text-info focus:ring-info/50"
                   />
                   <span>
                     <span className="text-sm font-medium text-text-primary">Calves at foot</span>
@@ -748,12 +748,12 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
         {result ? (
           <div className="space-y-4">
             {/* Hero Cost */}
-            <Card className="bg-sky-500/5 ring-sky-500/20">
+            <Card className="bg-info/5 ring-info/20">
               <CardContent className="p-6 text-center">
                 <p className="text-xs font-medium uppercase tracking-wider text-text-muted">
                   Freight Estimate
                 </p>
-                <p className="mt-1 text-4xl font-bold text-sky-400">
+                <p className="mt-1 text-4xl font-bold text-info">
                   ${Math.round(result.totalCost).toLocaleString()}
                   <span className="ml-1.5 text-base font-medium text-text-muted">+GST</span>
                 </p>

@@ -121,7 +121,7 @@ export function MappingPanel() {
                   <td className="py-1.5 pr-4">
                     {r.isMapped ? (
                       <span className="inline-flex items-center gap-1">
-                        <span className="text-amber-400">{r.mlaCategory}</span>
+                        <span className="text-warning">{r.mlaCategory}</span>
                         <span className="text-[10px] text-text-muted">(remapped)</span>
                       </span>
                     ) : (
@@ -133,7 +133,7 @@ export function MappingPanel() {
                   </td>
                   <td className="py-1.5 pr-4">
                     {r.fallback ? (
-                      <span className="text-sky-400">{r.fallback}</span>
+                      <span className="text-info">{r.fallback}</span>
                     ) : (
                       <span className="text-white/20">-</span>
                     )}
@@ -165,7 +165,7 @@ export function MappingPanel() {
                     <span className={`inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-medium ${
                       e.salePrefix === "Any"
                         ? "bg-white/[0.06] text-text-muted"
-                        : "bg-sky-500/15 text-sky-400"
+                        : "bg-info/15 text-info"
                     }`}>
                       {e.salePrefix}
                     </span>
@@ -174,7 +174,7 @@ export function MappingPanel() {
                     {e.storedAs === e.csvCategory ? (
                       <span className="text-success">{e.storedAs}</span>
                     ) : (
-                      <span className="text-amber-400">{e.storedAs}</span>
+                      <span className="text-warning">{e.storedAs}</span>
                     )}
                   </td>
                 </tr>

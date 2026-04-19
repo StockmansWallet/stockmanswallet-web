@@ -102,7 +102,7 @@ export default async function GridDetailPage({ params }: PageProps) {
         if (!expired && !expiringSoon) return null;
         const tone = expired
           ? "border-error/30 bg-error/[0.08] text-error"
-          : "border-amber-500/30 bg-amber-500/[0.08] text-amber-400";
+          : "border-warning/30 bg-warning/[0.08] text-warning";
         return (
           <div className={`mt-4 flex items-center gap-2 rounded-xl border px-4 py-2.5 ${tone}`}>
             <AlertTriangle className="h-4 w-4 shrink-0" />
@@ -182,8 +182,8 @@ export default async function GridDetailPage({ params }: PageProps) {
           <EntrySection
             title="Male Grades"
             entries={maleEntries}
-            color="text-blue-400"
-            bg="bg-blue-500/15"
+            color="text-info"
+            bg="bg-info/15"
           />
         )}
         {unisexEntries.length > 0 && (
@@ -194,8 +194,8 @@ export default async function GridDetailPage({ params }: PageProps) {
                 : `Grade Entries (${entries.length})`
             }
             entries={unisexEntries}
-            color="text-indigo-400"
-            bg="bg-indigo-500/15"
+            color="text-teal"
+            bg="bg-teal/15"
           />
         )}
       </div>
@@ -205,8 +205,8 @@ export default async function GridDetailPage({ params }: PageProps) {
         <Card className="mt-4">
           <CardContent className="p-0">
             <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
-              <TrendingUp className="h-4 w-4 text-indigo-400" />
-              <span className="text-sm font-semibold text-indigo-400">
+              <TrendingUp className="h-4 w-4 text-teal" />
+              <span className="text-sm font-semibold text-teal">
                 Analyses using this grid
               </span>
               <span className="text-xs text-text-muted">
@@ -248,9 +248,9 @@ export default async function GridDetailPage({ params }: PageProps) {
                               ks >= 85
                                 ? "text-success"
                                 : ks >= 70
-                                  ? "text-indigo-400"
+                                  ? "text-teal"
                                   : ks >= 50
-                                    ? "text-amber-400"
+                                    ? "text-warning"
                                     : "text-error"
                             }`}
                           >
@@ -262,7 +262,7 @@ export default async function GridDetailPage({ params }: PageProps) {
                     <div className="text-right">
                       <p
                         className={`text-sm font-semibold ${
-                          isProcessor ? "text-success" : "text-amber-400"
+                          isProcessor ? "text-success" : "text-warning"
                         }`}
                       >
                         {isProcessor ? "Over-the-Hooks" : "Saleyard"}
@@ -281,7 +281,7 @@ export default async function GridDetailPage({ params }: PageProps) {
               <div className="border-t border-white/[0.06] px-4 py-2.5 text-center">
                 <Link
                   href="/dashboard/tools/grid-iq/library?tab=analyses"
-                  className="text-xs font-medium text-indigo-400 hover:underline"
+                  className="text-xs font-medium text-teal hover:underline"
                 >
                   Showing latest 25. View all in Library →
                 </Link>
@@ -388,7 +388,7 @@ function EntrySection({
                             <span className="text-text-muted">
                               {String(p.weightBandLabel || p.weightBandKg)}
                             </span>
-                            <span className="font-mono font-medium text-indigo-400">
+                            <span className="font-mono font-medium text-teal">
                               ${Number(p.pricePerKg).toFixed(2)}
                             </span>
                           </span>

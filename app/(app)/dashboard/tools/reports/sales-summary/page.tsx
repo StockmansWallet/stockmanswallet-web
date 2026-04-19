@@ -67,7 +67,7 @@ export default async function SalesSummaryPage({ searchParams }: { searchParams:
     <div className="max-w-4xl">
       <PageHeader
         title="Sales Summary"
-        titleClassName="text-4xl font-bold text-amber-400"
+        titleClassName="text-4xl font-bold text-warning"
         subtitle="Transaction history and performance metrics."
         actions={!isEmpty ? <ReportExportButton reportData={reportData} reportType="sales-summary" title="Sales Summary" /> : undefined}
       />
@@ -91,7 +91,7 @@ export default async function SalesSummaryPage({ searchParams }: { searchParams:
             <Card>
               <CardContent className="px-5 py-4">
                 <p className="text-xs text-text-muted">Net Sales</p>
-                <p className="mt-1 text-xl font-bold tabular-nums text-amber-400">{fmt(totalSales)}</p>
+                <p className="mt-1 text-xl font-bold tabular-nums text-warning">{fmt(totalSales)}</p>
               </CardContent>
             </Card>
             <Card>
@@ -177,7 +177,7 @@ export default async function SalesSummaryPage({ searchParams }: { searchParams:
                       <td className="px-3 py-3" />
                       <td className="px-3 py-3" />
                       <td className="px-3 py-3 text-right tabular-nums text-text-primary">{fmt(totalFreight)}</td>
-                      <td className="px-5 py-3 text-right tabular-nums text-amber-400">{fmt(totalSales)}</td>
+                      <td className="px-5 py-3 text-right tabular-nums text-warning">{fmt(totalSales)}</td>
                     </tr>
                   </tfoot>
                 </table>

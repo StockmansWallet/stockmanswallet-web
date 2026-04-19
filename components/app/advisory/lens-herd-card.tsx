@@ -84,7 +84,7 @@ export function LensHerdCard({
         className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-surface-raised/50 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#2F8CD9]/15 text-xs font-bold text-[#2F8CD9]">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-advisor/15 text-xs font-bold text-advisor">
             {index + 1}
           </div>
           <div>
@@ -96,7 +96,7 @@ export function LensHerdCard({
         </div>
         <div className="flex items-center gap-2">
           {overrides.shading_percentage !== 100 && (
-            <Badge className="bg-amber-500/15 text-amber-600">
+            <Badge className="bg-warning/15 text-warning">
               {overrides.shading_percentage}% shading
             </Badge>
           )}
@@ -163,7 +163,7 @@ export function LensHerdCard({
                 max={100}
                 value={overrides.shading_percentage}
                 onChange={(e) => update("shading_percentage", Number(e.target.value))}
-                className="w-full accent-[#2F8CD9] mt-1.5"
+                className="w-full accent-advisor mt-1.5"
               />
               <div className="flex justify-between text-[10px] text-text-muted">
                 <span>0%</span>
@@ -181,7 +181,7 @@ export function LensHerdCard({
               maxLength={5000}
               rows={2}
               placeholder="Reasoning for adjustments..."
-              className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-[#2F8CD9]/40"
+              className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-advisor/40"
             />
           </div>
 

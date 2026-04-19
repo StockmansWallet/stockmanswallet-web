@@ -91,7 +91,7 @@ export function ProcessorsList({
       <Button
         variant="ghost"
         size="sm"
-        className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-indigo-400/40 text-indigo-400 hover:text-indigo-400" : "border-white/[0.08] text-text-muted hover:border-white/[0.14]"}`}
+        className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-teal/40 text-teal hover:text-teal" : "border-white/[0.08] text-text-muted hover:border-white/[0.14]"}`}
         onClick={() => (selecting ? exit() : setSelecting(true))}
         disabled={processors.length === 0}
       >
@@ -143,7 +143,7 @@ export function ProcessorsList({
             <span
               className={`flex h-4 w-4 items-center justify-center rounded border transition-colors ${
                 allSelected
-                  ? "border-indigo-400 bg-indigo-400 text-black"
+                  ? "border-teal bg-teal text-black"
                   : "border-white/20 bg-white/[0.04]"
               }`}
             >
@@ -153,7 +153,7 @@ export function ProcessorsList({
             </span>
             Select All ({processors.length})
             {selected.size > 0 && (
-              <span className="ml-2 text-indigo-400">
+              <span className="ml-2 text-teal">
                 {selected.size} selected
               </span>
             )}
@@ -174,15 +174,15 @@ export function ProcessorsList({
                   <span
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
                       checked
-                        ? "border-indigo-400 bg-indigo-400 text-black"
+                        ? "border-teal bg-teal text-black"
                         : "border-white/20 bg-white/[0.04]"
                     }`}
                   >
                     {checked && <Check className="h-3 w-3" strokeWidth={3} />}
                   </span>
                 )}
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/15">
-                  <Factory className="h-5 w-5 text-indigo-400" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal/15">
+                  <Factory className="h-5 w-5 text-teal" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
@@ -190,7 +190,7 @@ export function ProcessorsList({
                       {p.name}
                     </p>
                     {p.is_primary && (
-                      <span className="rounded-full bg-indigo-500/15 px-2 py-0.5 text-[10px] font-medium text-indigo-400">
+                      <span className="rounded-full bg-teal/15 px-2 py-0.5 text-[10px] font-medium text-teal">
                         Primary
                       </span>
                     )}
@@ -198,12 +198,12 @@ export function ProcessorsList({
                   <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-text-muted">
                     {p.address && <span>{p.address}</span>}
                     {hasCoords ? (
-                      <span className="flex items-center gap-1 text-indigo-400/70">
+                      <span className="flex items-center gap-1 text-teal/70">
                         <MapPin className="h-3 w-3" />
                         coords set
                       </span>
                     ) : (
-                      <span className="text-amber-400/80">no coords</span>
+                      <span className="text-warning/80">no coords</span>
                     )}
                     <span>
                       {p.grid_count} grid{p.grid_count === 1 ? "" : "s"}

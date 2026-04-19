@@ -30,14 +30,14 @@ function daysSince(dateStr: string | null): number | null {
 function freshnessColor(days: number | null): string {
   if (days === null) return "text-text-muted";
   if (days <= 7) return "text-success";
-  if (days <= 30) return "text-amber-400";
+  if (days <= 30) return "text-warning";
   return "text-error";
 }
 
 function freshnessBg(days: number | null): string {
   if (days === null) return "bg-white/[0.03]";
   if (days <= 7) return "bg-success/[0.06]";
-  if (days <= 30) return "bg-amber-500/[0.06]";
+  if (days <= 30) return "bg-warning/[0.06]";
   return "bg-error/[0.06]";
 }
 
@@ -114,7 +114,7 @@ export function SaleyardStatus() {
       {/* Summary */}
       <div className="flex flex-wrap items-center gap-3 rounded-xl border border-white/[0.06] bg-surface-secondary px-4 py-3">
         <div className="flex items-center gap-1.5">
-          <MapPinned className="h-3.5 w-3.5 text-sky-400" />
+          <MapPinned className="h-3.5 w-3.5 text-info" />
           <span className="text-xs text-text-muted">Saleyards with data</span>
           <span className="text-sm font-semibold text-text-primary">{withData}</span>
         </div>

@@ -63,7 +63,7 @@ export default async function FreightHistoryPage() {
 
       <PageHeader
         title="Saved Estimates"
-        titleClassName="text-4xl font-bold text-sky-400"
+        titleClassName="text-4xl font-bold text-info"
         subtitle="Freight calculations you've bookmarked from iOS or web"
         subtitleClassName="text-sm font-medium text-text-secondary"
       />

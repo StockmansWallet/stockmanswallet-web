@@ -72,8 +72,8 @@ export function ScenarioPicker({ connectionId, scenarios, activeLensScenarioId, 
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#2F8CD9]/15">
-              <Layers className="h-3.5 w-3.5 text-[#2F8CD9]" />
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-advisor/15">
+              <Layers className="h-3.5 w-3.5 text-advisor" />
             </div>
             <CardTitle>Scenarios</CardTitle>
           </div>
@@ -103,11 +103,11 @@ export function ScenarioPicker({ connectionId, scenarios, activeLensScenarioId, 
                 <div
                   key={scenario.id}
                   className={`flex items-center justify-between rounded-lg border px-3 py-2.5 ${
-                    isActive ? "border-[#2F8CD9]/30 bg-[#2F8CD9]/5" : "border-white/5 bg-white/[0.02]"
+                    isActive ? "border-advisor/30 bg-advisor/5" : "border-white/5 bg-white/[0.02]"
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-[#2F8CD9]" : "text-text-muted"}`} />
+                    <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-advisor" : "text-text-muted"}`} />
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-text-primary">{scenario.name}</p>
                       <div className="flex items-center gap-1.5">

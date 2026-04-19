@@ -31,7 +31,7 @@ export function ProcessorDeleteButton({ processorId }: { processorId: string }) 
   if (showConfirm) {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-xs text-amber-400">Delete this processor?</span>
+        <span className="text-xs text-warning">Delete this processor?</span>
         <Button
           size="sm"
           variant="ghost"

@@ -193,10 +193,10 @@ export function ClientHerdsTable({
                   <td className={`hidden px-5 py-3.5 xl:table-cell ${!herd.selected_saleyard ? "text-error/70 italic" : nearestSaleyard || isFallback ? "text-text-muted/50 line-through" : "text-text-muted"}`}>
                     {herd.selected_saleyard ? resolveShortSaleyardName(herd.selected_saleyard) ?? herd.selected_saleyard : "No Saleyard"}
                   </td>
-                  <td className={`hidden px-5 py-3.5 text-right tabular-nums lg:table-cell ${isFallback ? "text-error" : nearestSaleyard ? "text-amber-400" : "text-text-secondary"}`}>
+                  <td className={`hidden px-5 py-3.5 text-right tabular-nums lg:table-cell ${isFallback ? "text-error" : nearestSaleyard ? "text-warning" : "text-text-secondary"}`}>
                     <div className="flex items-center justify-end gap-1.5">
                       {nearestSaleyard && !isFallback && (
-                        <span className="inline-flex items-center rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
+                        <span className="inline-flex items-center rounded-full bg-warning/15 px-1.5 py-0.5 text-[9px] font-medium text-warning">
                           Via {resolveShortSaleyardName(nearestSaleyard) ?? nearestSaleyard}
                         </span>
                       )}

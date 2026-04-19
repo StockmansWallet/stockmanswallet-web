@@ -114,14 +114,14 @@ export function SavedEstimatesList({ estimates }: { estimates: SavedEstimate[] }
               >
                 <div className="flex items-center gap-2 text-sm font-semibold text-text-primary">
                   <span className="truncate">{estimate.originPropertyName}</span>
-                  <ArrowRight className="h-3.5 w-3.5 shrink-0 text-sky-400" />
+                  <ArrowRight className="h-3.5 w-3.5 shrink-0 text-info" />
                   <span className="truncate">{estimate.destinationName}</span>
                 </div>
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-muted">
                   {estimate.herdName && <span>{estimate.herdName}</span>}
                   <span>{estimate.headCount} head</span>
                   <span>{Math.round(estimate.distanceKm)} km</span>
-                  <span className="ml-auto font-semibold text-sky-400">
+                  <span className="ml-auto font-semibold text-info">
                     {formatCurrency(estimate.totalCost)}
                     <span className="ml-1 text-[10px] font-medium text-text-muted">+GST</span>
                   </span>
@@ -203,8 +203,8 @@ function DetailStat({ icon, label, value }: { icon: React.ReactNode; label: stri
 
 function Alert({ type, message }: { type: "warning" | "info" | "success"; message: string }) {
   const styles = {
-    warning: { bg: "bg-amber-500/10 ring-amber-500/20", icon: <AlertTriangle className="h-4 w-4 text-amber-400" /> },
-    info: { bg: "bg-blue-500/10 ring-blue-500/20", icon: <Info className="h-4 w-4 text-blue-400" /> },
+    warning: { bg: "bg-warning/10 ring-warning/20", icon: <AlertTriangle className="h-4 w-4 text-warning" /> },
+    info: { bg: "bg-info/10 ring-info/20", icon: <Info className="h-4 w-4 text-info" /> },
     success: { bg: "bg-success/10 ring-success/20", icon: <CheckCircle2 className="h-4 w-4 text-success" /> },
   };
   const s = styles[type];

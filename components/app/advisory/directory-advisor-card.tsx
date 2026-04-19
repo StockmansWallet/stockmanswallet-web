@@ -5,8 +5,8 @@ import { getCategoryConfig, type DirectoryAdvisor } from "@/lib/types/advisory";
 
 export function DirectoryAdvisorCard({ advisor }: { advisor: DirectoryAdvisor }) {
   const categoryConfig = getCategoryConfig(advisor.role);
-  const categoryBg = categoryConfig?.bgClass ?? "bg-[#2F8CD9]/15";
-  const categoryColour = categoryConfig?.colorClass ?? "text-[#2F8CD9]";
+  const categoryBg = categoryConfig?.bgClass ?? "bg-advisor/15";
+  const categoryColour = categoryConfig?.colorClass ?? "text-advisor";
 
   return (
     <Link
@@ -18,7 +18,7 @@ export function DirectoryAdvisorCard({ advisor }: { advisor: DirectoryAdvisor })
         {categoryConfig ? (
           <categoryConfig.icon className={`h-5 w-5 ${categoryColour}`} />
         ) : (
-          <span className="text-sm font-bold text-[#2F8CD9]">{advisor.display_name?.charAt(0)}</span>
+          <span className="text-sm font-bold text-advisor">{advisor.display_name?.charAt(0)}</span>
         )}
       </div>
 

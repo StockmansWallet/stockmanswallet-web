@@ -93,14 +93,14 @@ export default async function GridIQPage() {
           address we can't calculate freight accurately, so getting them to
           add one first gives every future analysis correct distance costs. */}
       {needsProcessor && (
-        <Card className="border-amber-500/20 bg-amber-500/[0.04]">
+        <Card className="border-warning/20 bg-warning/[0.04]">
           <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/15">
-                <Factory className="h-4 w-4 text-amber-400" />
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-warning/15">
+                <Factory className="h-4 w-4 text-warning" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-amber-400">
+                <p className="text-sm font-semibold text-warning">
                   Add your first processor to get started
                 </p>
                 <p className="mt-0.5 text-xs text-text-secondary">
@@ -112,7 +112,7 @@ export default async function GridIQPage() {
             </div>
             <Link
               href="/dashboard/tools/grid-iq/processors/new"
-              className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-amber-500 px-4 py-2 text-xs font-semibold text-black transition-colors hover:bg-amber-400"
+              className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-warning px-4 py-2 text-xs font-semibold text-black transition-colors hover:bg-warning"
             >
               <Factory className="h-3.5 w-3.5" />
               Add Processor
@@ -123,17 +123,17 @@ export default async function GridIQPage() {
 
       {/* Pending Consignments - Action Needed (full width) */}
       {safePending.length > 0 && (
-        <Card className="border-amber-500/20">
-            <CardHeader className="border-b border-amber-500/10">
+        <Card className="border-warning/20">
+            <CardHeader className="border-b border-warning/10">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Truck className="h-4 w-4 text-amber-400" />
-                  <CardTitle className="text-amber-400">Pending Consignments</CardTitle>
-                  <Badge className="bg-amber-500/15 text-amber-400">{safePending.length}</Badge>
+                  <Truck className="h-4 w-4 text-warning" />
+                  <CardTitle className="text-warning">Pending Consignments</CardTitle>
+                  <Badge className="bg-warning/15 text-warning">{safePending.length}</Badge>
                 </div>
                 <Link
                   href="/dashboard/tools/grid-iq/consignments"
-                  className="inline-flex items-center rounded-full bg-amber-500/15 px-3 py-1 text-xs font-medium text-amber-400 transition-colors hover:bg-amber-500/25"
+                  className="inline-flex items-center rounded-full bg-warning/15 px-3 py-1 text-xs font-medium text-warning transition-colors hover:bg-warning/25"
                 >
                   View All
                 </Link>
@@ -156,12 +156,12 @@ export default async function GridIQPage() {
                         <span>{new Date(c.kill_date as string).toLocaleDateString("en-AU")}</span>
                       )}
                       <span>{c.total_head_count as number ?? 0} head</span>
-                      <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-medium text-amber-400">
+                      <span className="rounded-full bg-warning/15 px-2 py-0.5 text-[10px] font-medium text-warning">
                         {(c.processor_grid_id as string | null) ? "Ready for post-kill" : "Draft"}
                       </span>
                     </div>
                   </div>
-                  <ArrowRight className="ml-2 h-4 w-4 shrink-0 text-amber-400/50 transition-all group-hover:translate-x-0.5 group-hover:text-amber-400" />
+                  <ArrowRight className="ml-2 h-4 w-4 shrink-0 text-warning/50 transition-all group-hover:translate-x-0.5 group-hover:text-warning" />
                 </Link>
               ))}
             </CardContent>
@@ -175,10 +175,10 @@ export default async function GridIQPage() {
           <CardHeader className="border-b border-white/[0.06]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-indigo-400" />
+                <TrendingUp className="h-4 w-4 text-teal" />
                 <CardTitle>Grid Analysis</CardTitle>
                 {safeAnalyses.length > 0 && (
-                  <Badge className="bg-indigo-500/15 text-indigo-400">{safeAnalyses.length}</Badge>
+                  <Badge className="bg-teal/15 text-teal">{safeAnalyses.length}</Badge>
                 )}
               </div>
               <Link
@@ -225,7 +225,7 @@ export default async function GridIQPage() {
                         {killScore !== null && (
                           <span
                             title="Kill Score: 85+ Excellent, 70-84 Good, 50-69 Fair, <50 Poor"
-                            className={`text-[10px] font-medium ${killScore >= 85 ? "text-success" : killScore >= 70 ? "text-indigo-400" : killScore >= 50 ? "text-amber-400" : "text-error"}`}
+                            className={`text-[10px] font-medium ${killScore >= 85 ? "text-success" : killScore >= 70 ? "text-teal" : killScore >= 50 ? "text-warning" : "text-error"}`}
                           >
                             KS {killScore.toFixed(0)}
                           </span>
@@ -251,7 +251,7 @@ export default async function GridIQPage() {
                         </span>
                       </div>
                       <p
-                        className={`mt-0.5 text-[11px] font-semibold tabular-nums ${isProcessor ? "text-success" : "text-amber-400"}`}
+                        className={`mt-0.5 text-[11px] font-semibold tabular-nums ${isProcessor ? "text-success" : "text-warning"}`}
                       >
                         {isProcessor ? "+" : "-"}$
                         {Math.abs(Math.round(advantage)).toLocaleString()}
@@ -273,10 +273,10 @@ export default async function GridIQPage() {
           <CardHeader className="border-b border-white/[0.06]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Truck className="h-4 w-4 text-indigo-400" />
+                <Truck className="h-4 w-4 text-teal" />
                 <CardTitle>Consignments</CardTitle>
                 {safeConsignments.length > 0 && (
-                  <Badge className="bg-indigo-500/15 text-indigo-400">{safeConsignments.length}</Badge>
+                  <Badge className="bg-teal/15 text-teal">{safeConsignments.length}</Badge>
                 )}
               </div>
               <Link
@@ -294,7 +294,7 @@ export default async function GridIQPage() {
                 const badgeCls = status === "completed"
                   ? "bg-success/15 text-success"
                   : status === "confirmed"
-                    ? "bg-indigo-500/15 text-indigo-400"
+                    ? "bg-teal/15 text-teal"
                     : "bg-white/[0.06] text-text-muted";
                 return (
                   <Link
@@ -339,16 +339,16 @@ export default async function GridIQPage() {
           <CardHeader className="border-b border-white/[0.06]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Grid3x3 className="h-4 w-4 text-indigo-400" />
+                <Grid3x3 className="h-4 w-4 text-teal" />
                 <CardTitle>Grids</CardTitle>
                 {safeGrids.length > 0 && (
-                  <Badge className="bg-indigo-500/15 text-indigo-400">{safeGrids.length}</Badge>
+                  <Badge className="bg-teal/15 text-teal">{safeGrids.length}</Badge>
                 )}
               </div>
               <div className="flex items-center gap-2">
                 <Link
                   href="/dashboard/tools/grid-iq/library?tab=grids&upload=grid"
-                  className="inline-flex items-center gap-1 rounded-full bg-indigo-500/15 px-3 py-1 text-xs font-medium text-indigo-400 transition-colors hover:bg-indigo-500/25"
+                  className="inline-flex items-center gap-1 rounded-full bg-teal/15 px-3 py-1 text-xs font-medium text-teal transition-colors hover:bg-teal/25"
                 >
                   <Upload className="h-3 w-3" />
                   Upload
@@ -404,7 +404,7 @@ export default async function GridIQPage() {
                         className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
                           isExpired
                             ? "bg-error/15 text-error"
-                            : "bg-amber-500/15 text-amber-400"
+                            : "bg-warning/15 text-warning"
                         }`}
                       >
                         <AlertTriangle className="h-3 w-3" />
@@ -430,16 +430,16 @@ export default async function GridIQPage() {
           <CardHeader className="border-b border-white/[0.06]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-indigo-400" />
+                <FileText className="h-4 w-4 text-teal" />
                 <CardTitle>Kill Sheets</CardTitle>
                 {safeKillSheets.length > 0 && (
-                  <Badge className="bg-indigo-500/15 text-indigo-400">{safeKillSheets.length}</Badge>
+                  <Badge className="bg-teal/15 text-teal">{safeKillSheets.length}</Badge>
                 )}
               </div>
               <div className="flex items-center gap-2">
                 <Link
                   href="/dashboard/tools/grid-iq/library?tab=kill-sheets&upload=killsheet"
-                  className="inline-flex items-center gap-1 rounded-full bg-indigo-500/15 px-3 py-1 text-xs font-medium text-indigo-400 transition-colors hover:bg-indigo-500/25"
+                  className="inline-flex items-center gap-1 rounded-full bg-teal/15 px-3 py-1 text-xs font-medium text-teal transition-colors hover:bg-teal/25"
                 >
                   <Upload className="h-3 w-3" />
                   Upload

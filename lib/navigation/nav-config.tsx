@@ -37,46 +37,46 @@ export const farmerNavItems: NavItem[] = [
 
 // Farmer mode - intelligence section
 export const farmerIntelItems: NavItem[] = [
-  { label: "Ask Brangus", href: "/dashboard/brangus", icon: <MessageCircle className="h-5 w-5" />, activeClass: "bg-[#FF8000]/15 text-[#FF8000]", inactiveClass: "text-[#FF8000]/80 hover:bg-[#FF8000]/10 hover:text-[#FF8000] hover:drop-shadow-[0_0_6px_rgba(255,128,0,0.4)]" },
+  { label: "Ask Brangus", href: "/dashboard/brangus", icon: <MessageCircle className="h-5 w-5" />, activeClass: "bg-brand/15 text-brand", inactiveClass: "text-brand/80 hover:bg-brand/10 hover:text-brand hover:drop-shadow-[0_0_6px_rgba(255,128,0,0.4)]" },
   { label: "Insights", href: "/dashboard/insights", icon: <Lightbulb className="h-5 w-5" /> },
   { label: "Markets", href: "/dashboard/market", icon: <TrendingUp className="h-5 w-5" /> },
 ];
 
 // Farmer mode - tools section
 export const farmerToolItems: NavItem[] = [
-  { label: "Yard Book", href: "/dashboard/tools/yard-book", icon: <BookOpen className="h-5 w-5" />, activeClass: "bg-lime-500/15 text-lime-400" },
-  { label: "Reports", href: "/dashboard/tools/reports", icon: <FileText className="h-5 w-5" />, activeClass: "bg-amber-500/15 text-amber-400" },
-  { label: "Freight IQ", href: "/dashboard/tools/freight", icon: <Truck className="h-5 w-5" />, activeClass: "bg-sky-500/15 text-sky-400" },
-  { label: "Grid IQ", href: "/dashboard/tools/grid-iq", icon: <Grid3x3 className="h-5 w-5" />, activeClass: "bg-indigo-500/15 text-indigo-400" },
+  { label: "Yard Book", href: "/dashboard/tools/yard-book", icon: <BookOpen className="h-5 w-5" />, activeClass: "bg-yard-book/15 text-yard-book" },
+  { label: "Reports", href: "/dashboard/tools/reports", icon: <FileText className="h-5 w-5" />, activeClass: "bg-reports/15 text-reports" },
+  { label: "Freight IQ", href: "/dashboard/tools/freight", icon: <Truck className="h-5 w-5" />, activeClass: "bg-freight-iq/15 text-freight-iq" },
+  { label: "Grid IQ", href: "/dashboard/tools/grid-iq", icon: <Grid3x3 className="h-5 w-5" />, activeClass: "bg-grid-iq/15 text-grid-iq" },
   // Advisory Hub hidden when advisor feature flag is off
-  ...(ADVISOR_ENABLED ? [{ label: "Advisory Hub", href: "/dashboard/advisory-hub", icon: <Users className="h-5 w-5" />, activeClass: "bg-[#2F8CD9]/15 text-[#2F8CD9]" }] : []),
-  { label: "Producer Network", href: "/dashboard/farmer-network", icon: <Handshake className="h-5 w-5" />, activeClass: "bg-orange-500/15 text-orange-400" },
+  ...(ADVISOR_ENABLED ? [{ label: "Advisory Hub", href: "/dashboard/advisory-hub", icon: <Users className="h-5 w-5" />, activeClass: "bg-advisor/15 text-advisor" }] : []),
+  { label: "Producer Network", href: "/dashboard/farmer-network", icon: <Handshake className="h-5 w-5" />, activeClass: "bg-violet/15 text-violet" },
 ];
 
 // Advisor mode - portfolio (core navigation)
 export const advisorNavItems: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard/advisor", icon: <Wallet className="h-5 w-5" />, activeClass: "bg-[#2F8CD9]/15 text-[#2F8CD9]" },
-  { label: "Clients", href: "/dashboard/advisor/clients", icon: <Users className="h-5 w-5" />, activeClass: "bg-[#2F8CD9]/15 text-[#2F8CD9]" },
-  { label: "Producer Directory", href: "/dashboard/advisor/directory", icon: <Search className="h-5 w-5" />, activeClass: "bg-[#2F8CD9]/15 text-[#2F8CD9]" },
+  { label: "Dashboard", href: "/dashboard/advisor", icon: <Wallet className="h-5 w-5" />, activeClass: "bg-advisor/15 text-advisor" },
+  { label: "Clients", href: "/dashboard/advisor/clients", icon: <Users className="h-5 w-5" />, activeClass: "bg-advisor/15 text-advisor" },
+  { label: "Producer Directory", href: "/dashboard/advisor/directory", icon: <Search className="h-5 w-5" />, activeClass: "bg-advisor/15 text-advisor" },
 ];
 
 // Advisor mode - intelligence section
 export const advisorIntelItems: NavItem[] = [
-  { label: "Ask Brangus", href: "/dashboard/brangus", icon: <MessageCircle className="h-5 w-5" />, activeClass: "bg-[#FF8000]/15 text-[#FF8000]", inactiveClass: "text-[#FF8000]/80 hover:bg-[#FF8000]/10 hover:text-[#FF8000] hover:drop-shadow-[0_0_6px_rgba(255,128,0,0.4)]" },
+  { label: "Ask Brangus", href: "/dashboard/brangus", icon: <MessageCircle className="h-5 w-5" />, activeClass: "bg-brand/15 text-brand", inactiveClass: "text-brand/80 hover:bg-brand/10 hover:text-brand hover:drop-shadow-[0_0_6px_rgba(255,128,0,0.4)]" },
   { label: "Insights", href: "/dashboard/insights", icon: <Lightbulb className="h-5 w-5" /> },
   { label: "Markets", href: "/dashboard/market", icon: <TrendingUp className="h-5 w-5" /> },
 ];
 
 // Advisor mode - tools section
 export const advisorToolItems: NavItem[] = [
-  { label: "Livestock Simulator", href: "/dashboard/advisor/simulator", icon: <FlaskConical className="h-5 w-5" />, activeClass: "bg-[#ff4021]/15 text-[#ff4021]" },
-  { label: "Freight IQ", href: "/dashboard/tools/freight", icon: <Truck className="h-5 w-5" />, activeClass: "bg-sky-500/15 text-sky-400" },
+  { label: "Livestock Simulator", href: "/dashboard/advisor/simulator", icon: <FlaskConical className="h-5 w-5" />, activeClass: "bg-red/15 text-red" },
+  { label: "Freight IQ", href: "/dashboard/tools/freight", icon: <Truck className="h-5 w-5" />, activeClass: "bg-freight-iq/15 text-freight-iq" },
 ];
 
 // Admin section (visible in both modes, gated by user_profiles.is_admin)
 export const adminItems: NavItem[] = [
-  { label: "Waitlist", href: "/dashboard/admin/waitlist", icon: <ClipboardList className="h-5 w-5" />, activeClass: "bg-cyan-500/15 text-cyan-400" },
-  { label: "Valuation Lab", href: "/dashboard/admin/valuation", icon: <FlaskConical className="h-5 w-5" />, activeClass: "bg-rose-500/15 text-rose-400" },
+  { label: "Waitlist", href: "/dashboard/admin/waitlist", icon: <ClipboardList className="h-5 w-5" />, activeClass: "bg-teal/15 text-teal" },
+  { label: "Valuation Lab", href: "/dashboard/admin/valuation", icon: <FlaskConical className="h-5 w-5" />, activeClass: "bg-violet/15 text-violet" },
   { label: "MLA Data Upload", href: "/dashboard/admin/mla-upload", icon: <Upload className="h-5 w-5" />, activeClass: "bg-success/15 text-success" },
 ];
 

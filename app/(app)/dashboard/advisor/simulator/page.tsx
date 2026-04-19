@@ -44,7 +44,7 @@ export default async function SimulatorPage() {
         <PageHeader
           title="Livestock Simulator"
           subtitle="Sandbox environment for what-if scenarios"
-          titleClassName="text-4xl font-bold text-[#ff4021]"
+          titleClassName="text-4xl font-bold text-red"
         />
         <p className="text-sm text-error">
           Failed to load simulator: {result.error}
@@ -140,7 +140,7 @@ export default async function SimulatorPage() {
     <div className="max-w-[1800px]">
       <PageHeader
         title="Livestock Simulator"
-        titleClassName="text-4xl font-bold text-[#ff4021]"
+        titleClassName="text-4xl font-bold text-red"
         subtitle="Sandbox environment for what-if scenarios"
         actions={
           sandboxHerds.length > 0 ? (
@@ -157,7 +157,7 @@ export default async function SimulatorPage() {
       {sandboxHerds.length === 0 ? (
         <Card>
           <EmptyState
-            icon={<FlaskConical className="h-6 w-6 text-[#ff4021]" />}
+            icon={<FlaskConical className="h-6 w-6 text-red" />}
             title="No herds yet"
             description="Add a herd to start modelling scenarios. Changes here do not affect real client data."
             actionLabel="Add Herd"

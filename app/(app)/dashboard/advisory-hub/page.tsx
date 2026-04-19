@@ -45,7 +45,7 @@ export default async function AdvisoryHubPage() {
       <ConnectionRealtime userId={user.id} />
       <PageHeader
         title="Advisory Hub"
-        titleClassName="text-4xl font-bold text-[#2F8CD9]"
+        titleClassName="text-4xl font-bold text-advisor"
         subtitle="Connect with your advisory team"
         subtitleClassName="text-sm font-medium text-text-secondary"
       />
@@ -65,19 +65,19 @@ export default async function AdvisoryHubPage() {
         </Card>
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
-              <Clock className="h-5 w-5 text-amber-400" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning/10">
+              <Clock className="h-5 w-5 text-warning" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-amber-400">{pendingCount}</p>
+              <p className="text-2xl font-bold text-warning">{pendingCount}</p>
               <p className="text-[11px] text-text-muted">Pending</p>
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#2F8CD9]/10">
-              <Users className="h-5 w-5 text-[#2F8CD9]" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-advisor/10">
+              <Users className="h-5 w-5 text-advisor" />
             </div>
             <div>
               <p className="text-2xl font-bold text-text-primary">{awaitingCount}</p>
@@ -94,8 +94,8 @@ export default async function AdvisoryHubPage() {
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#2F8CD9]/15 shadow-sm">
-                    <Users className="h-5 w-5 text-[#2F8CD9]" />
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-advisor/15 shadow-sm">
+                    <Users className="h-5 w-5 text-advisor" />
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-text-primary">My Advisors</h3>
@@ -122,8 +122,8 @@ export default async function AdvisoryHubPage() {
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#2F8CD9]/15 shadow-sm">
-                    <Search className="h-5 w-5 text-[#2F8CD9]" />
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-advisor/15 shadow-sm">
+                    <Search className="h-5 w-5 text-advisor" />
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-text-primary">Find Advisors</h3>

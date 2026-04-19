@@ -148,8 +148,8 @@ export function ShareMenu({ onAttach, disabled }: ShareMenuProps) {
               onClick={openPricePicker}
               className="flex w-full items-center gap-3 border-t border-white/[0.06] px-3 py-2.5 text-left transition-colors hover:bg-white/[0.04]"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/15">
-                <TrendingUp className="h-4 w-4 text-sky-400" aria-hidden="true" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-info/15">
+                <TrendingUp className="h-4 w-4 text-info" aria-hidden="true" />
               </div>
               <div>
                 <p className="text-sm font-medium text-text-primary">Share a market price</p>
@@ -209,8 +209,8 @@ export function ShareMenu({ onAttach, disabled }: ShareMenuProps) {
                     onClick={() => sharePrice(p)}
                     className="flex w-full items-center gap-3 px-4 py-3 text-left"
                   >
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-500/15">
-                      <TrendingUp className="h-4 w-4 text-sky-400" aria-hidden="true" />
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-info/15">
+                      <TrendingUp className="h-4 w-4 text-info" aria-hidden="true" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-text-primary">
@@ -226,7 +226,7 @@ export function ShareMenu({ onAttach, disabled }: ShareMenuProps) {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-base font-bold text-sky-400">
+                      <p className="text-base font-bold text-info">
                         ${(p.price_per_kg / 100).toFixed(2)}
                       </p>
                       <p className="text-[10px] text-text-muted">/kg</p>

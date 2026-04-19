@@ -155,12 +155,12 @@ export function FreightCalculator() {
               />
             )}
             {result.categoryWarning && (
-              <div className="py-2 text-xs text-amber-600 dark:text-amber-400">
+              <div className="py-2 text-xs text-warning dark:text-warning">
                 {result.categoryWarning}
               </div>
             )}
             {result.breederAutoDetectNotice && (
-              <div className="py-2 text-xs text-blue-600 dark:text-blue-400">
+              <div className="py-2 text-xs text-info dark:text-info">
                 {result.breederAutoDetectNotice}
               </div>
             )}

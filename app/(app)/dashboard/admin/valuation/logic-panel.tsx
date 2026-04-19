@@ -2,7 +2,7 @@
 
 export function LogicPanel() {
   return (
-    <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.04] px-5 py-4">
+    <div className="rounded-xl border border-warning/20 bg-warning/[0.04] px-5 py-4">
       <pre className="overflow-x-auto text-[11px] leading-relaxed font-mono text-amber-200/80">
 {`PROJECTED WEIGHT
   Standard:   ProjectedWeight = InitialWeight + (DWG x DaysElapsed)

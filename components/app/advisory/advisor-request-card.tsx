@@ -24,8 +24,8 @@ export function AdvisorRequestCard({ request }: { request: ConnectionRequest }) 
   const [loading, setLoading] = useState<"approve" | "deny" | null>(null);
   const [showDenyConfirm, setShowDenyConfirm] = useState(false);
   const categoryConfig = getCategoryConfig(request.requester_role);
-  const categoryBg = categoryConfig?.bgClass ?? "bg-[#2F8CD9]/15";
-  const categoryColour = categoryConfig?.colorClass ?? "text-[#2F8CD9]";
+  const categoryBg = categoryConfig?.bgClass ?? "bg-advisor/15";
+  const categoryColour = categoryConfig?.colorClass ?? "text-advisor";
 
   const handleApprove = async () => {
     setLoading("approve");
@@ -42,7 +42,7 @@ export function AdvisorRequestCard({ request }: { request: ConnectionRequest }) 
 
   return (
     <>
-    <Card className="bg-amber-500/[0.03]">
+    <Card className="bg-warning/[0.03]">
       <CardContent className="p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3.5">
@@ -51,7 +51,7 @@ export function AdvisorRequestCard({ request }: { request: ConnectionRequest }) 
               {categoryConfig ? (
                 <categoryConfig.icon className={`h-5 w-5 ${categoryColour}`} />
               ) : (
-                <Clock className="h-5 w-5 text-[#2F8CD9]" />
+                <Clock className="h-5 w-5 text-advisor" />
               )}
             </div>
             <div>

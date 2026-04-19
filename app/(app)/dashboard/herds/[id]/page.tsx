@@ -361,7 +361,7 @@ export default async function HerdDetailPage({
               <span className="flex items-center gap-2 font-medium text-text-primary">
                 {herd.selected_saleyard}
                 {isStale && (
-                  <span className="inline-flex items-center rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-medium text-amber-400">
+                  <span className="inline-flex items-center rounded-full bg-warning/15 px-2 py-0.5 text-[10px] font-medium text-warning">
                     Data {staleWeeks}w old
                   </span>
                 )}

@@ -89,8 +89,8 @@ export function AdvisorBusinessCard({ connection, advisorEmail, advisorPhone, av
                     className="h-11 w-11 shrink-0 rounded-full object-cover ring-2 ring-white/10"
                   />
                 ) : (
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#2F8CD9]/15 ring-2 ring-white/10">
-                    <span className="text-sm font-bold text-[#2F8CD9]">{initials}</span>
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-advisor/15 ring-2 ring-white/10">
+                    <span className="text-sm font-bold text-advisor">{initials}</span>
                   </div>
                 )}
                 <div className="min-w-0 flex-1">

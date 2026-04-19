@@ -131,6 +131,7 @@ summary {
   --color-freight-iq-light: var(--color-sky-light);
   --color-advisor: var(--color-indigo);
   --color-advisor-light: var(--color-indigo-light);
+  --color-advisor-dark: var(--color-indigo-dark);
 
   /* ================================================================
      CHARTS

@@ -31,9 +31,9 @@ function driverColour(driver: MovementDriver) {
   const map: Record<MovementDriver, string> = {
     "New Herd": "bg-success/20 text-success",
     "Removed/Sold": "bg-error/20 text-error",
-    "Market": "bg-blue-500/20 text-blue-400",
+    "Market": "bg-info/20 text-info",
     "Weight Gain": "bg-orange-500/20 text-orange-400",
-    "Calf Accrual": "bg-purple-500/20 text-purple-400",
+    "Calf Accrual": "bg-violet/20 text-violet",
     "Mortality": "bg-error/20 text-error",
     "Assumption": "bg-white/[0.06] text-text-muted",
   };
@@ -64,7 +64,7 @@ export function PortfolioMovementSection({
       {/* Initial load (no prior data): inline spinner occupies the date-label slot */}
       {!summary && isPending && (
         <p className="flex items-center justify-center gap-2 text-center text-xs text-text-muted">
-          <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-[#FFAA00] border-t-transparent" />
+          <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-brand border-t-transparent" />
           <span>Calculating movement...</span>
         </p>
       )}
@@ -75,7 +75,7 @@ export function PortfolioMovementSection({
           <p className="flex items-center justify-center gap-2 text-center text-xs text-text-muted">
             {isPending ? (
               <>
-                <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-[#FFAA00] border-t-transparent" />
+                <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-brand border-t-transparent" />
                 <span>Calculating movement...</span>
               </>
             ) : (

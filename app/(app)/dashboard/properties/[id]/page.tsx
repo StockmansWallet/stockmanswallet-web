@@ -90,8 +90,8 @@ export default async function PropertyDetailPage({
         </Card>
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
-              <Ruler className="h-5 w-5 text-amber-400" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning/10">
+              <Ruler className="h-5 w-5 text-warning" />
             </div>
             <div className="min-w-0">
               <p className="truncate text-sm font-medium text-text-primary">

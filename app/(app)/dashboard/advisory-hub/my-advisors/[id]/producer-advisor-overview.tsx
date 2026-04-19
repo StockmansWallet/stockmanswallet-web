@@ -83,7 +83,7 @@ export function ProducerAdvisorOverview({
                 {advisorEmail && (
                   <a
                     href={`mailto:${advisorEmail}`}
-                    className="flex items-center gap-2.5 text-sm text-[#2F8CD9] transition-colors hover:text-[#5AA8E8]"
+                    className="flex items-center gap-2.5 text-sm text-advisor transition-colors hover:text-[#5AA8E8]"
                   >
                     <Mail className="h-4 w-4 shrink-0" />
                     <span className="truncate">{advisorEmail}</span>
@@ -92,7 +92,7 @@ export function ProducerAdvisorOverview({
                 {advisorPhone && (
                   <a
                     href={`tel:${advisorPhone.replace(/\s/g, "")}`}
-                    className="flex items-center gap-2.5 text-sm text-[#2F8CD9] transition-colors hover:text-[#5AA8E8]"
+                    className="flex items-center gap-2.5 text-sm text-advisor transition-colors hover:text-[#5AA8E8]"
                   >
                     <Phone className="h-4 w-4 shrink-0" />
                     {advisorPhone}

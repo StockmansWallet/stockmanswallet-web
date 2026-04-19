@@ -109,7 +109,7 @@ export default async function ProducerProfilePage({
                 {producer.contact_email && (
                   <a
                     href={`mailto:${producer.contact_email}`}
-                    className="flex items-center gap-2.5 rounded-lg bg-white/[0.03] px-3.5 py-2.5 text-sm text-[#2F8CD9] transition-colors hover:bg-white/[0.06]"
+                    className="flex items-center gap-2.5 rounded-lg bg-white/[0.03] px-3.5 py-2.5 text-sm text-advisor transition-colors hover:bg-white/[0.06]"
                   >
                     <Mail className="h-4 w-4" />
                     {producer.contact_email}
@@ -118,7 +118,7 @@ export default async function ProducerProfilePage({
                 {producer.contact_phone && (
                   <a
                     href={`tel:${producer.contact_phone.replace(/\s/g, "")}`}
-                    className="flex items-center gap-2.5 rounded-lg bg-white/[0.03] px-3.5 py-2.5 text-sm text-[#2F8CD9] transition-colors hover:bg-white/[0.06]"
+                    className="flex items-center gap-2.5 rounded-lg bg-white/[0.03] px-3.5 py-2.5 text-sm text-advisor transition-colors hover:bg-white/[0.06]"
                   >
                     <Phone className="h-4 w-4" />
                     {producer.contact_phone}

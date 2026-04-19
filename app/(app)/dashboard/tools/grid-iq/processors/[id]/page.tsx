@@ -73,7 +73,7 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <PageHeader
           title={processor.name}
-          titleClassName="text-2xl font-bold text-indigo-400"
+          titleClassName="text-2xl font-bold text-teal"
           subtitle={processor.address || "No address set"}
           subtitleClassName="text-sm text-text-secondary"
           compact
@@ -107,8 +107,8 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
         <Card className="mt-4">
           <CardContent className="p-0">
             <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-3">
-              <Grid3x3 className="h-4 w-4 text-indigo-400" />
-              <span className="text-sm font-semibold text-indigo-400">
+              <Grid3x3 className="h-4 w-4 text-teal" />
+              <span className="text-sm font-semibold text-teal">
                 Grids ({grids.length})
               </span>
             </div>
@@ -119,7 +119,7 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
                   href={`/dashboard/tools/grid-iq/grids/${g.id}`}
                   className="group flex items-center gap-4 px-4 py-3 transition-colors hover:bg-white/[0.03]"
                 >
-                  <Grid3x3 className="h-4 w-4 shrink-0 text-indigo-400" />
+                  <Grid3x3 className="h-4 w-4 shrink-0 text-teal" />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm text-text-primary">
                       {g.grid_name || g.processor_name}
@@ -138,7 +138,7 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
               <div className="border-t border-white/[0.06] px-4 py-2.5 text-center">
                 <Link
                   href="/dashboard/tools/grid-iq/library?tab=grids"
-                  className="text-xs font-medium text-indigo-400 hover:underline"
+                  className="text-xs font-medium text-teal hover:underline"
                 >
                   Showing latest 25. View all in Library →
                 </Link>
@@ -152,8 +152,8 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
         <Card className="mt-4">
           <CardContent className="p-0">
             <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-3">
-              <FileText className="h-4 w-4 text-indigo-400" />
-              <span className="text-sm font-semibold text-indigo-400">
+              <FileText className="h-4 w-4 text-teal" />
+              <span className="text-sm font-semibold text-teal">
                 Kill Sheets ({killSheets.length})
               </span>
             </div>
@@ -164,7 +164,7 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
                   href={`/dashboard/tools/grid-iq/kill-sheets/${k.id}`}
                   className="group flex items-center gap-4 px-4 py-3 transition-colors hover:bg-white/[0.03]"
                 >
-                  <FileText className="h-4 w-4 shrink-0 text-indigo-400" />
+                  <FileText className="h-4 w-4 shrink-0 text-teal" />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm text-text-primary">
                       {k.record_name || k.processor_name}
@@ -186,7 +186,7 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
               <div className="border-t border-white/[0.06] px-4 py-2.5 text-center">
                 <Link
                   href="/dashboard/tools/grid-iq/library?tab=kill-sheets"
-                  className="text-xs font-medium text-indigo-400 hover:underline"
+                  className="text-xs font-medium text-teal hover:underline"
                 >
                   Showing latest 25. View all in Library →
                 </Link>
@@ -200,8 +200,8 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
         <Card className="mt-4">
           <CardContent className="p-0">
             <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-3">
-              <TrendingUp className="h-4 w-4 text-indigo-400" />
-              <span className="text-sm font-semibold text-indigo-400">
+              <TrendingUp className="h-4 w-4 text-teal" />
+              <span className="text-sm font-semibold text-teal">
                 Analyses ({analyses.length})
               </span>
             </div>
@@ -215,7 +215,7 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
                     href={`/dashboard/tools/grid-iq/analysis/${a.id}`}
                     className="group flex items-center gap-4 px-4 py-3 transition-colors hover:bg-white/[0.03]"
                   >
-                    <TrendingUp className="h-4 w-4 shrink-0 text-indigo-400" />
+                    <TrendingUp className="h-4 w-4 shrink-0 text-teal" />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm text-text-primary">
                         {a.herd_name ?? "Multi-herd"}
@@ -231,7 +231,7 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
                       </p>
                     </div>
                     <span
-                      className={`text-sm font-semibold ${isProcessor ? "text-success" : "text-amber-400"}`}
+                      className={`text-sm font-semibold ${isProcessor ? "text-success" : "text-warning"}`}
                     >
                       {isProcessor ? "+" : "-"}$
                       {Math.abs(Math.round(advantage)).toLocaleString()}
@@ -245,7 +245,7 @@ export default async function ProcessorDetailPage({ params }: PageProps) {
               <div className="border-t border-white/[0.06] px-4 py-2.5 text-center">
                 <Link
                   href="/dashboard/tools/grid-iq/library?tab=analyses"
-                  className="text-xs font-medium text-indigo-400 hover:underline"
+                  className="text-xs font-medium text-teal hover:underline"
                 >
                   Showing latest 25. View all in Library →
                 </Link>

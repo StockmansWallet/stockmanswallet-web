@@ -331,25 +331,25 @@ export function HerdsTable({
                 </span>
               )}
               {accrual > 0 && (
-                <span className="inline-flex items-center gap-0.5 rounded-full bg-lime-500/15 px-1.5 py-0.5 text-[9px] font-medium text-lime-400">
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald/15 px-1.5 py-0.5 text-[9px] font-medium text-emerald">
                   <Leaf className="h-2.5 w-2.5" />
                   Breeding Value +${Math.round(accrual).toLocaleString()}
                 </span>
               )}
               {herd.selected_saleyard && (
-                <span className={`inline-flex items-center gap-0.5 rounded-full bg-white/[0.06] px-1.5 py-0.5 text-[9px] font-medium ${nearestSaleyard && !isFallback ? "line-through text-text-muted/50" : isStale ? "text-amber-400" : "text-text-muted"}`}>
+                <span className={`inline-flex items-center gap-0.5 rounded-full bg-white/[0.06] px-1.5 py-0.5 text-[9px] font-medium ${nearestSaleyard && !isFallback ? "line-through text-text-muted/50" : isStale ? "text-warning" : "text-text-muted"}`}>
                   <Receipt className="h-2.5 w-2.5 shrink-0 no-underline" style={{ textDecoration: "none" }} />
                   {resolveShortSaleyardName(herd.selected_saleyard) ?? herd.selected_saleyard}
                 </span>
               )}
               {nearestSaleyard && !isFallback && (
-                <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-warning/15 px-1.5 py-0.5 text-[9px] font-medium text-warning">
                   <ArrowUpRight className="h-2.5 w-2.5" />
                   Via {resolveShortSaleyardName(nearestSaleyard) ?? nearestSaleyard}
                 </span>
               )}
               {isStale && !nearestSaleyard && (
-                <span className="inline-flex items-center rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
+                <span className="inline-flex items-center rounded-full bg-warning/15 px-1.5 py-0.5 text-[9px] font-medium text-warning">
                   Stale Data
                 </span>
               )}

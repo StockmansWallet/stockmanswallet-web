@@ -218,7 +218,7 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
                 defaultRange={{ key: "1Y" }}
               />
               {exposure && (
-                <p className="mt-3 rounded-lg bg-[#2F8CD9]/10 px-3 py-2 text-xs text-[#2F8CD9]">
+                <p className="mt-3 rounded-lg bg-advisor/10 px-3 py-2 text-xs text-advisor">
                   Your portfolio: {exposure.head_count} head across {exposure.herd_count} herd{exposure.herd_count === 1 ? "" : "s"} in this category
                   {exposure.avg_weight > 0 ? ` (avg ${Math.round(exposure.avg_weight)} kg/hd)` : ""}.
                 </p>

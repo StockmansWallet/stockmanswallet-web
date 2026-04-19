@@ -90,12 +90,12 @@ export function HerdLensPanel({
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#2F8CD9]/15">
-              <SlidersHorizontal className="h-3.5 w-3.5 text-[#2F8CD9]" />
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-advisor/15">
+              <SlidersHorizontal className="h-3.5 w-3.5 text-advisor" />
             </div>
             <CardTitle>Advisor Lens</CardTitle>
           </div>
-          <Badge className="bg-[#2F8CD9]/15 text-[#2F8CD9]">Per-Herd Overrides</Badge>
+          <Badge className="bg-advisor/15 text-advisor">Per-Herd Overrides</Badge>
         </div>
         <p className="mt-1 text-xs text-text-muted">
           Adjust assumptions for this herd. Overrides are visible only to you and do not affect the client&apos;s data.
@@ -154,7 +154,7 @@ export function HerdLensPanel({
             max={200}
             value={shading}
             onChange={(e) => setShading(Number(e.target.value))}
-            className="w-full accent-[#2F8CD9]"
+            className="w-full accent-advisor"
           />
           <div className="flex justify-between text-[10px] text-text-muted">
             <span>0%</span>
@@ -172,7 +172,7 @@ export function HerdLensPanel({
             maxLength={5000}
             rows={3}
             placeholder="Record your reasoning for these adjustments..."
-            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-[#2F8CD9]/40"
+            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-advisor/40"
           />
         </div>
 

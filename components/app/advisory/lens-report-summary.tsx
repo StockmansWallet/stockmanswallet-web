@@ -111,14 +111,14 @@ export function LensReportSummary({
                       <td className="py-2.5 pr-4 text-right font-medium text-text-primary">
                         ${(lens.cached_advisor_value ?? 0).toLocaleString("en-AU", { maximumFractionDigits: 0 })}
                       </td>
-                      <td className="py-2.5 pr-4 text-right font-semibold text-[#2F8CD9]">
+                      <td className="py-2.5 pr-4 text-right font-semibold text-advisor">
                         ${(lens.cached_shaded_value ?? 0).toLocaleString("en-AU", { maximumFractionDigits: 0 })}
                       </td>
                       <td className="py-2.5 pr-4 text-center">
                         <Badge
                           className={
                             (lens.shading_percentage ?? 100) !== 100
-                              ? "bg-amber-500/15 text-amber-600"
+                              ? "bg-warning/15 text-warning"
                               : "bg-surface-raised text-text-muted"
                           }
                         >
@@ -142,7 +142,7 @@ export function LensReportSummary({
                   <td className="py-2.5 pr-4 text-right font-semibold text-text-primary">
                     ${totalAdjusted.toLocaleString("en-AU", { maximumFractionDigits: 0 })}
                   </td>
-                  <td className="py-2.5 pr-4 text-right font-bold text-[#2F8CD9]">
+                  <td className="py-2.5 pr-4 text-right font-bold text-advisor">
                     ${totalShaded.toLocaleString("en-AU", { maximumFractionDigits: 0 })}
                   </td>
                   <td colSpan={2} />
@@ -174,13 +174,13 @@ function SummaryCard({
   isCurrency?: boolean;
 }) {
   return (
-    <Card className={primary ? "border-[#2F8CD9]/30 bg-[#2F8CD9]/5" : ""}>
+    <Card className={primary ? "border-advisor/30 bg-advisor/5" : ""}>
       <CardContent className="py-4 px-5">
         <div className="flex items-center gap-2 mb-1">
-          <div className={`${primary ? "text-[#2F8CD9]" : "text-text-muted"}`}>{icon}</div>
+          <div className={`${primary ? "text-advisor" : "text-text-muted"}`}>{icon}</div>
           <span className="text-xs text-text-muted">{label}</span>
         </div>
-        <p className={`text-xl font-bold ${primary ? "text-[#2F8CD9]" : muted ? "text-text-secondary" : "text-text-primary"}`}>
+        <p className={`text-xl font-bold ${primary ? "text-advisor" : muted ? "text-text-secondary" : "text-text-primary"}`}>
           {isCurrency
             ? `$${value.toLocaleString("en-AU", { maximumFractionDigits: 0 })}`
             : value.toLocaleString("en-AU")}

@@ -261,8 +261,8 @@ export function PropertyForm({ property, action, submitLabel, cancelHref, delete
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/15">
-              <FileText className="h-3.5 w-3.5 text-amber-400" />
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-warning/15">
+              <FileText className="h-3.5 w-3.5 text-warning" />
             </div>
             <CardTitle>Notes</CardTitle>
           </div>

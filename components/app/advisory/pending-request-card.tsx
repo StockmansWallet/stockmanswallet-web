@@ -65,12 +65,12 @@ export function PendingRequestCard({
   };
 
   return (
-    <Card className="bg-amber-500/[0.03]">
+    <Card className="bg-warning/[0.03]">
       <CardContent className="p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/15">
-              <span className="text-sm font-bold text-amber-400">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning/15">
+              <span className="text-sm font-bold text-warning">
                 {clientName.charAt(0).toUpperCase()}
               </span>
             </div>

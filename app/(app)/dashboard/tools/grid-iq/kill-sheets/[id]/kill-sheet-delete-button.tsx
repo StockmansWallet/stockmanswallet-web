@@ -36,7 +36,7 @@ export function KillSheetDeleteButton({
   if (showConfirm) {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-xs text-amber-400">Delete this kill sheet?</span>
+        <span className="text-xs text-warning">Delete this kill sheet?</span>
         <Button
           size="sm"
           variant="destructive"

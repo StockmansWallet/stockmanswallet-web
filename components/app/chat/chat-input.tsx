@@ -32,7 +32,7 @@ export function ChatInput({
   placeholder = "Write a message...",
   disabled = false,
   loading = false,
-  accentClass = "bg-purple-500 hover:bg-purple-600",
+  accentClass = "bg-violet hover:bg-violet",
   onTyping,
   isListening = false,
   onMicTap,

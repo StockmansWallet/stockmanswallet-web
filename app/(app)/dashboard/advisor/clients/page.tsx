@@ -76,7 +76,7 @@ export default async function AdvisorClientsPage() {
       <ConnectionRealtime userId={user.id} />
       <PageHeader
         title="Clients"
-        titleClassName="text-4xl font-bold text-[#2F8CD9]"
+        titleClassName="text-4xl font-bold text-advisor"
         subtitle="Manage your client connections"
         subtitleClassName="text-sm font-medium text-text-secondary"
       />
@@ -96,19 +96,19 @@ export default async function AdvisorClientsPage() {
         </Card>
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
-              <Clock className="h-5 w-5 text-amber-400" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning/10">
+              <Clock className="h-5 w-5 text-warning" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-amber-400">{pendingCount}</p>
+              <p className="text-2xl font-bold text-warning">{pendingCount}</p>
               <p className="text-[11px] text-text-muted">Pending</p>
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#2F8CD9]/10">
-              <Shield className="h-5 w-5 text-[#2F8CD9]" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-advisor/10">
+              <Shield className="h-5 w-5 text-advisor" />
             </div>
             <div>
               <p className="text-2xl font-bold text-text-primary">{sharingCount}</p>
@@ -123,7 +123,7 @@ export default async function AdvisorClientsPage() {
       {!hasAnything && (
         <Card>
           <EmptyState
-            icon={<Users className="h-6 w-6 text-[#2F8CD9]" />}
+            icon={<Users className="h-6 w-6 text-advisor" />}
             title="No clients yet"
             description="Browse the producer directory to connect with farmers and graziers."
             actionLabel="Find Producers"
@@ -136,7 +136,7 @@ export default async function AdvisorClientsPage() {
       {/* Incoming requests from producers (Accept/Decline) */}
       {incomingRequests.length > 0 && (
         <div className="mb-6">
-          <h2 className="mb-3 text-sm font-semibold text-amber-400">
+          <h2 className="mb-3 text-sm font-semibold text-warning">
             Incoming Requests ({incomingRequests.length})
           </h2>
           <div className="flex flex-col gap-3">

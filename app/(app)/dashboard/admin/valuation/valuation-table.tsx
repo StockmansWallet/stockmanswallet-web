@@ -110,7 +110,7 @@ export function ValuationTable({ herds, onTestHerd }: Props) {
 
   const sourceColor: Record<string, string> = {
     saleyard: "bg-success/15 text-success",
-    national: "bg-amber-500/15 text-amber-400",
+    national: "bg-warning/15 text-warning",
     fallback: "bg-error/15 text-error",
   };
 
@@ -229,8 +229,8 @@ export function ValuationTable({ herds, onTestHerd }: Props) {
                     <Td right>{fmtDollar(v.baseMarketValue)}</Td>
                     <Td right className={v.weightGainAccrual > 0 ? "text-success" : ""}>{fmtDollar(v.weightGainAccrual)}</Td>
                     <Td right>{fmtDollar(v.physicalValue)}</Td>
-                    <Td right className={v.preBirthAccrual > 0 ? "text-sky-400" : ""}>{v.preBirthAccrual > 0 ? fmtDollar(v.preBirthAccrual) : "-"}</Td>
-                    <Td right className={v.calvesAtFootValue > 0 ? "text-sky-400" : ""}>{v.calvesAtFootValue > 0 ? fmtDollar(v.calvesAtFootValue) : "-"}</Td>
+                    <Td right className={v.preBirthAccrual > 0 ? "text-info" : ""}>{v.preBirthAccrual > 0 ? fmtDollar(v.preBirthAccrual) : "-"}</Td>
+                    <Td right className={v.calvesAtFootValue > 0 ? "text-info" : ""}>{v.calvesAtFootValue > 0 ? fmtDollar(v.calvesAtFootValue) : "-"}</Td>
                     <Td right>{fmtDollar(v.grossValue)}</Td>
                     <Td right className={v.mortalityDeduction > 0 ? "text-error" : ""}>{v.mortalityDeduction > 0 ? `-${fmtDollar(v.mortalityDeduction)}` : "-"}</Td>
                     <Td right className="font-semibold text-text-primary">{fmtDollar(v.netValue)}</Td>
@@ -274,8 +274,8 @@ export function ValuationTable({ herds, onTestHerd }: Props) {
               <Td right>{fmtDollar(totals.baseMarketValue)}</Td>
               <Td right className="text-success">{fmtDollar(totals.weightGainAccrual)}</Td>
               <Td right>{fmtDollar(totals.physicalValue)}</Td>
-              <Td right className="text-sky-400">{totals.preBirthAccrual > 0 ? fmtDollar(totals.preBirthAccrual) : "-"}</Td>
-              <Td right className="text-sky-400">{totals.calvesAtFootValue > 0 ? fmtDollar(totals.calvesAtFootValue) : "-"}</Td>
+              <Td right className="text-info">{totals.preBirthAccrual > 0 ? fmtDollar(totals.preBirthAccrual) : "-"}</Td>
+              <Td right className="text-info">{totals.calvesAtFootValue > 0 ? fmtDollar(totals.calvesAtFootValue) : "-"}</Td>
               <Td right>{fmtDollar(totals.grossValue)}</Td>
               <Td right className="text-error">{totals.mortalityDeduction > 0 ? `-${fmtDollar(totals.mortalityDeduction)}` : "-"}</Td>
               <Td right className="text-brand">{fmtDollar(totals.netValue)}</Td>

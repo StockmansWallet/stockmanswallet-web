@@ -74,16 +74,16 @@ export default async function SettingsPage() {
             <NavItem
               href="/dashboard/settings/account"
               icon={CreditCard}
-              iconBg="bg-amber-500/15"
-              iconColor="text-amber-400"
+              iconBg="bg-warning/15"
+              iconColor="text-warning"
               label="Account"
               description="Subscription, password, and account management"
             />
             <NavItem
               href="/dashboard/settings/notifications"
               icon={Bell}
-              iconBg="bg-purple-500/15"
-              iconColor="text-purple-400"
+              iconBg="bg-violet/15"
+              iconColor="text-violet"
               label="Notifications"
               description="Alerts, reminders, and digests"
             />
@@ -98,24 +98,24 @@ export default async function SettingsPage() {
             <NavItem
               href="/dashboard/settings/sale-locations"
               icon={MapPinned}
-              iconBg="bg-sky-500/15"
-              iconColor="text-sky-400"
+              iconBg="bg-info/15"
+              iconColor="text-info"
               label="Sale Locations"
               description="Custom saleyards and sale points"
             />
             <NavItem
               href="/dashboard/settings/data"
               icon={Database}
-              iconBg="bg-amber-500/15"
-              iconColor="text-amber-400"
+              iconBg="bg-warning/15"
+              iconColor="text-warning"
               label="Data Management"
               description="Clear all data"
             />
             <NavItem
               href="/dashboard/settings/demo"
               icon={FlaskConical}
-              iconBg="bg-lime-500/15"
-              iconColor="text-lime-400"
+              iconBg="bg-emerald/15"
+              iconColor="text-emerald"
               label="Demo Data"
               description="Load sample herds to explore the app"
             />

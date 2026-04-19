@@ -41,22 +41,22 @@ const CATEGORY_CONFIG: Record<
     label: "Operations",
     icon: Wrench,
     bg: "bg-amber-700/15",
-    text: "text-amber-600",
+    text: "text-warning",
     iconBg: "bg-amber-700/20",
   },
   Finance: {
     label: "Finance",
     icon: DollarSign,
-    bg: "bg-blue-500/15",
-    text: "text-blue-400",
-    iconBg: "bg-blue-500/20",
+    bg: "bg-info/15",
+    text: "text-info",
+    iconBg: "bg-info/20",
   },
   Family: {
     label: "Family",
     icon: Home,
-    bg: "bg-purple-500/15",
-    text: "text-purple-400",
-    iconBg: "bg-purple-500/20",
+    bg: "bg-violet/15",
+    text: "text-violet",
+    iconBg: "bg-violet/20",
   },
   Me: {
     label: "Personal",
@@ -113,7 +113,7 @@ function countdownText(days: number): string {
 function countdownColor(days: number): string {
   if (days < 0) return "bg-error/15 text-error";
   if (days === 0) return "bg-success/15 text-success";
-  if (days <= 7) return "bg-amber-500/15 text-amber-400";
+  if (days <= 7) return "bg-warning/15 text-warning";
   return "bg-white/8 text-text-muted";
 }
 
@@ -203,7 +203,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
             onClick={() => setFilterCategory(null)}
             className={`inline-flex h-8 shrink-0 items-center rounded-full px-3.5 text-xs font-medium transition-all ${
               filterCategory === null
-                ? "bg-lime-500/15 text-lime-400"
+                ? "bg-emerald/15 text-emerald"
                 : "bg-surface text-text-muted hover:bg-surface-raised hover:text-text-secondary"
             }`}
           >
@@ -275,7 +275,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
                 >
                   {group.title}
                 </h3>
-                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-lime-500/15 px-1.5 text-[10px] font-semibold tabular-nums text-lime-400">
+                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald/15 px-1.5 text-[10px] font-semibold tabular-nums text-emerald">
                   {group.items.length}
                 </span>
               </div>

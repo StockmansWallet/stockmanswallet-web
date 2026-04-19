@@ -28,8 +28,8 @@ export function ConnectedAdvisorCard({ connection }: { connection: ConnectionReq
   const categoryConfig = getCategoryConfig(connection.requester_role);
   const isSharing = hasActivePermission(connection);
   const permissions = parseSharingPermissions(connection.sharing_permissions);
-  const categoryBg = categoryConfig?.bgClass ?? "bg-[#2F8CD9]/15";
-  const categoryColour = categoryConfig?.colorClass ?? "text-[#2F8CD9]";
+  const categoryBg = categoryConfig?.bgClass ?? "bg-advisor/15";
+  const categoryColour = categoryConfig?.colorClass ?? "text-advisor";
 
   const connectedDate = new Date(connection.created_at).toLocaleDateString("en-AU", {
     day: "numeric", month: "short", year: "numeric",
@@ -61,7 +61,7 @@ export function ConnectedAdvisorCard({ connection }: { connection: ConnectionReq
                 {categoryConfig ? (
                   <categoryConfig.icon className={`h-6 w-6 ${categoryColour}`} />
                 ) : (
-                  <span className="text-base font-bold text-[#2F8CD9]">
+                  <span className="text-base font-bold text-advisor">
                     {connection.requester_name.charAt(0)}
                   </span>
                 )}

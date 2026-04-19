@@ -33,7 +33,7 @@ export function GridDeleteButton({ gridId }: { gridId: string }) {
   if (showConfirm) {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-xs text-amber-400">Delete this grid?</span>
+        <span className="text-xs text-warning">Delete this grid?</span>
         <Button
           size="sm"
           variant="secondary"

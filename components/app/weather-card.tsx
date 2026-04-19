@@ -28,7 +28,7 @@ function ForecastDay({ forecast, index }: { forecast: DailyForecast; index: numb
         <span className="text-text-muted">{forecast.lowTemp}°</span>
       </div>
       {forecast.precipitationChance > 0 && (
-        <span className="flex items-center gap-0.5 text-[10px] text-sky-400">
+        <span className="flex items-center gap-0.5 text-[10px] text-info">
           <Droplets className="h-2.5 w-2.5" />
           {forecast.precipitationChance}%
         </span>

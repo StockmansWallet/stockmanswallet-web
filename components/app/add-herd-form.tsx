@@ -634,7 +634,7 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
                       const rest = desc.slice(dotIdx + 1).trim();
                       return (
                         <>
-                          <span className="text-amber-400">{first}</span>
+                          <span className="text-warning">{first}</span>
                           {rest && <> {rest}</>}
                         </>
                       );
@@ -678,10 +678,10 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
                     <span className="text-sm text-text-primary">
                       Confirm{" "}
                       {autoPremium !== null && !breedPremiumOverride && (
-                        <span className="text-amber-400">{autoPremium > 0 ? "+" : ""}{autoPremium}%</span>
+                        <span className="text-warning">{autoPremium > 0 ? "+" : ""}{autoPremium}%</span>
                       )}
                       {breedPremiumOverride && (
-                        <span className="text-amber-400">{Number(breedPremiumOverride) > 0 ? "+" : ""}{breedPremiumOverride}%</span>
+                        <span className="text-warning">{Number(breedPremiumOverride) > 0 ? "+" : ""}{breedPremiumOverride}%</span>
                       )}
                       {" "}breed premium
                     </span>
@@ -758,7 +758,7 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
               </div>
             )}
             {weightValidation && weightValidation.status === "warning" && (
-              <div className="flex items-start gap-2 rounded-lg border border-amber-800 bg-amber-900/20 px-3 py-2 text-xs text-amber-400">
+              <div className="flex items-start gap-2 rounded-lg border border-amber-800 bg-amber-900/20 px-3 py-2 text-xs text-warning">
                 <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 <span>{weightValidation.message}</span>
               </div>

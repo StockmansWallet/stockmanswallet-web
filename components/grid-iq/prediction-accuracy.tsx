@@ -44,14 +44,14 @@ export function PredictionAccuracy({
 
   const accuracyColor =
     overallAccuracy >= 95 ? "text-success"
-    : overallAccuracy >= 85 ? "text-indigo-400"
-    : overallAccuracy >= 70 ? "text-amber-400"
+    : overallAccuracy >= 85 ? "text-teal"
+    : overallAccuracy >= 70 ? "text-warning"
     : "text-error";
 
   const accuracyBg =
     overallAccuracy >= 95 ? "bg-success/15"
-    : overallAccuracy >= 85 ? "bg-indigo-500/15"
-    : overallAccuracy >= 70 ? "bg-amber-500/15"
+    : overallAccuracy >= 85 ? "bg-teal/15"
+    : overallAccuracy >= 70 ? "bg-warning/15"
     : "bg-error/15";
 
   const DiffIcon = processorDiff > 0 ? TrendingUp : processorDiff < 0 ? TrendingDown : Minus;
@@ -118,10 +118,10 @@ export function PredictionAccuracy({
           {/* Advantage */}
           <div className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-3 rounded-lg border border-white/[0.06] px-3 py-2">
             <span className="text-xs font-semibold text-text-primary">Grid IQ Advantage</span>
-            <span className={`w-24 text-right text-sm font-semibold ${preSaleAdvantage > 0 ? "text-success" : "text-amber-400"}`}>
+            <span className={`w-24 text-right text-sm font-semibold ${preSaleAdvantage > 0 ? "text-success" : "text-warning"}`}>
               {preSaleAdvantage > 0 ? "+" : "-"}{formatCurrency(preSaleAdvantage)}
             </span>
-            <span className={`w-24 text-right text-sm font-bold ${actualAdvantage > 0 ? "text-success" : "text-amber-400"}`}>
+            <span className={`w-24 text-right text-sm font-bold ${actualAdvantage > 0 ? "text-success" : "text-warning"}`}>
               {actualAdvantage > 0 ? "+" : "-"}{formatCurrency(actualAdvantage)}
             </span>
             <span className={`w-20 text-right text-sm font-medium ${advantageDiff >= 0 ? "text-success" : "text-error"}`}>

@@ -18,8 +18,8 @@ interface LensSavedListProps {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  draft: { label: "Draft", className: "bg-amber-500/15 text-amber-600" },
-  saved: { label: "Saved", className: "bg-[#2F8CD9]/15 text-[#2F8CD9]" },
+  draft: { label: "Draft", className: "bg-warning/15 text-warning" },
+  saved: { label: "Saved", className: "bg-advisor/15 text-advisor" },
   report_generated: { label: "Report Ready", className: "bg-success/15 text-success" },
 };
 
@@ -62,8 +62,8 @@ export function LensSavedList({
       {lensReports.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#2F8CD9]/10">
-              <Eye className="h-6 w-6 text-[#2F8CD9]" />
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-advisor/10">
+              <Eye className="h-6 w-6 text-advisor" />
             </div>
             <h4 className="text-sm font-semibold text-text-primary mb-1">
               No Lens Reports Yet
@@ -91,8 +91,8 @@ export function LensSavedList({
                   <CardContent className="py-4 px-5">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#2F8CD9]/10">
-                          <FileText className="h-4 w-4 text-[#2F8CD9]" />
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-advisor/10">
+                          <FileText className="h-4 w-4 text-advisor" />
                         </div>
                         <div>
                           <h4 className="text-sm font-semibold text-text-primary">

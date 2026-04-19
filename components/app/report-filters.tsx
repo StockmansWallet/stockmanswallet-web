@@ -103,7 +103,7 @@ export function ReportFilters({ properties, showPropertyFilter = true }: ReportF
             aria-pressed={currentPreset === preset.value}
             className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
               currentPreset === preset.value
-                ? "bg-amber-500/20 text-amber-400"
+                ? "bg-warning/20 text-warning"
                 : "text-text-muted hover:text-text-secondary"
             }`}
           >
@@ -199,7 +199,7 @@ function CustomRangeButton({
         aria-pressed={active}
         className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
           active
-            ? "bg-amber-500/20 text-amber-400"
+            ? "bg-warning/20 text-warning"
             : "text-text-muted hover:text-text-secondary"
         }`}
       >
@@ -238,7 +238,7 @@ function CustomRangeButton({
             <button
               onClick={handleApply}
               disabled={!canApply}
-              className="rounded-full bg-amber-500/20 px-4 py-1.5 text-xs font-semibold text-amber-400 transition-colors hover:bg-amber-500/30 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-full bg-warning/20 px-4 py-1.5 text-xs font-semibold text-warning transition-colors hover:bg-warning/30 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Apply
             </button>
@@ -279,7 +279,7 @@ function PropertyDropdown({
         {selected.length > 0 && (
           <button
             onClick={onClear}
-            className="w-full rounded-lg px-3 py-1.5 text-left text-xs text-amber-400 hover:bg-white/[0.04]"
+            className="w-full rounded-lg px-3 py-1.5 text-left text-xs text-warning hover:bg-white/[0.04]"
           >
             Clear filter
           </button>
@@ -293,12 +293,12 @@ function PropertyDropdown({
             <span
               className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border ${
                 selected.includes(prop.id)
-                  ? "border-amber-400 bg-amber-500/20"
+                  ? "border-warning bg-warning/20"
                   : "border-white/20"
               }`}
             >
               {selected.includes(prop.id) && (
-                <svg className="h-2.5 w-2.5 text-amber-400" viewBox="0 0 12 12" fill="none">
+                <svg className="h-2.5 w-2.5 text-warning" viewBox="0 0 12 12" fill="none">
                   <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               )}

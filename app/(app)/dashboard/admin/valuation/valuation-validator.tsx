@@ -104,7 +104,7 @@ function Divider() {
 function Badge({ color, label }: { color: "emerald" | "amber" | "red"; label: string }) {
   const colors = {
     emerald: "bg-success/15 text-success",
-    amber: "bg-amber-500/15 text-amber-400",
+    amber: "bg-warning/15 text-warning",
     red: "bg-error/15 text-error",
   };
   return (

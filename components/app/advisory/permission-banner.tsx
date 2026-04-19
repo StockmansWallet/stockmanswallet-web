@@ -49,11 +49,11 @@ export function PermissionBanner({ connection, isActive, permissions }: Permissi
   // Show pending state when connection status is pending or after just requesting
   if (connection.status === "pending" || requested) {
     return (
-      <div className="flex items-center gap-2 rounded-xl bg-blue-500/10 px-4 py-3">
-        <Clock className="h-4 w-4 text-blue-400" />
+      <div className="flex items-center gap-2 rounded-xl bg-info/10 px-4 py-3">
+        <Clock className="h-4 w-4 text-info" />
         <div>
-          <span className="text-sm font-medium text-blue-400">Access Requested</span>
-          <p className="text-xs text-blue-400/70">
+          <span className="text-sm font-medium text-info">Access Requested</span>
+          <p className="text-xs text-info/70">
             Waiting for the producer to grant data access.
           </p>
         </div>
@@ -62,12 +62,12 @@ export function PermissionBanner({ connection, isActive, permissions }: Permissi
   }
 
   return (
-    <div className="flex items-center justify-between rounded-xl bg-amber-500/10 px-4 py-3">
+    <div className="flex items-center justify-between rounded-xl bg-warning/10 px-4 py-3">
       <div className="flex items-center gap-2">
-        <Lock className="h-4 w-4 text-amber-400" />
+        <Lock className="h-4 w-4 text-warning" />
         <div>
-          <span className="text-sm font-medium text-amber-400">Data Not Shared</span>
-          <p className="text-xs text-amber-400/70">
+          <span className="text-sm font-medium text-warning">Data Not Shared</span>
+          <p className="text-xs text-warning/70">
             Request access to view this client's portfolio data.
           </p>
         </div>

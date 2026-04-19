@@ -32,7 +32,7 @@ export function AnalysisDeleteButton({ analysisId }: { analysisId: string }) {
   if (showConfirm) {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-xs text-amber-400">Delete this analysis?</span>
+        <span className="text-xs text-warning">Delete this analysis?</span>
         <Button size="sm" variant="secondary" onClick={() => setShowConfirm(false)} disabled={isDeleting}>
           Cancel
         </Button>

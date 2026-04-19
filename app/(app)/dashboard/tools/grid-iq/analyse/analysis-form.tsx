@@ -128,7 +128,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
       {/* Step 1: Select Grid */}
       <section>
         <div className="mb-2 flex items-center gap-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-500/20 text-xs font-bold text-indigo-400">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-teal/20 text-xs font-bold text-teal">
             1
           </div>
           <h2 className="text-sm font-semibold text-text-primary">Select Processor Grid</h2>
@@ -158,7 +158,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
                   key={grid.id}
                   className={`cursor-pointer transition-all ${
                     selected
-                      ? "border-indigo-500/50 bg-indigo-500/10"
+                      ? "border-teal/50 bg-teal/10"
                       : "hover:bg-white/[0.04]"
                   }`}
                   onClick={() => setSelectedGridId(selected ? null : grid.id)}
@@ -166,11 +166,11 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
                   <CardContent className="flex items-center gap-3 p-3">
                     <div
                       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                        selected ? "bg-indigo-500/20" : "bg-white/[0.06]"
+                        selected ? "bg-teal/20" : "bg-white/[0.06]"
                       }`}
                     >
                       <Grid3x3
-                        className={`h-4 w-4 ${selected ? "text-indigo-400" : "text-text-muted"}`}
+                        className={`h-4 w-4 ${selected ? "text-teal" : "text-text-muted"}`}
                       />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -190,7 +190,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
                       </Badge>
                     )}
                     {selected && (
-                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-500">
+                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal">
                         <Check className="h-3 w-3 text-white" />
                       </div>
                     )}
@@ -205,7 +205,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
       {/* Step 2: Select Herd */}
       <section>
         <div className="mb-2 flex items-center gap-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-500/20 text-xs font-bold text-indigo-400">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-teal/20 text-xs font-bold text-teal">
             2
           </div>
           <h2 className="text-sm font-semibold text-text-primary">Select Herd</h2>
@@ -233,7 +233,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
                   key={herd.id}
                   className={`cursor-pointer transition-all ${
                     selected
-                      ? "border-indigo-500/50 bg-indigo-500/10"
+                      ? "border-teal/50 bg-teal/10"
                       : "hover:bg-white/[0.04]"
                   }`}
                   onClick={() => setSelectedHerdId(selected ? null : herd.id)}
@@ -241,11 +241,11 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
                   <CardContent className="flex items-center gap-3 p-3">
                     <div
                       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                        selected ? "bg-indigo-500/20" : "bg-white/[0.06]"
+                        selected ? "bg-teal/20" : "bg-white/[0.06]"
                       }`}
                     >
                       <Target
-                        className={`h-4 w-4 ${selected ? "text-indigo-400" : "text-text-muted"}`}
+                        className={`h-4 w-4 ${selected ? "text-teal" : "text-text-muted"}`}
                       />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -255,7 +255,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
                       </p>
                     </div>
                     {selected && (
-                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-500">
+                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal">
                         <Check className="h-3 w-3 text-white" />
                       </div>
                     )}
@@ -299,9 +299,9 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
                   key={ks.id}
                   className={`cursor-pointer transition-all ${
                     selected
-                      ? "border-indigo-500/50 bg-indigo-500/10"
+                      ? "border-teal/50 bg-teal/10"
                       : suggested
-                        ? "border-indigo-500/20 hover:bg-white/[0.04]"
+                        ? "border-teal/20 hover:bg-white/[0.04]"
                         : "hover:bg-white/[0.04]"
                   }`}
                   onClick={() => setSelectedKillSheetId(selected ? null : ks.id)}
@@ -309,11 +309,11 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
                   <CardContent className="flex items-center gap-3 p-3">
                     <div
                       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                        selected ? "bg-indigo-500/20" : "bg-white/[0.06]"
+                        selected ? "bg-teal/20" : "bg-white/[0.06]"
                       }`}
                     >
                       <FileText
-                        className={`h-4 w-4 ${selected ? "text-indigo-400" : "text-text-muted"}`}
+                        className={`h-4 w-4 ${selected ? "text-teal" : "text-text-muted"}`}
                       />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -322,7 +322,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
                           {ks.record_name || ks.processor_name}
                         </p>
                         {suggested && !selected && (
-                          <Badge className="shrink-0 bg-indigo-500/15 text-[9px] text-indigo-400">
+                          <Badge className="shrink-0 bg-teal/15 text-[9px] text-teal">
                             Match
                           </Badge>
                         )}
@@ -333,7 +333,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
                       </p>
                     </div>
                     {selected && (
-                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-500">
+                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal">
                         <Check className="h-3 w-3 text-white" />
                       </div>
                     )}
@@ -352,8 +352,8 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
           <Badge
             className={
               selectedKillSheetId
-                ? "bg-amber-500/15 text-amber-400"
-                : "bg-indigo-500/15 text-indigo-400"
+                ? "bg-warning/15 text-warning"
+                : "bg-teal/15 text-teal"
             }
           >
             {analysisMode}

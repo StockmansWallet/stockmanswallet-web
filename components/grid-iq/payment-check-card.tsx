@@ -21,16 +21,16 @@ export function PaymentCheckCard({ result }: PaymentCheckCardProps) {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${allMatched ? "bg-success/15" : "bg-amber-500/15"}`}>
+            <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${allMatched ? "bg-success/15" : "bg-warning/15"}`}>
               {allMatched ? (
                 <ShieldCheck className="h-4 w-4 text-success" />
               ) : (
-                <AlertTriangle className="h-4 w-4 text-amber-400" />
+                <AlertTriangle className="h-4 w-4 text-warning" />
               )}
             </div>
             <p className="text-sm font-semibold text-text-primary">Payment Check</p>
           </div>
-          <span className={`text-xs font-medium ${allMatched ? "text-success" : "text-amber-400"}`}>
+          <span className={`text-xs font-medium ${allMatched ? "text-success" : "text-warning"}`}>
             {result.matchCount}/{totalChecked} match
           </span>
         </div>
@@ -48,7 +48,7 @@ export function PaymentCheckCard({ result }: PaymentCheckCardProps) {
               <span className="text-text-muted">
                 {result.lineDiscrepancies.length} discrepanc{result.lineDiscrepancies.length === 1 ? "y" : "ies"} found
               </span>
-              <span className={totalDiff >= 0 ? "text-success" : "text-amber-400"}>
+              <span className={totalDiff >= 0 ? "text-success" : "text-warning"}>
                 {totalDiff >= 0 ? "+" : ""}${Math.round(totalDiff).toLocaleString()}
               </span>
             </div>
@@ -79,7 +79,7 @@ export function PaymentCheckCard({ result }: PaymentCheckCardProps) {
                           ${d.expectedPricePerKg.toFixed(2)}
                         </td>
                         <td className="px-2.5 py-1.5 text-right">
-                          <span className={diff >= 0 ? "text-success" : "text-amber-400"}>
+                          <span className={diff >= 0 ? "text-success" : "text-warning"}>
                             ${d.actualPricePerKg.toFixed(2)}
                           </span>
                         </td>

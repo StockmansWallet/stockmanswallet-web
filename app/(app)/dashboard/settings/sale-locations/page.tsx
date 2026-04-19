@@ -21,7 +21,7 @@ export default function SaleLocationsPage() {
       </div>
       <PageHeader
         title="Sale Locations"
-        titleClassName="text-4xl font-bold text-sky-400"
+        titleClassName="text-4xl font-bold text-info"
         subtitle="Manage your saleyards and custom sale locations."
         actions={
           <Link href="/dashboard/settings/sale-locations/new">

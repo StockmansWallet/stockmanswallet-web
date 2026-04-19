@@ -105,7 +105,7 @@ export default async function MyAdvisorsPage() {
       <ConnectionRealtime userId={user.id} />
       <PageHeader
         title="My Advisors"
-        titleClassName="text-4xl font-bold text-[#2F8CD9]"
+        titleClassName="text-4xl font-bold text-advisor"
         subtitle="Manage your advisory connections"
         subtitleClassName="text-sm font-medium text-text-secondary"
         actions={
@@ -121,7 +121,7 @@ export default async function MyAdvisorsPage() {
       {!hasAnything && (
         <Card>
           <EmptyState
-            icon={<Users className="h-6 w-6 text-[#2F8CD9]" />}
+            icon={<Users className="h-6 w-6 text-advisor" />}
             title="No advisors yet"
             description="Browse the advisor directory to connect with your livestock agent, accountant, banker, or other advisors."
             actionLabel="Find Advisors"
@@ -134,7 +134,7 @@ export default async function MyAdvisorsPage() {
       {/* Incoming requests from advisors */}
       {incomingRequests.length > 0 && (
         <div className="mb-6">
-          <h3 className="mb-3 text-sm font-semibold text-amber-400">
+          <h3 className="mb-3 text-sm font-semibold text-warning">
             Incoming Requests ({incomingRequests.length})
           </h3>
           <div className="space-y-3">
@@ -159,11 +159,11 @@ export default async function MyAdvisorsPage() {
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#2F8CD9]/15">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-advisor/15">
                           {categoryConfig ? (
                             <categoryConfig.icon className={`h-5 w-5 ${categoryConfig.colorClass}`} />
                           ) : (
-                            <div className="h-5 w-5 rounded-full bg-[#2F8CD9]" />
+                            <div className="h-5 w-5 rounded-full bg-advisor" />
                           )}
                         </div>
                         <div>

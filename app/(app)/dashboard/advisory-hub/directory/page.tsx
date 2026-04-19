@@ -54,7 +54,7 @@ export default async function AdvisorDirectoryPage({
     <div className="max-w-4xl">
       <PageHeader
         title="Advisor Directory"
-        titleClassName="text-4xl font-bold text-[#2F8CD9]"
+        titleClassName="text-4xl font-bold text-advisor"
         titleHref="/dashboard/advisory-hub"
         subtitle="Find and connect with advisors"
         subtitleClassName="text-sm font-medium text-text-secondary"
@@ -68,7 +68,7 @@ export default async function AdvisorDirectoryPage({
       {filteredAdvisors.length === 0 ? (
         <Card>
           <EmptyState
-            icon={<Search className="h-6 w-6 text-[#2F8CD9]" />}
+            icon={<Search className="h-6 w-6 text-advisor" />}
             title="No advisors found"
             description={
               searchQuery

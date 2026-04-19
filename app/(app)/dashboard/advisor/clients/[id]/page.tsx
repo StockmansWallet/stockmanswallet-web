@@ -293,7 +293,7 @@ export default async function ClientDetailPage({
             ) : (
               <Card>
                 <EmptyState
-                  icon={<Lock className="h-6 w-6 text-[#2F8CD9]" />}
+                  icon={<Lock className="h-6 w-6 text-advisor" />}
                   title={permissions.herds ? "No Herds" : "Herds Not Shared"}
                   description={permissions.herds ? "This producer has no active herds." : "This producer has not enabled herd data sharing."}
                   variant="advisor"
@@ -314,7 +314,7 @@ export default async function ClientDetailPage({
             ) : (
               <Card>
                 <EmptyState
-                  icon={<Eye className="h-6 w-6 text-[#2F8CD9]" />}
+                  icon={<Eye className="h-6 w-6 text-advisor" />}
                   title="Herds Not Shared"
                   description="Herd data sharing is required to create lens assessments."
                   variant="advisor"
@@ -330,7 +330,7 @@ export default async function ClientDetailPage({
             ) : (
               <Card>
                 <EmptyState
-                  icon={<Lock className="h-6 w-6 text-[#2F8CD9]" />}
+                  icon={<Lock className="h-6 w-6 text-advisor" />}
                   title="Reports Not Shared"
                   description="This producer has not enabled report sharing."
                   variant="advisor"

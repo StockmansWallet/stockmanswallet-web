@@ -72,7 +72,7 @@ export default async function ConnectedClientsPage() {
       <ConnectionRealtime userId={user.id} />
       <PageHeader
         title="My Clients"
-        titleClassName="text-4xl font-bold text-[#2F8CD9]"
+        titleClassName="text-4xl font-bold text-advisor"
         subtitle="Manage your client connections"
         subtitleClassName="text-sm font-medium text-text-secondary"
         actions={
@@ -90,7 +90,7 @@ export default async function ConnectedClientsPage() {
       {!hasAnything && (
         <Card>
           <EmptyState
-            icon={<Users className="h-6 w-6 text-[#2F8CD9]" />}
+            icon={<Users className="h-6 w-6 text-advisor" />}
             title="No clients yet"
             description="Browse the producer directory to connect with farmers and graziers."
             actionLabel="Find Producers"
@@ -103,7 +103,7 @@ export default async function ConnectedClientsPage() {
       {/* Incoming requests from producers (Accept/Decline) */}
       {incomingRequests.length > 0 && (
         <div className="mb-6">
-          <h3 className="mb-3 text-sm font-semibold text-amber-400">
+          <h3 className="mb-3 text-sm font-semibold text-warning">
             Incoming Requests ({incomingRequests.length})
           </h3>
           <div className="flex flex-col gap-3">

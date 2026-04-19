@@ -71,17 +71,17 @@ export function YardBookBanner() {
       : "Breeding milestones have been updated in your Yard Book to reflect the new joining period dates.";
 
   return (
-    <div className="mb-4 flex items-start gap-3 rounded-xl border border-amber-700/30 bg-amber-900/20 px-4 py-3 text-sm text-amber-300">
+    <div className="mb-4 flex items-start gap-3 rounded-xl border border-amber-700/30 bg-amber-900/20 px-4 py-3 text-sm text-warning">
       <CalendarCheck className="mt-0.5 h-4 w-4 shrink-0" />
       <div className="flex-1">
         <p className="font-medium">
           {action === "created" ? "Added to Yard Book" : "Yard Book Updated"}
         </p>
-        <p className="mt-0.5 text-amber-400/80">{message}</p>
+        <p className="mt-0.5 text-warning/80">{message}</p>
       </div>
       <button
         onClick={() => setVisible(false)}
-        className="shrink-0 rounded p-0.5 text-amber-400/60 hover:text-amber-300"
+        className="shrink-0 rounded p-0.5 text-warning/60 hover:text-warning"
         aria-label="Dismiss"
       >
         <X className="h-4 w-4" />

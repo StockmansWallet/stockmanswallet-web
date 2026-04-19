@@ -32,9 +32,9 @@ const CATEGORY_CONFIG: Record<
   { icon: IconComponent; bg: string; text: string; label: string }
 > = {
   Livestock: { icon: IconCattleTags, bg: "bg-orange-500/15", text: "text-orange-400", label: "Livestock" },
-  Operations: { icon: Wrench, bg: "bg-amber-700/15", text: "text-amber-600", label: "Operations" },
-  Finance: { icon: DollarSign, bg: "bg-blue-500/15", text: "text-blue-400", label: "Finance" },
-  Family: { icon: Home, bg: "bg-purple-500/15", text: "text-purple-400", label: "Family" },
+  Operations: { icon: Wrench, bg: "bg-amber-700/15", text: "text-warning", label: "Operations" },
+  Finance: { icon: DollarSign, bg: "bg-info/15", text: "text-info", label: "Finance" },
+  Family: { icon: Home, bg: "bg-violet/15", text: "text-violet", label: "Family" },
   Me: { icon: User, bg: "bg-success/15", text: "text-success", label: "Me" },
 };
 
@@ -68,8 +68,8 @@ function InfoRow({
 
 function SectionIcon({ icon: Icon, className }: { icon: IconComponent; className?: string }) {
   return (
-    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${className ?? "bg-lime-500/15"}`}>
-      <Icon className={`h-3.5 w-3.5 ${className ? "" : "text-lime-400"}`} />
+    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${className ?? "bg-emerald/15"}`}>
+      <Icon className={`h-3.5 w-3.5 ${className ? "" : "text-emerald"}`} />
     </div>
   );
 }
@@ -323,7 +323,7 @@ export default async function YardBookItemPage({
                 >
                   <Link
                     href={`/dashboard/herds/${herd.id}`}
-                    className="font-medium text-lime-400 hover:underline"
+                    className="font-medium text-emerald hover:underline"
                   >
                     {herd.name}
                   </Link>

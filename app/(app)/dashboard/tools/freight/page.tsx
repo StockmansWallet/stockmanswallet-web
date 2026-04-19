@@ -32,7 +32,7 @@ export default async function FreightPage() {
     <div className="max-w-4xl">
       <PageHeader
         title="Freight IQ"
-        titleClassName="text-4xl font-bold text-sky-400"
+        titleClassName="text-4xl font-bold text-info"
         subtitle="Deck loading and route costing"
         subtitleClassName="text-sm font-medium text-text-secondary"
       />

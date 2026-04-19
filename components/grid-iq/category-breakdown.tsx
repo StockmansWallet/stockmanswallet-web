@@ -37,9 +37,9 @@ function sellWindowIcon(status: string) {
     case "ON_TARGET":
       return { icon: CheckCircle, color: "text-success" };
     case "EARLY":
-      return { icon: TrendingUp, color: "text-indigo-400" };
+      return { icon: TrendingUp, color: "text-teal" };
     case "RISK_OF_OVERWEIGHT":
-      return { icon: AlertTriangle, color: "text-amber-400" };
+      return { icon: AlertTriangle, color: "text-warning" };
     default:
       return { icon: Clock, color: "text-text-muted" };
   }
@@ -58,9 +58,9 @@ export function CategoryBreakdown({
     <Card>
       <CardContent className="p-0">
         <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-3">
-          <Users className="h-4 w-4 text-indigo-400" />
-          <span className="text-sm font-semibold text-indigo-400">Per-Category Breakdown</span>
-          <Badge className="ml-auto bg-indigo-500/15 text-indigo-400">
+          <Users className="h-4 w-4 text-teal" />
+          <span className="text-sm font-semibold text-teal">Per-Category Breakdown</span>
+          <Badge className="ml-auto bg-teal/15 text-teal">
             {categoryResults.length} allocations
           </Badge>
         </div>
@@ -102,7 +102,7 @@ export function CategoryBreakdown({
                 <span className="w-20 text-right text-sm text-text-primary">
                   {formatCurrency(row.netSaleyardValue)}
                 </span>
-                <span className={`w-20 text-right text-sm font-semibold ${isProcessor ? "text-success" : "text-amber-400"}`}>
+                <span className={`w-20 text-right text-sm font-semibold ${isProcessor ? "text-success" : "text-warning"}`}>
                   {isProcessor ? "+" : "-"}{formatCurrency(row.gridIQAdvantage)}
                 </span>
               </div>
@@ -120,7 +120,7 @@ export function CategoryBreakdown({
           <span className="w-20 text-right text-sm font-bold text-text-primary">
             {formatCurrency(totalNetSaleyard)}
           </span>
-          <span className={`w-20 text-right text-sm font-bold ${totalAdvantage > 0 ? "text-success" : "text-amber-400"}`}>
+          <span className={`w-20 text-right text-sm font-bold ${totalAdvantage > 0 ? "text-success" : "text-warning"}`}>
             {totalAdvantage > 0 ? "+" : "-"}{formatCurrency(totalAdvantage)}
           </span>
         </div>

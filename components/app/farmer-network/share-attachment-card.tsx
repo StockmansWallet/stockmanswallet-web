@@ -69,19 +69,19 @@ export function ShareAttachmentCard({ attachment }: { attachment: MessageAttachm
 
   // Price attachment
   return (
-    <div className="mt-2 flex min-w-0 items-start gap-3 rounded-xl border border-sky-500/20 bg-sky-500/[0.04] p-3">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-500/15">
-        <TrendingUp className="h-4 w-4 text-sky-400" aria-hidden="true" />
+    <div className="mt-2 flex min-w-0 items-start gap-3 rounded-xl border border-info/20 bg-info/[0.04] p-3">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-info/15">
+        <TrendingUp className="h-4 w-4 text-info" aria-hidden="true" />
       </div>
       <div className="min-w-0 flex-1">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-sky-400">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-info">
           Shared market price
         </span>
         <p className="mt-0.5 truncate text-sm font-semibold text-text-primary">
           {attachment.category}
           {attachment.breed ? ` (${attachment.breed})` : ""}
         </p>
-        <p className="mt-1 text-lg font-bold text-sky-400">
+        <p className="mt-1 text-lg font-bold text-info">
           ${(attachment.price_per_kg / 100).toFixed(2)}
           <span className="ml-0.5 text-[11px] font-medium text-text-muted">/kg</span>
         </p>

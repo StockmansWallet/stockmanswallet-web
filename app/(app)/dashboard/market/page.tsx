@@ -156,10 +156,10 @@ export default async function MarketPage({ searchParams }: Props) {
                     <Link
                       key={e.category}
                       href={`/dashboard/market/category/${e.slug}`}
-                      className="inline-flex items-center gap-2 rounded-full bg-[#2F8CD9]/10 px-3 py-1.5 text-xs text-[#2F8CD9] ring-1 ring-[#2F8CD9]/20 transition-colors hover:bg-[#2F8CD9]/15"
+                      className="inline-flex items-center gap-2 rounded-full bg-advisor/10 px-3 py-1.5 text-xs text-advisor ring-1 ring-advisor/20 transition-colors hover:bg-advisor/15"
                     >
                       <span className="font-medium">{e.category}</span>
-                      <span className="text-[#2F8CD9]/70 tabular-nums">
+                      <span className="text-advisor/70 tabular-nums">
                         {e.head_count} hd - {e.herd_count} herd{e.herd_count === 1 ? "" : "s"}
                       </span>
                     </Link>
