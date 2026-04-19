@@ -96,11 +96,11 @@ function rangeConfig(range: DateRange): { days: number | null; stepDays: number 
   switch (range) {
     case "1D":  return { days: 1,   stepDays: 1 };
     case "1W":  return { days: 7,   stepDays: 1 };
-    case "1M":  return { days: 30,  stepDays: 3 };
-    case "3M":  return { days: 90,  stepDays: 8 };
-    case "6M":  return { days: 180, stepDays: 15 };
-    case "1Y":  return { days: 365, stepDays: 30 };
-    case "All": return { days: null, stepDays: 7 };
+    case "1M":  return { days: 30,  stepDays: 1 };
+    case "3M":  return { days: 90,  stepDays: 3 };
+    case "6M":  return { days: 180, stepDays: 6 };
+    case "1Y":  return { days: 365, stepDays: 12 };
+    case "All": return { days: null, stepDays: 3 };
   }
 }
 
