@@ -19,6 +19,12 @@ interface FarmerPeerCardProps {
   lastMessage?: string | null;
   /** Connection created_at or approved_at in ISO form. Optional. */
   connectedSince?: string | null;
+  /**
+   * Unread new_message notifications for this connection. Drives the red
+   * pill on the avatar and the bold name treatment, matching the iOS
+   * Messages inbox language.
+   */
+  unreadCount?: number;
 }
 
 function formatConnectedSince(iso: string): string {
@@ -39,9 +45,11 @@ export function FarmerPeerCard({
   status,
   lastMessage,
   connectedSince,
+  unreadCount = 0,
 }: FarmerPeerCardProps) {
   const initial = (name?.trim().charAt(0) || "?").toUpperCase();
   const location = [state, region].filter(Boolean).join(", ");
+  const hasUnread = status === "approved" && unreadCount > 0;
 
   return (
     <Link href={href}>
@@ -49,14 +57,23 @@ export function FarmerPeerCard({
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
-              <div
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-500/15"
-                aria-hidden="true"
-              >
-                <span className="text-sm font-bold text-orange-400">{initial}</span>
+              <div className="relative shrink-0" aria-hidden="true">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/15">
+                  <span className="text-sm font-bold text-orange-400">{initial}</span>
+                </div>
+                {hasUnread && (
+                  <span
+                    className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[10px] font-bold text-white"
+                    aria-hidden="true"
+                  >
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
               </div>
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-text-primary">{name}</p>
+                <p className={`truncate text-sm ${hasUnread ? "font-bold text-text-primary" : "font-semibold text-text-primary"}`}>
+                  {name}
+                </p>
                 <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-text-secondary">
                   {company && <span className="truncate">{company}</span>}
                   {location && (
@@ -70,7 +87,7 @@ export function FarmerPeerCard({
                   )}
                 </div>
                 {status === "approved" && lastMessage && (
-                  <p className="mt-1 flex items-center gap-1 truncate text-[11px] text-text-muted">
+                  <p className={`mt-1 flex items-center gap-1 truncate text-[11px] ${hasUnread ? "font-medium text-text-secondary" : "text-text-muted"}`}>
                     <MessageSquare className="h-3 w-3 shrink-0" aria-hidden="true" />
                     <span className="truncate">{lastMessage}</span>
                   </p>
@@ -79,13 +96,11 @@ export function FarmerPeerCard({
             </div>
 
             <div className="flex shrink-0 items-center gap-3">
-              {status === "pending" ? (
+              {status === "pending" && (
                 <Badge variant="warning">
                   <Clock className="mr-1 h-3 w-3" aria-hidden="true" />
                   Pending
                 </Badge>
-              ) : (
-                <Badge variant="success">Connected</Badge>
               )}
               <ArrowRight
                 className="h-4 w-4 text-text-muted transition-transform group-hover:translate-x-0.5"

@@ -175,7 +175,7 @@ export async function notifyFarmerConnectionRequest(
     type: "farmer_connection_request",
     title: `${fromName} wants to connect`,
     body: "Review and accept or decline this connection request.",
-    link: "/dashboard/farmer-network/connections",
+    link: "/dashboard/farmer-network",
     connectionId,
   });
 }
@@ -220,7 +220,7 @@ export async function notifyFarmerRequestDenied(
       reason === "disconnected"
         ? "Your producer connection has ended. You can send a new request later."
         : undefined,
-    link: "/dashboard/farmer-network/connections",
+    link: "/dashboard/farmer-network",
     connectionId,
   });
 }
