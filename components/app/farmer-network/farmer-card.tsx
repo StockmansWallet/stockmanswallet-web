@@ -29,13 +29,17 @@ export function FarmerCard({ farmer, avatarUrl }: { farmer: DirectoryFarmer; ava
       />
 
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
           <p className="truncate text-sm font-semibold text-text-primary">
             {farmer.display_name}
           </p>
+          {(farmer.property_name || farmer.company_name) && (
+            <span className="truncate text-xs text-text-secondary">
+              {farmer.property_name ?? farmer.company_name}
+            </span>
+          )}
         </div>
         <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-text-muted">
-          {farmer.company_name && <span className="truncate">{farmer.company_name}</span>}
           {farmer.state && (
             <span className="flex items-center gap-1">
               <MapPin className="h-3 w-3" aria-hidden="true" />

@@ -74,6 +74,11 @@ export interface DirectoryFarmer {
   user_id: string;
   display_name: string;
   company_name: string;
+  /**
+   * Name of the producer's station/farm. Preferred over company_name on
+   * Producer Network surfaces since it's more identifying for peers.
+   */
+  property_name?: string | null;
   role: string;
   state: string;
   region: string;

@@ -14,6 +14,7 @@ import { BroadcastButton } from "@/components/app/farmer-network/broadcast-butto
 import { MarkNotificationsRead } from "@/components/app/mark-notifications-read";
 import { loadOutgoingBlocks } from "@/lib/data/user-blocks";
 import { fetchUserAvatars } from "@/lib/auth/fetch-user-avatars";
+import { enrichProducers } from "@/lib/data/producer-enrichment";
 import type { ConnectionRequest, DirectoryFarmer } from "@/lib/types/advisory";
 
 export const revalidate = 0;
@@ -143,14 +144,24 @@ export default async function FarmerNetworkPage() {
 
     const { data: nearby } = await supabase
       .from("user_profiles")
-      .select("user_id, display_name, company_name, role, state, region, bio")
+      .select("user_id, display_name, company_name, property_name, role, state, region, bio")
       .eq("role", "producer")
       .eq("state", myState)
       .not("user_id", "in", `(${excludeIds.join(",")})`)
       .order("display_name")
       .limit(4);
 
-    nearbyProducers = (nearby ?? []) as DirectoryFarmer[];
+    const baseNearby = (nearby ?? []) as DirectoryFarmer[];
+    // Enrich so the per-row meta line can show species beside state,
+    // matching the directory page.
+    const nearbyEnrichment = await enrichProducers(
+      supabase,
+      baseNearby.map((p) => p.user_id),
+    );
+    nearbyProducers = baseNearby.map((p) => ({
+      ...p,
+      primary_species: nearbyEnrichment.get(p.user_id)?.primary_species ?? null,
+    }));
   }
 
   // Avatar URLs live on auth.users.user_metadata, not user_profiles, so
