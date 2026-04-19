@@ -88,7 +88,7 @@ export default function AccountantReportPage() {
                   const fy = fyOptions.find((f) => f.short === e.target.value)!;
                   setSelectedFY(fy);
                 }}
-                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary outline-none focus:border-[#D4A053]/40"
+                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary outline-none focus:border-reports/40"
               >
                 {fyOptions.map((fy) => (
                   <option key={fy.short} value={fy.short}>{fy.label}</option>

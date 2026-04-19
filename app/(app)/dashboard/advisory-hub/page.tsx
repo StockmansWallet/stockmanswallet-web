@@ -106,7 +106,7 @@ export default async function AdvisoryHubPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   {pendingCount > 0 && (
-                    <Badge variant="warning" className="animate-pulse shadow-sm shadow-amber-500/20">
+                    <Badge variant="warning" className="animate-pulse shadow-sm shadow-warning/20">
                       {pendingCount} pending
                     </Badge>
                   )}

@@ -597,7 +597,7 @@ export function MlaUploader({ userEmail }: { userEmail: string }) {
                 type="checkbox"
                 checked={latestOnly}
                 onChange={(e) => setLatestOnly(e.target.checked)}
-                className="h-4 w-4 rounded border-white/20 bg-transparent accent-green-500"
+                className="h-4 w-4 rounded border-white/20 bg-transparent accent-success"
               />
               <div>
                 <p className="text-sm font-medium text-text-primary">

@@ -187,7 +187,7 @@ export function YardBookForm({
                     name="is_all_day"
                     checked={isAllDay}
                     onChange={(e) => setIsAllDay(e.target.checked)}
-                    className="h-4 w-4 rounded border-black/20 text-emerald accent-lime-500"
+                    className="h-4 w-4 rounded border-black/20 text-emerald accent-emerald"
                   />
                   All day event
                 </label>
@@ -260,7 +260,7 @@ export function YardBookForm({
                 type="checkbox"
                 checked={enableReminders}
                 onChange={(e) => setEnableReminders(e.target.checked)}
-                className="h-4 w-4 rounded border-black/20 text-emerald accent-lime-500"
+                className="h-4 w-4 rounded border-black/20 text-emerald accent-emerald"
               />
               Enable reminders
             </label>
@@ -298,7 +298,7 @@ export function YardBookForm({
                 name="is_recurring"
                 checked={isRecurring}
                 onChange={(e) => setIsRecurring(e.target.checked)}
-                className="h-4 w-4 rounded border-black/20 text-emerald accent-lime-500"
+                className="h-4 w-4 rounded border-black/20 text-emerald accent-emerald"
               />
               Recurring event
             </label>
