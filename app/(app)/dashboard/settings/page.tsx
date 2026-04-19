@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   User,
   Bell,
+  BellRing,
   MapPinned,
   Database,
   ChevronRight,
@@ -85,6 +86,14 @@ export default async function SettingsPage() {
               iconColor="text-purple-400"
               label="Notifications"
               description="Alerts, reminders, and digests"
+            />
+            <NavItem
+              href="/dashboard/settings/alerts"
+              icon={BellRing}
+              iconBg="bg-rose-500/15"
+              iconColor="text-rose-400"
+              label="Price alerts"
+              description="Notify me when categories or saleyards cross a target"
             />
             <NavItem
               href="/dashboard/settings/sale-locations"
