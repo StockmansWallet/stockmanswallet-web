@@ -261,13 +261,11 @@ export default async function FarmerNetworkPage() {
                 <FarmerPeerCard
                   key={c.id}
                   href={`/dashboard/farmer-network/connections/${c.id}`}
+                  profileHref={`/dashboard/farmer-network/directory/${otherId}`}
                   name={profile?.display_name ?? c.requester_name}
                   company={profile?.company_name}
-                  state={profile?.state}
-                  region={profile?.region}
                   status="approved"
                   lastMessage={lastMessages.get(c.id)?.content}
-                  connectedSince={c.permission_granted_at ?? c.created_at}
                   unreadCount={unreadByConnection.get(c.id) ?? 0}
                   avatarUrl={avatarMap.get(otherId) ?? null}
                 />
@@ -295,8 +293,6 @@ export default async function FarmerNetworkPage() {
                   href={`/dashboard/farmer-network/directory/${otherId}`}
                   name={profile?.display_name ?? c.requester_name}
                   company={profile?.company_name}
-                  state={profile?.state}
-                  region={profile?.region}
                   status="pending"
                   avatarUrl={avatarMap.get(otherId) ?? null}
                 />
