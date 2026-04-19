@@ -7,9 +7,18 @@ import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Chat - Brangus" };
 
-export default async function BrangusChatPage() {
+type Props = {
+  searchParams: Promise<{ prefill?: string }>;
+};
+
+export default async function BrangusChatPage({ searchParams }: Props) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+
+  const sp = await searchParams;
+  const prefill = typeof sp.prefill === "string" && sp.prefill.trim().length > 0
+    ? sp.prefill.trim()
+    : undefined;
 
   // Count past conversations to determine greeting style
   let pastConversationCount = 0;
@@ -40,7 +49,7 @@ export default async function BrangusChatPage() {
       />
 
       <Card className="flex flex-1 flex-col overflow-hidden rounded-3xl">
-        <BrangusChat pastConversationCount={pastConversationCount} />
+        <BrangusChat pastConversationCount={pastConversationCount} prefill={prefill} />
       </Card>
     </div>
   );
