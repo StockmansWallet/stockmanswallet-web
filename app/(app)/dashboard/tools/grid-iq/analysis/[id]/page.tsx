@@ -353,8 +353,8 @@ function getSellWindowConfig(status: string) {
     case "ON_TARGET":
       return {
         label: "On Target",
-        color: "text-emerald-400",
-        bg: "bg-emerald-500/15",
+        color: "text-success",
+        bg: "bg-success/15",
         icon: CheckCircle,
       };
     case "EARLY":

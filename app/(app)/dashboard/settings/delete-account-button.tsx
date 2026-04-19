@@ -31,7 +31,7 @@ export function DeleteAccountButton() {
       <Button
         variant="ghost"
         onClick={() => setOpen(true)}
-        className="w-full justify-start gap-2.5 border border-red-500/30 bg-red-500/10 text-red-400 hover:border-red-500/40 hover:bg-red-500/15 hover:text-red-300"
+        className="w-full justify-start gap-2.5 border border-error/30 bg-error/10 text-error hover:border-error/40 hover:bg-error/15 hover:text-error"
       >
         <Trash2 className="h-4 w-4" />
         Delete Account
@@ -47,19 +47,19 @@ export function DeleteAccountButton() {
 
           <div>
             <label className="mb-1.5 block text-sm font-medium text-text-secondary">
-              Type <span className="font-mono text-red-400">DELETE</span> to confirm
+              Type <span className="font-mono text-error">DELETE</span> to confirm
             </label>
             <input
               type="text"
               value={confirmText}
               onChange={(e) => setConfirmText(e.target.value)}
               placeholder="DELETE"
-              className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all ring-1 ring-inset ring-white/10 focus:ring-red-500/60"
+              className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all ring-1 ring-inset ring-white/10 focus:ring-error/60"
             />
           </div>
 
           {error && (
-            <div className="rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm text-red-400">
+            <div className="rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm text-error">
               {error}
             </div>
           )}

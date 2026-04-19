@@ -16,9 +16,9 @@ export function ChangeChip({ value, label, size = "xs" }: ChangeChipProps) {
   const positive = value > 0.05;
   const negative = value < -0.05;
   const tone = positive
-    ? "bg-emerald-500/10 text-emerald-300"
+    ? "bg-success/10 text-success"
     : negative
-    ? "bg-red-500/10 text-red-300"
+    ? "bg-error/10 text-error"
     : "bg-white/[0.04] text-text-muted";
   const sign = positive ? "+" : "";
   return (

@@ -28,10 +28,10 @@ export function PendingRequestCard({
 
   if (resolved === "accepted") {
     return (
-      <Card className="bg-green-500/5">
+      <Card className="bg-success/5">
         <CardContent className="flex items-center gap-3 p-4">
-          <Check className="h-5 w-5 text-green-400" />
-          <p className="text-sm font-medium text-green-400">
+          <Check className="h-5 w-5 text-success" />
+          <p className="text-sm font-medium text-success">
             {clientName} accepted. They are now a connected client.
           </p>
         </CardContent>
@@ -95,7 +95,7 @@ export function PendingRequestCard({
             <Button
               variant="ghost"
               size="sm"
-              className="border border-white/[0.08] bg-white/[0.04] text-xs text-text-muted hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
+              className="border border-white/[0.08] bg-white/[0.04] text-xs text-text-muted hover:border-error/30 hover:bg-error/10 hover:text-error"
               onClick={handleDecline}
               disabled={loading}
             >

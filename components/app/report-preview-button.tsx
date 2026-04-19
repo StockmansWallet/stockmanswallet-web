@@ -94,7 +94,7 @@ export function ReportPreviewButton({ reportPath }: ReportPreviewButtonProps) {
         </button>
       </div>
       {error && (
-        <p role="alert" className="text-[11px] text-red-400">{error}</p>
+        <p role="alert" className="text-[11px] text-error">{error}</p>
       )}
     </div>
   );

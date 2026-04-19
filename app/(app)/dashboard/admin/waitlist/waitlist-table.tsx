@@ -148,7 +148,7 @@ export function WaitlistTable({ signups }: WaitlistTableProps) {
                   <button
                     onClick={handleDelete}
                     disabled={deleting}
-                    className="inline-flex h-8 items-center gap-1.5 rounded-full bg-red-500/15 px-3.5 text-[13px] font-semibold text-red-400 transition-all hover:bg-red-500/25 active:scale-[0.97] disabled:opacity-40 cursor-pointer"
+                    className="inline-flex h-8 items-center gap-1.5 rounded-full bg-error/15 px-3.5 text-[13px] font-semibold text-error transition-all hover:bg-error/25 active:scale-[0.97] disabled:opacity-40 cursor-pointer"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                     {deleting ? "Deleting..." : "Confirm Delete"}
@@ -163,7 +163,7 @@ export function WaitlistTable({ signups }: WaitlistTableProps) {
               ) : (
                 <button
                   onClick={handleDelete}
-                  className="inline-flex h-8 items-center gap-1.5 rounded-full bg-red-500/15 px-3.5 text-[13px] font-semibold text-red-400 transition-all hover:bg-red-500/25 active:scale-[0.97] cursor-pointer"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-full bg-error/15 px-3.5 text-[13px] font-semibold text-error transition-all hover:bg-error/25 active:scale-[0.97] cursor-pointer"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                   Delete
@@ -277,7 +277,7 @@ export function WaitlistTable({ signups }: WaitlistTableProps) {
                     </span>
                   )}
                   <span className="flex items-center gap-1.5">
-                    <CheckCircle2 className={`h-3.5 w-3.5 ${signup.contact_opt_in ? "text-green-400" : "text-text-muted"}`} />
+                    <CheckCircle2 className={`h-3.5 w-3.5 ${signup.contact_opt_in ? "text-success" : "text-text-muted"}`} />
                     <span className="text-text-muted">Contact</span>
                     {signup.contact_opt_in ? (
                       <Badge variant="success">Yes</Badge>

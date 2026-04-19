@@ -225,7 +225,7 @@ export default async function GridIQPage() {
                         {killScore !== null && (
                           <span
                             title="Kill Score: 85+ Excellent, 70-84 Good, 50-69 Fair, <50 Poor"
-                            className={`text-[10px] font-medium ${killScore >= 85 ? "text-emerald-400" : killScore >= 70 ? "text-indigo-400" : killScore >= 50 ? "text-amber-400" : "text-red-400"}`}
+                            className={`text-[10px] font-medium ${killScore >= 85 ? "text-success" : killScore >= 70 ? "text-indigo-400" : killScore >= 50 ? "text-amber-400" : "text-error"}`}
                           >
                             KS {killScore.toFixed(0)}
                           </span>
@@ -251,7 +251,7 @@ export default async function GridIQPage() {
                         </span>
                       </div>
                       <p
-                        className={`mt-0.5 text-[11px] font-semibold tabular-nums ${isProcessor ? "text-emerald-400" : "text-amber-400"}`}
+                        className={`mt-0.5 text-[11px] font-semibold tabular-nums ${isProcessor ? "text-success" : "text-amber-400"}`}
                       >
                         {isProcessor ? "+" : "-"}$
                         {Math.abs(Math.round(advantage)).toLocaleString()}
@@ -292,7 +292,7 @@ export default async function GridIQPage() {
               safeConsignments.map((c: Record<string, unknown>) => {
                 const status = c.status as string;
                 const badgeCls = status === "completed"
-                  ? "bg-emerald-500/15 text-emerald-400"
+                  ? "bg-success/15 text-success"
                   : status === "confirmed"
                     ? "bg-indigo-500/15 text-indigo-400"
                     : "bg-white/[0.06] text-text-muted";
@@ -318,7 +318,7 @@ export default async function GridIQPage() {
                       </div>
                     </div>
                     {(c.total_gross_value as number | null) != null && (c.total_gross_value as number) > 0 && (
-                      <p className="text-sm font-semibold text-emerald-400">
+                      <p className="text-sm font-semibold text-success">
                         ${Math.round(c.total_gross_value as number).toLocaleString()}
                       </p>
                     )}
@@ -403,7 +403,7 @@ export default async function GridIQPage() {
                       <div
                         className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
                           isExpired
-                            ? "bg-red-500/15 text-red-400"
+                            ? "bg-error/15 text-error"
                             : "bg-amber-500/15 text-amber-400"
                         }`}
                       >

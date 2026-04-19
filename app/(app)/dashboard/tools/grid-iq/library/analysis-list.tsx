@@ -179,12 +179,12 @@ export function AnalysisList({
                         title="Kill Score: 85+ Excellent, 70-84 Good, 50-69 Fair, <50 Poor"
                         className={`text-[10px] font-medium ${
                           killScore >= 85
-                            ? "text-emerald-400"
+                            ? "text-success"
                             : killScore >= 70
                               ? "text-indigo-400"
                               : killScore >= 50
                                 ? "text-amber-400"
-                                : "text-red-400"
+                                : "text-error"
                         }`}
                       >
                         KS {killScore.toFixed(0)}
@@ -209,7 +209,7 @@ export function AnalysisList({
                     </span>
                   </div>
                   <p
-                    className={`mt-0.5 text-[11px] font-semibold tabular-nums ${isProcessor ? "text-emerald-400" : "text-amber-400"}`}
+                    className={`mt-0.5 text-[11px] font-semibold tabular-nums ${isProcessor ? "text-success" : "text-amber-400"}`}
                   >
                     {isProcessor ? "+" : "-"}$
                     {Math.abs(Math.round(advantage)).toLocaleString()}
@@ -249,8 +249,8 @@ export function AnalysisList({
       {selecting && selected.size > 0 && (
         <div className="mt-4">
           {showConfirm ? (
-            <div className="flex items-center justify-between rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3">
-              <span className="text-sm text-red-400">
+            <div className="flex items-center justify-between rounded-xl border border-error/20 bg-error/5 px-4 py-3">
+              <span className="text-sm text-error">
                 Delete {selected.size}{" "}
                 {selected.size === 1 ? "analysis" : "analyses"}?
               </span>

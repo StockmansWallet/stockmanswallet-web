@@ -125,7 +125,7 @@ export function MappingPanel() {
                         <span className="text-[10px] text-text-muted">(remapped)</span>
                       </span>
                     ) : (
-                      <span className="text-emerald-400">{r.mlaCategory}</span>
+                      <span className="text-success">{r.mlaCategory}</span>
                     )}
                   </td>
                   <td className="py-1.5 pr-4 text-text-muted">
@@ -172,7 +172,7 @@ export function MappingPanel() {
                   </td>
                   <td className="py-1.5">
                     {e.storedAs === e.csvCategory ? (
-                      <span className="text-emerald-400">{e.storedAs}</span>
+                      <span className="text-success">{e.storedAs}</span>
                     ) : (
                       <span className="text-amber-400">{e.storedAs}</span>
                     )}
@@ -191,7 +191,7 @@ export function MappingPanel() {
             <div key={r.breed} className="flex items-center justify-between py-1 text-xs border-b border-white/[0.03]">
               <span className="text-text-primary">{r.breed}</span>
               <span className={`tabular-nums font-medium ${
-                r.pct > 0 ? "text-emerald-400" : r.pct < 0 ? "text-red-400" : "text-text-muted"
+                r.pct > 0 ? "text-success" : r.pct < 0 ? "text-error" : "text-text-muted"
               }`}>
                 {r.pct > 0 ? "+" : ""}{r.pct}%
               </span>

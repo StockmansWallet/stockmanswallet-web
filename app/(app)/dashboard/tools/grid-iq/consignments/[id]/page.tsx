@@ -57,7 +57,7 @@ function statusBadge(status: string) {
     case "confirmed":
       return { label: "Confirmed", cls: "bg-indigo-500/15 text-indigo-400" };
     case "completed":
-      return { label: "Completed", cls: "bg-emerald-500/15 text-emerald-400" };
+      return { label: "Completed", cls: "bg-success/15 text-success" };
     default:
       return { label: status, cls: "bg-white/[0.06] text-text-muted" };
   }
@@ -278,7 +278,7 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
                 icon={Truck}
                 label="Gross Value"
                 value={`$${Math.round(consignment.total_gross_value).toLocaleString()}`}
-                valueColor="text-emerald-400"
+                valueColor="text-success"
               />
             )}
           </div>
@@ -314,7 +314,7 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
                       </div>
                     </div>
                     {alloc.total_value != null && alloc.total_value > 0 && (
-                      <span className="text-sm font-semibold text-emerald-400">
+                      <span className="text-sm font-semibold text-success">
                         ${Math.round(alloc.total_value).toLocaleString()}
                       </span>
                     )}
@@ -357,7 +357,7 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
                 </div>
               </div>
               {(killSheet.total_gross_value as number) > 0 && (
-                <span className="text-sm font-semibold text-emerald-400">
+                <span className="text-sm font-semibold text-success">
                   ${Math.round(killSheet.total_gross_value as number).toLocaleString()}
                 </span>
               )}
@@ -388,7 +388,7 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
                     <p className="text-xs text-text-muted">
                       {new Date(preSaleAnalysis.analysis_date).toLocaleDateString("en-AU")}
                       {preSaleAnalysis.grid_iq_advantage != null && (
-                        <span className={preSaleAnalysis.grid_iq_advantage > 0 ? " text-emerald-400" : " text-amber-400"}>
+                        <span className={preSaleAnalysis.grid_iq_advantage > 0 ? " text-success" : " text-amber-400"}>
                           {" "}Grid IQ: ${Math.abs(Math.round(preSaleAnalysis.grid_iq_advantage)).toLocaleString()}
                           {preSaleAnalysis.grid_iq_advantage > 0 ? " processor" : " saleyard"}
                         </span>
@@ -509,7 +509,7 @@ export default async function ConsignmentDetailPage({ params }: PageProps) {
 
       {/* Completed banner */}
       {isCompleted && (
-        <div className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-emerald-500/10 py-3 text-sm font-medium text-emerald-400">
+        <div className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-success/10 py-3 text-sm font-medium text-success">
           <Truck className="h-4 w-4" />
           Sale completed - herd records updated
         </div>

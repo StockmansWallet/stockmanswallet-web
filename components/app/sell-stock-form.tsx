@@ -103,7 +103,7 @@ export function SellStockForm({ herd, suggestedPricePerKg, projectedWeight, pric
   return (
     <div className="flex flex-col gap-4">
       {error && (
-        <div className="flex items-center gap-2 rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <div className="flex items-center gap-2 rounded-lg bg-error/10 px-4 py-3 text-sm text-error">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           {error}
         </div>
@@ -225,7 +225,7 @@ export function SellStockForm({ herd, suggestedPricePerKg, projectedWeight, pric
                 <>
                   <div className="mt-1 flex items-center justify-between">
                     <span className="text-sm text-text-muted">Freight</span>
-                    <span className="text-sm tabular-nums text-red-400">-${freight.toLocaleString()}</span>
+                    <span className="text-sm tabular-nums text-error">-${freight.toLocaleString()}</span>
                   </div>
                   <div className="mt-2 border-t border-white/10 pt-2">
                     <div className="flex items-center justify-between">

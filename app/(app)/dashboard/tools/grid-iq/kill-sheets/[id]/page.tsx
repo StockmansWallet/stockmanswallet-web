@@ -481,12 +481,12 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
                             title="Kill Score: 85+ Excellent, 70-84 Good, 50-69 Fair, <50 Poor"
                             className={`text-[10px] font-medium ${
                               killScore >= 85
-                                ? "text-emerald-400"
+                                ? "text-success"
                                 : killScore >= 70
                                   ? "text-indigo-400"
                                   : killScore >= 50
                                     ? "text-amber-400"
-                                    : "text-red-400"
+                                    : "text-error"
                             }`}
                           >
                             KS {killScore.toFixed(0)}
@@ -497,7 +497,7 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
                     <div className="text-right">
                       <p
                         className={`text-sm font-semibold ${
-                          isProcessor ? "text-emerald-400" : "text-amber-400"
+                          isProcessor ? "text-success" : "text-amber-400"
                         }`}
                       >
                         {isProcessor ? "Over-the-Hooks" : "Saleyard"}

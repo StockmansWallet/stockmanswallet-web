@@ -190,7 +190,7 @@ export function AlertForm({
         onChange={(e) => setNote(e.target.value)}
       />
 
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && <p className="text-xs text-error">{error}</p>}
 
       <div className="flex items-center gap-2 pt-2">
         <Button type="submit" disabled={isPending}>

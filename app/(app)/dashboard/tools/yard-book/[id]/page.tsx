@@ -35,7 +35,7 @@ const CATEGORY_CONFIG: Record<
   Operations: { icon: Wrench, bg: "bg-amber-700/15", text: "text-amber-600", label: "Operations" },
   Finance: { icon: DollarSign, bg: "bg-blue-500/15", text: "text-blue-400", label: "Finance" },
   Family: { icon: Home, bg: "bg-purple-500/15", text: "text-purple-400", label: "Family" },
-  Me: { icon: User, bg: "bg-green-500/15", text: "text-green-400", label: "Me" },
+  Me: { icon: User, bg: "bg-success/15", text: "text-success", label: "Me" },
 };
 
 const REMINDER_LABELS: Record<number, string> = {

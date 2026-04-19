@@ -525,7 +525,7 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
               className={btnClass}
               aria-label="Copy conversation"
             >
-              {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <ClipboardCopy className="h-3.5 w-3.5" />}
+              {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <ClipboardCopy className="h-3.5 w-3.5" />}
               {copied ? "Copied" : "Copy"}
             </button>
             <button

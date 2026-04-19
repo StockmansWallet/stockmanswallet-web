@@ -63,10 +63,10 @@ export default async function ProducerProfilePage({
 
       <Card className="overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-emerald-500/[0.06] to-transparent p-6">
+        <div className="bg-gradient-to-r from-success/[0.06] to-transparent p-6">
           <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/15 shadow-sm">
-              <span className="text-lg font-bold text-emerald-400">{initials}</span>
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-success/15 shadow-sm">
+              <span className="text-lg font-bold text-success">{initials}</span>
             </div>
             <div className="flex-1">
               <h1 className="text-2xl font-bold text-text-primary">

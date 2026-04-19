@@ -101,7 +101,7 @@ export default async function GridDetailPage({ params }: PageProps) {
         const expiringSoon = daysLeft >= 0 && daysLeft <= 7;
         if (!expired && !expiringSoon) return null;
         const tone = expired
-          ? "border-red-500/30 bg-red-500/[0.08] text-red-400"
+          ? "border-error/30 bg-error/[0.08] text-error"
           : "border-amber-500/30 bg-amber-500/[0.08] text-amber-400";
         return (
           <div className={`mt-4 flex items-center gap-2 rounded-xl border px-4 py-2.5 ${tone}`}>
@@ -246,12 +246,12 @@ export default async function GridDetailPage({ params }: PageProps) {
                             title="Kill Score: 85+ Excellent, 70-84 Good, 50-69 Fair, <50 Poor"
                             className={`text-[10px] font-medium ${
                               ks >= 85
-                                ? "text-emerald-400"
+                                ? "text-success"
                                 : ks >= 70
                                   ? "text-indigo-400"
                                   : ks >= 50
                                     ? "text-amber-400"
-                                    : "text-red-400"
+                                    : "text-error"
                             }`}
                           >
                             KS {ks.toFixed(0)}
@@ -262,7 +262,7 @@ export default async function GridDetailPage({ params }: PageProps) {
                     <div className="text-right">
                       <p
                         className={`text-sm font-semibold ${
-                          isProcessor ? "text-emerald-400" : "text-amber-400"
+                          isProcessor ? "text-success" : "text-amber-400"
                         }`}
                       >
                         {isProcessor ? "Over-the-Hooks" : "Saleyard"}

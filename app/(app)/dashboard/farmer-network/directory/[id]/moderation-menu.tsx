@@ -161,7 +161,7 @@ export function ModerationMenu({
               <button
                 type="button"
                 onClick={() => setPanel("block-confirm")}
-                className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-red-400 transition-colors hover:bg-red-500/[0.06]"
+                className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-error transition-colors hover:bg-error/[0.06]"
               >
                 <Ban className="h-4 w-4" aria-hidden="true" />
                 Block producer
@@ -257,7 +257,7 @@ export function ModerationMenu({
               />
             </div>
             {error && (
-              <p role="alert" className="text-xs text-red-400">{error}</p>
+              <p role="alert" className="text-xs text-error">{error}</p>
             )}
             <div className="flex justify-end gap-2">
               <Button

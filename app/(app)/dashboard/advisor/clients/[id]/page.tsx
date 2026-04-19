@@ -249,8 +249,8 @@ export default async function ClientDetailPage({
             className="h-14 w-14 shrink-0 rounded-full object-cover"
           />
         ) : (
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-emerald-500/15">
-            <span className="text-lg font-bold text-emerald-400">{clientInitials}</span>
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-success/15">
+            <span className="text-lg font-bold text-success">{clientInitials}</span>
           </div>
         )}
         <div className="min-w-0 flex-1">

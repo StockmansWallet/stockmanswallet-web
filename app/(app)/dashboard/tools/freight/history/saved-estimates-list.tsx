@@ -97,7 +97,7 @@ export function SavedEstimatesList({ estimates }: { estimates: SavedEstimate[] }
   return (
     <div className="space-y-3">
       {error && (
-        <p className="text-sm text-red-400" role="alert">{error}</p>
+        <p className="text-sm text-error" role="alert">{error}</p>
       )}
       {list.map((estimate) => {
         const isExpanded = expandedId === estimate.id;
@@ -205,7 +205,7 @@ function Alert({ type, message }: { type: "warning" | "info" | "success"; messag
   const styles = {
     warning: { bg: "bg-amber-500/10 ring-amber-500/20", icon: <AlertTriangle className="h-4 w-4 text-amber-400" /> },
     info: { bg: "bg-blue-500/10 ring-blue-500/20", icon: <Info className="h-4 w-4 text-blue-400" /> },
-    success: { bg: "bg-emerald-500/10 ring-emerald-500/20", icon: <CheckCircle2 className="h-4 w-4 text-emerald-400" /> },
+    success: { bg: "bg-success/10 ring-success/20", icon: <CheckCircle2 className="h-4 w-4 text-success" /> },
   };
   const s = styles[type];
   return (

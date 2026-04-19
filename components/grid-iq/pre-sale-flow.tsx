@@ -461,7 +461,7 @@ export function PreSaleFlow({
                             size="sm"
                             aria-label="Remove herd allocation"
                             onClick={() => removeAllocation(alloc.key)}
-                            className="shrink-0 border border-white/[0.08] bg-white/[0.04] text-text-muted hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
+                            className="shrink-0 border border-white/[0.08] bg-white/[0.04] text-text-muted hover:border-error/30 hover:bg-error/10 hover:text-error"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -973,7 +973,7 @@ export function PreSaleFlow({
               </div>
 
               {error && (
-                <div className="mb-3 rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-400">
+                <div className="mb-3 rounded-lg bg-error/10 px-3 py-2 text-xs text-error">
                   {error}
                 </div>
               )}

@@ -20,7 +20,7 @@ interface LensSavedListProps {
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   draft: { label: "Draft", className: "bg-amber-500/15 text-amber-600" },
   saved: { label: "Saved", className: "bg-[#2F8CD9]/15 text-[#2F8CD9]" },
-  report_generated: { label: "Report Ready", className: "bg-emerald-500/15 text-emerald-600" },
+  report_generated: { label: "Report Ready", className: "bg-success/15 text-success" },
 };
 
 export function LensSavedList({

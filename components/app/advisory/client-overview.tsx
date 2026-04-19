@@ -129,7 +129,7 @@ export function ClientOverview({ connection, clientUserId, baselineValue = 0 }: 
       {isActive && error && (
         <Card>
           <CardContent className="py-8 text-center">
-            <p className="text-sm text-red-400">{error}</p>
+            <p className="text-sm text-error">{error}</p>
           </CardContent>
         </Card>
       )}

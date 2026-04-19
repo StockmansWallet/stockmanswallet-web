@@ -22,7 +22,7 @@ function Row({ mover }: { mover: Mover }) {
           {mover.subtitle ? `${mover.subtitle} - ` : ""}${mover.latest_price.toFixed(2)}/kg
         </p>
       </div>
-      <div className={`inline-flex shrink-0 items-center gap-0.5 text-sm font-semibold tabular-nums ${positive ? "text-emerald-300" : "text-red-300"}`}>
+      <div className={`inline-flex shrink-0 items-center gap-0.5 text-sm font-semibold tabular-nums ${positive ? "text-success" : "text-error"}`}>
         <Icon className="h-3.5 w-3.5" />
         {positive ? "+" : ""}{mover.change_pct.toFixed(1)}%
       </div>
@@ -35,7 +35,7 @@ export function MoversStrip({ gainers, losers, windowLabel }: MoversStripProps) 
     <div className="grid gap-3 md:grid-cols-2">
       <div>
         <div className="mb-2 flex items-center justify-between px-1">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-emerald-300/90">Top gainers</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-success/90">Top gainers</h3>
           <span className="text-[11px] text-text-muted">{windowLabel}</span>
         </div>
         <div className="space-y-1.5">
@@ -50,7 +50,7 @@ export function MoversStrip({ gainers, losers, windowLabel }: MoversStripProps) 
       </div>
       <div>
         <div className="mb-2 flex items-center justify-between px-1">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-red-300/90">Top losers</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-error/90">Top losers</h3>
           <span className="text-[11px] text-text-muted">{windowLabel}</span>
         </div>
         <div className="space-y-1.5">

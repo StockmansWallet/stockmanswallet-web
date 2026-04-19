@@ -57,7 +57,7 @@ export function ShareAttachmentCard({ attachment }: { attachment: MessageAttachm
               <span>Avg {Math.round(attachment.current_weight)} kg</span>
             )}
             {attachment.estimated_value != null && attachment.estimated_value > 0 && (
-              <span className="font-medium text-emerald-400">
+              <span className="font-medium text-success">
                 ~{formatCurrency(attachment.estimated_value)}
               </span>
             )}

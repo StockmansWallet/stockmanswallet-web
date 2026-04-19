@@ -237,7 +237,7 @@ export function ProcessorForm({
       </Card>
 
       {error && (
-        <div className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400">
+        <div className="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">
           {error}
         </div>
       )}

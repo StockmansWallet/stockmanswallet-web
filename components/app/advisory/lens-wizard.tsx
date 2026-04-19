@@ -408,7 +408,7 @@ export function LensWizard({
 
           {/* Error */}
           {error && (
-            <p className="text-sm text-red-500">{error}</p>
+            <p className="text-sm text-error">{error}</p>
           )}
 
           {/* Save actions */}

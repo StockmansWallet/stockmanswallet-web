@@ -43,19 +43,19 @@ export function PredictionAccuracy({
   const overallAccuracy = Math.max(0, processorAccuracy);
 
   const accuracyColor =
-    overallAccuracy >= 95 ? "text-emerald-400"
+    overallAccuracy >= 95 ? "text-success"
     : overallAccuracy >= 85 ? "text-indigo-400"
     : overallAccuracy >= 70 ? "text-amber-400"
-    : "text-red-400";
+    : "text-error";
 
   const accuracyBg =
-    overallAccuracy >= 95 ? "bg-emerald-500/15"
+    overallAccuracy >= 95 ? "bg-success/15"
     : overallAccuracy >= 85 ? "bg-indigo-500/15"
     : overallAccuracy >= 70 ? "bg-amber-500/15"
-    : "bg-red-500/15";
+    : "bg-error/15";
 
   const DiffIcon = processorDiff > 0 ? TrendingUp : processorDiff < 0 ? TrendingDown : Minus;
-  const diffColor = processorDiff > 0 ? "text-emerald-400" : processorDiff < 0 ? "text-red-400" : "text-text-muted";
+  const diffColor = processorDiff > 0 ? "text-success" : processorDiff < 0 ? "text-error" : "text-text-muted";
 
   return (
     <Card>
@@ -109,7 +109,7 @@ export function PredictionAccuracy({
             <span className="w-24 text-right text-sm font-medium text-text-primary">
               {formatCurrency(actualNetSaleyard)}
             </span>
-            <span className={`w-20 text-right text-sm ${(actualNetSaleyard - preSaleNetSaleyard) >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+            <span className={`w-20 text-right text-sm ${(actualNetSaleyard - preSaleNetSaleyard) >= 0 ? "text-success" : "text-error"}`}>
               {(actualNetSaleyard - preSaleNetSaleyard) >= 0 ? "+" : "-"}
               {formatCurrency(actualNetSaleyard - preSaleNetSaleyard)}
             </span>
@@ -118,13 +118,13 @@ export function PredictionAccuracy({
           {/* Advantage */}
           <div className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-3 rounded-lg border border-white/[0.06] px-3 py-2">
             <span className="text-xs font-semibold text-text-primary">Grid IQ Advantage</span>
-            <span className={`w-24 text-right text-sm font-semibold ${preSaleAdvantage > 0 ? "text-emerald-400" : "text-amber-400"}`}>
+            <span className={`w-24 text-right text-sm font-semibold ${preSaleAdvantage > 0 ? "text-success" : "text-amber-400"}`}>
               {preSaleAdvantage > 0 ? "+" : "-"}{formatCurrency(preSaleAdvantage)}
             </span>
-            <span className={`w-24 text-right text-sm font-bold ${actualAdvantage > 0 ? "text-emerald-400" : "text-amber-400"}`}>
+            <span className={`w-24 text-right text-sm font-bold ${actualAdvantage > 0 ? "text-success" : "text-amber-400"}`}>
               {actualAdvantage > 0 ? "+" : "-"}{formatCurrency(actualAdvantage)}
             </span>
-            <span className={`w-20 text-right text-sm font-medium ${advantageDiff >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+            <span className={`w-20 text-right text-sm font-medium ${advantageDiff >= 0 ? "text-success" : "text-error"}`}>
               {advantageDiff >= 0 ? "+" : "-"}{formatCurrency(advantageDiff)}
             </span>
           </div>

@@ -22,8 +22,8 @@ export function CalvingAccrualCard({
     <Card>
       <CardHeader>
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15">
-            <Leaf className="h-3.5 w-3.5 text-emerald-400" />
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-success/15">
+            <Leaf className="h-3.5 w-3.5 text-success" />
           </div>
           <CardTitle>Breeding Accrual</CardTitle>
         </div>
@@ -31,7 +31,7 @@ export function CalvingAccrualCard({
       <CardContent className="space-y-4 px-5 pb-5">
         <div className="rounded-xl bg-white/[0.03] p-3 text-center">
           <p className="text-xs text-text-muted">Total Breeding Value</p>
-          <p className="mt-1 text-lg font-bold text-emerald-400">
+          <p className="mt-1 text-lg font-bold text-success">
             ${Math.round(combinedTotal).toLocaleString()}
           </p>
         </div>

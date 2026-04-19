@@ -46,7 +46,7 @@ export function ClearDataButton() {
         });
       }}
       disabled={pending}
-      className="rounded-full bg-red-500/15 px-5 py-2.5 text-sm font-semibold text-red-400 transition-all hover:bg-red-500/25 active:scale-[0.98] disabled:opacity-50"
+      className="rounded-full bg-error/15 px-5 py-2.5 text-sm font-semibold text-error transition-all hover:bg-error/25 active:scale-[0.98] disabled:opacity-50"
     >
       {pending ? "Clearing…" : "Clear Demo Data"}
     </button>
@@ -72,7 +72,7 @@ export function ClearAllDataButton() {
         });
       }}
       disabled={pending}
-      className="rounded-full bg-red-500/15 px-5 py-2.5 text-sm font-semibold text-red-400 transition-all hover:bg-red-500/25 active:scale-[0.98] disabled:opacity-50"
+      className="rounded-full bg-error/15 px-5 py-2.5 text-sm font-semibold text-error transition-all hover:bg-error/25 active:scale-[0.98] disabled:opacity-50"
     >
       {pending ? "Clearing all data…" : "Clear All Data"}
     </button>

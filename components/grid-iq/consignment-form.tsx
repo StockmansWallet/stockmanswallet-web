@@ -130,7 +130,7 @@ export function ConsignmentForm({ herds, grids }: ConsignmentFormProps) {
   return (
     <form onSubmit={handleSubmit} className="mt-4 space-y-4">
       {error && (
-        <div className="flex items-center gap-2 rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <div className="flex items-center gap-2 rounded-xl bg-error/10 px-4 py-3 text-sm text-error">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error}
         </div>
@@ -271,7 +271,7 @@ export function ConsignmentForm({ herds, grids }: ConsignmentFormProps) {
                       type="button"
                       aria-label="Remove herd allocation"
                       onClick={() => removeAllocation(alloc.key)}
-                      className="mb-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-text-muted transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
+                      className="mb-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-text-muted transition-colors hover:border-error/30 hover:bg-error/10 hover:text-error"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>

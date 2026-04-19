@@ -35,8 +35,8 @@ export function ProducerCard({ producer, connectionStatus, avatarUrl }: Producer
           className="h-10 w-10 shrink-0 rounded-full object-cover"
         />
       ) : (
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/15">
-          <span className="text-xs font-bold text-emerald-400">{initials}</span>
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-success/15">
+          <span className="text-xs font-bold text-success">{initials}</span>
         </div>
       )}
       <div className="min-w-0 flex-1">

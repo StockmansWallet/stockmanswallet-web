@@ -374,7 +374,7 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
                 onBlur={() => setEmailBlurred(true)}
                 placeholder="you@example.com"
                 required
-                className={`${inputClass} ${showEmailHint ? 'border-red-400/50' : ''}`}
+                className={`${inputClass} ${showEmailHint ? 'border-error/50' : ''}`}
               />
               <AnimatePresence>
                 {showEmailHint && (
@@ -382,7 +382,7 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
                     initial={{ opacity: 0, y: -4 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -4 }}
-                    className="mt-1.5 text-xs text-red-400/80"
+                    className="mt-1.5 text-xs text-error/80"
                   >
                     Please enter a valid email address
                   </motion.p>
@@ -590,7 +590,7 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
                   </label>
 
                   {status === 'error' && (
-                    <p className="mt-3 text-xs text-red-400">{errorMsg}</p>
+                    <p className="mt-3 text-xs text-error">{errorMsg}</p>
                   )}
 
                   <button

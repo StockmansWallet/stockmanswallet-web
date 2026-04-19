@@ -26,13 +26,13 @@ function SectionIcon({
 }) {
   const bg =
     variant === "danger"
-      ? "bg-red-500/15"
+      ? "bg-error/15"
       : variant === "accent"
         ? "bg-amber-500/15"
         : "bg-brand/15";
   const text =
     variant === "danger"
-      ? "text-red-400"
+      ? "text-error"
       : variant === "accent"
         ? "text-amber-400"
         : "text-brand";
@@ -167,11 +167,11 @@ export default async function AccountSettingsPage() {
         </Card>
 
         {/* Delete Account */}
-        <Card className="ring-1 ring-inset ring-red-500/20">
+        <Card className="ring-1 ring-inset ring-error/20">
           <CardHeader>
             <div className="flex items-center gap-2.5">
               <SectionIcon icon={Trash2} variant="danger" />
-              <CardTitle className="text-red-400">Delete Account</CardTitle>
+              <CardTitle className="text-error">Delete Account</CardTitle>
             </div>
           </CardHeader>
           <CardContent>

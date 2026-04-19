@@ -61,9 +61,9 @@ const CATEGORY_CONFIG: Record<
   Me: {
     label: "Personal",
     icon: User,
-    bg: "bg-green-500/15",
-    text: "text-green-400",
-    iconBg: "bg-green-500/20",
+    bg: "bg-success/15",
+    text: "text-success",
+    iconBg: "bg-success/20",
   },
 };
 
@@ -74,8 +74,8 @@ const HORIZON_CONFIG: {
   title: string;
   textClass: string;
 }[] = [
-  { key: "overdue", title: "Overdue", textClass: "text-red-400" },
-  { key: "today", title: "Today", textClass: "text-green-400" },
+  { key: "overdue", title: "Overdue", textClass: "text-error" },
+  { key: "today", title: "Today", textClass: "text-success" },
   { key: "next7", title: "Next 7 Days", textClass: "text-text-primary" },
   { key: "next30", title: "Next 30 Days", textClass: "text-text-primary" },
   { key: "next90", title: "Next 90 Days", textClass: "text-text-primary" },
@@ -111,8 +111,8 @@ function countdownText(days: number): string {
 }
 
 function countdownColor(days: number): string {
-  if (days < 0) return "bg-red-500/15 text-red-400";
-  if (days === 0) return "bg-green-500/15 text-green-400";
+  if (days < 0) return "bg-error/15 text-error";
+  if (days === 0) return "bg-success/15 text-success";
   if (days <= 7) return "bg-amber-500/15 text-amber-400";
   return "bg-white/8 text-text-muted";
 }
@@ -343,7 +343,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
                       {/* Countdown or completed badge */}
                       <div className="shrink-0">
                         {item.is_completed ? (
-                          <CheckCircle2 className="h-5 w-5 text-green-400" />
+                          <CheckCircle2 className="h-5 w-5 text-success" />
                         ) : (
                           <span
                             className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${countdownColor(days)}`}

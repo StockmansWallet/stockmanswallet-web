@@ -376,13 +376,13 @@ function BulkDeleteBar({
   return (
     <div className="mt-4">
       {error && (
-        <div role="alert" className="mb-2 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">
+        <div role="alert" className="mb-2 rounded-lg border border-error/20 bg-error/10 px-3 py-2 text-xs text-error">
           {error}
         </div>
       )}
       {showConfirm ? (
-        <div className="flex items-center justify-between rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3">
-          <span className="text-sm text-red-400">
+        <div className="flex items-center justify-between rounded-xl border border-error/20 bg-error/5 px-4 py-3">
+          <span className="text-sm text-error">
             Delete {selectedCount} {selectedCount === 1 ? noun : pluralNoun}?
           </span>
           <div className="flex items-center gap-2">
@@ -550,7 +550,7 @@ function GridsTab({
                   <div
                     className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
                       isExpired
-                        ? "bg-red-500/15 text-red-400"
+                        ? "bg-error/15 text-error"
                         : "bg-amber-500/15 text-amber-400"
                     }`}
                   >

@@ -278,19 +278,19 @@ export function PostSaleFlow({
             <div
               className={`mt-3 flex items-start gap-2.5 rounded-xl border px-4 py-3 ${
                 sexWarning.severity === "block"
-                  ? "border-red-500/30 bg-red-500/10"
+                  ? "border-error/30 bg-error/10"
                   : "border-amber-500/30 bg-amber-500/5"
               }`}
             >
               <AlertTriangle
                 className={`mt-0.5 h-4 w-4 shrink-0 ${
-                  sexWarning.severity === "block" ? "text-red-400" : "text-amber-400"
+                  sexWarning.severity === "block" ? "text-error" : "text-amber-400"
                 }`}
               />
               <div className="min-w-0 flex-1">
                 <p
                   className={`text-sm font-medium ${
-                    sexWarning.severity === "block" ? "text-red-400" : "text-amber-400"
+                    sexWarning.severity === "block" ? "text-error" : "text-amber-400"
                   }`}
                 >
                   {sexWarning.title}
@@ -300,7 +300,7 @@ export function PostSaleFlow({
             </div>
           )}
 
-          {error && <div className="mt-3 rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-400">{error}</div>}
+          {error && <div className="mt-3 rounded-lg bg-error/10 px-3 py-2 text-xs text-error">{error}</div>}
 
           <div className="mt-4 flex justify-end gap-2">
             <Button
@@ -333,10 +333,10 @@ export function PostSaleFlow({
       {stage === "confirm" && (
         <section>
           {analysisId && (
-            <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3">
-              <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+            <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-success/20 bg-success/5 px-4 py-3">
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-emerald-400">Analysis complete</p>
+                <p className="text-sm font-medium text-success">Analysis complete</p>
                 <p className="mt-0.5 text-xs text-text-secondary">
                   Review the allocations below, then confirm the sale to mark cattle as sold.
                 </p>
@@ -410,7 +410,7 @@ export function PostSaleFlow({
             </div>
           )}
 
-          {error && <div className="mb-3 rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-400">{error}</div>}
+          {error && <div className="mb-3 rounded-lg bg-error/10 px-3 py-2 text-xs text-error">{error}</div>}
 
           <div className="flex justify-between gap-2">
             <Button

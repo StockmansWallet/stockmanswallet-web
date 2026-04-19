@@ -37,7 +37,7 @@ export function PortfolioValueCard({ value, changeDollar, changePercent, fallbac
           </p>
         )}
         {fallbackCount > 0 && (
-          <span className="mt-1.5 inline-flex items-center rounded-full bg-red-500/15 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
+          <span className="mt-1.5 inline-flex items-center rounded-full bg-error/15 px-1.5 py-0.5 text-[10px] font-medium text-error">
             {fallbackCount} {fallbackCount === 1 ? "herd" : "herds"} national avg
           </span>
         )}

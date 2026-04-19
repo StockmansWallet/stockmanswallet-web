@@ -78,7 +78,7 @@ export function ConsignmentActions({
   return (
     <div className="mt-4 space-y-4">
       {error && (
-        <div className="flex items-center gap-2 rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <div className="flex items-center gap-2 rounded-xl bg-error/10 px-4 py-3 text-sm text-error">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error}
         </div>
@@ -137,7 +137,7 @@ export function ConsignmentActions({
           <Button
             variant="ghost"
             size="sm"
-            className="border border-white/[0.08] bg-white/[0.04] text-text-muted hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
+            className="border border-white/[0.08] bg-white/[0.04] text-text-muted hover:border-error/30 hover:bg-error/10 hover:text-error"
             onClick={() => setShowDeleteConfirm(true)}
             aria-label="Delete consignment"
           >
@@ -184,7 +184,7 @@ export function ConsignmentActions({
           <Button
             variant="ghost"
             size="sm"
-            className="border border-white/[0.08] bg-white/[0.04] text-text-muted hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
+            className="border border-white/[0.08] bg-white/[0.04] text-text-muted hover:border-error/30 hover:bg-error/10 hover:text-error"
             onClick={() => setShowDeleteConfirm(true)}
             aria-label="Delete consignment"
           >
@@ -198,7 +198,7 @@ export function ConsignmentActions({
       {showDeleteConfirm && (
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm font-semibold text-red-400">Delete Consignment?</p>
+            <p className="text-sm font-semibold text-error">Delete Consignment?</p>
             <p className="mt-1 text-xs text-text-muted">
               This will remove the consignment record. Linked kill sheets and analyses will not be affected.
             </p>

@@ -92,7 +92,7 @@ export function BroadcastButton({ recipientCount }: BroadcastButtonProps) {
               {content.length} / 5000
             </p>
             {error && (
-              <p role="alert" className="text-xs text-red-400">{error}</p>
+              <p role="alert" className="text-xs text-error">{error}</p>
             )}
             <div className="flex justify-end gap-2">
               <Button

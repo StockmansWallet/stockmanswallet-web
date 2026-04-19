@@ -132,7 +132,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
             1
           </div>
           <h2 className="text-sm font-semibold text-text-primary">Select Processor Grid</h2>
-          {selectedGrid && <Check className="h-4 w-4 text-emerald-400" />}
+          {selectedGrid && <Check className="h-4 w-4 text-success" />}
         </div>
 
         {grids.length === 0 ? (
@@ -209,7 +209,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
             2
           </div>
           <h2 className="text-sm font-semibold text-text-primary">Select Herd</h2>
-          {selectedHerd && <Check className="h-4 w-4 text-emerald-400" />}
+          {selectedHerd && <Check className="h-4 w-4 text-success" />}
         </div>
 
         {herds.length === 0 ? (
@@ -276,7 +276,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
           <h2 className="text-sm font-semibold text-text-primary">
             Kill Sheet <span className="font-normal text-text-muted">(optional)</span>
           </h2>
-          {selectedKillSheet && <Check className="h-4 w-4 text-emerald-400" />}
+          {selectedKillSheet && <Check className="h-4 w-4 text-success" />}
         </div>
         <p className="mb-2 text-xs text-text-muted">
           Select a kill sheet for post-sale analysis with Kill Score, GCR, and opportunity insights.
@@ -386,7 +386,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
         </div>
 
         {error && (
-          <div className="mb-3 rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-400">
+          <div className="mb-3 rounded-lg bg-error/10 px-3 py-2 text-xs text-error">
             {error}
           </div>
         )}

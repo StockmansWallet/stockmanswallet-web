@@ -152,8 +152,8 @@ export default async function AdvisorDashboardPage() {
 
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
-              <UserCheck className="h-5 w-5 text-emerald-400" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-success/10">
+              <UserCheck className="h-5 w-5 text-success" />
             </div>
             <div>
               <p className="text-2xl font-bold text-text-primary">{totalClients}</p>

@@ -325,7 +325,7 @@ export function HerdsTable({
                 </span>
               )}
               {customDelta !== null && (
-                <span className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-medium ${customDelta > 0 ? "bg-emerald-500/15 text-emerald-400" : customDelta < 0 ? "bg-red-500/15 text-red-400" : "bg-white/[0.06] text-text-muted"}`}>
+                <span className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-medium ${customDelta > 0 ? "bg-success/15 text-success" : customDelta < 0 ? "bg-error/15 text-error" : "bg-white/[0.06] text-text-muted"}`}>
                   <TrendingUp className="h-2.5 w-2.5" />
                   Custom Premium {customDelta > 0 ? "+" : ""}{customDelta}%
                 </span>
@@ -354,7 +354,7 @@ export function HerdsTable({
                 </span>
               )}
               {isFallback && (
-                <span className="inline-flex items-center rounded-full bg-red-500/15 px-1.5 py-0.5 text-[9px] font-medium text-red-400">
+                <span className="inline-flex items-center rounded-full bg-error/15 px-1.5 py-0.5 text-[9px] font-medium text-error">
                   {source === "national" ? "National Avg" : "Est. Fallback"}
                 </span>
               )}
@@ -363,7 +363,7 @@ export function HerdsTable({
         </div>
 
         {/* Value */}
-        <span className={`shrink-0 text-sm font-semibold tabular-nums ${isFallback ? "text-red-400" : "text-text-primary"}`}>
+        <span className={`shrink-0 text-sm font-semibold tabular-nums ${isFallback ? "text-error" : "text-text-primary"}`}>
           {value > 0 ? `$${Math.round(value).toLocaleString()}` : "\u2014"}
         </span>
 

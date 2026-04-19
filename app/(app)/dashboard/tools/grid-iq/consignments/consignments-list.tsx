@@ -37,7 +37,7 @@ function statusBadge(status: string) {
     case "confirmed":
       return { label: "Confirmed", cls: "bg-indigo-500/15 text-indigo-400" };
     case "completed":
-      return { label: "Completed", cls: "bg-emerald-500/15 text-emerald-400" };
+      return { label: "Completed", cls: "bg-success/15 text-success" };
     default:
       return { label: status, cls: "bg-white/[0.06] text-text-muted" };
   }
@@ -214,7 +214,7 @@ export function ConsignmentsList({ consignments }: Props) {
                   </div>
                 </div>
                 {c.total_gross_value != null && c.total_gross_value > 0 && (
-                  <span className="text-sm font-semibold text-emerald-400">
+                  <span className="text-sm font-semibold text-success">
                     ${Math.round(c.total_gross_value).toLocaleString()}
                   </span>
                 )}
@@ -252,8 +252,8 @@ export function ConsignmentsList({ consignments }: Props) {
       {selecting && selected.size > 0 && (
         <div className="mt-4">
           {showConfirm ? (
-            <div className="flex items-center justify-between rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3">
-              <span className="text-sm text-red-400">
+            <div className="flex items-center justify-between rounded-xl border border-error/20 bg-error/5 px-4 py-3">
+              <span className="text-sm text-error">
                 Delete {selected.size}{" "}
                 {selected.size === 1 ? "consignment" : "consignments"}?
               </span>

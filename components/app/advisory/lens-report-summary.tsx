@@ -186,7 +186,7 @@ function SummaryCard({
             : value.toLocaleString("en-AU")}
         </p>
         {delta != null && delta !== 0 && (
-          <p className={`text-xs mt-0.5 ${delta > 0 ? "text-emerald-500" : "text-red-500"}`}>
+          <p className={`text-xs mt-0.5 ${delta > 0 ? "text-success" : "text-error"}`}>
             {delta > 0 ? "+" : ""}${delta.toLocaleString("en-AU", { maximumFractionDigits: 0 })}
           </p>
         )}

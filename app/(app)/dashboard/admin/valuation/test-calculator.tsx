@@ -529,14 +529,14 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function MiniCard({ label, value, color, badge }: { label: string; value: string; color?: string; badge?: boolean }) {
   const colorMap: Record<string, string> = {
-    emerald: "text-emerald-400",
-    red: "text-red-400",
+    emerald: "text-success",
+    red: "text-error",
     sky: "text-sky-400",
   };
   const sourceColors: Record<string, string> = {
-    saleyard: "bg-emerald-500/15 text-emerald-400",
+    saleyard: "bg-success/15 text-success",
     national: "bg-amber-500/15 text-amber-400",
-    fallback: "bg-red-500/15 text-red-400",
+    fallback: "bg-error/15 text-error",
   };
 
   return (

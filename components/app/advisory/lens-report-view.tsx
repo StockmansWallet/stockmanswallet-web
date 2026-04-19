@@ -67,7 +67,7 @@ export function LensReportView({
                 </span>
               </div>
             </div>
-            <Badge className="bg-emerald-500/15 text-emerald-600">
+            <Badge className="bg-success/15 text-success">
               Report Generated
             </Badge>
           </div>

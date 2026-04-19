@@ -20,13 +20,13 @@ interface KillScoreCardProps {
 function labelConfig(label: KillScoreLabel) {
   switch (label) {
     case "Excellent":
-      return { color: "text-emerald-400", bg: "bg-emerald-500/15", icon: Star };
+      return { color: "text-success", bg: "bg-success/15", icon: Star };
     case "Good":
       return { color: "text-indigo-400", bg: "bg-indigo-500/15", icon: CheckCircle };
     case "Fair":
       return { color: "text-amber-400", bg: "bg-amber-500/15", icon: MinusCircle };
     case "Poor":
-      return { color: "text-red-400", bg: "bg-red-500/15", icon: AlertCircle };
+      return { color: "text-error", bg: "bg-error/15", icon: AlertCircle };
   }
 }
 
@@ -89,7 +89,7 @@ export function KillScoreCard({
         {/* Legend */}
         <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-text-muted">
           <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" />
+            <span className="h-2 w-2 rounded-full bg-success" />
             85+ Excellent
           </span>
           <span className="flex items-center gap-1">
@@ -101,7 +101,7 @@ export function KillScoreCard({
             50-69 Fair
           </span>
           <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-red-400" />
+            <span className="h-2 w-2 rounded-full bg-error" />
             &lt;50 Poor
           </span>
         </div>
@@ -124,7 +124,7 @@ export function KillScoreCard({
                 <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
                   Grid Risk
                 </p>
-                <p className={`mt-1 text-lg font-bold ${gridRisk > 30 ? "text-red-400" : gridRisk > 15 ? "text-amber-400" : "text-emerald-400"}`}>
+                <p className={`mt-1 text-lg font-bold ${gridRisk > 30 ? "text-error" : gridRisk > 15 ? "text-amber-400" : "text-success"}`}>
                   {gridRisk.toFixed(1)}%
                 </p>
               </div>

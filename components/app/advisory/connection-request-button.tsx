@@ -83,7 +83,7 @@ export function ConnectionRequestButton({
           </p>
         )}
         {error && (
-          <p className="mt-2 text-xs text-red-400">{error}</p>
+          <p className="mt-2 text-xs text-error">{error}</p>
         )}
       </div>
     );
@@ -147,7 +147,7 @@ export function ConnectionRequestButton({
       </div>
 
       {error && (
-        <p className="text-xs text-red-400">{error}</p>
+        <p className="text-xs text-error">{error}</p>
       )}
     </div>
   );

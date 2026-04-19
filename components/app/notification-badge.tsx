@@ -90,7 +90,7 @@ export function NotificationBadge() {
   if (unreadCount === 0) return null;
 
   return (
-    <span className="absolute -right-1 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold text-white">
+    <span className="absolute -right-1 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-error px-0.5 text-[9px] font-bold text-white">
       {unreadCount > 9 ? "9+" : unreadCount}
     </span>
   );

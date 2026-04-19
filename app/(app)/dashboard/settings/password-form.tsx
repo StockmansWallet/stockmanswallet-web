@@ -33,8 +33,8 @@ export function PasswordForm() {
         <div
           className={`rounded-xl border px-4 py-3 text-sm ${
             message.type === "error"
-              ? "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400"
-              : "border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/20 dark:text-green-400"
+              ? "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-error"
+              : "border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/20 dark:text-success"
           }`}
         >
           {message.text}

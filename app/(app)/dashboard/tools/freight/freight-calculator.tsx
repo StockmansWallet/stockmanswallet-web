@@ -106,7 +106,7 @@ function AlertCard({ type, message }: { type: "warning" | "info" | "success"; me
   const styles = {
     warning: { bg: "bg-amber-500/10 ring-amber-500/20", icon: <AlertTriangle className="h-4 w-4 text-amber-400" /> },
     info: { bg: "bg-blue-500/10 ring-blue-500/20", icon: <Info className="h-4 w-4 text-blue-400" /> },
-    success: { bg: "bg-emerald-500/10 ring-emerald-500/20", icon: <CheckCircle2 className="h-4 w-4 text-emerald-400" /> },
+    success: { bg: "bg-success/10 ring-success/20", icon: <CheckCircle2 className="h-4 w-4 text-success" /> },
   };
   const s = styles[type];
   return (
@@ -550,9 +550,9 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                   helperText="Enter the one-way road distance"
                 />
                 {calculatedDistance !== null && (
-                  <div className="flex flex-col justify-center rounded-xl bg-emerald-500/5 px-4 py-3 ring-1 ring-inset ring-emerald-500/20">
-                    <p className="text-xs font-medium text-emerald-400">Calculated Distance</p>
-                    <p className="mt-0.5 text-lg font-bold text-emerald-300">
+                  <div className="flex flex-col justify-center rounded-xl bg-success/5 px-4 py-3 ring-1 ring-inset ring-success/20">
+                    <p className="text-xs font-medium text-success">Calculated Distance</p>
+                    <p className="mt-0.5 text-lg font-bold text-success">
                       {Math.round(calculatedDistance)} km
                     </p>
                     <p className="mt-0.5 truncate text-xs text-text-muted">
@@ -839,7 +839,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 </Button>
               </div>
               {saveError && (
-                <p className="text-xs text-red-400" role="alert">{saveError}</p>
+                <p className="text-xs text-error" role="alert">{saveError}</p>
               )}
               <Link
                 href="/dashboard/tools/freight/history"

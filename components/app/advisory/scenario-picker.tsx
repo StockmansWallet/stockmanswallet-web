@@ -85,7 +85,7 @@ export function ScenarioPicker({ connectionId, scenarios, activeLensScenarioId, 
       </CardHeader>
       <CardContent className="px-5 pb-5">
         {error && (
-          <div className="mb-3 rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-400">{error}</div>
+          <div className="mb-3 rounded-lg bg-error/10 px-3 py-2 text-xs text-error">{error}</div>
         )}
 
         {scenarios.length === 0 ? (
@@ -151,7 +151,7 @@ export function ScenarioPicker({ connectionId, scenarios, activeLensScenarioId, 
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="border border-white/[0.08] bg-white/[0.04] text-xs text-text-muted hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
+                          className="border border-white/[0.08] bg-white/[0.04] text-xs text-text-muted hover:border-error/30 hover:bg-error/10 hover:text-error"
                           onClick={() => handleDelete(scenario.id)}
                           title="Delete scenario"
                           aria-label="Delete scenario"

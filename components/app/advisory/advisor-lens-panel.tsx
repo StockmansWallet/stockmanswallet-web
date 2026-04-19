@@ -108,7 +108,7 @@ export function AdvisorLensPanel({
   return (
     <div className="space-y-4">
       {error && (
-        <div className="rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-400">{error}</div>
+        <div className="rounded-lg bg-error/10 px-4 py-3 text-sm text-error">{error}</div>
       )}
 
       {/* Lens toggle + value summary */}

@@ -502,7 +502,7 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
   return (
     <div className="space-y-4 pb-4">
       {error && (
-        <div className="rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm text-red-400">
+        <div className="rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm text-error">
           {error}
         </div>
       )}
@@ -658,7 +658,7 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
                       breedPremiumConfirmed
                         ? "border-border bg-surface-secondary"
                         : showError("1", "breedPremiumConfirmed")
-                          ? "border-red-500/60 ring-1 ring-inset ring-red-500/60 bg-surface-secondary"
+                          ? "border-error/60 ring-1 ring-inset ring-error/60 bg-surface-secondary"
                           : "border-brand/40 shadow-[0_0_8px_#FF800040] bg-surface-secondary"
                     }`}
                   >
@@ -693,7 +693,7 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
 
           {/* Section incomplete message */}
           {sectionAttempted["1"] && !section1Done && (
-            <p className="mt-2 flex items-center gap-2 text-xs text-red-400">
+            <p className="mt-2 flex items-center gap-2 text-xs text-error">
               <AlertCircle className="h-3.5 w-3.5 shrink-0" />
               Complete the required fields above to continue.
             </p>
@@ -752,7 +752,7 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
 
             {/* Weight validation feedback */}
             {weightValidation && weightValidation.status === "error" && (
-              <div className="flex items-start gap-2 rounded-lg border border-red-800 bg-red-900/20 px-3 py-2 text-xs text-red-400">
+              <div className="flex items-start gap-2 rounded-lg border border-red-800 bg-red-900/20 px-3 py-2 text-xs text-error">
                 <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 <span>{weightValidation.message}</span>
               </div>
@@ -776,7 +776,7 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
 
             {/* Section incomplete message */}
             {sectionAttempted["2"] && !section2Done && (
-              <p className="mt-2 flex items-center gap-2 text-xs text-red-400">
+              <p className="mt-2 flex items-center gap-2 text-xs text-error">
                 <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                 Complete the required fields above to continue.
               </p>
@@ -844,7 +844,7 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
 
             {/* Section incomplete message */}
             {sectionAttempted["3"] && !section3Done && (
-              <p className="mt-2 flex items-center gap-2 text-xs text-red-400">
+              <p className="mt-2 flex items-center gap-2 text-xs text-error">
                 <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                 Complete the required fields above to continue.
               </p>
@@ -965,7 +965,7 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
 
             {/* Section incomplete message */}
             {sectionAttempted["4b"] && !calvesDetailsDone && (
-              <p className="mt-2 flex items-center gap-2 text-xs text-red-400">
+              <p className="mt-2 flex items-center gap-2 text-xs text-error">
                 <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                 Complete the required fields above to continue.
               </p>

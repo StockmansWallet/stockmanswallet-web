@@ -47,7 +47,7 @@ export function AnalysisComparison({
       <CardContent className="p-5">
         {/* Advantage hero */}
         <div className="text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-400">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-success">
             {winnerLabel} ahead
           </p>
           <p className="mt-1.5 text-4xl font-bold tracking-tight text-text-primary">
@@ -109,10 +109,10 @@ function ComparisonColumn({
   netValue: string;
 }) {
   const containerClass = isWinner
-    ? "border border-emerald-500/20 bg-emerald-500/[0.04]"
+    ? "border border-success/20 bg-success/[0.04]"
     : "border border-white/[0.06] bg-white/[0.02]";
-  const titleClass = isWinner ? "text-emerald-400" : "text-text-secondary";
-  const netValueClass = isWinner ? "text-emerald-400" : "text-text-primary";
+  const titleClass = isWinner ? "text-success" : "text-text-secondary";
+  const netValueClass = isWinner ? "text-success" : "text-text-primary";
 
   return (
     <div className={`rounded-xl ${containerClass} p-4`}>
@@ -122,7 +122,7 @@ function ComparisonColumn({
 
       <div className="mt-3 space-y-2.5">
         <LineItem label="Gross" value={grossValue} caption={grossCaption} />
-        <LineItem label="Freight" value={freightValue} valueClass="text-red-400" />
+        <LineItem label="Freight" value={freightValue} valueClass="text-error" />
       </div>
 
       <div className="mt-3 border-t border-white/[0.06] pt-3">

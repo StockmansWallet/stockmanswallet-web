@@ -77,7 +77,7 @@ export const advisorToolItems: NavItem[] = [
 export const adminItems: NavItem[] = [
   { label: "Waitlist", href: "/dashboard/admin/waitlist", icon: <ClipboardList className="h-5 w-5" />, activeClass: "bg-cyan-500/15 text-cyan-400" },
   { label: "Valuation Lab", href: "/dashboard/admin/valuation", icon: <FlaskConical className="h-5 w-5" />, activeClass: "bg-rose-500/15 text-rose-400" },
-  { label: "MLA Data Upload", href: "/dashboard/admin/mla-upload", icon: <Upload className="h-5 w-5" />, activeClass: "bg-emerald-500/15 text-emerald-400" },
+  { label: "MLA Data Upload", href: "/dashboard/admin/mla-upload", icon: <Upload className="h-5 w-5" />, activeClass: "bg-success/15 text-success" },
 ];
 
 // Bottom navigation (always visible)

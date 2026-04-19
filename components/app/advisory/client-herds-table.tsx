@@ -190,10 +190,10 @@ export function ClientHerdsTable({
                   <td className="hidden px-5 py-3.5 text-text-secondary lg:table-cell">
                     {herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} (${herd.sub_category})` : herd.category}
                   </td>
-                  <td className={`hidden px-5 py-3.5 xl:table-cell ${!herd.selected_saleyard ? "text-red-400/70 italic" : nearestSaleyard || isFallback ? "text-text-muted/50 line-through" : "text-text-muted"}`}>
+                  <td className={`hidden px-5 py-3.5 xl:table-cell ${!herd.selected_saleyard ? "text-error/70 italic" : nearestSaleyard || isFallback ? "text-text-muted/50 line-through" : "text-text-muted"}`}>
                     {herd.selected_saleyard ? resolveShortSaleyardName(herd.selected_saleyard) ?? herd.selected_saleyard : "No Saleyard"}
                   </td>
-                  <td className={`hidden px-5 py-3.5 text-right tabular-nums lg:table-cell ${isFallback ? "text-red-400" : nearestSaleyard ? "text-amber-400" : "text-text-secondary"}`}>
+                  <td className={`hidden px-5 py-3.5 text-right tabular-nums lg:table-cell ${isFallback ? "text-error" : nearestSaleyard ? "text-amber-400" : "text-text-secondary"}`}>
                     <div className="flex items-center justify-end gap-1.5">
                       {nearestSaleyard && !isFallback && (
                         <span className="inline-flex items-center rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-medium text-amber-400">
@@ -201,24 +201,24 @@ export function ClientHerdsTable({
                         </span>
                       )}
                       {isFallback && (
-                        <span className="inline-flex items-center rounded-full bg-red-500/15 px-1.5 py-0.5 text-[9px] font-medium text-red-400">
+                        <span className="inline-flex items-center rounded-full bg-error/15 px-1.5 py-0.5 text-[9px] font-medium text-error">
                           {source === "national" ? "National Avg" : "Est. Fallback"}
                         </span>
                       )}
                       {pricePerKg > 0 ? `$${pricePerKg.toFixed(2)}` : "\u2014"}
                     </div>
                   </td>
-                  <td className={`hidden px-5 py-3.5 text-right tabular-nums text-xs lg:table-cell ${breedPremium > 0 ? "text-emerald-400" : breedPremium < 0 ? "text-red-400" : "text-text-muted"}`}>
+                  <td className={`hidden px-5 py-3.5 text-right tabular-nums text-xs lg:table-cell ${breedPremium > 0 ? "text-success" : breedPremium < 0 ? "text-error" : "text-text-muted"}`}>
                     {breedPremium !== 0 ? `${breedPremium > 0 ? "+" : ""}${breedPremium}%` : "\u2014"}
                   </td>
                   <td className="hidden px-5 py-3.5 text-right tabular-nums text-text-secondary xl:table-cell">
                     {projectedWeight ? `${Math.round(projectedWeight).toLocaleString()} kg` : herd.current_weight ? `${herd.current_weight.toLocaleString()} kg` : "\u2014"}
                   </td>
-                  <td className={`px-5 py-3.5 text-right tabular-nums ${isFallback ? "text-red-400" : "text-text-secondary"}`}>
+                  <td className={`px-5 py-3.5 text-right tabular-nums ${isFallback ? "text-error" : "text-text-secondary"}`}>
                     <div className="flex flex-col items-end">
                       <span>{value > 0 ? `$${Math.round(value).toLocaleString()}` : "\u2014"}</span>
                       {accrual > 0 && (
-                        <span className="flex items-center gap-1 text-xs text-emerald-400">
+                        <span className="flex items-center gap-1 text-xs text-success">
                           <Leaf className="h-3 w-3" />
                           +${Math.round(accrual).toLocaleString()}
                         </span>

@@ -23,7 +23,7 @@ function DashboardPanel() {
     { name: 'M. Douglas', property: 'Doongara North', herds: 3, status: 'expired' as const },
   ]
   const statusStyles = {
-    active: { bg: 'bg-emerald-500/15', text: 'text-emerald-400', label: 'Active' },
+    active: { bg: 'bg-success/15', text: 'text-success', label: 'Active' },
     pending: { bg: 'bg-[#2F8CD9]/15', text: 'text-[#2F8CD9]', label: 'Pending' },
     expired: { bg: 'bg-amber-500/15', text: 'text-amber-400', label: 'Expired' },
   }
@@ -45,7 +45,7 @@ function DashboardPanel() {
         <div className="rounded-xl bg-white/[0.04] px-4 py-3 text-center sm:min-w-[200px]">
           <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Total Livestock Under Management</p>
           <p className="mt-1 text-2xl font-bold tabular-nums text-white">$213,955,020</p>
-          <span className="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-emerald-400">
+          <span className="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-success">
             <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
             </svg>
@@ -58,7 +58,7 @@ function DashboardPanel() {
       <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
         {[
           { label: 'Total Clients', value: '141', dot: 'bg-[#2F8CD9]' },
-          { label: 'Sharing Data', value: '132', dot: 'bg-emerald-400' },
+          { label: 'Sharing Data', value: '132', dot: 'bg-success' },
           { label: 'Pending', value: '9', dot: 'bg-amber-400' },
         ].map((stat) => (
           <div key={stat.label} className="rounded-xl bg-white/[0.04] p-3">
@@ -197,9 +197,9 @@ function LensPanel() {
             </svg>
             <span className="text-xs font-semibold text-white">Advisor Lens</span>
           </div>
-          <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2 py-0.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            <span className="text-[10px] font-medium text-emerald-400">Active</span>
+          <div className="flex items-center gap-1.5 rounded-full bg-success/15 px-2 py-0.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-success" />
+            <span className="text-[10px] font-medium text-success">Active</span>
           </div>
         </div>
         <div className="mt-2 flex items-center gap-3 border-t border-white/[0.06] pt-2">

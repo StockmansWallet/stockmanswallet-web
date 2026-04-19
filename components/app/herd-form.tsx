@@ -233,7 +233,7 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
   return (
     <form id="herd-form" onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-error">
           {error}
         </div>
       )}
@@ -372,7 +372,7 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
 
           {/* Weight validation feedback */}
           {weightValidation && weightValidation.status === "error" && (
-            <div className="flex items-start gap-2 rounded-lg border border-red-800 bg-red-900/20 px-3 py-2 text-xs text-red-400 mt-2">
+            <div className="flex items-start gap-2 rounded-lg border border-red-800 bg-red-900/20 px-3 py-2 text-xs text-error mt-2">
               <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
               <span>{weightValidation.message}</span>
             </div>

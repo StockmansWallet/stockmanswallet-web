@@ -42,7 +42,7 @@ export function VisibilityForm({
   return (
     <div className="space-y-5">
       {error && (
-        <div role="alert" className="rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm text-red-400">
+        <div role="alert" className="rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm text-error">
           {error}
         </div>
       )}

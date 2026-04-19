@@ -27,7 +27,7 @@ export function AdvisorConnectButton({
 
   if (status === "approved") {
     return (
-      <span className={`${base} ${sizeClass} bg-emerald-500/15 text-emerald-400`}>
+      <span className={`${base} ${sizeClass} bg-success/15 text-success`}>
         <Check className="mr-1.5 h-4 w-4" />
         Connected
       </span>
@@ -79,7 +79,7 @@ export function AdvisorConnectButton({
         </p>
       )}
       {error && (
-        <p className="mt-2 text-xs text-red-400">{error}</p>
+        <p className="mt-2 text-xs text-error">{error}</p>
       )}
     </div>
   );

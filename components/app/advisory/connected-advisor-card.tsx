@@ -102,10 +102,10 @@ export function ConnectedAdvisorCard({ connection }: { connection: ConnectionReq
                     return (
                       <div
                         key={key}
-                        className={`flex h-7 w-7 items-center justify-center rounded-lg ${active ? "bg-emerald-500/15" : "bg-white/5"}`}
+                        className={`flex h-7 w-7 items-center justify-center rounded-lg ${active ? "bg-success/15" : "bg-white/5"}`}
                         title={`${label}: ${active ? "Shared" : "Not shared"}`}
                       >
-                        <Icon className={`h-3.5 w-3.5 ${active ? "text-emerald-400" : "text-text-muted/40"}`} />
+                        <Icon className={`h-3.5 w-3.5 ${active ? "text-success" : "text-text-muted/40"}`} />
                       </div>
                     );
                   })

@@ -22,19 +22,19 @@ function fmtDate(iso: string) {
 }
 
 function changeColor(value: number) {
-  if (value > 0) return "text-emerald-400";
-  if (value < 0) return "text-red-400";
+  if (value > 0) return "text-success";
+  if (value < 0) return "text-error";
   return "text-text-muted";
 }
 
 function driverColour(driver: MovementDriver) {
   const map: Record<MovementDriver, string> = {
-    "New Herd": "bg-emerald-500/20 text-emerald-400",
-    "Removed/Sold": "bg-red-500/20 text-red-400",
+    "New Herd": "bg-success/20 text-success",
+    "Removed/Sold": "bg-error/20 text-error",
     "Market": "bg-blue-500/20 text-blue-400",
     "Weight Gain": "bg-orange-500/20 text-orange-400",
     "Calf Accrual": "bg-purple-500/20 text-purple-400",
-    "Mortality": "bg-red-500/20 text-red-400",
+    "Mortality": "bg-error/20 text-error",
     "Assumption": "bg-white/[0.06] text-text-muted",
   };
   return map[driver] ?? "bg-white/[0.06] text-text-muted";

@@ -116,7 +116,7 @@ export function PropertyForm({ property, action, submitLabel, cancelHref, delete
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm text-red-400">
+        <div className="rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm text-error">
           {error}
         </div>
       )}
@@ -191,8 +191,8 @@ export function PropertyForm({ property, action, submitLabel, cancelHref, delete
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15">
-              <MapPin className="h-3.5 w-3.5 text-emerald-400" />
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-success/15">
+              <MapPin className="h-3.5 w-3.5 text-success" />
             </div>
             <CardTitle>Location</CardTitle>
           </div>
@@ -246,7 +246,7 @@ export function PropertyForm({ property, action, submitLabel, cancelHref, delete
                   GPS Coordinates
                 </label>
                 <div className="flex items-center gap-2.5 rounded-xl bg-white/5 px-4 py-3">
-                  <MapPin className="h-4 w-4 shrink-0 text-emerald-400" />
+                  <MapPin className="h-4 w-4 shrink-0 text-success" />
                   <span className="text-sm tabular-nums text-text-primary">
                     {Number(latitude).toFixed(4)}° S, {Number(longitude).toFixed(4)}° E
                   </span>

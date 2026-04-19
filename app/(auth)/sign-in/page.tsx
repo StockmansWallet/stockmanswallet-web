@@ -73,7 +73,7 @@ export default function SignInPage() {
         </div>
 
         {error && (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-error dark:bg-red-900/20 dark:text-error">
             {error}
           </p>
         )}

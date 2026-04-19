@@ -85,8 +85,8 @@ export default async function AdvisorClientsPage() {
       <div className="mb-6 grid grid-cols-3 gap-3">
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
-              <UserCheck className="h-5 w-5 text-emerald-400" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-success/10">
+              <UserCheck className="h-5 w-5 text-success" />
             </div>
             <div>
               <p className="text-2xl font-bold text-text-primary">{approvedConnections.length}</p>
@@ -212,9 +212,9 @@ export default async function AdvisorClientsPage() {
       )}
 
       {/* Info note */}
-      <Card className="bg-emerald-500/[0.03]">
+      <Card className="bg-success/[0.03]">
         <CardContent className="flex items-start gap-3 p-4">
-          <Shield className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" />
+          <Shield className="mt-0.5 h-5 w-5 shrink-0 text-success" />
           <p className="text-xs leading-relaxed text-text-muted">
             You can view shared portfolio data but never modify a producer&apos;s records. Data access
             is controlled by each producer and can be revoked at any time.

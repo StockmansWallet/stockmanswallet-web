@@ -46,7 +46,7 @@ export default async function SimulatorPage() {
           subtitle="Sandbox environment for what-if scenarios"
           titleClassName="text-4xl font-bold text-[#ff4021]"
         />
-        <p className="text-sm text-red-400">
+        <p className="text-sm text-error">
           Failed to load simulator: {result.error}
         </p>
       </div>

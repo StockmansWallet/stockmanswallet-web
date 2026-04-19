@@ -19,7 +19,7 @@ export function DeleteNotificationButton({ notificationId }: { notificationId: s
     <button
       onClick={handleDelete}
       disabled={loading}
-      className="shrink-0 rounded-md p-1 text-text-muted opacity-0 transition-all hover:bg-red-500/10 hover:text-red-400 group-hover:opacity-100"
+      className="shrink-0 rounded-md p-1 text-text-muted opacity-0 transition-all hover:bg-error/10 hover:text-error group-hover:opacity-100"
       aria-label="Delete notification"
     >
       <X className="h-3.5 w-3.5" />

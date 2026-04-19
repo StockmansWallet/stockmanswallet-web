@@ -124,8 +124,8 @@ export function PerformanceView({ profile, trend }: Props) {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/15">
-                <ShieldCheck className="h-4 w-4 text-emerald-400" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-success/15">
+                <ShieldCheck className="h-4 w-4 text-success" />
               </div>
               <div>
                 <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
@@ -176,12 +176,12 @@ export function PerformanceView({ profile, trend }: Props) {
                 const barWidth = Math.min(ks, 100);
                 const barColor =
                   ks >= 85
-                    ? "bg-emerald-400"
+                    ? "bg-success"
                     : ks >= 70
                       ? "bg-indigo-400"
                       : ks >= 50
                         ? "bg-amber-400"
-                        : "bg-red-400";
+                        : "bg-error";
                 return (
                   <div key={a.id} className="flex items-center gap-3">
                     <span className="w-20 shrink-0 text-xs text-text-muted">

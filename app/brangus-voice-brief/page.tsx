@@ -332,8 +332,8 @@ export default function BrangusVoiceBriefPage() {
           </div>
 
           {/* What he does NOT sound like */}
-          <div className="rounded-xl border border-red-500/10 bg-red-500/[0.03] px-5 py-4">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-red-400/70">
+          <div className="rounded-xl border border-error/10 bg-error/[0.03] px-5 py-4">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-error/70">
               What he does not sound like
             </p>
             <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-text-muted">

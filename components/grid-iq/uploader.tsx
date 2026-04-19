@@ -53,12 +53,12 @@ function formatFileSize(bytes: number): string {
 function getFileIcon(type: string, name: string) {
   const ext = name.split(".").pop()?.toLowerCase() || "";
   if (ext === "xlsx" || ext === "xls")
-    return <FileSpreadsheet className="h-5 w-5 text-emerald-400" />;
+    return <FileSpreadsheet className="h-5 w-5 text-success" />;
   if (type.startsWith("image/"))
     return <FileImage className="h-5 w-5 text-blue-400" />;
   if (type === "application/pdf")
-    return <FileText className="h-5 w-5 text-red-400" />;
-  return <FileSpreadsheet className="h-5 w-5 text-emerald-400" />;
+    return <FileText className="h-5 w-5 text-error" />;
+  return <FileSpreadsheet className="h-5 w-5 text-success" />;
 }
 
 interface GridIQUploaderProps {
@@ -614,10 +614,10 @@ function ExtractionResultView({
 
       {/* Grid extraction result */}
       {result.documentType === "grid" && result.gridData && (
-        <div className="rounded-xl bg-emerald-500/5 p-4 ring-1 ring-inset ring-emerald-500/20">
+        <div className="rounded-xl bg-success/5 p-4 ring-1 ring-inset ring-success/20">
           <div className="flex items-center gap-2 mb-3">
-            <CheckCircle className="h-4 w-4 text-emerald-400" />
-            <span className="text-sm font-medium text-emerald-400">
+            <CheckCircle className="h-4 w-4 text-success" />
+            <span className="text-sm font-medium text-success">
               Grid Extracted{result.parsedViaAI ? " (AI)" : ""}
             </span>
           </div>
@@ -646,10 +646,10 @@ function ExtractionResultView({
       {/* Kill sheet extraction result */}
       {result.documentType === "killsheet" && result.killSheetData && (
         <>
-          <div className="rounded-xl bg-emerald-500/5 p-4 ring-1 ring-inset ring-emerald-500/20">
+          <div className="rounded-xl bg-success/5 p-4 ring-1 ring-inset ring-success/20">
             <div className="flex items-center gap-2 mb-3">
-              <CheckCircle className="h-4 w-4 text-emerald-400" />
-              <span className="text-sm font-medium text-emerald-400">
+              <CheckCircle className="h-4 w-4 text-success" />
+              <span className="text-sm font-medium text-success">
                 Kill Sheet Extracted{result.parsedViaAI ? " (AI)" : ""}
               </span>
             </div>
@@ -704,7 +704,7 @@ function ExtractionResultView({
                   </Button>
                 </div>
               ) : (
-                <div className="flex items-center gap-1.5 text-xs text-emerald-400">
+                <div className="flex items-center gap-1.5 text-xs text-success">
                   <CheckCircle className="h-3 w-3" />
                   Confirmed by user
                 </div>

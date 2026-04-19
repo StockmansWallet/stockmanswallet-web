@@ -45,7 +45,7 @@ export function ReportExportButton({ reportData, reportType, title }: ReportExpo
         Export PDF
       </Button>
       {error && (
-        <p role="alert" className="text-[11px] text-red-400">{error}</p>
+        <p role="alert" className="text-[11px] text-error">{error}</p>
       )}
     </div>
   );

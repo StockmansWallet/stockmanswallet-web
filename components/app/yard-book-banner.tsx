@@ -48,7 +48,7 @@ export function YardBookBanner() {
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
         <div className="flex-1">
           <p className="font-medium">Yard Book sync failed</p>
-          <p className="mt-0.5 text-red-300/80">
+          <p className="mt-0.5 text-error/80">
             The herd was saved, but breeding milestones could not be scheduled
             in Yard Book. Open the Yard Book tab and check your reminders, or
             edit the herd to retry.
@@ -56,7 +56,7 @@ export function YardBookBanner() {
         </div>
         <button
           onClick={() => setVisible(false)}
-          className="shrink-0 rounded p-0.5 text-red-300/60 hover:text-red-200"
+          className="shrink-0 rounded p-0.5 text-error/60 hover:text-red-200"
           aria-label="Dismiss"
         >
           <X className="h-4 w-4" />

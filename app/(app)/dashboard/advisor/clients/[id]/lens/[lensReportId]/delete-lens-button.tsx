@@ -60,7 +60,7 @@ export function DeleteLensButton({
     <Button
       variant="ghost"
       size="sm"
-      className="border border-white/[0.08] bg-white/[0.04] text-text-muted hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
+      className="border border-white/[0.08] bg-white/[0.04] text-text-muted hover:border-error/30 hover:bg-error/10 hover:text-error"
       onClick={() => setConfirming(true)}
     >
       <Trash2 className="mr-1 h-3.5 w-3.5" />

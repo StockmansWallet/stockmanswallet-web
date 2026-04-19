@@ -487,7 +487,7 @@ export function MlaUploader({ userEmail }: { userEmail: string }) {
       <Card>
         <CardContent className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2.5">
-            <div className="h-2 w-2 rounded-full bg-green-500" />
+            <div className="h-2 w-2 rounded-full bg-success" />
             <span className="text-sm text-text-secondary">{userEmail}</span>
           </div>
           <span className="text-xs text-text-muted">Admin</span>
@@ -496,7 +496,7 @@ export function MlaUploader({ userEmail }: { userEmail: string }) {
 
       {/* Drop zone */}
       <div
-        className="cursor-pointer rounded-2xl border-2 border-dashed border-white/10 bg-white/[0.02] p-12 text-center transition-all hover:border-green-500/40 hover:bg-green-500/[0.04]"
+        className="cursor-pointer rounded-2xl border-2 border-dashed border-white/10 bg-white/[0.02] p-12 text-center transition-all hover:border-success/40 hover:bg-success/[0.04]"
         onClick={() => fileInputRef.current?.click()}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
@@ -548,12 +548,12 @@ export function MlaUploader({ userEmail }: { userEmail: string }) {
                     </p>
                   )}
                   {pf.status === "success" && pf.result && (
-                    <p className="mt-0.5 text-xs text-green-400">
+                    <p className="mt-0.5 text-xs text-success">
                       {formatResult(pf)}
                     </p>
                   )}
                   {pf.status === "error" && pf.errorMessage && (
-                    <p className="mt-0.5 text-xs text-red-400">
+                    <p className="mt-0.5 text-xs text-error">
                       {pf.errorMessage}
                     </p>
                   )}
@@ -568,15 +568,15 @@ export function MlaUploader({ userEmail }: { userEmail: string }) {
                     <Loader2 className="h-4 w-4 animate-spin text-blue-400" />
                   )}
                   {pf.status === "success" && (
-                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <CheckCircle className="h-4 w-4 text-success" />
                   )}
                   {pf.status === "error" && (
-                    <AlertCircle className="h-4 w-4 text-red-500" />
+                    <AlertCircle className="h-4 w-4 text-error" />
                   )}
                   {pf.status === "pending" && (
                     <button
                       onClick={() => removeFile(pf.id)}
-                      className="rounded p-1 text-text-muted transition-colors hover:text-red-400"
+                      className="rounded p-1 text-text-muted transition-colors hover:text-error"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -648,14 +648,14 @@ export function MlaUploader({ userEmail }: { userEmail: string }) {
               </div>
               <div className="flex justify-between">
                 <span className="text-text-muted">Successful</span>
-                <span className="font-medium text-green-400">
+                <span className="font-medium text-success">
                   {summary.succeeded}
                 </span>
               </div>
               {summary.failed > 0 && (
                 <div className="flex justify-between">
                   <span className="text-text-muted">Failed</span>
-                  <span className="font-medium text-red-400">
+                  <span className="font-medium text-error">
                     {summary.failed}
                   </span>
                 </div>

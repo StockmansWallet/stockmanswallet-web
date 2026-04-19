@@ -98,8 +98,8 @@ export default async function FarmerConnectionsPage() {
       <div className="mb-6 grid grid-cols-2 gap-3">
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
-              <UserCheck className="h-5 w-5 text-emerald-400" aria-hidden="true" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-success/10">
+              <UserCheck className="h-5 w-5 text-success" aria-hidden="true" />
             </div>
             <div>
               <p className="text-2xl font-bold text-text-primary">{approved.length}</p>

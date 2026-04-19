@@ -43,8 +43,8 @@ export function ContactDetailsForm({
         <div
           className={`rounded-xl border px-4 py-3 text-sm ${
             message.type === "error"
-              ? "border-red-800 bg-red-900/20 text-red-400"
-              : "border-green-800 bg-green-900/20 text-green-400"
+              ? "border-red-800 bg-red-900/20 text-error"
+              : "border-green-800 bg-green-900/20 text-success"
           }`}
         >
           {message.text}

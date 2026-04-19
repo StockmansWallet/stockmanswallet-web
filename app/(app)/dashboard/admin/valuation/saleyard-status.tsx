@@ -29,16 +29,16 @@ function daysSince(dateStr: string | null): number | null {
 
 function freshnessColor(days: number | null): string {
   if (days === null) return "text-text-muted";
-  if (days <= 7) return "text-emerald-400";
+  if (days <= 7) return "text-success";
   if (days <= 30) return "text-amber-400";
-  return "text-red-400";
+  return "text-error";
 }
 
 function freshnessBg(days: number | null): string {
   if (days === null) return "bg-white/[0.03]";
-  if (days <= 7) return "bg-emerald-500/[0.06]";
+  if (days <= 7) return "bg-success/[0.06]";
   if (days <= 30) return "bg-amber-500/[0.06]";
-  return "bg-red-500/[0.06]";
+  return "bg-error/[0.06]";
 }
 
 function freshnessLabel(days: number | null): string {
@@ -81,8 +81,8 @@ export function SaleyardStatus() {
 
   if (error) {
     return (
-      <div className="rounded-xl border border-red-500/20 bg-red-500/[0.04] px-5 py-8 text-center">
-        <p className="text-sm text-red-400">{error}</p>
+      <div className="rounded-xl border border-error/20 bg-error/[0.04] px-5 py-8 text-center">
+        <p className="text-sm text-error">{error}</p>
       </div>
     );
   }
@@ -126,7 +126,7 @@ export function SaleyardStatus() {
         {staleCount > 0 && (
           <>
             <div className="h-4 w-px bg-white/[0.08]" />
-            <span className="inline-flex items-center rounded-md bg-red-500/15 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
+            <span className="inline-flex items-center rounded-md bg-error/15 px-1.5 py-0.5 text-[10px] font-medium text-error">
               {staleCount} stale (&gt;30 days)
             </span>
           </>
@@ -203,7 +203,7 @@ export function SaleyardStatus() {
                     <td className="px-3 py-2.5 text-right tabular-nums text-text-primary">{s.weightRanges.length}</td>
                     <td className="px-3 py-2.5 text-center">
                       {s.hasBreedSpecific ? (
-                        <span className="inline-flex rounded bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-medium text-emerald-400">
+                        <span className="inline-flex rounded bg-success/15 px-1.5 py-0.5 text-[10px] font-medium text-success">
                           {s.breeds.length} breeds
                         </span>
                       ) : (

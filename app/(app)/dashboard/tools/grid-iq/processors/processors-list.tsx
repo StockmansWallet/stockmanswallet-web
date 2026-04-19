@@ -248,8 +248,8 @@ export function ProcessorsList({
       {selecting && selected.size > 0 && (
         <div className="mt-4">
           {showConfirm ? (
-            <div className="flex items-center justify-between rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3">
-              <span className="text-sm text-red-400">
+            <div className="flex items-center justify-between rounded-xl border border-error/20 bg-error/5 px-4 py-3">
+              <span className="text-sm text-error">
                 Delete {selected.size}{" "}
                 {selected.size === 1 ? "processor" : "processors"}?
               </span>

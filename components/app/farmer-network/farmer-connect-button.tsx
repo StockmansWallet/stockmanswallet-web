@@ -95,7 +95,7 @@ export function FarmerConnectButton({
             </p>
           )}
           {error && (
-            <p role="alert" className="text-xs text-red-400">{error}</p>
+            <p role="alert" className="text-xs text-error">{error}</p>
           )}
         </div>
 
@@ -140,7 +140,7 @@ export function FarmerConnectButton({
         </p>
       )}
       {error && (
-        <p role="alert" className="text-xs text-red-400">{error}</p>
+        <p role="alert" className="text-xs text-error">{error}</p>
       )}
     </div>
   );

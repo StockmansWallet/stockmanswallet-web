@@ -29,7 +29,7 @@ const CATEGORIES: {
   { value: "Operations", label: "Operations", icon: Wrench, bg: "bg-amber-700/15", text: "text-amber-600" },
   { value: "Finance", label: "Finance", icon: DollarSign, bg: "bg-blue-500/15", text: "text-blue-400" },
   { value: "Family", label: "Family", icon: Home, bg: "bg-purple-500/15", text: "text-purple-400" },
-  { value: "Me", label: "Me", icon: User, bg: "bg-green-500/15", text: "text-green-400" },
+  { value: "Me", label: "Me", icon: User, bg: "bg-success/15", text: "text-success" },
 ];
 
 const REMINDER_OPTIONS = [
@@ -122,7 +122,7 @@ export function YardBookForm({
   return (
     <form onSubmit={handleSubmit}>
       {error && (
-        <div className="mb-6 rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm text-red-400">
+        <div className="mb-6 rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm text-error">
           {error}
         </div>
       )}

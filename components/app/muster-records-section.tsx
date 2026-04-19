@@ -76,7 +76,7 @@ function MusterForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3 rounded-xl bg-white/[0.03] p-4 ring-1 ring-inset ring-white/[0.06]">
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && <p className="text-xs text-error">{error}</p>}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Input id="mr-date" name="date" label="Date" type="date" defaultValue={record?.date ?? today} required />
         <Input id="mr-head" name="total_head_count" label="Head Count" type="number" min={0} defaultValue={record?.total_head_count ?? ""} />
@@ -178,7 +178,7 @@ export function MusterRecordsSection({
                         <button
                           onClick={() => handleDelete(r.id)}
                           disabled={deleting === r.id}
-                          className="rounded-lg p-1.5 text-text-muted hover:bg-red-500/10 hover:text-red-400"
+                          className="rounded-lg p-1.5 text-text-muted hover:bg-error/10 hover:text-error"
                         >
                           {deleting === r.id ? <X className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
                         </button>

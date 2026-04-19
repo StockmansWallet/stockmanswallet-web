@@ -35,7 +35,7 @@ function formatCurrency(value: number): string {
 function sellWindowIcon(status: string) {
   switch (status) {
     case "ON_TARGET":
-      return { icon: CheckCircle, color: "text-emerald-400" };
+      return { icon: CheckCircle, color: "text-success" };
     case "EARLY":
       return { icon: TrendingUp, color: "text-indigo-400" };
     case "RISK_OF_OVERWEIGHT":
@@ -102,7 +102,7 @@ export function CategoryBreakdown({
                 <span className="w-20 text-right text-sm text-text-primary">
                   {formatCurrency(row.netSaleyardValue)}
                 </span>
-                <span className={`w-20 text-right text-sm font-semibold ${isProcessor ? "text-emerald-400" : "text-amber-400"}`}>
+                <span className={`w-20 text-right text-sm font-semibold ${isProcessor ? "text-success" : "text-amber-400"}`}>
                   {isProcessor ? "+" : "-"}{formatCurrency(row.gridIQAdvantage)}
                 </span>
               </div>
@@ -120,7 +120,7 @@ export function CategoryBreakdown({
           <span className="w-20 text-right text-sm font-bold text-text-primary">
             {formatCurrency(totalNetSaleyard)}
           </span>
-          <span className={`w-20 text-right text-sm font-bold ${totalAdvantage > 0 ? "text-emerald-400" : "text-amber-400"}`}>
+          <span className={`w-20 text-right text-sm font-bold ${totalAdvantage > 0 ? "text-success" : "text-amber-400"}`}>
             {totalAdvantage > 0 ? "+" : "-"}{formatCurrency(totalAdvantage)}
           </span>
         </div>

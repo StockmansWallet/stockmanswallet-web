@@ -165,7 +165,7 @@ export function FreightCalculator() {
               </div>
             )}
             {result.efficiencyPrompt && (
-              <div className="py-2 text-xs text-green-600 dark:text-green-400">
+              <div className="py-2 text-xs text-success dark:text-success">
                 {result.efficiencyPrompt}
               </div>
             )}

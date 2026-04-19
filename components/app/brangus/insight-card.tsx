@@ -24,20 +24,20 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 const sentimentColor: Record<string, string> = {
-  positive: "text-emerald-400",
-  negative: "text-red-400",
+  positive: "text-success",
+  negative: "text-error",
   neutral: "text-brand",
 };
 
 const sentimentBg: Record<string, string> = {
-  positive: "bg-emerald-500/15",
-  negative: "bg-red-500/15",
+  positive: "bg-success/15",
+  negative: "bg-error/15",
   neutral: "bg-brand/15",
 };
 
 const sentimentIconColor: Record<string, string> = {
-  positive: "text-emerald-400",
-  negative: "text-red-400",
+  positive: "text-success",
+  negative: "text-error",
   neutral: "text-brand",
 };
 

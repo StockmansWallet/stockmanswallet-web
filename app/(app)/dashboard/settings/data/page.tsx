@@ -16,12 +16,12 @@ function SectionIcon({
   return (
     <div
       className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${
-        variant === "danger" ? "bg-red-500/15" : "bg-brand/15"
+        variant === "danger" ? "bg-error/15" : "bg-brand/15"
       }`}
     >
       <Icon
         className={`h-3.5 w-3.5 ${
-          variant === "danger" ? "text-red-400" : "text-brand"
+          variant === "danger" ? "text-error" : "text-brand"
         }`}
       />
     </div>

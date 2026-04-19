@@ -38,10 +38,10 @@ export function PermissionBanner({ connection, isActive, permissions }: Permissi
     const accessLabel = count === 4 ? "Full access" : `${count} of 4 categories`;
 
     return (
-      <div className="flex items-center gap-2 rounded-xl bg-green-500/10 px-4 py-3">
-        <Shield className="h-4 w-4 text-green-400" />
-        <span className="text-sm font-medium text-green-400">Data Shared</span>
-        <span className="text-xs text-green-400/70">{accessLabel}</span>
+      <div className="flex items-center gap-2 rounded-xl bg-success/10 px-4 py-3">
+        <Shield className="h-4 w-4 text-success" />
+        <span className="text-sm font-medium text-success">Data Shared</span>
+        <span className="text-xs text-success/70">{accessLabel}</span>
       </div>
     );
   }

@@ -103,9 +103,9 @@ function Divider() {
 
 function Badge({ color, label }: { color: "emerald" | "amber" | "red"; label: string }) {
   const colors = {
-    emerald: "bg-emerald-500/15 text-emerald-400",
+    emerald: "bg-success/15 text-success",
     amber: "bg-amber-500/15 text-amber-400",
-    red: "bg-red-500/15 text-red-400",
+    red: "bg-error/15 text-error",
   };
   return (
     <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium ${colors[color]}`}>

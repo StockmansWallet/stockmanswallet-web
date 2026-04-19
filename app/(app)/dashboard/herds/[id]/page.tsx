@@ -284,7 +284,7 @@ export default async function HerdDetailPage({
       <div className="mt-3 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2 lg:mt-4">
         <div className="flex items-center gap-1.5 pl-2">
           {isFallback && (
-            <span className="inline-flex items-center rounded-full bg-red-500/15 px-2 py-1 text-[10px] font-medium text-red-400">
+            <span className="inline-flex items-center rounded-full bg-error/15 px-2 py-1 text-[10px] font-medium text-error">
               {valuation.priceSource === "national" ? "National Avg" : "Est. Fallback"}
             </span>
           )}
@@ -457,7 +457,7 @@ export default async function HerdDetailPage({
               {valuation.breedingAccrual > 0 && (
                 <div className="flex items-center justify-between py-3 text-sm">
                   <span className="font-semibold text-text-primary">Total Breeding Value</span>
-                  <span className="font-semibold tabular-nums text-emerald-400">
+                  <span className="font-semibold tabular-nums text-success">
                     ${Math.round(valuation.breedingAccrual).toLocaleString()}
                   </span>
                 </div>
