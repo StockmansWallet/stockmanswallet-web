@@ -282,15 +282,42 @@ select option {
     color: #1a1a1a !important;
   }
 
-  /* Chat bubbles - preserve colours */
+  /* Light PDF theme: force chat surfaces to white */
+  [data-print-chat-card],
+  [data-print-chat],
+  [data-print-chat] > div {
+    background: white !important;
+  }
+
+  /* User bubble keeps brand orange for brand recognition */
   [data-print-chat] [class*="bg-brand"] {
     background: #FF8000 !important;
     color: white !important;
   }
 
+  /* Brangus bubble becomes light beige with dark text */
   [data-print-chat] [class*="bg-[#44372D]"] {
-    background: #44372D !important;
-    color: rgba(255, 255, 255, 0.9) !important;
+    background: #f5f0eb !important;
+    color: #1a1a1a !important;
+    border: 1px solid #e5dcd0 !important;
+  }
+
+  [data-print-chat] [class*="bg-[#44372D]"] * {
+    color: #1a1a1a !important;
+  }
+
+  /* Brangus bubble tail SVG (fill set via DOM attribute) */
+  [data-print-chat] svg path[fill="#44372D"] {
+    fill: #f5f0eb !important;
+  }
+
+  /* Initials avatar fallback pill */
+  [data-print-chat] .bg-white\/10 {
+    background: #f5f0eb !important;
+  }
+
+  [data-print-chat] .bg-white\/10 span {
+    color: #1a1a1a !important;
   }
 
   /* Prevent page breaks inside bubbles */
