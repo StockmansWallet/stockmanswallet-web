@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ChevronLeft } from "lucide-react";
 import { FarmerChatClient } from "./farmer-chat-client";
 import { ModerationMenu } from "@/app/(app)/dashboard/farmer-network/directory/[id]/moderation-menu";
+import { MarkConnectionNotificationsRead } from "@/components/app/mark-connection-notifications-read";
 import type { ConnectionRequest, AdvisoryMessage } from "@/lib/types/advisory";
 
 export const metadata = {
@@ -80,14 +81,15 @@ export default async function FarmerConnectionDetailPage({
 
   return (
     <div className="flex h-[calc(100vh-6rem)] max-w-4xl flex-col pb-4">
+      <MarkConnectionNotificationsRead connectionId={id} />
       {/* Back pill - canonical ChevronLeft + bg-surface-lowest per CLAUDE.md */}
       <div className="mb-3 pt-4">
         <Link
-          href="/dashboard/farmer-network/connections"
+          href="/dashboard/farmer-network"
           className="inline-flex items-center gap-1.5 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary"
         >
           <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
-          Connections
+          Producer Network
         </Link>
       </div>
 

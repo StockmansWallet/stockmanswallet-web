@@ -11,6 +11,7 @@ import { FarmerProducerSearch } from "@/components/app/farmer-network/farmer-pro
 import { FarmerConnectionsRealtime } from "@/components/app/farmer-network/farmer-connections-realtime";
 import { FarmerCard } from "@/components/app/farmer-network/farmer-card";
 import { BroadcastButton } from "@/components/app/farmer-network/broadcast-button";
+import { MarkNotificationsRead } from "@/components/app/mark-notifications-read";
 import { loadOutgoingBlocks } from "@/lib/data/user-blocks";
 import type { ConnectionRequest, DirectoryFarmer } from "@/lib/types/advisory";
 
@@ -148,6 +149,12 @@ export default async function FarmerNetworkPage() {
   return (
     <div className="max-w-4xl">
       <FarmerConnectionsRealtime userId={user.id} />
+      {/* Connection-request notifications are resolved the moment the
+          user lands here, since the Incoming Requests section is right
+          in front of them. new_message notifications are left alone so
+          the per-row unread pills remain visible; they clear when the
+          user actually opens a conversation. */}
+      <MarkNotificationsRead types={["new_connection_request"]} />
       <PageHeader feature="producer-network"
         title="Producer Network"
         titleClassName="text-4xl font-bold text-producer-network-light"

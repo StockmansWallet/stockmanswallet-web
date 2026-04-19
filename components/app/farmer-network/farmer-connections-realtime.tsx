@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 /**
- * Keeps the Producer Network "My Connections" list in sync without a manual
- * refresh. Uses the same triple-layer approach as the notification bell:
- *   1. Supabase Realtime subscription on connection_requests (instant).
+ * Keeps the Producer Network landing in sync without a manual refresh.
+ * Uses the same triple-layer approach as the notification bell:
+ *   1. Supabase Realtime subscriptions on connection_requests AND
+ *      notifications so both request state and per-row unread pills
+ *      update the moment something changes.
  *   2. Refresh on tab-focus (catches any missed realtime events).
  *   3. Periodic refresh every 15s as a safety net.
  *
@@ -50,6 +52,16 @@ export function FarmerConnectionsRealtime({ userId }: { userId: string }) {
           schema: "public",
           table: "connection_requests",
           filter: `target_user_id=eq.${userId}`,
+        },
+        () => { if (!cancelled) router.refresh(); },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${userId}`,
         },
         () => { if (!cancelled) router.refresh(); },
       )

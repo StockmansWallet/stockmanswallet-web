@@ -30,6 +30,12 @@ export interface NavItem {
   // drive the sidebar badge; clearing happens when the user lands on any
   // route under `href`.
   notificationTypes?: string[];
+  // Pathname prefix that should hide the badge while the user is inside
+  // it. Narrower than `href` so a feature with a landing index plus
+  // detail routes (e.g. Producer Network with its chat pages) can keep
+  // the badge visible on the landing and only suppress it while the
+  // user is actively reading a thread.
+  badgeSuppressPrefix?: string;
 }
 
 // Farmer mode - portfolio (core navigation)
@@ -48,13 +54,13 @@ export const farmerIntelItems: NavItem[] = [
 
 // Farmer mode - tools section
 export const farmerToolItems: NavItem[] = [
-  { label: "Yard Book", href: "/dashboard/tools/yard-book", icon: <BookOpen className="h-5 w-5" />, activeClass: "bg-yard-book/15 text-yard-book", notificationTypes: ["yard_book_overdue"] },
+  { label: "Yard Book", href: "/dashboard/tools/yard-book", icon: <BookOpen className="h-5 w-5" />, activeClass: "bg-yard-book/15 text-yard-book", notificationTypes: ["yard_book_overdue"], badgeSuppressPrefix: "/dashboard/tools/yard-book" },
   { label: "Reports", href: "/dashboard/tools/reports", icon: <FileText className="h-5 w-5" />, activeClass: "bg-reports/15 text-reports" },
   { label: "Freight IQ", href: "/dashboard/tools/freight", icon: <Truck className="h-5 w-5" />, activeClass: "bg-freight-iq/15 text-freight-iq" },
   { label: "Grid IQ", href: "/dashboard/tools/grid-iq", icon: <Grid3x3 className="h-5 w-5" />, activeClass: "bg-grid-iq/15 text-grid-iq" },
   // Advisory Hub hidden when advisor feature flag is off
   ...(ADVISOR_ENABLED ? [{ label: "Advisory Hub", href: "/dashboard/advisory-hub", icon: <Users className="h-5 w-5" />, activeClass: "bg-advisor/15 text-advisor" }] : []),
-  { label: "Producer Network", href: "/dashboard/farmer-network", icon: <Handshake className="h-5 w-5" />, activeClass: "bg-producer-network/15 text-producer-network", notificationTypes: ["new_message", "new_connection_request"] },
+  { label: "Producer Network", href: "/dashboard/farmer-network", icon: <Handshake className="h-5 w-5" />, activeClass: "bg-producer-network/15 text-producer-network", notificationTypes: ["new_message", "new_connection_request"], badgeSuppressPrefix: "/dashboard/farmer-network/connections/" },
 ];
 
 // Advisor mode - portfolio (core navigation)
