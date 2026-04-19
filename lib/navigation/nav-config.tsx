@@ -26,6 +26,10 @@ export interface NavItem {
   icon: React.ReactNode;
   activeClass?: string;
   inactiveClass?: string; // Override default inactive styling (e.g. Brangus amber glow)
+  // Notification types owned by this nav item. Unread counts for these types
+  // drive the sidebar badge; clearing happens when the user lands on any
+  // route under `href`.
+  notificationTypes?: string[];
 }
 
 // Farmer mode - portfolio (core navigation)
@@ -44,13 +48,13 @@ export const farmerIntelItems: NavItem[] = [
 
 // Farmer mode - tools section
 export const farmerToolItems: NavItem[] = [
-  { label: "Yard Book", href: "/dashboard/tools/yard-book", icon: <BookOpen className="h-5 w-5" />, activeClass: "bg-yard-book/15 text-yard-book" },
+  { label: "Yard Book", href: "/dashboard/tools/yard-book", icon: <BookOpen className="h-5 w-5" />, activeClass: "bg-yard-book/15 text-yard-book", notificationTypes: ["yard_book_overdue"] },
   { label: "Reports", href: "/dashboard/tools/reports", icon: <FileText className="h-5 w-5" />, activeClass: "bg-reports/15 text-reports" },
   { label: "Freight IQ", href: "/dashboard/tools/freight", icon: <Truck className="h-5 w-5" />, activeClass: "bg-freight-iq/15 text-freight-iq" },
   { label: "Grid IQ", href: "/dashboard/tools/grid-iq", icon: <Grid3x3 className="h-5 w-5" />, activeClass: "bg-grid-iq/15 text-grid-iq" },
   // Advisory Hub hidden when advisor feature flag is off
   ...(ADVISOR_ENABLED ? [{ label: "Advisory Hub", href: "/dashboard/advisory-hub", icon: <Users className="h-5 w-5" />, activeClass: "bg-advisor/15 text-advisor" }] : []),
-  { label: "Producer Network", href: "/dashboard/farmer-network", icon: <Handshake className="h-5 w-5" />, activeClass: "bg-violet/15 text-violet" },
+  { label: "Producer Network", href: "/dashboard/farmer-network", icon: <Handshake className="h-5 w-5" />, activeClass: "bg-violet/15 text-violet", notificationTypes: ["new_message", "new_connection_request"] },
 ];
 
 // Advisor mode - portfolio (core navigation)

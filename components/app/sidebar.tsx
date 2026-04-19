@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { signOut } from "@/app/(auth)/actions";
 import { Bell, Crown, LogOut } from "lucide-react";
 import { NotificationBadge } from "@/components/app/notification-badge";
+import { SidebarBadge } from "@/components/app/sidebar-badge";
 import { tierDisplayName, type SubscriptionTier } from "@/lib/subscriptions/tiers";
 import {
   farmerNavItems,
@@ -29,7 +30,10 @@ function NavLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
       }`}
     >
       {item.icon}
-      {item.label}
+      <span>{item.label}</span>
+      {item.notificationTypes && item.notificationTypes.length > 0 && (
+        <SidebarBadge types={item.notificationTypes} />
+      )}
     </Link>
   );
 }

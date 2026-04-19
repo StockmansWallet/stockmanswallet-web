@@ -8,6 +8,36 @@ const notificationIdSchema = z.object({
   notificationId: z.string().uuid(),
 });
 
+const typesSchema = z.object({
+  types: z.array(z.string().min(1)).min(1).max(20),
+});
+
+// Used by per-feature sidebar badges: when the user lands on a feature's
+// route, its owned notification types are marked read. Idempotent, no-ops
+// when nothing is unread.
+export async function markNotificationsReadByTypes(types: string[]) {
+  const parsed = typesSchema.safeParse({ types });
+  if (!parsed.success) return { error: "Invalid input" };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Not authenticated" };
+
+  const { error } = await supabase
+    .from("notifications")
+    .update({ is_read: true })
+    .eq("user_id", user.id)
+    .eq("is_read", false)
+    .in("type", parsed.data.types);
+
+  if (error) return { error: error.message };
+
+  return { success: true };
+}
+
 export async function markAsRead(notificationId: string) {
   const parsed = notificationIdSchema.safeParse({ notificationId });
   if (!parsed.success) return { error: "Invalid input" };

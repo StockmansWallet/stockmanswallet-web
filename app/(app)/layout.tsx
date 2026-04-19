@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/app/sidebar";
 import { MobileNav } from "@/components/app/mobile-nav";
 import { TopBar } from "@/components/app/top-bar";
+import { SidebarNotificationsProvider } from "@/components/app/sidebar-notifications-provider";
 import { isAdvisorRole, roleDisplayName } from "@/lib/types/advisory";
 import { ADVISOR_ENABLED } from "@/lib/feature-flags";
 
@@ -66,35 +67,37 @@ export default async function AppLayout({
   const isAdvisor = ADVISOR_ENABLED && !!(profile?.role && isAdvisorRole(profile.role));
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      {/* Mobile nav */}
-      <div data-print-hide>
-        <MobileNav userEmail={user.email} subscriptionTier={profile?.subscription_tier || "stockman"} isAdvisor={isAdvisor} />
-      </div>
-
-      {/* Desktop top header bar - full width, sticky */}
-      <div data-print-hide className="sticky top-0 z-40">
-        <TopBar
-          firstName={user.user_metadata?.first_name || ""}
-          lastName={user.user_metadata?.last_name || ""}
-          email={user.email || ""}
-          roleLabel={roleDisplayName(profile?.role || "producer")}
-          avatarUrl={user.user_metadata?.avatar_url || ""}
-        />
-      </div>
-
-      {/* Desktop sidebar + content */}
-      <div className="flex flex-1">
-        <div className="hidden lg:block">
-          <div className="sticky top-20 h-[calc(100vh-5rem)] py-4 pl-6">
-            <Sidebar isAdmin={isAdmin} subscriptionTier={profile?.subscription_tier || "stockman"} isAdvisor={isAdvisor} />
-          </div>
+    <SidebarNotificationsProvider>
+      <div className="flex min-h-screen flex-col bg-background">
+        {/* Mobile nav */}
+        <div data-print-hide>
+          <MobileNav userEmail={user.email} subscriptionTier={profile?.subscription_tier || "stockman"} isAdvisor={isAdvisor} />
         </div>
 
-        <main className="flex-1 overflow-y-auto px-6 pb-6 lg:px-8 lg:pb-8">
-          {children}
-        </main>
+        {/* Desktop top header bar - full width, sticky */}
+        <div data-print-hide className="sticky top-0 z-40">
+          <TopBar
+            firstName={user.user_metadata?.first_name || ""}
+            lastName={user.user_metadata?.last_name || ""}
+            email={user.email || ""}
+            roleLabel={roleDisplayName(profile?.role || "producer")}
+            avatarUrl={user.user_metadata?.avatar_url || ""}
+          />
+        </div>
+
+        {/* Desktop sidebar + content */}
+        <div className="flex flex-1">
+          <div className="hidden lg:block">
+            <div className="sticky top-20 h-[calc(100vh-5rem)] py-4 pl-6">
+              <Sidebar isAdmin={isAdmin} subscriptionTier={profile?.subscription_tier || "stockman"} isAdvisor={isAdvisor} />
+            </div>
+          </div>
+
+          <main className="flex-1 overflow-y-auto px-6 pb-6 lg:px-8 lg:pb-8">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </SidebarNotificationsProvider>
   );
 }
