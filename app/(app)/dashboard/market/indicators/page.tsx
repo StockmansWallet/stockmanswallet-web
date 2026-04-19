@@ -55,8 +55,8 @@ export default async function IndicatorsPage({ searchParams }: Props) {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
-                <TrendingUp className="h-3.5 w-3.5 text-brand" />
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-markets/15">
+                <TrendingUp className="h-3.5 w-3.5 text-markets" />
               </div>
               <CardTitle>Categories</CardTitle>
             </div>

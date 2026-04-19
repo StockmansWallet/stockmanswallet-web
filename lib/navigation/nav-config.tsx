@@ -41,9 +41,9 @@ export const farmerNavItems: NavItem[] = [
 
 // Farmer mode - intelligence section
 export const farmerIntelItems: NavItem[] = [
-  { label: "Brangus", href: "/dashboard/brangus", icon: <MessageCircle className="h-5 w-5" /> },
-  { label: "Insights", href: "/dashboard/insights", icon: <Lightbulb className="h-5 w-5" /> },
-  { label: "Markets", href: "/dashboard/market", icon: <TrendingUp className="h-5 w-5" /> },
+  { label: "Brangus", href: "/dashboard/brangus", icon: <MessageCircle className="h-5 w-5" />, activeClass: "bg-brangus/15 text-brangus" },
+  { label: "Insights", href: "/dashboard/insights", icon: <Lightbulb className="h-5 w-5" />, activeClass: "bg-insights/15 text-insights" },
+  { label: "Markets", href: "/dashboard/market", icon: <TrendingUp className="h-5 w-5" />, activeClass: "bg-markets/15 text-markets" },
 ];
 
 // Farmer mode - tools section
@@ -54,7 +54,7 @@ export const farmerToolItems: NavItem[] = [
   { label: "Grid IQ", href: "/dashboard/tools/grid-iq", icon: <Grid3x3 className="h-5 w-5" />, activeClass: "bg-grid-iq/15 text-grid-iq" },
   // Advisory Hub hidden when advisor feature flag is off
   ...(ADVISOR_ENABLED ? [{ label: "Advisory Hub", href: "/dashboard/advisory-hub", icon: <Users className="h-5 w-5" />, activeClass: "bg-advisor/15 text-advisor" }] : []),
-  { label: "Producer Network", href: "/dashboard/farmer-network", icon: <Handshake className="h-5 w-5" />, activeClass: "bg-violet/15 text-violet", notificationTypes: ["new_message", "new_connection_request"] },
+  { label: "Producer Network", href: "/dashboard/farmer-network", icon: <Handshake className="h-5 w-5" />, activeClass: "bg-producer-network/15 text-producer-network", notificationTypes: ["new_message", "new_connection_request"] },
 ];
 
 // Advisor mode - portfolio (core navigation)
@@ -66,9 +66,9 @@ export const advisorNavItems: NavItem[] = [
 
 // Advisor mode - intelligence section
 export const advisorIntelItems: NavItem[] = [
-  { label: "Brangus", href: "/dashboard/brangus", icon: <MessageCircle className="h-5 w-5" /> },
-  { label: "Insights", href: "/dashboard/insights", icon: <Lightbulb className="h-5 w-5" /> },
-  { label: "Markets", href: "/dashboard/market", icon: <TrendingUp className="h-5 w-5" /> },
+  { label: "Brangus", href: "/dashboard/brangus", icon: <MessageCircle className="h-5 w-5" />, activeClass: "bg-brangus/15 text-brangus" },
+  { label: "Insights", href: "/dashboard/insights", icon: <Lightbulb className="h-5 w-5" />, activeClass: "bg-insights/15 text-insights" },
+  { label: "Markets", href: "/dashboard/market", icon: <TrendingUp className="h-5 w-5" />, activeClass: "bg-markets/15 text-markets" },
 ];
 
 // Advisor mode - tools section

@@ -51,7 +51,7 @@ export function RangePicker({ value, onChange }: RangePickerProps) {
           onClick={() => onChange({ key: k })}
           className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
             value.key === k
-              ? "bg-brand text-white"
+              ? "bg-markets text-white"
               : "text-text-muted hover:text-text-primary"
           }`}
         >
@@ -63,7 +63,7 @@ export function RangePicker({ value, onChange }: RangePickerProps) {
         onClick={() => setShowCustom((v) => !v)}
         className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
           value.key === "Custom"
-            ? "bg-brand text-white"
+            ? "bg-markets text-white"
             : "text-text-muted hover:text-text-primary"
         }`}
       >
@@ -84,7 +84,7 @@ export function RangePicker({ value, onChange }: RangePickerProps) {
                 value={start}
                 max={end || undefined}
                 onChange={(e) => setStart(e.target.value)}
-                className="mt-1 w-full rounded-lg bg-surface px-3 py-2 text-sm text-text-primary outline-none ring-1 ring-white/5 focus:ring-brand"
+                className="mt-1 w-full rounded-lg bg-surface px-3 py-2 text-sm text-text-primary outline-none ring-1 ring-white/5 focus:ring-markets"
               />
             </label>
             <label className="block text-[11px] text-text-muted">
@@ -94,7 +94,7 @@ export function RangePicker({ value, onChange }: RangePickerProps) {
                 value={end}
                 min={start || undefined}
                 onChange={(e) => setEnd(e.target.value)}
-                className="mt-1 w-full rounded-lg bg-surface px-3 py-2 text-sm text-text-primary outline-none ring-1 ring-white/5 focus:ring-brand"
+                className="mt-1 w-full rounded-lg bg-surface px-3 py-2 text-sm text-text-primary outline-none ring-1 ring-white/5 focus:ring-markets"
               />
             </label>
           </div>
@@ -116,7 +116,7 @@ export function RangePicker({ value, onChange }: RangePickerProps) {
                 onChange({ key: "Custom", startISO: start, endISO: end });
                 setShowCustom(false);
               }}
-              className="rounded-full bg-brand px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-brand-dark disabled:opacity-40"
+              className="rounded-full bg-markets px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-markets-dark disabled:opacity-40"
             >
               Apply
             </button>

@@ -13,7 +13,7 @@ export default async function InsightsPage() {
     <div className="max-w-4xl">
       <PageHeader
         title="Insights"
-        titleClassName="text-4xl font-bold text-brand"
+        titleClassName="text-4xl font-bold text-insights"
         subtitle="AI-powered intelligence for your operation."
       />
 
@@ -26,8 +26,8 @@ export default async function InsightsPage() {
       ) : (
         <Card>
           <CardContent className="flex flex-col items-center py-12 text-center">
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-brand/10">
-              <Sparkles className="h-6 w-6 text-brand" />
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-insights/10">
+              <Sparkles className="h-6 w-6 text-insights" />
             </div>
             <p className="text-sm font-medium text-text-primary">No insights yet</p>
             <p className="mt-1 max-w-xs text-xs leading-relaxed text-text-muted">

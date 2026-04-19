@@ -47,8 +47,8 @@ export function WhatIfWidget({ summaries }: WhatIfWidgetProps) {
   return (
     <div className="rounded-2xl bg-surface-lowest p-5">
       <div className="mb-4 flex items-center gap-2.5">
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
-          <Calculator className="h-3.5 w-3.5 text-brand" />
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-markets/15">
+          <Calculator className="h-3.5 w-3.5 text-markets" />
         </div>
         <div>
           <h2 className="text-sm font-semibold text-text-primary">What-if calculator</h2>
@@ -62,7 +62,7 @@ export function WhatIfWidget({ summaries }: WhatIfWidgetProps) {
           <select
             value={categorySlug}
             onChange={(e) => setCategorySlug(e.target.value)}
-            className="mt-1 w-full rounded-lg bg-surface px-3 py-2 text-sm text-text-primary outline-none ring-1 ring-white/5 focus:ring-brand"
+            className="mt-1 w-full rounded-lg bg-surface px-3 py-2 text-sm text-text-primary outline-none ring-1 ring-white/5 focus:ring-markets"
           >
             {summaries.map((s) => (
               <option key={s.slug} value={s.slug}>{s.category}</option>
@@ -77,7 +77,7 @@ export function WhatIfWidget({ summaries }: WhatIfWidgetProps) {
             min="1"
             value={head}
             onChange={(e) => setHead(e.target.value)}
-            className="mt-1 w-full rounded-lg bg-surface px-3 py-2 text-sm text-text-primary tabular-nums outline-none ring-1 ring-white/5 focus:ring-brand"
+            className="mt-1 w-full rounded-lg bg-surface px-3 py-2 text-sm text-text-primary tabular-nums outline-none ring-1 ring-white/5 focus:ring-markets"
           />
         </label>
         <label className="block">
@@ -89,7 +89,7 @@ export function WhatIfWidget({ summaries }: WhatIfWidgetProps) {
             step="10"
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
-            className="mt-1 w-full rounded-lg bg-surface px-3 py-2 text-sm text-text-primary tabular-nums outline-none ring-1 ring-white/5 focus:ring-brand"
+            className="mt-1 w-full rounded-lg bg-surface px-3 py-2 text-sm text-text-primary tabular-nums outline-none ring-1 ring-white/5 focus:ring-markets"
           />
         </label>
       </div>
@@ -121,7 +121,7 @@ function ResultRow({
   highlight?: boolean;
 }) {
   return (
-    <div className={`rounded-xl px-3.5 py-2.5 ${highlight ? "bg-brand/10 ring-1 ring-brand/30" : "bg-surface"}`}>
+    <div className={`rounded-xl px-3.5 py-2.5 ${highlight ? "bg-markets/10 ring-1 ring-markets/30" : "bg-surface"}`}>
       <p className="text-[11px] text-text-muted">{label}</p>
       <p className="mt-0.5 text-lg font-semibold tabular-nums text-text-primary">
         {gross != null ? format(gross) : "-"}

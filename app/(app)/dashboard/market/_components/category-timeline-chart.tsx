@@ -132,10 +132,10 @@ export function CategoryTimelineChart({ data, height = 240 }: Props) {
               type="monotone"
               dataKey={cat}
               name={cat}
-              stroke={CATEGORY_COLOURS[cat] ?? "var(--color-brand)"}
+              stroke={CATEGORY_COLOURS[cat] ?? "var(--color-markets)"}
               strokeWidth={1.75}
               dot={false}
-              activeDot={{ r: 3.5, fill: CATEGORY_COLOURS[cat] ?? "var(--color-brand)", strokeWidth: 0 }}
+              activeDot={{ r: 3.5, fill: CATEGORY_COLOURS[cat] ?? "var(--color-markets)", strokeWidth: 0 }}
               connectNulls
               isAnimationActive
               animationDuration={600}

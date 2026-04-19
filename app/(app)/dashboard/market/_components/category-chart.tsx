@@ -152,8 +152,8 @@ export function CategoryChart({
         <AreaChart data={chartData} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id="mkt-value-grad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="var(--color-brand)" stopOpacity={0.28} />
-              <stop offset="100%" stopColor="var(--color-brand)" stopOpacity={0.02} />
+              <stop offset="0%" stopColor="var(--color-markets)" stopOpacity={0.28} />
+              <stop offset="100%" stopColor="var(--color-markets)" stopOpacity={0.02} />
             </linearGradient>
           </defs>
           <CartesianGrid stroke="var(--color-chart-grid)" vertical={false} />
@@ -223,11 +223,11 @@ export function CategoryChart({
             type="monotone"
             dataKey="value"
             name="Avg $/kg"
-            stroke="var(--color-brand)"
+            stroke="var(--color-markets)"
             strokeWidth={2.25}
             fill="url(#mkt-value-grad)"
             dot={false}
-            activeDot={{ r: 4, fill: "var(--color-brand)", strokeWidth: 0 }}
+            activeDot={{ r: 4, fill: "var(--color-markets)", strokeWidth: 0 }}
             isAnimationActive
             animationDuration={700}
           />

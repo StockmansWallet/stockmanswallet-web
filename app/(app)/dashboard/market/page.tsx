@@ -53,7 +53,7 @@ export default async function MarketPage({ searchParams }: Props) {
     <div className="max-w-4xl">
       <PageHeader
         title="Market"
-        titleClassName="text-4xl font-bold text-brand"
+        titleClassName="text-4xl font-bold text-markets"
         subtitle="Live livestock market intelligence and price indicators."
       />
 
@@ -109,7 +109,7 @@ export default async function MarketPage({ searchParams }: Props) {
                   <SectionIcon icon={TrendingUp} />
                   <CardTitle>Categories</CardTitle>
                 </div>
-                <Link href="/dashboard/market/indicators" className="text-xs font-medium text-brand hover:underline">
+                <Link href="/dashboard/market/indicators" className="text-xs font-medium text-markets hover:underline">
                   Detailed view <ArrowRight className="ml-0.5 inline h-3 w-3" />
                 </Link>
               </div>
@@ -132,7 +132,7 @@ export default async function MarketPage({ searchParams }: Props) {
                   <SectionIcon icon={Activity} />
                   <CardTitle>Market Pulse</CardTitle>
                 </div>
-                <Link href="/dashboard/market/pulse" className="text-xs font-medium text-brand hover:underline">
+                <Link href="/dashboard/market/pulse" className="text-xs font-medium text-markets hover:underline">
                   Browse saleyards <ArrowRight className="ml-0.5 inline h-3 w-3" />
                 </Link>
               </div>
@@ -176,8 +176,8 @@ export default async function MarketPage({ searchParams }: Props) {
 
 function SectionIcon({ icon: Icon }: { icon: React.ComponentType<{ className?: string }> }) {
   return (
-    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
-      <Icon className="h-3.5 w-3.5 text-brand" />
+    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-markets/15">
+      <Icon className="h-3.5 w-3.5 text-markets" />
     </div>
   );
 }

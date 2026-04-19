@@ -135,7 +135,7 @@ export function YearOverlayChart({ series, height = 240 }: Props) {
         />
         {orderedYears.map((year, idx) => {
           const isCurrent = idx === orderedYears.length - 1;
-          const colour = YEAR_COLOURS[idx] ?? "var(--color-brand)";
+          const colour = YEAR_COLOURS[idx] ?? "var(--color-markets)";
           return (
             <Line
               key={year}

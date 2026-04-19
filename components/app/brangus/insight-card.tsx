@@ -26,19 +26,19 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 const sentimentColor: Record<string, string> = {
   positive: "text-success",
   negative: "text-error",
-  neutral: "text-brand",
+  neutral: "text-insights",
 };
 
 const sentimentBg: Record<string, string> = {
   positive: "bg-success/15",
   negative: "bg-error/15",
-  neutral: "bg-brand/15",
+  neutral: "bg-insights/15",
 };
 
 const sentimentIconColor: Record<string, string> = {
   positive: "text-success",
   negative: "text-error",
-  neutral: "text-brand",
+  neutral: "text-insights",
 };
 
 export function InsightCard({ insight }: { insight: BrangusInsight }) {
@@ -75,7 +75,7 @@ export function InsightCard({ insight }: { insight: BrangusInsight }) {
 
         {/* Footer link */}
         {insight.linkHref && (
-          <div className="flex items-center gap-1 text-xs font-medium text-brand">
+          <div className="flex items-center gap-1 text-xs font-medium text-insights">
             View Details
             <ChevronRight className="h-3 w-3" />
           </div>

@@ -21,7 +21,7 @@ summary {
 @theme inline {
   /* ================================================================
      HUE PALETTE
-     8 vivid hues, matched in lightness + chroma to #FF8000 so they
+     10 vivid hues, matched in lightness + chroma to #FF8000 so they
      read as one family. Each hue has default / light / dark tints.
      ================================================================ */
 
@@ -35,32 +35,42 @@ summary {
   --color-gold-light: #FFC85C;
   --color-gold-dark: #CC8A19;
 
-  /* 3. Emerald - Success / Yard Book */
+  /* 3. Lime - Markets */
+  --color-lime: #9BD827;
+  --color-lime-light: #B5E55C;
+  --color-lime-dark: #7AB01F;
+
+  /* 4. Emerald - Success / Yard Book */
   --color-emerald: #2FD666;
   --color-emerald-light: #5FE088;
   --color-emerald-dark: #23A850;
 
-  /* 4. Teal - Grid IQ */
+  /* 5. Teal - Grid IQ */
   --color-teal: #19CFC0;
   --color-teal-light: #4DDBD0;
   --color-teal-dark: #14A599;
 
-  /* 5. Sky - Info / Freight IQ */
+  /* 6. Sky - Info / Freight IQ */
   --color-sky: #2DA6FF;
   --color-sky-light: #5FBBFF;
   --color-sky-dark: #1A85CC;
 
-  /* 6. Indigo - Advisor */
+  /* 7. Indigo - Advisor */
   --color-indigo: #5A6DF5;
   --color-indigo-light: #8291F8;
   --color-indigo-dark: #3F4FD4;
 
-  /* 7. Violet - Reserved / chart tertiary */
+  /* 8. Violet - Producer Network */
   --color-violet: #B057F5;
   --color-violet-light: #C380F8;
   --color-violet-dark: #8A3FD0;
 
-  /* 8. Red - Error / Destructive */
+  /* 9. Pink - Insights */
+  --color-pink: #FF4D8F;
+  --color-pink-light: #FF7FB0;
+  --color-pink-dark: #D93A73;
+
+  /* 10. Red - Error / Destructive */
   --color-red: #FF4052;
   --color-red-light: #FF7A87;
   --color-red-dark: #D62F3F;
@@ -121,14 +131,28 @@ summary {
      ================================================================ */
   --color-brangus: var(--color-orange);
   --color-brangus-light: var(--color-orange-light);
-  --color-reports: var(--color-gold);
-  --color-reports-light: var(--color-gold-light);
+  --color-brangus-dark: var(--color-orange-dark);
+  --color-insights: var(--color-pink);
+  --color-insights-light: var(--color-pink-light);
+  --color-insights-dark: var(--color-pink-dark);
+  --color-markets: var(--color-lime);
+  --color-markets-light: var(--color-lime-light);
+  --color-markets-dark: var(--color-lime-dark);
   --color-yard-book: var(--color-emerald);
   --color-yard-book-light: var(--color-emerald-light);
-  --color-grid-iq: var(--color-teal);
-  --color-grid-iq-light: var(--color-teal-light);
+  --color-yard-book-dark: var(--color-emerald-dark);
+  --color-reports: var(--color-gold);
+  --color-reports-light: var(--color-gold-light);
+  --color-reports-dark: var(--color-gold-dark);
   --color-freight-iq: var(--color-sky);
   --color-freight-iq-light: var(--color-sky-light);
+  --color-freight-iq-dark: var(--color-sky-dark);
+  --color-grid-iq: var(--color-teal);
+  --color-grid-iq-light: var(--color-teal-light);
+  --color-grid-iq-dark: var(--color-teal-dark);
+  --color-producer-network: var(--color-violet);
+  --color-producer-network-light: var(--color-violet-light);
+  --color-producer-network-dark: var(--color-violet-dark);
   --color-advisor: var(--color-indigo);
   --color-advisor-light: var(--color-indigo-light);
   --color-advisor-dark: var(--color-indigo-dark);

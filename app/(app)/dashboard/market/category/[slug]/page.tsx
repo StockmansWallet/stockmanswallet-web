@@ -200,8 +200,8 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
-                    <TrendingUp className="h-3.5 w-3.5 text-brand" />
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-markets/15">
+                    <TrendingUp className="h-3.5 w-3.5 text-markets" />
                   </div>
                   <CardTitle>Price history</CardTitle>
                 </div>
@@ -230,8 +230,8 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2.5">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
-                  <Calendar className="h-3.5 w-3.5 text-brand" />
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-markets/15">
+                  <Calendar className="h-3.5 w-3.5 text-markets" />
                 </div>
                 <CardTitle>Seasonality</CardTitle>
               </div>
@@ -249,8 +249,8 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
-                    <MapPin className="h-3.5 w-3.5 text-brand" />
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-markets/15">
+                    <MapPin className="h-3.5 w-3.5 text-markets" />
                   </div>
                   <CardTitle>Top saleyards</CardTitle>
                 </div>
