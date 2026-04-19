@@ -18,6 +18,7 @@ import { ChatBubble } from "@/components/app/chat/chat-bubble";
 import { ChatInput } from "@/components/app/chat/chat-input";
 import { TypingIndicator } from "@/components/app/chat/typing-indicator";
 import { QuickInsightRow } from "@/components/app/chat/quick-insight-row";
+import { BrangusChatPrintView } from "@/components/app/brangus/brangus-chat-print-view";
 
 const SUGGESTED_PROMPTS = [
   "What's my portfolio worth today?",
@@ -505,18 +506,10 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
 
   return (
     <div data-print-chat className="flex flex-1 flex-col overflow-hidden">
-      {/* Print header - hidden on screen, shown in print */}
-      <div data-print-header className="hidden items-center gap-3 px-6 py-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FF8000]">
-          <Brain className="h-5 w-5 text-white" />
-        </div>
-        <div>
-          <p className="text-lg font-bold text-[#1a1a1a]">Brangus</p>
-          <p className="text-xs text-[#666]">
-            {new Date().toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}
-          </p>
-        </div>
-      </div>
+      <BrangusChatPrintView
+        messages={messages.map((m) => ({ id: m.id, role: m.role, content: m.content }))}
+        userLabel={userInitials && userInitials !== "SW" ? userInitials : "You"}
+      />
 
       {/* Export toolbar - always rendered, disabled until 2+ messages */}
       {(() => {
