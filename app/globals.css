@@ -16,78 +16,157 @@ summary {
 
 :root {
   color-scheme: dark;
-
-  /* Brand */
-  --brand-orange: #FF8000;
-  --brand-orange-light: #FFa333;
-  --brand-orange-dark: #CC6600;
-
-  /* Backgrounds  -  dark tones matching mockup */
-  --background: #1F1B18;
-  --background-alt: #1A1A1A;
-
-  /* Surfaces (cards, inputs) */
-  --surface-lowest: rgba(255, 255, 255, 0.02);
-  --surface: rgba(255, 255, 255, 0.05);
-  --surface-raised: rgba(255, 255, 255, 0.08);
-  --surface-high: rgba(255, 255, 255, 0.12);
-  --surface-hover: rgba(255, 255, 255, 0.03);
-
-  /* Borders & dividers */
-  --divider: rgba(255, 255, 255, 0.04);
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border: rgba(255, 255, 255, 0.08);
-
-  /* Rings */
-  --ring-subtle: rgba(255, 255, 255, 0.10);
-  --ring-medium: rgba(255, 255, 255, 0.15);
-
-  /* Text */
-  --text-primary: #FFFFFF;
-  --text-secondary: rgba(255, 255, 255, 0.65);
-  --text-muted: rgba(255, 255, 255, 0.55);
-
-  /* Foreground (alias) */
-  --foreground: #FFFFFF;
-
-  /* Semantic */
-  --success: #7CA749;
-  --warning: #DB9B4D;
-  --info: #5C8FAD;
-  --error: #E05252;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-brand: var(--brand-orange);
-  --color-brand-light: var(--brand-orange-light);
-  --color-brand-dark: var(--brand-orange-dark);
-  --color-bg-alt: var(--background-alt);
-  --color-surface-lowest: var(--surface-lowest);
-  --color-surface: var(--surface);
-  --color-surface-raised: var(--surface-raised);
-  --color-surface-high: var(--surface-high);
-  --color-surface-hover: var(--surface-hover);
-  --color-divider: var(--divider);
-  --color-border-subtle: var(--border-subtle);
-  --color-border: var(--border);
-  --color-ring-subtle: var(--ring-subtle);
-  --color-ring-medium: var(--ring-medium);
-  --color-text-primary: var(--text-primary);
-  --color-text-secondary: var(--text-secondary);
-  --color-text-muted: var(--text-muted);
-  --color-text-tertiary: rgba(255, 255, 255, 0.50);
-  --color-text-quaternary: rgba(255, 255, 255, 0.2);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-info: var(--info);
-  --color-error: var(--error);
-  --font-sans: ui-rounded, "SF Pro Rounded", "SF Pro Display", -apple-system, BlinkMacSystemFont, var(--font-nunito), "Nunito", system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono);
-  --font-serif: var(--font-lora), "Lora", "Georgia", "Times New Roman", serif;
+  /* ================================================================
+     HUE PALETTE
+     8 vivid hues, matched in lightness + chroma to #FF8000 so they
+     read as one family. Each hue has default / light / dark tints.
+     ================================================================ */
 
-  /* Landing page backgrounds */
+  /* 1. Orange - Brand / Brangus */
+  --color-orange: #FF8000;
+  --color-orange-light: #FFA333;
+  --color-orange-dark: #CC6600;
+
+  /* 2. Gold - Warning / Reports */
+  --color-gold: #FFB020;
+  --color-gold-light: #FFC85C;
+  --color-gold-dark: #CC8A19;
+
+  /* 3. Emerald - Success / Yard Book */
+  --color-emerald: #2FD666;
+  --color-emerald-light: #5FE088;
+  --color-emerald-dark: #23A850;
+
+  /* 4. Teal - Grid IQ */
+  --color-teal: #19CFC0;
+  --color-teal-light: #4DDBD0;
+  --color-teal-dark: #14A599;
+
+  /* 5. Sky - Info / Freight IQ */
+  --color-sky: #2DA6FF;
+  --color-sky-light: #5FBBFF;
+  --color-sky-dark: #1A85CC;
+
+  /* 6. Indigo - Advisor */
+  --color-indigo: #5A6DF5;
+  --color-indigo-light: #8291F8;
+  --color-indigo-dark: #3F4FD4;
+
+  /* 7. Violet - Reserved / chart tertiary */
+  --color-violet: #B057F5;
+  --color-violet-light: #C380F8;
+  --color-violet-dark: #8A3FD0;
+
+  /* 8. Red - Error / Destructive */
+  --color-red: #FF4052;
+  --color-red-light: #FF7A87;
+  --color-red-dark: #D62F3F;
+
+  /* ================================================================
+     NEUTRALS - surfaces, borders, text
+     ================================================================ */
+  --color-background: #1F1B18;
+  --color-foreground: #FFFFFF;
+  --color-bg-alt: #1A1A1A;
+
+  --color-surface-lowest: rgba(255, 255, 255, 0.02);
+  --color-surface: rgba(255, 255, 255, 0.05);
+  --color-surface-raised: rgba(255, 255, 255, 0.08);
+  --color-surface-high: rgba(255, 255, 255, 0.12);
+  --color-surface-hover: rgba(255, 255, 255, 0.03);
+
+  --color-divider: rgba(255, 255, 255, 0.04);
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-ring-subtle: rgba(255, 255, 255, 0.10);
+  --color-ring-medium: rgba(255, 255, 255, 0.15);
+
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: rgba(255, 255, 255, 0.65);
+  --color-text-muted: rgba(255, 255, 255, 0.55);
+  --color-text-tertiary: rgba(255, 255, 255, 0.50);
+  --color-text-quaternary: rgba(255, 255, 255, 0.20);
+
+  /* ================================================================
+     BRAND - alias to orange
+     ================================================================ */
+  --color-brand: var(--color-orange);
+  --color-brand-light: var(--color-orange-light);
+  --color-brand-dark: var(--color-orange-dark);
+
+  /* ================================================================
+     SEMANTIC STATUS - alias to hue palette
+     ================================================================ */
+  --color-success: var(--color-emerald);
+  --color-success-light: var(--color-emerald-light);
+  --color-success-dark: var(--color-emerald-dark);
+
+  --color-warning: var(--color-gold);
+  --color-warning-light: var(--color-gold-light);
+  --color-warning-dark: var(--color-gold-dark);
+
+  --color-info: var(--color-sky);
+  --color-info-light: var(--color-sky-light);
+  --color-info-dark: var(--color-sky-dark);
+
+  --color-error: var(--color-red);
+  --color-error-light: var(--color-red-light);
+  --color-error-dark: var(--color-red-dark);
+
+  /* ================================================================
+     FEATURE / PRODUCT ACCENTS - alias to hue palette
+     ================================================================ */
+  --color-brangus: var(--color-orange);
+  --color-brangus-light: var(--color-orange-light);
+  --color-reports: var(--color-gold);
+  --color-reports-light: var(--color-gold-light);
+  --color-yard-book: var(--color-emerald);
+  --color-yard-book-light: var(--color-emerald-light);
+  --color-grid-iq: var(--color-teal);
+  --color-grid-iq-light: var(--color-teal-light);
+  --color-freight-iq: var(--color-sky);
+  --color-freight-iq-light: var(--color-sky-light);
+  --color-advisor: var(--color-indigo);
+  --color-advisor-light: var(--color-indigo-light);
+
+  /* ================================================================
+     CHARTS
+     Categorical ordering alternates warm/cool so adjacent series
+     stay visually distinct in legends and line charts.
+     ================================================================ */
+  --color-chart-1: var(--color-orange);
+  --color-chart-2: var(--color-sky);
+  --color-chart-3: var(--color-emerald);
+  --color-chart-4: var(--color-violet);
+  --color-chart-5: var(--color-gold);
+  --color-chart-6: var(--color-teal);
+  --color-chart-7: var(--color-red);
+  --color-chart-8: var(--color-indigo);
+
+  --color-chart-positive: var(--color-emerald);
+  --color-chart-negative: var(--color-red);
+  --color-chart-neutral: var(--color-text-muted);
+
+  /* Sequential ramp (orange) for heatmaps and density */
+  --color-chart-ramp-1: rgba(255, 128, 0, 0.15);
+  --color-chart-ramp-2: rgba(255, 128, 0, 0.35);
+  --color-chart-ramp-3: rgba(255, 128, 0, 0.55);
+  --color-chart-ramp-4: rgba(255, 128, 0, 0.75);
+  --color-chart-ramp-5: rgba(255, 128, 0, 1.00);
+
+  /* Chart chrome */
+  --color-chart-grid: rgba(255, 255, 255, 0.06);
+  --color-chart-axis: rgba(255, 255, 255, 0.35);
+  --color-chart-tooltip-bg: #271F16;
+  --color-chart-tooltip-border: rgba(255, 255, 255, 0.08);
+  --color-chart-reference: rgba(255, 255, 255, 0.25);
+
+  /* ================================================================
+     LANDING PAGE
+     ================================================================ */
   --color-bg-deep: #1D1916;
   --color-bg-primary: #1F1B18;
   --color-bg-card-1: #271F16;
@@ -95,27 +174,56 @@ summary {
   --color-bg-card-3: #453427;
   --color-bg-card-4: #4E3C2C;
 
-  /* Accent ramp (landing page) */
-  --color-accent: #FF8000;
-  --color-accent-light: #FFa333;
-  --color-accent-secondary: #CC6600;
+  --color-accent: var(--color-orange);
+  --color-accent-light: var(--color-orange-light);
+  --color-accent-secondary: var(--color-orange-dark);
   --color-accent-tertiary: #8E420B;
   --color-accent-quaternary: #5F2C07;
   --color-accent-quinary: #472105;
 
-  /* Feature accent colours */
-  --color-brangus: #FF8000;
-  --color-brangus-light: #FFa333;
-  --color-freight-iq: #1399EC;
-  --color-freight-iq-light: #64BBF5;
-  --color-yard-book: #87B11B;
-  --color-yard-book-light: #A3CC3D;
-  --color-grid-iq: #00B4A0;
-  --color-grid-iq-light: #33D4C0;
-  --color-reports: #D4A053;
-  --color-reports-light: #E8C07A;
-  --color-advisor: #1E5C8C;
-  --color-advisor-light: #2F8CD9;
+  /* ================================================================
+     FONTS
+     ================================================================ */
+  --font-sans: ui-rounded, "SF Pro Rounded", "SF Pro Display", -apple-system, BlinkMacSystemFont, var(--font-nunito), "Nunito", system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-lora), "Lora", "Georgia", "Times New Roman", serif;
+}
+
+/* ================================================================
+   BACK-COMPAT ALIASES
+   Legacy variable names still used throughout the codebase. New code
+   should use the --color-* tokens from @theme directly.
+   ================================================================ */
+:root {
+  --brand-orange: var(--color-orange);
+  --brand-orange-light: var(--color-orange-light);
+  --brand-orange-dark: var(--color-orange-dark);
+
+  --background: var(--color-background);
+  --background-alt: var(--color-bg-alt);
+  --foreground: var(--color-foreground);
+
+  --surface-lowest: var(--color-surface-lowest);
+  --surface: var(--color-surface);
+  --surface-raised: var(--color-surface-raised);
+  --surface-high: var(--color-surface-high);
+  --surface-hover: var(--color-surface-hover);
+
+  --divider: var(--color-divider);
+  --border-subtle: var(--color-border-subtle);
+  --border: var(--color-border);
+
+  --ring-subtle: var(--color-ring-subtle);
+  --ring-medium: var(--color-ring-medium);
+
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
+  --text-muted: var(--color-text-muted);
+
+  --success: var(--color-success);
+  --warning: var(--color-warning);
+  --info: var(--color-info);
+  --error: var(--color-error);
 }
 
 /* Glass effects (landing page) */

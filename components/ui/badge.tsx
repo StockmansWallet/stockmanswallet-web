@@ -13,13 +13,13 @@ const variantClasses: Record<BadgeVariant, string> = {
   brand:
     "bg-brand/15 text-brand",
   success:
-    "bg-green-500/15 text-green-400",
+    "bg-success/15 text-success",
   warning:
-    "bg-amber-500/15 text-amber-400",
+    "bg-warning/15 text-warning",
   danger:
-    "bg-red-500/15 text-red-400",
+    "bg-error/15 text-error",
   info:
-    "bg-blue-500/15 text-blue-400",
+    "bg-info/15 text-info",
 };
 
 function Badge({ variant = "default", children, className = "", ...props }: BadgeProps) {

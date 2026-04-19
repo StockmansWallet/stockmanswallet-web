@@ -62,7 +62,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             htmlFor={id}
             className="mb-1.5 block text-sm font-medium text-text-secondary"
           >
-            {label}{labelSuffix && <span className="ml-1 text-[11px] font-normal text-text-muted">{labelSuffix}</span>}{required && <span className="text-red-400"> *</span>}
+            {label}{labelSuffix && <span className="ml-1 text-[11px] font-normal text-text-muted">{labelSuffix}</span>}{required && <span className="text-error"> *</span>}
           </label>
         )}
         <div className="relative">
@@ -80,7 +80,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               hasTrailingIcon ? "pr-10" : ""
             } ${
               error
-                ? "ring-1 ring-inset ring-red-500/60 focus:ring-red-500"
+                ? "ring-1 ring-inset ring-error/60 focus:ring-error"
                 : hint
                   ? "ring-1 ring-inset ring-brand/40 shadow-[0_0_8px_#FF800040] focus:ring-brand/60 focus:shadow-[0_0_12px_#FF800059] focus:bg-surface-raised"
                   : "focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
@@ -109,7 +109,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
         </div>
         {error && (
-          <p className="mt-1.5 text-xs text-red-400">{error}</p>
+          <p className="mt-1.5 text-xs text-error">{error}</p>
         )}
         {helperText && !error && (
           <p className="mt-1.5 text-xs text-text-muted">{helperText}</p>

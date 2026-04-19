@@ -2,8 +2,8 @@
 
 const COLOR_CLASSES: Record<string, string> = {
   brand: "peer-checked:bg-brand peer-focus-visible:ring-brand/60",
-  blue: "peer-checked:bg-blue-500 peer-focus-visible:ring-blue-500/60",
-  green: "peer-checked:bg-green-500 peer-focus-visible:ring-green-500/60",
+  blue: "peer-checked:bg-sky peer-focus-visible:ring-sky/60",
+  green: "peer-checked:bg-success peer-focus-visible:ring-success/60",
 };
 
 interface SwitchProps {

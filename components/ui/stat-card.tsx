@@ -4,12 +4,12 @@ type StatCardAccent = "brand" | "lime" | "sky" | "teal" | "amber" | "purple" | "
 
 const accentClasses: Record<StatCardAccent, string> = {
   brand: "bg-brand/15 text-brand",
-  lime: "bg-lime-500/15 text-lime-400",
-  sky: "bg-sky-500/15 text-sky-400",
-  teal: "bg-teal-500/15 text-teal-400",
-  amber: "bg-amber-500/15 text-amber-400",
-  purple: "bg-purple-500/15 text-purple-400",
-  simulator: "bg-[#ff4021]/15 text-[#ff4021]",
+  lime: "bg-emerald/15 text-emerald",
+  sky: "bg-sky/15 text-sky",
+  teal: "bg-teal/15 text-teal",
+  amber: "bg-gold/15 text-gold",
+  purple: "bg-violet/15 text-violet",
+  simulator: "bg-red/15 text-red",
 };
 
 interface StatCardProps {

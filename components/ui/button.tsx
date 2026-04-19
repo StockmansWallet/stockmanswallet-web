@@ -12,27 +12,27 @@ const variantClasses: Record<ButtonVariant, string> = {
   primary:
     "bg-brand text-white hover:bg-brand-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   secondary:
-    "bg-[#333333] text-white/70 hover:bg-[#3D3D3D] active:scale-[0.97]",
+    "bg-surface-high text-text-secondary hover:bg-surface-raised active:scale-[0.97]",
   ghost:
     "text-text-secondary hover:bg-surface-raised hover:text-text-primary",
   destructive:
-    "bg-[#8A1316] text-white/80 hover:bg-[#9E1619] active:scale-[0.97] shadow-sm",
+    "bg-error text-white hover:bg-error-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   teal:
-    "bg-teal-500 text-white hover:bg-teal-600 active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
+    "bg-teal text-white hover:bg-teal-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   indigo:
-    "bg-indigo-500 text-white hover:bg-indigo-600 active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
+    "bg-indigo text-white hover:bg-indigo-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   lime:
-    "bg-lime-600 text-white hover:bg-lime-700 active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
+    "bg-emerald text-white hover:bg-emerald-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   sky:
-    "bg-sky-500 text-white hover:bg-sky-600 active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
+    "bg-sky text-white hover:bg-sky-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   amber:
-    "bg-amber-500 text-white hover:bg-amber-600 active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
+    "bg-gold text-white hover:bg-gold-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   purple:
-    "bg-[#2F8CD9] text-white hover:bg-[#1E5C8C] active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
+    "bg-violet text-white hover:bg-violet-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   advisor:
-    "bg-[#1E5C8C] text-white hover:bg-[#2F8CD9] active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
+    "bg-indigo text-white hover:bg-indigo-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   simulator:
-    "bg-[#ff4021] text-white hover:bg-[#e6391d] active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
+    "bg-red text-white hover:bg-red-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {

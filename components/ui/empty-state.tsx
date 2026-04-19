@@ -17,13 +17,13 @@ interface EmptyStateProps {
 
 const variantStyles: Record<EmptyStateVariant, { iconBg: string; iconText: string }> = {
   brand: { iconBg: "bg-brand/10", iconText: "text-brand" },
-  teal: { iconBg: "bg-teal-500/10", iconText: "text-teal-400" },
-  indigo: { iconBg: "bg-indigo-500/10", iconText: "text-indigo-400" },
-  lime: { iconBg: "bg-lime-500/10", iconText: "text-lime-400" },
-  sky: { iconBg: "bg-sky-500/10", iconText: "text-sky-400" },
-  amber: { iconBg: "bg-amber-500/10", iconText: "text-amber-400" },
-  purple: { iconBg: "bg-[#2F8CD9]/10", iconText: "text-[#2F8CD9]" },
-  advisor: { iconBg: "bg-[#2F8CD9]/10", iconText: "text-[#2F8CD9]" },
+  teal: { iconBg: "bg-teal/10", iconText: "text-teal" },
+  indigo: { iconBg: "bg-indigo/10", iconText: "text-indigo" },
+  lime: { iconBg: "bg-emerald/10", iconText: "text-emerald" },
+  sky: { iconBg: "bg-sky/10", iconText: "text-sky" },
+  amber: { iconBg: "bg-gold/10", iconText: "text-gold" },
+  purple: { iconBg: "bg-violet/10", iconText: "text-violet" },
+  advisor: { iconBg: "bg-indigo/10", iconText: "text-indigo" },
 };
 
 const variantToButton: Record<EmptyStateVariant, ButtonVariant> = {

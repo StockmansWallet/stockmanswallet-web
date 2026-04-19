@@ -234,7 +234,7 @@ function DatePicker({
           value ? "text-text-primary" : "text-text-muted"
         } ${
           error
-            ? "ring-1 ring-inset ring-red-500/60"
+            ? "ring-1 ring-inset ring-error/60"
             : open
               ? "ring-1 ring-inset ring-brand/60 bg-surface-raised"
               : "focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
@@ -245,7 +245,7 @@ function DatePicker({
       </button>
 
       {error && (
-        <p className="mt-1.5 text-xs text-red-400">{error}</p>
+        <p className="mt-1.5 text-xs text-error">{error}</p>
       )}
 
       {/* Calendar popover via portal */}

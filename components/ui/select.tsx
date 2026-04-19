@@ -168,7 +168,7 @@ function GroupedSelect({
           htmlFor={id}
           className="mb-1.5 block text-sm font-medium text-text-secondary"
         >
-          {label}{required && <span className="text-red-400"> *</span>}
+          {label}{required && <span className="text-error"> *</span>}
         </label>
       )}
 
@@ -193,7 +193,7 @@ function GroupedSelect({
           disabled
             ? ""
             : error
-              ? "ring-1 ring-inset ring-red-500/60"
+              ? "ring-1 ring-inset ring-error/60"
               : open
                 ? "ring-1 ring-inset ring-brand/60 bg-surface-raised"
                 : hint
@@ -206,7 +206,7 @@ function GroupedSelect({
       </button>
 
       {error && (
-        <p className="mt-1.5 text-xs text-red-400">{error}</p>
+        <p className="mt-1.5 text-xs text-error">{error}</p>
       )}
       {helperText && !error && (
         <p className="mt-1.5 text-xs text-text-muted">{helperText}</p>
@@ -258,7 +258,7 @@ const NativeSelect = forwardRef<HTMLSelectElement, SelectProps>(
             htmlFor={id}
             className="mb-1.5 block text-sm font-medium text-text-secondary"
           >
-            {label}{required && <span className="text-red-400"> *</span>}
+            {label}{required && <span className="text-error"> *</span>}
           </label>
         )}
         <div className="relative">
@@ -268,7 +268,7 @@ const NativeSelect = forwardRef<HTMLSelectElement, SelectProps>(
             required={required}
             className={`w-full appearance-none rounded-lg bg-surface py-3 pl-4 pr-10 text-sm text-text-primary outline-none transition-all ${
               error
-                ? "ring-1 ring-inset ring-red-500/60 focus:ring-red-500"
+                ? "ring-1 ring-inset ring-error/60 focus:ring-error"
                 : hint
                   ? "ring-1 ring-inset ring-brand/40 shadow-[0_0_8px_#FF800040] focus:ring-brand/60 focus:shadow-[0_0_12px_#FF800059] focus:bg-surface-raised"
                   : "focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
@@ -289,7 +289,7 @@ const NativeSelect = forwardRef<HTMLSelectElement, SelectProps>(
           <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
         </div>
         {error && (
-          <p className="mt-1.5 text-xs text-red-400">{error}</p>
+          <p className="mt-1.5 text-xs text-error">{error}</p>
         )}
         {helperText && !error && (
           <p className="mt-1.5 text-xs text-text-muted">{helperText}</p>

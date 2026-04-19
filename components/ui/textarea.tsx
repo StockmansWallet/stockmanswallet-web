@@ -15,7 +15,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             htmlFor={id}
             className="mb-1.5 block text-sm font-medium text-text-secondary"
           >
-            {label}{required && <span className="text-red-400"> *</span>}
+            {label}{required && <span className="text-error"> *</span>}
           </label>
         )}
         <textarea
@@ -24,13 +24,13 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           required={required}
           className={`w-full rounded-lg bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all resize-none ${
             error
-              ? "ring-1 ring-inset ring-red-500/60 focus:ring-red-500"
+              ? "ring-1 ring-inset ring-error/60 focus:ring-error"
               : "focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
           } ${className}`}
           {...props}
         />
         {error && (
-          <p className="mt-1.5 text-xs text-red-400">{error}</p>
+          <p className="mt-1.5 text-xs text-error">{error}</p>
         )}
         {helperText && !error && (
           <p className="mt-1.5 text-xs text-text-muted">{helperText}</p>
