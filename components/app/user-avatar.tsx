@@ -7,8 +7,8 @@ interface UserAvatarProps {
   avatarUrl?: string | null;
   // Tailwind size classes applied to the avatar square. Default 10x10.
   sizeClass?: string;
-  // Rounded corner style. Producer Network rows use rounded-xl tiles while
-  // chat headers and other large surfaces use full circles.
+  // Rounded corner style. Default is a full circle; "tile" is kept as an
+  // escape hatch for callers that want a rounded-xl square instead.
   shape?: "tile" | "circle";
   // Colour tone applied to the initials tile when no image is present.
   tone?: "producer-network" | "success" | "advisor" | "neutral";
@@ -34,7 +34,7 @@ export function UserAvatar({
   name,
   avatarUrl,
   sizeClass = "h-10 w-10",
-  shape = "tile",
+  shape = "circle",
   tone = "producer-network",
   initialClass = "text-sm font-bold",
 }: UserAvatarProps) {
