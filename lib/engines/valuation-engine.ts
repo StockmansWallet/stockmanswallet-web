@@ -358,29 +358,35 @@ function resolvePriceFromEntries(
 ): PriceResolution | null {
   if (entries.length === 0) return null;
 
-  // Newest date across all entries — used as the reported dataDate and as a tiebreaker
-  // when a single bracket has multiple entries on different dates.
-  const newestDate = entries
+  // Retire stale brackets at source. Each bracket carries its own MLA report date
+  // (Grown Steer 500-600 can be fresher than 0-540 at the same saleyard), so the
+  // staleness guard must run per-entry, not just on the final resolved price.
+  // Without this, the RPC's per-bracket latest-row output can surface year-old
+  // brackets (e.g. Roma Grown Steer 0-540 @ 2024-12-01) that would otherwise be
+  // filtered out, and matchWeightRange picks them over a current bracket when a
+  // 505 kg weight fits both.
+  const freshEntries = entries.filter((e) => !isDataStale(e.data_date, STALE_DATA_THRESHOLD_DAYS));
+  if (freshEntries.length === 0) return null;
+
+  // Newest date across the fresh entries — reported as the resolved dataDate and
+  // used as a fallback tiebreaker.
+  const newestDate = freshEntries
     .map((e) => e.data_date)
     .filter((d): d is string => d !== null && d !== undefined)
     .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] ?? null;
 
-  // Consider every bracket the category+saleyard publishes, not just those whose
-  // data_date matches the newest entry. The MLA RPC returns the latest price per
-  // (category, saleyard, weight_range) tuple, so different brackets legitimately
-  // carry different dates. Filtering by newest-date silently dropped valid brackets
-  // (e.g. Bulls 450-600 on 05/04 discarded when Bulls 0-450 on 12/04 existed at
-  // the same saleyard). Genuinely stale data is caught by the saleyard-level
-  // staleness guard in isDataStale().
+  // Consider every fresh bracket — different brackets legitimately carry different
+  // dates (e.g. Bulls 450-600 on 05/04 and Bulls 0-450 on 12/04 both current),
+  // so we must see them all to match correctly.
   const availableRanges = [...new Set(
-    entries.map((e) => e.weight_range).filter((r): r is string => r !== null)
+    freshEntries.map((e) => e.weight_range).filter((r): r is string => r !== null)
   )];
 
   // Try exact bracket match (with boundary preference for upper bracket)
   const matched = matchWeightRange(projectedWeight, availableRanges);
   if (matched) {
     // Pick the most recent price within the matched bracket.
-    const bracketEntries = entries.filter((e) => e.weight_range === matched);
+    const bracketEntries = freshEntries.filter((e) => e.weight_range === matched);
     const match = bracketEntries.sort(
       (a, b) => new Date(b.data_date ?? 0).getTime() - new Date(a.data_date ?? 0).getTime()
     )[0];
@@ -388,11 +394,11 @@ function resolvePriceFromEntries(
   }
 
   // Final fallback: any-weight entries (weight_range is null)
-  const nullRange = entries.filter((e) => e.weight_range === null);
+  const nullRange = freshEntries.filter((e) => e.weight_range === null);
   if (nullRange.length > 0) return { price: Math.max(...nullRange.map((e) => e.price_per_kg)), matchedRange: null, dataDate: newestDate };
 
-  // Absolute fallback: max price across all entries
-  if (entries.length > 0) return { price: Math.max(...entries.map((e) => e.price_per_kg)), matchedRange: null, dataDate: newestDate };
+  // Absolute fallback: max price across the fresh entries
+  if (freshEntries.length > 0) return { price: Math.max(...freshEntries.map((e) => e.price_per_kg)), matchedRange: null, dataDate: newestDate };
   return null;
 }
 
