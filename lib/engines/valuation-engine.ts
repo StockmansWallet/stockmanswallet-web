@@ -67,12 +67,15 @@ export function calculateProjectedWeight(
   dwgOld: number | null,
   dwgNew: number
 ): number {
+  // Whole calendar days only. Weight gain must align with CaF, pre-birth, and mortality,
+  // which all count whole days. MLA data updates daily, so sub-day precision has no
+  // source-of-truth equivalent and introduces fractional-day drift at scale.
   if (dateChange && dwgOld !== null) {
-    const daysPhase1 = Math.max(0, (dateChange.getTime() - dateStart.getTime()) / 86400000);
-    const daysPhase2 = Math.max(0, (dateCurrent.getTime() - dateChange.getTime()) / 86400000);
+    const daysPhase1 = Math.max(0, Math.floor((dateChange.getTime() - dateStart.getTime()) / 86400000));
+    const daysPhase2 = Math.max(0, Math.floor((dateCurrent.getTime() - dateChange.getTime()) / 86400000));
     return initialWeight + (dwgOld * daysPhase1) + (dwgNew * daysPhase2);
   } else {
-    const daysPhase2 = Math.max(0, (dateCurrent.getTime() - dateStart.getTime()) / 86400000);
+    const daysPhase2 = Math.max(0, Math.floor((dateCurrent.getTime() - dateStart.getTime()) / 86400000));
     return initialWeight + (dwgNew * daysPhase2);
   }
 }
@@ -355,35 +358,41 @@ function resolvePriceFromEntries(
 ): PriceResolution | null {
   if (entries.length === 0) return null;
 
-  // Find the newest date with data (parse as Date objects for correct ordering)
-  const dates = [...new Set(
-    entries.filter((e) => e.data_date).map((e) => e.data_date as string)
-  )].sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+  // Newest date across all entries — used as the reported dataDate and as a tiebreaker
+  // when a single bracket has multiple entries on different dates.
+  const newestDate = entries
+    .map((e) => e.data_date)
+    .filter((d): d is string => d !== null && d !== undefined)
+    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] ?? null;
 
-  const newestDate = dates[0] ?? null;
-
-  // Work with newest-date entries (or all entries if none have dates)
-  const relevantEntries = newestDate
-    ? entries.filter((e) => e.data_date === newestDate)
-    : entries;
-
+  // Consider every bracket the category+saleyard publishes, not just those whose
+  // data_date matches the newest entry. The MLA RPC returns the latest price per
+  // (category, saleyard, weight_range) tuple, so different brackets legitimately
+  // carry different dates. Filtering by newest-date silently dropped valid brackets
+  // (e.g. Bulls 450-600 on 05/04 discarded when Bulls 0-450 on 12/04 existed at
+  // the same saleyard). Genuinely stale data is caught by the saleyard-level
+  // staleness guard in isDataStale().
   const availableRanges = [...new Set(
-    relevantEntries.map((e) => e.weight_range).filter((r): r is string => r !== null)
+    entries.map((e) => e.weight_range).filter((r): r is string => r !== null)
   )];
 
   // Try exact bracket match (with boundary preference for upper bracket)
   const matched = matchWeightRange(projectedWeight, availableRanges);
   if (matched) {
-    const match = relevantEntries.find((e) => e.weight_range === matched);
-    if (match) return { price: match.price_per_kg, matchedRange: matched, dataDate: newestDate };
+    // Pick the most recent price within the matched bracket.
+    const bracketEntries = entries.filter((e) => e.weight_range === matched);
+    const match = bracketEntries.sort(
+      (a, b) => new Date(b.data_date ?? 0).getTime() - new Date(a.data_date ?? 0).getTime()
+    )[0];
+    if (match) return { price: match.price_per_kg, matchedRange: matched, dataDate: match.data_date ?? newestDate };
   }
 
   // Final fallback: any-weight entries (weight_range is null)
-  const nullRange = relevantEntries.filter((e) => e.weight_range === null);
+  const nullRange = entries.filter((e) => e.weight_range === null);
   if (nullRange.length > 0) return { price: Math.max(...nullRange.map((e) => e.price_per_kg)), matchedRange: null, dataDate: newestDate };
 
-  // Absolute fallback: max price from relevant entries
-  if (relevantEntries.length > 0) return { price: Math.max(...relevantEntries.map((e) => e.price_per_kg)), matchedRange: null, dataDate: newestDate };
+  // Absolute fallback: max price across all entries
+  if (entries.length > 0) return { price: Math.max(...entries.map((e) => e.price_per_kg)), matchedRange: null, dataDate: newestDate };
   return null;
 }
 
@@ -657,9 +666,12 @@ export function calculateHerdValuation(
   let calvesAtFootValue = 0;
   const calvesData = parseCalvesAtFoot(herd.additional_info);
   if (calvesData) {
+    // CaF anchor per spec v1.1 §3: fall back to created_at (immutable) so editing
+    // the herd record does not reset the DWG timer. updated_at bumps on every row
+    // mutation and would silently move the anchor whenever the user edits the herd.
     const weightRecordDate = herd.calf_weight_recorded_date
       ? parseLocal(herd.calf_weight_recorded_date)
-      : new Date(herd.updated_at);
+      : new Date(herd.created_at);
     calvesAtFootValue = calculateCalfAtFootValue(
       calvesData,
       weightRecordDate,
