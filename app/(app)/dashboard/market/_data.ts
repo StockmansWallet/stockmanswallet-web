@@ -11,6 +11,9 @@ import {
   type Mover,
   type SeasonalityCell,
   type HerdExposure,
+  type YearOverlaySeries,
+  type YearWeeklyPoint,
+  type CategoryTimelineRow,
 } from "./_constants";
 
 export {
@@ -29,6 +32,9 @@ export type {
   Mover,
   SeasonalityCell,
   HerdExposure,
+  YearWeeklyPoint,
+  YearOverlaySeries,
+  CategoryTimelineRow,
 } from "./_constants";
 
 function pctChange(current: number, prev: number): number | null {
@@ -378,6 +384,139 @@ export async function getSaleyardsForState(state?: string): Promise<Array<{ sale
   return Array.from(seen.entries())
     .map(([saleyard, state]) => ({ saleyard, state }))
     .sort((a, b) => a.saleyard.localeCompare(b.saleyard));
+}
+
+function dayOfYearFromYMD(year: number, month: number, day: number): number {
+  const date = new Date(Date.UTC(year, month - 1, day));
+  const start = new Date(Date.UTC(year, 0, 1));
+  return Math.floor((date.getTime() - start.getTime()) / 86_400_000) + 1;
+}
+
+export async function getYearOverYearMonthly(opts: {
+  state?: string;
+  years?: number;
+}): Promise<YearOverlaySeries[]> {
+  const yearsBack = opts.years ?? 3;
+  const now = new Date();
+  const currentYear = now.getUTCFullYear();
+  const startYear = currentYear - (yearsBack - 1);
+
+  const supabase = await createClient();
+
+  // Supabase PostgREST caps each request, so paginate with .range() until we
+  // drain the window. One request chain per year runs in parallel across years.
+  const PAGE = 1000;
+  const byYearMonth = new Map<string, { total: number; count: number }>();
+
+  const years = Array.from({ length: yearsBack }, (_, i) => startYear + i);
+
+  await Promise.all(
+    years.map(async (year) => {
+      const startDate = `${year}-01-01`;
+      const endExclusive = `${year + 1}-01-01`;
+
+      let from = 0;
+      while (true) {
+        let q = supabase
+          .from("category_prices")
+          .select("final_price_per_kg, data_date")
+          .gte("data_date", startDate)
+          .lt("data_date", endExclusive)
+          .order("data_date", { ascending: true })
+          .range(from, from + PAGE - 1);
+        if (opts.state) q = q.eq("state", opts.state);
+        const { data, error } = await q;
+        if (error || !data) break;
+        for (const r of data as Array<{ final_price_per_kg: number; data_date: string }>) {
+          const [ys, ms, ds] = r.data_date.split("-");
+          const dayOfYear = dayOfYearFromYMD(parseInt(ys), parseInt(ms), parseInt(ds));
+          const week = Math.min(53, Math.max(1, Math.ceil(dayOfYear / 7)));
+          const key = `${ys}-${String(week).padStart(2, "0")}`;
+          const g = byYearMonth.get(key) ?? { total: 0, count: 0 };
+          g.total += r.final_price_per_kg;
+          g.count += 1;
+          byYearMonth.set(key, g);
+        }
+        if (data.length < PAGE) break;
+        from += PAGE;
+      }
+    })
+  );
+
+  const series: YearOverlaySeries[] = [];
+  for (let y = startYear; y <= currentYear; y++) {
+    const points: YearWeeklyPoint[] = Array.from({ length: 53 }, (_, i) => {
+      const key = `${y}-${String(i + 1).padStart(2, "0")}`;
+      const g = byYearMonth.get(key);
+      return {
+        week: i + 1,
+        avg_price: g && g.count > 0 ? g.total / g.count / 100 : null,
+      };
+    });
+    series.push({ year: y, points });
+  }
+  return series;
+}
+
+export async function getCategoryTimelineWeekly(opts: {
+  state?: string;
+  years?: number;
+}): Promise<CategoryTimelineRow[]> {
+  const yearsBack = opts.years ?? 2;
+  const now = new Date();
+  const currentYear = now.getUTCFullYear();
+  const startYear = currentYear - yearsBack;
+
+  const supabase = await createClient();
+  const PAGE = 1000;
+
+  // weekDate -> category -> { total, count }
+  const byDateCat = new Map<string, Map<string, { total: number; count: number }>>();
+
+  const years = Array.from({ length: yearsBack + 1 }, (_, i) => startYear + i);
+
+  await Promise.all(
+    years.map(async (year) => {
+      const yearStart = `${year}-01-01`;
+      const yearEnd = `${year + 1}-01-01`;
+      let from = 0;
+      while (true) {
+        let q = supabase
+          .from("category_prices")
+          .select("category, final_price_per_kg, data_date")
+          .gte("data_date", yearStart)
+          .lt("data_date", yearEnd)
+          .order("data_date", { ascending: true })
+          .range(from, from + PAGE - 1);
+        if (opts.state) q = q.eq("state", opts.state);
+        const { data, error } = await q;
+        if (error || !data) break;
+        for (const r of data as Array<{ category: string; final_price_per_kg: number; data_date: string }>) {
+          const m = byDateCat.get(r.data_date) ?? new Map();
+          const g = m.get(r.category) ?? { total: 0, count: 0 };
+          g.total += r.final_price_per_kg;
+          g.count += 1;
+          m.set(r.category, g);
+          byDateCat.set(r.data_date, m);
+        }
+        if (data.length < PAGE) break;
+        from += PAGE;
+      }
+    })
+  );
+
+  // Keep only the rolling window from (today - yearsBack*365) to today
+  const cutoff = daysAgo(yearsBack * 365);
+  const dates = Array.from(byDateCat.keys()).filter((d) => d >= cutoff).sort();
+
+  return dates.map((date) => {
+    const row: CategoryTimelineRow = { week_date: date };
+    const catMap = byDateCat.get(date)!;
+    for (const [cat, g] of catMap) {
+      row[cat] = g.count > 0 ? g.total / g.count / 100 : null;
+    }
+    return row;
+  });
 }
 
 export async function resolveSlug(

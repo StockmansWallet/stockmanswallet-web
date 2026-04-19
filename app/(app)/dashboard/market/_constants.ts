@@ -68,6 +68,20 @@ export type SeasonalityCell = {
   samples: number;
 };
 
+export type YearWeeklyPoint = {
+  week: number; // 1-53, approximates week-of-year
+  avg_price: number | null;
+};
+
+export type YearOverlaySeries = {
+  year: number;
+  points: YearWeeklyPoint[];
+};
+
+export type CategoryTimelineRow = {
+  week_date: string;
+} & Record<string, number | string | null>;
+
 export type HerdExposure = {
   category: string;
   slug: string;

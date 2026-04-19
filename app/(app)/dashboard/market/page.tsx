@@ -8,6 +8,8 @@ import {
   getCategorySummaries,
   getTopMovers,
   getHerdExposure,
+  getYearOverYearMonthly,
+  getCategoryTimelineWeekly,
   AU_STATES,
   formatAUDate,
 } from "./_data";
@@ -15,6 +17,7 @@ import { StateFilter } from "./_components/state-filter";
 import { CategoryTile } from "./_components/category-tile";
 import { MoversStrip } from "./_components/movers-strip";
 import { WhatIfWidget } from "./_components/what-if-widget";
+import { MarketOverviewCard } from "./_components/market-overview-card";
 
 export const revalidate = 0;
 export const metadata = { title: "Market" };
@@ -34,11 +37,13 @@ export default async function MarketPage({ searchParams }: Props) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [summaries, movers7, movers30, exposure] = await Promise.all([
+  const [summaries, movers7, movers30, exposure, yoySeries, timelineData] = await Promise.all([
     getCategorySummaries(stateFilter),
     getTopMovers(7, stateFilter),
     getTopMovers(30, stateFilter),
     user ? getHerdExposure(user.id) : Promise.resolve([]),
+    getYearOverYearMonthly({ state: stateFilter, years: 3 }),
+    getCategoryTimelineWeekly({ state: stateFilter, years: 2 }),
   ]);
 
   const exposureByCat = new Map(exposure.map((e) => [e.category, e]));
@@ -70,6 +75,13 @@ export default async function MarketPage({ searchParams }: Props) {
         </Card>
       ) : (
         <div className="space-y-5">
+          {/* Market overview (seasonal YoY + category timeline toggle) */}
+          <MarketOverviewCard
+            yoySeries={yoySeries}
+            timelineData={timelineData}
+            stateFilter={stateFilter}
+          />
+
           {/* Top Movers */}
           <Card>
             <CardHeader>
