@@ -233,7 +233,9 @@ select option {
     padding: 0 !important;
   }
 
-  /* Chat container - remove overflow constraints */
+  /* Release every container above the chat so the full conversation prints */
+  [data-print-chat-wrapper],
+  [data-print-chat-card],
   [data-print-chat] {
     overflow: visible !important;
     height: auto !important;
@@ -243,6 +245,14 @@ select option {
   [data-print-chat] > div {
     overflow: visible !important;
     height: auto !important;
+    max-height: none !important;
+  }
+
+  /* Release the main scroll container so the full chat prints */
+  main {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
   }
 
   /* Print header - only visible in print */

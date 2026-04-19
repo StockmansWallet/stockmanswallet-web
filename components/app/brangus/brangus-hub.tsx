@@ -139,8 +139,8 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
       </div>
 
       {/* Chat tab (always mounted, hidden when inactive) */}
-      <div className={activeTab !== "chat" ? "hidden" : ""} style={{ height: "calc(100vh - 19rem)" }}>
-        <Card className="flex h-full flex-col overflow-hidden rounded-3xl">
+      <div data-print-chat-wrapper className={activeTab !== "chat" ? "hidden" : ""} style={{ height: "calc(100vh - 19rem)" }}>
+        <Card data-print-chat-card className="flex h-full flex-col overflow-hidden rounded-3xl">
           {loadingConv ? (
             <div className="flex flex-1 items-center justify-center">
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-brand border-t-transparent" />
