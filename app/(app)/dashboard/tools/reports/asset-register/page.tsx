@@ -23,19 +23,23 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const { data: properties } = await supabase
-    .from("properties")
-    .select("id, property_name")
-    .eq("user_id", user!.id)
-    .eq("is_deleted", false)
-    .order("property_name");
-
-  const reportData = await generateAssetRegisterData(supabase, user!.id, {
-    reportType: "asset-register",
-    startDate: config.startDate,
-    endDate: config.endDate,
-    selectedPropertyIds: config.selectedPropertyIds,
-  });
+  // Parallel: filter-dropdown properties + the heavier report generator.
+  // Sequential await was an unnecessary round-trip since neither depends
+  // on the other beyond the auth user.
+  const [{ data: properties }, reportData] = await Promise.all([
+    supabase
+      .from("properties")
+      .select("id, property_name")
+      .eq("user_id", user!.id)
+      .eq("is_deleted", false)
+      .order("property_name"),
+    generateAssetRegisterData(supabase, user!.id, {
+      reportType: "asset-register",
+      startDate: config.startDate,
+      endDate: config.endDate,
+      selectedPropertyIds: config.selectedPropertyIds,
+    }),
+  ]);
 
   const { executiveSummary, herdData, herdComposition, userDetails, properties: reportProperties } = reportData;
   const isEmpty = herdData.length === 0;

@@ -28,19 +28,24 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  const { data: properties } = await supabase
-    .from("properties")
-    .select("id, property_name")
-    .eq("user_id", user!.id)
-    .eq("is_deleted", false)
-    .order("property_name");
 
-  const reportData = await generateSaleyardComparisonData(supabase, user!.id, {
-    reportType: "saleyard-comparison",
-    startDate: config.startDate,
-    endDate: config.endDate,
-    selectedPropertyIds: config.selectedPropertyIds,
-  });
+  // Parallel: filter-dropdown properties + the heavier report generator.
+  // Sequential await was an unnecessary round-trip since neither depends
+  // on the other beyond the auth user.
+  const [{ data: properties }, reportData] = await Promise.all([
+    supabase
+      .from("properties")
+      .select("id, property_name")
+      .eq("user_id", user!.id)
+      .eq("is_deleted", false)
+      .order("property_name"),
+    generateSaleyardComparisonData(supabase, user!.id, {
+      reportType: "saleyard-comparison",
+      startDate: config.startDate,
+      endDate: config.endDate,
+      selectedPropertyIds: config.selectedPropertyIds,
+    }),
+  ]);
 
   const { saleyardComparison: sc } = reportData;
   const isEmpty = sc.length === 0;
@@ -64,7 +69,7 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
       />
 
       {/* Toolbar: filters + export in pill row */}
-      <div className="mb-6 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2">
+      <div className="mb-6 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md">
         <Suspense>
           <ReportFilters properties={properties ?? []} />
         </Suspense>
