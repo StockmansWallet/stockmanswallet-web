@@ -9,12 +9,19 @@ function fmtFull(v: number) {
   return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
 }
 
+function parseDate(iso: string) {
+  // sale_date is TIMESTAMPTZ in the DB (returns "YYYY-MM-DDTHH:MM:SS+..."),
+  // but legacy rows or mapped data may be a plain "YYYY-MM-DD". Only append
+  // a local-midnight time when it's the date-only form.
+  return new Date(iso.length === 10 ? iso + "T00:00:00" : iso);
+}
+
 function fmtDate(iso: string) {
-  return new Date(iso + "T00:00:00").toLocaleDateString("en-AU", { day: "2-digit", month: "short", year: "numeric" });
+  return parseDate(iso).toLocaleDateString("en-AU", { day: "2-digit", month: "short", year: "numeric" });
 }
 
 function monthKey(iso: string) {
-  const d = new Date(iso + "T00:00:00");
+  const d = parseDate(iso);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 

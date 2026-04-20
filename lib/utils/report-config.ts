@@ -1,16 +1,18 @@
 // Parse report configuration from URL searchParams  -  shared by server components
 
 const DATE_PRESETS = [
-  { value: "1m", months: 1 },
-  { value: "3m", months: 3 },
-  { value: "6m", months: 6 },
-  { value: "1y", months: 12 },
+  { value: "1d", days: 1 },
+  { value: "1w", days: 7 },
+  { value: "1m", days: 30 },
+  { value: "3m", days: 90 },
+  { value: "6m", days: 180 },
+  { value: "1y", days: 365 },
 ] as const;
 
-function getPresetDates(months: number) {
+function getPresetDates(days: number) {
   const end = new Date();
   const start = new Date();
-  start.setMonth(start.getMonth() - months);
+  start.setDate(start.getDate() - days);
   return {
     start: start.toISOString().split("T")[0],
     end: end.toISOString().split("T")[0],
@@ -24,7 +26,7 @@ export function parseReportConfig(searchParams: { [key: string]: string | string
 } {
   const range = (searchParams.range as string) ?? "1y";
   const preset = DATE_PRESETS.find((p) => p.value === range);
-  const defaultDates = getPresetDates(preset?.months ?? 12);
+  const defaultDates = getPresetDates(preset?.days ?? 365);
 
   return {
     startDate: (searchParams.start as string) ?? defaultDates.start,

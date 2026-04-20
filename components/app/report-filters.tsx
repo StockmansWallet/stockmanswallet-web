@@ -8,16 +8,18 @@ import { DatePicker } from "@/components/ui/date-picker";
 // MARK: - Date Presets
 
 const DATE_PRESETS = [
-  { label: "1M", value: "1m", months: 1 },
-  { label: "3M", value: "3m", months: 3 },
-  { label: "6M", value: "6m", months: 6 },
-  { label: "1Y", value: "1y", months: 12 },
+  { label: "1D", value: "1d", days: 1 },
+  { label: "1W", value: "1w", days: 7 },
+  { label: "1M", value: "1m", days: 30 },
+  { label: "3M", value: "3m", days: 90 },
+  { label: "6M", value: "6m", days: 180 },
+  { label: "1Y", value: "1y", days: 365 },
 ] as const;
 
-function getPresetDates(months: number) {
+function getPresetDates(days: number) {
   const end = new Date();
   const start = new Date();
-  start.setMonth(start.getMonth() - months);
+  start.setDate(start.getDate() - days);
   return {
     start: start.toISOString().split("T")[0],
     end: end.toISOString().split("T")[0],
@@ -72,7 +74,7 @@ export function ReportFilters({ properties, showPropertyFilter = true }: ReportF
   const handlePresetChange = (preset: string) => {
     const match = DATE_PRESETS.find((p) => p.value === preset);
     if (!match) return;
-    const dates = getPresetDates(match.months);
+    const dates = getPresetDates(match.days);
     updateParams({ range: preset, start: dates.start, end: dates.end });
   };
 

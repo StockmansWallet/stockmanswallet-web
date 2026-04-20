@@ -1,4 +1,4 @@
-// API route: returns a server-rendered PDF of the Asset Register.
+// API route: returns a server-rendered PDF of the Sales Summary.
 // Puppeteer navigates to the web print template page, authenticating via an
 // `x-pdf-token` HTTP header (not a query string) so the JWT never lands in
 // server logs, CDN access logs, browser history, or Referer headers.
@@ -11,8 +11,6 @@ import chromium from "@sparticuz/chromium";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-// Query params forwarded to the print template. Anything else is dropped so a
-// malicious caller cannot reflect arbitrary params into the authenticated page.
 const FORWARDED_PARAMS = new Set(["range", "start", "end", "properties"]);
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -41,7 +39,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Missing authentication token" }, { status: 401 });
   }
 
-  // Verify the JWT belongs to a real user before kicking off a headless browser.
   const supabase = createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -51,9 +48,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 
-  // Build the print URL with only allow-listed, validated params.
   const sp = request.nextUrl.searchParams;
-  const printURL = new URL("/asset-register", "https://stockmanswallet.com.au");
+  const printURL = new URL("/sales-summary", "https://stockmanswallet.com.au");
   for (const [key, value] of sp.entries()) {
     if (!FORWARDED_PARAMS.has(key)) continue;
     if (!validateParam(key, value)) continue;
@@ -70,12 +66,9 @@ export async function GET(request: NextRequest) {
     });
 
     const page = await browser.newPage();
-    // Custom header isn't logged by Vercel's request logs the way query params
-    // are; it also doesn't leak via Referer to subresources.
     await page.setExtraHTTPHeaders({ "x-pdf-token": jwt });
     await page.goto(printURL.toString(), { waitUntil: "networkidle0", timeout: 30000 });
 
-    // Switch to print media BEFORE generating the PDF so @media print rules apply.
     await page.emulateMediaType("print");
 
     await page.evaluate(() => {
@@ -84,8 +77,6 @@ export async function GET(request: NextRequest) {
       });
     });
 
-    // Page margins are owned by CSS @page in print-styles.tsx. Zeroing
-    // Puppeteer's margins prevents it from overriding the CSS with defaults.
     const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: true,
@@ -96,7 +87,7 @@ export async function GET(request: NextRequest) {
     return new NextResponse(Buffer.from(pdfBuffer), {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": "inline; filename=AssetRegister.pdf",
+        "Content-Disposition": "inline; filename=SalesSummary.pdf",
       },
     });
   } catch (error) {

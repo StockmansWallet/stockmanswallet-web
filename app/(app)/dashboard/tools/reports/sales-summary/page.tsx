@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ReportFilters } from "@/components/app/report-filters";
 import { parseReportConfig } from "@/lib/utils/report-config";
-import { ReportExportButton } from "@/components/app/report-export-button";
+import { ReportPreviewButton } from "@/components/app/report-preview-button";
 import { generateSalesSummaryData } from "@/lib/services/report-service";
 import { SalesRevenueChart } from "./sales-revenue-chart";
 import { SalesRecordsSection } from "./_components/sales-records-section";
@@ -43,10 +43,11 @@ export default async function SalesSummaryPage({ searchParams }: { searchParams:
   const totalFreight = salesData.reduce((s, r) => s + r.freightCost, 0);
   const totalHead = salesData.reduce((s, r) => s + r.headCount, 0);
 
-  // Build monthly revenue data for chart
+  // Build monthly revenue data for chart. sale.date is TIMESTAMPTZ from
+  // Supabase, so only append local midnight for date-only strings.
   const monthlyRevenue = new Map<string, number>();
   for (const sale of salesData) {
-    const d = new Date(sale.date + "T00:00:00");
+    const d = new Date(sale.date.length === 10 ? sale.date + "T00:00:00" : sale.date);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
     monthlyRevenue.set(key, (monthlyRevenue.get(key) ?? 0) + sale.netValue);
   }
@@ -64,13 +65,14 @@ export default async function SalesSummaryPage({ searchParams }: { searchParams:
         title="Sales Summary"
         titleClassName="text-4xl font-bold text-warning"
         subtitle="Transaction history and performance metrics."
-        actions={!isEmpty ? <ReportExportButton reportData={reportData} reportType="sales-summary" title="Sales Summary" /> : undefined}
       />
 
-      <div className="mb-4">
+      {/* Toolbar */}
+      <div className="mb-6 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2">
         <Suspense>
           <ReportFilters properties={properties ?? []} showPropertyFilter={false} />
         </Suspense>
+        {!isEmpty && <ReportPreviewButton reportPath="/sales-summary" />}
       </div>
 
       {isEmpty ? (

@@ -9,7 +9,7 @@ export type ReportType =
   | "accountant"
   | "advisor-lens";
 
-export type DateRangePreset = "1m" | "3m" | "6m" | "1y" | "custom";
+export type DateRangePreset = "1d" | "1w" | "1m" | "3m" | "6m" | "1y" | "custom";
 
 export interface ReportConfiguration {
   reportType: ReportType;
