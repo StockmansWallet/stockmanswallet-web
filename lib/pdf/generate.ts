@@ -3,8 +3,55 @@
 // Chrome-on-Vercel compatible binaries. Replaces the per-report
 // /api/report/{type}/pdf routes that previously duplicated this logic.
 
+import { existsSync } from "fs";
 import puppeteerCore from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
+
+// @sparticuz/chromium ships a Linux-only binary built for Vercel's serverless
+// environment. On macOS/Windows dev boxes its executablePath points at a file
+// the OS can't exec (fails with `spawn ENOEXEC`). Fall back to a locally
+// installed Google Chrome / Chromium when we're not on a Linux host.
+const LOCAL_CHROME_PATHS = [
+  // macOS
+  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary",
+  "/Applications/Chromium.app/Contents/MacOS/Chromium",
+  // Windows
+  "C:/Program Files/Google/Chrome/Application/chrome.exe",
+  "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
+  // Linux (covers bare-metal dev, not Vercel)
+  "/usr/bin/google-chrome",
+  "/usr/bin/chromium",
+  "/usr/bin/chromium-browser",
+];
+
+async function launchBrowser() {
+  // Vercel functions set VERCEL=1. We also check platform so other Linux
+  // deployments that use @sparticuz/chromium work out of the box.
+  const useSparticuz = !!process.env.VERCEL || process.platform === "linux";
+  if (useSparticuz) {
+    return puppeteerCore.launch({
+      args: chromium.args,
+      executablePath: await chromium.executablePath(),
+      headless: true,
+      defaultViewport: { width: 794, height: 1123 },
+    });
+  }
+  const executablePath = LOCAL_CHROME_PATHS.find((p) => existsSync(p));
+  if (!executablePath) {
+    throw new Error(
+      "No Chrome/Chromium binary found locally. Install Google Chrome or run on Vercel.",
+    );
+  }
+  return puppeteerCore.launch({
+    executablePath,
+    headless: true,
+    defaultViewport: { width: 794, height: 1123 },
+    // --no-sandbox is fine in local dev; Vercel path uses Sparticuz's curated
+    // args set which already handles sandboxing for the containerised env.
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
+}
 
 // Map our public report-type slug to the internal preview route Puppeteer
 // renders. Preview routes accept an `x-pdf-token` header to authenticate
@@ -71,12 +118,7 @@ export async function generatePdfBuffer(args: GenerateArgs): Promise<Buffer> {
 
   let browser;
   try {
-    browser = await puppeteerCore.launch({
-      args: chromium.args,
-      executablePath: await chromium.executablePath(),
-      headless: true,
-      defaultViewport: { width: 794, height: 1123 },
-    });
+    browser = await launchBrowser();
 
     const page = await browser.newPage();
     // JWT in a custom header avoids logging via Vercel access logs, browser

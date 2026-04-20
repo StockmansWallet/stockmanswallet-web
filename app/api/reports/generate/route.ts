@@ -19,6 +19,7 @@ import {
   reportFilename,
   reportTitle,
 } from "@/lib/pdf/generate";
+import { parseReportConfig } from "@/lib/utils/report-config";
 
 export const dynamic = "force-dynamic";
 // Puppeteer cold-start + render can exceed the Next default. 60 s matches
@@ -75,8 +76,13 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const startDate = searchParams.get("start");
-  const endDate = searchParams.get("end");
+  // Resolve the effective date range. Callers usually pass just `range` (a
+  // preset like "1y") and let parseReportConfig derive the concrete
+  // start/end. We do that on the server so the filename always includes the
+  // actual date range regardless of which params the caller sent.
+  const configForDates = parseReportConfig(Object.fromEntries(searchParams.entries()));
+  const startDate = configForDates.startDate;
+  const endDate = configForDates.endDate;
 
   // ----- Render PDF -------------------------------------------------------
   let pdfBuffer: Buffer;
