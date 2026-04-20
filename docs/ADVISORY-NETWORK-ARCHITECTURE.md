@@ -147,7 +147,7 @@ Created via `createNotification()` RPC. Displayed at `/dashboard/notifications` 
 **Helpers:**
 - `hasActivePermission(connection)` - status=approved and permission_expires_at in future
 - `permissionTimeRemaining(connection)` - human-readable countdown
-- `isAdvisorRole(role)` - true if not farmer_grazier
+- `isAdvisorRole(role)` - true if role is not "producer"
 
 ---
 

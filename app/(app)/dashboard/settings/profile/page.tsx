@@ -20,7 +20,7 @@ export default async function ProfileSettingsPage() {
 
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select("role, contact_email, contact_phone, bio, is_discoverable_to_farmers, is_listed_in_directory, company_name, property_name, state, region")
+    .select("role, contact_email, contact_phone, bio, is_discoverable_to_producers, is_listed_in_directory, company_name, property_name, state, region")
     .eq("user_id", user!.id)
     .single();
 
@@ -93,7 +93,7 @@ export default async function ProfileSettingsPage() {
           <CardContent>
             <VisibilityForm
               isAdvisor={isAdvisor}
-              isDiscoverableToFarmers={profile?.is_discoverable_to_farmers ?? false}
+              isDiscoverableToProducers={profile?.is_discoverable_to_producers ?? false}
               isListedInDirectory={profile?.is_listed_in_directory ?? false}
             />
           </CardContent>

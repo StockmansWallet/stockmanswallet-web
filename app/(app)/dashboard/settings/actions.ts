@@ -24,7 +24,7 @@ const updateBioSchema = z.object({
 });
 
 const updateVisibilityToggleSchema = z.object({
-  field: z.enum(["is_discoverable", "is_discoverable_to_farmers", "is_listed_in_directory"]),
+  field: z.enum(["is_discoverable", "is_discoverable_to_producers", "is_listed_in_directory"]),
   value: z.boolean(),
 });
 

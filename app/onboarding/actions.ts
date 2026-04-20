@@ -31,7 +31,7 @@ const onboardingDataSchema = z.object({
   businessAddress: z.string().max(300).optional(),
   accountTypeRole: z.string().max(100).optional(),
   isDiscoverableToAdvisors: z.boolean().optional(),
-  isVisibleOnFarmerNetwork: z.boolean().optional(),
+  isVisibleOnProducerNetwork: z.boolean().optional(),
   isListedInDirectory: z.boolean().optional(),
   contactEmail: z.string().email().or(z.literal("")).optional(),
   contactPhone: z.string().max(30).optional(),
@@ -98,8 +98,8 @@ export async function completeOnboarding(data: OnboardingData) {
   if (validData.accountType === "producer") {
     // Producer visibility
     profileUpdate.is_discoverable = validData.isDiscoverableToAdvisors ?? false;
-    profileUpdate.is_discoverable_to_farmers =
-      validData.isVisibleOnFarmerNetwork ?? false;
+    profileUpdate.is_discoverable_to_producers =
+      validData.isVisibleOnProducerNetwork ?? false;
 
     // Store primary property info on profile for quick access
     const primaryProp = validData.properties.find((p) => p.isDefault);

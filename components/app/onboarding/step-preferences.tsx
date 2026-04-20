@@ -123,13 +123,13 @@ function PublicProfileFields({
 export function StepPreferences({
   accountType,
   isDiscoverableToAdvisors,
-  isVisibleOnFarmerNetwork,
+  isVisibleOnProducerNetwork,
   isListedInDirectory,
   contactEmail,
   contactPhone,
   bio,
   onDiscoverableToAdvisorsChange,
-  onVisibleOnFarmerNetworkChange,
+  onVisibleOnProducerNetworkChange,
   onListedInDirectoryChange,
   onContactEmailChange,
   onContactPhoneChange,
@@ -137,13 +137,13 @@ export function StepPreferences({
 }: {
   accountType?: string;
   isDiscoverableToAdvisors: boolean;
-  isVisibleOnFarmerNetwork: boolean;
+  isVisibleOnProducerNetwork: boolean;
   isListedInDirectory: boolean;
   contactEmail: string;
   contactPhone: string;
   bio: string;
   onDiscoverableToAdvisorsChange: (v: boolean) => void;
-  onVisibleOnFarmerNetworkChange: (v: boolean) => void;
+  onVisibleOnProducerNetworkChange: (v: boolean) => void;
   onListedInDirectoryChange: (v: boolean) => void;
   onContactEmailChange: (v: string) => void;
   onContactPhoneChange: (v: string) => void;
@@ -152,7 +152,7 @@ export function StepPreferences({
   const isAdvisor = accountType === "advisor";
   const showProfile = isAdvisor
     ? isListedInDirectory
-    : isDiscoverableToAdvisors || isVisibleOnFarmerNetwork;
+    : isDiscoverableToAdvisors || isVisibleOnProducerNetwork;
 
   if (isAdvisor) {
     return (
@@ -210,8 +210,8 @@ export function StepPreferences({
           icon={<Users className="h-5 w-5" />}
           label="Visible on Producer Network"
           subtitle="Other producers can discover and connect with you"
-          checked={isVisibleOnFarmerNetwork}
-          onChange={onVisibleOnFarmerNetworkChange}
+          checked={isVisibleOnProducerNetwork}
+          onChange={onVisibleOnProducerNetworkChange}
         />
       </div>
 

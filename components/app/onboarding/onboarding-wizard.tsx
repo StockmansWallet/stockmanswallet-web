@@ -43,7 +43,7 @@ export function OnboardingWizard({ userName }: { userName: string }) {
   // Preferences - producer
   const [isDiscoverableToAdvisors, setIsDiscoverableToAdvisors] =
     useState(false);
-  const [isVisibleOnFarmerNetwork, setIsVisibleOnFarmerNetwork] =
+  const [isVisibleOnProducerNetwork, setIsVisibleOnProducerNetwork] =
     useState(false);
 
   // Preferences - advisor
@@ -84,7 +84,7 @@ export function OnboardingWizard({ userName }: { userName: string }) {
       businessAddress,
       accountTypeRole,
       isDiscoverableToAdvisors,
-      isVisibleOnFarmerNetwork,
+      isVisibleOnProducerNetwork,
       isListedInDirectory,
       contactEmail,
       contactPhone,
@@ -170,13 +170,13 @@ export function OnboardingWizard({ userName }: { userName: string }) {
       key="prefs"
       accountType={accountType}
       isDiscoverableToAdvisors={isDiscoverableToAdvisors}
-      isVisibleOnFarmerNetwork={isVisibleOnFarmerNetwork}
+      isVisibleOnProducerNetwork={isVisibleOnProducerNetwork}
       isListedInDirectory={isListedInDirectory}
       contactEmail={contactEmail}
       contactPhone={contactPhone}
       bio={bio}
       onDiscoverableToAdvisorsChange={setIsDiscoverableToAdvisors}
-      onVisibleOnFarmerNetworkChange={setIsVisibleOnFarmerNetwork}
+      onVisibleOnProducerNetworkChange={setIsVisibleOnProducerNetwork}
       onListedInDirectoryChange={setIsListedInDirectory}
       onContactEmailChange={setContactEmail}
       onContactPhoneChange={setContactPhone}

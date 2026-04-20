@@ -11,15 +11,15 @@ import { updateVisibilityToggle } from "./actions";
  */
 export function VisibilityForm({
   isAdvisor,
-  isDiscoverableToFarmers,
+  isDiscoverableToProducers,
   isListedInDirectory,
 }: {
   isAdvisor: boolean;
-  isDiscoverableToFarmers: boolean;
+  isDiscoverableToProducers: boolean;
   isListedInDirectory: boolean;
 }) {
   const [values, setValues] = useState({
-    is_discoverable_to_farmers: isDiscoverableToFarmers,
+    is_discoverable_to_producers: isDiscoverableToProducers,
     is_listed_in_directory: isListedInDirectory,
   });
   const [saving, setSaving] = useState<string | null>(null);
@@ -59,10 +59,10 @@ export function VisibilityForm({
         />
       ) : (
         <Switch
-          id="is_discoverable_to_farmers"
-          checked={values.is_discoverable_to_farmers}
-          onChange={(c) => handleToggle("is_discoverable_to_farmers", c)}
-          disabled={saving === "is_discoverable_to_farmers"}
+          id="is_discoverable_to_producers"
+          checked={values.is_discoverable_to_producers}
+          onChange={(c) => handleToggle("is_discoverable_to_producers", c)}
+          disabled={saving === "is_discoverable_to_producers"}
           label="Visible to Producers"
           description="Other producers on Stockman's Wallet can find you in the Producer Network."
           color="green"
