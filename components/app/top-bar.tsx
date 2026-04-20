@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -12,12 +11,6 @@ interface TopBarProps {
   avatarUrl?: string;
 }
 
-// Pixels of scroll before the header switches from fully transparent to
-// frosted-glass. Low enough that any intentional scroll triggers it, high
-// enough that hairline touchpad jitter at the top doesn't flicker the
-// effect.
-const SCROLL_THRESHOLD_PX = 8;
-
 export function TopBar({ firstName, lastName, email, roleLabel, avatarUrl }: TopBarProps) {
   const initials =
     firstName && lastName
@@ -25,37 +18,12 @@ export function TopBar({ firstName, lastName, email, roleLabel, avatarUrl }: Top
       : "SW";
   const displayName = firstName && lastName ? `${firstName} ${lastName}` : email || "";
 
-  // Transparent at top, frosted once the user scrolls. Matches the iOS
-  // compact-large-title pattern where the navigation bar gains its chrome
-  // as content slides underneath it.
-  //
-  // Despite (app)/layout setting overflow-y-auto on <main>, main never
-  // actually scrolls because its height is uncapped (flex-1 inside a
-  // min-h-screen parent); scrollHeight == clientHeight, so scrollTop stays
-  // at 0. The window is the real scroll container - confirmed by
-  // inspecting document.documentElement.scrollTop at runtime.
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    function update() {
-      // Read both for robustness: some older browsers populate one or the
-      // other depending on quirks mode / flex layout.
-      const y = window.scrollY || document.documentElement.scrollTop || 0;
-      setScrolled(y > SCROLL_THRESHOLD_PX);
-    }
-
-    update(); // initial read, in case the page loaded pre-scrolled
-    window.addEventListener("scroll", update, { passive: true });
-    return () => window.removeEventListener("scroll", update);
-  }, []);
-
   return (
     <header
-      className={`hidden h-20 shrink-0 items-center justify-between border-b px-8 transition-[background-color,backdrop-filter,border-color] duration-200 lg:flex ${
-        scrolled
-          ? "border-white/[0.04] bg-background/40 backdrop-blur-xl"
-          : "border-transparent bg-transparent"
-      }`}
+      // bg-surface-lowest + backdrop-blur-xl matches the exact "frosted
+      // glass" material every Card and StatCard uses, so the top bar reads
+      // as part of the same surface language rather than a separate chrome.
+      className="hidden h-20 shrink-0 items-center justify-between border-b border-white/[0.04] bg-surface-lowest px-8 backdrop-blur-xl lg:flex"
     >
       {/* Logo */}
       <Link href="/dashboard" className="flex items-center gap-2.5">

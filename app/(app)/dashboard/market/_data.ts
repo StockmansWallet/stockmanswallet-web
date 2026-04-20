@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import {
   MLA_CATEGORIES,
   daysAgo,
@@ -310,20 +311,43 @@ export async function getHerdExposure(userId: string): Promise<HerdExposure[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("herds")
-    .select("category, head_count, current_weight")
+    .select("category, breeder_sub_type, head_count, current_weight, initial_weight")
     .eq("user_id", userId)
     .eq("is_sold", false)
     .eq("is_deleted", false);
   if (!data || data.length === 0) return [];
+
+  // Roll up by *MLA category* (Grown Steer / Yearling Heifer / Cows / ...)
+  // rather than the master category (Steer / Heifer / Breeder / ...). The
+  // market page's summaries, category pages, and category tile overlays
+  // all use MLA categories as keys, so exposure grouped by master would
+  // never intersect and would emit /dashboard/market/category/<master-
+  // slug> links that 404 in resolveSlug.
+  type Row = {
+    category: string | null;
+    breeder_sub_type: string | null;
+    head_count: number | null;
+    current_weight: number | null;
+    initial_weight: number | null;
+  };
+
   const groups = new Map<string, { head: number; herds: number; weightSum: number }>();
-  for (const h of data as Array<{ category: string | null; head_count: number | null; current_weight: number | null }>) {
+  for (const h of data as Row[]) {
     if (!h.category) continue;
-    const g = groups.get(h.category) ?? { head: 0, herds: 0, weightSum: 0 };
+    const weightForResolve = h.initial_weight ?? h.current_weight ?? 0;
+    const resolution = resolveMLACategory(
+      h.category,
+      weightForResolve,
+      h.breeder_sub_type ?? undefined,
+    );
+    const mlaCat = resolution.primaryMLACategory;
+    const g = groups.get(mlaCat) ?? { head: 0, herds: 0, weightSum: 0 };
     g.head += h.head_count ?? 0;
     g.herds += 1;
     g.weightSum += (h.current_weight ?? 0) * (h.head_count ?? 0);
-    groups.set(h.category, g);
+    groups.set(mlaCat, g);
   }
+
   const out: HerdExposure[] = [];
   for (const [cat, g] of groups) {
     out.push({
