@@ -139,7 +139,10 @@ export function SaleyardComparisonTemplate({ data }: { data: ReportData }) {
                 <p className="text-xs font-semibold text-[#271F16]">{shortSaleyardName(s.saleyardName)}</p>
               </div>
               <p className="mt-1 text-lg font-bold tabular-nums text-[#271F16]">{fmt(s.totalPortfolioValue)}</p>
-              <p className="text-[10px] tabular-nums text-[#271F16]/50">{fmtPrice(s.avgPrice)} avg</p>
+              <p className="text-[10px] tabular-nums text-[#271F16]/50">
+                {fmtPrice(s.avgPrice)} avg
+                {s.distanceKm != null && <> | {s.distanceKm.toLocaleString("en-AU")} km</>}
+              </p>
             </div>
           ))}
         </div>
@@ -159,7 +162,8 @@ export function SaleyardComparisonTemplate({ data }: { data: ReportData }) {
                 <th className="pb-1.5 pr-2 text-right font-semibold">Spread</th>
                 <th className="pb-1.5 pr-2 text-right font-semibold">Diff ($)</th>
                 <th className="pb-1.5 pr-2 text-right font-semibold">Diff (%)</th>
-                <th className="pb-1.5 text-left font-semibold">State</th>
+                <th className="pb-1.5 pr-2 text-left font-semibold">State</th>
+                <th className="pb-1.5 text-right font-semibold">Distance</th>
               </tr>
             </thead>
             <tbody>
@@ -189,7 +193,10 @@ export function SaleyardComparisonTemplate({ data }: { data: ReportData }) {
                     <td className="py-1.5 pr-2 text-right tabular-nums text-[#271F16]/50">
                       {s.diffToBestPercent > 0 ? `-${s.diffToBestPercent.toFixed(1)}%` : "-"}
                     </td>
-                    <td className="py-1.5 text-[#6B5B45]">{s.state ?? ""}</td>
+                    <td className="py-1.5 pr-2 text-[#6B5B45]">{s.state ?? ""}</td>
+                    <td className="py-1.5 text-right tabular-nums text-[#271F16]/80">
+                      {s.distanceKm != null ? `${s.distanceKm.toLocaleString("en-AU")} km` : "-"}
+                    </td>
                   </tr>
                 );
               })}

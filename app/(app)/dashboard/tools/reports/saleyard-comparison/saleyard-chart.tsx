@@ -25,7 +25,7 @@ export function SaleyardComparisonChart({
   const displayData = data.map((d) => ({
     ...d,
     valueLabel: d.distanceKm != null
-      ? `${fmtValue(d.portfolioValue)} \u00b7 ${d.distanceKm.toLocaleString("en-AU")} km`
+      ? `${fmtValue(d.portfolioValue)} | ${d.distanceKm.toLocaleString("en-AU")} km`
       : fmtValue(d.portfolioValue),
     nameColor: "#271F16",
     valueColor: "#271F16",
