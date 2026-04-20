@@ -2,23 +2,18 @@ import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ReportFilters } from "@/components/app/report-filters";
 import { parseReportConfig } from "@/lib/utils/report-config";
 import { ReportExportButton } from "@/components/app/report-export-button";
 import { generateSalesSummaryData } from "@/lib/services/report-service";
 import { SalesRevenueChart } from "./sales-revenue-chart";
+import { SalesRecordsSection } from "./_components/sales-records-section";
 
 export const revalidate = 0;
 export const metadata = { title: "Sales Summary" };
 
 function fmt(v: number) {
   return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 }).format(v);
-}
-
-function fmtDate(dateStr: string) {
-  const d = new Date(dateStr + "T00:00:00");
-  return d.toLocaleDateString("en-AU", { day: "2-digit", month: "short", year: "numeric" });
 }
 
 export default async function SalesSummaryPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
@@ -126,64 +121,7 @@ export default async function SalesSummaryPage({ searchParams }: { searchParams:
             </Card>
           )}
 
-          {/* Sales Table */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Sales Records</CardTitle>
-                <span className="text-xs tabular-nums text-text-muted">{salesData.length} records</span>
-              </div>
-            </CardHeader>
-            <CardContent className="px-0 pb-0">
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="border-b border-white/5 text-left text-text-muted">
-                      <th className="px-5 pb-2 font-medium">Date</th>
-                      <th className="px-3 pb-2 font-medium">Herd</th>
-                      <th className="px-3 pb-2 text-right font-medium">Head</th>
-                      <th className="px-3 pb-2 text-right font-medium">Avg Wt</th>
-                      <th className="px-3 pb-2 text-right font-medium">Price</th>
-                      <th className="px-3 pb-2 font-medium">Type</th>
-                      <th className="px-3 pb-2 font-medium">Location</th>
-                      <th className="px-3 pb-2 text-right font-medium">Freight</th>
-                      <th className="px-5 pb-2 text-right font-medium">Net Value</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {salesData.map((s) => (
-                      <tr key={s.id} className="transition-colors hover:bg-white/[0.02]">
-                        <td className="px-5 py-2.5 tabular-nums text-text-secondary">{fmtDate(s.date)}</td>
-                        <td className="px-3 py-2.5 text-text-secondary">{s.herdName ?? "-"}</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums text-text-primary">{s.headCount}</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums text-text-secondary">{s.avgWeight.toFixed(0)} kg</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums text-text-secondary">
-                          {s.pricingType === "per_kg" ? `$${s.pricePerKg.toFixed(2)}/kg` : `$${(s.pricePerHead ?? 0).toFixed(0)}/hd`}
-                        </td>
-                        <td className="px-3 py-2.5 text-text-muted">{s.saleType ?? "-"}</td>
-                        <td className="px-3 py-2.5 text-text-muted">{s.saleLocation ?? "-"}</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums text-text-muted">{fmt(s.freightCost)}</td>
-                        <td className="px-5 py-2.5 text-right tabular-nums font-medium text-text-primary">{fmt(s.netValue)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr className="border-t border-white/10 font-medium">
-                      <td className="px-5 py-3 text-text-primary">Total</td>
-                      <td className="px-3 py-3" />
-                      <td className="px-3 py-3 text-right tabular-nums text-text-primary">{totalHead}</td>
-                      <td className="px-3 py-3" />
-                      <td className="px-3 py-3" />
-                      <td className="px-3 py-3" />
-                      <td className="px-3 py-3" />
-                      <td className="px-3 py-3 text-right tabular-nums text-text-primary">{fmt(totalFreight)}</td>
-                      <td className="px-5 py-3 text-right tabular-nums text-warning">{fmt(totalSales)}</td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
+          <SalesRecordsSection salesData={salesData} />
         </div>
       )}
     </div>
