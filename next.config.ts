@@ -1,10 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Debug: Include @sparticuz/chromium binary files in the PDF route's serverless function.
-  // Without this, Vercel's output file tracing excludes the bin/ directory and Chromium fails to start.
+  // Include @sparticuz/chromium binary files in the PDF generation serverless
+  // function. Without this, Vercel's output file tracing excludes the bin/
+  // directory and Puppeteer fails at runtime with 'executable not found'.
   outputFileTracingIncludes: {
-    "/api/report/asset-register/pdf": ["./node_modules/@sparticuz/chromium/bin/**"],
+    "/api/reports/generate": ["./node_modules/@sparticuz/chromium/bin/**"],
   },
   images: {
     // Pin to the exact Supabase project subdomain. The previous wildcard
