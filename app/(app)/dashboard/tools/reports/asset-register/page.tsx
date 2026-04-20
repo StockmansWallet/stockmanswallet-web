@@ -52,8 +52,11 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
         subtitle="Complete herd listing with current valuations."
       />
 
-      {/* Toolbar */}
-      <div className="mb-6 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md">
+      {/* Toolbar. relative + z-20 lifts the toolbar's stacking context
+          above the content below (which create their own contexts via
+          backdrop-blur-xl), so the ReportFilters property dropdown
+          renders above them. */}
+      <div className="relative z-20 mb-6 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md">
         <Suspense>
           <ReportFilters properties={properties ?? []} />
         </Suspense>

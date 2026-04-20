@@ -72,8 +72,11 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
         subtitle="Compare how your portfolio values across saleyards."
       />
 
-      {/* Toolbar: filters + export in pill row */}
-      <div className="mb-6 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md">
+      {/* Toolbar: filters + export in pill row. relative + z-20 lifts
+          the toolbar's stacking context above the stat cards below (which
+          create their own contexts via backdrop-blur-xl), so the
+          ReportFilters property dropdown renders above them. */}
+      <div className="relative z-20 mb-6 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md">
         <Suspense>
           <ReportFilters properties={properties ?? []} />
         </Suspense>
