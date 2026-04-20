@@ -136,7 +136,7 @@ export default async function SaleyardDetailPage({ params }: Props) {
         <div className="space-y-5">
           {/* Overall stats */}
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-            <div className="rounded-2xl bg-surface-lowest p-4">
+            <div className="rounded-2xl bg-surface-lowest p-4 backdrop-blur-xl">
               <p className="text-[11px] uppercase tracking-wide text-text-muted">Latest</p>
               {latest && (
                 <>
@@ -147,14 +147,14 @@ export default async function SaleyardDetailPage({ params }: Props) {
                 </>
               )}
             </div>
-            <div className="rounded-2xl bg-surface-lowest p-4">
+            <div className="rounded-2xl bg-surface-lowest p-4 backdrop-blur-xl">
               <p className="text-[11px] uppercase tracking-wide text-text-muted">4-week change</p>
               <div className="mt-1.5">
                 <ChangeChip value={summary4wPct} size="sm" />
               </div>
               <p className="mt-1 text-[11px] text-text-muted">All categories weighted</p>
             </div>
-            <div className="col-span-2 rounded-2xl bg-surface-lowest p-4 md:col-span-1">
+            <div className="col-span-2 rounded-2xl bg-surface-lowest p-4 backdrop-blur-xl md:col-span-1">
               <p className="text-[11px] uppercase tracking-wide text-text-muted">Categories traded</p>
               <p className="mt-1 text-xl font-semibold tabular-nums text-text-primary">
                 {categoriesPresent.length}

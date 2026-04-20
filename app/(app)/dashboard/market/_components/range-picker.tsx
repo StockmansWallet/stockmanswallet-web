@@ -73,7 +73,7 @@ export function RangePicker({ value, onChange }: RangePickerProps) {
       {showCustom && (
         <div
           ref={popoverRef}
-          className="absolute right-0 top-[calc(100%+8px)] z-20 w-72 rounded-xl bg-surface-lowest p-4 shadow-xl ring-1 ring-white/10"
+          className="absolute right-0 top-[calc(100%+8px)] z-20 w-72 rounded-xl bg-surface-lowest p-4 shadow-xl ring-1 ring-white/10 backdrop-blur-xl"
         >
           <p className="mb-3 text-xs font-medium text-text-secondary">Custom range</p>
           <div className="space-y-2.5">

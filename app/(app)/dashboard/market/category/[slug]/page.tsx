@@ -296,7 +296,7 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
 
 function StatBlock({ label, value, chip, sub }: { label: string; value?: string; chip?: React.ReactNode; sub?: string }) {
   return (
-    <div className="rounded-2xl bg-surface-lowest p-4">
+    <div className="rounded-2xl bg-surface-lowest p-4 backdrop-blur-xl">
       <p className="text-[11px] uppercase tracking-wide text-text-muted">{label}</p>
       <div className="mt-1">
         {value ? (

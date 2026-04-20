@@ -25,11 +25,13 @@ function NavLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
       // Active items get backdrop-blur-xl so the tinted pill reads as the
       // same "frosted glass" material the cards and top bar use. Feature-
       // coloured overrides from nav-config.tsx (Brangus amber, Markets
-      // green, Reports amber etc.) still apply on top.
+      // green, Reports amber etc.) still apply on top. Inactive items
+      // also get backdrop-blur-xl on hover so the hover pill feels like
+      // the same material, just not yet committed to the active state.
       className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
         isActive
           ? `backdrop-blur-xl ${item.activeClass ?? "bg-brand/15 text-brand"}`
-          : (item.inactiveClass ?? "text-text-secondary hover:bg-white/5 hover:text-text-primary")
+          : (item.inactiveClass ?? "text-text-secondary hover:bg-white/5 hover:text-text-primary hover:backdrop-blur-xl")
       }`}
     >
       {item.icon}
@@ -115,7 +117,7 @@ export function Sidebar({ isAdmin = false, subscriptionTier = "stockman", isAdvi
               className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 ${
                 checkActive(item.href)
                   ? "bg-brand/15 text-brand backdrop-blur-xl"
-                  : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+                  : "text-text-secondary hover:bg-white/5 hover:text-text-primary hover:backdrop-blur-xl"
               }`}
             >
               {item.icon}

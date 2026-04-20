@@ -45,7 +45,7 @@ export function WhatIfWidget({ summaries }: WhatIfWidgetProps) {
   const avg12wGross = avg12w != null ? avg12w * totalKg : null;
 
   return (
-    <div className="rounded-2xl bg-surface-lowest p-5">
+    <div className="rounded-2xl bg-surface-lowest p-5 backdrop-blur-xl">
       <div className="mb-4 flex items-center gap-2.5">
         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-markets/15">
           <Calculator className="h-3.5 w-3.5 text-markets" />

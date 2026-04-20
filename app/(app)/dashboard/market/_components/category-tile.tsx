@@ -14,7 +14,7 @@ export function CategoryTile({ summary, exposure }: CategoryTileProps) {
   return (
     <Link
       href={`/dashboard/market/category/${summary.slug}`}
-      className="group block rounded-2xl bg-surface-lowest p-4 transition-colors hover:bg-surface"
+      className="group block rounded-2xl bg-surface-lowest p-4 backdrop-blur-xl transition-colors hover:bg-surface"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
