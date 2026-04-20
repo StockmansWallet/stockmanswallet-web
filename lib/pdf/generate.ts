@@ -62,6 +62,8 @@ const PREVIEW_PATH_BY_TYPE: Record<ReportType, string> = {
   "saleyard-comparison":  "/saleyard-comparison",
   "sales-summary":        "/sales-summary",
   "accountant":           "/accountant",
+  "value-vs-land-area":   "/value-vs-land-area",
+  "property-comparison":  "/property-comparison",
 };
 
 export const REPORT_TYPES = [
@@ -70,6 +72,8 @@ export const REPORT_TYPES = [
   "saleyard-comparison",
   "sales-summary",
   "accountant",
+  "value-vs-land-area",
+  "property-comparison",
 ] as const;
 
 export type ReportType = (typeof REPORT_TYPES)[number];
@@ -176,6 +180,8 @@ const TITLE_BY_TYPE: Record<ReportType, string> = {
   "saleyard-comparison": "Saleyard Comparison",
   "sales-summary":       "Sales Summary",
   "accountant":          "Accountant Report",
+  "value-vs-land-area":  "Value vs Land Area",
+  "property-comparison": "Property Comparison",
 };
 
 const PASCAL_BY_TYPE: Record<ReportType, string> = {
@@ -184,6 +190,8 @@ const PASCAL_BY_TYPE: Record<ReportType, string> = {
   "saleyard-comparison": "SaleyardComparison",
   "sales-summary":       "SalesSummary",
   "accountant":          "AccountantReport",
+  "value-vs-land-area":  "ValueVsLandArea",
+  "property-comparison": "PropertyComparison",
 };
 
 export function reportTitle(reportType: ReportType): string {

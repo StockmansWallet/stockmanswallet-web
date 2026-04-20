@@ -20,6 +20,8 @@ import type {
   HerdReportData,
   SaleReportData,
   SaleyardComparisonData,
+  LandValueAnalysisData,
+  PropertyComparisonData,
   ExecutiveSummary,
   HerdCompositionItem,
   UserReportDetails,
@@ -300,6 +302,8 @@ export async function generateAssetRegisterData(
     herdData: herdDataArray,
     salesData: [],
     saleyardComparison: [],
+    landValueAnalysis: [],
+    propertyComparison: [],
     executiveSummary,
     herdComposition,
     userDetails,
@@ -381,6 +385,8 @@ export async function generateSalesSummaryData(
     herdData: [],
     salesData,
     saleyardComparison: [],
+    landValueAnalysis: [],
+    propertyComparison: [],
     executiveSummary: null,
     herdComposition: [],
     userDetails,
@@ -628,6 +634,8 @@ export async function generateSaleyardComparisonData(
     herdData: [],
     salesData: [],
     saleyardComparison: comparisonData,
+    landValueAnalysis: [],
+    propertyComparison: [],
     executiveSummary: null,
     herdComposition: [],
     userDetails,
@@ -666,6 +674,8 @@ export async function generateAccountantData(
     herdData: assetData.herdData,
     salesData: salesData.salesData,
     saleyardComparison: [],
+    landValueAnalysis: [],
+    propertyComparison: [],
     executiveSummary: assetData.executiveSummary,
     herdComposition: assetData.herdComposition,
     userDetails: assetData.userDetails,
@@ -685,5 +695,253 @@ export async function generateAccountantData(
       marketMinusBookDifference,
       generatedAt: new Date().toISOString(),
     },
+  };
+}
+
+// MARK: - Value vs Land Area
+
+/**
+ * Per-property breakdown of livestock value against land area. Only
+ * properties with acreage > 0 are included; properties without acreage
+ * are dropped because value-per-acre is undefined for them.
+ *
+ * Mirrors the iOS `generateLivestockValueVsLandAreaData` generator.
+ */
+export async function generateLandValueData(
+  supabase: SupabaseClient,
+  userId: string,
+  config: ReportConfiguration
+): Promise<ReportData> {
+  const [{ data: herds }, { data: properties }, premiumMap, userDetails] = await Promise.all([
+    supabase
+      .from("herds")
+      .select(HERD_SELECT)
+      .eq("user_id", userId)
+      .eq("is_sold", false)
+      .eq("is_deleted", false)
+      .order("name"),
+    supabase
+      .from("properties")
+      .select("id, property_name, property_pic, state, acreage, is_default, default_saleyard, region")
+      .eq("user_id", userId)
+      .eq("is_deleted", false)
+      .order("property_name"),
+    buildPremiumMap(supabase),
+    fetchUserReportDetails(supabase, userId),
+  ]);
+
+  const activeHerds = herds ?? [];
+  const allProperties = (properties ?? []) as {
+    id: string;
+    property_name: string;
+    property_pic: string | null;
+    state: string | null;
+    acreage: number | null;
+    is_default: boolean;
+    default_saleyard: string | null;
+    region: string | null;
+  }[];
+
+  // Property filter (empty = all)
+  const propertiesToAnalyse = config.selectedPropertyIds.length > 0
+    ? allProperties.filter((p) => config.selectedPropertyIds.includes(p.id))
+    : allProperties;
+
+  // Only properties with a real acreage can produce a value-per-acre metric.
+  const usable = propertiesToAnalyse.filter((p) => (p.acreage ?? 0) > 0);
+
+  // Price maps once for the whole portfolio; the valuation engine picks the
+  // right entry per herd based on saleyard + category.
+  const { nationalPriceMap, saleyardPriceMap, saleyardBreedPriceMap } = await buildPriceMaps(
+    supabase,
+    activeHerds
+  );
+
+  const analysis: LandValueAnalysisData[] = [];
+  for (const property of usable) {
+    const propertyHerds = activeHerds.filter(
+      (h: { property_id: string | null }) => h.property_id === property.id
+    );
+
+    let propertyValue = 0;
+    let propertyHeadCount = 0;
+
+    for (const herd of propertyHerds) {
+      const valuation = calculateHerdValuation(
+        herd as Parameters<typeof calculateHerdValuation>[0],
+        nationalPriceMap,
+        premiumMap,
+        undefined,
+        saleyardPriceMap,
+        saleyardBreedPriceMap
+      );
+      propertyValue += valuation.netValue;
+      propertyHeadCount += herd.head_count ?? 0;
+    }
+
+    const acreage = property.acreage ?? 0;
+    analysis.push({
+      propertyName: property.property_name,
+      acreage,
+      livestockValue: propertyValue,
+      valuePerAcre: acreage > 0 ? propertyValue / acreage : 0,
+      totalHeadCount: propertyHeadCount,
+    });
+  }
+
+  analysis.sort((a, b) => b.valuePerAcre - a.valuePerAcre);
+
+  // Build property headers for the PDF.
+  const reportProperties: ReportPropertyDetails[] = usable.map((p) => ({
+    name: p.property_name,
+    picCode: p.property_pic ?? null,
+    state: p.state ?? null,
+  }));
+
+  const defaultProp = allProperties.find((p) => p.is_default) ?? allProperties[0];
+  const farmName = defaultProp?.property_name ?? null;
+
+  return {
+    farmName,
+    totalValue: analysis.reduce((s, a) => s + a.livestockValue, 0),
+    totalSales: 0,
+    herdData: [],
+    salesData: [],
+    saleyardComparison: [],
+    landValueAnalysis: analysis,
+    propertyComparison: [],
+    executiveSummary: null,
+    herdComposition: [],
+    userDetails,
+    properties: reportProperties,
+    generatedAt: new Date().toISOString(),
+    dateRange: { start: config.startDate, end: config.endDate },
+  };
+}
+
+// MARK: - Property vs Property
+
+/**
+ * Per-property comparison of total value, head count, average price, and
+ * value per head. Mirrors iOS `generatePropertyComparisonData`.
+ *
+ * avgPricePerKg is weighted by head count so a small high-price herd can't
+ * dominate a large mid-price herd's contribution.
+ */
+export async function generatePropertyComparisonData(
+  supabase: SupabaseClient,
+  userId: string,
+  config: ReportConfiguration
+): Promise<ReportData> {
+  const [{ data: herds }, { data: properties }, premiumMap, userDetails] = await Promise.all([
+    supabase
+      .from("herds")
+      .select(HERD_SELECT)
+      .eq("user_id", userId)
+      .eq("is_sold", false)
+      .eq("is_deleted", false)
+      .order("name"),
+    supabase
+      .from("properties")
+      .select("id, property_name, property_pic, state, is_default, default_saleyard, region")
+      .eq("user_id", userId)
+      .eq("is_deleted", false)
+      .order("property_name"),
+    buildPremiumMap(supabase),
+    fetchUserReportDetails(supabase, userId),
+  ]);
+
+  const activeHerds = herds ?? [];
+  const allProperties = (properties ?? []) as {
+    id: string;
+    property_name: string;
+    property_pic: string | null;
+    state: string | null;
+    is_default: boolean;
+    default_saleyard: string | null;
+    region: string | null;
+  }[];
+
+  const propertiesToCompare = config.selectedPropertyIds.length > 0
+    ? allProperties.filter((p) => config.selectedPropertyIds.includes(p.id))
+    : allProperties;
+
+  const { nationalPriceMap, saleyardPriceMap, saleyardBreedPriceMap } = await buildPriceMaps(
+    supabase,
+    activeHerds
+  );
+
+  const comparison: PropertyComparisonData[] = [];
+  for (const property of propertiesToCompare) {
+    const propertyHerds = activeHerds.filter(
+      (h: { property_id: string | null }) => h.property_id === property.id
+    );
+
+    if (propertyHerds.length === 0) {
+      comparison.push({
+        propertyName: property.property_name,
+        totalValue: 0,
+        totalHeadCount: 0,
+        avgPricePerKg: 0,
+        valuePerHead: 0,
+      });
+      continue;
+    }
+
+    let totalValue = 0;
+    let totalHead = 0;
+    let weightedPriceSum = 0;
+
+    for (const herd of propertyHerds) {
+      const valuation = calculateHerdValuation(
+        herd as Parameters<typeof calculateHerdValuation>[0],
+        nationalPriceMap,
+        premiumMap,
+        undefined,
+        saleyardPriceMap,
+        saleyardBreedPriceMap
+      );
+      totalValue += valuation.netValue;
+      totalHead += herd.head_count ?? 0;
+      // Weighted by head count so large herds carry more weight in the
+      // property-level average.
+      weightedPriceSum += valuation.pricePerKg * (herd.head_count ?? 0);
+    }
+
+    comparison.push({
+      propertyName: property.property_name,
+      totalValue,
+      totalHeadCount: totalHead,
+      avgPricePerKg: totalHead > 0 ? weightedPriceSum / totalHead : 0,
+      valuePerHead: totalHead > 0 ? totalValue / totalHead : 0,
+    });
+  }
+
+  comparison.sort((a, b) => b.totalValue - a.totalValue);
+
+  const reportProperties: ReportPropertyDetails[] = propertiesToCompare.map((p) => ({
+    name: p.property_name,
+    picCode: p.property_pic ?? null,
+    state: p.state ?? null,
+  }));
+
+  const defaultProp = allProperties.find((p) => p.is_default) ?? allProperties[0];
+  const farmName = defaultProp?.property_name ?? null;
+
+  return {
+    farmName,
+    totalValue: comparison.reduce((s, c) => s + c.totalValue, 0),
+    totalSales: 0,
+    herdData: [],
+    salesData: [],
+    saleyardComparison: [],
+    landValueAnalysis: [],
+    propertyComparison: comparison,
+    executiveSummary: null,
+    herdComposition: [],
+    userDetails,
+    properties: reportProperties,
+    generatedAt: new Date().toISOString(),
+    dateRange: { start: config.startDate, end: config.endDate },
   };
 }

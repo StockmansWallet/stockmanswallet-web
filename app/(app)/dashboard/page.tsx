@@ -6,10 +6,22 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { HerdComposition } from "./herd-composition";
 import { OutlookCard } from "./outlook-card";
-import { calculateHerdValuation, categoryFallback, parseCalvesAtFoot, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import {
+  calculateHerdValuation,
+  categoryFallback,
+  parseCalvesAtFoot,
+  type CategoryPriceEntry,
+} from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
-import { cattleBreedPremiums, resolveMLASaleyardName, saleyardLocality } from "@/lib/data/reference-data";
-import { closestSaleyardsToProperty, expandWithNearbySaleyards } from "@/lib/data/saleyard-proximity";
+import {
+  cattleBreedPremiums,
+  resolveMLASaleyardName,
+  saleyardLocality,
+} from "@/lib/data/reference-data";
+import {
+  closestSaleyardsToProperty,
+  expandWithNearbySaleyards,
+} from "@/lib/data/saleyard-proximity";
 import { centsToDollars } from "@/lib/types/money";
 import { PortfolioValueCard } from "@/components/app/portfolio-value-card";
 import { ComingUpCard } from "@/components/app/coming-up-card";
@@ -25,7 +37,10 @@ function shortSaleyardName(name: string): string {
     .replace(/ Livestock (Marketing Centre|Selling Centre|Exchange|Centre)$/i, "")
     .replace(/ Regional Livestock (Exchange|Market)$/i, "")
     .replace(/ Central [\w ]+ Livestock Exchange$/i, "")
-    .replace(/ (Dalrymple |Northern Victoria |Great Southern Regional Cattle |Gippsland Regional |South Eastern |Western Victorian |Victorian |Southern |South Australian )?Saleyards?$/i, "")
+    .replace(
+      / (Dalrymple |Northern Victoria |Great Southern Regional Cattle |Gippsland Regional |South Eastern |Western Victorian |Victorian |Southern |South Australian )?Saleyards?$/i,
+      ""
+    )
     .replace(/ Livestock Exchange$/i, "")
     .trim();
 }
@@ -60,31 +75,38 @@ export default async function DashboardPage() {
   const displayName = authFirstName || profile?.display_name?.split(" ")[0] || "Stockman";
   const todayStr = new Date().toISOString().split("T")[0];
 
-  const [{ data: herds }, { data: properties }, { data: breedPremiumData }, { data: upcomingItems }] = await Promise.all([
+  const [
+    { data: herds },
+    { data: properties },
+    { data: breedPremiumData },
+    { data: upcomingItems },
+  ] = await Promise.all([
     supabase
       .from("herds")
-      .select(`id, name, species, breed, category, head_count,
+      .select(
+        `id, name, species, breed, category, head_count,
                initial_weight, current_weight, daily_weight_gain,
                dwg_change_date, previous_dwg, created_at,
                is_breeder, is_pregnant, joined_date, calving_rate,
                breeding_program_type, joining_period_start, joining_period_end,
                breed_premium_override, mortality_rate, is_sold, selected_saleyard,
                additional_info, calf_weight_recorded_date, updated_at,
-               breeder_sub_type, sub_category, property_id`)
+               breeder_sub_type, sub_category, property_id`
+      )
       .eq("user_id", user.id)
       .eq("is_sold", false)
       .eq("is_deleted", false)
       .order("name"),
     supabase
       .from("properties")
-      .select("id, property_name, state, acreage, is_simulated, latitude, longitude, is_default, suburb")
+      .select(
+        "id, property_name, state, acreage, is_simulated, latitude, longitude, is_default, suburb"
+      )
       .eq("user_id", user.id)
       .eq("is_deleted", false)
       .order("property_name"),
     // Breed premiums (matches iOS BreedPremiumService)
-    supabase
-      .from("breed_premiums")
-      .select("breed, premium_percent:premium_pct"),
+    supabase.from("breed_premiums").select("breed, premium_percent:premium_pct"),
     // Upcoming yard book items for Coming Up card
     supabase
       .from("yard_book_items")
@@ -100,22 +122,50 @@ export default async function DashboardPage() {
   // Fetch only the newest date's prices per saleyard+category via RPC.
   // Prices are fetched for each herd's individual saleyard plus the 3 closest
   // saleyards to the primary property (used by the Closest Saleyards card).
-  const primaryProperty = (properties ?? []).find((p) => p.is_default) ?? (properties ?? [])[0] ?? null;
+  const primaryProperty =
+    (properties ?? []).find((p) => p.is_default) ?? (properties ?? [])[0] ?? null;
   const closestYards = closestSaleyardsToProperty(primaryProperty, 3);
-  const herdSaleyards = [...new Set((herds ?? []).map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
+  const herdSaleyards = [
+    ...new Set(
+      (herds ?? [])
+        .map((h) => (h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null))
+        .filter(Boolean)
+    ),
+  ] as string[];
   const saleyards = expandWithNearbySaleyards([...new Set([...herdSaleyards, ...closestYards])]);
-  const primaryCategories = [...new Set((herds ?? []).map((h) => resolveMLACategory(h.category, h.initial_weight, h.breeder_sub_type ?? undefined).primaryMLACategory))];
-  const mlaCategories = [...new Set([...primaryCategories, ...primaryCategories.map(c => categoryFallback(c)).filter((c): c is string => c !== null)])];
+  const primaryCategories = [
+    ...new Set(
+      (herds ?? []).map(
+        (h) =>
+          resolveMLACategory(h.category, h.initial_weight, h.breeder_sub_type ?? undefined)
+            .primaryMLACategory
+      )
+    ),
+  ];
+  const mlaCategories = [
+    ...new Set([
+      ...primaryCategories,
+      ...primaryCategories.map((c) => categoryFallback(c)).filter((c): c is string => c !== null),
+    ]),
+  ];
 
-  type PriceRow = { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string };
+  type PriceRow = {
+    category: string;
+    price_per_kg: number;
+    weight_range: string | null;
+    saleyard: string;
+    breed: string | null;
+    data_date: string;
+  };
   const emptyPrices: PriceRow[] = [];
 
-  const { data: rpcPrices } = mlaCategories.length > 0
-    ? await supabase.rpc("latest_saleyard_prices", {
-        p_saleyards: saleyards,
-        p_categories: mlaCategories,
-      }) as unknown as { data: PriceRow[] | null }
-    : { data: emptyPrices };
+  const { data: rpcPrices } =
+    mlaCategories.length > 0
+      ? ((await supabase.rpc("latest_saleyard_prices", {
+          p_saleyards: saleyards,
+          p_categories: mlaCategories,
+        })) as unknown as { data: PriceRow[] | null })
+      : { data: emptyPrices };
 
   const allPrices = rpcPrices ?? [];
 
@@ -128,8 +178,12 @@ export default async function DashboardPage() {
   const nationalPriceMap = new Map<string, CategoryPriceEntry[]>();
   const saleyardPriceMap = new Map<string, CategoryPriceEntry[]>();
   const saleyardBreedPriceMap = new Map<string, CategoryPriceEntry[]>();
-  for (const p of (allPrices ?? [])) {
-    const priceEntry = { price_per_kg: centsToDollars(p.price_per_kg), weight_range: p.weight_range, data_date: p.data_date };
+  for (const p of allPrices ?? []) {
+    const priceEntry = {
+      price_per_kg: centsToDollars(p.price_per_kg),
+      weight_range: p.weight_range,
+      data_date: p.data_date,
+    };
     if (p.saleyard === "National" && p.breed === null) {
       const entries = nationalPriceMap.get(p.category) ?? [];
       entries.push(priceEntry);
@@ -150,7 +204,7 @@ export default async function DashboardPage() {
   }
   // Seed with local breed premiums, then let Supabase override (matches iOS BreedPremiumService)
   const premiumMap = new Map<string, number>(Object.entries(cattleBreedPremiums));
-  for (const b of (breedPremiumData ?? [])) {
+  for (const b of breedPremiumData ?? []) {
     premiumMap.set(b.breed, b.premium_percent);
   }
 
@@ -163,7 +217,11 @@ export default async function DashboardPage() {
   for (const h of activeHerds) {
     const result = calculateHerdValuation(
       h as Parameters<typeof calculateHerdValuation>[0],
-      nationalPriceMap, premiumMap, undefined, saleyardPriceMap, saleyardBreedPriceMap
+      nationalPriceMap,
+      premiumMap,
+      undefined,
+      saleyardPriceMap,
+      saleyardBreedPriceMap
     );
     portfolioValue += result.netValue;
     totalPreBirthAccrual += result.preBirthAccrual;
@@ -178,7 +236,11 @@ export default async function DashboardPage() {
     for (const h of activeHerds) {
       const result = calculateHerdValuation(
         { ...h, selected_saleyard: yard } as Parameters<typeof calculateHerdValuation>[0],
-        nationalPriceMap, premiumMap, undefined, saleyardPriceMap, saleyardBreedPriceMap
+        nationalPriceMap,
+        premiumMap,
+        undefined,
+        saleyardPriceMap,
+        saleyardBreedPriceMap
       );
       total += result.netValue;
     }
@@ -189,9 +251,11 @@ export default async function DashboardPage() {
       value: total,
     };
   });
-  const hasPrimaryLocation = !!(primaryProperty && (
-    (primaryProperty.latitude != null && primaryProperty.longitude != null) || primaryProperty.state
-  ));
+  const hasPrimaryLocation = !!(
+    primaryProperty &&
+    ((primaryProperty.latitude != null && primaryProperty.longitude != null) ||
+      primaryProperty.state)
+  );
   const totalBreedingAccrual = totalPreBirthAccrual + totalCalvesAtFootValue;
   const totalCalvesAtFootHead = activeHerds.reduce((sum, h) => {
     const parsed = parseCalvesAtFoot(h.additional_info);
@@ -226,14 +290,21 @@ export default async function DashboardPage() {
 
   if ((snapshotCount ?? 0) <= 1 && activeHerds.length > 0) {
     const creationDates = activeHerds
-      .map((h) => h.created_at ? new Date(h.created_at) : null)
+      .map((h) => (h.created_at ? new Date(h.created_at) : null))
       .filter((d): d is Date => d !== null);
-    const earliest = creationDates.length > 0
-      ? new Date(Math.min(...creationDates.map((d) => d.getTime())))
-      : null;
+    const earliest =
+      creationDates.length > 0
+        ? new Date(Math.min(...creationDates.map((d) => d.getTime())))
+        : null;
 
     if (earliest && earliest.getTime() < now.getTime() - 86_400_000) {
-      const backfillRows: { user_id: string; snapshot_date: string; total_value: number; head_count: number; herd_count: number }[] = [];
+      const backfillRows: {
+        user_id: string;
+        snapshot_date: string;
+        total_value: number;
+        head_count: number;
+        herd_count: number;
+      }[] = [];
       const cursor = new Date(earliest);
 
       while (cursor.getTime() < now.getTime() - 86_400_000) {
@@ -245,10 +316,17 @@ export default async function DashboardPage() {
 
         if (herdsAtDate.length > 0) {
           const dateVal = herdsAtDate.reduce((sum, h) => {
-            return sum + calculateHerdValuation(
-              h as Parameters<typeof calculateHerdValuation>[0],
-              nationalPriceMap, premiumMap, asOfDate, saleyardPriceMap, saleyardBreedPriceMap
-            ).netValue;
+            return (
+              sum +
+              calculateHerdValuation(
+                h as Parameters<typeof calculateHerdValuation>[0],
+                nationalPriceMap,
+                premiumMap,
+                asOfDate,
+                saleyardPriceMap,
+                saleyardBreedPriceMap
+              ).netValue
+            );
           }, 0);
           const dateHeads = herdsAtDate.reduce((sum, h) => sum + (h.head_count ?? 0), 0);
 
@@ -317,13 +395,11 @@ export default async function DashboardPage() {
 
   // Change ticker: compare today vs previous snapshot
   const todayVal = Math.round(portfolioValue);
-  const prevVal = historicPoints.length > 0 ? historicPoints[historicPoints.length - 1].value : undefined;
-  const changeDollar =
-    prevVal !== undefined ? todayVal - prevVal : undefined;
+  const prevVal =
+    historicPoints.length > 0 ? historicPoints[historicPoints.length - 1].value : undefined;
+  const changeDollar = prevVal !== undefined ? todayVal - prevVal : undefined;
   const changePercent =
-    prevVal !== undefined && prevVal > 0
-      ? ((todayVal - prevVal) / prevVal) * 100
-      : undefined;
+    prevVal !== undefined && prevVal > 0 ? ((todayVal - prevVal) / prevVal) * 100 : undefined;
 
   return (
     <>
@@ -331,17 +407,15 @@ export default async function DashboardPage() {
         {!hasData ? (
           /* Empty state - matches iOS EmptyDashboardView */
           <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
-            <h2 className="text-2xl font-bold text-text-primary">
-              Welcome to Your Dashboard
-            </h2>
-            <p className="mt-3 max-w-md text-sm text-text-secondary">
+            <h2 className="text-text-primary text-2xl font-bold">Welcome to Your Dashboard</h2>
+            <p className="text-text-secondary mt-3 max-w-md text-sm">
               Add your first herd to see live valuations, market trends, and portfolio insights.
             </p>
 
             <div className="mt-8 flex w-full max-w-xs flex-col gap-3">
               <Link
                 href="/dashboard/herds/new"
-                className="inline-flex w-full items-center justify-center rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                className="bg-brand inline-flex w-full items-center justify-center rounded-full px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
               >
                 Add Your First Herd
               </Link>
@@ -355,17 +429,31 @@ export default async function DashboardPage() {
               subtitle="Here&#8217;s your herd overview."
             />
 
-            {/* Top row: value + stats */}
-            <div className="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-4 lg:gap-4">
-              <PortfolioValueCard
-                value={portfolioValue}
-                changeDollar={changeDollar}
-                changePercent={changePercent}
-                fallbackCount={fallbackCount}
+            {/* Hero: Total Portfolio Value */}
+            <PortfolioValueCard
+              value={portfolioValue}
+              changeDollar={changeDollar}
+              changePercent={changePercent}
+              fallbackCount={fallbackCount}
+            />
+
+            {/* Secondary stat strip */}
+            <div className="mt-3 grid grid-cols-3 items-stretch gap-3 lg:mt-4 lg:gap-4">
+              <StatCard
+                icon={<Tags className="h-3.5 w-3.5" />}
+                label="Head"
+                value={totalHead.toLocaleString()}
               />
-              <StatCard icon={<Tags className="h-3.5 w-3.5" />} label="Head" value={totalHead.toLocaleString()} />
-              <StatCard icon={<Layers className="h-3.5 w-3.5" />} label="Herds" value={String(herdCount)} />
-              <StatCard icon={<MapPinned className="h-3.5 w-3.5" />} label="Properties" value={String(propertyCount)} />
+              <StatCard
+                icon={<Layers className="h-3.5 w-3.5" />}
+                label="Herds"
+                value={String(herdCount)}
+              />
+              <StatCard
+                icon={<MapPinned className="h-3.5 w-3.5" />}
+                label="Properties"
+                value={String(propertyCount)}
+              />
             </div>
 
             {/* Portfolio Outlook chart - full width */}
@@ -381,14 +469,14 @@ export default async function DashboardPage() {
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
-                          <IconCattleTags className="h-3.5 w-3.5 text-brand" />
+                        <div className="bg-brand/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+                          <IconCattleTags className="text-brand h-3.5 w-3.5" />
                         </div>
                         <CardTitle>Herd Composition</CardTitle>
                       </div>
                       <Link
                         href="/dashboard/herds"
-                        className="text-xs font-medium text-brand hover:underline"
+                        className="text-brand text-xs font-medium hover:underline"
                       >
                         View all
                       </Link>
@@ -420,63 +508,65 @@ export default async function DashboardPage() {
 
               {/* Right column */}
               <div className="flex min-w-0 flex-col gap-3 lg:gap-4">
-              <ClosestSaleyardsCard yards={closestYardValues} hasLocation={hasPrimaryLocation} />
+                <ClosestSaleyardsCard yards={closestYardValues} hasLocation={hasPrimaryLocation} />
 
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
-                        <IconCattleTags className="h-3.5 w-3.5 text-brand" />
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="bg-brand/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+                          <IconCattleTags className="text-brand h-3.5 w-3.5" />
+                        </div>
+                        <CardTitle>Largest Herds</CardTitle>
                       </div>
-                      <CardTitle>Largest Herds</CardTitle>
+                      <span className="text-text-muted text-xs">by head count</span>
                     </div>
-                    <span className="text-xs text-text-muted">by head count</span>
-                  </div>
-                </CardHeader>
-                <CardContent className="px-5 pb-5">
-                  {[...herdsByProperty.entries()].map(([propName, herds], groupIdx) => (
-                    <div key={propName} className={groupIdx > 0 ? "mt-4" : ""}>
-                      <div className="flex items-center gap-1.5 pb-2">
-                        <MapPinned className="h-3 w-3 text-text-muted" />
-                        <p className="text-xs font-medium text-text-muted">{propName}</p>
-                      </div>
-                      <ul className="divide-y divide-white/5">
-                        {herds.map((herd) => (
-                          <li key={herd.id}>
-                            <Link
-                              href={`/dashboard/herds/${herd.id}`}
-                              className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
-                            >
-                              <div className="min-w-0">
-                                <p className="truncate text-sm font-semibold text-text-primary">
-                                  {herd.name}
-                                </p>
-                                <p className="text-xs text-text-muted">
-                                  {herd.breed} &middot; {herd.sub_category && herd.sub_category !== herd.category ? `${herd.category} (${herd.sub_category})` : herd.category}
-                                </p>
-                              </div>
-                              <div className="ml-4 flex flex-shrink-0 items-center gap-3">
-                                <span className="text-sm font-semibold tabular-nums text-text-primary">
-                                  {herd.head_count?.toLocaleString()} hd
-                                </span>
-                                {herd.current_weight > 0 && (
-                                  <span className="text-xs tabular-nums text-text-muted">
-                                    {herd.current_weight} kg
+                  </CardHeader>
+                  <CardContent className="px-5 pb-5">
+                    {[...herdsByProperty.entries()].map(([propName, herds], groupIdx) => (
+                      <div key={propName} className={groupIdx > 0 ? "mt-4" : ""}>
+                        <div className="flex items-center gap-1.5 pb-2">
+                          <MapPinned className="text-text-muted h-3 w-3" />
+                          <p className="text-text-muted text-xs font-medium">{propName}</p>
+                        </div>
+                        <ul className="divide-y divide-white/5">
+                          {herds.map((herd) => (
+                            <li key={herd.id}>
+                              <Link
+                                href={`/dashboard/herds/${herd.id}`}
+                                className="-mx-2 flex items-center justify-between rounded-lg px-2 py-3 transition-colors hover:bg-white/[0.03]"
+                              >
+                                <div className="min-w-0">
+                                  <p className="text-text-primary truncate text-sm font-semibold">
+                                    {herd.name}
+                                  </p>
+                                  <p className="text-text-muted text-xs">
+                                    {herd.breed} &middot;{" "}
+                                    {herd.sub_category && herd.sub_category !== herd.category
+                                      ? `${herd.category} (${herd.sub_category})`
+                                      : herd.category}
+                                  </p>
+                                </div>
+                                <div className="ml-4 flex flex-shrink-0 items-center gap-3">
+                                  <span className="text-text-primary text-sm font-semibold tabular-nums">
+                                    {herd.head_count?.toLocaleString()} hd
                                   </span>
-                                )}
-                              </div>
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+                                  {herd.current_weight > 0 && (
+                                    <span className="text-text-muted text-xs tabular-nums">
+                                      {herd.current_weight} kg
+                                    </span>
+                                  )}
+                                </div>
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
             </div>
-
-          </div>
           </div>
         )}
       </div>

@@ -7,6 +7,8 @@ export type ReportType =
   | "sales-summary"
   | "saleyard-comparison"
   | "accountant"
+  | "value-vs-land-area"
+  | "property-comparison"
   | "advisor-lens";
 
 export type DateRangePreset = "1d" | "1w" | "1m" | "3m" | "6m" | "1y" | "custom";
@@ -121,6 +123,26 @@ export interface ReportPropertyDetails {
   state: string | null;
 }
 
+// MARK: - Value vs Land Area (iOS parity)
+
+export interface LandValueAnalysisData {
+  propertyName: string;
+  acreage: number;
+  livestockValue: number;
+  valuePerAcre: number;
+  totalHeadCount: number;
+}
+
+// MARK: - Property vs Property (iOS parity)
+
+export interface PropertyComparisonData {
+  propertyName: string;
+  totalValue: number;
+  totalHeadCount: number;
+  avgPricePerKg: number;
+  valuePerHead: number;
+}
+
 // MARK: - Accountant Report Snapshot (mirrors iOS AccountantReportSnapshot)
 
 export interface AccountantSnapshot {
@@ -146,6 +168,10 @@ export interface ReportData {
   herdData: HerdReportData[];
   salesData: SaleReportData[];
   saleyardComparison: SaleyardComparisonData[];
+  /** Populated by the Value vs Land Area report; empty for others. */
+  landValueAnalysis: LandValueAnalysisData[];
+  /** Populated by the Property vs Property report; empty for others. */
+  propertyComparison: PropertyComparisonData[];
   executiveSummary: ExecutiveSummary | null;
   herdComposition: HerdCompositionItem[];
   userDetails: UserReportDetails | null;

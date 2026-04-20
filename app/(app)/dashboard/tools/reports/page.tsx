@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
-import { ClipboardList, BarChart3, Scale, FileText, ChevronRight } from "lucide-react";
+import { ClipboardList, BarChart3, Scale, FileText, ChevronRight, Map, Building2 } from "lucide-react";
 
 export const metadata = { title: "Reports" };
 
@@ -29,6 +29,18 @@ const reports = [
     description: "Professional summary report suitable for your accountant or bank manager.",
     href: "/dashboard/tools/reports/accountant",
     icon: <FileText className="h-5 w-5" />,
+  },
+  {
+    name: "Value vs Land Area",
+    description: "Livestock value density per acre across your properties.",
+    href: "/dashboard/tools/reports/value-vs-land-area",
+    icon: <Map className="h-5 w-5" />,
+  },
+  {
+    name: "Property vs Property",
+    description: "Compare total value, head count, and average price across properties.",
+    href: "/dashboard/tools/reports/property-comparison",
+    icon: <Building2 className="h-5 w-5" />,
   },
 ];
 
