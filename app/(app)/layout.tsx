@@ -4,6 +4,7 @@ import { Sidebar } from "@/components/app/sidebar";
 import { MobileNav } from "@/components/app/mobile-nav";
 import { TopBar } from "@/components/app/top-bar";
 import { SidebarNotificationsProvider } from "@/components/app/sidebar-notifications-provider";
+import { DemoModeBanner } from "@/components/app/demo-mode-banner";
 import { isAdvisorRole, roleDisplayName } from "@/lib/types/advisory";
 import { ADVISOR_ENABLED } from "@/lib/feature-flags";
 
@@ -66,6 +67,9 @@ export default async function AppLayout({
   // When advisor feature flag is off, never treat anyone as an advisor
   const isAdvisor = ADVISOR_ENABLED && !!(profile?.role && isAdvisorRole(profile.role));
 
+  // Demo user check - email comparison is authoritative; RLS enforces read-only server-side.
+  const isDemoUser = user.email?.toLowerCase() === process.env.DEMO_EMAIL?.toLowerCase();
+
   return (
     <SidebarNotificationsProvider>
       {/* Fixed background: single div, CSS-only stack.
@@ -92,6 +96,12 @@ export default async function AppLayout({
       />
 
       <div className="flex min-h-screen flex-col bg-background/0">
+        {isDemoUser && (
+          <div data-print-hide className="sticky top-0 z-50">
+            <DemoModeBanner />
+          </div>
+        )}
+
         {/* Mobile nav */}
         <div data-print-hide>
           <MobileNav userEmail={user.email} subscriptionTier={profile?.subscription_tier || "stockman"} isAdvisor={isAdvisor} />

@@ -51,6 +51,27 @@ export async function signIn(formData: FormData) {
   redirect("/dashboard");
 }
 
+// Signs into the shared public demo account. The account is enforced read-only
+// at the Supabase RLS layer; credentials live in server env vars so they never
+// touch the client bundle. Form action signature requires Promise<void>, so
+// failures redirect back to /sign-in with an ?error= rather than returning.
+export async function signInAsDemo() {
+  const email = process.env.DEMO_EMAIL;
+  const password = process.env.DEMO_PASSWORD;
+  if (!email || !password) {
+    redirect("/sign-in?error=demo-not-configured");
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    redirect("/sign-in?error=demo-failed");
+  }
+
+  redirect("/dashboard");
+}
+
 export async function signUp(formData: FormData) {
   const parsed = signUpSchema.safeParse({
     email: formData.get("email"),

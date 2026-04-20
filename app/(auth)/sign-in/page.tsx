@@ -1,12 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { signIn, signInWithApple, signInWithGoogle } from "../actions";
+import { useSearchParams } from "next/navigation";
+import { signIn, signInAsDemo, signInWithApple, signInWithGoogle } from "../actions";
 
 export default function SignInPage() {
+  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Debug: Demo sign-in is a Server Action that can't return values, so failures
+  // redirect back here with ?error=demo-failed. Surface that message on mount.
+  useEffect(() => {
+    const code = searchParams.get("error");
+    if (code === "demo-failed") setError("Couldn't start demo. Please try again.");
+    else if (code === "demo-not-configured") setError("Demo account is not configured.");
+  }, [searchParams]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -134,6 +144,17 @@ export default function SignInPage() {
           Sign up
         </Link>
       </p>
+
+      <div className="mt-4 text-center">
+        <form action={signInAsDemo}>
+          <button
+            type="submit"
+            className="text-sm font-medium text-brand underline-offset-4 transition-colors hover:underline hover:text-brand-dark"
+          >
+            Try Demo
+          </button>
+        </form>
+      </div>
     </>
   );
 }

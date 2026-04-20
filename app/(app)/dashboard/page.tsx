@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server";
 import { isAdvisorRole } from "@/lib/types/advisory";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { LoadDemoDataButton } from "@/components/app/load-demo-data-button";
 import { HerdComposition } from "./herd-composition";
 import { OutlookCard } from "./outlook-card";
 import { calculateHerdValuation, categoryFallback, parseCalvesAtFoot, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
@@ -346,7 +345,6 @@ export default async function DashboardPage() {
               >
                 Add Your First Herd
               </Link>
-              <LoadDemoDataButton />
             </div>
           </div>
         ) : (

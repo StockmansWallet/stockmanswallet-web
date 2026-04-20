@@ -9,7 +9,6 @@ import {
   MapPinned,
   Database,
   ChevronRight,
-  FlaskConical,
   CreditCard,
 } from "lucide-react";
 import { isAdminUser } from "@/lib/data/admin";
@@ -110,14 +109,6 @@ export default async function SettingsPage() {
               iconColor="text-warning"
               label="Data Management"
               description="Clear all data"
-            />
-            <NavItem
-              href="/dashboard/settings/demo"
-              icon={FlaskConical}
-              iconBg="bg-emerald/15"
-              iconColor="text-emerald"
-              label="Demo Data"
-              description="Load sample herds to explore the app"
             />
           </CardContent>
         </Card>

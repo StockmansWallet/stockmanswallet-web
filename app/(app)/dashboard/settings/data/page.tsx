@@ -2,7 +2,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ChevronLeft, Database } from "lucide-react";
-import { ClearAllDataButton } from "../demo-buttons";
+import { ClearAllDataButton } from "../data-management-buttons";
 
 export const metadata = { title: "Data Management - Settings" };
 
