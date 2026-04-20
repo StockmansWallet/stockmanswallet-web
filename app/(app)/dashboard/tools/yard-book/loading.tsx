@@ -1,4 +1,4 @@
-import { Skeleton, SkeletonCard } from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function YardBookLoading() {
   return (
@@ -12,62 +12,51 @@ export default function YardBookLoading() {
         <Skeleton className="h-10 w-24 rounded-xl" />
       </div>
 
-      {/* Stat cards */}
+      {/* Stat cards (match blurred StatCard style) */}
       <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-        <SkeletonCard />
-        <SkeletonCard />
-        <SkeletonCard />
-        <SkeletonCard />
-      </div>
-
-      {/* Category pills */}
-      <div className="mb-6 flex gap-1.5">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-7 w-20 rounded-full" />
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="rounded-2xl bg-surface-lowest p-5 backdrop-blur-xl">
+            <Skeleton className="mx-auto mb-2 h-3 w-20" />
+            <Skeleton className="mx-auto h-6 w-28" />
+          </div>
         ))}
       </div>
 
-      {/* Run sheet items */}
-      <div className="space-y-6">
-        {/* Section header */}
-        <div>
-          <Skeleton className="mb-3 h-4 w-16" />
-          <div className="space-y-1.5">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-3 rounded-xl px-3 py-3 ring-1 ring-inset ring-white/[0.04]"
-              >
-                <Skeleton className="h-9 w-9 rounded-full" />
-                <div className="flex-1">
-                  <Skeleton className="mb-1.5 h-4 w-48" />
-                  <Skeleton className="h-3 w-32" />
-                </div>
-                <Skeleton className="h-5 w-14 rounded-full" />
-              </div>
-            ))}
-          </div>
+      {/* Category toolbar pill */}
+      <div className="mb-4 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md">
+        <div className="flex items-center gap-1.5 overflow-x-auto">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-8 w-20 rounded-full" />
+          ))}
         </div>
+        <Skeleton className="h-8 w-20 rounded-full" />
+      </div>
 
-        {/* Second section */}
-        <div>
-          <Skeleton className="mb-3 h-4 w-24" />
-          <div className="space-y-1.5">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-3 rounded-xl px-3 py-3 ring-1 ring-inset ring-white/[0.04]"
-              >
-                <Skeleton className="h-9 w-9 rounded-full" />
-                <div className="flex-1">
-                  <Skeleton className="mb-1.5 h-4 w-40" />
-                  <Skeleton className="h-3 w-28" />
+      {/* Horizon sections */}
+      <div className="space-y-6">
+        {[6, 3].map((count, section) => (
+          <div key={section}>
+            <div className="mb-2 flex items-center gap-2">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-5 w-5 rounded-full" />
+            </div>
+            <div className="space-y-1.5">
+              {Array.from({ length: count }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-3 backdrop-blur-xl"
+                >
+                  <Skeleton className="h-9 w-9 rounded-full" />
+                  <div className="flex-1">
+                    <Skeleton className="mb-1.5 h-4 w-48" />
+                    <Skeleton className="h-3 w-32" />
+                  </div>
+                  <Skeleton className="h-5 w-14 rounded-full" />
                 </div>
-                <Skeleton className="h-5 w-14 rounded-full" />
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );

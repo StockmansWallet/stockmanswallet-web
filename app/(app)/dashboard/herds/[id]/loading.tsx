@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function SkeletonInfoCard({ rows = 4 }: { rows?: number }) {
   return (
-    <div className="rounded-2xl bg-surface-lowest">
+    <div className="rounded-2xl bg-surface-lowest backdrop-blur-xl">
       <div className="px-5 pt-5 pb-4">
         <div className="flex items-center gap-2.5">
           <Skeleton className="h-7 w-7 rounded-lg" />
@@ -33,7 +33,7 @@ export default function HerdDetailLoading() {
       {/* Stat cards (5 cols) */}
       <div className="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-5 lg:gap-4">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="rounded-2xl bg-surface-lowest p-5">
+          <div key={i} className="rounded-2xl bg-surface-lowest p-5 backdrop-blur-xl">
             <Skeleton className="mx-auto mb-2 h-3 w-16" />
             <Skeleton className="mx-auto h-6 w-20" />
           </div>
@@ -41,7 +41,7 @@ export default function HerdDetailLoading() {
       </div>
 
       {/* Action bar */}
-      <div className="mt-3 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2 lg:mt-4">
+      <div className="mt-3 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md lg:mt-4">
         <div className="flex items-center gap-1.5 pl-2">
           <Skeleton className="h-5 w-20 rounded-full" />
         </div>

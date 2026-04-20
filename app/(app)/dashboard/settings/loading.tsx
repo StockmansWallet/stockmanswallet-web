@@ -11,7 +11,7 @@ export default function SettingsLoading() {
 
       <div className="space-y-6">
         {/* Nav card */}
-        <div className="overflow-hidden rounded-2xl bg-surface-lowest">
+        <div className="overflow-hidden rounded-2xl bg-surface-lowest backdrop-blur-xl">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3.5 border-b border-white/[0.04] px-4 py-3.5 last:border-0">
               <Skeleton className="h-9 w-9 rounded-xl" />
