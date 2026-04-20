@@ -362,18 +362,41 @@ export async function getHerdExposure(userId: string): Promise<HerdExposure[]> {
 }
 
 export async function getSaleyardsForState(state?: string): Promise<Array<{ saleyard: string; state: string }>> {
+  // Returns the set of distinct saleyards (with their state) that have
+  // price data in the last 60 days. Feeds resolveSlug() on the market
+  // detail pages, so missing entries manifest as 404s when the user
+  // clicks a legitimate saleyard (Echuca, Naracoorte, etc.).
+  //
+  // PostgREST enforces db-max-rows = 1000 per response regardless of
+  // .limit() passed by the client. The previous single-query approach
+  // with .limit(10000) was silently truncated to 1000 rows, covering
+  // only a subset of saleyards. We paginate with .range() until the
+  // window is drained so every saleyard surfaces.
   const supabase = await createClient();
-  let q = supabase
-    .from("category_prices")
-    .select("saleyard, state")
-    .gte("data_date", daysAgo(60));
-  if (state) q = q.eq("state", state);
-  const { data } = await q.limit(10000);
-  if (!data) return [];
   const seen = new Map<string, string>();
-  for (const r of data as Array<{ saleyard: string; state: string }>) {
-    if (!seen.has(r.saleyard)) seen.set(r.saleyard, r.state);
+  const cutoff = daysAgo(60);
+  const PAGE = 1000;
+
+  for (let from = 0; ; from += PAGE) {
+    let q = supabase
+      .from("category_prices")
+      .select("saleyard, state")
+      .gte("data_date", cutoff)
+      // Deterministic ordering is required for .range() pagination to be
+      // consistent across pages. Ordering by saleyard also clusters
+      // rows for the same yard, making the dedup inside the loop cheap.
+      .order("saleyard", { ascending: true })
+      .range(from, from + PAGE - 1);
+    if (state) q = q.eq("state", state);
+
+    const { data, error } = await q;
+    if (error || !data || data.length === 0) break;
+    for (const r of data as Array<{ saleyard: string; state: string }>) {
+      if (!seen.has(r.saleyard)) seen.set(r.saleyard, r.state);
+    }
+    if (data.length < PAGE) break;
   }
+
   return Array.from(seen.entries())
     .map(([saleyard, state]) => ({ saleyard, state }))
     .sort((a, b) => a.saleyard.localeCompare(b.saleyard));
