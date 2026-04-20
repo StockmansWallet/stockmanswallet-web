@@ -73,7 +73,20 @@ export async function GET(request: NextRequest) {
     // Custom header isn't logged by Vercel's request logs the way query params
     // are; it also doesn't leak via Referer to subresources.
     await page.setExtraHTTPHeaders({ "x-pdf-token": jwt });
-    await page.goto(printURL.toString(), { waitUntil: "networkidle0", timeout: 30000 });
+    const response = await page.goto(printURL.toString(), { waitUntil: "networkidle0", timeout: 30000 });
+
+    // DEBUG (temporary): verify what Puppeteer actually rendered.
+    console.log("[pdf-debug] requested", printURL.toString());
+    console.log("[pdf-debug] final page url", page.url());
+    console.log("[pdf-debug] response status", response?.status());
+    const html = await page.content();
+    console.log("[pdf-debug] html length", html.length);
+    console.log("[pdf-debug] html head snippet", html.slice(0, 400));
+    const bodyText = await page.evaluate(() => document.body.innerText);
+    console.log("[pdf-debug] body innerText length", bodyText.length);
+    console.log("[pdf-debug] body innerText snippet", bodyText.slice(0, 400));
+    const hasReportPage = await page.evaluate(() => !!document.querySelector(".report-page"));
+    console.log("[pdf-debug] .report-page present?", hasReportPage);
 
     // Switch to print media BEFORE generating the PDF so @media print rules apply.
     await page.emulateMediaType("print");
@@ -92,6 +105,7 @@ export async function GET(request: NextRequest) {
       preferCSSPageSize: true,
       margin: { top: "0", right: "0", bottom: "0", left: "0" },
     });
+    console.log("[pdf-debug] pdfBuffer bytes", pdfBuffer.length);
 
     return new NextResponse(Buffer.from(pdfBuffer), {
       headers: {
