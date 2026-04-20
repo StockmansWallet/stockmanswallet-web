@@ -7,6 +7,18 @@ Live URL: `https://stockmanswallet.com.au` (Vercel hosting, custom domain).
 - **Stack:** Next.js 15 (App Router) + Supabase + Tailwind + shadcn/ui
 - **Language:** Australian English, AUD currency, dd/MM/yyyy dates
 
+## Commands
+```bash
+npm run dev          # Next.js dev server (port 3000)
+npm run build        # Production build
+npm run lint         # ESLint
+npx tsc --noEmit     # Type check
+npx prettier --write <file>   # Format (also runs automatically via PostToolUse hook on edits)
+```
+
+## Feature flags
+- `ADVISOR_ENABLED` (in `lib/feature-flags.ts`) is `false` for MVP. Advisor routes, nav items, and marketing sections are gated behind it. Don't add advisor-only features without flipping the flag.
+
 ## Writing Style
 - NEVER use em-dashes in any content, copy, or code comments
 - NEVER say "mob/mobs", always "herd/herds"
