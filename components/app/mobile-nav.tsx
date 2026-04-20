@@ -8,7 +8,7 @@ import { signOut } from "@/app/(auth)/actions";
 import { Menu, X, Crown, HelpCircle, Settings, LogOut } from "lucide-react";
 import { tierDisplayName, type SubscriptionTier } from "@/lib/subscriptions/tiers";
 import {
-  farmerMobileItems,
+  producerMobileItems,
   advisorMobileItems,
   type NavItem,
 } from "@/lib/navigation/nav-config";
@@ -21,7 +21,7 @@ export function MobileNav({ userEmail, subscriptionTier = "stockman", isAdvisor 
     pathname === href ||
     (href !== "/dashboard" && pathname.startsWith(href));
 
-  const navItems: NavItem[] = isAdvisor ? advisorMobileItems : farmerMobileItems;
+  const navItems: NavItem[] = isAdvisor ? advisorMobileItems : producerMobileItems;
 
   return (
     <>

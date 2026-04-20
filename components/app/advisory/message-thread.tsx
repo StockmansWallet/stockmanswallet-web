@@ -2,7 +2,7 @@
 
 import { ChatBubble } from "@/components/app/chat/chat-bubble";
 import { Badge } from "@/components/ui/badge";
-import { ShareAttachmentCard } from "@/components/app/farmer-network/share-attachment-card";
+import { ShareAttachmentCard } from "@/components/app/producer-network/share-attachment-card";
 import type { AdvisoryMessage, MessageType } from "@/lib/types/advisory";
 
 interface Participant {
@@ -30,7 +30,7 @@ const messageTypeLabels: Record<MessageType, { label: string; variant: "warning"
   general_note: { label: "Note", variant: "default" },
 };
 
-// Farmer chat colors (solid opaque so tails match perfectly)
+// Producer chat colors (solid opaque so tails match perfectly)
 const OWN_BG = "#31243C";
 const OTHER_BG = "#2A2929";
 

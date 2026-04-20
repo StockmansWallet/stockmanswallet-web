@@ -27,7 +27,7 @@ export default async function MyAdvisorsPage() {
 
   if (!user) redirect("/sign-in");
 
-  // Fetch advisory connections only (exclude farmer_peer)
+  // Fetch advisory connections only (exclude producer_peer)
   const { data: rawConnections } = await supabase
     .from("connection_requests")
     .select("*")

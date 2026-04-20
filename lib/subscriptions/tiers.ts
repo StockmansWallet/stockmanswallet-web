@@ -11,7 +11,7 @@ export type SubscriptionTier =
   | "head_advisor";
 
 // User type classification
-export type UserType = "farmer" | "advisor";
+export type UserType = "producer" | "advisor";
 
 // Tier display metadata
 export const TIER_DISPLAY: Record<
@@ -21,20 +21,20 @@ export const TIER_DISPLAY: Record<
   stockman: {
     name: "Stockman",
     subtitle: "Single Property",
-    userType: "farmer",
-    isFree: true,
+    userType: "producer",
+    isFree: false,
   },
   head_stockman: {
     name: "Head Stockman",
     subtitle: "Multi Property",
-    userType: "farmer",
+    userType: "producer",
     isFree: false,
   },
   advisor: {
     name: "Advisor",
     subtitle: "Professional",
     userType: "advisor",
-    isFree: true,
+    isFree: false,
   },
   head_advisor: {
     name: "Head Advisor",
@@ -117,14 +117,14 @@ export function isPaidTier(tier: SubscriptionTier): boolean {
  * Get the free tier for a user type.
  */
 export function freeTierFor(userType: UserType): SubscriptionTier {
-  return userType === "farmer" ? "stockman" : "advisor";
+  return userType === "producer" ? "stockman" : "advisor";
 }
 
 /**
  * Get the paid tier for a user type.
  */
 export function paidTierFor(userType: UserType): SubscriptionTier {
-  return userType === "farmer" ? "head_stockman" : "head_advisor";
+  return userType === "producer" ? "head_stockman" : "head_advisor";
 }
 
 /**

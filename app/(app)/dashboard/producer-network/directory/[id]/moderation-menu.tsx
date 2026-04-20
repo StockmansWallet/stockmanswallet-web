@@ -11,7 +11,7 @@ import {
   unblockUser,
   reportUser,
 } from "./moderation-actions";
-import { disconnectFarmer } from "@/app/(app)/dashboard/farmer-network/connections/[id]/actions";
+import { disconnectProducer } from "@/app/(app)/dashboard/producer-network/connections/[id]/actions";
 
 interface ModerationMenuProps {
   targetUserId: string;
@@ -19,7 +19,7 @@ interface ModerationMenuProps {
   alreadyBlocked: boolean;
   /**
    * When provided, the menu includes a Disconnect option that calls
-   * disconnectFarmer on this connection id. Only makes sense on the
+   * disconnectProducer on this connection id. Only makes sense on the
    * chat page (where a connection exists); omit on the directory
    * profile page where the viewer may not even be connected.
    */
@@ -71,7 +71,7 @@ export function ModerationMenu({
       return;
     }
     setPanel("closed");
-    router.push("/dashboard/farmer-network");
+    router.push("/dashboard/producer-network");
     router.refresh();
   };
 
@@ -92,14 +92,14 @@ export function ModerationMenu({
     if (!connectionIdForDisconnect) return;
     setLoading(true);
     setError(null);
-    const result = await disconnectFarmer(connectionIdForDisconnect);
+    const result = await disconnectProducer(connectionIdForDisconnect);
     setLoading(false);
     if ("error" in result && result.error) {
       setError(result.error);
       return;
     }
     setPanel("closed");
-    router.push("/dashboard/farmer-network/connections");
+    router.push("/dashboard/producer-network/connections");
     router.refresh();
   };
 

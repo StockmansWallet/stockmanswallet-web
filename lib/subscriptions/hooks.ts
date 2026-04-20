@@ -39,7 +39,7 @@ export function useSubscription(userId: string | null): SubscriptionState {
     isActive: false,
     isLoading: true,
     displayName: "Stockman",
-    isFree: true,
+    isFree: false,
   });
 
   useEffect(() => {
@@ -66,7 +66,7 @@ export function useSubscription(userId: string | null): SubscriptionState {
         isActive: data?.is_active ?? false,
         isLoading: false,
         displayName: display?.name ?? "Stockman",
-        isFree: display?.isFree ?? true,
+        isFree: display?.isFree ?? false,
       });
     }
 

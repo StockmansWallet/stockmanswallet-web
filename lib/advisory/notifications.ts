@@ -164,7 +164,7 @@ export async function notifyRenewalRequested(
   });
 }
 
-export async function notifyFarmerConnectionRequest(
+export async function notifyProducerConnectionRequest(
   supabase: SupabaseClient,
   toUserId: string,
   fromName: string,
@@ -172,15 +172,15 @@ export async function notifyFarmerConnectionRequest(
 ) {
   await createNotification(supabase, {
     userId: toUserId,
-    type: "farmer_connection_request",
+    type: "producer_connection_request",
     title: `${fromName} wants to connect`,
     body: "Review and accept or decline this connection request.",
-    link: "/dashboard/farmer-network",
+    link: "/dashboard/producer-network",
     connectionId,
   });
 }
 
-export async function notifyFarmerRequestApproved(
+export async function notifyProducerRequestApproved(
   supabase: SupabaseClient,
   toUserId: string,
   fromName: string,
@@ -188,10 +188,10 @@ export async function notifyFarmerRequestApproved(
 ) {
   await createNotification(supabase, {
     userId: toUserId,
-    type: "farmer_request_approved",
+    type: "producer_request_approved",
     title: `${fromName} accepted your connection`,
     body: "You can now chat with each other.",
-    link: `/dashboard/farmer-network/connections/${connectionId}`,
+    link: `/dashboard/producer-network/connections/${connectionId}`,
     connectionId,
   });
 }
@@ -202,7 +202,7 @@ export async function notifyFarmerRequestApproved(
  * advisor-flow path used by notifyDenial) because the detail page is
  * gated on an approved connection and would 404 after the disconnect.
  */
-export async function notifyFarmerRequestDenied(
+export async function notifyProducerRequestDenied(
   supabase: SupabaseClient,
   toUserId: string,
   fromName: string,
@@ -220,7 +220,7 @@ export async function notifyFarmerRequestDenied(
       reason === "disconnected"
         ? "Your producer connection has ended. You can send a new request later."
         : undefined,
-    link: "/dashboard/farmer-network",
+    link: "/dashboard/producer-network",
     connectionId,
   });
 }

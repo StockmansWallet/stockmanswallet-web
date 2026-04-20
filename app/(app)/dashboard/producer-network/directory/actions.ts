@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { notifyFarmerConnectionRequest } from "@/lib/advisory/notifications";
+import { notifyProducerConnectionRequest } from "@/lib/advisory/notifications";
 import { sanitiseSearchQuery } from "@/lib/utils/search-sanitise";
 
 const targetUserIdSchema = z.object({
@@ -43,7 +43,7 @@ export async function searchProducersForPeer(query: string) {
     supabase
       .from("connection_requests")
       .select("requester_user_id, target_user_id")
-      .eq("connection_type", "farmer_peer")
+      .eq("connection_type", "producer_peer")
       .or(`requester_user_id.eq.${user.id},target_user_id.eq.${user.id}`)
       .in("status", ["pending", "approved"]),
     supabase
@@ -74,7 +74,7 @@ export async function searchProducersForPeer(query: string) {
   return { producers: producers ?? [] };
 }
 
-export async function sendFarmerConnectionRequest(targetUserId: string) {
+export async function sendProducerConnectionRequest(targetUserId: string) {
   const parsed = targetUserIdSchema.safeParse({ targetUserId });
   if (!parsed.success) return { error: "Invalid input" };
   const supabase = await createClient();
@@ -84,18 +84,18 @@ export async function sendFarmerConnectionRequest(targetUserId: string) {
 
   if (!user) return { error: "Not authenticated" };
 
-  // Check for existing farmer_peer connection
+  // Check for existing producer_peer connection
   const { data: existing } = await supabase
     .from("connection_requests")
     .select("id, status")
-    .eq("connection_type", "farmer_peer")
+    .eq("connection_type", "producer_peer")
     .or(
       `and(requester_user_id.eq.${user.id},target_user_id.eq.${targetUserId}),and(requester_user_id.eq.${targetUserId},target_user_id.eq.${user.id})`
     )
     .in("status", ["pending", "approved"]);
 
   if (existing && existing.length > 0) {
-    return { error: "You already have an active or pending connection with this farmer." };
+    return { error: "You already have an active or pending connection with this producer." };
   }
 
   // Get requester profile
@@ -118,16 +118,16 @@ export async function sendFarmerConnectionRequest(targetUserId: string) {
       requester_role: requesterRole,
       requester_company: requesterCompany,
       status: "pending",
-      connection_type: "farmer_peer",
+      connection_type: "producer_peer",
     })
     .select("id")
     .single();
 
   if (error) return { error: error.message };
 
-  await notifyFarmerConnectionRequest(supabase, targetUserId, requesterName, conn.id);
+  await notifyProducerConnectionRequest(supabase, targetUserId, requesterName, conn.id);
 
-  revalidatePath("/dashboard/farmer-network");
+  revalidatePath("/dashboard/producer-network");
   return { success: true };
 }
 
@@ -137,7 +137,7 @@ export async function sendFarmerConnectionRequest(targetUserId: string) {
  * but NOT to self-approve). Target is not notified, since the request never
  * reached a relationship.
  */
-export async function cancelFarmerConnectionRequest(connectionId: string) {
+export async function cancelProducerConnectionRequest(connectionId: string) {
   const parsed = connectionIdSchema.safeParse({ connectionId });
   if (!parsed.success) return { error: "Invalid input" };
 
@@ -149,7 +149,7 @@ export async function cancelFarmerConnectionRequest(connectionId: string) {
     .from("connection_requests")
     .select("id, requester_user_id, status")
     .eq("id", connectionId)
-    .eq("connection_type", "farmer_peer")
+    .eq("connection_type", "producer_peer")
     .single();
 
   if (!connection) return { error: "Request not found" };
@@ -168,7 +168,7 @@ export async function cancelFarmerConnectionRequest(connectionId: string) {
 
   if (error) return { error: error.message };
 
-  revalidatePath("/dashboard/farmer-network");
-  revalidatePath(`/dashboard/farmer-network/directory/${connection.requester_user_id}`);
+  revalidatePath("/dashboard/producer-network");
+  revalidatePath(`/dashboard/producer-network/directory/${connection.requester_user_id}`);
   return { success: true };
 }

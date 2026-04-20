@@ -28,7 +28,7 @@ export default async function AdvisoryHubPage() {
 
   if (!user) redirect("/sign-in");
 
-  // Advisory connections only (exclude farmer_peer)
+  // Advisory connections only (exclude producer_peer)
   const { data: connections } = await supabase
     .from("connection_requests")
     .select("id, status, target_user_id")

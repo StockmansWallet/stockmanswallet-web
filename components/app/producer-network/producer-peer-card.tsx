@@ -5,7 +5,7 @@ import { ArrowRight, Clock, MessageSquare } from "lucide-react";
 import { UserAvatar } from "@/components/app/user-avatar";
 import { AnimatedUnreadPill } from "@/components/app/animated-unread-pill";
 
-interface FarmerPeerCardProps {
+interface ProducerPeerCardProps {
   /**
    * Destination when the row body is clicked. Approved connections link to
    * the chat detail page. Outgoing-pending connections link back to the
@@ -33,7 +33,7 @@ interface FarmerPeerCardProps {
   profileHref?: string;
 }
 
-export function FarmerPeerCard({
+export function ProducerPeerCard({
   href,
   name,
   company,
@@ -42,7 +42,7 @@ export function FarmerPeerCard({
   unreadCount = 0,
   avatarUrl,
   profileHref,
-}: FarmerPeerCardProps) {
+}: ProducerPeerCardProps) {
   const hasUnread = status === "approved" && unreadCount > 0;
 
   const avatarBlock = (

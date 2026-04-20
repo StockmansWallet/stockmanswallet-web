@@ -5,8 +5,8 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Building2, Handshake, Home, Ban } from "lucide-react";
-import { FarmerConnectButton } from "@/components/app/farmer-network/farmer-connect-button";
-import { FarmerConnectionStatusBadge } from "@/components/app/farmer-network/farmer-connection-status-badge";
+import { ProducerConnectButton } from "@/components/app/producer-network/producer-connect-button";
+import { ProducerConnectionStatusBadge } from "@/components/app/producer-network/producer-connection-status-badge";
 import { ModerationMenu } from "./moderation-menu";
 import { enrichProducers } from "@/lib/data/producer-enrichment";
 import { isBlockedBy } from "@/lib/data/user-blocks";
@@ -28,7 +28,7 @@ export const metadata = {
   title: "Producer Profile",
 };
 
-export default async function FarmerProfilePage({
+export default async function ProducerProfilePage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -41,13 +41,13 @@ export default async function FarmerProfilePage({
 
   if (!user) redirect("/sign-in");
 
-  const { data: farmer } = await supabase
+  const { data: producer } = await supabase
     .from("user_profiles")
     .select("user_id, display_name, company_name, role, state, region, bio")
     .eq("user_id", id)
     .single();
 
-  if (!farmer) notFound();
+  if (!producer) notFound();
 
   // Moderation: is the viewer blocked BY this producer? Hides their details
   // as if the producer doesn't exist. Uses service role because the
@@ -70,11 +70,11 @@ export default async function FarmerProfilePage({
   const enrichmentMap = await enrichProducers(supabase, [id]);
   const enrichment = enrichmentMap.get(id);
 
-  // Check for existing farmer_peer connection (either direction)
+  // Check for existing producer_peer connection (either direction)
   const { data: existingConnections } = await supabase
     .from("connection_requests")
     .select("id, status, requester_user_id")
-    .eq("connection_type", "farmer_peer")
+    .eq("connection_type", "producer_peer")
     .or(
       `and(requester_user_id.eq.${user.id},target_user_id.eq.${id}),and(requester_user_id.eq.${id},target_user_id.eq.${user.id})`
     );
@@ -98,7 +98,7 @@ export default async function FarmerProfilePage({
       <PageHeader feature="producer-network"
         title="Producer Profile"
         titleClassName="text-4xl font-bold text-producer-network-light"
-        titleHref="/dashboard/farmer-network/directory"
+        titleHref="/dashboard/producer-network/directory"
         subtitle="Back to directory"
         subtitleClassName="text-sm font-medium text-text-secondary"
       />
@@ -111,12 +111,12 @@ export default async function FarmerProfilePage({
             </div>
             <div className="min-w-0 flex-1">
               <h2 className="text-xl font-bold text-text-primary">
-                {farmer.display_name}
+                {producer.display_name}
               </h2>
-              {farmer.company_name && (
+              {producer.company_name && (
                 <span className="mt-1 flex items-center gap-1 text-sm text-text-secondary">
                   <Building2 className="h-3.5 w-3.5" aria-hidden="true" />
-                  {farmer.company_name}
+                  {producer.company_name}
                 </span>
               )}
             </div>
@@ -127,11 +127,11 @@ export default async function FarmerProfilePage({
                   Blocked
                 </Badge>
               ) : (
-                <FarmerConnectionStatusBadge status={existingStatus} />
+                <ProducerConnectionStatusBadge status={existingStatus} />
               )}
               <ModerationMenu
                 targetUserId={id}
-                targetName={farmer.display_name}
+                targetName={producer.display_name}
                 alreadyBlocked={viewerBlockedThem}
               />
             </div>
@@ -143,11 +143,11 @@ export default async function FarmerProfilePage({
               Each field hides if unavailable so the row scales cleanly for
               producers who haven't filled out much yet. */}
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-text-secondary">
-            {(farmer.state || farmer.region) && (
+            {(producer.state || producer.region) && (
               <span className="flex items-center gap-1.5">
                 <MapPin className="h-4 w-4 text-text-muted" aria-hidden="true" />
-                {farmer.state}
-                {farmer.region ? `, ${farmer.region}` : ""}
+                {producer.state}
+                {producer.region ? `, ${producer.region}` : ""}
               </span>
             )}
             {enrichment?.primary_species && (
@@ -169,16 +169,16 @@ export default async function FarmerProfilePage({
             )}
           </div>
 
-          {farmer.bio && (
+          {producer.bio && (
             <div>
               <h3 className="mb-1.5 text-xs font-semibold uppercase text-text-muted">About</h3>
-              <p className="text-sm leading-relaxed text-text-secondary">{farmer.bio}</p>
+              <p className="text-sm leading-relaxed text-text-secondary">{producer.bio}</p>
             </div>
           )}
 
           {!viewerBlockedThem && existingStatus !== "approved" && (
             <div className="flex justify-end border-t border-white/5 pt-4">
-              <FarmerConnectButton
+              <ProducerConnectButton
                 targetUserId={id}
                 existingStatus={existingStatus}
                 pendingRequestIdIfSent={pendingRequestIdIfSent}

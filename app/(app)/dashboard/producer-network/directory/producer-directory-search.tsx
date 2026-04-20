@@ -5,7 +5,7 @@ import { useState, useCallback } from "react";
 import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface FarmerDirectorySearchProps {
+interface ProducerDirectorySearchProps {
   currentSearch: string;
   currentState: string;
   currentSpecies: string;
@@ -14,11 +14,11 @@ interface FarmerDirectorySearchProps {
 const AUSTRALIAN_STATES = ["QLD", "NSW", "VIC", "SA", "WA", "TAS", "NT", "ACT"] as const;
 const SPECIES_OPTIONS = ["Cattle", "Sheep", "Pig", "Goat"] as const;
 
-export function FarmerDirectorySearch({
+export function ProducerDirectorySearch({
   currentSearch,
   currentState,
   currentSpecies,
-}: FarmerDirectorySearchProps) {
+}: ProducerDirectorySearchProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchValue, setSearchValue] = useState(currentSearch);
@@ -33,7 +33,7 @@ export function FarmerDirectorySearch({
           params.delete(key);
         }
       }
-      router.push(`/dashboard/farmer-network/directory?${params.toString()}`);
+      router.push(`/dashboard/producer-network/directory?${params.toString()}`);
     },
     [router, searchParams],
   );

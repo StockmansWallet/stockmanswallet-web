@@ -16,7 +16,7 @@ import { createClient } from "@/lib/supabase/client";
  * Handler just calls router.refresh() so the server component re-queries
  * Supabase; no client-side state to keep in sync.
  */
-export function FarmerConnectionsRealtime({ userId }: { userId: string }) {
+export function ProducerConnectionsRealtime({ userId }: { userId: string }) {
   const router = useRouter();
   const supabaseRef = useRef(createClient());
 
@@ -34,7 +34,7 @@ export function FarmerConnectionsRealtime({ userId }: { userId: string }) {
     });
 
     const channel = supabase
-      .channel(`farmer-connections-${userId.slice(0, 8)}`)
+      .channel(`producer-connections-${userId.slice(0, 8)}`)
       .on(
         "postgres_changes",
         {

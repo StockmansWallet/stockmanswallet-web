@@ -26,7 +26,7 @@ export interface UserUsage {
 
 /**
  * Get the subscription tier for a user.
- * Returns "stockman" (free farmer tier) if no subscription exists.
+ * Returns "stockman" (default producer tier) if no subscription exists.
  */
 export async function getUserTier(
   userId: string

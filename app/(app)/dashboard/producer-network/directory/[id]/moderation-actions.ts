@@ -48,14 +48,14 @@ export async function blockUser(userId: string, reason?: string) {
   await supabase
     .from("connection_requests")
     .update({ status: "removed", updated_at: new Date().toISOString() })
-    .eq("connection_type", "farmer_peer")
+    .eq("connection_type", "producer_peer")
     .in("status", ["pending", "approved"])
     .or(
       `and(requester_user_id.eq.${user.id},target_user_id.eq.${userId}),and(requester_user_id.eq.${userId},target_user_id.eq.${user.id})`,
     );
 
-  revalidatePath("/dashboard/farmer-network");
-  revalidatePath(`/dashboard/farmer-network/directory/${userId}`);
+  revalidatePath("/dashboard/producer-network");
+  revalidatePath(`/dashboard/producer-network/directory/${userId}`);
   return { success: true };
 }
 
@@ -75,8 +75,8 @@ export async function unblockUser(userId: string) {
 
   if (error) return { error: error.message };
 
-  revalidatePath("/dashboard/farmer-network");
-  revalidatePath(`/dashboard/farmer-network/directory/${userId}`);
+  revalidatePath("/dashboard/producer-network");
+  revalidatePath(`/dashboard/producer-network/directory/${userId}`);
   return { success: true };
 }
 

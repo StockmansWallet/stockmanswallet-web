@@ -6,7 +6,7 @@ import { Check, Clock } from "lucide-react";
  * Pure presentation; no interactivity. Returns null when there's no status
  * to surface so the caller can reserve space without a visual element.
  */
-export function FarmerConnectionStatusBadge({ status }: { status: string | null }) {
+export function ProducerConnectionStatusBadge({ status }: { status: string | null }) {
   if (status === "approved") {
     return (
       <Badge variant="success">

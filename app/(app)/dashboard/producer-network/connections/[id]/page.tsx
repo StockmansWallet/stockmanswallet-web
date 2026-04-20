@@ -1,8 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
-import { FarmerChatClient } from "./farmer-chat-client";
-import { ModerationMenu } from "@/app/(app)/dashboard/farmer-network/directory/[id]/moderation-menu";
+import { ProducerChatClient } from "./producer-chat-client";
+import { ModerationMenu } from "@/app/(app)/dashboard/producer-network/directory/[id]/moderation-menu";
 import { MarkConnectionNotificationsRead } from "@/components/app/mark-connection-notifications-read";
 import { UserAvatar } from "@/components/app/user-avatar";
 import { fetchUserAvatars } from "@/lib/auth/fetch-user-avatars";
@@ -12,7 +12,7 @@ export const metadata = {
   title: "Producer Chat",
 };
 
-export default async function FarmerConnectionDetailPage({
+export default async function ProducerConnectionDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -26,7 +26,7 @@ export default async function FarmerConnectionDetailPage({
     .from("connection_requests")
     .select("*")
     .eq("id", id)
-    .eq("connection_type", "farmer_peer")
+    .eq("connection_type", "producer_peer")
     .eq("status", "approved")
     .single();
 
@@ -111,7 +111,7 @@ export default async function FarmerConnectionDetailPage({
 
       <Card className="flex min-h-0 flex-1 flex-col rounded-3xl">
         <CardContent className="flex min-h-0 flex-1 flex-col px-5 pb-5 pt-5">
-          <FarmerChatClient
+          <ProducerChatClient
             connectionId={id}
             currentUserId={user.id}
             messages={(messages ?? []) as AdvisoryMessage[]}

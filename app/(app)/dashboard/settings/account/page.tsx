@@ -124,11 +124,11 @@ export default async function AccountSettingsPage() {
                   {tierDisplayName(tier)}
                 </p>
                 <p className="text-xs text-text-muted">
-                  {tierInfo.isFree ? "Free plan" : "Active subscription"} - {tierInfo.subtitle}
+                  Active subscription - {tierInfo.subtitle}
                 </p>
               </div>
               <span className="inline-flex items-center rounded-full bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
-                {tierInfo.isFree ? "Free" : "Pro"}
+                Pro
               </span>
             </div>
             <p className="mt-3 text-xs text-text-muted">

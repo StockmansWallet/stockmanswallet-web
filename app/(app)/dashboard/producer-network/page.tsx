@@ -5,16 +5,16 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Handshake, UserCheck, Clock, Users2, MapPin, ChevronRight } from "lucide-react";
-import { FarmerRequestCard } from "@/components/app/farmer-network/farmer-request-card";
-import { FarmerPeerCard } from "@/components/app/farmer-network/farmer-peer-card";
-import { FarmerProducerSearch } from "@/components/app/farmer-network/farmer-producer-search";
-import { FarmerConnectionsRealtime } from "@/components/app/farmer-network/farmer-connections-realtime";
-import { FarmerCard } from "@/components/app/farmer-network/farmer-card";
+import { ProducerRequestCard } from "@/components/app/producer-network/producer-request-card";
+import { ProducerPeerCard } from "@/components/app/producer-network/producer-peer-card";
+import { ProducerSearch } from "@/components/app/producer-network/producer-search";
+import { ProducerConnectionsRealtime } from "@/components/app/producer-network/producer-connections-realtime";
+import { ProducerCard } from "@/components/app/producer-network/producer-card";
 import { MarkNotificationsRead } from "@/components/app/mark-notifications-read";
 import { loadOutgoingBlocks } from "@/lib/data/user-blocks";
 import { fetchUserAvatars } from "@/lib/auth/fetch-user-avatars";
 import { enrichProducers } from "@/lib/data/producer-enrichment";
-import type { ConnectionRequest, DirectoryFarmer } from "@/lib/types/advisory";
+import type { ConnectionRequest, DirectoryProducer } from "@/lib/types/advisory";
 
 export const revalidate = 0;
 
@@ -22,7 +22,7 @@ export const metadata = {
   title: "Producer Network",
 };
 
-export default async function FarmerNetworkPage() {
+export default async function ProducerNetworkPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in");
@@ -30,7 +30,7 @@ export default async function FarmerNetworkPage() {
   const { data: connections } = await supabase
     .from("connection_requests")
     .select("*")
-    .eq("connection_type", "farmer_peer")
+    .eq("connection_type", "producer_peer")
     .or(`requester_user_id.eq.${user.id},target_user_id.eq.${user.id}`)
     .order("created_at", { ascending: false });
 
@@ -132,7 +132,7 @@ export default async function FarmerNetworkPage() {
     .maybeSingle();
   const myState = myProfile?.state ?? null;
 
-  let nearbyProducers: DirectoryFarmer[] = [];
+  let nearbyProducers: DirectoryProducer[] = [];
   if (myState) {
     const blockedIds = await loadOutgoingBlocks(supabase, user.id);
     const excludeIds = [
@@ -150,7 +150,7 @@ export default async function FarmerNetworkPage() {
       .order("display_name")
       .limit(4);
 
-    const baseNearby = (nearby ?? []) as DirectoryFarmer[];
+    const baseNearby = (nearby ?? []) as DirectoryProducer[];
     // Enrich so the per-row meta line can show species beside state,
     // matching the directory page.
     const nearbyEnrichment = await enrichProducers(
@@ -174,7 +174,7 @@ export default async function FarmerNetworkPage() {
 
   return (
     <div className="max-w-4xl">
-      <FarmerConnectionsRealtime userId={user.id} />
+      <ProducerConnectionsRealtime userId={user.id} />
       {/* Connection-request notifications are resolved the moment the
           user lands here, since the Incoming Requests section is right
           in front of them. new_message notifications are left alone so
@@ -215,7 +215,7 @@ export default async function FarmerNetworkPage() {
         </Card>
       </div>
 
-      <FarmerProducerSearch />
+      <ProducerSearch />
 
       {/* First-run empty state only when the user has zero activity of
           any kind. Once they have a request or a connection, the
@@ -227,7 +227,7 @@ export default async function FarmerNetworkPage() {
             title="No connections yet"
             description="Search above, or browse the full directory to find other producers."
             actionLabel="Browse Directory"
-            actionHref="/dashboard/farmer-network/directory"
+            actionHref="/dashboard/producer-network/directory"
             variant="amber"
           />
         </Card>
@@ -242,7 +242,7 @@ export default async function FarmerNetworkPage() {
           </h2>
           <div className="flex flex-col gap-3">
             {incomingRequests.map((req) => (
-              <FarmerRequestCard
+              <ProducerRequestCard
                 key={req.id}
                 request={req}
                 avatarUrl={avatarMap.get(req.requester_user_id) ?? null}
@@ -266,10 +266,10 @@ export default async function FarmerNetworkPage() {
               const otherId = otherIdFor(c);
               const profile = profileMap.get(otherId);
               return (
-                <FarmerPeerCard
+                <ProducerPeerCard
                   key={c.id}
-                  href={`/dashboard/farmer-network/connections/${c.id}`}
-                  profileHref={`/dashboard/farmer-network/directory/${otherId}`}
+                  href={`/dashboard/producer-network/connections/${c.id}`}
+                  profileHref={`/dashboard/producer-network/directory/${otherId}`}
                   name={profile?.display_name ?? c.requester_name}
                   company={profile?.property_name ?? profile?.company_name}
                   status="approved"
@@ -296,9 +296,9 @@ export default async function FarmerNetworkPage() {
               const otherId = otherIdFor(c);
               const profile = profileMap.get(otherId);
               return (
-                <FarmerPeerCard
+                <ProducerPeerCard
                   key={c.id}
-                  href={`/dashboard/farmer-network/directory/${otherId}`}
+                  href={`/dashboard/producer-network/directory/${otherId}`}
                   name={profile?.display_name ?? c.requester_name}
                   company={profile?.property_name ?? profile?.company_name}
                   status="pending"
@@ -320,7 +320,7 @@ export default async function FarmerNetworkPage() {
               In your region ({myState})
             </h2>
             <Link
-              href={`/dashboard/farmer-network/directory?state=${encodeURIComponent(myState)}`}
+              href={`/dashboard/producer-network/directory?state=${encodeURIComponent(myState)}`}
               className="inline-flex items-center gap-1 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-xs font-medium text-producer-network-light transition-colors hover:bg-surface-raised"
             >
               See all
@@ -330,9 +330,9 @@ export default async function FarmerNetworkPage() {
           <Card>
             <div className="divide-y divide-white/[0.06]">
               {nearbyProducers.map((p) => (
-                <FarmerCard
+                <ProducerCard
                   key={p.user_id}
-                  farmer={p}
+                  producer={p}
                   avatarUrl={avatarMap.get(p.user_id) ?? null}
                 />
               ))}

@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   searchProducersForPeer,
-  sendFarmerConnectionRequest,
-} from "@/app/(app)/dashboard/farmer-network/directory/actions";
+  sendProducerConnectionRequest,
+} from "@/app/(app)/dashboard/producer-network/directory/actions";
 
 interface SearchResult {
   user_id: string;
@@ -24,7 +24,7 @@ interface SearchResult {
  * card results with a Connect button per row, tracks already-sent
  * requests locally so the UI gives immediate feedback.
  */
-export function FarmerProducerSearch() {
+export function ProducerSearch() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
@@ -57,7 +57,7 @@ export function FarmerProducerSearch() {
   const handleConnect = async (userId: string) => {
     setSendingTo(userId);
     setError(null);
-    const result = await sendFarmerConnectionRequest(userId);
+    const result = await sendProducerConnectionRequest(userId);
     if ("error" in result && result.error) {
       setError(result.error);
     } else {

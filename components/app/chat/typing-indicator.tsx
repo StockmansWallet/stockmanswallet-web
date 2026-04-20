@@ -9,7 +9,7 @@ interface TypingIndicatorProps {
 
 /**
  * Shared typing indicator bubble with three bouncing dots.
- * Used by both Brangus AI chat and farmer peer chat.
+ * Used by both Brangus AI chat and producer peer chat.
  */
 export function TypingIndicator({
   bgColor,

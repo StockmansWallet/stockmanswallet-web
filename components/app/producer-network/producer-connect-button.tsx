@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/app/advisory/confirm-modal";
 import { Handshake, X } from "lucide-react";
 import {
-  sendFarmerConnectionRequest,
-  cancelFarmerConnectionRequest,
-} from "@/app/(app)/dashboard/farmer-network/directory/actions";
+  sendProducerConnectionRequest,
+  cancelProducerConnectionRequest,
+} from "@/app/(app)/dashboard/producer-network/directory/actions";
 
-interface FarmerConnectButtonProps {
+interface ProducerConnectButtonProps {
   targetUserId: string;
   existingStatus: string | null;
   /**
@@ -26,13 +26,13 @@ interface FarmerConnectButtonProps {
  * Action row for the Producer Profile page. Renders the appropriate
  * Connect / Cancel Request / Re-request button based on current connection
  * state. The status badge itself lives in the header via
- * FarmerConnectionStatusBadge, so this component focuses on the action.
+ * ProducerConnectionStatusBadge, so this component focuses on the action.
  */
-export function FarmerConnectButton({
+export function ProducerConnectButton({
   targetUserId,
   existingStatus,
   pendingRequestIdIfSent,
-}: FarmerConnectButtonProps) {
+}: ProducerConnectButtonProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(existingStatus);
@@ -48,7 +48,7 @@ export function FarmerConnectButton({
   const handleRequest = async () => {
     setLoading(true);
     setError(null);
-    const result = await sendFarmerConnectionRequest(targetUserId);
+    const result = await sendProducerConnectionRequest(targetUserId);
     if (result.error) {
       setError(result.error);
     } else {
@@ -62,7 +62,7 @@ export function FarmerConnectButton({
     if (!activePendingId) return;
     setLoading(true);
     setError(null);
-    const result = await cancelFarmerConnectionRequest(activePendingId);
+    const result = await cancelProducerConnectionRequest(activePendingId);
     if ("error" in result && result.error) {
       setError(result.error);
       setLoading(false);

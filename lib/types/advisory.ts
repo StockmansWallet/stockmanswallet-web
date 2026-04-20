@@ -13,8 +13,8 @@ import {
 // Connection request lifecycle
 export type ConnectionStatus = "pending" | "approved" | "denied" | "expired" | "removed";
 
-// Connection type (advisory vs farmer peer)
-export type ConnectionType = "advisory" | "farmer_peer";
+// Connection type (advisory vs producer peer)
+export type ConnectionType = "advisory" | "producer_peer";
 
 // Granular data sharing categories
 export interface SharingPermissions {
@@ -69,8 +69,8 @@ export interface ConnectionRequest {
   created_at: string;
 }
 
-// Farmer profile (for farmer network directory)
-export interface DirectoryFarmer {
+// Producer profile (for producer network directory)
+export interface DirectoryProducer {
   user_id: string;
   display_name: string;
   company_name: string;
@@ -256,8 +256,8 @@ export type NotificationType =
   | "access_expired"
   | "new_message"
   | "renewal_requested"
-  | "farmer_connection_request"
-  | "farmer_request_approved"
+  | "producer_connection_request"
+  | "producer_request_approved"
   | "yard_book_reminder"
   | "yard_book_overdue"
   | "price_alert";

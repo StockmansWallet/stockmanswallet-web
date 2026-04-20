@@ -7,9 +7,9 @@ import { Crown, LogOut } from "lucide-react";
 import { SidebarBadge } from "@/components/app/sidebar-badge";
 import { tierDisplayName, type SubscriptionTier } from "@/lib/subscriptions/tiers";
 import {
-  farmerNavItems,
-  farmerIntelItems,
-  farmerToolItems,
+  producerNavItems,
+  producerIntelItems,
+  producerToolItems,
   advisorNavItems,
   advisorIntelItems,
   advisorToolItems,
@@ -50,9 +50,9 @@ export function Sidebar({ isAdmin = false, subscriptionTier = "stockman", isAdvi
     return pathname.startsWith(href);
   };
 
-  const mainItems = isAdvisor ? advisorNavItems : farmerNavItems;
-  const intelItems = isAdvisor ? advisorIntelItems : farmerIntelItems;
-  const toolItems = isAdvisor ? advisorToolItems : farmerToolItems;
+  const mainItems = isAdvisor ? advisorNavItems : producerNavItems;
+  const intelItems = isAdvisor ? advisorIntelItems : producerIntelItems;
+  const toolItems = isAdvisor ? advisorToolItems : producerToolItems;
 
   return (
     <aside className="flex h-full w-64 flex-col">

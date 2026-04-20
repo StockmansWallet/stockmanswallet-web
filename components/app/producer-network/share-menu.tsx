@@ -8,7 +8,7 @@ import type { MessageAttachment } from "@/lib/types/advisory";
 import {
   listMyHerdsForShare,
   listMarketPricesForShare,
-} from "@/app/(app)/dashboard/farmer-network/connections/[id]/actions";
+} from "@/app/(app)/dashboard/producer-network/connections/[id]/actions";
 
 interface ShareMenuProps {
   onAttach: (attachment: MessageAttachment) => void;

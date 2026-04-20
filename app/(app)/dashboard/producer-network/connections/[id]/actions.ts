@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import { createNotification, notifyFarmerRequestDenied } from "@/lib/advisory/notifications";
+import { createNotification, notifyProducerRequestDenied } from "@/lib/advisory/notifications";
 import type { AdvisoryMessage, MessageType, MessageAttachment } from "@/lib/types/advisory";
 
 const connectionIdSchema = z.object({
@@ -49,7 +49,7 @@ const sendMessageSchema = z.object({
   { message: "Message must have content or an attachment" },
 );
 
-export async function fetchFarmerMessages(connectionId: string) {
+export async function fetchProducerMessages(connectionId: string) {
   const parsed = connectionIdSchema.safeParse({ connectionId });
   if (!parsed.success) return { error: "Invalid input", messages: [] };
   const supabase = await createClient();
@@ -63,7 +63,7 @@ export async function fetchFarmerMessages(connectionId: string) {
     .from("connection_requests")
     .select("id, requester_user_id, target_user_id")
     .eq("id", connectionId)
-    .eq("connection_type", "farmer_peer")
+    .eq("connection_type", "producer_peer")
     .eq("status", "approved")
     .single();
 
@@ -83,7 +83,7 @@ export async function fetchFarmerMessages(connectionId: string) {
   return { messages: (messages ?? []) as AdvisoryMessage[] };
 }
 
-export async function sendFarmerMessage(
+export async function sendProducerMessage(
   connectionId: string,
   content: string,
   _messageType: MessageType = "general_note",
@@ -98,12 +98,12 @@ export async function sendFarmerMessage(
 
   if (!user) return { error: "Not authenticated" };
 
-  // Verify user is a party on this farmer_peer connection
+  // Verify user is a party on this producer_peer connection
   const { data: connection } = await supabase
     .from("connection_requests")
     .select("id, requester_user_id, target_user_id")
     .eq("id", connectionId)
-    .eq("connection_type", "farmer_peer")
+    .eq("connection_type", "producer_peer")
     .eq("status", "approved")
     .single();
 
@@ -164,24 +164,24 @@ export async function sendFarmerMessage(
     .select("display_name")
     .eq("user_id", user.id)
     .single();
-  const senderName = profile?.display_name ?? "A farmer";
+  const senderName = profile?.display_name ?? "A producer";
 
   await createNotification(supabase, {
     userId: recipientId,
     type: "new_message",
     title: `New message from ${senderName}`,
-    link: `/dashboard/farmer-network/connections/${connectionId}`,
+    link: `/dashboard/producer-network/connections/${connectionId}`,
     connectionId,
   });
 
-  revalidatePath(`/dashboard/farmer-network/connections/${connectionId}`);
+  revalidatePath(`/dashboard/producer-network/connections/${connectionId}`);
   return { success: true };
 }
 
 /**
  * Returns the caller's active herds formatted as share candidates. Each
  * row is the subset of columns the picker surfaces; the final snapshot
- * is re-read server-side in sendFarmerMessage for defence in depth.
+ * is re-read server-side in sendProducerMessage for defence in depth.
  */
 export async function listMyHerdsForShare() {
   const supabase = await createClient();
@@ -234,7 +234,7 @@ export async function listMarketPricesForShare() {
   return { prices: (rows ?? []).slice(0, 12) };
 }
 
-export async function disconnectFarmer(connectionId: string) {
+export async function disconnectProducer(connectionId: string) {
   const parsed = connectionIdSchema.safeParse({ connectionId });
   if (!parsed.success) return { error: "Invalid input" };
   const supabase = await createClient();
@@ -248,7 +248,7 @@ export async function disconnectFarmer(connectionId: string) {
     .from("connection_requests")
     .select("id, requester_user_id, target_user_id")
     .eq("id", connectionId)
-    .eq("connection_type", "farmer_peer")
+    .eq("connection_type", "producer_peer")
     .single();
 
   if (!connection) return { error: "Connection not found" };
@@ -274,10 +274,10 @@ export async function disconnectFarmer(connectionId: string) {
     .select("display_name")
     .eq("user_id", user.id)
     .single();
-  const name = profile?.display_name ?? "A farmer";
+  const name = profile?.display_name ?? "A producer";
 
-  await notifyFarmerRequestDenied(supabase, recipientId, name, connectionId, "disconnected");
+  await notifyProducerRequestDenied(supabase, recipientId, name, connectionId, "disconnected");
 
-  revalidatePath("/dashboard/farmer-network");
+  revalidatePath("/dashboard/producer-network");
   return { success: true };
 }

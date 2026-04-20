@@ -4,13 +4,13 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Search } from "lucide-react";
-import { FarmerCard } from "@/components/app/farmer-network/farmer-card";
-import { FarmerDirectorySearch } from "./farmer-directory-search";
+import { ProducerCard } from "@/components/app/producer-network/producer-card";
+import { ProducerDirectorySearch } from "./producer-directory-search";
 import { sanitiseSearchQuery } from "@/lib/utils/search-sanitise";
 import { enrichProducers, type PrimarySpecies } from "@/lib/data/producer-enrichment";
 import { loadOutgoingBlocks } from "@/lib/data/user-blocks";
 import { fetchUserAvatars } from "@/lib/auth/fetch-user-avatars";
-import type { DirectoryFarmer } from "@/lib/types/advisory";
+import type { DirectoryProducer } from "@/lib/types/advisory";
 
 export const revalidate = 0;
 
@@ -21,7 +21,7 @@ export const metadata = {
 const SPECIES_VALUES: readonly PrimarySpecies[] = ["Cattle", "Sheep", "Pig", "Goat"];
 const STATE_VALUES = ["QLD", "NSW", "VIC", "SA", "WA", "TAS", "NT", "ACT"] as const;
 
-export default async function FarmerDirectoryPage({
+export default async function ProducerDirectoryPage({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string; state?: string; species?: string }>;
@@ -63,18 +63,18 @@ export default async function FarmerDirectoryPage({
     );
   }
 
-  const { data: rawFarmers } = await query.order("display_name");
-  const baseFarmers = (rawFarmers ?? []) as DirectoryFarmer[];
+  const { data: rawProducers } = await query.order("display_name");
+  const baseProducers = (rawProducers ?? []) as DirectoryProducer[];
 
   // Enrich every card with species + herd-size bucket (+ property count).
   // Species filter is applied after enrichment since species lives in
   // the herds table, not user_profiles.
   const enrichment = await enrichProducers(
     supabase,
-    baseFarmers.map((f) => f.user_id),
+    baseProducers.map((f) => f.user_id),
   );
 
-  const enrichedFarmers: DirectoryFarmer[] = baseFarmers.map((f) => {
+  const enrichedProducers: DirectoryProducer[] = baseProducers.map((f) => {
     const e = enrichment.get(f.user_id);
     return {
       ...f,
@@ -84,29 +84,29 @@ export default async function FarmerDirectoryPage({
     };
   });
 
-  const filteredFarmers = speciesFilter
-    ? enrichedFarmers.filter((f) => f.primary_species === speciesFilter)
-    : enrichedFarmers;
+  const filteredProducers = speciesFilter
+    ? enrichedProducers.filter((f) => f.primary_species === speciesFilter)
+    : enrichedProducers;
 
-  const avatarMap = await fetchUserAvatars(filteredFarmers.map((f) => f.user_id));
+  const avatarMap = await fetchUserAvatars(filteredProducers.map((f) => f.user_id));
 
   return (
     <div className="max-w-4xl">
       <PageHeader feature="producer-network"
         title="Producer Directory"
         titleClassName="text-4xl font-bold text-producer-network-light"
-        titleHref="/dashboard/farmer-network"
+        titleHref="/dashboard/producer-network"
         subtitle="Back to Producer Network"
         subtitleClassName="text-sm font-medium text-text-secondary"
       />
 
-      <FarmerDirectorySearch
+      <ProducerDirectorySearch
         currentSearch={searchQuery}
         currentState={stateFilter}
         currentSpecies={speciesFilter as string}
       />
 
-      {filteredFarmers.length === 0 ? (
+      {filteredProducers.length === 0 ? (
         <Card>
           <EmptyState
             icon={<Search className="h-6 w-6 text-producer-network-light" />}
@@ -122,11 +122,11 @@ export default async function FarmerDirectoryPage({
       ) : (
         <Card>
           <div className="divide-y divide-white/[0.06]">
-            {filteredFarmers.map((farmer) => (
-              <FarmerCard
-                key={farmer.user_id}
-                farmer={farmer}
-                avatarUrl={avatarMap.get(farmer.user_id) ?? null}
+            {filteredProducers.map((producer) => (
+              <ProducerCard
+                key={producer.user_id}
+                producer={producer}
+                avatarUrl={avatarMap.get(producer.user_id) ?? null}
               />
             ))}
           </div>

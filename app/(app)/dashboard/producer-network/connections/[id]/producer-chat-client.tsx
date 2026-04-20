@@ -4,28 +4,28 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { MessageThread } from "@/components/app/advisory/message-thread";
 import { ChatInput } from "@/components/app/chat/chat-input";
 import { TypingIndicator } from "@/components/app/chat/typing-indicator";
-import { ShareMenu } from "@/components/app/farmer-network/share-menu";
-import { ShareAttachmentCard } from "@/components/app/farmer-network/share-attachment-card";
+import { ShareMenu } from "@/components/app/producer-network/share-menu";
+import { ShareAttachmentCard } from "@/components/app/producer-network/share-attachment-card";
 import { useTypingIndicator } from "@/hooks/use-typing-indicator";
-import { sendFarmerMessage, fetchFarmerMessages } from "./actions";
+import { sendProducerMessage, fetchProducerMessages } from "./actions";
 import type { AdvisoryMessage, MessageAttachment } from "@/lib/types/advisory";
 
 const POLL_INTERVAL = 5000;
 const OTHER_BG = "#2A2929";
 
-interface FarmerChatClientProps {
+interface ProducerChatClientProps {
   connectionId: string;
   currentUserId: string;
   messages: AdvisoryMessage[];
   participants: Record<string, { name: string; role: string }>;
 }
 
-export function FarmerChatClient({
+export function ProducerChatClient({
   connectionId,
   currentUserId,
   messages: initialMessages,
   participants,
-}: FarmerChatClientProps) {
+}: ProducerChatClientProps) {
   const [messages, setMessages] = useState<AdvisoryMessage[]>(initialMessages);
   const [animatedIds, setAnimatedIds] = useState<Set<string>>(new Set());
   const [pendingAttachment, setPendingAttachment] = useState<MessageAttachment | null>(null);
@@ -44,7 +44,7 @@ export function FarmerChatClient({
   // Poll for new messages
   useEffect(() => {
     const interval = setInterval(async () => {
-      const result = await fetchFarmerMessages(connectionId);
+      const result = await fetchProducerMessages(connectionId);
       if (result.messages && result.messages.length > 0) {
         setMessages((prev) => {
           const prevIds = new Set(prev.map((m) => m.id));
@@ -89,7 +89,7 @@ export function FarmerChatClient({
       setAnimatedIds((ids) => new Set(ids).add(optimisticMsg.id));
       setPendingAttachment(null);
 
-      const result = await sendFarmerMessage(
+      const result = await sendProducerMessage(
         connectionId,
         text,
         "general_note",
@@ -103,7 +103,7 @@ export function FarmerChatClient({
         return;
       }
 
-      const refreshed = await fetchFarmerMessages(connectionId);
+      const refreshed = await fetchProducerMessages(connectionId);
       if (refreshed.messages) {
         setMessages(refreshed.messages);
       }

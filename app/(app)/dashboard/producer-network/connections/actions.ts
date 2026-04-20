@@ -4,15 +4,15 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import {
-  notifyFarmerRequestApproved,
-  notifyFarmerRequestDenied,
+  notifyProducerRequestApproved,
+  notifyProducerRequestDenied,
 } from "@/lib/advisory/notifications";
 
 const requestIdSchema = z.object({
   requestId: z.string().uuid(),
 });
 
-export async function approveFarmerRequest(requestId: string) {
+export async function approveProducerRequest(requestId: string) {
   const parsed = requestIdSchema.safeParse({ requestId });
   if (!parsed.success) return { error: "Invalid input" };
   const supabase = await createClient();
@@ -27,7 +27,7 @@ export async function approveFarmerRequest(requestId: string) {
     .update({ status: "approved" })
     .eq("id", requestId)
     .eq("target_user_id", user.id)
-    .eq("connection_type", "farmer_peer")
+    .eq("connection_type", "producer_peer")
     .select("id, requester_user_id")
     .single();
 
@@ -38,15 +38,15 @@ export async function approveFarmerRequest(requestId: string) {
     .select("display_name")
     .eq("user_id", user.id)
     .single();
-  const name = profile?.display_name || "A farmer";
+  const name = profile?.display_name || "A producer";
 
-  await notifyFarmerRequestApproved(supabase, conn.requester_user_id, name, conn.id);
+  await notifyProducerRequestApproved(supabase, conn.requester_user_id, name, conn.id);
 
-  revalidatePath("/dashboard/farmer-network");
+  revalidatePath("/dashboard/producer-network");
   return { success: true };
 }
 
-export async function denyFarmerRequest(requestId: string) {
+export async function denyProducerRequest(requestId: string) {
   const parsed = requestIdSchema.safeParse({ requestId });
   if (!parsed.success) return { error: "Invalid input" };
   const supabase = await createClient();
@@ -61,7 +61,7 @@ export async function denyFarmerRequest(requestId: string) {
     .update({ status: "denied" })
     .eq("id", requestId)
     .eq("target_user_id", user.id)
-    .eq("connection_type", "farmer_peer")
+    .eq("connection_type", "producer_peer")
     .select("id, requester_user_id")
     .single();
 
@@ -72,10 +72,10 @@ export async function denyFarmerRequest(requestId: string) {
     .select("display_name")
     .eq("user_id", user.id)
     .single();
-  const name = profile?.display_name || "A farmer";
+  const name = profile?.display_name || "A producer";
 
-  await notifyFarmerRequestDenied(supabase, conn.requester_user_id, name, conn.id, "denied");
+  await notifyProducerRequestDenied(supabase, conn.requester_user_id, name, conn.id, "denied");
 
-  revalidatePath("/dashboard/farmer-network");
+  revalidatePath("/dashboard/producer-network");
   return { success: true };
 }

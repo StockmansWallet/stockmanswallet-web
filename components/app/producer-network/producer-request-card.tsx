@@ -5,9 +5,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/app/advisory/confirm-modal";
 import { UserAvatar } from "@/components/app/user-avatar";
-import { approveFarmerRequest, denyFarmerRequest } from "@/app/(app)/dashboard/farmer-network/connections/actions";
+import { approveProducerRequest, denyProducerRequest } from "@/app/(app)/dashboard/producer-network/connections/actions";
 
-interface FarmerRequestCardProps {
+interface ProducerRequestCardProps {
   request: {
     id: string;
     requester_user_id: string;
@@ -19,19 +19,19 @@ interface FarmerRequestCardProps {
   avatarUrl?: string | null;
 }
 
-export function FarmerRequestCard({ request, avatarUrl }: FarmerRequestCardProps) {
+export function ProducerRequestCard({ request, avatarUrl }: ProducerRequestCardProps) {
   const [loading, setLoading] = useState<"approve" | "deny" | null>(null);
   const [showDenyConfirm, setShowDenyConfirm] = useState(false);
 
   const handleApprove = async () => {
     setLoading("approve");
-    await approveFarmerRequest(request.id);
+    await approveProducerRequest(request.id);
     setLoading(null);
   };
 
   const handleDeny = async () => {
     setLoading("deny");
-    await denyFarmerRequest(request.id);
+    await denyProducerRequest(request.id);
     setLoading(null);
     setShowDenyConfirm(false);
   };
