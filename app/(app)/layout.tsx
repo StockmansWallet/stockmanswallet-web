@@ -96,11 +96,7 @@ export default async function AppLayout({
       />
 
       <div className="flex min-h-screen flex-col bg-background/0">
-        {isDemoUser && (
-          <div data-print-hide className="sticky top-0 z-50">
-            <DemoModeBanner />
-          </div>
-        )}
+        {isDemoUser && <DemoModeBanner />}
 
         {/* Mobile nav */}
         <div data-print-hide>

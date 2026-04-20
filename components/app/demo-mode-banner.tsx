@@ -1,16 +1,16 @@
-import { Eye } from "lucide-react";
-
 /**
- * Banner shown at the top of the app when signed in as the public demo account.
- * Signals that writes won't persist (RLS blocks them) so users understand why
- * local edits seem to "undo" themselves on the next refresh.
+ * Small orange pill shown at the top of the app when signed in as the
+ * public demo account. Floats over content rather than pushing it down.
  */
 export function DemoModeBanner() {
   return (
-    <div className="flex items-center justify-center gap-2 bg-brand px-3 py-2 text-center text-xs font-medium text-white">
-      <Eye className="h-3.5 w-3.5 shrink-0" />
-      <span>
-        Demo mode — changes won&apos;t save. Sign up for your own account to get started.
+    <div
+      className="pointer-events-none fixed top-2 left-1/2 z-50 -translate-x-1/2"
+      data-print-hide
+      aria-label="Demo mode active. Changes will not save."
+    >
+      <span className="rounded-full bg-brand px-3 py-1 text-[11px] font-semibold text-white shadow-sm">
+        Demo Mode
       </span>
     </div>
   );
