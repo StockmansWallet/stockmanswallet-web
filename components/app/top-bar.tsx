@@ -12,19 +12,11 @@ interface TopBarProps {
   avatarUrl?: string;
 }
 
-// Pixels of main-element scroll before the header switches from fully
-// transparent to frosted-glass. Low enough that any intentional scroll
-// triggers it, high enough that hairline touchpad jitter at the top
-// doesn't flicker the effect.
+// Pixels of scroll before the header switches from fully transparent to
+// frosted-glass. Low enough that any intentional scroll triggers it, high
+// enough that hairline touchpad jitter at the top doesn't flicker the
+// effect.
 const SCROLL_THRESHOLD_PX = 8;
-
-// Finds the authenticated layout's scroll container. The (app)/layout uses
-// <main className="overflow-y-auto"> as the scroll surface, not window, so
-// listening to window.scroll wouldn't catch anything.
-function getScrollContainer(): HTMLElement | null {
-  if (typeof document === "undefined") return null;
-  return document.querySelector("main");
-}
 
 export function TopBar({ firstName, lastName, email, roleLabel, avatarUrl }: TopBarProps) {
   const initials =
@@ -36,19 +28,25 @@ export function TopBar({ firstName, lastName, email, roleLabel, avatarUrl }: Top
   // Transparent at top, frosted once the user scrolls. Matches the iOS
   // compact-large-title pattern where the navigation bar gains its chrome
   // as content slides underneath it.
+  //
+  // Despite (app)/layout setting overflow-y-auto on <main>, main never
+  // actually scrolls because its height is uncapped (flex-1 inside a
+  // min-h-screen parent); scrollHeight == clientHeight, so scrollTop stays
+  // at 0. The window is the real scroll container - confirmed by
+  // inspecting document.documentElement.scrollTop at runtime.
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const main = getScrollContainer();
-    if (!main) return;
-
     function update() {
-      setScrolled((main?.scrollTop ?? 0) > SCROLL_THRESHOLD_PX);
+      // Read both for robustness: some older browsers populate one or the
+      // other depending on quirks mode / flex layout.
+      const y = window.scrollY || document.documentElement.scrollTop || 0;
+      setScrolled(y > SCROLL_THRESHOLD_PX);
     }
 
     update(); // initial read, in case the page loaded pre-scrolled
-    main.addEventListener("scroll", update, { passive: true });
-    return () => main.removeEventListener("scroll", update);
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
   }, []);
 
   return (
