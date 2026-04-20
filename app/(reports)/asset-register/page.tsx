@@ -4,12 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { parseReportConfig } from "@/lib/utils/report-config";
 import { generateAssetRegisterData } from "@/lib/services/report-service";
-import { calculatePortfolioMovement } from "@/lib/services/movement-service";
-import { createMovementPeriod } from "@/lib/types/portfolio-movement";
 import { AssetRegisterTemplate } from "./report-template";
 
 export const revalidate = 0;
-export const metadata = { title: "Asset Register - Stockman's Wallet" };
+export const metadata = { title: "Asset Report - Stockman's Wallet" };
 
 export default async function AssetRegisterReportPage({
   searchParams,
@@ -44,19 +42,15 @@ export default async function AssetRegisterReportPage({
     userId = user.id;
   }
 
-  // Fetch report data and movement data in parallel.
-  // Movement window matches the top filter's date range (config.startDate to config.endDate)
-  // so the PDF reflects whatever the user selected in the UI.
-  const period = createMovementPeriod("custom", config.startDate, config.endDate);
-  const [reportData, movementData] = await Promise.all([
-    generateAssetRegisterData(supabase, userId, {
-      reportType: "asset-register",
-      startDate: config.startDate,
-      endDate: config.endDate,
-      selectedPropertyIds: config.selectedPropertyIds,
-    }),
-    calculatePortfolioMovement(supabase, userId, period, config.selectedPropertyIds),
-  ]);
+  // Asset Report variant - snapshot only, no Portfolio Movement section.
+  // The Lender Report route (/lender-report) fetches the movement summary
+  // and renders the full version of this template.
+  const reportData = await generateAssetRegisterData(supabase, userId, {
+    reportType: "asset-register",
+    startDate: config.startDate,
+    endDate: config.endDate,
+    selectedPropertyIds: config.selectedPropertyIds,
+  });
 
-  return <AssetRegisterTemplate data={reportData} movementSummary={movementData} />;
+  return <AssetRegisterTemplate data={reportData} variant="asset" />;
 }

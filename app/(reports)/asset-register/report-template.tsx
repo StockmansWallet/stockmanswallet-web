@@ -157,8 +157,24 @@ function HerdCard({ herd }: { herd: HerdReportData }) {
 
 // -- Main template ------------------------------------------------------------
 
-export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportData; movementSummary?: PortfolioMovementSummary | null }) {
+// Variant controls the PDF identity:
+//   - "asset":  Asset Report (snapshot only, no movement section)
+//   - "lender": Lender Report (snapshot + Portfolio Movement section)
+// When variant is "lender" the movementSummary must be provided. When
+// variant is "asset" the movement section is never rendered even if a
+// summary is passed in.
+export function AssetRegisterTemplate({
+  data,
+  movementSummary,
+  variant = "asset",
+}: {
+  data: ReportData;
+  movementSummary?: PortfolioMovementSummary | null;
+  variant?: "asset" | "lender";
+}) {
   const { executiveSummary, herdData, herdComposition, userDetails, properties, dateRange } = data;
+  const title = variant === "lender" ? "Lender Report" : "Asset Report";
+  const showMovement = variant === "lender" && !!movementSummary;
 
   const grouped = new Map<string, HerdReportData[]>();
   for (const h of herdData) {
@@ -182,7 +198,7 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
         <div className="flex items-end justify-between">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/images/sw-logo-light.svg" alt="Stockman's Wallet" className="h-16 w-auto" />
-          <p className="text-3xl font-bold leading-none" style={{ color: "#271F16", paddingBottom: "2px" }}>Asset Register</p>
+          <p className="text-3xl font-bold leading-none" style={{ color: "#271F16", paddingBottom: "2px" }}>{title}</p>
         </div>
 
         {/* Executive Summary: full width */}
@@ -263,8 +279,8 @@ export function AssetRegisterTemplate({ data, movementSummary }: { data: ReportD
           )}
         </div>
 
-        {/* PORTFOLIO MOVEMENT */}
-        {movementSummary && (
+        {/* PORTFOLIO MOVEMENT (Lender Report variant only) */}
+        {showMovement && movementSummary && (
           <section className="mt-5">
             {/* Keep the section heading, date range, and the exec stat card as one unit
                 so a page break cannot clip the card away from its own label. */}
