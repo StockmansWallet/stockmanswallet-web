@@ -346,7 +346,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
       </section>
 
       {/* Review and Run */}
-      <section className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
+      <section className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 backdrop-blur-xl">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-text-primary">Analysis Summary</h2>
           <Badge

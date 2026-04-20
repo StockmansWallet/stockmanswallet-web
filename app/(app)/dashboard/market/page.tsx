@@ -57,10 +57,12 @@ export default async function MarketPage({ searchParams }: Props) {
         subtitle="Live livestock market intelligence and price indicators."
       />
 
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <StateFilter />
+      <div className="mb-5 flex flex-col gap-3 rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-1.5 overflow-x-auto">
+          <StateFilter />
+        </div>
         {latestDate && (
-          <p className="text-xs text-text-muted">
+          <p className="px-3 text-xs text-text-muted">
             Latest sale data as of {formatAUDate(latestDate)}
           </p>
         )}

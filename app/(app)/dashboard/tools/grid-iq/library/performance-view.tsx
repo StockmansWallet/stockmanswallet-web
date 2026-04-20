@@ -296,7 +296,7 @@ export function PerformanceView({ profile, trend }: Props) {
       )}
 
       {/* Confidence tier note */}
-      <div className="rounded-xl bg-white/[0.02] px-4 py-3">
+      <div className="rounded-xl bg-white/[0.02] px-4 py-3 backdrop-blur-md">
         <p className="text-xs text-text-muted">
           {getConfidenceLabel(profile.confidenceTier)}
         </p>

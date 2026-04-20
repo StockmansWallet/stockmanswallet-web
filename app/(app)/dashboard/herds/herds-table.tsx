@@ -4,8 +4,9 @@ import { useState, useMemo, useCallback, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Modal } from "@/components/ui/modal";
-import { Search, ChevronUp, ChevronRight, MapPinned, Trash2, ArrowUpRight, Leaf, TrendingUp, Receipt } from "lucide-react";
+import { Search, ChevronUp, MapPinned, Trash2 } from "lucide-react";
 import { deleteHerds } from "./actions";
 import { resolveShortSaleyardName } from "@/lib/data/reference-data";
 
@@ -15,9 +16,17 @@ type HerdWithProperty = {
   species: string;
   breed: string;
   category: string;
+  sub_category?: string | null;
   sex: string;
   head_count: number;
   current_weight: number;
+  age_months?: number | null;
+  livestock_owner?: string | null;
+  daily_weight_gain?: number | null;
+  mortality_rate?: number | null;
+  calving_rate?: number | null;
+  is_breeder?: boolean | null;
+  breed_premium_override?: number | null;
   selected_saleyard: string | null;
   property_id: string | null;
   properties: { property_name: string } | null;
@@ -34,6 +43,195 @@ const SPECIES_TABS = ["All", "Cattle", "Sheep", "Pig", "Goat"] as const;
 
 
 type SortKey = "name" | "breed" | "category" | "selected_saleyard" | "head_count" | "current_weight" | "value" | "price_per_kg" | null;
+
+type StatAccent = "none" | "brand" | "warning" | "error" | "success";
+
+// Snapshot time once per module load - 42-day staleness threshold doesn't need sub-minute precision
+const NOW_MS = Date.now();
+
+const SORT_OPTIONS: { key: SortKey; label: string }[] = [
+  { key: "name", label: "Name" },
+  { key: "head_count", label: "Head" },
+  { key: "value", label: "Value" },
+  { key: "breed", label: "Breed" },
+  { key: "current_weight", label: "Weight" },
+];
+
+function SortIcon({ active, sortDir }: { active: boolean; sortDir: "asc" | "desc" }) {
+  if (!active) return null;
+  return (
+    <ChevronUp
+      className={`ml-0.5 inline h-3 w-3 transition-transform ${sortDir === "desc" ? "rotate-180" : ""}`}
+    />
+  );
+}
+
+function Stat({ label, value, accent = "none" }: { label: string; value: string; accent?: StatAccent }) {
+  const colour =
+    accent === "brand" ? "text-brand"
+    : accent === "warning" ? "text-warning"
+    : accent === "error" ? "text-error"
+    : accent === "success" ? "text-success"
+    : "text-text-primary";
+  return (
+    <div className="min-w-0">
+      <p className="truncate text-[10px] font-medium uppercase tracking-wider text-text-muted">{label}</p>
+      <p className={`mt-0.5 truncate text-sm font-semibold tabular-nums ${colour}`}>{value}</p>
+    </div>
+  );
+}
+
+interface HerdCardProps {
+  herd: HerdWithProperty;
+  value: number;
+  source: string | undefined;
+  pricePerKg: number;
+  accrual: number;
+  nearestSaleyard: string | null;
+  projectedWeight: number | undefined;
+  defaultPremium: number;
+  customDelta: number | null;
+  dataDate: string | null | undefined;
+  isEditing: boolean;
+  isSelected: boolean;
+  onToggleSelect: (id: string) => void;
+  onNavigate: (id: string) => void;
+}
+
+function HerdCard({
+  herd, value, source, pricePerKg, accrual, nearestSaleyard, projectedWeight,
+  defaultPremium, customDelta, dataDate, isEditing, isSelected, onToggleSelect, onNavigate,
+}: HerdCardProps) {
+  const isFallback = source !== undefined && source !== "saleyard";
+  const dataAgeDays = dataDate ? Math.floor((NOW_MS - new Date(dataDate).getTime()) / 86400000) : 0;
+  const isStale = dataAgeDays > 42 && !isFallback;
+
+  const categoryLabel = herd.sub_category && herd.sub_category !== herd.category
+    ? `${herd.category} (${herd.sub_category})`
+    : herd.category;
+
+  const weightNumber = projectedWeight ?? herd.current_weight ?? 0;
+  const calvingPct = (herd.calving_rate ?? 0) > 1 ? (herd.calving_rate ?? 0) : (herd.calving_rate ?? 0) * 100;
+  const mortalityPct = (herd.mortality_rate ?? 0) > 1 ? (herd.mortality_rate ?? 0) : (herd.mortality_rate ?? 0) * 100;
+  const dwg = herd.daily_weight_gain ?? 0;
+  const headCount = herd.head_count ?? 0;
+  const avgPerHead = headCount > 0 ? value / headCount : 0;
+
+  let saleyardLabel: string | null = null;
+  let saleyardAccent: StatAccent = "none";
+  if (isFallback) {
+    saleyardLabel = source === "national" ? "National Avg" : "Est. Fallback";
+    saleyardAccent = "error";
+  } else if (nearestSaleyard) {
+    saleyardLabel = `Via ${resolveShortSaleyardName(nearestSaleyard) ?? nearestSaleyard}`;
+    saleyardAccent = "warning";
+  } else if (herd.selected_saleyard) {
+    saleyardLabel = resolveShortSaleyardName(herd.selected_saleyard) ?? herd.selected_saleyard;
+    saleyardAccent = isStale ? "warning" : "none";
+  }
+
+  const extras: { label: string; value: string; accent?: StatAccent }[] = [];
+  if (saleyardLabel) {
+    extras.push({
+      label: isStale && saleyardAccent === "warning" && !nearestSaleyard ? "Saleyard (stale)" : "Saleyard",
+      value: saleyardLabel,
+      accent: saleyardAccent,
+    });
+  }
+  if (headCount > 0 && value > 0) {
+    extras.push({ label: "Avg per Head", value: `$${Math.round(avgPerHead).toLocaleString()}` });
+  }
+  if (dwg > 0) {
+    extras.push({ label: "DWG", value: `${dwg.toFixed(2)} kg/day` });
+  }
+  if (herd.is_breeder && calvingPct > 0) {
+    extras.push({ label: "Calving", value: `${calvingPct.toFixed(0)}%` });
+  }
+  if (accrual > 0) {
+    extras.push({ label: "Calf Accrual", value: `$${Math.round(accrual).toLocaleString()}`, accent: "success" });
+  }
+  if (mortalityPct > 0) {
+    extras.push({ label: "Mortality", value: `${mortalityPct.toFixed(1)}% p.a.` });
+  }
+  if (defaultPremium !== 0) {
+    extras.push({ label: "Breed Premium", value: `${defaultPremium > 0 ? "+" : ""}${defaultPremium}%` });
+  }
+  if (customDelta !== null) {
+    extras.push({
+      label: "Custom Premium",
+      value: `${customDelta > 0 ? "+" : ""}${customDelta}%`,
+      accent: customDelta > 0 ? "success" : customDelta < 0 ? "error" : "none",
+    });
+  }
+
+  const extraRows: (typeof extras)[] = [];
+  for (let i = 0; i < extras.length; i += 4) extraRows.push(extras.slice(i, i + 4));
+
+  function handleCardClick() {
+    if (isEditing) onToggleSelect(herd.id);
+    else onNavigate(herd.id);
+  }
+
+  return (
+    <Card
+      onClick={handleCardClick}
+      className={`cursor-pointer overflow-hidden transition-colors ${isSelected ? "ring-1 ring-brand/60" : "hover:bg-white/[0.03]"}`}
+    >
+      {/* Header: tinted row with head-count pill, name, category, value */}
+      <div className="flex items-center gap-3 bg-white/[0.04] px-4 py-2.5">
+        {isEditing && (
+          <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={() => onToggleSelect(herd.id)}
+              aria-label={`Select ${herd.name}`}
+              className="h-4 w-4 cursor-pointer rounded border-white/20 bg-transparent accent-brand"
+            />
+          </div>
+        )}
+        <span className="flex h-9 w-12 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-sm font-semibold tabular-nums text-text-primary">
+          {headCount.toLocaleString()}
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+            <h5 className="truncate text-sm font-semibold text-text-primary">{herd.name}</h5>
+            <p className="shrink-0 text-xs text-text-muted">
+              {herd.breed} | {categoryLabel}
+            </p>
+          </div>
+          {herd.livestock_owner && (
+            <p className="mt-0.5 text-[11px] text-text-muted">
+              <span className="text-text-muted/70">Livestock Owner:</span>{" "}
+              <span className="text-text-secondary">{herd.livestock_owner}</span>
+            </p>
+          )}
+        </div>
+        <p className={`ml-3 shrink-0 text-base font-bold tabular-nums ${isFallback ? "text-error" : "text-text-primary"}`}>
+          {value > 0 ? `$${Math.round(value).toLocaleString()}` : "\u2014"}
+        </p>
+      </div>
+
+      {/* Core 4-col grid */}
+      <CardContent className="px-4 py-2">
+        <div className="grid grid-cols-4 gap-x-3">
+          <Stat label="Head" value={headCount.toLocaleString()} />
+          <Stat label="Age" value={herd.age_months ? `${herd.age_months} months` : "\u2014"} />
+          <Stat label="Weight" value={weightNumber > 0 ? `${Math.round(weightNumber).toLocaleString()} kg` : "\u2014"} />
+          <Stat label="Price" value={pricePerKg > 0 ? `$${pricePerKg.toFixed(2)}/kg` : "\u2014"} />
+        </div>
+
+        {extraRows.map((row, ri) => (
+          <div key={ri} className="mt-1.5 grid grid-cols-4 gap-x-3 border-t border-white/[0.04] pt-1.5">
+            {row.map((e) => (
+              <Stat key={e.label} label={e.label} value={e.value} accent={e.accent} />
+            ))}
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
 
 export function HerdsTable({
   herds,
@@ -63,6 +261,9 @@ export function HerdsTable({
   headerActions?: ReactNode;
 }) {
   const router = useRouter();
+  const navigateToHerd = useCallback((id: string) => {
+    router.push(`/dashboard/herds/${id}`);
+  }, [router]);
   const [activeTab, setActiveTab] = useState<string>("All");
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>(null);
@@ -120,7 +321,7 @@ export function HerdsTable({
       const cmp = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
       return sortDir === "asc" ? cmp : -cmp;
     });
-  }, [searched, sortKey, sortDir, herdValues]);
+  }, [searched, sortKey, sortDir, herdValues, herdPricePerKg]);
 
   // Group herds by property, preserving the property order from server
   const groupedHerds = useMemo(() => {
@@ -209,175 +410,10 @@ export function HerdsTable({
     }
   }
 
-  function SortIcon({ column }: { column: SortKey }) {
-    if (sortKey !== column) return null;
-    return (
-      <ChevronUp
-        className={`ml-0.5 inline h-3 w-3 transition-transform ${sortDir === "desc" ? "rotate-180" : ""}`}
-      />
-    );
-  }
-
-  const SORT_OPTIONS: { key: SortKey; label: string }[] = [
-    { key: "name", label: "Name" },
-    { key: "head_count", label: "Head" },
-    { key: "value", label: "Value" },
-    { key: "breed", label: "Breed" },
-    { key: "current_weight", label: "Weight" },
-  ];
-
-  function SortBar() {
-    return (
-      <div className="flex items-center gap-1 border-b border-white/[0.04] px-5 py-2">
-        <span className="mr-1.5 text-[10px] font-medium text-text-muted">Sort by</span>
-        <div className="flex items-center gap-0.5 rounded-full bg-white/[0.03] p-0.5">
-          {SORT_OPTIONS.map((opt) => (
-            <button
-              key={opt.key}
-              onClick={() => handleSort(opt.key)}
-              className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors ${
-                sortKey === opt.key
-                  ? "bg-brand/15 text-brand"
-                  : "text-text-muted hover:text-text-secondary"
-              }`}
-            >
-              {opt.label}
-              <SortIcon column={opt.key} />
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  function HerdRow({ herd }: { herd: HerdWithProperty }) {
-    const value = herdValues[herd.id] ?? 0;
-    const source = herdSources?.[herd.id];
-    const isFallback = source !== undefined && source !== "saleyard";
-    const pricePerKg = herdPricePerKg?.[herd.id] ?? 0;
-    const accrual = herdBreedingAccrual?.[herd.id] ?? 0;
-    const nearestSaleyard = herdNearestSaleyard?.[herd.id] ?? null;
-    const projectedWeight = herdProjectedWeight?.[herd.id];
-    const defaultPremium = herdDefaultBreedPremium?.[herd.id] ?? 0;
-    const customDelta = herdCustomBreedPremium?.[herd.id] ?? null;
-    const dataDate = herdDataDates?.[herd.id];
-    const dataAgeDays = dataDate ? Math.floor((Date.now() - new Date(dataDate).getTime()) / 86400000) : 0;
-    const isStale = dataAgeDays > 42 && !isFallback;
-    const isSelected = selectedIds.has(herd.id);
-
-    const categoryLabel = herd.sub_category && herd.sub_category !== herd.category
-      ? `${herd.category} (${herd.sub_category})`
-      : herd.category;
-
-    const weightDisplay = projectedWeight
-      ? `${Math.round(projectedWeight).toLocaleString()} kg`
-      : herd.current_weight
-        ? `${herd.current_weight.toLocaleString()} kg`
-        : null;
-
-    function handleRowClick() {
-      if (isEditing) {
-        toggleSelect(herd.id);
-      } else {
-        router.push(`/dashboard/herds/${herd.id}`);
-      }
-    }
-
-    return (
-      <div
-        onClick={handleRowClick}
-        className={`group flex cursor-pointer items-center gap-3 px-5 py-3.5 transition-colors ${
-          isSelected ? "bg-brand/10" : "hover:bg-white/[0.03]"
-        }`}
-      >
-        {isEditing && (
-          <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-            <input
-              type="checkbox"
-              checked={isSelected}
-              onChange={() => toggleSelect(herd.id)}
-              className="h-4 w-4 rounded border-white/20 bg-transparent accent-brand cursor-pointer"
-            />
-          </div>
-        )}
-
-        {/* Head count pill */}
-        <span className="flex h-9 w-12 shrink-0 items-center justify-center rounded-lg bg-white/[0.04] text-sm font-semibold tabular-nums text-text-primary">
-          {herd.head_count?.toLocaleString() ?? "\u2014"}
-        </span>
-
-        {/* Name + details + pills */}
-        <div className="min-w-0 flex-1">
-          <p className="flex items-baseline gap-2 truncate">
-            <span className="text-sm font-medium text-text-primary">{herd.name}</span>
-            <span className="truncate text-xs text-text-muted">
-              {herd.breed} | {categoryLabel}
-              {weightDisplay && <> | {weightDisplay}</>}
-              {pricePerKg > 0 && <> | ${pricePerKg.toFixed(2)}/kg</>}
-            </span>
-          </p>
-          {(defaultPremium !== 0 || customDelta !== null || accrual > 0 || herd.selected_saleyard || isFallback) && (
-            <div className="mt-1.5 flex flex-wrap items-center gap-1">
-              {defaultPremium !== 0 && (
-                <span className="inline-flex items-center gap-0.5 rounded-full bg-white/[0.06] px-1.5 py-0.5 text-[9px] font-medium text-text-muted">
-                  <TrendingUp className="h-2.5 w-2.5" />
-                  Breed Premium {defaultPremium > 0 ? "+" : ""}{defaultPremium}%
-                </span>
-              )}
-              {customDelta !== null && (
-                <span className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-medium ${customDelta > 0 ? "bg-success/15 text-success" : customDelta < 0 ? "bg-error/15 text-error" : "bg-white/[0.06] text-text-muted"}`}>
-                  <TrendingUp className="h-2.5 w-2.5" />
-                  Custom Premium {customDelta > 0 ? "+" : ""}{customDelta}%
-                </span>
-              )}
-              {accrual > 0 && (
-                <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald/15 px-1.5 py-0.5 text-[9px] font-medium text-emerald">
-                  <Leaf className="h-2.5 w-2.5" />
-                  Breeding Value +${Math.round(accrual).toLocaleString()}
-                </span>
-              )}
-              {herd.selected_saleyard && (
-                <span className={`inline-flex items-center gap-0.5 rounded-full bg-white/[0.06] px-1.5 py-0.5 text-[9px] font-medium ${nearestSaleyard && !isFallback ? "line-through text-text-muted/50" : isStale ? "text-warning" : "text-text-muted"}`}>
-                  <Receipt className="h-2.5 w-2.5 shrink-0 no-underline" style={{ textDecoration: "none" }} />
-                  {resolveShortSaleyardName(herd.selected_saleyard) ?? herd.selected_saleyard}
-                </span>
-              )}
-              {nearestSaleyard && !isFallback && (
-                <span className="inline-flex items-center gap-0.5 rounded-full bg-warning/15 px-1.5 py-0.5 text-[9px] font-medium text-warning">
-                  <ArrowUpRight className="h-2.5 w-2.5" />
-                  Via {resolveShortSaleyardName(nearestSaleyard) ?? nearestSaleyard}
-                </span>
-              )}
-              {isStale && !nearestSaleyard && (
-                <span className="inline-flex items-center rounded-full bg-warning/15 px-1.5 py-0.5 text-[9px] font-medium text-warning">
-                  Stale Data
-                </span>
-              )}
-              {isFallback && (
-                <span className="inline-flex items-center rounded-full bg-error/15 px-1.5 py-0.5 text-[9px] font-medium text-error">
-                  {source === "national" ? "National Avg" : "Est. Fallback"}
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Value */}
-        <span className={`shrink-0 text-sm font-semibold tabular-nums ${isFallback ? "text-error" : "text-text-primary"}`}>
-          {value > 0 ? `$${Math.round(value).toLocaleString()}` : "\u2014"}
-        </span>
-
-        {!isEditing && (
-          <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
-        )}
-      </div>
-    );
-  }
-
   return (
     <div>
       {/* Toolbar: species pills + manage + search */}
-      <div className="mb-4 flex flex-col gap-3 rounded-full bg-surface-lowest px-2 py-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-4 flex flex-col gap-3 rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
         {/* Left: species filters */}
         <div className="flex items-center gap-1.5 overflow-x-auto">
           {SPECIES_TABS.map((tab) => {
@@ -433,68 +469,116 @@ export function HerdsTable({
       </div>
 
       {sorted.length === 0 ? (
-        <div className="overflow-hidden rounded-2xl bg-surface-lowest">
+        <div className="overflow-hidden rounded-2xl bg-surface-lowest backdrop-blur-md">
           <p className="px-5 py-16 text-center text-sm text-text-muted">
             {search ? "No herds match your search." : "No herds found."}
           </p>
         </div>
-      ) : showPropertyHeaders ? (
-        <div className="flex flex-col gap-5">
-          {groupedHerds.map((group) => {
-            const groupHead = group.herds.reduce((s, h) => s + (h.head_count ?? 0), 0);
-            const groupValue = group.herds.reduce((s, h) => s + (herdValues[h.id] ?? 0), 0);
-            return (
-              <div key={group.id ?? "_unassigned"} className="overflow-hidden rounded-2xl bg-surface-lowest">
-                {/* Property header */}
-                <div className="flex items-center justify-between border-b border-border-subtle px-5 py-3.5">
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/10">
-                      <MapPinned className="h-3.5 w-3.5 text-brand" />
-                    </div>
-                    <span className="text-sm font-semibold text-text-primary">
-                      {group.name}
-                    </span>
-                    {group.isDefault && (
-                      <Badge variant="brand" className="text-[10px] px-1.5 py-0">Primary</Badge>
-                    )}
-                  </div>
-                  {groupValue > 0 && (
-                    <span className="text-sm font-semibold tabular-nums text-brand">
-                      ${Math.round(groupValue).toLocaleString()}
-                    </span>
-                  )}
-                </div>
-                <SortBar />
-                <div className="divide-y divide-white/[0.06]">
-                  {group.herds.map((herd) => (
-                    <HerdRow key={herd.id} herd={herd} />
-                  ))}
-                </div>
-                <div className="border-t border-border-subtle px-5 py-2.5">
-                  <p className="text-right text-xs text-text-muted">
-                    {group.herds.length} {group.herds.length === 1 ? "herd" : "herds"} | {groupHead.toLocaleString()} head
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl bg-surface-lowest">
-          <SortBar />
-          <div className="divide-y divide-white/[0.06]">
-            {sorted.map((herd) => (
-              <HerdRow key={herd.id} herd={herd} />
-            ))}
+        <>
+          {/* Single sort bar above all groups */}
+          <div className="mb-3 rounded-full bg-surface-lowest px-2 py-1.5 backdrop-blur-md">
+            <div className="flex items-center gap-1 px-2 py-0.5">
+              <span className="mr-1.5 text-[10px] font-medium text-text-muted">Sort by</span>
+              <div className="flex items-center gap-0.5 rounded-full bg-white/[0.03] p-0.5">
+                {SORT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.key}
+                    onClick={() => handleSort(opt.key)}
+                    className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors ${
+                      sortKey === opt.key
+                        ? "bg-brand/15 text-brand"
+                        : "text-text-muted hover:text-text-secondary"
+                    }`}
+                  >
+                    {opt.label}
+                    <SortIcon active={sortKey === opt.key} sortDir={sortDir} />
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
-          <div className="border-t border-border-subtle px-5 py-3">
-            <p className="text-xs text-text-muted">
-              {sorted.length === herds.length
-                ? `${herds.length} ${herds.length === 1 ? "herd" : "herds"}`
-                : `${sorted.length} of ${herds.length} herds`}
-            </p>
-          </div>
-        </div>
+
+          {showPropertyHeaders ? (
+            <div className="flex flex-col gap-5">
+              {groupedHerds.map((group) => {
+                const groupHead = group.herds.reduce((s, h) => s + (h.head_count ?? 0), 0);
+                const groupValue = group.herds.reduce((s, h) => s + (herdValues[h.id] ?? 0), 0);
+                return (
+                  <div key={group.id ?? "_unassigned"}>
+                    {/* Property header pill */}
+                    <div className="mb-2 flex items-center justify-between rounded-full bg-white/[0.06] px-4 py-2.5 backdrop-blur-md">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/10">
+                          <MapPinned className="h-3.5 w-3.5 text-brand" />
+                        </div>
+                        <span className="text-sm font-semibold text-text-primary">{group.name}</span>
+                        {group.isDefault && (
+                          <Badge variant="brand" className="text-[10px] px-1.5 py-0">Primary</Badge>
+                        )}
+                      </div>
+                      <span className="text-xs tabular-nums text-text-muted">
+                        {groupHead.toLocaleString()} head{groupValue > 0 && (
+                          <> &middot; <span className="font-semibold text-brand">${Math.round(groupValue).toLocaleString()}</span></>
+                        )}
+                      </span>
+                    </div>
+
+                    {/* Herd cards */}
+                    <div className="flex flex-col gap-2">
+                      {group.herds.map((herd) => (
+                        <HerdCard
+                          key={herd.id}
+                          herd={herd}
+                          value={herdValues[herd.id] ?? 0}
+                          source={herdSources?.[herd.id]}
+                          pricePerKg={herdPricePerKg?.[herd.id] ?? 0}
+                          accrual={herdBreedingAccrual?.[herd.id] ?? 0}
+                          nearestSaleyard={herdNearestSaleyard?.[herd.id] ?? null}
+                          projectedWeight={herdProjectedWeight?.[herd.id]}
+                          defaultPremium={herdDefaultBreedPremium?.[herd.id] ?? 0}
+                          customDelta={herdCustomBreedPremium?.[herd.id] ?? null}
+                          dataDate={herdDataDates?.[herd.id]}
+                          isEditing={isEditing}
+                          isSelected={selectedIds.has(herd.id)}
+                          onToggleSelect={toggleSelect}
+                          onNavigate={navigateToHerd}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {sorted.map((herd) => (
+                <HerdCard
+                  key={herd.id}
+                  herd={herd}
+                  value={herdValues[herd.id] ?? 0}
+                  source={herdSources?.[herd.id]}
+                  pricePerKg={herdPricePerKg?.[herd.id] ?? 0}
+                  accrual={herdBreedingAccrual?.[herd.id] ?? 0}
+                  nearestSaleyard={herdNearestSaleyard?.[herd.id] ?? null}
+                  projectedWeight={herdProjectedWeight?.[herd.id]}
+                  defaultPremium={herdDefaultBreedPremium?.[herd.id] ?? 0}
+                  customDelta={herdCustomBreedPremium?.[herd.id] ?? null}
+                  dataDate={herdDataDates?.[herd.id]}
+                  isEditing={isEditing}
+                  isSelected={selectedIds.has(herd.id)}
+                  onToggleSelect={toggleSelect}
+                  onNavigate={navigateToHerd}
+                />
+              ))}
+              <p className="mt-2 text-xs text-text-muted">
+                {sorted.length === herds.length
+                  ? `${herds.length} ${herds.length === 1 ? "herd" : "herds"}`
+                  : `${sorted.length} of ${herds.length} herds`}
+              </p>
+            </div>
+          )}
+        </>
       )}
 
       {/* Floating action bar when items selected */}

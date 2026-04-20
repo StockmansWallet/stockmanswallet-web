@@ -271,9 +271,9 @@ body {
   color: var(--foreground);
 }
 
-html {
-  scroll-behavior: smooth;
-}
+/* scroll-behavior: smooth removed - exaggerated jerkiness on pages with
+   backdrop-filter layers. Anchor-link smooth scroll can be added per link
+   with element.scrollIntoView({ behavior: "smooth" }) if needed. */
 
 /* Animated gradient orbs */
 @keyframes orb-drift {

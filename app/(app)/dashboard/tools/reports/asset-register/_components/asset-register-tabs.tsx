@@ -75,7 +75,7 @@ export function AssetRegisterTabs({ herdData, startDate, endDate, selectedProper
       {/* Tab bar */}
       <div
         ref={containerRef}
-        className="relative mb-4 flex gap-1 rounded-full bg-surface p-1"
+        className="relative mb-4 flex gap-1 rounded-full bg-surface p-1 backdrop-blur-md"
         role="tablist"
         aria-label="Asset Register sections"
       >

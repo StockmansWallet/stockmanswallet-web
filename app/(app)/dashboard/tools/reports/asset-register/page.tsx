@@ -49,7 +49,7 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
       />
 
       {/* Toolbar */}
-      <div className="mb-6 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2">
+      <div className="mb-6 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md">
         <Suspense>
           <ReportFilters properties={properties ?? []} />
         </Suspense>

@@ -103,7 +103,7 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
   return (
     <div>
       {/* Tab bar */}
-      <div ref={containerRef} className="relative mb-4 flex gap-1 rounded-full bg-surface p-1">
+      <div ref={containerRef} className="relative mb-4 flex gap-1 rounded-full bg-surface p-1 backdrop-blur-md">
         <div
           className={`absolute top-1 bottom-1 rounded-full bg-surface-high shadow-sm ${ready ? "transition-all duration-250 ease-out" : ""}`}
           style={{ left: indicator.left, width: indicator.width }}
@@ -125,7 +125,7 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
       </div>
 
       {/* Action toolbar: export buttons (portalled from BrangusChat) + New Chat */}
-      <div className="mb-4 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-1.5">
+      <div className="mb-4 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-1.5 backdrop-blur-md">
         {/* Left: portal target for export buttons from BrangusChat */}
         <div ref={setToolbarEl} className="flex items-center" />
 

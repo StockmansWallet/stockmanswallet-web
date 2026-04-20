@@ -11,7 +11,7 @@ export function PortfolioValueCard({ value, changeDollar, changePercent, fallbac
   const isPositive = changePercent !== undefined && changePercent >= 0;
 
   return (
-    <div className="flex rounded-2xl bg-surface-lowest p-5">
+    <div className="flex rounded-2xl bg-surface-lowest p-5 backdrop-blur-xl">
       <div className="flex flex-1 flex-col items-center justify-center text-center">
         <p className="text-xs font-medium uppercase tracking-wide text-text-muted">Total Value</p>
         <p className="mt-1.5 text-xl font-bold text-text-primary">

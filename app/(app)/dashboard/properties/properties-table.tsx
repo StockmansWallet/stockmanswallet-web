@@ -45,7 +45,7 @@ export function PropertiesTable({
   return (
     <div>
       {/* Toolbar */}
-      <div className="mb-4 flex flex-col gap-3 rounded-full bg-surface-lowest px-2 py-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-4 flex flex-col gap-3 rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-1.5 overflow-x-auto">
           <span className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-brand/15 px-3.5 text-xs font-medium text-brand">
             All
@@ -76,13 +76,13 @@ export function PropertiesTable({
 
       {/* List */}
       {filtered.length === 0 ? (
-        <div className="overflow-hidden rounded-2xl bg-surface-lowest">
+        <div className="overflow-hidden rounded-2xl bg-surface-lowest backdrop-blur-xl">
           <p className="px-5 py-16 text-center text-sm text-text-muted">
             {search ? "No properties match your search." : "No properties found."}
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl bg-surface-lowest">
+        <div className="overflow-hidden rounded-2xl bg-surface-lowest backdrop-blur-xl">
           <div className="divide-y divide-white/[0.06]">
             {filtered.map((property) => {
               const herds = herdCounts[property.id] ?? 0;

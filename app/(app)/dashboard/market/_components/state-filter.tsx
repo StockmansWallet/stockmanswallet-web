@@ -24,21 +24,24 @@ export function StateFilter() {
   );
 
   return (
-    <div className="inline-flex items-center gap-1 rounded-full bg-surface p-1">
-      {OPTIONS.map((o) => (
-        <button
-          key={o.value || "all"}
-          type="button"
-          onClick={() => onChange(o.value)}
-          className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-            current === o.value
-              ? "bg-surface-high text-text-primary shadow-sm"
-              : "text-text-muted hover:text-text-primary"
-          }`}
-        >
-          {o.label}
-        </button>
-      ))}
-    </div>
+    <>
+      {OPTIONS.map((o) => {
+        const isActive = current === o.value;
+        return (
+          <button
+            key={o.value || "all"}
+            type="button"
+            onClick={() => onChange(o.value)}
+            className={`inline-flex h-8 shrink-0 items-center rounded-full px-3.5 text-xs font-medium transition-all ${
+              isActive
+                ? "bg-markets/15 text-markets"
+                : "bg-surface text-text-muted hover:bg-surface-raised hover:text-text-secondary"
+            }`}
+          >
+            {o.label}
+          </button>
+        );
+      })}
+    </>
   );
 }

@@ -87,35 +87,38 @@ export function aggregateWeekly(rows: PriceRow[]): WeeklyPoint[] {
 }
 
 export async function getCategorySummaries(state?: string): Promise<CategorySummary[]> {
-  const startDate = daysAgo(420);
-  const results = await Promise.all(
-    MLA_CATEGORIES.map(async (category) => {
-      const rows = await fetchPriceRows({ category, startDate, state, limit: 20000 });
-      const series = aggregateWeekly(rows);
-      if (series.length === 0) return null;
-      const latest = series[series.length - 1];
-      const pick = (weeksBack: number) => {
-        const target = series[series.length - 1 - weeksBack];
-        if (!target) return null;
-        return pctChange(latest.avg_price, target.avg_price);
-      };
-      const summary: CategorySummary = {
-        category,
-        slug: slugify(category),
-        latest_price: latest.avg_price,
-        latest_date: latest.week_date,
-        change_1w_pct: pick(1),
-        change_4w_pct: pick(4),
-        change_12w_pct: pick(12),
-        change_52w_pct: pick(52),
-        sparkline: series.slice(-12),
-        saleyard_count: latest.saleyards,
-      };
-      return summary;
-    })
-  );
-  return results
-    .filter((r): r is CategorySummary => r !== null)
+  // Aggregated in Postgres via market_category_summaries RPC - returns 8 rows
+  // (one per MLA category) with latest price, change %%s, and sparkline jsonb.
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("market_category_summaries", {
+    p_state: state ?? null,
+    p_days: 420,
+  });
+  if (error || !data) return [];
+  type Row = {
+    category: string;
+    latest_price: number;
+    latest_date: string;
+    change_1w_pct: number | null;
+    change_4w_pct: number | null;
+    change_12w_pct: number | null;
+    change_52w_pct: number | null;
+    saleyard_count: number;
+    sparkline: WeeklyPoint[];
+  };
+  return (data as Row[])
+    .map((r) => ({
+      category: r.category,
+      slug: slugify(r.category),
+      latest_price: Number(r.latest_price),
+      latest_date: r.latest_date,
+      change_1w_pct: r.change_1w_pct,
+      change_4w_pct: r.change_4w_pct,
+      change_12w_pct: r.change_12w_pct,
+      change_52w_pct: r.change_52w_pct,
+      sparkline: r.sparkline ?? [],
+      saleyard_count: r.saleyard_count,
+    }))
     .sort((a, b) => a.category.localeCompare(b.category));
 }
 
@@ -260,81 +263,47 @@ export async function getTopMovers(
   windowDays: 7 | 30,
   state?: string
 ): Promise<{ gainers: Mover[]; losers: Mover[] }> {
-  const startDate = daysAgo(windowDays + 14);
-  const rows = await fetchPriceRows({ startDate, state, limit: 20000 });
-
-  const catByDate = new Map<string, Map<string, { total: number; count: number }>>();
-  const yardByDate = new Map<string, Map<string, { total: number; count: number; state: string }>>();
-
-  for (const r of rows) {
-    const cm = catByDate.get(r.category) ?? new Map();
-    const c = cm.get(r.data_date) ?? { total: 0, count: 0 };
-    c.total += r.final_price_per_kg;
-    c.count += 1;
-    cm.set(r.data_date, c);
-    catByDate.set(r.category, cm);
-
-    const ym = yardByDate.get(r.saleyard) ?? new Map();
-    const y = ym.get(r.data_date) ?? { total: 0, count: 0, state: r.state };
-    y.total += r.final_price_per_kg;
-    y.count += 1;
-    ym.set(r.data_date, y);
-    yardByDate.set(r.saleyard, ym);
-  }
-
-  const movers: Mover[] = [];
-
-  const pushSeries = (
-    kind: "category" | "saleyard",
-    name: string,
-    dateMap: Map<string, { total: number; count: number; state?: string }>,
-    subtitle?: string
-  ) => {
-    const dates = Array.from(dateMap.keys()).sort();
-    if (dates.length < 2) return;
-    const latestKey = dates[dates.length - 1];
-    const latest = dateMap.get(latestKey)!;
-    const latestAvg = latest.total / latest.count / 100;
-    let priorKey: string | undefined;
-    for (let i = dates.length - 2; i >= 0; i--) {
-      const diff =
-        (new Date(latestKey).getTime() - new Date(dates[i]).getTime()) / 86_400_000;
-      if (diff >= windowDays - 3) {
-        priorKey = dates[i];
-        break;
-      }
-    }
-    if (!priorKey) return;
-    const prior = dateMap.get(priorKey)!;
-    const priorAvg = prior.total / prior.count / 100;
-    const change = pctChange(latestAvg, priorAvg);
-    if (change === null) return;
-    const slug = slugify(name);
-    movers.push({
-      kind,
-      name,
+  // Aggregated via market_top_movers RPC - returns up to 10 rows (top 5
+  // gainers + top 5 losers across both categories and saleyards).
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("market_top_movers", {
+    p_state: state ?? null,
+    p_window_days: windowDays,
+  });
+  if (error || !data) return { gainers: [], losers: [] };
+  type Row = {
+    kind: "category" | "saleyard";
+    name: string;
+    state: string | null;
+    latest_price: number;
+    change_pct: number;
+    gainer_rank: number | null;
+    loser_rank: number | null;
+  };
+  const toMover = (r: Row): Mover => {
+    const slug = slugify(r.name);
+    return {
+      kind: r.kind,
+      name: r.name,
       slug,
-      href: kind === "category" ? `/dashboard/market/category/${slug}` : `/dashboard/market/saleyard/${slug}`,
-      latest_price: latestAvg,
-      change_pct: change,
-      subtitle,
-    });
+      href: r.kind === "category"
+        ? `/dashboard/market/category/${slug}`
+        : `/dashboard/market/saleyard/${slug}`,
+      latest_price: Number(r.latest_price),
+      change_pct: Number(r.change_pct),
+      subtitle: r.kind === "category" ? "Category" : r.state ?? undefined,
+    };
   };
-
-  for (const [cat, dm] of catByDate) {
-    pushSeries("category", cat, dm, "Category");
-  }
-  for (const [yard, dm] of yardByDate) {
-    const firstEntry = dm.values().next().value;
-    const st = firstEntry?.state;
-    pushSeries("saleyard", yard, dm, st);
-  }
-
-  const sorted = movers.slice().sort((a, b) => b.change_pct - a.change_pct);
-  return {
-    gainers: sorted.slice(0, 5),
-    losers: sorted.slice(-5).reverse(),
-  };
+  const rows = data as Row[];
+  const gainers = rows
+    .filter((r) => r.gainer_rank !== null)
+    .sort((a, b) => (a.gainer_rank ?? 99) - (b.gainer_rank ?? 99))
+    .map(toMover);
+  const losers = rows
+    .filter((r) => r.loser_rank !== null)
+    .sort((a, b) => (a.loser_rank ?? 99) - (b.loser_rank ?? 99))
+    .map(toMover);
+  return { gainers, losers };
 }
 
 export async function getHerdExposure(userId: string): Promise<HerdExposure[]> {
@@ -386,73 +355,39 @@ export async function getSaleyardsForState(state?: string): Promise<Array<{ sale
     .sort((a, b) => a.saleyard.localeCompare(b.saleyard));
 }
 
-function dayOfYearFromYMD(year: number, month: number, day: number): number {
-  const date = new Date(Date.UTC(year, month - 1, day));
-  const start = new Date(Date.UTC(year, 0, 1));
-  return Math.floor((date.getTime() - start.getTime()) / 86_400_000) + 1;
-}
-
 export async function getYearOverYearMonthly(opts: {
   state?: string;
   years?: number;
 }): Promise<YearOverlaySeries[]> {
   const yearsBack = opts.years ?? 3;
-  const now = new Date();
-  const currentYear = now.getUTCFullYear();
-  const startYear = currentYear - (yearsBack - 1);
-
+  // Aggregated via market_yoy_weekly RPC - returns (year, week, avg_price)
+  // triples directly from Postgres. Reshape into 53-slot arrays per year.
   const supabase = await createClient();
+  const { data, error } = await supabase.rpc("market_yoy_weekly", {
+    p_state: opts.state ?? null,
+    p_years: yearsBack,
+  });
+  if (error || !data) return [];
+  type Row = { year: number; week: number; avg_price: number };
 
-  // Supabase PostgREST caps each request, so paginate with .range() until we
-  // drain the window. One request chain per year runs in parallel across years.
-  const PAGE = 1000;
-  const byYearMonth = new Map<string, { total: number; count: number }>();
+  const byYear = new Map<number, Map<number, number>>();
+  for (const r of data as Row[]) {
+    const y = Number(r.year);
+    const w = Number(r.week);
+    const m = byYear.get(y) ?? new Map<number, number>();
+    m.set(w, Number(r.avg_price));
+    byYear.set(y, m);
+  }
 
-  const years = Array.from({ length: yearsBack }, (_, i) => startYear + i);
-
-  await Promise.all(
-    years.map(async (year) => {
-      const startDate = `${year}-01-01`;
-      const endExclusive = `${year + 1}-01-01`;
-
-      let from = 0;
-      while (true) {
-        let q = supabase
-          .from("category_prices")
-          .select("final_price_per_kg, data_date")
-          .gte("data_date", startDate)
-          .lt("data_date", endExclusive)
-          .order("data_date", { ascending: true })
-          .range(from, from + PAGE - 1);
-        if (opts.state) q = q.eq("state", opts.state);
-        const { data, error } = await q;
-        if (error || !data) break;
-        for (const r of data as Array<{ final_price_per_kg: number; data_date: string }>) {
-          const [ys, ms, ds] = r.data_date.split("-");
-          const dayOfYear = dayOfYearFromYMD(parseInt(ys), parseInt(ms), parseInt(ds));
-          const week = Math.min(53, Math.max(1, Math.ceil(dayOfYear / 7)));
-          const key = `${ys}-${String(week).padStart(2, "0")}`;
-          const g = byYearMonth.get(key) ?? { total: 0, count: 0 };
-          g.total += r.final_price_per_kg;
-          g.count += 1;
-          byYearMonth.set(key, g);
-        }
-        if (data.length < PAGE) break;
-        from += PAGE;
-      }
-    })
-  );
-
+  const currentYear = new Date().getUTCFullYear();
+  const startYear = currentYear - (yearsBack - 1);
   const series: YearOverlaySeries[] = [];
   for (let y = startYear; y <= currentYear; y++) {
-    const points: YearWeeklyPoint[] = Array.from({ length: 53 }, (_, i) => {
-      const key = `${y}-${String(i + 1).padStart(2, "0")}`;
-      const g = byYearMonth.get(key);
-      return {
-        week: i + 1,
-        avg_price: g && g.count > 0 ? g.total / g.count / 100 : null,
-      };
-    });
+    const yearMap = byYear.get(y);
+    const points: YearWeeklyPoint[] = Array.from({ length: 53 }, (_, i) => ({
+      week: i + 1,
+      avg_price: yearMap?.get(i + 1) ?? null,
+    }));
     series.push({ year: y, points });
   }
   return series;
@@ -463,57 +398,20 @@ export async function getCategoryTimelineWeekly(opts: {
   years?: number;
 }): Promise<CategoryTimelineRow[]> {
   const yearsBack = opts.years ?? 2;
-  const now = new Date();
-  const currentYear = now.getUTCFullYear();
-  const startYear = currentYear - yearsBack;
-
+  // Aggregated and pivoted via market_category_timeline_weekly RPC - returns
+  // one row per date with one column per MLA category.
   const supabase = await createClient();
-  const PAGE = 1000;
-
-  // weekDate -> category -> { total, count }
-  const byDateCat = new Map<string, Map<string, { total: number; count: number }>>();
-
-  const years = Array.from({ length: yearsBack + 1 }, (_, i) => startYear + i);
-
-  await Promise.all(
-    years.map(async (year) => {
-      const yearStart = `${year}-01-01`;
-      const yearEnd = `${year + 1}-01-01`;
-      let from = 0;
-      while (true) {
-        let q = supabase
-          .from("category_prices")
-          .select("category, final_price_per_kg, data_date")
-          .gte("data_date", yearStart)
-          .lt("data_date", yearEnd)
-          .order("data_date", { ascending: true })
-          .range(from, from + PAGE - 1);
-        if (opts.state) q = q.eq("state", opts.state);
-        const { data, error } = await q;
-        if (error || !data) break;
-        for (const r of data as Array<{ category: string; final_price_per_kg: number; data_date: string }>) {
-          const m = byDateCat.get(r.data_date) ?? new Map();
-          const g = m.get(r.category) ?? { total: 0, count: 0 };
-          g.total += r.final_price_per_kg;
-          g.count += 1;
-          m.set(r.category, g);
-          byDateCat.set(r.data_date, m);
-        }
-        if (data.length < PAGE) break;
-        from += PAGE;
-      }
-    })
-  );
-
-  // Keep only the rolling window from (today - yearsBack*365) to today
-  const cutoff = daysAgo(yearsBack * 365);
-  const dates = Array.from(byDateCat.keys()).filter((d) => d >= cutoff).sort();
-
-  return dates.map((date) => {
-    const row: CategoryTimelineRow = { week_date: date };
-    const catMap = byDateCat.get(date)!;
-    for (const [cat, g] of catMap) {
-      row[cat] = g.count > 0 ? g.total / g.count / 100 : null;
+  const { data, error } = await supabase.rpc("market_category_timeline_weekly", {
+    p_state: opts.state ?? null,
+    p_years: yearsBack,
+  });
+  if (error || !data) return [];
+  type Row = { week_date: string } & Record<string, number | string | null>;
+  return (data as Row[]).map((r) => {
+    const row: CategoryTimelineRow = { week_date: r.week_date };
+    for (const cat of MLA_CATEGORIES) {
+      const v = r[cat];
+      row[cat] = v == null ? null : Number(v);
     }
     return row;
   });

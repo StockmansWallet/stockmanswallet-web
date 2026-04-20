@@ -196,7 +196,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
   return (
     <div>
       {/* Toolbar: category pills + add item */}
-      <div className="mb-4 flex flex-col gap-3 rounded-full bg-surface-lowest px-2 py-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-4 flex flex-col gap-3 rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
         {/* Left: category filters */}
         <div className="flex items-center gap-1.5 overflow-x-auto">
           <button
@@ -257,7 +257,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
 
       {/* Horizon sections */}
       {horizonGroups.length === 0 ? (
-        <div className="rounded-2xl bg-white/[0.03] p-12 text-center">
+        <div className="rounded-2xl bg-white/[0.03] p-12 text-center backdrop-blur-xl">
           <p className="text-sm text-text-muted">
             {filterCategory
               ? `No ${filterCategory.toLowerCase()} items to show.`
@@ -294,7 +294,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
                     <Link
                       key={item.id}
                       href={`/dashboard/tools/yard-book/${item.id}`}
-                      className="group flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-3 transition-all hover:bg-white/[0.06]"
+                      className="group flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-3 backdrop-blur-xl transition-all hover:bg-white/[0.06]"
                     >
                       {/* Category icon */}
                       <div

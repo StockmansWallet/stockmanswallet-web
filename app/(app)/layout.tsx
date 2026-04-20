@@ -68,7 +68,30 @@ export default async function AppLayout({
 
   return (
     <SidebarNotificationsProvider>
-      <div className="flex min-h-screen flex-col bg-background">
+      {/* Fixed background: single div, CSS-only stack.
+          One compositing layer instead of four; no mix-blend-mode (was per-frame compositor work);
+          no next/Image (skips dev-mode image-optimisation overhead). Image is darkened inline via
+          the stacked black overlay so it reads the same as the previous opacity-10 treatment. */}
+      <div
+        data-print-hide
+        aria-hidden
+        className="pointer-events-none fixed inset-0 -z-10 bg-background"
+        style={{
+          backgroundImage: [
+            // Dark bottom gradient (fades image into page background)
+            "linear-gradient(to bottom, rgba(31,27,24,0) 0%, rgba(31,27,24,0.7) 60%, rgba(31,27,24,1) 100%)",
+            // Soft brand glow in top-left
+            "radial-gradient(ellipse 2200px 2200px at -500px -500px, rgba(217,118,47,0.12) 0%, transparent 70%)",
+            // Hero image, darkened to ~10% visibility via stacked black overlay
+            "linear-gradient(rgba(31,27,24,0.9), rgba(31,27,24,0.9)), url('/images/landing-bg.webp')",
+          ].join(","),
+          backgroundSize: "100% 100%, 100% 100%, cover, cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      />
+
+      <div className="flex min-h-screen flex-col bg-background/0">
         {/* Mobile nav */}
         <div data-print-hide>
           <MobileNav userEmail={user.email} subscriptionTier={profile?.subscription_tier || "stockman"} isAdvisor={isAdvisor} />

@@ -94,7 +94,7 @@ export function GridIQNav({ pendingConsignments = 0 }: GridIQNavProps = {}) {
   return (
     <nav
       ref={containerRef}
-      className="relative mb-4 flex gap-1 overflow-x-auto rounded-full bg-surface p-1"
+      className="relative mb-4 flex gap-1 overflow-x-auto rounded-full bg-surface p-1 backdrop-blur-md"
     >
       {activeHref && (
         <div
