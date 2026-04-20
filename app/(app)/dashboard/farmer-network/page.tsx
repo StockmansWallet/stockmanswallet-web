@@ -10,7 +10,6 @@ import { FarmerPeerCard } from "@/components/app/farmer-network/farmer-peer-card
 import { FarmerProducerSearch } from "@/components/app/farmer-network/farmer-producer-search";
 import { FarmerConnectionsRealtime } from "@/components/app/farmer-network/farmer-connections-realtime";
 import { FarmerCard } from "@/components/app/farmer-network/farmer-card";
-import { BroadcastButton } from "@/components/app/farmer-network/broadcast-button";
 import { MarkNotificationsRead } from "@/components/app/mark-notifications-read";
 import { loadOutgoingBlocks } from "@/lib/data/user-blocks";
 import { fetchUserAvatars } from "@/lib/auth/fetch-user-avatars";
@@ -259,12 +258,9 @@ export default async function FarmerNetworkPage() {
           notification lands next to the thing that triggered it. */}
       {sortedApproved.length > 0 && (
         <div className="mb-6">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-text-secondary">
-              Conversations ({sortedApproved.length})
-            </h2>
-            {sortedApproved.length >= 2 && <BroadcastButton recipientCount={sortedApproved.length} />}
-          </div>
+          <h2 className="mb-3 text-sm font-semibold text-text-secondary">
+            Conversations ({sortedApproved.length})
+          </h2>
           <div className="flex flex-col gap-3">
             {sortedApproved.map((c) => {
               const otherId = otherIdFor(c);
