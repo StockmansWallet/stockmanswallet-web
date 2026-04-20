@@ -25,11 +25,13 @@ export function AssetRegisterTabs({ herdData, startDate, endDate, selectedProper
   const searchParams = useSearchParams();
 
   const tabParam = searchParams.get("tab");
-  const activeTab: TabId = tabParam === "movement" ? "movement" : "livestock";
+  // Portfolio Movement is the default tab so the range filter's effect is
+  // visible immediately; Livestock Assets is a reference view behind ?tab=livestock.
+  const activeTab: TabId = tabParam === "livestock" ? "livestock" : "movement";
 
   const setActiveTab = useCallback((tab: TabId) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (tab === "livestock") {
+    if (tab === "movement") {
       params.delete("tab");
     } else {
       params.set("tab", tab);
@@ -39,8 +41,8 @@ export function AssetRegisterTabs({ herdData, startDate, endDate, selectedProper
   }, [router, pathname, searchParams]);
 
   const tabs = useMemo<{ id: TabId; label: string }[]>(() => [
-    { id: "livestock", label: "Livestock Assets" },
     { id: "movement", label: "Portfolio Movement" },
+    { id: "livestock", label: "Livestock Assets" },
   ], []);
 
   // Sliding pill indicator (matches existing Tabs component styling)
