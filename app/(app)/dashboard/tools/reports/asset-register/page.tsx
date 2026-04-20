@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ReportFilters } from "@/components/app/report-filters";
 import { parseReportConfig } from "@/lib/utils/report-config";
-import { ReportLinkButton } from "@/components/app/report-link-button";
+import { ReportExportButton } from "@/components/app/report-export-button";
 import { generateAssetRegisterData } from "@/lib/services/report-service";
 
 import { ExecutiveSummaryCard } from "./_components/executive-summary-card";
@@ -59,8 +59,8 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
         </Suspense>
         {!isEmpty && (
           <div className="flex shrink-0 items-center gap-1.5">
-            <ReportLinkButton label="Asset Report" reportPath="/asset-register" />
-            <ReportLinkButton label="Lender Report" reportPath="/lender-report" />
+            <ReportExportButton label="Asset Report" reportType="asset-report" />
+            <ReportExportButton label="Lender Report" reportType="lender-report" />
           </div>
         )}
       </div>

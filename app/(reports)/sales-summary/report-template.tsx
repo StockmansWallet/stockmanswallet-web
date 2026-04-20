@@ -1,5 +1,4 @@
 import type { ReportData, SaleReportData } from "@/lib/types/reports";
-import { PrintActions } from "../asset-register/print-actions";
 import { ReportPrintStyles } from "../asset-register/print-styles";
 
 function fmt(v: number) {
@@ -156,7 +155,6 @@ export function SalesSummaryTemplate({ data }: { data: ReportData }) {
   return (
     <>
       <ReportPrintStyles />
-      <PrintActions />
 
       <div className="report-page font-sans text-[#271F16]">
         {/* Logo + title */}

@@ -1,6 +1,5 @@
 import type { ReportData, SaleyardComparisonData } from "@/lib/types/reports";
 import { shortSaleyardName } from "@/lib/data/reference-data";
-import { PrintActions } from "../asset-register/print-actions";
 import { ReportPrintStyles } from "../asset-register/print-styles";
 
 // -- Formatters ---------------------------------------------------------------
@@ -57,7 +56,6 @@ export function SaleyardComparisonTemplate({ data }: { data: ReportData }) {
   return (
     <>
       <ReportPrintStyles />
-      <PrintActions />
 
       <div className="report-page font-sans text-[#271F16]">
 

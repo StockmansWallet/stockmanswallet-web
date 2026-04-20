@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ReportFilters } from "@/components/app/report-filters";
 import { parseReportConfig } from "@/lib/utils/report-config";
-import { ReportLinkButton } from "@/components/app/report-link-button";
+import { ReportExportButton } from "@/components/app/report-export-button";
 import { generateSalesSummaryData } from "@/lib/services/report-service";
 import { SalesRevenueChart } from "./sales-revenue-chart";
 import { SalesRecordsSection } from "./_components/sales-records-section";
@@ -76,7 +76,7 @@ export default async function SalesSummaryPage({ searchParams }: { searchParams:
         <Suspense>
           <ReportFilters properties={properties ?? []} showPropertyFilter={false} />
         </Suspense>
-        {!isEmpty && <ReportLinkButton label="Sales Summary" reportPath="/sales-summary" />}
+        {!isEmpty && <ReportExportButton label="Sales Summary" reportType="sales-summary" />}
       </div>
 
       {isEmpty ? (

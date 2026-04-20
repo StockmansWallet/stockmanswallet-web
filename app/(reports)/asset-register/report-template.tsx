@@ -1,6 +1,5 @@
 import type { ReportData, HerdReportData } from "@/lib/types/reports";
 import type { PortfolioMovementSummary } from "@/lib/types/portfolio-movement";
-import { PrintActions } from "./print-actions";
 import { ReportPrintStyles } from "./print-styles";
 
 // -- Formatters ---------------------------------------------------------------
@@ -190,7 +189,6 @@ export function AssetRegisterTemplate({
   return (
     <>
       <ReportPrintStyles />
-      <PrintActions />
 
       <div className="report-page font-sans text-[#271F16]">
 
