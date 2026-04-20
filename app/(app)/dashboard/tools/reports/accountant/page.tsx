@@ -6,8 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Download, Loader2, Calculator } from "lucide-react";
+import { Loader2, Calculator } from "lucide-react";
 import { fetchAccountantReport } from "./actions";
+import { ReportExportButton } from "@/components/app/report-export-button";
 import type { ReportData, AccountantSnapshot } from "@/lib/types/reports";
 
 export default function AccountantReportPage() {
@@ -21,7 +22,6 @@ export default function AccountantReportPage() {
   const [openingBookValue, setOpeningBookValue] = useState("");
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [exporting, setExporting] = useState(false);
 
   // Generate report when FY changes or user clicks generate
   function handleGenerate() {
@@ -44,28 +44,6 @@ export default function AccountantReportPage() {
   }, []);
 
   const snap = reportData?.accountantSnapshot;
-
-  async function handleExportPDF() {
-    if (!reportData) return;
-    setExporting(true);
-    try {
-      const { generateReportPDF } = await import("@/lib/services/report-pdf-service");
-      const pdfBytes = await generateReportPDF(reportData, "accountant", "Accountant Report");
-      const blob = new Blob([pdfBytes as BlobPart], { type: "application/pdf" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `accountant-report-${snap?.financialYearShortTitle ?? "report"}-${new Date().toISOString().split("T")[0]}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("PDF export failed:", err);
-    } finally {
-      setExporting(false);
-    }
-  }
 
   return (
     <div className="max-w-3xl">
@@ -166,20 +144,18 @@ export default function AccountantReportPage() {
             </CardContent>
           </Card>
 
-          {/* Export */}
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleExportPDF}
-            disabled={exporting}
-          >
-            {exporting ? (
-              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Download className="mr-1.5 h-3.5 w-3.5" />
-            )}
-            Export PDF
-          </Button>
+          {/* Export - matches the other report pages: single pill that
+              server-renders the PDF via Puppeteer and streams it back as
+              a download. extraConfig carries the Accountant-specific
+              inputs (FY + opening book value) that aren't in the URL. */}
+          <ReportExportButton
+            label="Accountant Report"
+            reportType="accountant"
+            extraConfig={{
+              fy: selectedFY.short,
+              openingBook: openingBookValue || "0",
+            }}
+          />
         </>
       )}
 

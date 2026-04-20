@@ -61,6 +61,7 @@ const PREVIEW_PATH_BY_TYPE: Record<ReportType, string> = {
   "lender-report":        "/lender-report",
   "saleyard-comparison":  "/saleyard-comparison",
   "sales-summary":        "/sales-summary",
+  "accountant":           "/accountant",
 };
 
 export const REPORT_TYPES = [
@@ -68,6 +69,7 @@ export const REPORT_TYPES = [
   "lender-report",
   "saleyard-comparison",
   "sales-summary",
+  "accountant",
 ] as const;
 
 export type ReportType = (typeof REPORT_TYPES)[number];
@@ -79,19 +81,31 @@ export function isReportType(value: unknown): value is ReportType {
 // Only allow-listed query params flow from the caller to the preview route,
 // preventing a malicious caller from reflecting arbitrary params into an
 // authenticated render.
-const FORWARDED_PARAMS = new Set(["range", "start", "end", "properties"]);
+//   range/start/end/properties  - shared by all reports
+//   fy/openingBook              - Accountant Report only (FY selector +
+//                                 opening book value input)
+const FORWARDED_PARAMS = new Set([
+  "range", "start", "end", "properties",
+  "fy", "openingBook",
+]);
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const RANGE_RE = /^(1d|1w|1m|3m|6m|1y)$/;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const FY_RE = /^FY\d{4}$/;
+// Up to 12 integer digits + optional 2dp. Handles every realistic opening
+// book value; rejects negative numbers and scientific notation.
+const OPENING_BOOK_RE = /^\d{1,12}(\.\d{1,2})?$/;
 
 function validateParam(key: string, value: string): boolean {
   if (value.length > 500) return false;
   switch (key) {
-    case "range":      return RANGE_RE.test(value);
+    case "range":       return RANGE_RE.test(value);
     case "start":
-    case "end":        return DATE_RE.test(value);
-    case "properties": return value.split(",").every((id) => id === "" || UUID_RE.test(id));
-    default:           return false;
+    case "end":         return DATE_RE.test(value);
+    case "properties":  return value.split(",").every((id) => id === "" || UUID_RE.test(id));
+    case "fy":          return FY_RE.test(value);
+    case "openingBook": return OPENING_BOOK_RE.test(value);
+    default:            return false;
   }
 }
 
@@ -161,6 +175,7 @@ const TITLE_BY_TYPE: Record<ReportType, string> = {
   "lender-report":       "Lender Report",
   "saleyard-comparison": "Saleyard Comparison",
   "sales-summary":       "Sales Summary",
+  "accountant":          "Accountant Report",
 };
 
 const PASCAL_BY_TYPE: Record<ReportType, string> = {
@@ -168,6 +183,7 @@ const PASCAL_BY_TYPE: Record<ReportType, string> = {
   "lender-report":       "LenderReport",
   "saleyard-comparison": "SaleyardComparison",
   "sales-summary":       "SalesSummary",
+  "accountant":          "AccountantReport",
 };
 
 export function reportTitle(reportType: ReportType): string {
@@ -175,17 +191,27 @@ export function reportTitle(reportType: ReportType): string {
 }
 
 /**
- * Build a PDF filename including the report's date range, e.g.
- *   AssetReport_2026-04-01_to_2026-04-20.pdf
+ * Build a PDF filename for a report export.
+ *   Asset / Lender / Saleyard / Sales:  AssetReport_2026-04-01_to_2026-04-20.pdf
+ *   Accountant:                          AccountantReport_FY2026.pdf
  */
 export function reportFilename(
   reportType: ReportType,
-  startDate: string | null,
-  endDate: string | null
+  context: {
+    startDate?: string | null;
+    endDate?: string | null;
+    fy?: string | null;
+  }
 ): string {
   const slug = PASCAL_BY_TYPE[reportType];
-  if (startDate && endDate && DATE_RE.test(startDate) && DATE_RE.test(endDate)) {
-    return `${slug}_${startDate}_to_${endDate}.pdf`;
+  if (reportType === "accountant" && context.fy && FY_RE.test(context.fy)) {
+    return `${slug}_${context.fy}.pdf`;
+  }
+  if (
+    context.startDate && context.endDate
+    && DATE_RE.test(context.startDate) && DATE_RE.test(context.endDate)
+  ) {
+    return `${slug}_${context.startDate}_to_${context.endDate}.pdf`;
   }
   return `${slug}.pdf`;
 }

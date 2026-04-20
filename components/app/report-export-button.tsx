@@ -19,12 +19,20 @@ import type { ReportType } from "@/lib/pdf/generate";
 interface ReportExportButtonProps {
   label: string;
   reportType: ReportType;
+  /**
+   * Extra config params to merge into the POST body. Pages with bespoke
+   * inputs outside the URL searchParams (e.g. Accountant Report's FY
+   * selector + Opening Book Value) pass them here. Values take precedence
+   * over any conflicting keys read from searchParams.
+   */
+  extraConfig?: Record<string, string>;
 }
 
-// Keep in sync with lib/pdf/generate.ts#FORWARDED_PARAMS.
-const FORWARD_KEYS = ["range", "start", "end", "properties"] as const;
+// Keep in sync with lib/pdf/generate.ts#FORWARDED_PARAMS. Extend carefully
+// since the API revalidates each value against a per-key regex.
+const FORWARD_KEYS = ["range", "start", "end", "properties", "fy", "openingBook"] as const;
 
-export function ReportExportButton({ label, reportType }: ReportExportButtonProps) {
+export function ReportExportButton({ label, reportType, extraConfig }: ReportExportButtonProps) {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,10 +51,17 @@ export function ReportExportButton({ label, reportType }: ReportExportButtonProp
       }
 
       // Only forward params the API accepts. Server revalidates regardless.
+      // extraConfig overrides searchParams so page-local state wins over
+      // whatever was in the URL.
       const config: Record<string, string> = {};
       for (const key of FORWARD_KEYS) {
         const value = searchParams.get(key);
         if (value) config[key] = value;
+      }
+      if (extraConfig) {
+        for (const [key, value] of Object.entries(extraConfig)) {
+          if (value) config[key] = value;
+        }
       }
 
       const response = await fetch("/api/reports/generate", {

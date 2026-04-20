@@ -52,7 +52,11 @@ export async function GET(
 
   const cfg = (row.config_json ?? {}) as Record<string, string | undefined>;
   const filename = isReportType(row.report_type)
-    ? reportFilename(row.report_type, cfg.start ?? null, cfg.end ?? null)
+    ? reportFilename(row.report_type, {
+        startDate: cfg.start ?? null,
+        endDate: cfg.end ?? null,
+        fy: cfg.fy ?? null,
+      })
     : "Report.pdf";
 
   const { data: signed, error: signError } = await service.storage

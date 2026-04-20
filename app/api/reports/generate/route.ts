@@ -29,10 +29,13 @@ export const maxDuration = 60;
 const BUCKET = "reports";
 const SIGNED_URL_TTL_SECONDS = 24 * 60 * 60; // 24 hours
 
-// Input validation: we expect the caller to have already filtered search
-// params on the way in (ReportExportButton forwards only range/start/end/
-// properties). We revalidate in generatePdfBuffer regardless.
-const ALLOWED_CONFIG_KEYS = new Set(["range", "start", "end", "properties"]);
+// Input validation: keep in sync with lib/pdf/generate.ts#FORWARDED_PARAMS.
+// Keys outside this set are silently dropped before being forwarded to the
+// preview route. Per-value regex validation happens inside generatePdfBuffer.
+const ALLOWED_CONFIG_KEYS = new Set([
+  "range", "start", "end", "properties",
+  "fy", "openingBook",
+]);
 
 export async function POST(request: NextRequest) {
   // ----- Auth -------------------------------------------------------------
@@ -80,9 +83,11 @@ export async function POST(request: NextRequest) {
   // preset like "1y") and let parseReportConfig derive the concrete
   // start/end. We do that on the server so the filename always includes the
   // actual date range regardless of which params the caller sent.
+  // Accountant overrides this - its filename uses `fy` (e.g. AccountantReport_FY2026).
   const configForDates = parseReportConfig(Object.fromEntries(searchParams.entries()));
   const startDate = configForDates.startDate;
   const endDate = configForDates.endDate;
+  const fy = searchParams.get("fy");
 
   // ----- Render PDF -------------------------------------------------------
   let pdfBuffer: Buffer;
@@ -106,7 +111,7 @@ export async function POST(request: NextRequest) {
   const exportId = randomUUID();
   const storagePath = `${user.id}/${exportId}.pdf`;
   const title = reportTitle(reportType);
-  const filename = reportFilename(reportType, startDate, endDate);
+  const filename = reportFilename(reportType, { startDate, endDate, fy });
 
   const service = createServiceRoleClient();
 
