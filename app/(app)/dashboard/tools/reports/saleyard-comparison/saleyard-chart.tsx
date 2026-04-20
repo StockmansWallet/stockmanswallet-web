@@ -6,7 +6,11 @@ function fmtValue(v: number) {
   return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 }).format(v);
 }
 
-export function SaleyardComparisonChart({ data }: { data: { name: string; portfolioValue: number }[] }) {
+export function SaleyardComparisonChart({
+  data,
+}: {
+  data: { name: string; portfolioValue: number; distanceKm: number | null }[];
+}) {
   // Zoom into the range where differences are visible
   const values = data.map((d) => d.portfolioValue);
   const minVal = Math.min(...values);
@@ -17,10 +21,12 @@ export function SaleyardComparisonChart({ data }: { data: { name: string; portfo
   // Min opacity 0.5 so dark text stays readable on all bars
   const opacityFor = (i: number) => i === 0 ? 1 : Math.max(0.5, 0.75 - (i - 1) * 0.03);
 
-  // Add formatted value and per-row text colours
-  const displayData = data.map((d, i) => ({
+  // Add formatted value (with km suffix when available) and per-row text colours
+  const displayData = data.map((d) => ({
     ...d,
-    valueLabel: fmtValue(d.portfolioValue),
+    valueLabel: d.distanceKm != null
+      ? `${fmtValue(d.portfolioValue)} \u00b7 ${d.distanceKm.toLocaleString("en-AU")} km`
+      : fmtValue(d.portfolioValue),
     nameColor: "#271F16",
     valueColor: "#271F16",
   }));

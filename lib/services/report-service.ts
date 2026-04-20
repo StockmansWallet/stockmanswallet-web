@@ -11,8 +11,8 @@ import {
   type HerdValuationResult,
 } from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
-import { cattleBreedPremiums, resolveMLASaleyardName, saleyards as allSaleyards, saleyardToState } from "@/lib/data/reference-data";
-import { expandWithNearbySaleyards } from "@/lib/data/saleyard-proximity";
+import { cattleBreedPremiums, resolveMLASaleyardName, saleyards as allSaleyards, saleyardCoordinates, saleyardToState } from "@/lib/data/reference-data";
+import { expandWithNearbySaleyards, haversineDistance } from "@/lib/data/saleyard-proximity";
 import { centsToDollars, type Cents } from "@/lib/types/money";
 import type {
   ReportConfiguration,
@@ -408,7 +408,7 @@ export async function generateSaleyardComparisonData(
       .order("name"),
     supabase
       .from("properties")
-      .select("id, property_name, is_default, default_saleyard")
+      .select("id, property_name, is_default, default_saleyard, latitude, longitude")
       .eq("user_id", userId)
       .eq("is_deleted", false),
     fetchUserReportDetails(supabase, userId),
@@ -569,7 +569,41 @@ export async function generateSaleyardComparisonData(
       diffToBestDollars: 0, // assigned after sorting
       diffToBestPercent: 0, // assigned after sorting
       state: saleyardToState[saleyard] ?? null,
+      distanceKm: null, // assigned below once origin property is resolved
     });
+  }
+
+  // Resolve origin property for distance calculations. Prefer the first
+  // filtered property (if the report is scoped to specific properties),
+  // otherwise fall back to the default/primary property, then the first.
+  // Cast: the raw select() result is typed loosely; we only need the fields
+  // that exist in the query.
+  type PropRow = {
+    id: string;
+    property_name: string;
+    is_default: boolean;
+    default_saleyard: string | null;
+    latitude: number | null;
+    longitude: number | null;
+  };
+  const allProps = (properties ?? []) as PropRow[];
+  const filteredProps = config.selectedPropertyIds.length > 0
+    ? allProps.filter((p) => config.selectedPropertyIds.includes(p.id))
+    : allProps;
+  const originProp = filteredProps.find((p) => p.is_default) ?? filteredProps[0] ?? allProps[0] ?? null;
+  const originLat = originProp?.latitude ?? null;
+  const originLon = originProp?.longitude ?? null;
+
+  // Populate distanceKm for every row. Null when the origin property has no
+  // coordinates or the saleyard isn't in the reference-data coord table.
+  if (originLat != null && originLon != null) {
+    for (const row of comparisonData) {
+      const coords = saleyardCoordinates[row.saleyardName];
+      if (!coords) continue;
+      row.distanceKm = Math.round(
+        haversineDistance(originLat, originLon, coords.lat, coords.lon)
+      );
+    }
   }
 
   // Sort by portfolio value descending (best first)

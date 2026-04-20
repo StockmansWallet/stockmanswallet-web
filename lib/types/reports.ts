@@ -99,6 +99,9 @@ export interface SaleyardComparisonData {
   diffToBestDollars: number;
   diffToBestPercent: number;
   state: string | null;
+  // Haversine distance (km) from the user's origin property. Null when the
+  // origin property or the saleyard is missing coordinates.
+  distanceKm: number | null;
 }
 
 // MARK: - User Details (for PDF header)

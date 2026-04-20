@@ -8,6 +8,10 @@ const SaleyardComparisonChart = dynamic(
   { ssr: false, loading: () => <div className="flex h-[320px] items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-text-muted" /></div> }
 );
 
-export function LazyChart({ data }: { data: { name: string; portfolioValue: number }[] }) {
+export function LazyChart({
+  data,
+}: {
+  data: { name: string; portfolioValue: number; distanceKm: number | null }[];
+}) {
   return <SaleyardComparisonChart data={data} />;
 }

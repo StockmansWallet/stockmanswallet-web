@@ -3,7 +3,7 @@ import { saleyardCoordinates, saleyardToState, saleyards } from "./reference-dat
 /**
  * Haversine formula for distance between two coordinates in kilometers.
  */
-function haversineDistance(
+export function haversineDistance(
   lat1: number,
   lon1: number,
   lat2: number,

@@ -50,10 +50,14 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
   const { saleyardComparison: sc } = reportData;
   const isEmpty = sc.length === 0;
 
-  // Top 10 for chart (by portfolio value, short names)
+  // Top 10 for chart (by portfolio value, short names).
+  // distanceKm is the haversine distance from the user's origin property
+  // (filtered selection if any, else default). Null when either the origin
+  // property or the saleyard is missing coordinates.
   const chartData = sc.slice(0, 10).map((s) => ({
     name: shortSaleyardName(s.saleyardName),
     portfolioValue: Math.round(s.totalPortfolioValue),
+    distanceKm: s.distanceKm,
   }));
 
   const best = sc[0] ?? null;
