@@ -77,7 +77,7 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
         <Suspense>
           <ReportFilters properties={properties ?? []} />
         </Suspense>
-        {!isEmpty && <ReportLinkButton label="Export Report" reportPath="/saleyard-comparison" />}
+        {!isEmpty && <ReportLinkButton label="Saleyard Comparison" reportPath="/saleyard-comparison" />}
       </div>
 
       {isEmpty ? (
