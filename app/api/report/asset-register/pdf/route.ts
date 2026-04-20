@@ -88,6 +88,21 @@ export async function GET(request: NextRequest) {
     const hasReportPage = await page.evaluate(() => !!document.querySelector(".report-page"));
     console.log("[pdf-debug] .report-page present?", hasReportPage);
 
+    const screenInfo = await page.evaluate(() => {
+      const rp = document.querySelector(".report-page") as HTMLElement | null;
+      return {
+        bodyScrollHeight: document.body.scrollHeight,
+        bodyOffsetHeight: document.body.offsetHeight,
+        reportPageRect: rp ? rp.getBoundingClientRect().toJSON() : null,
+        reportPageDisplay: rp ? getComputedStyle(rp).display : null,
+        reportPageVisibility: rp ? getComputedStyle(rp).visibility : null,
+        htmlClass: document.documentElement.className,
+      };
+    });
+    console.log("[pdf-debug] SCREEN info", JSON.stringify(screenInfo));
+    const screenShot = await page.screenshot({ encoding: "base64", fullPage: false });
+    console.log("[pdf-debug] SCREEN screenshot bytes", screenShot.length);
+
     // Switch to print media BEFORE generating the PDF so @media print rules apply.
     await page.emulateMediaType("print");
 
@@ -96,6 +111,22 @@ export async function GET(request: NextRequest) {
         (el as HTMLElement).style.display = "none";
       });
     });
+
+    const printInfo = await page.evaluate(() => {
+      const rp = document.querySelector(".report-page") as HTMLElement | null;
+      return {
+        bodyScrollHeight: document.body.scrollHeight,
+        bodyOffsetHeight: document.body.offsetHeight,
+        reportPageRect: rp ? rp.getBoundingClientRect().toJSON() : null,
+        reportPageDisplay: rp ? getComputedStyle(rp).display : null,
+        reportPageVisibility: rp ? getComputedStyle(rp).visibility : null,
+        bodyChildCount: document.body.children.length,
+        firstChildTag: document.body.firstElementChild?.tagName,
+      };
+    });
+    console.log("[pdf-debug] PRINT info", JSON.stringify(printInfo));
+    const printShot = await page.screenshot({ encoding: "base64", fullPage: false });
+    console.log("[pdf-debug] PRINT screenshot bytes", printShot.length);
 
     // Page margins are owned by CSS @page in print-styles.tsx. Zeroing
     // Puppeteer's margins prevents it from overriding the CSS with defaults.
