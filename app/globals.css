@@ -347,9 +347,10 @@ select option {
 
 @media print {
   /* Hide every sibling at the body root so only the print subtree renders.
-     This avoids fighting the dark app shell (bg-background, min-h-screen)
-     and keeps the print reflow small so the OS print dialog opens faster. */
-  body > *:not([data-brangus-print]) {
+     Scoped with :has() so this only fires when the Brangus print subtree is
+     actually mounted, otherwise it would blank out every other PDF route
+     (e.g. /asset-register), which has no data-brangus-print element. */
+  body:has([data-brangus-print]) > *:not([data-brangus-print]) {
     display: none !important;
   }
 
