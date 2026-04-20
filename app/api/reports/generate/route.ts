@@ -30,9 +30,17 @@ const BUCKET = "reports";
 const SIGNED_URL_TTL_SECONDS = 24 * 60 * 60; // 24 hours
 
 // Input validation: we expect the caller to have already filtered search
-// params on the way in (ReportExportButton forwards only range/start/end/
+// params on the way in (ReportExport forwards only range/start/end/
 // properties). We revalidate in generatePdfBuffer regardless.
 const ALLOWED_CONFIG_KEYS = new Set(["range", "start", "end", "properties"]);
+
+// Caller picks whether the signed URL should force a download or open
+// inline in the browser's PDF viewer. Defaults to attachment so the
+// existing download flow keeps working for callers that don't pass it.
+type Disposition = "attachment" | "inline";
+function normaliseDisposition(v: unknown): Disposition {
+  return v === "inline" ? "inline" : "attachment";
+}
 
 export async function POST(request: NextRequest) {
   // ----- Auth -------------------------------------------------------------
@@ -52,7 +60,7 @@ export async function POST(request: NextRequest) {
   }
 
   // ----- Body -------------------------------------------------------------
-  let body: { reportType?: unknown; config?: unknown };
+  let body: { reportType?: unknown; config?: unknown; disposition?: unknown };
   try {
     body = await request.json();
   } catch {
@@ -63,6 +71,8 @@ export async function POST(request: NextRequest) {
   if (!isReportType(reportType)) {
     return NextResponse.json({ error: "Unknown reportType" }, { status: 400 });
   }
+
+  const disposition = normaliseDisposition(body.disposition);
 
   // Build a sanitised URLSearchParams from the caller-supplied config. Only
   // keys we explicitly allow flow through to Puppeteer, which independently
@@ -141,11 +151,14 @@ export async function POST(request: NextRequest) {
   }
 
   // ----- Signed URL -------------------------------------------------------
+  // `download: filename` sets Content-Disposition: attachment on the
+  // response, forcing the browser to save the file with the friendly
+  // filename. Omitting it defaults to inline, which lets the browser
+  // display the PDF in its built-in viewer for preview.
+  const signOptions = disposition === "attachment" ? { download: filename } : undefined;
   const { data: signed, error: signError } = await service.storage
     .from(BUCKET)
-    .createSignedUrl(storagePath, SIGNED_URL_TTL_SECONDS, {
-      download: filename,
-    });
+    .createSignedUrl(storagePath, SIGNED_URL_TTL_SECONDS, signOptions);
 
   if (signError || !signed?.signedUrl) {
     console.error("[/api/reports/generate] signed URL failed:", signError);
