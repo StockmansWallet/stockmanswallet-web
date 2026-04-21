@@ -112,7 +112,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               lastName={user.user_metadata?.last_name || ""}
               email={user.email || ""}
               roleLabel={roleDisplayName(profile?.role || "producer")}
-              avatarUrl={user.user_metadata?.avatar_url || ""}
+              avatarUrl={
+                isDemoUser ? "/images/demo-user-profile.webp" : user.user_metadata?.avatar_url || ""
+              }
               subscriptionTier={profile?.subscription_tier || "stockman"}
             />
           </div>

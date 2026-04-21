@@ -6,9 +6,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Lock, MessageCircle, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChatBubble } from "@/components/app/chat/chat-bubble";
+import { QuickInsightRow } from "@/components/app/chat/quick-insight-row";
+import type { CardAction } from "@/lib/brangus/types";
 import {
   DEMO_ACTIVE_CONVERSATION,
   DEMO_SAVED_CONVERSATIONS,
@@ -18,6 +21,7 @@ import {
 const BRANGUS_BG = "#44372D";
 const USER_BG = "var(--color-brand)";
 const BRANGUS_AVATAR = "/images/brangus-chat-profile.webp";
+const DEMO_USER_AVATAR = "/images/demo-user-profile.webp";
 
 type TabId = "chat" | "saved";
 
@@ -68,7 +72,13 @@ function FormattedAssistantText({ text }: { text: string }) {
   );
 }
 
-function DemoChatView({ conversation }: { conversation: DemoConversation }) {
+function DemoChatView({
+  conversation,
+  onCardAction,
+}: {
+  conversation: DemoConversation;
+  onCardAction: (action: CardAction) => void;
+}) {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <div className="flex-1 overflow-y-auto px-4 pt-4 pb-2">
@@ -82,8 +92,7 @@ function DemoChatView({ conversation }: { conversation: DemoConversation }) {
                 bgClass={isUser ? "bg-brand" : "bg-[#44372D]"}
                 tailColor={isUser ? USER_BG : BRANGUS_BG}
                 textClass={isUser ? "text-white" : "text-white/80"}
-                avatarUrl={isUser ? undefined : BRANGUS_AVATAR}
-                avatarInitials={isUser ? "DS" : undefined}
+                avatarUrl={isUser ? DEMO_USER_AVATAR : BRANGUS_AVATAR}
               >
                 {isUser ? msg.content : <FormattedAssistantText text={msg.content} />}
               </ChatBubble>
@@ -91,6 +100,13 @@ function DemoChatView({ conversation }: { conversation: DemoConversation }) {
           })}
         </div>
       </div>
+
+      {/* Summary card strip - mirrors the real Brangus chat */}
+      {conversation.insights && conversation.insights.length > 0 && (
+        <div className="border-t border-white/10 py-2">
+          <QuickInsightRow insights={conversation.insights} onCardAction={onCardAction} />
+        </div>
+      )}
 
       {/* Read-only composer */}
       <div className="border-t border-white/10 p-4">
@@ -145,8 +161,32 @@ function SavedConversationRow({
 }
 
 export function BrangusDemoHub() {
+  const router = useRouter();
   const [activeConvId, setActiveConvId] = useState<string>(DEMO_ACTIVE_CONVERSATION.id);
   const [activeTab, setActiveTab] = useState<TabId>("chat");
+
+  const handleCardAction = useCallback(
+    (action: CardAction) => {
+      switch (action.type) {
+        case "yardBook":
+          router.push("/dashboard/tools/yard-book");
+          break;
+        case "herdDetail":
+          router.push(`/dashboard/herds/${action.id}`);
+          break;
+        case "portfolio":
+          router.push("/dashboard");
+          break;
+        case "market":
+          router.push("/dashboard/market");
+          break;
+        case "freight":
+          router.push("/dashboard/tools/freight");
+          break;
+      }
+    },
+    [router]
+  );
 
   // Sliding tab indicator (copied pattern from BrangusHub)
   const containerRef = useRef<HTMLDivElement>(null);
@@ -234,7 +274,7 @@ export function BrangusDemoHub() {
         style={{ height: "calc(100vh - 19rem)" }}
       >
         <Card className="flex h-full flex-col overflow-hidden rounded-3xl">
-          <DemoChatView conversation={activeConv} />
+          <DemoChatView conversation={activeConv} onCardAction={handleCardAction} />
         </Card>
       </div>
 
