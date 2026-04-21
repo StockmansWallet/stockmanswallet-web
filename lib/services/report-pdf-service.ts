@@ -3,6 +3,8 @@
 
 import { PDFDocument, PDFFont, PDFImage, PDFPage, rgb } from "pdf-lib";
 import type { ReportData } from "@/lib/types/reports";
+import { formatDateAU } from "@/lib/dates";
+import { shortSaleyardName } from "@/lib/data/reference-data";
 
 // MARK: - Page Constants (US Letter, matching iOS)
 
@@ -47,10 +49,7 @@ function fmt(v: number) {
   return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 2 }).format(v);
 }
 
-function fmtDate(dateStr: string) {
-  const d = new Date(dateStr + "T00:00:00");
-  return d.toLocaleDateString("en-AU", { day: "2-digit", month: "short", year: "numeric" });
-}
+const fmtDate = formatDateAU;
 
 // MARK: - Draw Context
 
@@ -292,7 +291,7 @@ function drawPropertyHeader(ctx: Ctx, name: string) {
 
 function drawHerdCard(ctx: Ctx, h: ReportData["herdData"][0]) {
   const riskFields = buildRiskFields(h);
-  const cardH = riskFields.length > 0 ? 170 : 130;
+  const cardH = riskFields.length > 0 ? 186 : 146;
   ensureSpace(ctx, cardH + 16);
 
   const cardY = ctx.y - cardH;
@@ -311,7 +310,13 @@ function drawHerdCard(ctx: Ctx, h: ReportData["herdData"][0]) {
 
   // Category
   ctx.page.drawText(h.category, { x: MARGIN + pad, y: iy, size: FONT_CAPTION, font: ctx.font, color: SECONDARY });
-  iy -= 28;
+  iy -= 14;
+
+  // Valuation source line
+  ctx.page.drawText(pdfValuationSource(h), {
+    x: MARGIN + pad, y: iy, size: FONT_LABEL, font: ctx.font, color: TERTIARY,
+  });
+  iy -= 18;
 
   // Stats grid: 4 columns
   const statW = innerW / 4;
@@ -319,8 +324,8 @@ function drawHerdCard(ctx: Ctx, h: ReportData["herdData"][0]) {
   const values = [
     `${h.headCount} head`,
     `${h.ageMonths} months`,
-    `${h.weight.toFixed(0)} kg`,
-    `$${h.pricePerKg.toFixed(2)}/kg`,
+    `${h.weight.toFixed(1)} kg`,
+    `$${h.pricePerKg.toFixed(3)}/kg`,
   ];
 
   for (let i = 0; i < 4; i++) {
@@ -348,6 +353,17 @@ function drawHerdCard(ctx: Ctx, h: ReportData["herdData"][0]) {
   }
 
   ctx.y = cardY - CARD_SPACING;
+}
+
+function pdfValuationSource(h: ReportData["herdData"][0]): string {
+  const datePart = h.dataDate ? ` | ${fmtDate(h.dataDate)}` : "";
+  if (h.priceSource === "saleyard" && h.saleyardUsed) {
+    return `MLA | ${shortSaleyardName(h.saleyardUsed)} saleyard${datePart}`;
+  }
+  if (h.priceSource === "national") {
+    return `MLA | National indicator${datePart}`;
+  }
+  return "Default fallback (no recent MLA data)";
 }
 
 function buildRiskFields(h: ReportData["herdData"][0]): { label: string; value: string }[] {

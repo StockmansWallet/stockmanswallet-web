@@ -15,7 +15,9 @@ export default async function FreightPage() {
   const [{ data: herds }, { data: properties }] = await Promise.all([
     supabase
       .from("herds")
-      .select("id, name, species, breed, sex, category, head_count, current_weight, is_breeder, property_id, additional_info")
+      .select(
+        "id, name, species, breed, sex, category, head_count, current_weight, is_breeder, property_id, additional_info"
+      )
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
       .eq("is_sold", false)
@@ -30,9 +32,9 @@ export default async function FreightPage() {
 
   return (
     <div className="max-w-4xl">
-      <PageHeader feature="freight-iq"
+      <PageHeader
+        feature="freight-iq"
         title="Freight IQ"
-        titleClassName="text-4xl font-bold text-info"
         subtitle="Deck loading and route costing"
         subtitleClassName="text-sm font-medium text-text-secondary"
       />

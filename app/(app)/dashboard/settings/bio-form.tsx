@@ -5,13 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { updateBio } from "./actions";
 
-export function BioForm({
-  bio,
-  isAdvisor,
-}: {
-  bio: string;
-  isAdvisor: boolean;
-}) {
+export function BioForm({ bio, isAdvisor }: { bio: string; isAdvisor: boolean }) {
   const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -37,8 +31,8 @@ export function BioForm({
         <div
           className={`rounded-xl border px-4 py-3 text-sm ${
             message.type === "error"
-              ? "border-red-800 bg-red-900/20 text-error"
-              : "border-green-800 bg-green-900/20 text-success"
+              ? "border-error/40 bg-error/10 text-error"
+              : "border-success/40 bg-success/10 text-success"
           }`}
         >
           {message.text}

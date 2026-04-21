@@ -6,15 +6,7 @@ import { createAnalysis } from "./actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Grid3x3,
-  FileText,
-  Target,
-  Check,
-  Loader2,
-  AlertTriangle,
-  Upload,
-} from "lucide-react";
+import { Grid3x3, FileText, Target, Check, Loader2, AlertTriangle, Upload } from "lucide-react";
 import Link from "next/link";
 
 interface GridSummary {
@@ -128,20 +120,20 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
       {/* Step 1: Select Grid */}
       <section>
         <div className="mb-2 flex items-center gap-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-teal/20 text-xs font-bold text-teal">
+          <div className="bg-grid-iq/20 text-grid-iq flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold">
             1
           </div>
-          <h2 className="text-sm font-semibold text-text-primary">Select Processor Grid</h2>
-          {selectedGrid && <Check className="h-4 w-4 text-success" />}
+          <h2 className="text-text-primary text-sm font-semibold">Select Processor Grid</h2>
+          {selectedGrid && <Check className="text-success h-4 w-4" />}
         </div>
 
         {grids.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="flex flex-col items-center gap-2 py-6 text-center">
-              <Grid3x3 className="h-8 w-8 text-text-muted" />
-              <p className="text-sm text-text-muted">No processor grids uploaded yet.</p>
+              <Grid3x3 className="text-text-muted h-8 w-8" />
+              <p className="text-text-muted text-sm">No processor grids uploaded yet.</p>
               <Link href="/dashboard/tools/grid-iq/library?tab=grids&upload=grid">
-                <Button size="sm" variant="teal">
+                <Button size="sm" variant="grid-iq">
                   <Upload className="mr-1.5 h-3.5 w-3.5" />
                   Upload Grid
                 </Button>
@@ -157,27 +149,25 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
                 <Card
                   key={grid.id}
                   className={`cursor-pointer transition-all ${
-                    selected
-                      ? "border-teal/50 bg-teal/10"
-                      : "hover:bg-white/[0.04]"
+                    selected ? "border-grid-iq/50 bg-grid-iq/10" : "hover:bg-white/[0.04]"
                   }`}
                   onClick={() => setSelectedGridId(selected ? null : grid.id)}
                 >
                   <CardContent className="flex items-center gap-3 p-3">
                     <div
                       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                        selected ? "bg-teal/20" : "bg-white/[0.06]"
+                        selected ? "bg-grid-iq/20" : "bg-white/[0.06]"
                       }`}
                     >
                       <Grid3x3
-                        className={`h-4 w-4 ${selected ? "text-teal" : "text-text-muted"}`}
+                        className={`h-4 w-4 ${selected ? "text-grid-iq" : "text-text-muted"}`}
                       />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-text-primary">
+                      <p className="text-text-primary truncate text-sm font-medium">
                         {grid.grid_name || grid.processor_name}
                       </p>
-                      <p className="text-xs text-text-muted">
+                      <p className="text-text-muted text-xs">
                         {grid.grid_code ? `${grid.grid_code} - ` : ""}
                         {formatDate(grid.grid_date)}
                         {grid.entries ? ` - ${(grid.entries as unknown[]).length} entries` : ""}
@@ -190,7 +180,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
                       </Badge>
                     )}
                     {selected && (
-                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal">
+                      <div className="bg-grid-iq flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
                         <Check className="h-3 w-3 text-white" />
                       </div>
                     )}
@@ -205,20 +195,20 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
       {/* Step 2: Select Herd */}
       <section>
         <div className="mb-2 flex items-center gap-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-teal/20 text-xs font-bold text-teal">
+          <div className="bg-grid-iq/20 text-grid-iq flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold">
             2
           </div>
-          <h2 className="text-sm font-semibold text-text-primary">Select Herd</h2>
-          {selectedHerd && <Check className="h-4 w-4 text-success" />}
+          <h2 className="text-text-primary text-sm font-semibold">Select Herd</h2>
+          {selectedHerd && <Check className="text-success h-4 w-4" />}
         </div>
 
         {herds.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="flex flex-col items-center gap-2 py-6 text-center">
-              <Target className="h-8 w-8 text-text-muted" />
-              <p className="text-sm text-text-muted">No cattle herds in your portfolio.</p>
+              <Target className="text-text-muted h-8 w-8" />
+              <p className="text-text-muted text-sm">No cattle herds in your portfolio.</p>
               <Link href="/dashboard/herds">
-                <Button size="sm" variant="teal">
+                <Button size="sm" variant="grid-iq">
                   Add Herd
                 </Button>
               </Link>
@@ -232,30 +222,28 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
                 <Card
                   key={herd.id}
                   className={`cursor-pointer transition-all ${
-                    selected
-                      ? "border-teal/50 bg-teal/10"
-                      : "hover:bg-white/[0.04]"
+                    selected ? "border-grid-iq/50 bg-grid-iq/10" : "hover:bg-white/[0.04]"
                   }`}
                   onClick={() => setSelectedHerdId(selected ? null : herd.id)}
                 >
                   <CardContent className="flex items-center gap-3 p-3">
                     <div
                       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                        selected ? "bg-teal/20" : "bg-white/[0.06]"
+                        selected ? "bg-grid-iq/20" : "bg-white/[0.06]"
                       }`}
                     >
                       <Target
-                        className={`h-4 w-4 ${selected ? "text-teal" : "text-text-muted"}`}
+                        className={`h-4 w-4 ${selected ? "text-grid-iq" : "text-text-muted"}`}
                       />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-text-primary">{herd.name}</p>
-                      <p className="text-xs text-text-muted">
+                      <p className="text-text-primary truncate text-sm font-medium">{herd.name}</p>
+                      <p className="text-text-muted text-xs">
                         {herd.category} - {herd.breed} - {herd.head_count} head
                       </p>
                     </div>
                     {selected && (
-                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal">
+                      <div className="bg-grid-iq flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
                         <Check className="h-3 w-3 text-white" />
                       </div>
                     )}
@@ -270,23 +258,23 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
       {/* Step 3: Kill Sheet (Optional) */}
       <section>
         <div className="mb-2 flex items-center gap-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white/[0.08] text-xs font-bold text-text-secondary">
+          <div className="text-text-secondary flex h-6 w-6 items-center justify-center rounded-full bg-white/[0.08] text-xs font-bold">
             3
           </div>
-          <h2 className="text-sm font-semibold text-text-primary">
-            Kill Sheet <span className="font-normal text-text-muted">(optional)</span>
+          <h2 className="text-text-primary text-sm font-semibold">
+            Kill Sheet <span className="text-text-muted font-normal">(optional)</span>
           </h2>
-          {selectedKillSheet && <Check className="h-4 w-4 text-success" />}
+          {selectedKillSheet && <Check className="text-success h-4 w-4" />}
         </div>
-        <p className="mb-2 text-xs text-text-muted">
+        <p className="text-text-muted mb-2 text-xs">
           Select a kill sheet for post-sale analysis with Kill Score, GCR, and opportunity insights.
         </p>
 
         {killSheets.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="flex flex-col items-center gap-2 py-4 text-center">
-              <FileText className="h-6 w-6 text-text-muted" />
-              <p className="text-xs text-text-muted">No kill sheets uploaded yet.</p>
+              <FileText className="text-text-muted h-6 w-6" />
+              <p className="text-text-muted text-xs">No kill sheets uploaded yet.</p>
             </CardContent>
           </Card>
         ) : (
@@ -299,9 +287,9 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
                   key={ks.id}
                   className={`cursor-pointer transition-all ${
                     selected
-                      ? "border-teal/50 bg-teal/10"
+                      ? "border-grid-iq/50 bg-grid-iq/10"
                       : suggested
-                        ? "border-teal/20 hover:bg-white/[0.04]"
+                        ? "border-grid-iq/20 hover:bg-white/[0.04]"
                         : "hover:bg-white/[0.04]"
                   }`}
                   onClick={() => setSelectedKillSheetId(selected ? null : ks.id)}
@@ -309,31 +297,31 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
                   <CardContent className="flex items-center gap-3 p-3">
                     <div
                       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                        selected ? "bg-teal/20" : "bg-white/[0.06]"
+                        selected ? "bg-grid-iq/20" : "bg-white/[0.06]"
                       }`}
                     >
                       <FileText
-                        className={`h-4 w-4 ${selected ? "text-teal" : "text-text-muted"}`}
+                        className={`h-4 w-4 ${selected ? "text-grid-iq" : "text-text-muted"}`}
                       />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        <p className="truncate text-sm font-medium text-text-primary">
+                        <p className="text-text-primary truncate text-sm font-medium">
                           {ks.record_name || ks.processor_name}
                         </p>
                         {suggested && !selected && (
-                          <Badge className="shrink-0 bg-teal/15 text-[9px] text-teal">
+                          <Badge className="bg-grid-iq/15 text-grid-iq shrink-0 text-[9px]">
                             Match
                           </Badge>
                         )}
                       </div>
-                      <p className="text-xs text-text-muted">
+                      <p className="text-text-muted text-xs">
                         {formatDate(ks.kill_date)} - {ks.total_head_count ?? 0} head
                         {ks.total_gross_value ? ` - ${formatCurrency(ks.total_gross_value)}` : ""}
                       </p>
                     </div>
                     {selected && (
-                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal">
+                      <div className="bg-grid-iq flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
                         <Check className="h-3 w-3 text-white" />
                       </div>
                     )}
@@ -348,12 +336,10 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
       {/* Review and Run */}
       <section className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 backdrop-blur-xl">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-text-primary">Analysis Summary</h2>
+          <h2 className="text-text-primary text-sm font-semibold">Analysis Summary</h2>
           <Badge
             className={
-              selectedKillSheetId
-                ? "bg-warning/15 text-warning"
-                : "bg-teal/15 text-teal"
+              selectedKillSheetId ? "bg-warning/15 text-warning" : "bg-grid-iq/15 text-grid-iq"
             }
           >
             {analysisMode}
@@ -364,7 +350,9 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
           <div className="flex justify-between">
             <span className="text-text-muted">Processor Grid</span>
             <span className="text-text-primary">
-              {selectedGrid ? (selectedGrid.grid_name || selectedGrid.processor_name) : "Not selected"}
+              {selectedGrid
+                ? selectedGrid.grid_name || selectedGrid.processor_name
+                : "Not selected"}
             </span>
           </div>
           <div className="flex justify-between">
@@ -386,13 +374,11 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
         </div>
 
         {error && (
-          <div className="mb-3 rounded-lg bg-error/10 px-3 py-2 text-xs text-error">
-            {error}
-          </div>
+          <div className="bg-error/10 text-error mb-3 rounded-lg px-3 py-2 text-xs">{error}</div>
         )}
 
         <Button
-          variant="teal"
+          variant="grid-iq"
           className="w-full"
           disabled={!canAnalyse || isPending}
           onClick={handleSubmit}
@@ -408,7 +394,7 @@ export function AnalysisForm({ grids, herds, killSheets }: AnalysisFormProps) {
         </Button>
 
         {!canAnalyse && (
-          <p className="mt-2 text-center text-[11px] text-text-muted">
+          <p className="text-text-muted mt-2 text-center text-[11px]">
             Select a processor grid and a herd to continue.
           </p>
         )}

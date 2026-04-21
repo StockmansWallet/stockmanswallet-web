@@ -107,9 +107,7 @@ export function LibraryTabs({
 }: Props) {
   const resolved = tabAliases[defaultTab] ?? "analyses";
   const [activeTab, setActiveTab] = useState<TabId>(resolved);
-  const [uploadType, setUploadType] = useState<"grid" | "killsheet" | null>(
-    initialUpload ?? null
-  );
+  const [uploadType, setUploadType] = useState<"grid" | "killsheet" | null>(initialUpload ?? null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Map<TabId, HTMLButtonElement>>(new Map());
@@ -140,19 +138,16 @@ export function LibraryTabs({
     <div>
       {/* Heading */}
       <div className="mb-4">
-        <h2 className="text-xl font-semibold text-text-primary">Library</h2>
-        <p className="mt-0.5 text-sm text-text-muted">
+        <h2 className="text-text-primary text-xl font-semibold">Library</h2>
+        <p className="text-text-muted mt-0.5 text-sm">
           Your analyses, grids, kill sheets, and performance history.
         </p>
       </div>
 
       {/* Primary tab bar */}
-      <div
-        ref={containerRef}
-        className="relative mb-5 flex gap-1 rounded-full bg-surface p-1"
-      >
+      <div ref={containerRef} className="bg-surface relative mb-5 flex gap-1 rounded-full p-1">
         <div
-          className={`absolute top-1 bottom-1 rounded-full bg-surface-high shadow-sm ${
+          className={`bg-surface-high absolute top-1 bottom-1 rounded-full shadow-sm ${
             indicatorReady ? "transition-all duration-250 ease-out" : ""
           }`}
           style={{ left: indicator.left, width: indicator.width }}
@@ -168,14 +163,10 @@ export function LibraryTabs({
               }}
               onClick={() => setActiveTab(tab.id)}
               className={`relative z-10 flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-150 ${
-                active
-                  ? "text-text-primary"
-                  : "text-text-muted hover:text-text-secondary"
+                active ? "text-text-primary" : "text-text-muted hover:text-text-secondary"
               }`}
             >
-              <Icon
-                className={`h-4 w-4 ${active ? "text-teal" : "text-text-muted"}`}
-              />
+              <Icon className={`h-4 w-4 ${active ? "text-grid-iq" : "text-text-muted"}`} />
               {tab.label}
             </button>
           );
@@ -184,18 +175,11 @@ export function LibraryTabs({
 
       {/* Tab content */}
       {activeTab === "analyses" && <AnalysesTab analyses={analyses} />}
-      {activeTab === "grids" && (
-        <GridsTab grids={grids} onUpload={() => setUploadType("grid")} />
-      )}
+      {activeTab === "grids" && <GridsTab grids={grids} onUpload={() => setUploadType("grid")} />}
       {activeTab === "kill-sheets" && (
-        <KillSheetsTab
-          killSheets={killSheets}
-          onUpload={() => setUploadType("killsheet")}
-        />
+        <KillSheetsTab killSheets={killSheets} onUpload={() => setUploadType("killsheet")} />
       )}
-      {activeTab === "performance" && (
-        <PerformanceView profile={profile} trend={postSaleTrend} />
-      )}
+      {activeTab === "performance" && <PerformanceView profile={profile} trend={postSaleTrend} />}
 
       {/* Upload modal (shared by Grids and Kill Sheets tabs) */}
       <UploadModal
@@ -232,7 +216,7 @@ function AnalysesTab({ analyses }: { analyses: AnalysisRow[] }) {
     <div>
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-medium uppercase tracking-wide text-text-muted">
+          <span className="text-text-muted text-[11px] font-medium tracking-wide uppercase">
             Filter
           </span>
           <div className="flex gap-1.5">
@@ -244,15 +228,15 @@ function AnalysesTab({ analyses }: { analyses: AnalysisRow[] }) {
                   onClick={() => setSubTab(f.id)}
                   className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                     active
-                      ? "border-teal/40 bg-teal/15 text-teal"
-                      : "border-white/[0.08] bg-surface-lowest text-text-secondary hover:border-white/[0.14] hover:text-text-primary"
+                      ? "border-grid-iq/40 bg-grid-iq/15 text-grid-iq"
+                      : "bg-surface-lowest text-text-secondary hover:text-text-primary border-white/[0.08] hover:border-white/[0.14]"
                   }`}
                 >
                   {f.label}
                   {f.count > 0 && (
                     <span
                       className={`rounded-full px-1.5 py-[1px] text-[10px] ${
-                        active ? "bg-teal/20 text-teal" : "bg-white/[0.06] text-text-muted"
+                        active ? "bg-grid-iq/20 text-grid-iq" : "text-text-muted bg-white/[0.06]"
                       }`}
                     >
                       {f.count}
@@ -267,7 +251,7 @@ function AnalysesTab({ analyses }: { analyses: AnalysisRow[] }) {
           <Button
             variant="ghost"
             size="sm"
-            className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-teal/40 text-teal hover:text-teal" : "border-white/[0.08] text-text-muted hover:border-white/[0.14]"}`}
+            className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-grid-iq/40 text-grid-iq hover:text-grid-iq" : "text-text-muted border-white/[0.08] hover:border-white/[0.14]"}`}
             onClick={() => (selecting ? exitSelecting() : setSelecting(true))}
           >
             {selecting ? "Cancel" : "Select"}
@@ -312,27 +296,25 @@ function SelectionToolbar({
       {selecting ? (
         <button
           onClick={onSelectAll}
-          className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs text-text-muted transition-colors hover:border-white/[0.14] hover:bg-white/[0.06] hover:text-text-primary"
+          className="text-text-muted hover:text-text-primary inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs transition-colors hover:border-white/[0.14] hover:bg-white/[0.06]"
         >
           <span
             className={`flex h-4 w-4 items-center justify-center rounded border transition-colors ${
               allSelected
-                ? "border-teal bg-teal text-black"
+                ? "border-grid-iq bg-grid-iq text-black"
                 : "border-white/20 bg-white/[0.04]"
             }`}
           >
             {allSelected && <Check className="h-3 w-3" strokeWidth={3} />}
           </span>
           Select All ({total})
-          {selected.size > 0 && (
-            <span className="ml-2 text-teal">{selected.size} selected</span>
-          )}
+          {selected.size > 0 && <span className="text-grid-iq ml-2">{selected.size} selected</span>}
         </button>
       ) : (
         <span />
       )}
       <div className="flex items-center gap-2">
-        <Button variant="teal" size="sm" onClick={onUpload}>
+        <Button variant="grid-iq" size="sm" onClick={onUpload}>
           <Upload className="mr-1.5 h-3.5 w-3.5" />
           {uploadLabel}
         </Button>
@@ -340,7 +322,7 @@ function SelectionToolbar({
           <Button
             variant="ghost"
             size="sm"
-            className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-teal/40 text-teal hover:text-teal" : "border-white/[0.08] text-text-muted hover:border-white/[0.14]"}`}
+            className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-grid-iq/40 text-grid-iq hover:text-grid-iq" : "text-text-muted border-white/[0.08] hover:border-white/[0.14]"}`}
             onClick={onToggle}
           >
             {selecting ? "Cancel" : "Select"}
@@ -376,13 +358,16 @@ function BulkDeleteBar({
   return (
     <div className="mt-4">
       {error && (
-        <div role="alert" className="mb-2 rounded-lg border border-error/20 bg-error/10 px-3 py-2 text-xs text-error">
+        <div
+          role="alert"
+          className="border-error/20 bg-error/10 text-error mb-2 rounded-lg border px-3 py-2 text-xs"
+        >
           {error}
         </div>
       )}
       {showConfirm ? (
-        <div className="flex items-center justify-between rounded-xl border border-error/20 bg-error/5 px-4 py-3">
-          <span className="text-sm text-error">
+        <div className="border-error/20 bg-error/5 flex items-center justify-between rounded-xl border px-4 py-3">
+          <span className="text-error text-sm">
             Delete {selectedCount} {selectedCount === 1 ? noun : pluralNoun}?
           </span>
           <div className="flex items-center gap-2">
@@ -395,12 +380,7 @@ function BulkDeleteBar({
             >
               Cancel
             </Button>
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={onConfirmDelete}
-              disabled={isDeleting}
-            >
+            <Button size="sm" variant="destructive" onClick={onConfirmDelete} disabled={isDeleting}>
               {isDeleting ? (
                 <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
               ) : (
@@ -411,11 +391,7 @@ function BulkDeleteBar({
           </div>
         </div>
       ) : (
-        <Button
-          variant="destructive"
-          className="w-full"
-          onClick={onShowConfirm}
-        >
+        <Button variant="destructive" className="w-full" onClick={onShowConfirm}>
           <Trash2 className="mr-1.5 h-4 w-4" />
           Delete Selected ({selectedCount})
         </Button>
@@ -426,13 +402,7 @@ function BulkDeleteBar({
 
 // MARK: - Grids
 
-function GridsTab({
-  grids,
-  onUpload,
-}: {
-  grids: GridRow[];
-  onUpload: () => void;
-}) {
+function GridsTab({ grids, onUpload }: { grids: GridRow[]; onUpload: () => void }) {
   const router = useRouter();
   const [selecting, setSelecting] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -481,7 +451,7 @@ function GridsTab({
           description="Upload a processor grid photo, PDF, or spreadsheet. Grid IQ extracts the price matrix automatically."
           actionLabel="Upload Grid"
           onAction={onUpload}
-          variant="teal"
+          variant="grid-iq"
         />
       </Card>
     );
@@ -509,9 +479,7 @@ function GridsTab({
               : null;
             const isExpired = daysUntilExpiry !== null && daysUntilExpiry < 0;
             const isExpiringSoon =
-              daysUntilExpiry !== null &&
-              daysUntilExpiry >= 0 &&
-              daysUntilExpiry <= 7;
+              daysUntilExpiry !== null && daysUntilExpiry >= 0 && daysUntilExpiry <= 7;
             const checked = selected.has(g.id);
 
             const content = (
@@ -520,21 +488,21 @@ function GridsTab({
                   <span
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
                       checked
-                        ? "border-teal bg-teal text-black"
+                        ? "border-grid-iq bg-grid-iq text-black"
                         : "border-white/20 bg-white/[0.04]"
                     }`}
                   >
                     {checked && <Check className="h-3 w-3" strokeWidth={3} />}
                   </span>
                 )}
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal/15">
-                  <Grid3x3 className="h-5 w-5 text-teal" />
+                <div className="bg-grid-iq/15 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                  <Grid3x3 className="text-grid-iq h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-text-primary">
+                  <p className="text-text-primary text-sm font-medium">
                     {g.grid_name || g.processor_name}
                   </p>
-                  <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-text-muted">
+                  <div className="text-text-muted mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
                     {g.grid_name && <span>{g.processor_name}</span>}
                     {g.grid_code ? <span>{g.grid_code}</span> : null}
                     {g.grid_date && (
@@ -549,9 +517,7 @@ function GridsTab({
                 {(isExpired || isExpiringSoon) && (
                   <div
                     className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
-                      isExpired
-                        ? "bg-error/15 text-error"
-                        : "bg-warning/15 text-warning"
+                      isExpired ? "bg-error/15 text-error" : "bg-warning/15 text-warning"
                     }`}
                   >
                     <AlertTriangle className="h-3 w-3" />
@@ -559,7 +525,7 @@ function GridsTab({
                   </div>
                 )}
                 {!selecting && (
-                  <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
+                  <ChevronRight className="text-text-muted group-hover:text-text-secondary h-4 w-4 shrink-0 transition-all group-hover:translate-x-0.5" />
                 )}
               </>
             );
@@ -598,7 +564,10 @@ function GridsTab({
           showConfirm={showConfirm}
           error={deleteError}
           onShowConfirm={() => setShowConfirm(true)}
-          onCancelConfirm={() => { setShowConfirm(false); setDeleteError(null); }}
+          onCancelConfirm={() => {
+            setShowConfirm(false);
+            setDeleteError(null);
+          }}
           onConfirmDelete={handleBulkDelete}
         />
       )}
@@ -663,7 +632,7 @@ function KillSheetsTab({
           description="Upload kill sheets to start tracking your over-the-hooks performance. Kill history improves Grid IQ accuracy with personalised realisation factors."
           actionLabel="Upload Kill Sheet"
           onAction={onUpload}
-          variant="teal"
+          variant="grid-iq"
         />
       </Card>
     );
@@ -693,28 +662,26 @@ function KillSheetsTab({
                   <span
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
                       checked
-                        ? "border-teal bg-teal text-black"
+                        ? "border-grid-iq bg-grid-iq text-black"
                         : "border-white/20 bg-white/[0.04]"
                     }`}
                   >
                     {checked && <Check className="h-3 w-3" strokeWidth={3} />}
                   </span>
                 )}
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal/15">
-                  <FileText className="h-5 w-5 text-teal" />
+                <div className="bg-grid-iq/15 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                  <FileText className="text-grid-iq h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-text-primary">
+                  <p className="text-text-primary text-sm font-medium">
                     {ks.record_name || ks.processor_name}
                   </p>
-                  <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-text-muted">
+                  <div className="text-text-muted mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
                     {ks.record_name && <span>{ks.processor_name}</span>}
                     {ks.kill_date && (
                       <span>{new Date(ks.kill_date).toLocaleDateString("en-AU")}</span>
                     )}
-                    {ks.total_head_count != null && (
-                      <span>{ks.total_head_count} head</span>
-                    )}
+                    {ks.total_head_count != null && <span>{ks.total_head_count} head</span>}
                     {ks.average_body_weight != null && (
                       <span>{Math.round(ks.average_body_weight)} kg avg</span>
                     )}
@@ -723,11 +690,11 @@ function KillSheetsTab({
                 </div>
                 <div className="shrink-0 text-right">
                   {ks.total_gross_value != null && (
-                    <p className="text-sm font-semibold text-text-primary">
+                    <p className="text-text-primary text-sm font-semibold">
                       ${Math.round(ks.total_gross_value).toLocaleString()}
                     </p>
                   )}
-                  <p className="mt-0.5 text-xs text-text-muted">
+                  <p className="text-text-muted mt-0.5 text-xs">
                     {ks.average_price_per_kg != null
                       ? `$${ks.average_price_per_kg.toFixed(2)}/kg`
                       : ""}
@@ -735,7 +702,7 @@ function KillSheetsTab({
                   </p>
                 </div>
                 {!selecting && (
-                  <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
+                  <ChevronRight className="text-text-muted group-hover:text-text-secondary h-4 w-4 shrink-0 transition-all group-hover:translate-x-0.5" />
                 )}
               </>
             );
@@ -774,7 +741,10 @@ function KillSheetsTab({
           showConfirm={showConfirm}
           error={deleteError}
           onShowConfirm={() => setShowConfirm(true)}
-          onCancelConfirm={() => { setShowConfirm(false); setDeleteError(null); }}
+          onCancelConfirm={() => {
+            setShowConfirm(false);
+            setDeleteError(null);
+          }}
           onConfirmDelete={handleBulkDelete}
         />
       )}

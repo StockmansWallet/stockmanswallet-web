@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ReportCompositionChart } from "@/components/app/report-composition-chart";
 import type { ReportData } from "@/lib/types/reports";
+import { formatDateAU } from "@/lib/dates";
 
 function fmt(v: number) {
   return new Intl.NumberFormat("en-AU", {
@@ -11,10 +12,7 @@ function fmt(v: number) {
   }).format(v);
 }
 
-function fmtDate(dateStr: string) {
-  const d = new Date(dateStr + "T00:00:00");
-  return d.toLocaleDateString("en-AU", { day: "2-digit", month: "short", year: "numeric" });
-}
+const fmtDate = formatDateAU;
 
 interface ClientReportTabProps {
   reportData: ReportData | null;

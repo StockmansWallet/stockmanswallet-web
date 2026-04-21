@@ -27,9 +27,7 @@ export function YardBookBanner() {
       // Debug: Clean up the URL param so it doesn't persist on refresh
       const params = new URLSearchParams(searchParams.toString());
       params.delete("yardbook");
-      const cleanUrl = params.toString()
-        ? `${pathname}?${params.toString()}`
-        : pathname;
+      const cleanUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
       router.replace(cleanUrl, { scroll: false });
 
       // Success banners self-dismiss; error stays visible until acknowledged.
@@ -44,19 +42,18 @@ export function YardBookBanner() {
 
   if (action === "error") {
     return (
-      <div className="mb-4 flex items-start gap-3 rounded-xl border border-red-700/40 bg-red-900/25 px-4 py-3 text-sm text-red-200">
+      <div className="border-error/40 bg-error/10 text-error mb-4 flex items-start gap-3 rounded-xl border px-4 py-3 text-sm">
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
         <div className="flex-1">
           <p className="font-medium">Yard Book sync failed</p>
-          <p className="mt-0.5 text-error/80">
-            The herd was saved, but breeding milestones could not be scheduled
-            in Yard Book. Open the Yard Book tab and check your reminders, or
-            edit the herd to retry.
+          <p className="text-error/80 mt-0.5">
+            The herd was saved, but breeding milestones could not be scheduled in Yard Book. Open
+            the Yard Book tab and check your reminders, or edit the herd to retry.
           </p>
         </div>
         <button
           onClick={() => setVisible(false)}
-          className="shrink-0 rounded p-0.5 text-error/60 hover:text-red-200"
+          className="text-error/60 hover:text-error shrink-0 rounded p-0.5"
           aria-label="Dismiss"
         >
           <X className="h-4 w-4" />
@@ -71,17 +68,17 @@ export function YardBookBanner() {
       : "Breeding milestones have been updated in your Yard Book to reflect the new joining period dates.";
 
   return (
-    <div className="mb-4 flex items-start gap-3 rounded-xl border border-amber-700/30 bg-amber-900/20 px-4 py-3 text-sm text-warning">
+    <div className="text-warning border-warning/40 bg-warning/10 mb-4 flex items-start gap-3 rounded-xl border px-4 py-3 text-sm">
       <CalendarCheck className="mt-0.5 h-4 w-4 shrink-0" />
       <div className="flex-1">
         <p className="font-medium">
           {action === "created" ? "Added to Yard Book" : "Yard Book Updated"}
         </p>
-        <p className="mt-0.5 text-warning/80">{message}</p>
+        <p className="text-warning/80 mt-0.5">{message}</p>
       </div>
       <button
         onClick={() => setVisible(false)}
-        className="shrink-0 rounded p-0.5 text-warning/60 hover:text-warning"
+        className="text-warning/60 hover:text-warning shrink-0 rounded p-0.5"
         aria-label="Dismiss"
       >
         <X className="h-4 w-4" />

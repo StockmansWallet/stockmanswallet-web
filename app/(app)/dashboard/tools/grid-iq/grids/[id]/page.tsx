@@ -69,7 +69,7 @@ export default async function GridDetailPage({ params }: PageProps) {
       <div className="mb-4">
         <Link
           href="/dashboard/tools/grid-iq/library?tab=grids"
-          className="inline-flex items-center gap-1.5 rounded-full bg-surface-lowest px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-text-primary"
+          className="bg-surface-lowest text-text-secondary hover:text-text-primary inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors hover:bg-white/[0.06]"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
           Library
@@ -82,7 +82,7 @@ export default async function GridDetailPage({ params }: PageProps) {
           table="processor_grids"
           initialName={String((g.grid_name as string | null) || g.processor_name)}
         />
-        <p className="mt-0.5 text-sm font-medium text-text-secondary">
+        <p className="text-text-secondary mt-0.5 text-sm font-medium">
           {String(g.processor_name)}
           {(g.grid_code as string | null) ? ` - ${String(g.grid_code)}` : ""}
         </p>
@@ -94,9 +94,7 @@ export default async function GridDetailPage({ params }: PageProps) {
         if (!expiryStr) return null;
         const expiry = new Date(expiryStr);
         const now = new Date();
-        const daysLeft = Math.ceil(
-          (expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-        );
+        const daysLeft = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
         const expired = daysLeft < 0;
         const expiringSoon = daysLeft >= 0 && daysLeft <= 7;
         if (!expired && !expiringSoon) return null;
@@ -123,18 +121,14 @@ export default async function GridDetailPage({ params }: PageProps) {
               icon={Calendar}
               label="Grid Date"
               value={
-                g.grid_date
-                  ? new Date(g.grid_date as string).toLocaleDateString("en-AU")
-                  : "-"
+                g.grid_date ? new Date(g.grid_date as string).toLocaleDateString("en-AU") : "-"
               }
             />
             {(g.expiry_date as string | null) ? (
               <MetaItem
                 icon={Calendar}
                 label="Expires"
-                value={new Date(g.expiry_date as string).toLocaleDateString(
-                  "en-AU"
-                )}
+                value={new Date(g.expiry_date as string).toLocaleDateString("en-AU")}
               />
             ) : null}
             {(g.contact_name as string | null) ? (
@@ -149,8 +143,8 @@ export default async function GridDetailPage({ params }: PageProps) {
           </div>
           {(g.notes as string | null) ? (
             <div className="mt-3 border-t border-white/[0.06] pt-3">
-              <p className="text-xs text-text-muted">Notes</p>
-              <p className="mt-0.5 text-sm text-text-secondary whitespace-pre-line">
+              <p className="text-text-muted text-xs">Notes</p>
+              <p className="text-text-secondary mt-0.5 text-sm whitespace-pre-line">
                 {String(g.notes)}
               </p>
             </div>
@@ -174,8 +168,8 @@ export default async function GridDetailPage({ params }: PageProps) {
           <EntrySection
             title="Female Grades"
             entries={femaleEntries}
-            color="text-pink-400"
-            bg="bg-pink-500/15"
+            color="text-pink"
+            bg="bg-pink/15"
           />
         )}
         {maleEntries.length > 0 && (
@@ -194,8 +188,8 @@ export default async function GridDetailPage({ params }: PageProps) {
                 : `Grade Entries (${entries.length})`
             }
             entries={unisexEntries}
-            color="text-teal"
-            bg="bg-teal/15"
+            color="text-grid-iq"
+            bg="bg-grid-iq/15"
           />
         )}
       </div>
@@ -204,14 +198,10 @@ export default async function GridDetailPage({ params }: PageProps) {
       {relatedAnalyses && relatedAnalyses.length > 0 && (
         <Card className="mt-4">
           <CardContent className="p-0">
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
-              <TrendingUp className="h-4 w-4 text-teal" />
-              <span className="text-sm font-semibold text-teal">
-                Analyses using this grid
-              </span>
-              <span className="text-xs text-text-muted">
-                ({relatedAnalyses.length})
-              </span>
+            <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-3">
+              <TrendingUp className="text-grid-iq h-4 w-4" />
+              <span className="text-grid-iq text-sm font-semibold">Analyses using this grid</span>
+              <span className="text-text-muted text-xs">({relatedAnalyses.length})</span>
             </div>
             <div className="divide-y divide-white/[0.06]">
               {relatedAnalyses.map((a: Record<string, unknown>) => {
@@ -226,14 +216,12 @@ export default async function GridDetailPage({ params }: PageProps) {
                     className="group flex items-center gap-4 px-4 py-3 transition-colors hover:bg-white/[0.03]"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-text-primary">
+                      <p className="text-text-primary text-sm font-medium">
                         {(a.herd_name as string | null) ?? "Multi-herd"}
                       </p>
-                      <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-text-muted">
+                      <div className="text-text-muted mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
                         {typeof a.analysis_date === "string" && (
-                          <span>
-                            {new Date(a.analysis_date).toLocaleDateString("en-AU")}
-                          </span>
+                          <span>{new Date(a.analysis_date).toLocaleDateString("en-AU")}</span>
                         )}
                         <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px]">
                           {mode === "post_sale" ? "Post-Sale" : "Pre-Sale"}
@@ -248,7 +236,7 @@ export default async function GridDetailPage({ params }: PageProps) {
                               ks >= 85
                                 ? "text-success"
                                 : ks >= 70
-                                  ? "text-teal"
+                                  ? "text-grid-iq"
                                   : ks >= 50
                                     ? "text-warning"
                                     : "text-error"
@@ -267,12 +255,11 @@ export default async function GridDetailPage({ params }: PageProps) {
                       >
                         {isProcessor ? "Over-the-Hooks" : "Saleyard"}
                       </p>
-                      <p className="text-xs text-text-muted">
-                        {isProcessor ? "+" : ""}$
-                        {Math.abs(Math.round(advantage)).toLocaleString()}
+                      <p className="text-text-muted text-xs">
+                        {isProcessor ? "+" : ""}${Math.abs(Math.round(advantage)).toLocaleString()}
                       </p>
                     </div>
-                    <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
+                    <ChevronRight className="text-text-muted group-hover:text-text-secondary h-4 w-4 shrink-0 transition-all group-hover:translate-x-0.5" />
                   </Link>
                 );
               })}
@@ -281,7 +268,7 @@ export default async function GridDetailPage({ params }: PageProps) {
               <div className="border-t border-white/[0.06] px-4 py-2.5 text-center">
                 <Link
                   href="/dashboard/tools/grid-iq/library?tab=analyses"
-                  className="text-xs font-medium text-teal hover:underline"
+                  className="text-grid-iq text-xs font-medium hover:underline"
                 >
                   Showing latest 25. View all in Library →
                 </Link>
@@ -310,12 +297,10 @@ function MetaItem({
 }) {
   return (
     <div className="flex items-center gap-2">
-      <Icon className="h-3.5 w-3.5 shrink-0 text-text-muted" />
+      <Icon className="text-text-muted h-3.5 w-3.5 shrink-0" />
       <div className="min-w-0">
-        <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
-          {label}
-        </p>
-        <p className="truncate text-sm text-text-primary">{value}</p>
+        <p className="text-text-muted text-[10px] font-medium tracking-wider uppercase">{label}</p>
+        <p className="text-text-primary truncate text-sm">{value}</p>
       </div>
     </div>
   );
@@ -335,25 +320,23 @@ function EntrySection({
   return (
     <Card>
       <CardContent className="p-0">
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
-          <div
-            className={`flex h-7 w-7 items-center justify-center rounded-lg ${bg}`}
-          >
+        <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-3">
+          <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${bg}`}>
             <Grid3x3 className={`h-3.5 w-3.5 ${color}`} />
           </div>
           <span className={`text-sm font-semibold ${color}`}>{title}</span>
-          <span className="text-xs text-text-muted">({entries.length})</span>
+          <span className="text-text-muted text-xs">({entries.length})</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b border-white/[0.06] text-left">
-                <th className="px-4 py-2 font-medium text-text-muted">Grade</th>
-                <th className="px-4 py-2 font-medium text-text-muted">Category</th>
-                <th className="px-4 py-2 font-medium text-text-muted">Fat</th>
-                <th className="px-4 py-2 font-medium text-text-muted">Teeth</th>
-                <th className="px-4 py-2 font-medium text-text-muted">Shape</th>
-                <th className="px-4 py-2 font-medium text-text-muted text-right">
+                <th className="text-text-muted px-4 py-2 font-medium">Grade</th>
+                <th className="text-text-muted px-4 py-2 font-medium">Category</th>
+                <th className="text-text-muted px-4 py-2 font-medium">Fat</th>
+                <th className="text-text-muted px-4 py-2 font-medium">Teeth</th>
+                <th className="text-text-muted px-4 py-2 font-medium">Shape</th>
+                <th className="text-text-muted px-4 py-2 text-right font-medium">
                   Weight Bands / Prices ($/kg)
                 </th>
               </tr>
@@ -363,21 +346,17 @@ function EntrySection({
                 const prices = (entry.weightBandPrices as Record<string, unknown>[]) || [];
                 return (
                   <tr key={i} className="hover:bg-white/[0.02]">
-                    <td className="px-4 py-2 font-mono font-semibold text-text-primary">
+                    <td className="text-text-primary px-4 py-2 font-mono font-semibold">
                       {String(entry.gradeCode || "-")}
                     </td>
-                    <td className="px-4 py-2 text-text-secondary">
+                    <td className="text-text-secondary px-4 py-2">
                       {String(entry.category || "-")}
                     </td>
-                    <td className="px-4 py-2 text-text-muted">
-                      {String(entry.fatRange || "-")}
-                    </td>
-                    <td className="px-4 py-2 text-text-muted">
+                    <td className="text-text-muted px-4 py-2">{String(entry.fatRange || "-")}</td>
+                    <td className="text-text-muted px-4 py-2">
                       {String(entry.dentitionRange || "-")}
                     </td>
-                    <td className="px-4 py-2 text-text-muted">
-                      {String(entry.shapeRange || "-")}
-                    </td>
+                    <td className="text-text-muted px-4 py-2">{String(entry.shapeRange || "-")}</td>
                     <td className="px-4 py-2 text-right">
                       <div className="flex flex-wrap justify-end gap-1.5">
                         {prices.map((p, j) => (
@@ -388,7 +367,7 @@ function EntrySection({
                             <span className="text-text-muted">
                               {String(p.weightBandLabel || p.weightBandKg)}
                             </span>
-                            <span className="font-mono font-medium text-teal">
+                            <span className="text-grid-iq font-mono font-medium">
                               ${Number(p.pricePerKg).toFixed(2)}
                             </span>
                           </span>

@@ -66,6 +66,10 @@ export interface HerdReportData {
   breedPremiumJustification: string | null;
   priceSource: string;
   dataDate: string | null;
+  // Human-readable saleyard name when priceSource is "saleyard" (either the
+  // herd's selected saleyard or a nearby proximity fallback). null when the
+  // price came from the national average or a hardcoded default.
+  saleyardUsed: string | null;
 }
 
 // MARK: - Sale Report Data

@@ -183,8 +183,8 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
         <Card className="mt-4">
           <CardContent className="p-0">
             <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
-              <Layers className="h-4 w-4 text-teal" />
-              <span className="text-sm font-semibold text-teal">
+              <Layers className="h-4 w-4 text-grid-iq" />
+              <span className="text-sm font-semibold text-grid-iq">
                 Category Summaries
               </span>
             </div>
@@ -234,7 +234,7 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
                           Number(cat.average_price_per_kg ?? cat.averagePricePerKg) || 0
                         ).toFixed(2)}
                       </td>
-                      <td className="px-4 py-2 text-right font-semibold text-teal">
+                      <td className="px-4 py-2 text-right font-semibold text-grid-iq">
                         $
                         {Math.round(
                           Number(cat.total_value ?? cat.totalValue) || 0
@@ -254,8 +254,8 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
         <Card className="mt-4">
           <CardContent className="p-0">
             <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
-              <FileText className="h-4 w-4 text-teal" />
-              <span className="text-sm font-semibold text-teal">
+              <FileText className="h-4 w-4 text-grid-iq" />
+              <span className="text-sm font-semibold text-grid-iq">
                 Grade Distribution
               </span>
             </div>
@@ -312,8 +312,8 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
         <Card className="mt-4">
           <CardContent className="p-0">
             <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
-              <Hash className="h-4 w-4 text-teal" />
-              <span className="text-sm font-semibold text-teal">
+              <Hash className="h-4 w-4 text-grid-iq" />
+              <span className="text-sm font-semibold text-grid-iq">
                 Line Items ({lineItems.length})
               </span>
             </div>
@@ -364,7 +364,7 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
                           )
                         ).toFixed(2)}
                       </td>
-                      <td className="px-3 py-1.5 text-right font-semibold text-teal">
+                      <td className="px-3 py-1.5 text-right font-semibold text-grid-iq">
                         ${Math.round(Number(item.gross_value ?? item.grossValue ?? 0)).toLocaleString()}
                       </td>
                     </tr>
@@ -394,8 +394,8 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
         <Card className="mt-4">
           <CardContent className="p-0">
             <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
-              <ClipboardList className="h-4 w-4 text-teal" />
-              <span className="text-sm font-semibold text-teal">
+              <ClipboardList className="h-4 w-4 text-grid-iq" />
+              <span className="text-sm font-semibold text-grid-iq">
                 Part of consignment
               </span>
             </div>
@@ -403,8 +403,8 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
               href={`/dashboard/tools/grid-iq/consignments/${parentConsignment.id}`}
               className="group flex items-center gap-4 px-4 py-3 transition-colors hover:bg-white/[0.03]"
             >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal/10">
-                <ClipboardList className="h-4 w-4 text-teal" />
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-grid-iq/10">
+                <ClipboardList className="h-4 w-4 text-grid-iq" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-text-primary">
@@ -440,8 +440,8 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
         <Card className="mt-4">
           <CardContent className="p-0">
             <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
-              <TrendingUp className="h-4 w-4 text-teal" />
-              <span className="text-sm font-semibold text-teal">
+              <TrendingUp className="h-4 w-4 text-grid-iq" />
+              <span className="text-sm font-semibold text-grid-iq">
                 Analyses using this kill sheet
               </span>
               <span className="text-xs text-text-muted">
@@ -483,7 +483,7 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
                               killScore >= 85
                                 ? "text-success"
                                 : killScore >= 70
-                                  ? "text-teal"
+                                  ? "text-grid-iq"
                                   : killScore >= 50
                                     ? "text-warning"
                                     : "text-error"
@@ -516,7 +516,7 @@ export default async function KillSheetDetailPage({ params }: PageProps) {
               <div className="border-t border-white/[0.06] px-4 py-2.5 text-center">
                 <Link
                   href="/dashboard/tools/grid-iq/library?tab=analyses"
-                  className="text-xs font-medium text-teal hover:underline"
+                  className="text-xs font-medium text-grid-iq hover:underline"
                 >
                   Showing latest 25. View all in Library →
                 </Link>

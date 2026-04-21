@@ -3,7 +3,11 @@
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, LabelList } from "recharts";
 
 function fmtValue(v: number) {
-  return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 }).format(v);
+  return new Intl.NumberFormat("en-AU", {
+    style: "currency",
+    currency: "AUD",
+    maximumFractionDigits: 0,
+  }).format(v);
 }
 
 export function PropertyComparisonChart({
@@ -26,7 +30,11 @@ export function PropertyComparisonChart({
   return (
     <div className="h-[320px]">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={displayData} layout="vertical" margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
+        <BarChart
+          data={displayData}
+          layout="vertical"
+          margin={{ top: 0, right: 8, left: 0, bottom: 0 }}
+        >
           <YAxis type="category" dataKey="name" hide />
           <XAxis type="number" domain={[domainMin, "auto"]} hide />
           <Bar
@@ -47,7 +55,7 @@ export function PropertyComparisonChart({
                 <text
                   x={(x as number) + 24}
                   y={(y as number) + (height as number) / 2}
-                  fill="#271F16"
+                  fill="var(--color-bg-card-1)"
                   fontSize={10}
                   fontWeight={600}
                   dominantBaseline="central"
@@ -64,7 +72,7 @@ export function PropertyComparisonChart({
                 <text
                   x={(x as number) + (width as number) - 16}
                   y={(y as number) + (height as number) / 2}
-                  fill="#271F16"
+                  fill="var(--color-bg-card-1)"
                   fontSize={9}
                   fontWeight={600}
                   dominantBaseline="central"

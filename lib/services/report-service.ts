@@ -14,6 +14,7 @@ import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName, saleyards as allSaleyards, saleyardCoordinates, saleyardToState } from "@/lib/data/reference-data";
 import { expandWithNearbySaleyards, haversineDistance } from "@/lib/data/saleyard-proximity";
 import { centsToDollars, type Cents } from "@/lib/types/money";
+import { endOfDaySydney } from "@/lib/dates";
 import type {
   ReportConfiguration,
   ReportData,
@@ -198,11 +199,11 @@ export async function generateAssetRegisterData(
   // Build property lookup (name only; livestock_owner is now a herd-level attribute).
   const propertyMap = new Map(allProperties.map((p: { id: string; property_name: string }) => [p.id, { name: p.property_name }]));
 
-  // Calculate valuations as of the report's end date so the Executive Summary
-  // lines up with Portfolio Movement's closing value. Parsing the ISO date string
-  // matches how movement-service builds its closingDateObj (UTC midnight), which
-  // is what avoids the sub-day drift between the two figures.
-  const asOfDate = new Date(config.endDate);
+  // Valuation as-at the end of the report period, anchored to Australia/Sydney.
+  // Using endOfDaySydney ensures DWG accrues through the full selected day
+  // regardless of server timezone, and guarantees the displayed Valuation Date
+  // matches the configured period end without sub-day drift.
+  const asOfDate = endOfDaySydney(config.endDate);
 
   const herdDataArray: HerdReportData[] = [];
   const compositionMap = new Map<string, { value: number; headCount: number }>();
@@ -223,6 +224,12 @@ export async function generateAssetRegisterData(
     const propertyName = propertyInfo?.name ?? null;
     // Livestock owner is attributed to the herd, not the property (agistment is common).
     const livestockOwner = herd.livestock_owner ?? null;
+
+    // Which saleyard (if any) the valuation's $/kg came from, preferring the
+    // proximity-fallback saleyard if the engine had to look to a neighbour.
+    const saleyardUsed = valuation.priceSource === "saleyard"
+      ? (valuation.nearestSaleyardUsed ?? (herd.selected_saleyard ? resolveMLASaleyardName(herd.selected_saleyard) : null))
+      : null;
 
     herdDataArray.push({
       id: herd.id,
@@ -247,6 +254,7 @@ export async function generateAssetRegisterData(
       breedPremiumJustification: herd.breed_premium_justification ?? null,
       priceSource: valuation.priceSource,
       dataDate: valuation.dataDate,
+      saleyardUsed,
     });
 
     totalValue += valuation.netValue;
@@ -283,7 +291,7 @@ export async function generateAssetRegisterData(
     totalPortfolioValue: totalValue,
     totalHeadCount,
     averageValuePerHead: totalHeadCount > 0 ? totalValue / totalHeadCount : 0,
-    valuationDate: asOfDate.toISOString(),
+    valuationDate: config.endDate,
   };
 
   // Farm name from default property
@@ -514,7 +522,7 @@ export async function generateSaleyardComparisonData(
 
   // For each saleyard, calculate portfolio value using that saleyard's prices
   const comparisonData: SaleyardComparisonData[] = [];
-  const now = new Date();
+  const now = endOfDaySydney(config.endDate);
 
   for (const [saleyard, prices] of rawBySaleyard) {
     // Filter to latest date only
@@ -762,6 +770,7 @@ export async function generateLandValueData(
     activeHerds
   );
 
+  const asOfDate = endOfDaySydney(config.endDate);
   const analysis: LandValueAnalysisData[] = [];
   for (const property of usable) {
     const propertyHerds = activeHerds.filter(
@@ -776,7 +785,7 @@ export async function generateLandValueData(
         herd as Parameters<typeof calculateHerdValuation>[0],
         nationalPriceMap,
         premiumMap,
-        undefined,
+        asOfDate,
         saleyardPriceMap,
         saleyardBreedPriceMap
       );
@@ -876,6 +885,7 @@ export async function generatePropertyComparisonData(
     activeHerds
   );
 
+  const asOfDate = endOfDaySydney(config.endDate);
   const comparison: PropertyComparisonData[] = [];
   for (const property of propertiesToCompare) {
     const propertyHerds = activeHerds.filter(
@@ -902,7 +912,7 @@ export async function generatePropertyComparisonData(
         herd as Parameters<typeof calculateHerdValuation>[0],
         nationalPriceMap,
         premiumMap,
-        undefined,
+        asOfDate,
         saleyardPriceMap,
         saleyardBreedPriceMap
       );

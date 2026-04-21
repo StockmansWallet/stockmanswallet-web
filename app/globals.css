@@ -18,6 +18,66 @@ summary {
   color-scheme: dark;
 }
 
+/* ================================================================
+   HUE PALETTE - Apple iOS dark-mode System Colors, calibrated.
+   Raw hex values live at :root so components use --color-* tokens
+   (exposed via @theme inline below) while the hex stays editable
+   in one place.
+   ================================================================ */
+:root {
+  --hue-orange: #ff9f0a; /* Apple systemOrange */
+  --hue-orange-light: #ffbb55;
+  --hue-orange-dark: #cc7e08;
+
+  --hue-gold: #ffd60a; /* Apple systemYellow */
+  --hue-gold-light: #ffe55c;
+  --hue-gold-dark: #cca808;
+
+  --hue-lime: #a8d72f; /* Apple-calibrated lime (no Apple equivalent) */
+  --hue-lime-light: #c3e26b;
+  --hue-lime-dark: #86ac25;
+
+  --hue-emerald: #30d158; /* Apple systemGreen */
+  --hue-emerald-light: #5fdc7c;
+  --hue-emerald-dark: #26a746;
+
+  --hue-teal: #40cbe0; /* Apple systemTeal */
+  --hue-teal-light: #73d8e8;
+  --hue-teal-dark: #33a2b3;
+
+  --hue-sky: #0a84ff; /* Apple systemBlue */
+  --hue-sky-light: #52a6ff;
+  --hue-sky-dark: #0869cc;
+
+  --hue-indigo: #5e5ce6; /* Apple systemIndigo */
+  --hue-indigo-light: #8583ed;
+  --hue-indigo-dark: #4b49b8;
+
+  --hue-violet: #bf5af2; /* Apple systemPurple */
+  --hue-violet-light: #d080f5;
+  --hue-violet-dark: #9848c1;
+
+  --hue-pink: #ff375f; /* Apple systemPink */
+  --hue-pink-light: #ff6988;
+  --hue-pink-dark: #cc2c4c;
+
+  --hue-red: #ff453a; /* Apple systemRed */
+  --hue-red-light: #ff7b73;
+  --hue-red-dark: #cc372e;
+
+  /* Text-safe variants - darker shades passing WCAG AA on white text */
+  --hue-orange-text: #b45d00;
+  --hue-gold-text: #8a7000;
+  --hue-lime-text: #567312;
+  --hue-emerald-text: #14803a;
+  --hue-teal-text: #166b75;
+  --hue-sky-text: #0058b3;
+  --hue-indigo-text: #3d3ba8;
+  --hue-violet-text: #8029b8;
+  --hue-pink-text: #b4244c;
+  --hue-red-text: #b82a24;
+}
+
 @theme inline {
   /* ================================================================
      HUE PALETTE
@@ -25,62 +85,67 @@ summary {
      read as one family. Each hue has default / light / dark tints.
      ================================================================ */
 
-  /* 1. Orange - Brand / Brangus */
-  --color-orange: #FF8000;
-  --color-orange-light: #FFA333;
-  --color-orange-dark: #CC6600;
+  /* Hues — values live at :root as --hue-* so they can be overridden
+     at runtime by palette toggles (see html[data-palette="apple"]). */
+  --color-orange: var(--hue-orange);
+  --color-orange-light: var(--hue-orange-light);
+  --color-orange-dark: var(--hue-orange-dark);
 
-  /* 2. Gold - Warning / Reports */
-  --color-gold: #FFB020;
-  --color-gold-light: #FFC85C;
-  --color-gold-dark: #CC8A19;
+  --color-gold: var(--hue-gold);
+  --color-gold-light: var(--hue-gold-light);
+  --color-gold-dark: var(--hue-gold-dark);
 
-  /* 3. Lime - Markets */
-  --color-lime: #9BD827;
-  --color-lime-light: #B5E55C;
-  --color-lime-dark: #7AB01F;
+  --color-lime: var(--hue-lime);
+  --color-lime-light: var(--hue-lime-light);
+  --color-lime-dark: var(--hue-lime-dark);
 
-  /* 4. Emerald - Success / Yard Book */
-  --color-emerald: #2FD666;
-  --color-emerald-light: #5FE088;
-  --color-emerald-dark: #23A850;
+  --color-emerald: var(--hue-emerald);
+  --color-emerald-light: var(--hue-emerald-light);
+  --color-emerald-dark: var(--hue-emerald-dark);
 
-  /* 5. Teal - Grid IQ */
-  --color-teal: #19CFC0;
-  --color-teal-light: #4DDBD0;
-  --color-teal-dark: #14A599;
+  --color-teal: var(--hue-teal);
+  --color-teal-light: var(--hue-teal-light);
+  --color-teal-dark: var(--hue-teal-dark);
 
-  /* 6. Sky - Info / Freight IQ */
-  --color-sky: #2DA6FF;
-  --color-sky-light: #5FBBFF;
-  --color-sky-dark: #1A85CC;
+  --color-sky: var(--hue-sky);
+  --color-sky-light: var(--hue-sky-light);
+  --color-sky-dark: var(--hue-sky-dark);
 
-  /* 7. Indigo - Advisor */
-  --color-indigo: #5A6DF5;
-  --color-indigo-light: #8291F8;
-  --color-indigo-dark: #3F4FD4;
+  --color-indigo: var(--hue-indigo);
+  --color-indigo-light: var(--hue-indigo-light);
+  --color-indigo-dark: var(--hue-indigo-dark);
 
-  /* 8. Violet - Producer Network */
-  --color-violet: #B057F5;
-  --color-violet-light: #C380F8;
-  --color-violet-dark: #8A3FD0;
+  --color-violet: var(--hue-violet);
+  --color-violet-light: var(--hue-violet-light);
+  --color-violet-dark: var(--hue-violet-dark);
 
-  /* 9. Pink - Insights */
-  --color-pink: #FF4D8F;
-  --color-pink-light: #FF7FB0;
-  --color-pink-dark: #D93A73;
+  --color-pink: var(--hue-pink);
+  --color-pink-light: var(--hue-pink-light);
+  --color-pink-dark: var(--hue-pink-dark);
 
-  /* 10. Red - Error / Destructive */
-  --color-red: #FF4052;
-  --color-red-light: #FF7A87;
-  --color-red-dark: #D62F3F;
+  --color-red: var(--hue-red);
+  --color-red-light: var(--hue-red-light);
+  --color-red-dark: var(--hue-red-dark);
+
+  /* Text-safe accents: darker variants with WCAG AA (>= 4.5:1) against
+     white text. Use ONLY where an accent backs white body text. */
+  --color-orange-text: var(--hue-orange-text);
+  --color-gold-text: var(--hue-gold-text);
+  --color-lime-text: var(--hue-lime-text);
+  --color-emerald-text: var(--hue-emerald-text);
+  --color-teal-text: var(--hue-teal-text);
+  --color-sky-text: var(--hue-sky-text);
+  --color-indigo-text: var(--hue-indigo-text);
+  --color-violet-text: var(--hue-violet-text);
+  --color-pink-text: var(--hue-pink-text);
+  --color-red-text: var(--hue-red-text);
 
   /* ================================================================
      NEUTRALS - surfaces, borders, text
      ================================================================ */
-  --color-background: #1F1B18;
-  --color-foreground: #FFFFFF;
-  --color-bg-alt: #1A1A1A;
+  --color-background: #1f1b18;
+  --color-foreground: #ffffff;
+  --color-bg-alt: #1a1a1a;
 
   --color-surface-lowest: rgba(255, 255, 255, 0.02);
   --color-surface: rgba(255, 255, 255, 0.05);
@@ -91,14 +156,14 @@ summary {
   --color-divider: rgba(255, 255, 255, 0.04);
   --color-border-subtle: rgba(255, 255, 255, 0.06);
   --color-border: rgba(255, 255, 255, 0.08);
-  --color-ring-subtle: rgba(255, 255, 255, 0.10);
+  --color-ring-subtle: rgba(255, 255, 255, 0.1);
   --color-ring-medium: rgba(255, 255, 255, 0.15);
 
-  --color-text-primary: #FFFFFF;
+  --color-text-primary: #ffffff;
   --color-text-secondary: rgba(255, 255, 255, 0.65);
   --color-text-muted: rgba(255, 255, 255, 0.55);
-  --color-text-tertiary: rgba(255, 255, 255, 0.50);
-  --color-text-quaternary: rgba(255, 255, 255, 0.20);
+  --color-text-tertiary: rgba(255, 255, 255, 0.5);
+  --color-text-quaternary: rgba(255, 255, 255, 0.2);
 
   /* ================================================================
      BRAND - alias to orange
@@ -106,6 +171,7 @@ summary {
   --color-brand: var(--color-orange);
   --color-brand-light: var(--color-orange-light);
   --color-brand-dark: var(--color-orange-dark);
+  --color-brand-text: var(--color-orange-text);
 
   /* ================================================================
      SEMANTIC STATUS - alias to hue palette
@@ -113,18 +179,22 @@ summary {
   --color-success: var(--color-emerald);
   --color-success-light: var(--color-emerald-light);
   --color-success-dark: var(--color-emerald-dark);
+  --color-success-text: var(--color-emerald-text);
 
   --color-warning: var(--color-gold);
   --color-warning-light: var(--color-gold-light);
   --color-warning-dark: var(--color-gold-dark);
+  --color-warning-text: var(--color-gold-text);
 
   --color-info: var(--color-sky);
   --color-info-light: var(--color-sky-light);
   --color-info-dark: var(--color-sky-dark);
+  --color-info-text: var(--color-sky-text);
 
   --color-error: var(--color-red);
   --color-error-light: var(--color-red-light);
   --color-error-dark: var(--color-red-dark);
+  --color-error-text: var(--color-red-text);
 
   /* ================================================================
      FEATURE / PRODUCT ACCENTS - alias to hue palette
@@ -132,30 +202,52 @@ summary {
   --color-brangus: var(--color-orange);
   --color-brangus-light: var(--color-orange-light);
   --color-brangus-dark: var(--color-orange-dark);
-  --color-insights: var(--color-pink);
-  --color-insights-light: var(--color-pink-light);
-  --color-insights-dark: var(--color-pink-dark);
-  --color-markets: var(--color-lime);
-  --color-markets-light: var(--color-lime-light);
-  --color-markets-dark: var(--color-lime-dark);
-  --color-yard-book: var(--color-emerald);
-  --color-yard-book-light: var(--color-emerald-light);
-  --color-yard-book-dark: var(--color-emerald-dark);
+  --color-insights: var(--color-violet);
+  --color-insights-light: var(--color-violet-light);
+  --color-insights-dark: var(--color-violet-dark);
+  --color-markets: var(--color-pink);
+  --color-markets-light: var(--color-pink-light);
+  --color-markets-dark: var(--color-pink-dark);
+  --color-yard-book: var(--color-teal);
+  --color-yard-book-light: var(--color-teal-light);
+  --color-yard-book-dark: var(--color-teal-dark);
   --color-reports: var(--color-gold);
   --color-reports-light: var(--color-gold-light);
   --color-reports-dark: var(--color-gold-dark);
   --color-freight-iq: var(--color-sky);
   --color-freight-iq-light: var(--color-sky-light);
   --color-freight-iq-dark: var(--color-sky-dark);
-  --color-grid-iq: var(--color-teal);
-  --color-grid-iq-light: var(--color-teal-light);
-  --color-grid-iq-dark: var(--color-teal-dark);
-  --color-producer-network: var(--color-violet);
-  --color-producer-network-light: var(--color-violet-light);
-  --color-producer-network-dark: var(--color-violet-dark);
+  --color-grid-iq: var(--color-emerald);
+  --color-grid-iq-light: var(--color-emerald-light);
+  --color-grid-iq-dark: var(--color-emerald-dark);
+  --color-producer-network: var(--color-lime);
+  --color-producer-network-light: var(--color-lime-light);
+  --color-producer-network-dark: var(--color-lime-dark);
   --color-advisor: var(--color-indigo);
   --color-advisor-light: var(--color-indigo-light);
   --color-advisor-dark: var(--color-indigo-dark);
+
+  /* ================================================================
+     CHAT BUBBLES
+     - chat-user: own bubble in Brangus / producer-peer chats
+     - chat-other: peer bubble used across all chats (neutral grey)
+     - chat-advisor-own: own bubble in advisor / connection chat (purple)
+     - chat-advisor-accent: send-button accent in advisor chat (rose)
+     Brangus (assistant) uses --color-sky-text.
+     ================================================================ */
+  --color-chat-user: #3d4550;
+  --color-chat-other: #2a2929;
+  --color-chat-advisor-own: #31243c;
+  --color-chat-advisor-accent: #b0657a;
+  --color-chat-advisor-accent-hover: #8a4d5e;
+
+  /* ================================================================
+     POPOVERS / MENUS - solid dark surfaces for floating menus,
+     dropdowns and tooltips. Slightly lighter than --color-bg-alt
+     to read as elevated above the page surface.
+     ================================================================ */
+  --color-popover: #2a2420;
+  --color-popover-cool: #1c1c1e;
 
   /* ================================================================
      CHARTS
@@ -180,38 +272,159 @@ summary {
   --color-chart-ramp-2: rgba(255, 128, 0, 0.35);
   --color-chart-ramp-3: rgba(255, 128, 0, 0.55);
   --color-chart-ramp-4: rgba(255, 128, 0, 0.75);
-  --color-chart-ramp-5: rgba(255, 128, 0, 1.00);
+  --color-chart-ramp-5: rgba(255, 128, 0, 1);
 
   /* Chart chrome */
   --color-chart-grid: rgba(255, 255, 255, 0.06);
   --color-chart-axis: rgba(255, 255, 255, 0.35);
-  --color-chart-tooltip-bg: #1A1A1A;
+  --color-chart-tooltip-bg: #1a1a1a;
   --color-chart-tooltip-border: rgba(255, 255, 255, 0.08);
   --color-chart-reference: rgba(255, 255, 255, 0.25);
 
   /* ================================================================
      LANDING PAGE
      ================================================================ */
-  --color-bg-deep: #1D1916;
-  --color-bg-primary: #1F1B18;
-  --color-bg-card-1: #271F16;
-  --color-bg-card-2: #3B2D21;
+  --color-bg-deep: #1d1916;
+  --color-bg-primary: #1f1b18;
+  --color-bg-card-1: #271f16;
+  --color-bg-card-2: #3b2d21;
   --color-bg-card-3: #453427;
-  --color-bg-card-4: #4E3C2C;
+  --color-bg-card-4: #4e3c2c;
 
   --color-accent: var(--color-orange);
   --color-accent-light: var(--color-orange-light);
   --color-accent-secondary: var(--color-orange-dark);
-  --color-accent-tertiary: #8E420B;
-  --color-accent-quaternary: #5F2C07;
+  --color-accent-tertiary: #8e420b;
+  --color-accent-quaternary: #5f2c07;
   --color-accent-quinary: #472105;
 
   /* ================================================================
      FONTS
      ================================================================ */
-  --font-sans: ui-rounded, "SF Pro Rounded", "SF Pro Display", -apple-system, BlinkMacSystemFont, var(--font-nunito), "Nunito", system-ui, sans-serif;
+  --font-sans:
+    ui-rounded, "SF Pro Rounded", "SF Pro Display", -apple-system, BlinkMacSystemFont,
+    var(--font-nunito), "Nunito", system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
   --font-serif: var(--font-lora), "Lora", "Georgia", "Times New Roman", serif;
+}
+
+/* ================================================================
+   OUTBACK PALETTE (A/B toggle via html[data-palette="outback"])
+   Earthy but vivid. Saturated enough to feel alive, muted enough to
+   feel grounded. R.M. Williams / Akubra territory - rural premium.
+   ================================================================ */
+html[data-palette="outback"] {
+  --hue-orange: #db7a2c; /* Burnt ochre */
+  --hue-orange-light: #e99f63;
+  --hue-orange-dark: #b1601d;
+
+  --hue-gold: #d9a53a; /* Honey amber */
+  --hue-gold-light: #e5bd6d;
+  --hue-gold-dark: #ae8321;
+
+  --hue-lime: #7fa539; /* Bush olive */
+  --hue-lime-light: #a5c569;
+  --hue-lime-dark: #638226;
+
+  --hue-emerald: #2fa868; /* Eucalyptus */
+  --hue-emerald-light: #5fc38a;
+  --hue-emerald-dark: #1f7b4b;
+
+  --hue-teal: #319aa1; /* Billabong */
+  --hue-teal-light: #64b6bb;
+  --hue-teal-dark: #216f74;
+
+  --hue-sky: #2f7cc2; /* Outback dusk */
+  --hue-sky-light: #5f9cd4;
+  --hue-sky-dark: #225a90;
+
+  --hue-indigo: #584bb9; /* Ironstone */
+  --hue-indigo-light: #7e74cb;
+  --hue-indigo-dark: #403688;
+
+  --hue-violet: #a14bb5; /* Dusty mulberry */
+  --hue-violet-light: #be7bcd;
+  --hue-violet-dark: #763585;
+
+  --hue-pink: #d55a5a; /* Terracotta rose */
+  --hue-pink-light: #e18989;
+  --hue-pink-dark: #a03f3f;
+
+  --hue-red: #c14032; /* Rust red */
+  --hue-red-light: #d57266;
+  --hue-red-dark: #922e24;
+
+  /* Text-safe variants (WCAG AA on white text) */
+  --hue-orange-text: #8a4c17;
+  --hue-gold-text: #6e5410;
+  --hue-lime-text: #3f5416;
+  --hue-emerald-text: #165c38;
+  --hue-teal-text: #14585c;
+  --hue-sky-text: #1a4269;
+  --hue-indigo-text: #322a73;
+  --hue-violet-text: #5e2a6b;
+  --hue-pink-text: #7d2828;
+  --hue-red-text: #7f2218;
+}
+
+/* ================================================================
+   GEMINI PALETTE (A/B toggle via html[data-palette="gemini"])
+   High-vis vivid palette tuned to read on the dark warm-brown
+   background (#201813). Each hue is one of Gemini's named swatches.
+   Toggle lives in <PaletteToggle /> (dev only).
+   ================================================================ */
+html[data-palette="gemini"] {
+  --hue-orange: #ff9500; /* Burned Orange - hero CTA */
+  --hue-orange-light: #ffb14a;
+  --hue-orange-dark: #cc7700;
+
+  --hue-gold: #ffcc00; /* Harvest Gold - hero highlight */
+  --hue-gold-light: #ffdd55;
+  --hue-gold-dark: #cca300;
+
+  --hue-lime: #4cd964; /* Growth Green - punchy lime */
+  --hue-lime-light: #7be38b;
+  --hue-lime-dark: #3aae50;
+
+  --hue-emerald: #2dbe4e; /* Derived darker Growth Green */
+  --hue-emerald-light: #5cd07a;
+  --hue-emerald-dark: #1f8d39;
+
+  --hue-teal: #00d7c4; /* Bright Teal - shifted to green to separate from sky */
+  --hue-teal-light: #4fe3d4;
+  --hue-teal-dark: #00aa9c;
+
+  --hue-sky: #007fff; /* Deep Azure - lifted so it doesn't get lost */
+  --hue-sky-light: #32b3e6; /* Sky Blue - lighter cyan-blue */
+  --hue-sky-dark: #0066cc;
+
+  --hue-indigo: #5e5ce6; /* Electric Indigo - kept electric, not muddy */
+  --hue-indigo-light: #8583ed;
+  --hue-indigo-dark: #4a48b8;
+
+  --hue-violet: #948aff; /* Dusty Rose - vivid soft violet */
+  --hue-violet-light: #b3acff;
+  --hue-violet-dark: #6f64e6;
+
+  --hue-pink: #bf5af2; /* Royal Purple - magenta-purple, harmonises with red */
+  --hue-pink-light: #d080f5;
+  --hue-pink-dark: #9848c1;
+
+  --hue-red: #ff3b30; /* Deep Coral - pure alert red for dark themes */
+  --hue-red-light: #ff6c63;
+  --hue-red-dark: #cc2f26;
+
+  /* Text-safe variants (WCAG AA against white text on the swatch fill) */
+  --hue-orange-text: #a35f00;
+  --hue-gold-text: #856900;
+  --hue-lime-text: #1f7a30;
+  --hue-emerald-text: #155f24;
+  --hue-teal-text: #006e64;
+  --hue-sky-text: #0058b3;
+  --hue-indigo-text: #3d3ba8;
+  --hue-violet-text: #4e44a8;
+  --hue-pink-text: #7d2db0;
+  --hue-red-text: #b3201a;
 }
 
 /* ================================================================
@@ -277,15 +490,29 @@ body {
 
 /* Animated gradient orbs */
 @keyframes orb-drift {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(30px, -20px) scale(1.05); }
-  66% { transform: translate(-20px, 15px) scale(0.95); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -20px) scale(1.05);
+  }
+  66% {
+    transform: translate(-20px, 15px) scale(0.95);
+  }
 }
 
 @keyframes orb-drift-reverse {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(-25px, 20px) scale(0.95); }
-  66% { transform: translate(15px, -25px) scale(1.05); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-25px, 20px) scale(0.95);
+  }
+  66% {
+    transform: translate(15px, -25px) scale(1.05);
+  }
 }
 
 @utility animate-orb-drift {
@@ -316,18 +543,21 @@ body {
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @utility animate-fade-in {
   animation: fade-in 0.3s ease-out both;
 }
 
-
 /* Native select/input dark styling */
 select option {
-  background: #1A1A1A;
+  background: #1a1a1a;
   color: #ffffff;
 }
 
@@ -370,7 +600,11 @@ select option {
 
   [data-brangus-print] {
     display: block !important;
-    font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-family:
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      sans-serif;
     font-size: 11pt;
     line-height: 1.5;
     color: #1a1a1a;
@@ -383,14 +617,14 @@ select option {
     gap: 12pt;
     padding-bottom: 10pt;
     margin-bottom: 16pt;
-    border-bottom: 2pt solid #FF8000;
+    border-bottom: 2pt solid #ff8000;
   }
 
   [data-brangus-print] .brangus-print__logo {
     width: 34pt;
     height: 34pt;
     border-radius: 50%;
-    background: #FF8000;
+    background: #ff8000;
     color: white;
     display: flex;
     align-items: center;
@@ -403,7 +637,7 @@ select option {
   [data-brangus-print] .brangus-print__title {
     font-size: 18pt;
     font-weight: 700;
-    color: #FF8000;
+    color: #ff8000;
     margin: 0;
   }
 
@@ -428,7 +662,7 @@ select option {
   }
 
   [data-brangus-print] .brangus-print__msg--user {
-    background: #FF8000;
+    background: #ff8000;
     color: white;
     margin-left: auto;
   }

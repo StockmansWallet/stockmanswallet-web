@@ -31,8 +31,13 @@ const CATEGORY_CONFIG: Record<
   YardBookCategory,
   { icon: IconComponent; bg: string; text: string; label: string }
 > = {
-  Livestock: { icon: IconCattleTags, bg: "bg-yard-book/15", text: "text-yard-book-light", label: "Livestock" },
-  Operations: { icon: Wrench, bg: "bg-amber-700/15", text: "text-warning", label: "Operations" },
+  Livestock: {
+    icon: IconCattleTags,
+    bg: "bg-yard-book/15",
+    text: "text-yard-book-light",
+    label: "Livestock",
+  },
+  Operations: { icon: Wrench, bg: "bg-warning/15", text: "text-warning", label: "Operations" },
   Finance: { icon: DollarSign, bg: "bg-info/15", text: "text-info", label: "Finance" },
   Family: { icon: Home, bg: "bg-violet/15", text: "text-violet", label: "Family" },
   Me: { icon: User, bg: "bg-success/15", text: "text-success", label: "Me" },
@@ -59,17 +64,19 @@ function InfoRow({
   if (!value) return null;
   return (
     <div className="flex items-center gap-3 py-3 text-sm">
-      <Icon className="h-4 w-4 shrink-0 text-text-muted" />
+      <Icon className="text-text-muted h-4 w-4 shrink-0" />
       <span className="text-text-muted">{label}</span>
-      <span className="ml-auto font-medium text-text-primary">{value}</span>
+      <span className="text-text-primary ml-auto font-medium">{value}</span>
     </div>
   );
 }
 
 function SectionIcon({ icon: Icon, className }: { icon: IconComponent; className?: string }) {
   return (
-    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${className ?? "bg-emerald/15"}`}>
-      <Icon className={`h-3.5 w-3.5 ${className ? "" : "text-emerald"}`} />
+    <div
+      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${className ?? "bg-yard-book/15"}`}
+    >
+      <Icon className={`h-3.5 w-3.5 ${className ? "" : "text-yard-book"}`} />
     </div>
   );
 }
@@ -96,9 +103,7 @@ function daysUntil(dateStr: string): number {
   today.setHours(0, 0, 0, 0);
   const dateOnly = dateStr.split("T")[0];
   const event = new Date(dateOnly + "T00:00:00");
-  return Math.floor(
-    (event.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-  );
+  return Math.floor((event.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 function recurrenceLabel(rule: string, interval?: number | null): string {
@@ -117,11 +122,7 @@ function recurrenceLabel(rule: string, interval?: number | null): string {
   }
 }
 
-export default async function YardBookItemPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function YardBookItemPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
   const {
@@ -163,14 +164,14 @@ export default async function YardBookItemPage({
   }
 
   const catConfig =
-    CATEGORY_CONFIG[item.category_raw as YardBookCategory] ??
-    CATEGORY_CONFIG.Livestock;
+    CATEGORY_CONFIG[item.category_raw as YardBookCategory] ?? CATEGORY_CONFIG.Livestock;
   const CatIcon = catConfig.icon;
   const days = daysUntil(item.event_date);
 
   return (
     <div className="max-w-4xl">
-      <PageHeader feature="yard-book"
+      <PageHeader
+        feature="yard-book"
         title={item.title}
         subtitle={catConfig.label}
         actions={
@@ -200,7 +201,7 @@ export default async function YardBookItemPage({
               <CardTitle>Overview</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
+          <CardContent className="divide-y divide-white/[0.04] px-5 pb-5">
             <div className="flex items-center justify-between py-3 text-sm">
               <span className="text-text-muted">Category</span>
               <span
@@ -227,7 +228,7 @@ export default async function YardBookItemPage({
             {item.is_completed && item.completed_date && (
               <div className="flex items-center justify-between py-3 text-sm">
                 <span className="text-text-muted">Completed</span>
-                <span className="font-medium text-text-primary">
+                <span className="text-text-primary font-medium">
                   {formatDateAU(item.completed_date.split("T")[0])}
                 </span>
               </div>
@@ -243,39 +244,26 @@ export default async function YardBookItemPage({
               <CardTitle>Event</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
-            <InfoRow
-              icon={Calendar}
-              label="Date"
-              value={formatDateAU(item.event_date)}
-            />
+          <CardContent className="divide-y divide-white/[0.04] px-5 pb-5">
+            <InfoRow icon={Calendar} label="Date" value={formatDateAU(item.event_date)} />
             {!item.is_all_day && item.event_time && (
-              <InfoRow
-                icon={Clock}
-                label="Time"
-                value={formatTime(item.event_time)}
-              />
+              <InfoRow icon={Clock} label="Time" value={formatTime(item.event_time)} />
             )}
             {item.is_all_day && (
               <div className="flex items-center gap-3 py-3 text-sm">
-                <Clock className="h-4 w-4 shrink-0 text-text-muted" />
+                <Clock className="text-text-muted h-4 w-4 shrink-0" />
                 <span className="text-text-muted">Time</span>
-                <span className="ml-auto text-text-muted">All day</span>
+                <span className="text-text-muted ml-auto">All day</span>
               </div>
             )}
             {item.is_recurring && item.recurrence_rule && (
               <InfoRow
                 icon={Repeat}
                 label="Repeats"
-                value={recurrenceLabel(
-                  item.recurrence_rule,
-                  item.recurrence_interval
-                )}
+                value={recurrenceLabel(item.recurrence_rule, item.recurrence_interval)}
               />
             )}
-            {propertyName && (
-              <InfoRow icon={MapPin} label="Property" value={propertyName} />
-            )}
+            {propertyName && <InfoRow icon={MapPin} label="Property" value={propertyName} />}
           </CardContent>
         </Card>
 
@@ -295,7 +283,7 @@ export default async function YardBookItemPage({
                   .map((offset) => (
                     <span
                       key={offset}
-                      className="inline-flex items-center gap-1 rounded-full bg-white/8 px-2.5 py-1 text-xs font-medium text-text-secondary"
+                      className="text-text-secondary inline-flex items-center gap-1 rounded-full bg-white/8 px-2.5 py-1 text-xs font-medium"
                     >
                       <Bell className="h-3 w-3" />
                       {REMINDER_LABELS[offset] ?? `${offset} days before`}
@@ -315,21 +303,16 @@ export default async function YardBookItemPage({
                 <CardTitle>Linked Herds</CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
+            <CardContent className="divide-y divide-white/[0.04] px-5 pb-5">
               {linkedHerds.map((herd) => (
-                <div
-                  key={herd.id}
-                  className="flex items-center justify-between py-3 text-sm"
-                >
+                <div key={herd.id} className="flex items-center justify-between py-3 text-sm">
                   <Link
                     href={`/dashboard/herds/${herd.id}`}
-                    className="font-medium text-emerald hover:underline"
+                    className="text-yard-book font-medium hover:underline"
                   >
                     {herd.name}
                   </Link>
-                  <span className="text-text-muted">
-                    {herd.head_count.toLocaleString()} head
-                  </span>
+                  <span className="text-text-muted">{herd.head_count.toLocaleString()} head</span>
                 </div>
               ))}
             </CardContent>
@@ -346,7 +329,7 @@ export default async function YardBookItemPage({
               </div>
             </CardHeader>
             <CardContent>
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-secondary">
+              <p className="text-text-secondary text-sm leading-relaxed whitespace-pre-wrap">
                 {item.notes}
               </p>
             </CardContent>

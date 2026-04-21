@@ -11,6 +11,7 @@ import {
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { resolveMLASaleyardName } from "@/lib/data/reference-data";
 import { buildPriceMaps, buildPremiumMap } from "@/lib/services/report-service";
+import { startOfDaySydney, endOfDaySydney } from "@/lib/dates";
 import type {
   MovementPeriod,
   PortfolioMovementSummary,
@@ -197,9 +198,13 @@ export async function calculatePortfolioMovement(
     return calculateHerdValuation(herd, nationalPriceMap, premiumMap, asOfDate, saleyardPriceMap, saleyardBreedPriceMap);
   }
 
-  // Compute valuations
-  const openingDateObj = new Date(openingDate);
-  const closingDateObj = new Date(closingDate);
+  // Compute valuations. Opening is the start of the period's first day in
+  // Australia/Sydney (so the opening balance reflects the state at the dawn
+  // of that date), closing is the end of the period's last day (so DWG
+  // accrues fully through the selected day). Anchoring to Sydney keeps the
+  // behaviour stable regardless of server TZ.
+  const openingDateObj = startOfDaySydney(openingDate);
+  const closingDateObj = endOfDaySydney(closingDate);
 
   let totalOpeningValue = 0;
   let totalClosingValue = 0;

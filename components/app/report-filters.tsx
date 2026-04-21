@@ -4,6 +4,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Calendar, ChevronDown } from "lucide-react";
 import { DatePicker } from "@/components/ui/date-picker";
+import { formatDateAU, todaySydney } from "@/lib/dates";
 
 // MARK: - Date Presets
 
@@ -17,22 +18,21 @@ const DATE_PRESETS = [
 ] as const;
 
 function getPresetDates(days: number) {
-  const end = new Date();
-  const start = new Date();
-  start.setDate(start.getDate() - days);
-  return {
-    start: start.toISOString().split("T")[0],
-    end: end.toISOString().split("T")[0],
-  };
+  const end = todaySydney();
+  const [y, m, d] = end.split("-").map(Number);
+  const startDate = new Date(Date.UTC(y, m - 1, d));
+  startDate.setUTCDate(startDate.getUTCDate() - days);
+  const start = startDate.toISOString().split("T")[0];
+  return { start, end };
 }
 
 function todayISO() {
-  return new Date().toISOString().split("T")[0];
+  return todaySydney();
 }
 
 function fmtShort(iso: string) {
   if (!iso) return "";
-  return new Date(iso).toLocaleDateString("en-AU", { day: "2-digit", month: "short", year: "numeric" });
+  return formatDateAU(iso);
 }
 
 // MARK: - Props

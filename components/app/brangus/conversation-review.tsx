@@ -10,9 +10,10 @@ import { ChatBubble } from "@/components/app/chat/chat-bubble";
 import { formatConversationForExport } from "@/lib/brangus/conversation-service";
 import type { BrangusConversationRow, BrangusMessageRow } from "@/lib/brangus/conversation-service";
 
-// Brangus brand brown (matches Theme+Brangus.swift)
-const BRANGUS_BG = "#4D331F";
-const USER_BG = "var(--color-brand)";
+// Brangus bubble - palette sky blue (text-safe variant), matching his work shirt
+const BRANGUS_BG = "var(--color-sky-text)";
+// User bubble - cool-toned stone grey that pairs with Brangus's blue
+const USER_BG = "var(--color-chat-user)";
 
 interface ConversationReviewProps {
   conversation: BrangusConversationRow;
@@ -58,30 +59,34 @@ export function ConversationReview({ conversation, messages }: ConversationRevie
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Toolbar */}
-      <div className="flex items-center gap-2 px-4 py-2 border-b border-white/6">
+      <div className="flex items-center gap-2 border-b border-white/6 px-4 py-2">
         <Link
           href="/dashboard/brangus"
-          className="flex items-center gap-1.5 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary"
+          className="bg-surface-lowest text-text-secondary hover:bg-surface-raised hover:text-text-primary flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
           Back
         </Link>
         <div className="flex-1" />
         <div className="flex items-center gap-2">
-        <button
-          onClick={handleCopy}
-          className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.05] hover:text-text-primary"
-        >
-          {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
-          {copied ? "Copied" : "Copy"}
-        </button>
-        <button
-          onClick={handleDownload}
-          className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.05] hover:text-text-primary"
-        >
-          <Download className="h-3.5 w-3.5" />
-          Download
-        </button>
+          <button
+            onClick={handleCopy}
+            className="text-text-secondary hover:text-text-primary flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors hover:bg-white/[0.05]"
+          >
+            {copied ? (
+              <Check className="text-success h-3.5 w-3.5" />
+            ) : (
+              <Copy className="h-3.5 w-3.5" />
+            )}
+            {copied ? "Copied" : "Copy"}
+          </button>
+          <button
+            onClick={handleDownload}
+            className="text-text-secondary hover:text-text-primary flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors hover:bg-white/[0.05]"
+          >
+            <Download className="h-3.5 w-3.5" />
+            Download
+          </button>
         </div>
       </div>
 
@@ -94,15 +99,11 @@ export function ConversationReview({ conversation, messages }: ConversationRevie
               <ChatBubble
                 key={msg.id}
                 side={isUser ? "right" : "left"}
-                bgClass={isUser ? "bg-brand" : "bg-[#4D331F]"}
+                bgClass={isUser ? "bg-chat-user" : "bg-sky-text"}
                 tailColor={isUser ? USER_BG : BRANGUS_BG}
-                textClass={isUser ? "text-white" : "text-text-primary"}
+                textClass={isUser ? "text-white" : "text-white"}
               >
-                {isUser ? (
-                  msg.content
-                ) : (
-                  <FormattedResponse text={msg.content} />
-                )}
+                {isUser ? msg.content : <FormattedResponse text={msg.content} />}
               </ChatBubble>
             );
           })}
@@ -130,7 +131,9 @@ function FormattedResponse({ text }: { text: string }) {
                 return (
                   <div key={j} className="flex gap-2 pl-1">
                     <span className="text-text-muted shrink-0">-</span>
-                    <span className="whitespace-pre-wrap">{trimmed.slice(2).replace(/\*\*(.*?)\*\*/g, "$1")}</span>
+                    <span className="whitespace-pre-wrap">
+                      {trimmed.slice(2).replace(/\*\*(.*?)\*\*/g, "$1")}
+                    </span>
                   </div>
                 );
               }
@@ -139,7 +142,9 @@ function FormattedResponse({ text }: { text: string }) {
                 return (
                   <p key={j} className="whitespace-pre-wrap">
                     <span className="text-text-muted">{labelMatch[1]}:</span>{" "}
-                    <span className="font-medium">{labelMatch[2].replace(/\*\*(.*?)\*\*/g, "$1")}</span>
+                    <span className="font-medium">
+                      {labelMatch[2].replace(/\*\*(.*?)\*\*/g, "$1")}
+                    </span>
                   </p>
                 );
               }

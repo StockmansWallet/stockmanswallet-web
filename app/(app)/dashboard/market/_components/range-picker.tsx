@@ -116,7 +116,7 @@ export function RangePicker({ value, onChange }: RangePickerProps) {
                 onChange({ key: "Custom", startISO: start, endISO: end });
                 setShowCustom(false);
               }}
-              className="bg-markets hover:bg-markets-dark rounded-full px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors disabled:opacity-40"
+              className="bg-markets hover:bg-markets-dark rounded-full px-3.5 py-1.5 text-xs font-semibold text-black shadow-sm transition-colors disabled:opacity-40"
             >
               Apply
             </button>

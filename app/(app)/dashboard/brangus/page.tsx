@@ -23,7 +23,6 @@ export default async function BrangusPage() {
       <PageHeader
         feature="brangus"
         title="Brangus"
-        titleClassName="text-4xl font-bold text-brand"
         subtitle="Your personal livestock advisor, and new best mate."
         subtitleClassName="mt-1 text-base text-text-muted"
       />

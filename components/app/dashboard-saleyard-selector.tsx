@@ -3,7 +3,12 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MapPin, ChevronDown, X, Search } from "lucide-react";
-import { saleyards, saleyardToState, saleyardCoordinates, saleyardLocality } from "@/lib/data/reference-data";
+import {
+  saleyards,
+  saleyardToState,
+  saleyardCoordinates,
+  saleyardLocality,
+} from "@/lib/data/reference-data";
 
 const stateOrder = ["NSW", "QLD", "VIC", "SA", "WA", "TAS", "Other"] as const;
 
@@ -23,7 +28,10 @@ function shortName(name: string): string {
     .replace(/ Livestock (Marketing Centre|Selling Centre|Exchange|Centre)$/i, "")
     .replace(/ Regional Livestock (Exchange|Market)$/i, "")
     .replace(/ Central [\w ]+ Livestock Exchange$/i, "")
-    .replace(/ (Dalrymple |Northern Victoria |Great Southern Regional Cattle |Gippsland Regional |South Eastern |Western Victorian |Victorian |Southern |South Australian )?Saleyards?$/i, "")
+    .replace(
+      / (Dalrymple |Northern Victoria |Great Southern Regional Cattle |Gippsland Regional |South Eastern |Western Victorian |Victorian |Southern |South Australian )?Saleyards?$/i,
+      ""
+    )
     .replace(/ Livestock Exchange$/i, "")
     .trim();
 }
@@ -47,7 +55,15 @@ function closestSaleyards(
   if (property.latitude != null && property.longitude != null) {
     const distances = saleyards
       .filter((s) => saleyardCoordinates[s])
-      .map((s) => ({ name: s, dist: haversineDistance(property.latitude!, property.longitude!, saleyardCoordinates[s].lat, saleyardCoordinates[s].lon) }))
+      .map((s) => ({
+        name: s,
+        dist: haversineDistance(
+          property.latitude!,
+          property.longitude!,
+          saleyardCoordinates[s].lat,
+          saleyardCoordinates[s].lon
+        ),
+      }))
       .sort((a, b) => a.dist - b.dist);
     return distances.slice(0, 3).map((d) => d.name);
   }
@@ -59,10 +75,17 @@ function closestSaleyards(
 
 interface DashboardSaleyardSelectorProps {
   currentSaleyard: string | null;
-  primaryProperty?: { latitude?: number | null; longitude?: number | null; state?: string | null } | null;
+  primaryProperty?: {
+    latitude?: number | null;
+    longitude?: number | null;
+    state?: string | null;
+  } | null;
 }
 
-export function DashboardSaleyardSelector({ currentSaleyard, primaryProperty }: DashboardSaleyardSelectorProps) {
+export function DashboardSaleyardSelector({
+  currentSaleyard,
+  primaryProperty,
+}: DashboardSaleyardSelectorProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
@@ -124,11 +147,18 @@ export function DashboardSaleyardSelector({ currentSaleyard, primaryProperty }: 
         role="button"
         tabIndex={0}
         onClick={() => setOpen(!open)}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpen(!open); } }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setOpen(!open);
+          }
+        }}
         className="flex w-full cursor-pointer items-center gap-2 rounded-lg bg-gradient-to-b from-white/[0.07] to-white/[0.02] px-3 py-3 text-left text-sm transition-colors hover:from-white/[0.09] hover:to-white/[0.04]"
       >
-        <MapPin className="h-4 w-4 shrink-0 text-brand" />
-        <span className={`flex-1 truncate ${displayName ? "text-text-primary font-medium" : "text-text-muted"}`}>
+        <MapPin className="text-brand h-4 w-4 shrink-0" />
+        <span
+          className={`flex-1 truncate ${displayName ? "text-text-primary font-medium" : "text-text-muted"}`}
+        >
           {displayName ?? "Your Herd\u2019s Combined Saleyards"}
         </span>
         {currentSaleyard ? (
@@ -141,26 +171,28 @@ export function DashboardSaleyardSelector({ currentSaleyard, primaryProperty }: 
             className="rounded p-1 hover:bg-white/10"
             aria-label="Clear saleyard"
           >
-            <X className="h-3.5 w-3.5 text-text-muted" />
+            <X className="text-text-muted h-3.5 w-3.5" />
           </button>
         ) : (
-          <ChevronDown className={`h-4 w-4 shrink-0 text-text-muted transition-transform ${open ? "rotate-180" : ""}`} />
+          <ChevronDown
+            className={`text-text-muted h-4 w-4 shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+          />
         )}
       </div>
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute left-0 right-0 z-50 mt-1 max-h-80 overflow-hidden rounded-xl border border-white/10 bg-[#1c1c1e] shadow-xl">
+        <div className="bg-popover-cool absolute right-0 left-0 z-50 mt-1 max-h-80 overflow-hidden rounded-xl border border-white/10 shadow-xl">
           {/* Search */}
           <div className="flex items-center gap-2 border-b border-white/5 px-3 py-2">
-            <Search className="h-3.5 w-3.5 text-text-muted" />
+            <Search className="text-text-muted h-3.5 w-3.5" />
             <input
               ref={searchRef}
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search saleyards..."
-              className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none"
+              className="text-text-primary placeholder:text-text-muted flex-1 bg-transparent text-sm outline-none"
             />
           </div>
 
@@ -195,7 +227,7 @@ export function DashboardSaleyardSelector({ currentSaleyard, primaryProperty }: 
             {/* Close to your property */}
             {filteredNearby.length > 0 && (
               <div className="mt-2">
-                <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+                <p className="text-text-muted mb-1 px-3 text-[10px] font-semibold tracking-wider uppercase">
                   Close to Your Property
                 </p>
                 {filteredNearby.map((yard) => (
@@ -211,7 +243,7 @@ export function DashboardSaleyardSelector({ currentSaleyard, primaryProperty }: 
                   >
                     <span>{shortName(yard)}</span>
                     {saleyardLocality[yard] && (
-                      <span className="ml-2 text-xs text-text-muted">{saleyardLocality[yard]}</span>
+                      <span className="text-text-muted ml-2 text-xs">{saleyardLocality[yard]}</span>
                     )}
                   </button>
                 ))}
@@ -220,7 +252,7 @@ export function DashboardSaleyardSelector({ currentSaleyard, primaryProperty }: 
 
             {filteredGroups.map((g) => (
               <div key={g.state} className="mt-2">
-                <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+                <p className="text-text-muted mb-1 px-3 text-[10px] font-semibold tracking-wider uppercase">
                   {g.state}
                 </p>
                 {g.yards.map((yard) => (
@@ -241,7 +273,9 @@ export function DashboardSaleyardSelector({ currentSaleyard, primaryProperty }: 
             ))}
 
             {filteredGroups.length === 0 && (
-              <p className="py-4 text-center text-sm text-text-muted">No saleyards match your search.</p>
+              <p className="text-text-muted py-4 text-center text-sm">
+                No saleyards match your search.
+              </p>
             )}
           </div>
         </div>

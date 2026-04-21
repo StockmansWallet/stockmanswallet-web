@@ -1,5 +1,6 @@
 import type { ReportData } from "@/lib/types/reports";
 import { ReportPrintStyles } from "../asset-register/print-styles";
+import { formatDateAU } from "@/lib/dates";
 
 // Formatters
 function fmt(v: number) {
@@ -19,13 +20,7 @@ function fmtFull(v: number) {
   }).format(v);
 }
 
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-AU", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
+const fmtDate = formatDateAU;
 
 function fmtGeneratedAt(iso: string) {
   const d = new Date(iso);

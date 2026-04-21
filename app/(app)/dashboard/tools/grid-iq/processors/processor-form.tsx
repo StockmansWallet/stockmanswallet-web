@@ -61,9 +61,7 @@ export function ProcessorForm({
   }) => {
     const display =
       result.formattedAddress ||
-      [result.address, result.suburb, result.state, result.postcode]
-        .filter(Boolean)
-        .join(", ");
+      [result.address, result.suburb, result.state, result.postcode].filter(Boolean).join(", ");
     setAddress(display);
     setLatitude(result.latitude.toFixed(5));
     setLongitude(result.longitude.toFixed(5));
@@ -121,7 +119,7 @@ export function ProcessorForm({
   };
 
   const inputCls =
-    "w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-teal/50 focus:outline-none focus:ring-1 focus:ring-teal/25";
+    "w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-grid-iq/50 focus:outline-none focus:ring-1 focus:ring-grid-iq/25";
   const labelCls = "mb-1 block text-[11px] text-text-muted";
 
   return (
@@ -150,11 +148,7 @@ export function ProcessorForm({
               placeholder="e.g. JBS Dinmore, or 37644 Bruce Highway Riverview"
               searchTypes={[]}
             />
-            {address && (
-              <p className="mt-1 text-[11px] text-text-muted">
-                Saved: {address}
-              </p>
-            )}
+            {address && <p className="text-text-muted mt-1 text-[11px]">Saved: {address}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -181,16 +175,16 @@ export function ProcessorForm({
               />
             </div>
           </div>
-          <p className="text-[11px] text-text-muted">
-            Coordinates drive freight calculations. Pick a search result above
-            or paste lat/lng from Google Maps.
+          <p className="text-text-muted text-[11px]">
+            Coordinates drive freight calculations. Pick a search result above or paste lat/lng from
+            Google Maps.
           </p>
         </CardContent>
       </Card>
 
       <Card>
         <CardContent className="space-y-3 p-4">
-          <p className="text-xs font-semibold text-text-primary">Contact (optional)</p>
+          <p className="text-text-primary text-xs font-semibold">Contact (optional)</p>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className={labelCls}>Contact Name</label>
@@ -236,11 +230,7 @@ export function ProcessorForm({
         </CardContent>
       </Card>
 
-      {error && (
-        <div className="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">
-          {error}
-        </div>
-      )}
+      {error && <div className="bg-error/10 text-error rounded-lg px-3 py-2 text-sm">{error}</div>}
 
       <div className="flex justify-end gap-2">
         <Button
@@ -252,7 +242,7 @@ export function ProcessorForm({
         >
           Cancel
         </Button>
-        <Button type="submit" variant="teal" disabled={isPending}>
+        <Button type="submit" variant="grid-iq" disabled={isPending}>
           {isPending ? (
             <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
           ) : (

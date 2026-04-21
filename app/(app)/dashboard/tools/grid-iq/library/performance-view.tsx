@@ -2,14 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import {
-  TrendingUp,
-  ShieldCheck,
-  Target,
-  Award,
-  BarChart3,
-  Scale,
-} from "lucide-react";
+import { TrendingUp, ShieldCheck, Target, Award, BarChart3, Scale } from "lucide-react";
 import type { ProducerProfile } from "@/lib/grid-iq/producer-profile";
 
 // Inlined so this client component does not pull in the server-only
@@ -48,7 +41,7 @@ export function PerformanceView({ profile, trend }: Props) {
         <EmptyState
           title="No performance data yet"
           description="Upload kill sheets and run post-sale analyses to build your performance profile. The more data you add, the more accurate your insights become."
-          variant="teal"
+          variant="grid-iq"
         />
       </Card>
     );
@@ -60,11 +53,7 @@ export function PerformanceView({ profile, trend }: Props) {
       <Card>
         <CardContent className="p-4">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <MetricCard
-              icon={BarChart3}
-              label="Kill Sheets"
-              value={`${profile.killSheetCount}`}
-            />
+            <MetricCard icon={BarChart3} label="Kill Sheets" value={`${profile.killSheetCount}`} />
             <MetricCard
               icon={Target}
               label="Total Head"
@@ -74,17 +63,14 @@ export function PerformanceView({ profile, trend }: Props) {
               icon={Award}
               label="Confidence"
               value={
-                profile.confidenceTier.charAt(0).toUpperCase() +
-                profile.confidenceTier.slice(1)
+                profile.confidenceTier.charAt(0).toUpperCase() + profile.confidenceTier.slice(1)
               }
             />
             <MetricCard
               icon={Scale}
               label="Avg Weight"
               value={
-                profile.averageBodyWeight
-                  ? `${Math.round(profile.averageBodyWeight)} kg`
-                  : "-"
+                profile.averageBodyWeight ? `${Math.round(profile.averageBodyWeight)} kg` : "-"
               }
             />
           </div>
@@ -96,20 +82,20 @@ export function PerformanceView({ profile, trend }: Props) {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal/15">
-                <TrendingUp className="h-4 w-4 text-teal" />
+              <div className="bg-grid-iq/15 flex h-8 w-8 items-center justify-center rounded-lg">
+                <TrendingUp className="text-grid-iq h-4 w-4" />
               </div>
               <div>
-                <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
+                <p className="text-text-muted text-[10px] font-medium tracking-wider uppercase">
                   Avg Realisation Factor
                 </p>
-                <p className="text-lg font-bold text-text-primary">
+                <p className="text-text-primary text-lg font-bold">
                   {profile.averageRF ? `${Math.round(profile.averageRF * 100)}%` : "-"}
                 </p>
               </div>
             </div>
             {profile.latestRF != null && profile.averageRF != null && (
-              <p className="mt-2 text-xs text-text-muted">
+              <p className="text-text-muted mt-2 text-xs">
                 Latest: {Math.round(profile.latestRF * 100)}%
                 {profile.latestRF > profile.averageRF
                   ? " (above avg)"
@@ -124,14 +110,14 @@ export function PerformanceView({ profile, trend }: Props) {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-success/15">
-                <ShieldCheck className="h-4 w-4 text-success" />
+              <div className="bg-success/15 flex h-8 w-8 items-center justify-center rounded-lg">
+                <ShieldCheck className="text-success h-4 w-4" />
               </div>
               <div>
-                <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
+                <p className="text-text-muted text-[10px] font-medium tracking-wider uppercase">
                   Avg Grid Capture
                 </p>
-                <p className="text-lg font-bold text-text-primary">
+                <p className="text-text-primary text-lg font-bold">
                   {profile.averageGCR ? `${profile.averageGCR.toFixed(1)}%` : "-"}
                 </p>
               </div>
@@ -142,17 +128,15 @@ export function PerformanceView({ profile, trend }: Props) {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-warning/15">
-                <Award className="h-4 w-4 text-warning" />
+              <div className="bg-warning/15 flex h-8 w-8 items-center justify-center rounded-lg">
+                <Award className="text-warning h-4 w-4" />
               </div>
               <div>
-                <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
+                <p className="text-text-muted text-[10px] font-medium tracking-wider uppercase">
                   Avg Kill Score
                 </p>
-                <p className="text-lg font-bold text-text-primary">
-                  {profile.averageKillScore
-                    ? `${profile.averageKillScore.toFixed(0)}/100`
-                    : "-"}
+                <p className="text-text-primary text-lg font-bold">
+                  {profile.averageKillScore ? `${profile.averageKillScore.toFixed(0)}/100` : "-"}
                 </p>
               </div>
             </div>
@@ -165,8 +149,8 @@ export function PerformanceView({ profile, trend }: Props) {
         <Card>
           <CardContent className="p-4">
             <div className="mb-3 flex items-center gap-2">
-              <Award className="h-4 w-4 text-teal" />
-              <p className="text-sm font-semibold text-teal">Kill Score Trend</p>
+              <Award className="text-grid-iq h-4 w-4" />
+              <p className="text-grid-iq text-sm font-semibold">Kill Score Trend</p>
             </div>
             <div className="space-y-2">
               {trend.map((a) => {
@@ -178,13 +162,13 @@ export function PerformanceView({ profile, trend }: Props) {
                   ks >= 85
                     ? "bg-success"
                     : ks >= 70
-                      ? "bg-teal"
+                      ? "bg-grid-iq"
                       : ks >= 50
                         ? "bg-warning"
                         : "bg-error";
                 return (
                   <div key={a.id} className="flex items-center gap-3">
-                    <span className="w-20 shrink-0 text-xs text-text-muted">
+                    <span className="text-text-muted w-20 shrink-0 text-xs">
                       {a.analysis_date
                         ? new Date(a.analysis_date).toLocaleDateString("en-AU", {
                             day: "2-digit",
@@ -200,11 +184,11 @@ export function PerformanceView({ profile, trend }: Props) {
                         />
                       </div>
                     </div>
-                    <span className="w-10 shrink-0 text-right text-xs font-semibold text-text-primary">
+                    <span className="text-text-primary w-10 shrink-0 text-right text-xs font-semibold">
                       {ks.toFixed(0)}
                     </span>
                     {gcr != null && (
-                      <span className="w-16 shrink-0 text-right text-[10px] text-text-muted">
+                      <span className="text-text-muted w-16 shrink-0 text-right text-[10px]">
                         GCR {gcr.toFixed(0)}%
                       </span>
                     )}
@@ -221,27 +205,27 @@ export function PerformanceView({ profile, trend }: Props) {
         <Card>
           <CardContent className="p-4">
             <div className="mb-3 flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-teal" />
-              <p className="text-sm font-semibold text-teal">Top Grades</p>
+              <BarChart3 className="text-grid-iq h-4 w-4" />
+              <p className="text-grid-iq text-sm font-semibold">Top Grades</p>
             </div>
             <div className="space-y-2">
               {profile.topGrades.map((g) => (
                 <div key={g.gradeCode} className="flex items-center gap-3">
-                  <span className="w-12 shrink-0 font-mono text-sm font-semibold text-text-primary">
+                  <span className="text-text-primary w-12 shrink-0 font-mono text-sm font-semibold">
                     {g.gradeCode}
                   </span>
                   <div className="flex-1">
                     <div className="h-5 w-full overflow-hidden rounded-lg bg-white/[0.04]">
                       <div
-                        className="h-full rounded-lg bg-teal/60 transition-all"
+                        className="bg-grid-iq/60 h-full rounded-lg transition-all"
                         style={{ width: `${Math.min(g.percentage, 100)}%` }}
                       />
                     </div>
                   </div>
-                  <span className="w-14 shrink-0 text-right text-xs text-text-muted">
+                  <span className="text-text-muted w-14 shrink-0 text-right text-xs">
                     {g.percentage.toFixed(1)}%
                   </span>
-                  <span className="w-14 shrink-0 text-right text-xs text-text-secondary">
+                  <span className="text-text-secondary w-14 shrink-0 text-right text-xs">
                     {g.bodyCount} head
                   </span>
                 </div>
@@ -256,36 +240,36 @@ export function PerformanceView({ profile, trend }: Props) {
         <Card>
           <CardContent className="p-4">
             <div className="mb-3 flex items-center gap-2">
-              <Scale className="h-4 w-4 text-teal" />
-              <p className="text-sm font-semibold text-teal">Carcase Averages</p>
+              <Scale className="text-grid-iq h-4 w-4" />
+              <p className="text-grid-iq text-sm font-semibold">Carcase Averages</p>
             </div>
             <div className="grid grid-cols-3 gap-4 text-center">
               {profile.averageP8Fat != null && (
                 <div>
-                  <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
+                  <p className="text-text-muted text-[10px] font-medium tracking-wider uppercase">
                     Avg P8 Fat
                   </p>
-                  <p className="mt-0.5 text-sm font-bold text-text-primary">
+                  <p className="text-text-primary mt-0.5 text-sm font-bold">
                     {profile.averageP8Fat.toFixed(1)} mm
                   </p>
                 </div>
               )}
               {profile.averageDentition != null && (
                 <div>
-                  <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
+                  <p className="text-text-muted text-[10px] font-medium tracking-wider uppercase">
                     Avg Dentition
                   </p>
-                  <p className="mt-0.5 text-sm font-bold text-text-primary">
+                  <p className="text-text-primary mt-0.5 text-sm font-bold">
                     {profile.averageDentition.toFixed(1)}
                   </p>
                 </div>
               )}
               {profile.averageBodyWeight != null && (
                 <div>
-                  <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
+                  <p className="text-text-muted text-[10px] font-medium tracking-wider uppercase">
                     Avg HSCW
                   </p>
-                  <p className="mt-0.5 text-sm font-bold text-text-primary">
+                  <p className="text-text-primary mt-0.5 text-sm font-bold">
                     {Math.round(profile.averageBodyWeight)} kg
                   </p>
                 </div>
@@ -297,9 +281,7 @@ export function PerformanceView({ profile, trend }: Props) {
 
       {/* Confidence tier note */}
       <div className="rounded-xl bg-white/[0.02] px-4 py-3 backdrop-blur-md">
-        <p className="text-xs text-text-muted">
-          {getConfidenceLabel(profile.confidenceTier)}
-        </p>
+        <p className="text-text-muted text-xs">{getConfidenceLabel(profile.confidenceTier)}</p>
       </div>
     </div>
   );
@@ -317,12 +299,10 @@ function MetricCard({
   return (
     <div className="text-center">
       <div className="mb-0.5 flex items-center justify-center gap-1">
-        <Icon className="h-3 w-3 text-text-muted" />
-        <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
-          {label}
-        </p>
+        <Icon className="text-text-muted h-3 w-3" />
+        <p className="text-text-muted text-[10px] font-medium tracking-wider uppercase">{label}</p>
       </div>
-      <p className="text-sm font-bold text-text-primary">{value}</p>
+      <p className="text-text-primary text-sm font-bold">{value}</p>
     </div>
   );
 }

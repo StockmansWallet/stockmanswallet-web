@@ -39,7 +39,9 @@ async function loadAlerts(userId: string): Promise<AlertRow[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("market_price_alerts")
-    .select("id, target_kind, target_name, state, comparator, threshold_cents, is_active, triggered_at, last_observed_price_cents, note, created_at")
+    .select(
+      "id, target_kind, target_name, state, comparator, threshold_cents, is_active, triggered_at, last_observed_price_cents, note, created_at"
+    )
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
@@ -60,15 +62,12 @@ export default async function PriceAlertsPage() {
           title="Price alerts"
           subtitle="Get notified when categories or saleyards cross your target price."
         />
-        <p className="text-sm text-text-muted">Sign in to manage your alerts.</p>
+        <p className="text-text-muted text-sm">Sign in to manage your alerts.</p>
       </div>
     );
   }
 
-  const [alerts, saleyards] = await Promise.all([
-    loadAlerts(user.id),
-    loadSaleyards(),
-  ]);
+  const [alerts, saleyards] = await Promise.all([loadAlerts(user.id), loadSaleyards()]);
 
   const categoryOptions = MLA_CATEGORIES.map((c) => ({ value: c, label: c }));
   const stateOptions = [
@@ -81,7 +80,7 @@ export default async function PriceAlertsPage() {
       <div className="mb-4 sm:hidden">
         <Link
           href="/dashboard/settings"
-          className="inline-flex items-center gap-1.5 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary"
+          className="bg-surface-lowest text-text-secondary hover:bg-surface-raised hover:text-text-primary inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
           Settings
@@ -89,7 +88,7 @@ export default async function PriceAlertsPage() {
       </div>
       <PageHeader
         title="Price alerts"
-        titleClassName="text-4xl font-bold text-rose-400"
+        titleClassName="text-4xl font-bold text-pink"
         subtitle="Get notified when categories or saleyards cross your target price."
       />
 

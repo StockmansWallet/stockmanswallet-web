@@ -25,8 +25,8 @@ interface ProfileSettingsFormProps {
 
 function SectionIcon({ icon: Icon }: { icon: React.ComponentType<{ className?: string }> }) {
   return (
-    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
-      <Icon className="h-3.5 w-3.5 text-brand" aria-hidden="true" />
+    <div className="bg-brand/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+      <Icon className="text-brand h-3.5 w-3.5" aria-hidden="true" />
     </div>
   );
 }
@@ -78,8 +78,8 @@ export function ProfileSettingsForm({
           role={message.type === "error" ? "alert" : "status"}
           className={`rounded-xl border px-4 py-3 text-sm ${
             message.type === "error"
-              ? "border-red-800 bg-red-900/20 text-error"
-              : "border-green-800 bg-green-900/20 text-success"
+              ? "border-error/40 bg-error/10 text-error"
+              : "border-success/40 bg-success/10 text-success"
           }`}
         >
           {message.text}
@@ -96,10 +96,28 @@ export function ProfileSettingsForm({
         <CardContent>
           <div className="space-y-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Input id="first_name" name="first_name" label="First Name" defaultValue={firstName} placeholder="First name" />
-              <Input id="last_name" name="last_name" label="Last Name" defaultValue={lastName} placeholder="Last name" />
+              <Input
+                id="first_name"
+                name="first_name"
+                label="First Name"
+                defaultValue={firstName}
+                placeholder="First name"
+              />
+              <Input
+                id="last_name"
+                name="last_name"
+                label="Last Name"
+                defaultValue={lastName}
+                placeholder="Last name"
+              />
             </div>
-            <Input id="email" label="Email" value={email} disabled helperText="Email cannot be changed" />
+            <Input
+              id="email"
+              label="Email"
+              value={email}
+              disabled
+              helperText="Email cannot be changed"
+            />
             <Input
               id="role_display"
               label="Role"
@@ -121,8 +139,9 @@ export function ProfileSettingsForm({
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <p className="text-xs leading-relaxed text-text-muted">
-              These details are visible when another producer views your profile in the Producer Network.
+            <p className="text-text-muted text-xs leading-relaxed">
+              These details are visible when another producer views your profile in the Producer
+              Network.
             </p>
             <Input
               id="contact_email"

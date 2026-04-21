@@ -3,16 +3,44 @@
 // Interactive Brangus chat component
 // Handles message display, input, API calls, and tool execution loop
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useLayoutEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import { Brain, Loader2, AlertCircle, ClipboardCopy, Download, Check, FileText, Share2, Mail, MessageCircle } from "lucide-react";
-import { sendMessage, buildSystemPrompt, loadChatDataStore, fetchServerConfig } from "@/lib/brangus/chat-service";
+import {
+  Brain,
+  ChevronDown,
+  Loader2,
+  AlertCircle,
+  ClipboardCopy,
+  Download,
+  Check,
+  FileText,
+  Share2,
+  Mail,
+  MessageCircle,
+} from "lucide-react";
+import {
+  sendMessage,
+  buildSystemPrompt,
+  loadChatDataStore,
+  fetchServerConfig,
+} from "@/lib/brangus/chat-service";
 import { fetchUserMemories } from "@/lib/brangus/tools";
-import { createConversation, saveMessage, autoTitleConversation, formatConversationForExport } from "@/lib/brangus/conversation-service";
+import {
+  createConversation,
+  saveMessage,
+  autoTitleConversation,
+  formatConversationForExport,
+} from "@/lib/brangus/conversation-service";
 import type { BrangusConversationRow } from "@/lib/brangus/conversation-service";
 import { useSpeechRecognition } from "@/lib/brangus/use-speech-recognition";
-import type { ChatMessage, AnthropicMessage, ChatDataStore, QuickInsight, CardAction } from "@/lib/brangus/types";
+import type {
+  ChatMessage,
+  AnthropicMessage,
+  ChatDataStore,
+  QuickInsight,
+  CardAction,
+} from "@/lib/brangus/types";
 import { createClient } from "@/lib/supabase/client";
 import { ChatBubble } from "@/components/app/chat/chat-bubble";
 import { ChatInput } from "@/components/app/chat/chat-input";
@@ -29,10 +57,10 @@ const SUGGESTED_PROMPTS = [
   "Give me a breakdown of all my herds",
 ];
 
-// Brangus bubble background - warm brown
-const BRANGUS_BG = "#44372D";
-// User brand color
-const USER_BG = "var(--color-brand)";
+// Brangus bubble - palette sky blue (text-safe variant), matching his work shirt
+const BRANGUS_BG = "var(--color-sky-text)";
+// User bubble - semantic token (cool-toned stone grey)
+const USER_BG = "var(--color-chat-user)";
 // Profile images
 const BRANGUS_AVATAR = "/images/brangus-chat-profile.webp";
 
@@ -124,7 +152,15 @@ function hydrateCards(messages: SavedMessage[]): QuickInsight[] {
   return cards;
 }
 
-export function BrangusChat({ conversationId: existingConvId, initialMessages, pastConversationCount = 0, onConversationCreated, onConversationUpdated, toolbarContainer, prefill }: BrangusChatProps = {}) {
+export function BrangusChat({
+  conversationId: existingConvId,
+  initialMessages,
+  pastConversationCount = 0,
+  onConversationCreated,
+  onConversationUpdated,
+  toolbarContainer,
+  prefill,
+}: BrangusChatProps = {}) {
   // Hydrate UI messages from saved conversation (if resuming)
   const hydratedMessages: ChatMessage[] = (initialMessages ?? []).map((m) => ({
     id: m.id,
@@ -139,17 +175,21 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
   }));
 
   // Add welcome message for new conversations (not resumed)
-  const welcomeMessage: ChatMessage[] = !existingConvId && hydratedMessages.length === 0
-    ? [{
-        id: "welcome",
-        role: "assistant" as const,
-        content: buildWelcomeGreeting(pastConversationCount),
-        timestamp: new Date(),
-      }]
-    : [];
+  const welcomeMessage: ChatMessage[] =
+    !existingConvId && hydratedMessages.length === 0
+      ? [
+          {
+            id: "welcome",
+            role: "assistant" as const,
+            content: buildWelcomeGreeting(pastConversationCount),
+            timestamp: new Date(),
+          },
+        ]
+      : [];
 
   const [messages, setMessages] = useState<ChatMessage[]>([...welcomeMessage, ...hydratedMessages]);
-  const [conversationHistory, setConversationHistory] = useState<AnthropicMessage[]>(hydratedHistory);
+  const [conversationHistory, setConversationHistory] =
+    useState<AnthropicMessage[]>(hydratedHistory);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialising, setIsInitialising] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -157,9 +197,16 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
   const [systemPrompt, setSystemPrompt] = useState("");
   // Accumulated summary cards for the persistent bottom strip - grows across the session
   // Hydrate from saved messages when loading a saved conversation
-  const [sessionCards, setSessionCards] = useState<QuickInsight[]>(() => hydrateCards(initialMessages ?? []));
+  const [sessionCards, setSessionCards] = useState<QuickInsight[]>(() =>
+    hydrateCards(initialMessages ?? [])
+  );
   const [copied, setCopied] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const shareTriggerRef = useRef<HTMLButtonElement>(null);
+  const shareMenuRef = useRef<HTMLDivElement>(null);
+  const [shareMenuPos, setShareMenuPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
+  const [shareMenuMounted, setShareMenuMounted] = useState(false);
+  useEffect(() => { setShareMenuMounted(true); }, []);
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [userInitials, setUserInitials] = useState("SW");
@@ -171,7 +218,14 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
   const prefillSentRef = useRef(false);
 
   // Voice input via Web Speech API (en-AU, livestock term corrections)
-  const { isListening, transcript, finalTranscript, startListening, stopListening, isSupported: micSupported } = useSpeechRecognition();
+  const {
+    isListening,
+    transcript,
+    finalTranscript,
+    startListening,
+    stopListening,
+    isSupported: micSupported,
+  } = useSpeechRecognition();
 
   const handleMicTap = useCallback(() => {
     if (isListening) {
@@ -190,8 +244,18 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
     supabase.auth.getUser().then(({ data }) => {
       const meta = data.user?.user_metadata;
       if (meta) {
-        const first = (meta.first_name || meta.given_name || meta.full_name?.split(" ")[0] || "").charAt(0);
-        const last = (meta.last_name || meta.family_name || meta.full_name?.split(" ").pop() || "").charAt(0);
+        const first = (
+          meta.first_name ||
+          meta.given_name ||
+          meta.full_name?.split(" ")[0] ||
+          ""
+        ).charAt(0);
+        const last = (
+          meta.last_name ||
+          meta.family_name ||
+          meta.full_name?.split(" ").pop() ||
+          ""
+        ).charAt(0);
         if (first || last) setUserInitials((first + last).toUpperCase());
 
         // Use custom avatar, Google avatar, or fall back to initials
@@ -219,25 +283,28 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
   }, [messages]);
 
   // Card action handler - navigates to the relevant section of the app
-  const handleCardAction = useCallback((action: CardAction) => {
-    switch (action.type) {
-      case "yardBook":
-        router.push("/dashboard/tools/yard-book");
-        break;
-      case "herdDetail":
-        router.push(`/dashboard/herds/${action.id}`);
-        break;
-      case "portfolio":
-        router.push("/dashboard");
-        break;
-      case "market":
-        router.push("/dashboard/market");
-        break;
-      case "freight":
-        router.push("/dashboard/tools/freight");
-        break;
-    }
-  }, [router]);
+  const handleCardAction = useCallback(
+    (action: CardAction) => {
+      switch (action.type) {
+        case "yardBook":
+          router.push("/dashboard/tools/yard-book");
+          break;
+        case "herdDetail":
+          router.push(`/dashboard/herds/${action.id}`);
+          break;
+        case "portfolio":
+          router.push("/dashboard");
+          break;
+        case "market":
+          router.push("/dashboard/market");
+          break;
+        case "freight":
+          router.push("/dashboard/tools/freight");
+          break;
+      }
+    },
+    [router]
+  );
 
   // Load portfolio data on mount
   useEffect(() => {
@@ -246,7 +313,9 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
     async function init() {
       try {
         const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (user) userIdRef.current = user.id;
 
         // Debug: Fetch all config from server (mirrors iOS ServerConfig pattern)
@@ -269,13 +338,17 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
     }
 
     init();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Persist yard book mutations after each response
   const persistMutations = useCallback(async (dataStore: ChatDataStore) => {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return;
 
     // Create new yard book events
@@ -311,97 +384,112 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
     dataStore.pendingYardBookActions = [];
   }, []);
 
-  const handleSend = useCallback(async (text: string) => {
-    if (!text || isLoading || !store) return;
+  const handleSend = useCallback(
+    async (text: string) => {
+      if (!text || isLoading || !store) return;
 
-    setError(null);
-    const userId = userIdRef.current;
+      setError(null);
+      const userId = userIdRef.current;
 
-    // Create conversation on first send
-    if (!conversationIdRef.current && userId) {
-      try {
-        const conv = await createConversation(userId);
-        conversationIdRef.current = conv.id;
-        onConversationCreated?.(conv);
-      } catch (err) {
-        console.error("Failed to create conversation:", err);
+      // Create conversation on first send
+      if (!conversationIdRef.current && userId) {
+        try {
+          const conv = await createConversation(userId);
+          conversationIdRef.current = conv.id;
+          onConversationCreated?.(conv);
+        } catch (err) {
+          console.error("Failed to create conversation:", err);
+        }
       }
-    }
 
-    // Add user message to UI
-    const userMessage: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content: text,
-      timestamp: new Date(),
-    };
-    setMessages((prev) => [...prev, userMessage]);
-    setIsLoading(true);
-
-    // Persist user message (non-blocking)
-    const convId = conversationIdRef.current;
-    if (convId && userId) {
-      saveMessage(convId, userId, "user", text).catch((err) =>
-        console.error("Failed to persist user message:", err)
-      );
-    }
-
-    try {
-      const { assistantText, updatedHistory, quickInsights } = await sendMessage(
-        text,
-        conversationHistory,
-        store,
-        systemPrompt
-      );
-
-      // Add assistant message to UI (fade in, not bounce, since it replaces typing indicator)
-      const assistantMessage: ChatMessage = {
+      // Add user message to UI
+      const userMessage: ChatMessage = {
         id: crypto.randomUUID(),
-        role: "assistant",
-        content: assistantText,
+        role: "user",
+        content: text,
         timestamp: new Date(),
       };
-      postTypingIdRef.current = assistantMessage.id;
-      setMessages((prev) => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, userMessage]);
+      setIsLoading(true);
 
-      // Append summary cards to the persistent bottom strip
-      if (quickInsights && quickInsights.length > 0) {
-        setSessionCards((prev) => [...quickInsights, ...prev]);
-      }
-      setConversationHistory(updatedHistory);
-
-      // Persist assistant message (non-blocking) - include summary cards if present
-      const cardsToSave = quickInsights && quickInsights.length > 0 ? quickInsights : null;
+      // Persist user message (non-blocking)
+      const convId = conversationIdRef.current;
       if (convId && userId) {
-        saveMessage(convId, userId, "assistant", assistantText, cardsToSave).then(() => {
-          const preview = assistantText.length > 100 ? assistantText.slice(0, 97) + "..." : assistantText;
-          onConversationUpdated?.(convId, { preview_text: preview, updated_at: new Date().toISOString() });
-        }).catch((err) =>
-          console.error("Failed to persist assistant message:", err)
+        saveMessage(convId, userId, "user", text).catch((err) =>
+          console.error("Failed to persist user message:", err)
         );
       }
 
-      // Auto-title after first exchange
-      if (convId && !hasRequestedTitleRef.current) {
-        hasRequestedTitleRef.current = true;
-        autoTitleConversation(convId, text, assistantText).then((title) => {
-          if (title && convId) {
-            onConversationUpdated?.(convId, { title });
-          }
-        }).catch((err) =>
-          console.error("Auto-title failed:", err)
+      try {
+        const { assistantText, updatedHistory, quickInsights } = await sendMessage(
+          text,
+          conversationHistory,
+          store,
+          systemPrompt
         );
-      }
 
-      // Persist any yard book mutations
-      await persistMutations(store);
-    } catch (err) {
-      console.error("Brangus error:", err);
-      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isLoading, store, conversationHistory, systemPrompt, persistMutations, onConversationCreated, onConversationUpdated]);
+        // Add assistant message to UI (fade in, not bounce, since it replaces typing indicator)
+        const assistantMessage: ChatMessage = {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: assistantText,
+          timestamp: new Date(),
+        };
+        postTypingIdRef.current = assistantMessage.id;
+        setMessages((prev) => [...prev, assistantMessage]);
+
+        // Append summary cards to the persistent bottom strip
+        if (quickInsights && quickInsights.length > 0) {
+          setSessionCards((prev) => [...quickInsights, ...prev]);
+        }
+        setConversationHistory(updatedHistory);
+
+        // Persist assistant message (non-blocking) - include summary cards if present
+        const cardsToSave = quickInsights && quickInsights.length > 0 ? quickInsights : null;
+        if (convId && userId) {
+          saveMessage(convId, userId, "assistant", assistantText, cardsToSave)
+            .then(() => {
+              const preview =
+                assistantText.length > 100 ? assistantText.slice(0, 97) + "..." : assistantText;
+              onConversationUpdated?.(convId, {
+                preview_text: preview,
+                updated_at: new Date().toISOString(),
+              });
+            })
+            .catch((err) => console.error("Failed to persist assistant message:", err));
+        }
+
+        // Auto-title after first exchange
+        if (convId && !hasRequestedTitleRef.current) {
+          hasRequestedTitleRef.current = true;
+          autoTitleConversation(convId, text, assistantText)
+            .then((title) => {
+              if (title && convId) {
+                onConversationUpdated?.(convId, { title });
+              }
+            })
+            .catch((err) => console.error("Auto-title failed:", err));
+        }
+
+        // Persist any yard book mutations
+        await persistMutations(store);
+      } catch (err) {
+        console.error("Brangus error:", err);
+        setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [
+      isLoading,
+      store,
+      conversationHistory,
+      systemPrompt,
+      persistMutations,
+      onConversationCreated,
+      onConversationUpdated,
+    ]
+  );
 
   // Keep handleSendRef current so the speech effect can call it without stale closure
   handleSendRef.current = handleSend;
@@ -464,20 +552,60 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
     return formatConversationForExport(null, new Date().toISOString(), exportMessages);
   }, [messages]);
 
-  const handleShare = useCallback(async () => {
+  const handleShareNative = useCallback(async () => {
     const text = getShareText();
-    // Use native Web Share API if available (mobile + modern desktop)
     if (navigator.share) {
       try {
         await navigator.share({ title: "Brangus Chat", text });
-        return;
       } catch {
-        // User cancelled or share failed - fall through to menu
+        // User cancelled - fine, nothing to do.
       }
     }
-    // Fallback: toggle share menu dropdown
-    setShowShareMenu((prev) => !prev);
+    setShowShareMenu(false);
   }, [getShareText]);
+
+  // Position the portalled share menu under the trigger, anchored right so
+  // it never runs off screen at the edge of a chat panel. Re-runs on resize
+  // and scroll (capture phase, so nested scroll containers also trigger it)
+  // to keep the menu glued to the trigger while open.
+  useLayoutEffect(() => {
+    if (!showShareMenu) return;
+    const updatePos = () => {
+      const rect = shareTriggerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      setShareMenuPos({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      });
+    };
+    updatePos();
+    window.addEventListener("resize", updatePos);
+    window.addEventListener("scroll", updatePos, true);
+    return () => {
+      window.removeEventListener("resize", updatePos);
+      window.removeEventListener("scroll", updatePos, true);
+    };
+  }, [showShareMenu]);
+
+  // Close the share menu on click-outside / Escape.
+  useEffect(() => {
+    if (!showShareMenu) return;
+    function onPointer(e: PointerEvent) {
+      const target = e.target as Node;
+      if (shareMenuRef.current?.contains(target)) return;
+      if (shareTriggerRef.current?.contains(target)) return;
+      setShowShareMenu(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setShowShareMenu(false);
+    }
+    document.addEventListener("pointerdown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [showShareMenu]);
 
   const handleShareEmail = useCallback(() => {
     const text = getShareText();
@@ -498,8 +626,8 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
   if (isInitialising) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-brand" />
-        <p className="text-sm text-text-muted">Loading your portfolio data...</p>
+        <Loader2 className="text-brangus h-8 w-8 animate-spin" />
+        <p className="text-text-muted text-sm">Loading your portfolio data...</p>
       </div>
     );
   }
@@ -511,79 +639,119 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
         userLabel={userInitials && userInitials !== "SW" ? userInitials : "You"}
       />
 
-      {/* Export toolbar - always rendered, disabled until 2+ messages */}
+      {/* Share menu - one unified button. Disabled until there are 2+ messages
+          so there's something worth sharing. Matches the styling of the
+          "Download Reports" button on the reports pages. The dropdown is
+          portalled to document.body + fixed-positioned so it escapes any
+          overflow-clipping parent (eg. the hub's toolbar container). */}
       {(() => {
         const canExport = messages.length >= 2;
-        const btnClass = canExport
-          ? "inline-flex h-8 items-center gap-1.5 rounded-full bg-surface px-3.5 text-xs font-medium text-text-muted transition-colors hover:bg-surface-raised hover:text-text-secondary"
-          : "inline-flex h-8 items-center gap-1.5 rounded-full bg-surface px-3.5 text-xs font-medium text-text-muted/40 opacity-40 cursor-not-allowed";
+        const canNativeShare = typeof navigator !== "undefined" && !!navigator.share;
+        const menuItemClass =
+          "flex w-full items-center gap-2.5 px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-white/[0.04] hover:text-text-primary";
         const toolbar = (
-          <div data-print-hide className="flex items-center gap-1.5">
+          <div data-print-hide className="flex items-center">
             <button
-              onClick={canExport ? handleCopy : undefined}
+              ref={shareTriggerRef}
+              onClick={canExport ? () => setShowShareMenu((o) => !o) : undefined}
               disabled={!canExport}
-              className={btnClass}
-              aria-label="Copy conversation"
+              aria-haspopup="menu"
+              aria-expanded={showShareMenu}
+              aria-label="Share conversation"
+              className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold transition-colors ${
+                canExport
+                  ? "bg-warning/15 text-warning hover:bg-warning/25"
+                  : "bg-warning/10 text-warning/40 cursor-not-allowed"
+              }`}
             >
-              {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <ClipboardCopy className="h-3.5 w-3.5" />}
-              {copied ? "Copied" : "Copy"}
+              <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Share</span>
+              <ChevronDown
+                className={`h-3 w-3 transition-transform ${showShareMenu ? "rotate-180" : ""}`}
+                aria-hidden="true"
+              />
             </button>
-            <button
-              onClick={canExport ? handleDownload : undefined}
-              disabled={!canExport}
-              className={btnClass}
-              aria-label="Download conversation"
-            >
-              <Download className="h-3.5 w-3.5" />
-              Save
-            </button>
-            <button
-              onClick={canExport ? handlePrint : undefined}
-              disabled={!canExport}
-              className={btnClass}
-              aria-label="Save as PDF"
-            >
-              <FileText className="h-3.5 w-3.5" />
-              PDF
-            </button>
-            <div className="relative">
-              <button
-                onClick={canExport ? handleShare : undefined}
-                disabled={!canExport}
-                className={btnClass}
-                aria-label="Share conversation"
-              >
-                <Share2 className="h-3.5 w-3.5" />
-                Share
-              </button>
-              {showShareMenu && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowShareMenu(false)} />
-                  <div className="absolute right-0 top-full z-50 mt-1 w-40 rounded-xl border border-white/10 bg-[#2a2420] py-1 shadow-lg">
-                    <button
-                      onClick={handleShareEmail}
-                      className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-white/[0.05] hover:text-text-primary"
-                    >
-                      <Mail className="h-3.5 w-3.5" />
-                      Email
-                    </button>
-                    <button
-                      onClick={handleShareWhatsApp}
-                      className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-text-secondary transition-colors hover:bg-white/[0.05] hover:text-text-primary"
-                    >
-                      <MessageCircle className="h-3.5 w-3.5" />
-                      WhatsApp
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
           </div>
         );
-        // Portal into the hub toolbar if available, otherwise render inline
-        return toolbarContainer
-          ? createPortal(toolbar, toolbarContainer)
-          : <div className="flex justify-end border-b border-white/6 px-4 py-1.5">{toolbar}</div>;
+        const menu =
+          showShareMenu && shareMenuMounted ? (
+            <div
+              ref={shareMenuRef}
+              role="menu"
+              aria-label="Share conversation"
+              className="fixed z-[60] w-52 overflow-hidden rounded-xl border border-white/[0.08] py-1 shadow-2xl"
+              style={{
+                top: shareMenuPos.top,
+                right: shareMenuPos.right,
+                backgroundColor: "rgba(26, 26, 26, 0.55)",
+                backdropFilter: "blur(28px) saturate(1.6)",
+                WebkitBackdropFilter: "blur(28px) saturate(1.6)",
+              }}
+            >
+              <button
+                role="menuitem"
+                onClick={() => {
+                  handleCopy();
+                  setShowShareMenu(false);
+                }}
+                className={menuItemClass}
+              >
+                {copied ? (
+                  <Check className="text-success h-3.5 w-3.5" aria-hidden="true" />
+                ) : (
+                  <ClipboardCopy className="h-3.5 w-3.5" aria-hidden="true" />
+                )}
+                <span>{copied ? "Copied" : "Copy text"}</span>
+              </button>
+              <button
+                role="menuitem"
+                onClick={() => {
+                  handleDownload();
+                  setShowShareMenu(false);
+                }}
+                className={menuItemClass}
+              >
+                <Download className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>Save as .txt</span>
+              </button>
+              <button
+                role="menuitem"
+                onClick={() => {
+                  handlePrint();
+                  setShowShareMenu(false);
+                }}
+                className={menuItemClass}
+              >
+                <FileText className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>Save as PDF</span>
+              </button>
+              <div className="my-1 border-t border-white/[0.06]" />
+              {canNativeShare && (
+                <button role="menuitem" onClick={handleShareNative} className={menuItemClass}>
+                  <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span>Share via device</span>
+                </button>
+              )}
+              <button role="menuitem" onClick={handleShareEmail} className={menuItemClass}>
+                <Mail className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>Email</span>
+              </button>
+              <button role="menuitem" onClick={handleShareWhatsApp} className={menuItemClass}>
+                <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>WhatsApp</span>
+              </button>
+            </div>
+          ) : null;
+        return (
+          <>
+            {toolbarContainer ? (
+              createPortal(toolbar, toolbarContainer)
+            ) : (
+              <div className="flex justify-end border-b border-white/6 px-4 py-1.5">{toolbar}</div>
+            )}
+            {menu && createPortal(menu, document.body)}
+          </>
+        );
       })()}
 
       {/* Messages area */}
@@ -599,23 +767,19 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
                 <ChatBubble
                   key={msg.id}
                   side={isUser ? "right" : "left"}
-                  bgClass={isUser ? "bg-brand" : "bg-[#44372D]"}
+                  bgClass={isUser ? "bg-chat-user" : "bg-sky-text"}
                   tailColor={isUser ? USER_BG : BRANGUS_BG}
-                  textClass={isUser ? "text-white" : "text-white/80"}
+                  textClass={isUser ? "text-white" : "text-white"}
                   avatarUrl={isUser ? userAvatarUrl : BRANGUS_AVATAR}
                   avatarInitials={isUser ? userInitials : undefined}
                   animate
                   animationType={isPostTyping ? "fade" : "bounce"}
                 >
-                  {isUser ? (
-                    msg.content
-                  ) : (
-                    <FormattedResponse text={msg.content} />
-                  )}
+                  {isUser ? msg.content : <FormattedResponse text={msg.content} />}
                 </ChatBubble>
               );
             })}
-            {isLoading && <TypingIndicator bgColor={BRANGUS_BG} dotClass="bg-brand/60" />}
+            {isLoading && <TypingIndicator bgColor={BRANGUS_BG} dotClass="bg-brangus/60" />}
             <div ref={messagesEndRef} />
           </div>
         )}
@@ -623,7 +787,7 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
 
       {/* Error banner */}
       {error && (
-        <div className="mx-4 mb-2 flex items-center gap-2 rounded-xl bg-error/10 px-4 py-2.5 text-sm text-error">
+        <div className="bg-error/10 text-error mx-4 mb-2 flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm">
           <AlertCircle className="h-4 w-4 shrink-0" />
           <p>{error}</p>
         </div>
@@ -644,7 +808,7 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
             placeholder="Ask Brangus anything..."
             disabled={!store}
             loading={isLoading}
-            accentClass="bg-brand hover:bg-brand-dark"
+            accentClass="bg-brangus hover:bg-brangus-dark"
             isListening={isListening}
             onMicTap={handleMicTap}
             micSupported={micSupported}
@@ -661,13 +825,14 @@ export function BrangusChat({ conversationId: existingConvId, initialMessages, p
 function EmptyState({ onPromptClick }: { onPromptClick: (prompt: string) => void }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand/10">
-        <Brain className="h-7 w-7 text-brand" />
+      <div className="bg-brangus/10 flex h-14 w-14 items-center justify-center rounded-full">
+        <Brain className="text-brangus h-7 w-7" />
       </div>
       <div>
-        <p className="font-semibold text-text-primary">G&apos;day, I&apos;m Brangus</p>
-        <p className="mt-1 max-w-sm text-sm leading-relaxed text-text-muted">
-          Ask me anything about your herds, freight costs, market conditions, or livestock management.
+        <p className="text-text-primary font-semibold">G&apos;day, I&apos;m Brangus</p>
+        <p className="text-text-muted mt-1 max-w-sm text-sm leading-relaxed">
+          Ask me anything about your herds, freight costs, market conditions, or livestock
+          management.
         </p>
       </div>
 
@@ -676,7 +841,7 @@ function EmptyState({ onPromptClick }: { onPromptClick: (prompt: string) => void
           <button
             key={prompt}
             onClick={() => onPromptClick(prompt)}
-            className="rounded-xl bg-white/5 px-3.5 py-1.5 text-xs text-text-secondary transition-all hover:bg-white/8 hover:text-text-primary"
+            className="text-text-secondary hover:text-text-primary rounded-xl bg-white/5 px-3.5 py-1.5 text-xs transition-all hover:bg-white/8"
           >
             {prompt}
           </button>
@@ -712,7 +877,9 @@ function FormattedResponse({ text }: { text: string }) {
                 return (
                   <div key={j} className="flex gap-2 pl-1">
                     <span className="text-text-muted shrink-0">-</span>
-                    <span className="whitespace-pre-wrap">{formatInlineText(trimmed.slice(2))}</span>
+                    <span className="whitespace-pre-wrap">
+                      {formatInlineText(trimmed.slice(2))}
+                    </span>
                   </div>
                 );
               }
@@ -768,4 +935,3 @@ function formatInlineText(text: string): string {
   // Bold **text** -> just return plain for now (CSS handles weight via .font-medium)
   return text.replace(/\*\*(.*?)\*\*/g, "$1");
 }
-

@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ReportFilters } from "@/components/app/report-filters";
-import { ReportExportButton } from "@/components/app/report-export-button";
+import { ReportDownloadMenu } from "@/components/app/report-download-menu";
 import { parseReportConfig } from "@/lib/utils/report-config";
 import { generatePropertyComparisonData } from "@/lib/services/report-service";
 import { LazyChart } from "./lazy-chart";
@@ -75,7 +75,11 @@ export default async function PropertyComparisonPage({
         <Suspense>
           <ReportFilters properties={properties ?? []} />
         </Suspense>
-        {!isEmpty && <ReportExportButton label="Property Comparison" reportType="property-comparison" />}
+        {!isEmpty && (
+          <ReportDownloadMenu
+            groups={[{ label: "Property Comparison", reportType: "property-comparison" }]}
+          />
+        )}
       </div>
 
       {isEmpty ? (

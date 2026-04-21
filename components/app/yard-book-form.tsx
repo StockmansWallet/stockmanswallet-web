@@ -5,12 +5,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import {
-  Wrench,
-  DollarSign,
-  Home,
-  User,
-} from "lucide-react";
+import { Wrench, DollarSign, Home, User } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
 import type { Database } from "@/lib/types/database";
 import type { YardBookCategory, RecurrenceRule } from "@/lib/types/models";
@@ -25,8 +20,20 @@ const CATEGORIES: {
   bg: string;
   text: string;
 }[] = [
-  { value: "Livestock", label: "Livestock", icon: IconCattleTags, bg: "bg-yard-book/15", text: "text-yard-book-light" },
-  { value: "Operations", label: "Operations", icon: Wrench, bg: "bg-amber-700/15", text: "text-warning" },
+  {
+    value: "Livestock",
+    label: "Livestock",
+    icon: IconCattleTags,
+    bg: "bg-yard-book/15",
+    text: "text-yard-book-light",
+  },
+  {
+    value: "Operations",
+    label: "Operations",
+    icon: Wrench,
+    bg: "bg-warning/15",
+    text: "text-warning",
+  },
   { value: "Finance", label: "Finance", icon: DollarSign, bg: "bg-info/15", text: "text-info" },
   { value: "Family", label: "Family", icon: Home, bg: "bg-violet/15", text: "text-violet" },
   { value: "Me", label: "Me", icon: User, bg: "bg-success/15", text: "text-success" },
@@ -56,25 +63,15 @@ interface YardBookFormProps {
   submitLabel: string;
 }
 
-export function YardBookForm({
-  item,
-  herds,
-  properties,
-  action,
-  submitLabel,
-}: YardBookFormProps) {
+export function YardBookForm({ item, herds, properties, action, submitLabel }: YardBookFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const [category, setCategory] = useState<YardBookCategory>(
-    item?.category_raw ?? "Livestock"
-  );
+  const [category, setCategory] = useState<YardBookCategory>(item?.category_raw ?? "Livestock");
   const [isAllDay, setIsAllDay] = useState(item?.is_all_day ?? true);
   const [isRecurring, setIsRecurring] = useState(item?.is_recurring ?? false);
-  const [enableReminders, setEnableReminders] = useState(
-    (item?.reminder_offsets?.length ?? 0) > 0
-  );
+  const [enableReminders, setEnableReminders] = useState((item?.reminder_offsets?.length ?? 0) > 0);
   const [selectedOffsets, setSelectedOffsets] = useState<Set<number>>(
     new Set(item?.reminder_offsets ?? [])
   );
@@ -122,7 +119,7 @@ export function YardBookForm({
   return (
     <form onSubmit={handleSubmit}>
       {error && (
-        <div className="mb-6 rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm text-error">
+        <div className="border-error/40 bg-error/10 text-error mb-6 rounded-xl border px-4 py-3 text-sm">
           {error}
         </div>
       )}
@@ -133,19 +130,13 @@ export function YardBookForm({
         type="hidden"
         name="reminder_offsets"
         value={
-          enableReminders && selectedOffsets.size > 0
-            ? JSON.stringify([...selectedOffsets])
-            : ""
+          enableReminders && selectedOffsets.size > 0 ? JSON.stringify([...selectedOffsets]) : ""
         }
       />
       <input
         type="hidden"
         name="linked_herd_ids"
-        value={
-          selectedHerdIds.size > 0
-            ? JSON.stringify([...selectedHerdIds])
-            : ""
-        }
+        value={selectedHerdIds.size > 0 ? JSON.stringify([...selectedHerdIds]) : ""}
       />
 
       <div className="grid grid-cols-1 gap-x-8 gap-y-8 lg:grid-cols-2">
@@ -153,7 +144,7 @@ export function YardBookForm({
         <div className="space-y-8">
           {/* Title */}
           <section>
-            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
+            <h3 className="text-text-muted mb-4 text-xs font-semibold tracking-wider uppercase">
               Event Details
             </h3>
             <Input
@@ -168,7 +159,7 @@ export function YardBookForm({
 
           {/* Date & Time */}
           <section>
-            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
+            <h3 className="text-text-muted mb-4 text-xs font-semibold tracking-wider uppercase">
               Date & Time
             </h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -181,13 +172,13 @@ export function YardBookForm({
                 defaultValue={item?.event_date?.split("T")[0] ?? ""}
               />
               <div>
-                <label className="mb-1.5 flex items-center gap-2 text-sm font-medium text-text-secondary">
+                <label className="text-text-secondary mb-1.5 flex items-center gap-2 text-sm font-medium">
                   <input
                     type="checkbox"
                     name="is_all_day"
                     checked={isAllDay}
                     onChange={(e) => setIsAllDay(e.target.checked)}
-                    className="h-4 w-4 rounded border-black/20 text-emerald accent-emerald"
+                    className="text-emerald accent-emerald h-4 w-4 rounded border-black/20"
                   />
                   All day event
                 </label>
@@ -206,7 +197,7 @@ export function YardBookForm({
 
           {/* Category */}
           <section>
-            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
+            <h3 className="text-text-muted mb-4 text-xs font-semibold tracking-wider uppercase">
               Category
             </h3>
             <div className="flex flex-wrap gap-2">
@@ -221,7 +212,7 @@ export function YardBookForm({
                     className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
                       isActive
                         ? `${cat.bg} ${cat.text}`
-                        : "bg-white/5 text-text-muted hover:bg-white/8 hover:text-text-secondary"
+                        : "text-text-muted hover:text-text-secondary bg-white/5 hover:bg-white/8"
                     }`}
                   >
                     <Icon className="h-3.5 w-3.5" />
@@ -234,7 +225,7 @@ export function YardBookForm({
 
           {/* Notes */}
           <section>
-            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
+            <h3 className="text-text-muted mb-4 text-xs font-semibold tracking-wider uppercase">
               Notes
             </h3>
             <textarea
@@ -243,7 +234,7 @@ export function YardBookForm({
               rows={3}
               defaultValue={item?.notes ?? ""}
               placeholder="Any additional notes..."
-              className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:ring-1 focus:ring-inset focus:ring-emerald/60 focus:bg-white/8"
+              className="text-text-primary placeholder:text-text-muted focus:ring-emerald/60 w-full rounded-xl bg-white/5 px-4 py-3 text-sm transition-all outline-none focus:bg-white/8 focus:ring-1 focus:ring-inset"
             />
           </section>
         </div>
@@ -252,15 +243,15 @@ export function YardBookForm({
         <div className="space-y-8">
           {/* Reminders */}
           <section>
-            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
+            <h3 className="text-text-muted mb-4 text-xs font-semibold tracking-wider uppercase">
               Reminders
             </h3>
-            <label className="mb-3 flex items-center gap-2 text-sm text-text-primary">
+            <label className="text-text-primary mb-3 flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
                 checked={enableReminders}
                 onChange={(e) => setEnableReminders(e.target.checked)}
-                className="h-4 w-4 rounded border-black/20 text-emerald accent-emerald"
+                className="text-emerald accent-emerald h-4 w-4 rounded border-black/20"
               />
               Enable reminders
             </label>
@@ -276,7 +267,7 @@ export function YardBookForm({
                       className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                         isActive
                           ? "bg-emerald/15 text-emerald"
-                          : "bg-white/5 text-text-muted hover:bg-white/8 hover:text-text-secondary"
+                          : "text-text-muted hover:text-text-secondary bg-white/5 hover:bg-white/8"
                       }`}
                     >
                       {opt.label}
@@ -289,16 +280,16 @@ export function YardBookForm({
 
           {/* Recurrence */}
           <section>
-            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
+            <h3 className="text-text-muted mb-4 text-xs font-semibold tracking-wider uppercase">
               Recurrence
             </h3>
-            <label className="mb-3 flex items-center gap-2 text-sm text-text-primary">
+            <label className="text-text-primary mb-3 flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
                 name="is_recurring"
                 checked={isRecurring}
                 onChange={(e) => setIsRecurring(e.target.checked)}
-                className="h-4 w-4 rounded border-black/20 text-emerald accent-emerald"
+                className="text-emerald accent-emerald h-4 w-4 rounded border-black/20"
               />
               Recurring event
             </label>
@@ -317,7 +308,7 @@ export function YardBookForm({
           {/* Linked Herds */}
           {herds.length > 0 && (
             <section>
-              <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
+              <h3 className="text-text-muted mb-4 text-xs font-semibold tracking-wider uppercase">
                 Link to Herds
               </h3>
               <div className="flex flex-wrap gap-2">
@@ -331,7 +322,7 @@ export function YardBookForm({
                       className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                         isActive
                           ? "bg-emerald/15 text-emerald"
-                          : "bg-white/5 text-text-muted hover:bg-white/8 hover:text-text-secondary"
+                          : "text-text-muted hover:text-text-secondary bg-white/5 hover:bg-white/8"
                       }`}
                     >
                       <IconCattleTags className="h-3 w-3" />
@@ -347,7 +338,7 @@ export function YardBookForm({
           {/* Property */}
           {propertyOptions.length > 0 && (
             <section>
-              <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-text-muted">
+              <h3 className="text-text-muted mb-4 text-xs font-semibold tracking-wider uppercase">
                 Property
               </h3>
               <Select
@@ -364,7 +355,7 @@ export function YardBookForm({
 
       {/* Actions */}
       <div className="mt-8 flex items-center gap-3">
-        <Button type="submit" variant="lime" disabled={submitting}>
+        <Button type="submit" variant="yard-book" disabled={submitting}>
           {submitting ? "Saving..." : submitLabel}
         </Button>
         <Button

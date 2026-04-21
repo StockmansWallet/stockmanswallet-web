@@ -66,24 +66,25 @@ export function ProducerAdvisorOverview({
             {hasDetails ? (
               <div className="space-y-3">
                 {advisorCompany && (
-                  <div className="flex items-center gap-2.5 text-sm text-text-secondary">
-                    <Building2 className="h-4 w-4 shrink-0 text-text-muted" />
+                  <div className="text-text-secondary flex items-center gap-2.5 text-sm">
+                    <Building2 className="text-text-muted h-4 w-4 shrink-0" />
                     {advisorCompany}
                   </div>
                 )}
                 {advisorState && (
-                  <div className="flex items-center gap-2.5 text-sm text-text-secondary">
-                    <MapPin className="h-4 w-4 shrink-0 text-text-muted" />
-                    {advisorState}{advisorRegion ? `, ${advisorRegion}` : ""}
+                  <div className="text-text-secondary flex items-center gap-2.5 text-sm">
+                    <MapPin className="text-text-muted h-4 w-4 shrink-0" />
+                    {advisorState}
+                    {advisorRegion ? `, ${advisorRegion}` : ""}
                   </div>
                 )}
                 {advisorBio && (
-                  <p className="text-sm leading-relaxed text-text-muted">{advisorBio}</p>
+                  <p className="text-text-muted text-sm leading-relaxed">{advisorBio}</p>
                 )}
                 {advisorEmail && (
                   <a
                     href={`mailto:${advisorEmail}`}
-                    className="flex items-center gap-2.5 text-sm text-advisor transition-colors hover:text-[#5AA8E8]"
+                    className="text-advisor hover:text-advisor-light flex items-center gap-2.5 text-sm transition-colors"
                   >
                     <Mail className="h-4 w-4 shrink-0" />
                     <span className="truncate">{advisorEmail}</span>
@@ -92,7 +93,7 @@ export function ProducerAdvisorOverview({
                 {advisorPhone && (
                   <a
                     href={`tel:${advisorPhone.replace(/\s/g, "")}`}
-                    className="flex items-center gap-2.5 text-sm text-advisor transition-colors hover:text-[#5AA8E8]"
+                    className="text-advisor hover:text-advisor-light flex items-center gap-2.5 text-sm transition-colors"
                   >
                     <Phone className="h-4 w-4 shrink-0" />
                     {advisorPhone}
@@ -100,7 +101,7 @@ export function ProducerAdvisorOverview({
                 )}
               </div>
             ) : (
-              <p className="text-sm text-text-muted">No details shared by this advisor.</p>
+              <p className="text-text-muted text-sm">No details shared by this advisor.</p>
             )}
           </CardContent>
         </Card>
@@ -116,11 +117,13 @@ export function ProducerAdvisorOverview({
                 disabled={loading}
                 color="green"
                 label="Data sharing"
-                description={isActive
-                  ? "Your advisor can view the data categories you have enabled."
-                  : "Your advisor cannot view any of your data."}
+                description={
+                  isActive
+                    ? "Your advisor can view the data categories you have enabled."
+                    : "Your advisor cannot view any of your data."
+                }
               />
-              <div className="flex items-center gap-2.5 border-t border-white/[0.06] pt-3 text-xs text-text-muted">
+              <div className="text-text-muted flex items-center gap-2.5 border-t border-white/[0.06] pt-3 text-xs">
                 <Calendar className="h-3.5 w-3.5 shrink-0" />
                 Connected {connectedDate}
               </div>

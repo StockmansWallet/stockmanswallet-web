@@ -31,7 +31,7 @@ export default async function WaitlistPage() {
     <div className="max-w-3xl">
       <PageHeader
         title="Waitlist"
-        titleClassName="text-4xl font-bold text-cyan-400"
+        titleClassName="text-4xl font-bold text-teal"
         subtitle={`${signups?.length ?? 0} signups`}
       />
       <WaitlistTable signups={signups ?? []} />

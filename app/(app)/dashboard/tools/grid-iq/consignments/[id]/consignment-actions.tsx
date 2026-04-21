@@ -78,7 +78,7 @@ export function ConsignmentActions({
   return (
     <div className="mt-4 space-y-4">
       {error && (
-        <div className="flex items-center gap-2 rounded-xl bg-error/10 px-4 py-3 text-sm text-error">
+        <div className="bg-error/10 text-error flex items-center gap-2 rounded-xl px-4 py-3 text-sm">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error}
         </div>
@@ -91,9 +91,9 @@ export function ConsignmentActions({
       {!hasGrid && !hasKillSheet && availableKillSheets.length > 0 && (
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Link2 className="h-4 w-4 text-teal" />
-              <p className="text-sm font-semibold text-text-primary">Link Kill Sheet</p>
+            <div className="mb-3 flex items-center gap-2">
+              <Link2 className="text-grid-iq h-4 w-4" />
+              <p className="text-text-primary text-sm font-semibold">Link Kill Sheet</p>
             </div>
             <div className="flex items-end gap-3">
               <div className="min-w-0 flex-1">
@@ -110,7 +110,7 @@ export function ConsignmentActions({
                 />
               </div>
               <Button
-                variant="teal"
+                variant="grid-iq"
                 size="sm"
                 disabled={!selectedKillSheetId || isPending}
                 onClick={handleLinkKillSheet}
@@ -126,7 +126,7 @@ export function ConsignmentActions({
       {!hasGrid && !showCompleteConfirm && (
         <div className="flex items-center gap-3">
           <Button
-            variant="teal"
+            variant="grid-iq"
             className="flex-1"
             disabled={isPending}
             onClick={() => setShowCompleteConfirm(true)}
@@ -137,7 +137,7 @@ export function ConsignmentActions({
           <Button
             variant="ghost"
             size="sm"
-            className="border border-white/[0.08] bg-white/[0.04] text-text-muted hover:border-error/30 hover:bg-error/10 hover:text-error"
+            className="text-text-muted hover:border-error/30 hover:bg-error/10 hover:text-error border border-white/[0.08] bg-white/[0.04]"
             onClick={() => setShowDeleteConfirm(true)}
             aria-label="Delete consignment"
           >
@@ -149,18 +149,13 @@ export function ConsignmentActions({
       {!hasGrid && showCompleteConfirm && (
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm font-semibold text-text-primary">Confirm Complete Sale</p>
-            <p className="mt-1 text-xs text-text-muted">
-              This will deduct head counts from allocated herds, create sale records,
-              and mark this consignment as completed. This action cannot be undone.
+            <p className="text-text-primary text-sm font-semibold">Confirm Complete Sale</p>
+            <p className="text-text-muted mt-1 text-xs">
+              This will deduct head counts from allocated herds, create sale records, and mark this
+              consignment as completed. This action cannot be undone.
             </p>
             <div className="mt-3 flex items-center gap-3">
-              <Button
-                variant="teal"
-                size="sm"
-                disabled={isPending}
-                onClick={handleCompleteSale}
-              >
+              <Button variant="grid-iq" size="sm" disabled={isPending} onClick={handleCompleteSale}>
                 {isPending ? "Processing..." : "Yes, Complete Sale"}
               </Button>
               <Button
@@ -184,7 +179,7 @@ export function ConsignmentActions({
           <Button
             variant="ghost"
             size="sm"
-            className="border border-white/[0.08] bg-white/[0.04] text-text-muted hover:border-error/30 hover:bg-error/10 hover:text-error"
+            className="text-text-muted hover:border-error/30 hover:bg-error/10 hover:text-error border border-white/[0.08] bg-white/[0.04]"
             onClick={() => setShowDeleteConfirm(true)}
             aria-label="Delete consignment"
           >
@@ -198,17 +193,13 @@ export function ConsignmentActions({
       {showDeleteConfirm && (
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm font-semibold text-error">Delete Consignment?</p>
-            <p className="mt-1 text-xs text-text-muted">
-              This will remove the consignment record. Linked kill sheets and analyses will not be affected.
+            <p className="text-error text-sm font-semibold">Delete Consignment?</p>
+            <p className="text-text-muted mt-1 text-xs">
+              This will remove the consignment record. Linked kill sheets and analyses will not be
+              affected.
             </p>
             <div className="mt-3 flex items-center gap-3">
-              <Button
-                variant="destructive"
-                size="sm"
-                disabled={isPending}
-                onClick={handleDelete}
-              >
+              <Button variant="destructive" size="sm" disabled={isPending} onClick={handleDelete}>
                 {isPending ? "Deleting..." : "Delete"}
               </Button>
               <Button

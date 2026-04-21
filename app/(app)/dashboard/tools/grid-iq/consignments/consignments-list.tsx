@@ -8,14 +8,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/client";
-import {
-  Truck,
-  ChevronRight,
-  Plus,
-  Trash2,
-  Loader2,
-  Check,
-} from "lucide-react";
+import { Truck, ChevronRight, Plus, Trash2, Loader2, Check } from "lucide-react";
 
 interface ConsignmentRow {
   id: string;
@@ -35,7 +28,7 @@ function statusBadge(status: string) {
     case "draft":
       return { label: "Draft", cls: "bg-white/[0.06] text-text-muted" };
     case "confirmed":
-      return { label: "Confirmed", cls: "bg-teal/15 text-teal" };
+      return { label: "Confirmed", cls: "bg-grid-iq/15 text-grid-iq" };
     case "completed":
       return { label: "Completed", cls: "bg-success/15 text-success" };
     default:
@@ -94,7 +87,7 @@ export function ConsignmentsList({ consignments }: Props) {
   const headerActions = (
     <>
       <Link href="/dashboard/tools/grid-iq/consignments/new">
-        <Button variant="teal" size="sm" className="gap-1.5">
+        <Button variant="grid-iq" size="sm" className="gap-1.5">
           <Plus className="h-3.5 w-3.5" />
           New
         </Button>
@@ -102,7 +95,7 @@ export function ConsignmentsList({ consignments }: Props) {
       <Button
         variant="ghost"
         size="sm"
-        className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-teal/40 text-teal hover:text-teal" : "border-white/[0.08] text-text-muted hover:border-white/[0.14]"}`}
+        className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-grid-iq/40 text-grid-iq hover:text-grid-iq" : "text-text-muted border-white/[0.08] hover:border-white/[0.14]"}`}
         onClick={() => (selecting ? exit() : setSelecting(true))}
         disabled={consignments.length === 0}
       >
@@ -112,7 +105,8 @@ export function ConsignmentsList({ consignments }: Props) {
   );
 
   const header = (
-    <PageHeader feature="grid-iq"
+    <PageHeader
+      feature="grid-iq"
       title="Consignments"
       titleClassName="text-2xl font-semibold text-text-primary"
       subtitle="Processor bookings and kill records"
@@ -132,15 +126,14 @@ export function ConsignmentsList({ consignments }: Props) {
             description="Create a consignment to track cattle sent to a processor. Allocate herds, link kill sheets, and record sales."
             actionLabel="New Consignment"
             actionHref="/dashboard/tools/grid-iq/consignments/new"
-            variant="teal"
+            variant="grid-iq"
           />
         </Card>
       </div>
     );
   }
 
-  const allSelected =
-    consignments.length > 0 && selected.size === consignments.length;
+  const allSelected = consignments.length > 0 && selected.size === consignments.length;
 
   return (
     <div>
@@ -149,24 +142,20 @@ export function ConsignmentsList({ consignments }: Props) {
         <div className="mb-3">
           <button
             onClick={toggleAll}
-            className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs text-text-muted transition-colors hover:border-white/[0.14] hover:bg-white/[0.06] hover:text-text-primary"
+            className="text-text-muted hover:text-text-primary inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs transition-colors hover:border-white/[0.14] hover:bg-white/[0.06]"
           >
             <span
               className={`flex h-4 w-4 items-center justify-center rounded border transition-colors ${
                 allSelected
-                  ? "border-teal bg-teal text-black"
+                  ? "border-grid-iq bg-grid-iq text-black"
                   : "border-white/20 bg-white/[0.04]"
               }`}
             >
-              {allSelected && (
-                <Check className="h-3 w-3" strokeWidth={3} />
-              )}
+              {allSelected && <Check className="h-3 w-3" strokeWidth={3} />}
             </span>
             Select All ({consignments.length})
             {selected.size > 0 && (
-              <span className="ml-2 text-teal">
-                {selected.size} selected
-              </span>
+              <span className="text-grid-iq ml-2">{selected.size} selected</span>
             )}
           </button>
         </div>
@@ -184,21 +173,21 @@ export function ConsignmentsList({ consignments }: Props) {
                   <span
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
                       checked
-                        ? "border-teal bg-teal text-black"
+                        ? "border-grid-iq bg-grid-iq text-black"
                         : "border-white/20 bg-white/[0.04]"
                     }`}
                   >
                     {checked && <Check className="h-3 w-3" strokeWidth={3} />}
                   </span>
                 )}
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal/15">
-                  <Truck className="h-5 w-5 text-teal" />
+                <div className="bg-grid-iq/15 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                  <Truck className="text-grid-iq h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-text-primary">
+                  <p className="text-text-primary text-sm font-medium">
                     {c.consignment_name || c.processor_name}
                   </p>
-                  <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-text-muted">
+                  <div className="text-text-muted mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
                     {c.consignment_name && <span>{c.processor_name}</span>}
                     {c.plant_location && <span>{c.plant_location}</span>}
                     {c.kill_date && (
@@ -214,12 +203,12 @@ export function ConsignmentsList({ consignments }: Props) {
                   </div>
                 </div>
                 {c.total_gross_value != null && c.total_gross_value > 0 && (
-                  <span className="text-sm font-semibold text-success">
+                  <span className="text-success text-sm font-semibold">
                     ${Math.round(c.total_gross_value).toLocaleString()}
                   </span>
                 )}
                 {!selecting && (
-                  <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
+                  <ChevronRight className="text-text-muted group-hover:text-text-secondary h-4 w-4 shrink-0 transition-all group-hover:translate-x-0.5" />
                 )}
               </>
             );
@@ -252,10 +241,9 @@ export function ConsignmentsList({ consignments }: Props) {
       {selecting && selected.size > 0 && (
         <div className="mt-4">
           {showConfirm ? (
-            <div className="flex items-center justify-between rounded-xl border border-error/20 bg-error/5 px-4 py-3">
-              <span className="text-sm text-error">
-                Delete {selected.size}{" "}
-                {selected.size === 1 ? "consignment" : "consignments"}?
+            <div className="border-error/20 bg-error/5 flex items-center justify-between rounded-xl border px-4 py-3">
+              <span className="text-error text-sm">
+                Delete {selected.size} {selected.size === 1 ? "consignment" : "consignments"}?
               </span>
               <div className="flex items-center gap-2">
                 <Button
@@ -283,11 +271,7 @@ export function ConsignmentsList({ consignments }: Props) {
               </div>
             </div>
           ) : (
-            <Button
-              variant="destructive"
-              className="w-full"
-              onClick={() => setShowConfirm(true)}
-            >
+            <Button variant="destructive" className="w-full" onClick={() => setShowConfirm(true)}>
               <Trash2 className="mr-1.5 h-4 w-4" />
               Delete Selected ({selected.size})
             </Button>

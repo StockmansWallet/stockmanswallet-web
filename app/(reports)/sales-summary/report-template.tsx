@@ -1,5 +1,6 @@
 import type { ReportData, SaleReportData } from "@/lib/types/reports";
 import { ReportPrintStyles } from "../asset-register/print-styles";
+import { formatDateAU, parseLocalDate } from "@/lib/dates";
 
 function fmt(v: number) {
   return new Intl.NumberFormat("en-AU", {
@@ -18,20 +19,10 @@ function fmtFull(v: number) {
   }).format(v);
 }
 
-function parseDate(iso: string) {
-  return new Date(iso.length === 10 ? iso + "T00:00:00" : iso);
-}
-
-function fmtDate(iso: string) {
-  return parseDate(iso).toLocaleDateString("en-AU", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
+const fmtDate = formatDateAU;
 
 function monthKey(iso: string) {
-  const d = parseDate(iso);
+  const d = parseLocalDate(iso);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 

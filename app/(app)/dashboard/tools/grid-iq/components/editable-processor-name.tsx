@@ -65,12 +65,12 @@ export function EditableProcessorName({
           }}
           autoFocus
           disabled={isSaving}
-          className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-2xl font-bold text-teal outline-none focus:border-teal/50 focus:ring-1 focus:ring-teal/25 disabled:opacity-50"
+          className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-2xl font-bold text-grid-iq outline-none focus:border-grid-iq/50 focus:ring-1 focus:ring-grid-iq/25 disabled:opacity-50"
         />
         <button
           onClick={handleSave}
           disabled={isSaving}
-          className="rounded-lg p-1.5 text-teal hover:bg-teal/10 disabled:opacity-50"
+          className="rounded-lg p-1.5 text-grid-iq hover:bg-grid-iq/10 disabled:opacity-50"
           title="Save"
         >
           {isSaving ? (
@@ -100,7 +100,7 @@ export function EditableProcessorName({
         setDraft(name);
         setIsEditing(true);
       }}
-      className="rounded-md text-left text-2xl font-bold text-teal transition-colors hover:text-teal"
+      className="rounded-md text-left text-2xl font-bold text-grid-iq transition-colors hover:text-grid-iq"
       title="Click to rename"
     >
       {name}

@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ReportFilters } from "@/components/app/report-filters";
-import { ReportExportButton } from "@/components/app/report-export-button";
+import { ReportDownloadMenu } from "@/components/app/report-download-menu";
 import { parseReportConfig } from "@/lib/utils/report-config";
 import { generateSaleyardComparisonData } from "@/lib/services/report-service";
 import { shortSaleyardName } from "@/lib/data/reference-data";
@@ -80,7 +80,11 @@ export default async function SaleyardComparisonPage({ searchParams }: { searchP
         <Suspense>
           <ReportFilters properties={properties ?? []} />
         </Suspense>
-        {!isEmpty && <ReportExportButton label="Saleyard Comparison" reportType="saleyard-comparison" />}
+        {!isEmpty && (
+          <ReportDownloadMenu
+            groups={[{ label: "Saleyard Comparison", reportType: "saleyard-comparison" }]}
+          />
+        )}
       </div>
 
       {isEmpty ? (

@@ -1,6 +1,8 @@
 import type { ReportData, HerdReportData } from "@/lib/types/reports";
 import type { PortfolioMovementSummary } from "@/lib/types/portfolio-movement";
 import { ReportPrintStyles } from "./print-styles";
+import { formatDateAU } from "@/lib/dates";
+import { shortSaleyardName } from "@/lib/data/reference-data";
 
 // -- Formatters ---------------------------------------------------------------
 
@@ -21,12 +23,17 @@ function fmtFull(v: number) {
   }).format(v);
 }
 
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-AU", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+const fmtDate = formatDateAU;
+
+function valuationSourceLabel(h: HerdReportData): string {
+  const datePart = h.dataDate ? ` · ${fmtDate(h.dataDate)}` : "";
+  if (h.priceSource === "saleyard" && h.saleyardUsed) {
+    return `MLA · ${shortSaleyardName(h.saleyardUsed)} saleyard${datePart}`;
+  }
+  if (h.priceSource === "national") {
+    return `MLA · National indicator${datePart}`;
+  }
+  return "Default fallback (no recent MLA data)";
 }
 
 // -- Colour palette (matches web app) -----------------------------------------
@@ -117,6 +124,10 @@ function HerdCard({ herd }: { herd: HerdReportData }) {
               <span>{herd.livestockOwner}</span>
             </p>
           )}
+          <p className="text-[10px] text-[#271F16]/60">
+            <span className="text-[#271F16]/45">Valuation source:</span>{" "}
+            <span>{valuationSourceLabel(herd)}</span>
+          </p>
         </div>
         <p className="ml-4 shrink-0 text-base font-bold tabular-nums text-[#271F16]">
           {fmtFull(herd.netValue)}
@@ -127,8 +138,8 @@ function HerdCard({ herd }: { herd: HerdReportData }) {
       <div className="grid grid-cols-4 gap-x-3 px-4 py-2">
         <PrintStat label="Head Count" value={`${herd.headCount}`} />
         <PrintStat label="Age" value={`${herd.ageMonths} months`} />
-        <PrintStat label="Weight" value={`${herd.weight.toFixed(0)} kg`} />
-        <PrintStat label="Price" value={`$${herd.pricePerKg.toFixed(2)}/kg`} />
+        <PrintStat label="Weight" value={`${herd.weight.toFixed(1)} kg`} />
+        <PrintStat label="Price" value={`$${herd.pricePerKg.toFixed(3)}/kg`} />
       </div>
 
       {/* Supplementary metrics: rows of 4 */}

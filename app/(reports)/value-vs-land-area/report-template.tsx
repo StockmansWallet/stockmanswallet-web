@@ -1,5 +1,6 @@
 import type { ReportData } from "@/lib/types/reports";
 import { ReportPrintStyles } from "../asset-register/print-styles";
+import { formatDateAU } from "@/lib/dates";
 
 // ---------- Formatters -------------------------------------------------------
 
@@ -24,13 +25,7 @@ function fmtAcres(v: number) {
   return `${new Intl.NumberFormat("en-AU", { maximumFractionDigits: 0 }).format(v)} ac`;
 }
 
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-AU", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
+const fmtDate = formatDateAU;
 
 // ---------- Template ---------------------------------------------------------
 

@@ -18,8 +18,8 @@ import {
   type DemoConversation,
 } from "@/lib/brangus/demo-chats";
 
-const BRANGUS_BG = "#44372D";
-const USER_BG = "var(--color-brand)";
+const BRANGUS_BG = "var(--color-sky-text)";
+const USER_BG = "var(--color-chat-user)";
 const BRANGUS_AVATAR = "/images/brangus-chat-profile.webp";
 const DEMO_USER_AVATAR = "/images/demo-user-profile.webp";
 
@@ -89,9 +89,9 @@ function DemoChatView({
               <ChatBubble
                 key={msg.id}
                 side={isUser ? "right" : "left"}
-                bgClass={isUser ? "bg-brand" : "bg-[#44372D]"}
+                bgClass={isUser ? "bg-chat-user" : "bg-sky-text"}
                 tailColor={isUser ? USER_BG : BRANGUS_BG}
-                textClass={isUser ? "text-white" : "text-white/80"}
+                textClass={isUser ? "text-white" : "text-white"}
                 avatarUrl={isUser ? DEMO_USER_AVATAR : BRANGUS_AVATAR}
               >
                 {isUser ? msg.content : <FormattedAssistantText text={msg.content} />}
@@ -117,7 +117,7 @@ function DemoChatView({
           </div>
           <Link
             href="/sign-up"
-            className="bg-brand hover:bg-brand-dark inline-flex h-8 shrink-0 items-center rounded-full px-3 text-xs font-semibold text-white transition-colors"
+            className="bg-brangus hover:bg-brangus-dark inline-flex h-8 shrink-0 items-center rounded-full px-3 text-xs font-semibold text-white transition-colors"
           >
             Sign up to chat live
           </Link>
@@ -144,8 +144,8 @@ function SavedConversationRow({
         active ? "bg-surface-raised" : "hover:bg-surface"
       }`}
     >
-      <div className="bg-brand/10 mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
-        <MessageCircle className="text-brand h-4 w-4" />
+      <div className="bg-brangus/10 mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
+        <MessageCircle className="text-brangus h-4 w-4" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
@@ -260,8 +260,8 @@ export function BrangusDemoHub() {
       </div>
 
       {/* Demo notice strip (replaces the action toolbar from the live hub) */}
-      <div className="bg-brand/5 border-brand/20 mb-4 flex items-center gap-2.5 rounded-full border px-4 py-2 text-xs backdrop-blur-xl">
-        <Sparkles className="text-brand h-3.5 w-3.5 shrink-0" />
+      <div className="bg-brangus/5 border-brangus/20 mb-4 flex items-center gap-2.5 rounded-full border px-4 py-2 text-xs backdrop-blur-xl">
+        <Sparkles className="text-brangus h-3.5 w-3.5 shrink-0" />
         <p className="text-text-secondary leading-snug">
           You&apos;re exploring Brangus with sample conversations. Sign up to ask your own questions
           and get live answers tailored to your herd.

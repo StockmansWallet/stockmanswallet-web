@@ -1,6 +1,22 @@
 import { Card, CardContent } from "@/components/ui/card";
 import type { HerdReportData } from "@/lib/types/reports";
-import { fmt, fmtFull } from "./format";
+import { fmt, fmtDate, fmtFull } from "./format";
+import { shortSaleyardName } from "@/lib/data/reference-data";
+
+// Human-readable valuation source line for a herd, eg:
+//   "MLA · Armidale Regional Saleyards · 18 Apr 2026"
+//   "MLA National Indicator · 18 Apr 2026"
+//   "Default fallback (no recent MLA data)"
+function valuationSourceLabel(h: HerdReportData): string {
+  const datePart = h.dataDate ? ` · ${fmtDate(h.dataDate)}` : "";
+  if (h.priceSource === "saleyard" && h.saleyardUsed) {
+    return `MLA · ${shortSaleyardName(h.saleyardUsed)} saleyard${datePart}`;
+  }
+  if (h.priceSource === "national") {
+    return `MLA · National indicator${datePart}`;
+  }
+  return "Default fallback (no recent MLA data)";
+}
 
 export function LivestockAssetsSection({ herdData }: { herdData: HerdReportData[] }) {
   // Group herds by property name
@@ -106,6 +122,10 @@ function HerdCard({ herd: h }: { herd: HerdReportData }) {
               <span className="text-text-secondary">{h.livestockOwner}</span>
             </p>
           )}
+          <p className="mt-0.5 text-[11px] text-text-muted">
+            <span className="text-text-muted/70">Valuation source:</span>{" "}
+            <span className="text-text-secondary">{valuationSourceLabel(h)}</span>
+          </p>
         </div>
         <p className="ml-3 shrink-0 text-base font-bold tabular-nums text-text-primary">{fmtFull(h.netValue)}</p>
       </div>
@@ -115,8 +135,8 @@ function HerdCard({ herd: h }: { herd: HerdReportData }) {
         <div className="grid grid-cols-4 gap-x-3">
           <Stat label="Head Count" value={`${h.headCount}`} />
           <Stat label="Age" value={`${h.ageMonths} months`} />
-          <Stat label="Weight" value={`${h.weight.toFixed(0)} kg`} />
-          <Stat label="Price" value={`$${h.pricePerKg.toFixed(2)}/kg`} />
+          <Stat label="Weight" value={`${h.weight.toFixed(1)} kg`} />
+          <Stat label="Price" value={`$${h.pricePerKg.toFixed(3)}/kg`} />
         </div>
 
         {/* Supplementary metrics: rows of 4 */}

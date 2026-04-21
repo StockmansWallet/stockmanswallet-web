@@ -36,7 +36,14 @@ interface PropertyFormProps {
   actionBarLayout?: boolean;
 }
 
-export function PropertyForm({ property, action, submitLabel, cancelHref, deleteButton, actionBarLayout }: PropertyFormProps) {
+export function PropertyForm({
+  property,
+  action,
+  submitLabel,
+  cancelHref,
+  deleteButton,
+  actionBarLayout,
+}: PropertyFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [suburb, setSuburb] = useState(property?.suburb ?? "");
@@ -67,7 +74,9 @@ export function PropertyForm({ property, action, submitLabel, cancelHref, delete
         const dLon = ((coords.lng - lon1) * Math.PI) / 180;
         const a =
           Math.sin(dLat / 2) ** 2 +
-          Math.cos((lat1 * Math.PI) / 180) * Math.cos((coords.lat * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+          Math.cos((lat1 * Math.PI) / 180) *
+            Math.cos((coords.lat * Math.PI) / 180) *
+            Math.sin(dLon / 2) ** 2;
         return { name, dist: R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) };
       })
       .sort((a, b) => a.dist - b.dist);
@@ -76,7 +85,10 @@ export function PropertyForm({ property, action, submitLabel, cancelHref, delete
     const stateLabel = AU_STATES.find((s) => s.value === state)?.label ?? state;
     const groups = [
       { header: "Suggested", options: [{ value: closest.name, label: closest.name }] },
-      { header: `${stateLabel} Local Government Areas`, options: lgas.map((c) => ({ value: c, label: c })) },
+      {
+        header: `${stateLabel} Local Government Areas`,
+        options: lgas.map((c) => ({ value: c, label: c })),
+      },
     ];
 
     return { lgaGroups: groups, lgaFlat: flat };
@@ -104,7 +116,13 @@ export function PropertyForm({ property, action, submitLabel, cancelHref, delete
       }
     } catch (err) {
       // Next.js redirect() throws a special error that must propagate
-      if (err && typeof err === "object" && "digest" in err && typeof (err as { digest: unknown }).digest === "string" && (err as { digest: string }).digest.startsWith("NEXT_REDIRECT")) {
+      if (
+        err &&
+        typeof err === "object" &&
+        "digest" in err &&
+        typeof (err as { digest: unknown }).digest === "string" &&
+        (err as { digest: string }).digest.startsWith("NEXT_REDIRECT")
+      ) {
         throw err;
       }
       setError("Something went wrong. Please try again.");
@@ -116,7 +134,7 @@ export function PropertyForm({ property, action, submitLabel, cancelHref, delete
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm text-error">
+        <div className="border-error/40 bg-error/10 text-error rounded-xl border px-4 py-3 text-sm">
           {error}
         </div>
       )}
@@ -125,8 +143,8 @@ export function PropertyForm({ property, action, submitLabel, cancelHref, delete
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
-              <Home className="h-3.5 w-3.5 text-brand" />
+            <div className="bg-brand/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+              <Home className="text-brand h-3.5 w-3.5" />
             </div>
             <CardTitle>Property Details</CardTitle>
           </div>
@@ -191,8 +209,8 @@ export function PropertyForm({ property, action, submitLabel, cancelHref, delete
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-success/15">
-              <MapPin className="h-3.5 w-3.5 text-success" />
+            <div className="bg-success/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+              <MapPin className="text-success h-3.5 w-3.5" />
             </div>
             <CardTitle>Location</CardTitle>
           </div>
@@ -200,7 +218,10 @@ export function PropertyForm({ property, action, submitLabel, cancelHref, delete
         <CardContent className="px-5 pb-5">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label htmlFor="address" className="mb-1.5 block text-sm font-medium text-text-secondary">
+              <label
+                htmlFor="address"
+                className="text-text-secondary mb-1.5 block text-sm font-medium"
+              >
                 Property Address
               </label>
               <AddressAutocomplete
@@ -242,12 +263,12 @@ export function PropertyForm({ property, action, submitLabel, cancelHref, delete
             <input type="hidden" name="longitude" value={longitude} />
             {latitude && longitude && (
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-text-secondary">
+                <label className="text-text-secondary mb-1.5 block text-sm font-medium">
                   GPS Coordinates
                 </label>
                 <div className="flex items-center gap-2.5 rounded-xl bg-white/5 px-4 py-3">
-                  <MapPin className="h-4 w-4 shrink-0 text-success" />
-                  <span className="text-sm tabular-nums text-text-primary">
+                  <MapPin className="text-success h-4 w-4 shrink-0" />
+                  <span className="text-text-primary text-sm tabular-nums">
                     {Number(latitude).toFixed(4)}° S, {Number(longitude).toFixed(4)}° E
                   </span>
                 </div>
@@ -261,8 +282,8 @@ export function PropertyForm({ property, action, submitLabel, cancelHref, delete
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-warning/15">
-              <FileText className="h-3.5 w-3.5 text-warning" />
+            <div className="bg-warning/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+              <FileText className="text-warning h-3.5 w-3.5" />
             </div>
             <CardTitle>Notes</CardTitle>
           </div>
@@ -274,28 +295,26 @@ export function PropertyForm({ property, action, submitLabel, cancelHref, delete
             rows={3}
             defaultValue={property?.notes ?? ""}
             placeholder="Any additional notes about this property..."
-            className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all ring-1 ring-inset ring-white/10 focus:ring-brand/60 focus:bg-white/8"
+            className="text-text-primary placeholder:text-text-muted focus:ring-brand/60 w-full rounded-xl bg-white/5 px-4 py-3 text-sm ring-1 ring-white/10 transition-all outline-none ring-inset focus:bg-white/8"
           />
         </CardContent>
       </Card>
 
       {/* Actions */}
       {actionBarLayout ? (
-        <div className="flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2">
-          <div className="flex items-center gap-1.5 pl-1">
-            {deleteButton}
-          </div>
+        <div className="bg-surface-lowest flex items-center justify-between rounded-full px-2 py-2">
+          <div className="flex items-center gap-1.5 pl-1">{deleteButton}</div>
           <div className="flex items-center gap-1.5">
             <Link
               href={cancelHref ?? "/dashboard/properties"}
-              className="inline-flex h-8 shrink-0 items-center rounded-full bg-surface-lowest px-3.5 text-xs font-medium text-text-muted transition-all hover:bg-surface-raised hover:text-text-secondary"
+              className="bg-surface-lowest text-text-muted hover:bg-surface-raised hover:text-text-secondary inline-flex h-8 shrink-0 items-center rounded-full px-3.5 text-xs font-medium transition-all"
             >
               Cancel
             </Link>
             <button
               type="submit"
               disabled={submitting}
-              className="inline-flex h-8 shrink-0 items-center rounded-full bg-brand px-3.5 text-xs font-medium text-white transition-all hover:bg-brand-dark disabled:opacity-50"
+              className="bg-brand hover:bg-brand-dark inline-flex h-8 shrink-0 items-center rounded-full px-3.5 text-xs font-medium text-white transition-all disabled:opacity-50"
             >
               {submitting ? "Saving..." : submitLabel}
             </button>

@@ -630,7 +630,7 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
   return (
     <div className="space-y-4 pb-4">
       {error && (
-        <div className="text-error rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm">
+        <div className="text-error border-error/40 bg-error/10 rounded-xl border px-4 py-3 text-sm">
           {error}
         </div>
       )}
@@ -899,13 +899,13 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
 
             {/* Weight validation feedback */}
             {weightValidation && weightValidation.status === "error" && (
-              <div className="text-error flex items-start gap-2 rounded-lg border border-red-800 bg-red-900/20 px-3 py-2 text-xs">
+              <div className="text-error border-error/40 bg-error/10 flex items-start gap-2 rounded-lg border px-3 py-2 text-xs">
                 <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 <span>{weightValidation.message}</span>
               </div>
             )}
             {weightValidation && weightValidation.status === "warning" && (
-              <div className="text-warning flex items-start gap-2 rounded-lg border border-amber-800 bg-amber-900/20 px-3 py-2 text-xs">
+              <div className="text-warning border-warning/40 bg-warning/10 flex items-start gap-2 rounded-lg border px-3 py-2 text-xs">
                 <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 <span>{weightValidation.message}</span>
               </div>

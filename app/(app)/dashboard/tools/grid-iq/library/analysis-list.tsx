@@ -50,11 +50,7 @@ export function AnalysisList({
     return (
       <Card>
         <EmptyState
-          title={
-            tab === "pre-sale"
-              ? "No pre-sale analyses yet"
-              : "No post-kill analyses yet"
-          }
+          title={tab === "pre-sale" ? "No pre-sale analyses yet" : "No post-kill analyses yet"}
           description={
             tab === "pre-sale"
               ? "Run a Grid IQ analysis to compare saleyard vs over-the-hooks value for your herds."
@@ -62,14 +58,13 @@ export function AnalysisList({
           }
           actionLabel="New Analysis"
           actionHref="/dashboard/tools/grid-iq/analyse"
-          variant="teal"
+          variant="grid-iq"
         />
       </Card>
     );
   }
 
-  const allSelected =
-    analyses.length > 0 && analyses.every((a) => selected.has(a.id));
+  const allSelected = analyses.length > 0 && analyses.every((a) => selected.has(a.id));
 
   const toggleOne = (id: string) => {
     const next = new Set(selected);
@@ -112,25 +107,21 @@ export function AnalysisList({
         <div className="mb-2 flex items-center justify-between px-1">
           <button
             onClick={toggleAll}
-            className="flex items-center gap-2 text-xs text-text-muted hover:text-text-primary"
+            className="text-text-muted hover:text-text-primary flex items-center gap-2 text-xs"
           >
             <span
               className={`flex h-4 w-4 items-center justify-center rounded border transition-colors ${
                 allSelected
-                  ? "border-teal bg-teal text-black"
+                  ? "border-grid-iq bg-grid-iq text-black"
                   : "border-white/20 bg-white/[0.04]"
               }`}
             >
-              {allSelected && (
-                <Check className="h-3 w-3" strokeWidth={3} />
-              )}
+              {allSelected && <Check className="h-3 w-3" strokeWidth={3} />}
             </span>
             Select All ({analyses.length})
           </button>
           {selected.size > 0 && (
-            <span className="text-xs text-teal">
-              {selected.size} selected
-            </span>
+            <span className="text-grid-iq text-xs">{selected.size} selected</span>
           )}
         </div>
       )}
@@ -154,25 +145,23 @@ export function AnalysisList({
                   <span
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
                       checked
-                        ? "border-teal bg-teal text-black"
+                        ? "border-grid-iq bg-grid-iq text-black"
                         : "border-white/20 bg-white/[0.04]"
                     }`}
                   >
                     {checked && <Check className="h-3 w-3" strokeWidth={3} />}
                   </span>
                 )}
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal/15">
-                  <TrendingUp className="h-5 w-5 text-teal" />
+                <div className="bg-grid-iq/15 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                  <TrendingUp className="text-grid-iq h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-text-primary">
+                  <p className="text-text-primary text-sm font-medium">
                     {a.herd_name ?? "Multi-herd"} vs {a.processor_name ?? "Unknown"}
                   </p>
-                  <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-text-muted">
+                  <div className="text-text-muted mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
                     {a.analysis_date && (
-                      <span>
-                        {new Date(a.analysis_date).toLocaleDateString("en-AU")}
-                      </span>
+                      <span>{new Date(a.analysis_date).toLocaleDateString("en-AU")}</span>
                     )}
                     {killScore !== null && (
                       <span
@@ -181,7 +170,7 @@ export function AnalysisList({
                           killScore >= 85
                             ? "text-success"
                             : killScore >= 70
-                              ? "text-teal"
+                              ? "text-grid-iq"
                               : killScore >= 50
                                 ? "text-warning"
                                 : "text-error"
@@ -190,33 +179,26 @@ export function AnalysisList({
                         KS {killScore.toFixed(0)}
                       </span>
                     )}
-                    {gcr !== null && (
-                      <span className="text-[10px]">GCR {gcr.toFixed(0)}%</span>
-                    )}
+                    {gcr !== null && <span className="text-[10px]">GCR {gcr.toFixed(0)}%</span>}
                   </div>
                 </div>
                 <div className="shrink-0 text-right">
                   <div className="flex items-baseline justify-end gap-2 text-xs">
                     <span className="text-text-muted">Saleyard</span>
-                    <span className="tabular-nums text-text-secondary">
-                      {fmt(saleyardValue)}
-                    </span>
+                    <span className="text-text-secondary tabular-nums">{fmt(saleyardValue)}</span>
                   </div>
                   <div className="flex items-baseline justify-end gap-2 text-xs">
                     <span className="text-text-muted">Grid</span>
-                    <span className="tabular-nums text-text-secondary">
-                      {fmt(processorValue)}
-                    </span>
+                    <span className="text-text-secondary tabular-nums">{fmt(processorValue)}</span>
                   </div>
                   <p
                     className={`mt-0.5 text-[11px] font-semibold tabular-nums ${isProcessor ? "text-success" : "text-warning"}`}
                   >
-                    {isProcessor ? "+" : "-"}$
-                    {Math.abs(Math.round(advantage)).toLocaleString()}
+                    {isProcessor ? "+" : "-"}${Math.abs(Math.round(advantage)).toLocaleString()}
                   </p>
                 </div>
                 {!selecting && (
-                  <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
+                  <ChevronRight className="text-text-muted group-hover:text-text-secondary h-4 w-4 shrink-0 transition-all group-hover:translate-x-0.5" />
                 )}
               </>
             );
@@ -249,10 +231,9 @@ export function AnalysisList({
       {selecting && selected.size > 0 && (
         <div className="mt-4">
           {showConfirm ? (
-            <div className="flex items-center justify-between rounded-xl border border-error/20 bg-error/5 px-4 py-3">
-              <span className="text-sm text-error">
-                Delete {selected.size}{" "}
-                {selected.size === 1 ? "analysis" : "analyses"}?
+            <div className="border-error/20 bg-error/5 flex items-center justify-between rounded-xl border px-4 py-3">
+              <span className="text-error text-sm">
+                Delete {selected.size} {selected.size === 1 ? "analysis" : "analyses"}?
               </span>
               <div className="flex items-center gap-2">
                 <Button
@@ -280,11 +261,7 @@ export function AnalysisList({
               </div>
             </div>
           ) : (
-            <Button
-              variant="destructive"
-              className="w-full"
-              onClick={() => setShowConfirm(true)}
-            >
+            <Button variant="destructive" className="w-full" onClick={() => setShowConfirm(true)}>
               <Trash2 className="mr-1.5 h-4 w-4" />
               Delete Selected ({selected.size})
             </Button>

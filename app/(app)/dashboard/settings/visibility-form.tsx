@@ -42,7 +42,10 @@ export function VisibilityForm({
   return (
     <div className="space-y-5">
       {error && (
-        <div role="alert" className="rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm text-error">
+        <div
+          role="alert"
+          className="border-error/40 bg-error/10 text-error rounded-xl border px-4 py-3 text-sm"
+        >
           {error}
         </div>
       )}
@@ -69,7 +72,7 @@ export function VisibilityForm({
         />
       )}
 
-      <p className="text-xs leading-relaxed text-text-muted">
+      <p className="text-text-muted text-xs leading-relaxed">
         {isAdvisor
           ? "Control whether producers can find you in the advisor directory."
           : "Control whether other producers can find you on Stockman's Wallet. You can turn this off at any time."}

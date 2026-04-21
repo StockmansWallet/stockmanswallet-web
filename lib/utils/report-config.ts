@@ -1,5 +1,7 @@
 // Parse report configuration from URL searchParams  -  shared by server components
 
+import { todaySydney } from "@/lib/dates";
+
 const DATE_PRESETS = [
   { value: "1d", days: 1 },
   { value: "1w", days: 7 },
@@ -10,13 +12,14 @@ const DATE_PRESETS = [
 ] as const;
 
 function getPresetDates(days: number) {
-  const end = new Date();
-  const start = new Date();
-  start.setDate(start.getDate() - days);
-  return {
-    start: start.toISOString().split("T")[0],
-    end: end.toISOString().split("T")[0],
-  };
+  // Anchor to Australia/Sydney today so presets do not flip a day when the
+  // user crosses UTC midnight in the evening local time.
+  const end = todaySydney();
+  const [y, m, d] = end.split("-").map(Number);
+  const startDate = new Date(Date.UTC(y, m - 1, d));
+  startDate.setUTCDate(startDate.getUTCDate() - days);
+  const start = startDate.toISOString().split("T")[0];
+  return { start, end };
 }
 
 export function parseReportConfig(searchParams: { [key: string]: string | string[] | undefined }): {

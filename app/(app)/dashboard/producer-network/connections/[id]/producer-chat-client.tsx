@@ -11,7 +11,7 @@ import { sendProducerMessage, fetchProducerMessages } from "./actions";
 import type { AdvisoryMessage, MessageAttachment } from "@/lib/types/advisory";
 
 const POLL_INTERVAL = 5000;
-const OTHER_BG = "#2A2929";
+const OTHER_BG = "var(--color-chat-other)";
 
 interface ProducerChatClientProps {
   connectionId: string;
@@ -31,10 +31,7 @@ export function ProducerChatClient({
   const [pendingAttachment, setPendingAttachment] = useState<MessageAttachment | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { peerIsTyping, notifyTyping } = useTypingIndicator(
-    `chat:${connectionId}`,
-    currentUserId,
-  );
+  const { peerIsTyping, notifyTyping } = useTypingIndicator(`chat:${connectionId}`, currentUserId);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -93,7 +90,7 @@ export function ProducerChatClient({
         connectionId,
         text,
         "general_note",
-        attachmentForThisSend,
+        attachmentForThisSend
       );
 
       if (result?.error) {
@@ -108,7 +105,7 @@ export function ProducerChatClient({
         setMessages(refreshed.messages);
       }
     },
-    [connectionId, currentUserId, pendingAttachment],
+    [connectionId, currentUserId, pendingAttachment]
   );
 
   return (
@@ -131,7 +128,7 @@ export function ProducerChatClient({
         {/* Pending-attachment preview sits above the input so the sender
             can see what's queued and remove it before hitting send. */}
         {pendingAttachment && (
-          <div className="mb-2 flex items-start gap-2 rounded-xl border border-white/5 bg-surface-lowest p-2 pr-2">
+          <div className="bg-surface-lowest mb-2 flex items-start gap-2 rounded-xl border border-white/5 p-2 pr-2">
             <div className="flex-1">
               <ShareAttachmentCard attachment={pendingAttachment} />
             </div>
@@ -139,7 +136,7 @@ export function ProducerChatClient({
               type="button"
               onClick={() => setPendingAttachment(null)}
               aria-label="Remove attachment"
-              className="mt-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-white/10 hover:text-text-primary"
+              className="text-text-muted hover:text-text-primary mt-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-white/10"
             >
               <span aria-hidden="true">×</span>
             </button>
@@ -153,11 +150,9 @@ export function ProducerChatClient({
               onSend={handleSend}
               onTyping={notifyTyping}
               placeholder={
-                pendingAttachment
-                  ? "Add a note (optional), then send..."
-                  : "Write a message..."
+                pendingAttachment ? "Add a note (optional), then send..." : "Write a message..."
               }
-              accentClass="bg-violet hover:bg-violet"
+              accentClass="bg-producer-network hover:bg-producer-network"
               allowEmpty={pendingAttachment != null}
             />
           </div>

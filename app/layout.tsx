@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Caveat, Geist_Mono, Nunito } from "next/font/google";
+import { PaletteToggle } from "@/components/dev/palette-toggle";
 import "./globals.css";
 
 const geistMono = Geist_Mono({
@@ -41,8 +42,7 @@ export const metadata: Metadata = {
   authors: [{ name: "Stockman's Wallet" }],
   openGraph: {
     title: "Stockman's Wallet - Intelligent Livestock Valuation",
-    description:
-      "Track your livestock herds as financial assets with real-time market valuations.",
+    description: "Track your livestock herds as financial assets with real-time market valuations.",
     url: "https://stockmanswallet.com.au",
     siteName: "Stockman's Wallet",
     locale: "en_AU",
@@ -57,8 +57,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en-AU" className="dark">
-      <body className={`${geistMono.variable} ${nunito.variable} ${caveat.variable} font-sans antialiased`}>
+      <body
+        className={`${geistMono.variable} ${nunito.variable} ${caveat.variable} font-sans antialiased`}
+      >
         {children}
+        <PaletteToggle />
       </body>
     </html>
   );

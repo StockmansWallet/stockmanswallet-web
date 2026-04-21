@@ -1,5 +1,6 @@
 import type { ReportData } from "@/lib/types/reports";
 import { ReportPrintStyles } from "../asset-register/print-styles";
+import { formatDateAU } from "@/lib/dates";
 
 // ---------- Formatters -------------------------------------------------------
 
@@ -24,13 +25,7 @@ function fmtPrice(v: number) {
   return `$${v.toFixed(2)}/kg`;
 }
 
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-AU", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
+const fmtDate = formatDateAU;
 
 // ---------- Template ---------------------------------------------------------
 

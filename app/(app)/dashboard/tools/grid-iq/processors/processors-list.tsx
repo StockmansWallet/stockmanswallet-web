@@ -8,15 +8,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { createClient } from "@/lib/supabase/client";
-import {
-  Factory,
-  ChevronRight,
-  Plus,
-  Trash2,
-  Loader2,
-  MapPin,
-  Check,
-} from "lucide-react";
+import { Factory, ChevronRight, Plus, Trash2, Loader2, MapPin, Check } from "lucide-react";
 
 interface ProcessorRow {
   id: string;
@@ -32,11 +24,7 @@ interface ProcessorRow {
   updated_at: string;
 }
 
-export function ProcessorsList({
-  processors,
-}: {
-  processors: ProcessorRow[];
-}) {
+export function ProcessorsList({ processors }: { processors: ProcessorRow[] }) {
   const router = useRouter();
   const [selecting, setSelecting] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -83,7 +71,7 @@ export function ProcessorsList({
   const headerActions = (
     <>
       <Link href="/dashboard/tools/grid-iq/processors/new">
-        <Button variant="teal" size="sm" className="gap-1.5">
+        <Button variant="grid-iq" size="sm" className="gap-1.5">
           <Plus className="h-3.5 w-3.5" />
           New
         </Button>
@@ -91,7 +79,7 @@ export function ProcessorsList({
       <Button
         variant="ghost"
         size="sm"
-        className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-teal/40 text-teal hover:text-teal" : "border-white/[0.08] text-text-muted hover:border-white/[0.14]"}`}
+        className={`border bg-white/[0.04] hover:bg-white/[0.06] ${selecting ? "border-grid-iq/40 text-grid-iq hover:text-grid-iq" : "text-text-muted border-white/[0.08] hover:border-white/[0.14]"}`}
         onClick={() => (selecting ? exit() : setSelecting(true))}
         disabled={processors.length === 0}
       >
@@ -101,7 +89,8 @@ export function ProcessorsList({
   );
 
   const header = (
-    <PageHeader feature="grid-iq"
+    <PageHeader
+      feature="grid-iq"
       title="Processors"
       titleClassName="text-2xl font-semibold text-text-primary"
       subtitle="Your processor directory, reused across grids and analyses"
@@ -121,15 +110,14 @@ export function ProcessorsList({
             description="Add the processors you work with. Each processor stores a single copy of the address and contact details, and is reused every time you upload a grid or run an analysis."
             actionLabel="Add Processor"
             actionHref="/dashboard/tools/grid-iq/processors/new"
-            variant="teal"
+            variant="grid-iq"
           />
         </Card>
       </div>
     );
   }
 
-  const allSelected =
-    processors.length > 0 && selected.size === processors.length;
+  const allSelected = processors.length > 0 && selected.size === processors.length;
 
   return (
     <div>
@@ -138,24 +126,20 @@ export function ProcessorsList({
         <div className="mb-3">
           <button
             onClick={toggleAll}
-            className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs text-text-muted transition-colors hover:border-white/[0.14] hover:bg-white/[0.06] hover:text-text-primary"
+            className="text-text-muted hover:text-text-primary inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs transition-colors hover:border-white/[0.14] hover:bg-white/[0.06]"
           >
             <span
               className={`flex h-4 w-4 items-center justify-center rounded border transition-colors ${
                 allSelected
-                  ? "border-teal bg-teal text-black"
+                  ? "border-grid-iq bg-grid-iq text-black"
                   : "border-white/20 bg-white/[0.04]"
               }`}
             >
-              {allSelected && (
-                <Check className="h-3 w-3" strokeWidth={3} />
-              )}
+              {allSelected && <Check className="h-3 w-3" strokeWidth={3} />}
             </span>
             Select All ({processors.length})
             {selected.size > 0 && (
-              <span className="ml-2 text-teal">
-                {selected.size} selected
-              </span>
+              <span className="text-grid-iq ml-2">{selected.size} selected</span>
             )}
           </button>
         </div>
@@ -165,8 +149,7 @@ export function ProcessorsList({
         <CardContent className="divide-y divide-white/[0.06] p-0">
           {processors.map((p) => {
             const checked = selected.has(p.id);
-            const hasCoords =
-              p.location_latitude != null && p.location_longitude != null;
+            const hasCoords = p.location_latitude != null && p.location_longitude != null;
 
             const content = (
               <>
@@ -174,31 +157,29 @@ export function ProcessorsList({
                   <span
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
                       checked
-                        ? "border-teal bg-teal text-black"
+                        ? "border-grid-iq bg-grid-iq text-black"
                         : "border-white/20 bg-white/[0.04]"
                     }`}
                   >
                     {checked && <Check className="h-3 w-3" strokeWidth={3} />}
                   </span>
                 )}
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal/15">
-                  <Factory className="h-5 w-5 text-teal" />
+                <div className="bg-grid-iq/15 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                  <Factory className="text-grid-iq h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-text-primary">
-                      {p.name}
-                    </p>
+                    <p className="text-text-primary text-sm font-medium">{p.name}</p>
                     {p.is_primary && (
-                      <span className="rounded-full bg-teal/15 px-2 py-0.5 text-[10px] font-medium text-teal">
+                      <span className="bg-grid-iq/15 text-grid-iq rounded-full px-2 py-0.5 text-[10px] font-medium">
                         Primary
                       </span>
                     )}
                   </div>
-                  <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-text-muted">
+                  <div className="text-text-muted mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
                     {p.address && <span>{p.address}</span>}
                     {hasCoords ? (
-                      <span className="flex items-center gap-1 text-teal/70">
+                      <span className="text-grid-iq/70 flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
                         coords set
                       </span>
@@ -215,7 +196,7 @@ export function ProcessorsList({
                   </div>
                 </div>
                 {!selecting && (
-                  <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
+                  <ChevronRight className="text-text-muted group-hover:text-text-secondary h-4 w-4 shrink-0 transition-all group-hover:translate-x-0.5" />
                 )}
               </>
             );
@@ -248,10 +229,9 @@ export function ProcessorsList({
       {selecting && selected.size > 0 && (
         <div className="mt-4">
           {showConfirm ? (
-            <div className="flex items-center justify-between rounded-xl border border-error/20 bg-error/5 px-4 py-3">
-              <span className="text-sm text-error">
-                Delete {selected.size}{" "}
-                {selected.size === 1 ? "processor" : "processors"}?
+            <div className="border-error/20 bg-error/5 flex items-center justify-between rounded-xl border px-4 py-3">
+              <span className="text-error text-sm">
+                Delete {selected.size} {selected.size === 1 ? "processor" : "processors"}?
               </span>
               <div className="flex items-center gap-2">
                 <Button
@@ -279,11 +259,7 @@ export function ProcessorsList({
               </div>
             </div>
           ) : (
-            <Button
-              variant="destructive"
-              className="w-full"
-              onClick={() => setShowConfirm(true)}
-            >
+            <Button variant="destructive" className="w-full" onClick={() => setShowConfirm(true)}>
               <Trash2 className="mr-1.5 h-4 w-4" />
               Delete Selected ({selected.size})
             </Button>

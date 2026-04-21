@@ -21,7 +21,9 @@ export function ConnectionRequestButton({
   const [showToggles, setShowToggles] = useState(false);
 
   // Sync server-refreshed prop to local state (router.refresh updates the prop)
-  useEffect(() => { setStatus(existingStatus); }, [existingStatus]);
+  useEffect(() => {
+    setStatus(existingStatus);
+  }, [existingStatus]);
 
   // Sharing toggles
   const [shareHerds, setShareHerds] = useState(true);
@@ -69,22 +71,16 @@ export function ConnectionRequestButton({
   if (!showToggles) {
     return (
       <div>
-        <Button
-          variant="purple"
-          onClick={() => setShowToggles(true)}
-          disabled={loading}
-        >
+        <Button variant="purple" onClick={() => setShowToggles(true)} disabled={loading}>
           <UserPlus className="mr-1.5 h-4 w-4" />
           {isDeniedOrExpired ? "Re-request Connection" : "Connect with Advisor"}
         </Button>
         {isDeniedOrExpired && (
-          <p className="mt-1 text-xs text-text-muted">
+          <p className="text-text-muted mt-1 text-xs">
             Previous request was {status}. You can send a new one.
           </p>
         )}
-        {error && (
-          <p className="mt-2 text-xs text-error">{error}</p>
-        )}
+        {error && <p className="text-error mt-2 text-xs">{error}</p>}
       </div>
     );
   }
@@ -92,8 +88,8 @@ export function ConnectionRequestButton({
   return (
     <div className="space-y-4">
       <div>
-        <h4 className="mb-1 text-sm font-semibold text-text-primary">Choose what to share</h4>
-        <p className="text-xs text-text-muted">You can change these settings after connecting.</p>
+        <h4 className="text-text-primary mb-1 text-sm font-semibold">Choose what to share</h4>
+        <p className="text-text-muted text-xs">You can change these settings after connecting.</p>
       </div>
 
       <div className="divide-y divide-white/5 rounded-xl bg-white/[0.03]">
@@ -128,12 +124,7 @@ export function ConnectionRequestButton({
       </div>
 
       <div className="flex gap-2">
-        <Button
-          variant="purple"
-          onClick={handleRequest}
-          disabled={loading}
-          className="flex-1"
-        >
+        <Button variant="purple" onClick={handleRequest} disabled={loading} className="flex-1">
           {loading ? "Connecting..." : "Connect & Share"}
         </Button>
         <Button
@@ -146,9 +137,7 @@ export function ConnectionRequestButton({
         </Button>
       </div>
 
-      {error && (
-        <p className="text-xs text-error">{error}</p>
-      )}
+      {error && <p className="text-error text-xs">{error}</p>}
     </div>
   );
 }
@@ -168,16 +157,16 @@ function SharingToggle({
 }) {
   return (
     <label className="flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors hover:bg-white/[0.02]">
-      <span className="text-[#B0657A]">{icon}</span>
+      <span className="text-chat-advisor-accent">{icon}</span>
       <div className="flex-1">
-        <p className="text-sm font-medium text-text-primary">{title}</p>
-        <p className="text-xs text-text-muted">{subtitle}</p>
+        <p className="text-text-primary text-sm font-medium">{title}</p>
+        <p className="text-text-muted text-xs">{subtitle}</p>
       </div>
       <input
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="h-4 w-4 rounded border-white/20 bg-white/5 text-[#B0657A] accent-[#B0657A]"
+        className="text-chat-advisor-accent accent-chat-advisor-accent h-4 w-4 rounded border-white/20 bg-white/5"
       />
     </label>
   );

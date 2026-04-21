@@ -56,9 +56,7 @@ export function EditableGridLocation({
   }) => {
     const display =
       result.formattedAddress ||
-      [result.address, result.suburb, result.state, result.postcode]
-        .filter(Boolean)
-        .join(", ");
+      [result.address, result.suburb, result.state, result.postcode].filter(Boolean).join(", ");
     setLocation(display);
     setLatitude(result.latitude.toFixed(5));
     setLongitude(result.longitude.toFixed(5));
@@ -97,15 +95,13 @@ export function EditableGridLocation({
       <CardContent className="p-4">
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-teal" />
-            <p className="text-sm font-semibold text-teal">
-              Processor Location
-            </p>
+            <MapPin className="text-grid-iq h-4 w-4" />
+            <p className="text-grid-iq text-sm font-semibold">Processor Location</p>
           </div>
           {!isEditing && (
             <button
               onClick={() => setIsEditing(true)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-xs text-text-secondary transition-colors hover:border-teal/40 hover:bg-teal/10 hover:text-teal"
+              className="text-text-secondary hover:border-grid-iq/40 hover:bg-grid-iq/10 hover:text-grid-iq inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1 text-xs transition-colors"
             >
               <Pencil className="h-3 w-3" />
               Edit
@@ -116,27 +112,25 @@ export function EditableGridLocation({
         {!isEditing ? (
           <div className="space-y-1.5">
             {location ? (
-              <p className="text-sm text-text-primary">{location}</p>
+              <p className="text-text-primary text-sm">{location}</p>
             ) : (
-              <p className="text-sm italic text-text-muted">
-                No address set.
-              </p>
+              <p className="text-text-muted text-sm italic">No address set.</p>
             )}
             {initialLatitude != null && initialLongitude != null ? (
-              <p className="font-mono text-xs text-text-secondary">
+              <p className="text-text-secondary font-mono text-xs">
                 {initialLatitude.toFixed(5)}, {initialLongitude.toFixed(5)}
               </p>
             ) : (
-              <p className="text-xs text-warning">
-                No coordinates set. Freight to processor shows as $0 until
-                you add latitude and longitude.
+              <p className="text-warning text-xs">
+                No coordinates set. Freight to processor shows as $0 until you add latitude and
+                longitude.
               </p>
             )}
           </div>
         ) : (
           <div className="space-y-3">
             <div>
-              <label className="mb-1 block text-[11px] text-text-muted">
+              <label className="text-text-muted mb-1 block text-[11px]">
                 Address or Business Name
               </label>
               <AddressAutocomplete
@@ -145,54 +139,43 @@ export function EditableGridLocation({
                 placeholder="Start typing an address or business name..."
                 searchTypes={[]}
               />
-              {location && (
-                <p className="mt-1 text-[11px] text-text-muted">
-                  Saved: {location}
-                </p>
-              )}
+              {location && <p className="text-text-muted mt-1 text-[11px]">Saved: {location}</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 block text-[11px] text-text-muted">
-                  Latitude
-                </label>
+                <label className="text-text-muted mb-1 block text-[11px]">Latitude</label>
                 <input
                   type="number"
                   step="0.00001"
                   value={latitude}
                   onChange={(e) => setLatitude(e.target.value)}
                   placeholder="-27.59842"
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-mono text-sm text-text-primary placeholder:text-text-muted focus:border-teal/50 focus:outline-none focus:ring-1 focus:ring-teal/25"
+                  className="text-text-primary placeholder:text-text-muted focus:border-grid-iq/50 focus:ring-grid-iq/25 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-mono text-sm focus:ring-1 focus:outline-none"
                   disabled={isSaving}
                 />
               </div>
               <div>
-                <label className="mb-1 block text-[11px] text-text-muted">
-                  Longitude
-                </label>
+                <label className="text-text-muted mb-1 block text-[11px]">Longitude</label>
                 <input
                   type="number"
                   step="0.00001"
                   value={longitude}
                   onChange={(e) => setLongitude(e.target.value)}
                   placeholder="152.86914"
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-mono text-sm text-text-primary placeholder:text-text-muted focus:border-teal/50 focus:outline-none focus:ring-1 focus:ring-teal/25"
+                  className="text-text-primary placeholder:text-text-muted focus:border-grid-iq/50 focus:ring-grid-iq/25 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-mono text-sm focus:ring-1 focus:outline-none"
                   disabled={isSaving}
                 />
               </div>
             </div>
 
-            <p className="text-[11px] text-text-muted">
-              Pick a search result above to auto-fill coordinates. For
-              addresses Google does not know, paste lat/lng manually
-              (right-click the pin in Google Maps).
+            <p className="text-text-muted text-[11px]">
+              Pick a search result above to auto-fill coordinates. For addresses Google does not
+              know, paste lat/lng manually (right-click the pin in Google Maps).
             </p>
 
             {error && (
-              <div className="rounded-lg bg-error/10 px-3 py-2 text-xs text-error">
-                {error}
-              </div>
+              <div className="bg-error/10 text-error rounded-lg px-3 py-2 text-xs">{error}</div>
             )}
 
             <div className="flex items-center justify-end gap-2 pt-1">
@@ -202,12 +185,8 @@ export function EditableGridLocation({
                 className="border border-white/[0.08] bg-white/[0.04] text-xs hover:bg-white/[0.06]"
                 onClick={() => {
                   setLocation(initialLocation ?? "");
-                  setLatitude(
-                    initialLatitude != null ? String(initialLatitude) : ""
-                  );
-                  setLongitude(
-                    initialLongitude != null ? String(initialLongitude) : ""
-                  );
+                  setLatitude(initialLatitude != null ? String(initialLatitude) : "");
+                  setLongitude(initialLongitude != null ? String(initialLongitude) : "");
                   setError(null);
                   setIsEditing(false);
                 }}
@@ -217,7 +196,7 @@ export function EditableGridLocation({
                 Cancel
               </Button>
               <Button
-                variant="teal"
+                variant="grid-iq"
                 size="sm"
                 onClick={handleSave}
                 disabled={isSaving || !coordsValid}

@@ -43,15 +43,15 @@ export function ContactDetailsForm({
         <div
           className={`rounded-xl border px-4 py-3 text-sm ${
             message.type === "error"
-              ? "border-red-800 bg-red-900/20 text-error"
-              : "border-green-800 bg-green-900/20 text-success"
+              ? "border-error/40 bg-error/10 text-error"
+              : "border-success/40 bg-success/10 text-success"
           }`}
         >
           {message.text}
         </div>
       )}
 
-      <p className="text-xs text-text-muted leading-relaxed">
+      <p className="text-text-muted text-xs leading-relaxed">
         {isAdvisor
           ? "These details are visible to producers in the directory when your listing is active."
           : "These details are visible when someone views your profile in the network or directory."}

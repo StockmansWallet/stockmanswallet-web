@@ -3,7 +3,23 @@ import Link from "next/link";
 import { Inbox } from "lucide-react";
 import { Button, type ButtonVariant } from "@/components/ui/button";
 
-type EmptyStateVariant = "brand" | "teal" | "indigo" | "lime" | "sky" | "amber" | "purple" | "advisor";
+type EmptyStateVariant =
+  | "brand"
+  | "teal"
+  | "indigo"
+  | "lime"
+  | "sky"
+  | "amber"
+  | "purple"
+  | "advisor"
+  | "brangus"
+  | "insights"
+  | "markets"
+  | "yard-book"
+  | "reports"
+  | "freight-iq"
+  | "grid-iq"
+  | "producer-network";
 
 interface EmptyStateProps {
   icon?: ReactNode;
@@ -23,7 +39,15 @@ const variantStyles: Record<EmptyStateVariant, { iconBg: string; iconText: strin
   sky: { iconBg: "bg-sky/10", iconText: "text-sky" },
   amber: { iconBg: "bg-gold/10", iconText: "text-gold" },
   purple: { iconBg: "bg-violet/10", iconText: "text-violet" },
-  advisor: { iconBg: "bg-indigo/10", iconText: "text-indigo" },
+  advisor: { iconBg: "bg-advisor/10", iconText: "text-advisor" },
+  brangus: { iconBg: "bg-brangus/10", iconText: "text-brangus" },
+  insights: { iconBg: "bg-insights/10", iconText: "text-insights" },
+  markets: { iconBg: "bg-markets/10", iconText: "text-markets" },
+  "yard-book": { iconBg: "bg-yard-book/10", iconText: "text-yard-book" },
+  reports: { iconBg: "bg-reports/10", iconText: "text-reports" },
+  "freight-iq": { iconBg: "bg-freight-iq/10", iconText: "text-freight-iq" },
+  "grid-iq": { iconBg: "bg-grid-iq/10", iconText: "text-grid-iq" },
+  "producer-network": { iconBg: "bg-producer-network/10", iconText: "text-producer-network" },
 };
 
 const variantToButton: Record<EmptyStateVariant, ButtonVariant> = {
@@ -35,9 +59,25 @@ const variantToButton: Record<EmptyStateVariant, ButtonVariant> = {
   amber: "amber",
   purple: "purple",
   advisor: "advisor",
+  brangus: "brangus",
+  insights: "insights",
+  markets: "markets",
+  "yard-book": "yard-book",
+  reports: "reports",
+  "freight-iq": "freight-iq",
+  "grid-iq": "grid-iq",
+  "producer-network": "producer-network",
 };
 
-function EmptyState({ icon, title, description, actionLabel, actionHref, onAction, variant = "brand" }: EmptyStateProps) {
+function EmptyState({
+  icon,
+  title,
+  description,
+  actionLabel,
+  actionHref,
+  onAction,
+  variant = "brand",
+}: EmptyStateProps) {
   const v = variantStyles[variant];
   const btnVariant = variantToButton[variant];
   return (
@@ -45,8 +85,8 @@ function EmptyState({ icon, title, description, actionLabel, actionHref, onActio
       <div className={`mb-3 flex h-12 w-12 items-center justify-center rounded-full ${v.iconBg}`}>
         {icon || <Inbox className={`h-6 w-6 ${v.iconText}`} />}
       </div>
-      <h3 className="mb-1 text-sm font-medium text-text-primary">{title}</h3>
-      <p className="max-w-xs text-xs text-text-muted">{description}</p>
+      <h3 className="text-text-primary mb-1 text-sm font-medium">{title}</h3>
+      <p className="text-text-muted max-w-xs text-xs">{description}</p>
       {actionLabel && actionHref && (
         <Link href={actionHref} className="mt-4">
           <Button variant={btnVariant} size="sm">

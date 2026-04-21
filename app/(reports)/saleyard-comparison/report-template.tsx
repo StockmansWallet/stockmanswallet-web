@@ -1,6 +1,7 @@
 import type { ReportData, SaleyardComparisonData } from "@/lib/types/reports";
 import { shortSaleyardName } from "@/lib/data/reference-data";
 import { ReportPrintStyles } from "../asset-register/print-styles";
+import { formatDateAU } from "@/lib/dates";
 
 // -- Formatters ---------------------------------------------------------------
 
@@ -21,13 +22,7 @@ function fmtFull(v: number) {
   }).format(v);
 }
 
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-AU", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
+const fmtDate = formatDateAU;
 
 function fmtPrice(v: number) {
   return `$${v.toFixed(2)}/kg`;

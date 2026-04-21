@@ -21,10 +21,10 @@ export default async function GridIQLayout({ children }: { children: React.React
 
   return (
     <div className="max-w-4xl">
-      <PageHeader feature="grid-iq"
+      <PageHeader
+        feature="grid-iq"
         title="Grid IQ"
         titleHref="/dashboard/tools/grid-iq"
-        titleClassName="text-4xl font-bold text-teal"
         subtitle="Processor grid analysis and kill sheet comparison."
         subtitleClassName="text-sm font-medium text-text-secondary"
       />

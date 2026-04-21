@@ -7,11 +7,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import {
-  breedsForSpecies,
-  saleyards,
-  cattleBreedPremiums,
-} from "@/lib/data/reference-data";
+import { breedsForSpecies, saleyards, cattleBreedPremiums } from "@/lib/data/reference-data";
 import {
   categoriesForSpecies,
   validateWeight,
@@ -20,14 +16,21 @@ import {
 } from "@/lib/data/weight-mapping";
 import type { Database } from "@/lib/types/database";
 import { parseCalvesAtFoot } from "@/lib/engines/valuation-engine";
-import { Info, Scale, Heart, MapPin, FileText, AlertTriangle, AlertCircle, Baby } from "lucide-react";
+import {
+  Info,
+  Scale,
+  Heart,
+  MapPin,
+  FileText,
+  AlertTriangle,
+  AlertCircle,
+  Baby,
+} from "lucide-react";
 import { scrollToFirstError } from "@/lib/validation/scroll-to-first-error";
 
 type HerdRow = Database["public"]["Tables"]["herds"]["Row"];
 
-const SPECIES_OPTIONS = [
-  { value: "Cattle", label: "Cattle" },
-];
+const SPECIES_OPTIONS = [{ value: "Cattle", label: "Cattle" }];
 
 const BREEDING_PROGRAM_OPTIONS = [
   { value: "", label: "None" },
@@ -48,8 +51,8 @@ const saleyardOptions = [
 
 function SectionIcon({ icon: Icon }: { icon: React.ComponentType<{ className?: string }> }) {
   return (
-    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
-      <Icon className="h-3.5 w-3.5 text-brand" />
+    <div className="bg-brand/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+      <Icon className="text-brand h-3.5 w-3.5" />
     </div>
   );
 }
@@ -64,22 +67,42 @@ interface HerdFormProps {
   cancelHref?: string;
 }
 
-export function HerdForm({ herd, properties, existingOwners = [], action, submitLabel = "Save", cancelHref }: HerdFormProps) {
+export function HerdForm({
+  herd,
+  properties,
+  existingOwners = [],
+  action,
+  submitLabel = "Save",
+  cancelHref,
+}: HerdFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [species, setSpecies] = useState<string>(herd?.species ?? "Cattle");
   const [breed, setBreed] = useState<string>(herd?.breed ?? "");
   const [category, setCategory] = useState<string>(herd?.category ?? "");
-  const [breederSubType, setBreederSubType] = useState<BreederSubType | "">((herd as Record<string, unknown>)?.breeder_sub_type as BreederSubType ?? "");
+  const [breederSubType, setBreederSubType] = useState<BreederSubType | "">(
+    ((herd as Record<string, unknown>)?.breeder_sub_type as BreederSubType) ?? ""
+  );
   const [isBreeder, setIsBreeder] = useState(herd?.is_breeder ?? false);
   const [breedingProgramType, setBreedingProgramType] = useState(herd?.breeding_program_type ?? "");
-  const [joiningStart, setJoiningStart] = useState(herd?.joining_period_start ? herd.joining_period_start.split("T")[0] : "");
-  const [joiningEnd, setJoiningEnd] = useState(herd?.joining_period_end ? herd.joining_period_end.split("T")[0] : "");
-  const [currentWeight, setCurrentWeight] = useState<string>(String(herd?.current_weight ?? herd?.initial_weight ?? ""));
-  const [hasCustomPremium, setHasCustomPremium] = useState(herd?.breed_premium_override != null && herd.breed_premium_override !== 0);
+  const [joiningStart, setJoiningStart] = useState(
+    herd?.joining_period_start ? herd.joining_period_start.split("T")[0] : ""
+  );
+  const [joiningEnd, setJoiningEnd] = useState(
+    herd?.joining_period_end ? herd.joining_period_end.split("T")[0] : ""
+  );
+  const [currentWeight, setCurrentWeight] = useState<string>(
+    String(herd?.current_weight ?? herd?.initial_weight ?? "")
+  );
+  const [hasCustomPremium, setHasCustomPremium] = useState(
+    herd?.breed_premium_override != null && herd.breed_premium_override !== 0
+  );
 
   // Calves at foot - parse existing data from additional_info
-  const parsedCalves = useMemo(() => parseCalvesAtFoot(herd?.additional_info ?? null), [herd?.additional_info]);
+  const parsedCalves = useMemo(
+    () => parseCalvesAtFoot(herd?.additional_info ?? null),
+    [herd?.additional_info]
+  );
   const [calvesHeadCount, setCalvesHeadCount] = useState(parsedCalves?.headCount?.toString() ?? "");
   const [calvesAgeMonths, setCalvesAgeMonths] = useState(parsedCalves?.ageMonths?.toString() ?? "");
   const [calvesWeight, setCalvesWeight] = useState(parsedCalves?.averageWeight?.toString() ?? "");
@@ -87,7 +110,10 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
   // the herd creation date so backfilled calves accrue over the full ownership
   // window. Dates are persisted as yyyy-MM-dd to match <input type="date"> format.
   const [calvesWeighedOn, setCalvesWeighedOn] = useState(() => {
-    const existing = (herd as Record<string, unknown>)?.calf_weight_recorded_date as string | null | undefined;
+    const existing = (herd as Record<string, unknown>)?.calf_weight_recorded_date as
+      | string
+      | null
+      | undefined;
     const seed = existing ?? herd?.created_at ?? new Date().toISOString();
     return new Date(seed).toISOString().slice(0, 10);
   });
@@ -146,7 +172,7 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
     return new Date(calvesWeighedOn).toISOString();
   }, [calvesWeight, calvesWeighedOn]);
 
-  const autoPremium = species === "Cattle" ? cattleBreedPremiums[breed] ?? null : null;
+  const autoPremium = species === "Cattle" ? (cattleBreedPremiums[breed] ?? null) : null;
 
   const breedOptions = breedsForSpecies(species).map((b) => ({
     value: b,
@@ -233,7 +259,7 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
   return (
     <form id="herd-form" onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-error">
+        <div className="border-error/40 bg-error/10 text-error rounded-xl border px-4 py-3 text-sm">
           {error}
         </div>
       )}
@@ -272,7 +298,10 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
               required
               options={SPECIES_OPTIONS}
               value={species}
-              onChange={(e) => { setSpecies(e.target.value); setBreed(breedsForSpecies(e.target.value)[0] ?? ""); }}
+              onChange={(e) => {
+                setSpecies(e.target.value);
+                setBreed(breedsForSpecies(e.target.value)[0] ?? "");
+              }}
             />
             <Select
               id="breed"
@@ -283,7 +312,10 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
               placeholder="Select breed"
               value={breed}
               error={submitAttempted ? fieldErrors.breed : undefined}
-              onChange={(e) => { setBreed(e.target.value); clearFieldError("breed"); }}
+              onChange={(e) => {
+                setBreed(e.target.value);
+                clearFieldError("breed");
+              }}
             />
             <Select
               id="category"
@@ -312,7 +344,10 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
                 placeholder="Cow or Heifer?"
                 value={breederSubType}
                 error={submitAttempted ? fieldErrors.breeder_sub_type : undefined}
-                onChange={(e) => { setBreederSubType(e.target.value as BreederSubType); clearFieldError("breeder_sub_type"); }}
+                onChange={(e) => {
+                  setBreederSubType(e.target.value as BreederSubType);
+                  clearFieldError("breeder_sub_type");
+                }}
               />
             )}
             <Input
@@ -372,13 +407,13 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
 
           {/* Weight validation feedback */}
           {weightValidation && weightValidation.status === "error" && (
-            <div className="flex items-start gap-2 rounded-lg border border-red-800 bg-red-900/20 px-3 py-2 text-xs text-error mt-2">
+            <div className="text-error border-error/40 bg-error/10 mt-2 flex items-start gap-2 rounded-lg border px-3 py-2 text-xs">
               <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
               <span>{weightValidation.message}</span>
             </div>
           )}
           {weightValidation && weightValidation.status === "warning" && (
-            <div className="flex items-start gap-2 rounded-lg border border-amber-800 bg-amber-900/20 px-3 py-2 text-xs text-warning mt-2">
+            <div className="text-warning border-warning/40 bg-warning/10 mt-2 flex items-start gap-2 rounded-lg border px-3 py-2 text-xs">
               <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
               <span>{weightValidation.message}</span>
             </div>
@@ -386,15 +421,16 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
 
           {/* Derived sub-category label */}
           {derivedSubCategory && weightValidation?.status !== "error" && (
-            <p className="flex items-center gap-2 text-xs text-text-muted mt-2">
+            <p className="text-text-muted mt-2 flex items-center gap-2 text-xs">
               <Info className="h-3.5 w-3.5 shrink-0" />
               <span>
-                MLA category: <span className="font-medium text-text-primary">{derivedSubCategory}</span>
+                MLA category:{" "}
+                <span className="text-text-primary font-medium">{derivedSubCategory}</span>
               </span>
             </p>
           )}
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mt-4">
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Input
               id="daily_weight_gain"
               name="daily_weight_gain"
@@ -439,7 +475,11 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
             rows={2}
             error={submitAttempted ? fieldErrors.breed_premium_justification : undefined}
             onInput={() => clearFieldError("breed_premium_justification")}
-            helperText={hasCustomPremium ? "Required. Explains why a custom premium is applied." : "Optional. Provides transparency for banks and advisors."}
+            helperText={
+              hasCustomPremium
+                ? "Required. Explains why a custom premium is applied."
+                : "Optional. Provides transparency for banks and advisors."
+            }
             className="mt-4"
           />
         </CardContent>
@@ -457,12 +497,12 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
           {isBreeder && (
             <div className="mb-4 flex items-center gap-6">
               <input type="hidden" name="is_breeder" value="on" />
-              <label className="flex items-center gap-2 text-sm text-text-primary">
+              <label className="text-text-primary flex items-center gap-2 text-sm">
                 <input
                   type="checkbox"
                   name="is_pregnant"
                   defaultChecked={herd?.is_pregnant ?? false}
-                  className="h-4 w-4 rounded border-black/20 text-brand accent-brand"
+                  className="text-brand accent-brand h-4 w-4 rounded border-black/20"
                 />
                 Pregnant
               </label>
@@ -484,7 +524,13 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
                 label="Calving Rate (%)"
                 type="number"
                 step="0.1"
-                defaultValue={herd?.calving_rate != null ? Math.round(herd.calving_rate > 1 ? herd.calving_rate : herd.calving_rate * 100) : 85}
+                defaultValue={
+                  herd?.calving_rate != null
+                    ? Math.round(
+                        herd.calving_rate > 1 ? herd.calving_rate : herd.calving_rate * 100
+                      )
+                    : 85
+                }
               />
               {(breedingProgramType === "ai" || breedingProgramType === "controlled") && (
                 <>
@@ -499,7 +545,9 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
                   <Input
                     id="joining_period_end"
                     name="joining_period_end"
-                    label={breedingProgramType === "ai" ? "Insemination Complete" : "Pull Bulls Out"}
+                    label={
+                      breedingProgramType === "ai" ? "Insemination Complete" : "Pull Bulls Out"
+                    }
                     type="date"
                     value={joiningEnd}
                     onChange={(e) => setJoiningEnd(e.target.value)}
@@ -507,9 +555,17 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
                   {/* Effective Joining Date: live-computed midpoint of period */}
                   {joiningStart && joiningEnd && (
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-medium text-text-muted">Effective Joining Date</label>
-                      <p className="rounded-lg border border-white/[0.06] bg-surface-secondary px-3 py-2 text-sm text-text-primary">
-                        {new Date((new Date(joiningStart).getTime() + new Date(joiningEnd).getTime()) / 2).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+                      <label className="text-text-muted text-xs font-medium">
+                        Effective Joining Date
+                      </label>
+                      <p className="bg-surface-secondary text-text-primary rounded-lg border border-white/[0.06] px-3 py-2 text-sm">
+                        {new Date(
+                          (new Date(joiningStart).getTime() + new Date(joiningEnd).getTime()) / 2
+                        ).toLocaleDateString("en-AU", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
                       </p>
                     </div>
                   )}
@@ -526,10 +582,10 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
           )}
           {isBreeder && (
             <>
-              <div className="border-t border-white/[0.04] mt-4 pt-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Baby className="h-4 w-4 text-brand" />
-                  <span className="text-sm font-medium text-text-primary">Calves at Foot</span>
+              <div className="mt-4 border-t border-white/[0.04] pt-4">
+                <div className="mb-3 flex items-center gap-2">
+                  <Baby className="text-brand h-4 w-4" />
+                  <span className="text-text-primary text-sm font-medium">Calves at Foot</span>
                 </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <Input
@@ -569,29 +625,41 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
                     id="calves_weighed_on"
                     label="Weighed on"
                     type="date"
-                    min={herd?.created_at ? new Date(herd.created_at).toISOString().slice(0, 10) : undefined}
+                    min={
+                      herd?.created_at
+                        ? new Date(herd.created_at).toISOString().slice(0, 10)
+                        : undefined
+                    }
                     max={new Date().toISOString().slice(0, 10)}
                     value={calvesWeighedOn}
                     onChange={(e) => setCalvesWeighedOn(e.target.value)}
                     helperText="Leave as today unless backfilling historical data."
                   />
                 </div>
-                <p className="flex items-start gap-2 text-xs text-text-muted mt-2">
+                <p className="text-text-muted mt-2 flex items-start gap-2 text-xs">
                   <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                  <span>Record the calves currently with this breeder herd for accurate valuation.</span>
+                  <span>
+                    Record the calves currently with this breeder herd for accurate valuation.
+                  </span>
                 </p>
               </div>
               {/* Hidden inputs for serialized calves at foot data */}
               <input type="hidden" name="additional_info" value={serializedAdditionalInfo} />
               {calfWeightRecordedDate && (
-                <input type="hidden" name="calf_weight_recorded_date" value={calfWeightRecordedDate} />
+                <input
+                  type="hidden"
+                  name="calf_weight_recorded_date"
+                  value={calfWeightRecordedDate}
+                />
               )}
             </>
           )}
           {/* Hidden input for derived sub_category */}
-          {derivedSubCategory && <input type="hidden" name="sub_category" value={derivedSubCategory} />}
+          {derivedSubCategory && (
+            <input type="hidden" name="sub_category" value={derivedSubCategory} />
+          )}
           {!isBreeder && (
-            <p className="text-xs text-text-muted">
+            <p className="text-text-muted text-xs">
               Select Breeder or Dry Cow as the category to enable breeding fields.
             </p>
           )}
@@ -666,14 +734,14 @@ export function HerdForm({ herd, properties, existingOwners = [], action, submit
             rows={3}
             defaultValue={herd?.notes ?? ""}
             placeholder="Any additional notes about this herd..."
-            className="w-full rounded-xl bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all ring-1 ring-inset ring-ring-subtle focus:ring-brand/60 focus:bg-surface-raised"
+            className="bg-surface text-text-primary placeholder:text-text-muted ring-ring-subtle focus:ring-brand/60 focus:bg-surface-raised w-full rounded-xl px-4 py-3 text-sm ring-1 transition-all outline-none ring-inset"
           />
         </CardContent>
       </Card>
 
       {/* Sticky bottom action bar */}
       {(submitLabel || cancelHref) && (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/80 backdrop-blur-xl">
+        <div className="border-border bg-background/80 fixed inset-x-0 bottom-0 z-30 border-t backdrop-blur-xl">
           <div className="mx-auto flex max-w-6xl items-center justify-end gap-3 px-6 py-3 lg:px-8">
             {cancelHref && (
               <Link href={cancelHref}>

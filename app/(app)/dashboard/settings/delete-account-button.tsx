@@ -31,7 +31,7 @@ export function DeleteAccountButton() {
       <Button
         variant="ghost"
         onClick={() => setOpen(true)}
-        className="w-full justify-start gap-2.5 border border-error/30 bg-error/10 text-error hover:border-error/40 hover:bg-error/15 hover:text-error"
+        className="border-error/30 bg-error/10 text-error hover:border-error/40 hover:bg-error/15 hover:text-error w-full justify-start gap-2.5 border"
       >
         <Trash2 className="h-4 w-4" />
         Delete Account
@@ -39,27 +39,27 @@ export function DeleteAccountButton() {
 
       <Modal open={open} onClose={() => setOpen(false)} title="Delete Account" size="sm">
         <div className="space-y-4">
-          <p className="text-sm text-text-secondary leading-relaxed">
+          <p className="text-text-secondary text-sm leading-relaxed">
             This will permanently delete your account and all associated data including herds,
-            properties, records, and settings. This action cannot be undone and affects both
-            the web app and iOS app.
+            properties, records, and settings. This action cannot be undone and affects both the web
+            app and iOS app.
           </p>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-text-secondary">
-              Type <span className="font-mono text-error">DELETE</span> to confirm
+            <label className="text-text-secondary mb-1.5 block text-sm font-medium">
+              Type <span className="text-error font-mono">DELETE</span> to confirm
             </label>
             <input
               type="text"
               value={confirmText}
               onChange={(e) => setConfirmText(e.target.value)}
               placeholder="DELETE"
-              className="w-full rounded-xl bg-white/5 px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all ring-1 ring-inset ring-white/10 focus:ring-error/60"
+              className="text-text-primary placeholder:text-text-muted focus:ring-error/60 w-full rounded-xl bg-white/5 px-4 py-3 text-sm ring-1 ring-white/10 transition-all outline-none ring-inset"
             />
           </div>
 
           {error && (
-            <div className="rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm text-error">
+            <div className="border-error/40 bg-error/10 text-error rounded-xl border px-4 py-3 text-sm">
               {error}
             </div>
           )}

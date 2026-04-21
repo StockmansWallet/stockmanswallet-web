@@ -195,8 +195,8 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal/15">
-                    <Target className="h-5 w-5 text-teal" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-grid-iq/15">
+                    <Target className="h-5 w-5 text-grid-iq" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-text-primary">Processor Fit</p>
@@ -205,7 +205,7 @@ export default async function AnalysisDetailPage({ params }: PageProps) {
                     </p>
                   </div>
                 </div>
-                <span className="text-lg font-bold text-teal">
+                <span className="text-lg font-bold text-grid-iq">
                   {analysis.processor_fit_score.toFixed(0)}/100
                 </span>
               </div>
@@ -328,7 +328,7 @@ function BrangusCommentarySection({
           <ul className="mt-3 space-y-1.5">
             {commentary.bullets.map((bullet, i) => (
               <li key={i} className="flex items-start gap-2 text-xs leading-relaxed text-text-secondary">
-                <span className="mt-0.5 text-teal">-</span>
+                <span className="mt-0.5 text-grid-iq">-</span>
                 {bullet}
               </li>
             ))}
@@ -360,8 +360,8 @@ function getSellWindowConfig(status: string) {
     case "EARLY":
       return {
         label: "Early",
-        color: "text-teal",
-        bg: "bg-teal/15",
+        color: "text-grid-iq",
+        bg: "bg-grid-iq/15",
         icon: TrendingUp,
       };
     case "RISK_OF_OVERWEIGHT":

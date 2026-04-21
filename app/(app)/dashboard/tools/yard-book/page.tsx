@@ -65,7 +65,7 @@ export default async function YardBookPage() {
     <div className="max-w-4xl">
       <PageHeader feature="yard-book"
         title="Yard Book"
-        titleClassName="text-4xl font-bold text-emerald"
+        titleClassName="text-4xl font-bold text-yard-book"
         subtitle="Top Pocket Stuff"
         subtitleClassName="text-sm font-medium text-text-secondary"
       />
@@ -77,7 +77,7 @@ export default async function YardBookPage() {
             description="Add tasks, events, and reminders to your run sheet."
             actionLabel="Add Item"
             actionHref="/dashboard/tools/yard-book/new"
-            variant="lime"
+            variant="teal"
           />
         </Card>
       ) : (

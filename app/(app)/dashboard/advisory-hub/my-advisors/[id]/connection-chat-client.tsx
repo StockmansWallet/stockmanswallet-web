@@ -9,7 +9,7 @@ import { sendMessage, fetchConnectionMessages } from "./actions";
 import type { AdvisoryMessage } from "@/lib/types/advisory";
 
 const POLL_INTERVAL = 5000;
-const OTHER_BG = "#2A2929";
+const OTHER_BG = "var(--color-chat-other)";
 
 interface ConnectionChatClientProps {
   connectionId: string;
@@ -64,33 +64,36 @@ export function ConnectionChatClient({
     return () => clearInterval(interval);
   }, [connectionId]);
 
-  const handleSend = useCallback(async (text: string) => {
-    // Optimistic add
-    const optimisticMsg: AdvisoryMessage = {
-      id: `optimistic-${Date.now()}`,
-      connection_id: connectionId,
-      sender_user_id: currentUserId,
-      message_type: "general_note",
-      content: text,
-      created_at: new Date().toISOString(),
-    };
+  const handleSend = useCallback(
+    async (text: string) => {
+      // Optimistic add
+      const optimisticMsg: AdvisoryMessage = {
+        id: `optimistic-${Date.now()}`,
+        connection_id: connectionId,
+        sender_user_id: currentUserId,
+        message_type: "general_note",
+        content: text,
+        created_at: new Date().toISOString(),
+      };
 
-    setMessages((prev) => [...prev, optimisticMsg]);
-    setAnimatedIds((ids) => new Set(ids).add(optimisticMsg.id));
+      setMessages((prev) => [...prev, optimisticMsg]);
+      setAnimatedIds((ids) => new Set(ids).add(optimisticMsg.id));
 
-    const result = await sendMessage(connectionId, text, "general_note");
+      const result = await sendMessage(connectionId, text, "general_note");
 
-    if (result?.error) {
-      setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
-      return;
-    }
+      if (result?.error) {
+        setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
+        return;
+      }
 
-    // Fetch real messages to replace optimistic
-    const refreshed = await fetchConnectionMessages(connectionId);
-    if (refreshed.messages) {
-      setMessages(refreshed.messages);
-    }
-  }, [connectionId, currentUserId]);
+      // Fetch real messages to replace optimistic
+      const refreshed = await fetchConnectionMessages(connectionId);
+      if (refreshed.messages) {
+        setMessages(refreshed.messages);
+      }
+    },
+    [connectionId, currentUserId]
+  );
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -114,7 +117,7 @@ export function ConnectionChatClient({
           onSend={handleSend}
           onTyping={notifyTyping}
           placeholder="Write a message..."
-          accentClass="bg-[#B0657A] hover:bg-[#8A4D5E]"
+          accentClass="bg-chat-advisor-accent hover:bg-chat-advisor-accent-hover"
         />
       </div>
     </div>

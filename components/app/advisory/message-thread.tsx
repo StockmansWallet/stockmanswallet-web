@@ -23,16 +23,19 @@ interface MessageThreadProps {
   hideSenderName?: boolean;
 }
 
-const messageTypeLabels: Record<MessageType, { label: string; variant: "warning" | "info" | "brand" | "default" }> = {
+const messageTypeLabels: Record<
+  MessageType,
+  { label: string; variant: "warning" | "info" | "brand" | "default" }
+> = {
   access_request: { label: "Access Request", variant: "warning" },
   renewal_request: { label: "Renewal Request", variant: "warning" },
   review_request: { label: "Review Request", variant: "info" },
   general_note: { label: "Note", variant: "default" },
 };
 
-// Producer chat colors (solid opaque so tails match perfectly)
-const OWN_BG = "#31243C";
-const OTHER_BG = "#2A2929";
+// Solid opaque tokens so tails match the bubble fill perfectly
+const OWN_BG = "var(--color-chat-advisor-own)";
+const OTHER_BG = "var(--color-chat-other)";
 
 const FIVE_MINUTES = 5 * 60 * 1000;
 
@@ -60,14 +63,19 @@ function formatTimeSeparator(date: Date): string {
     return `${dayName} ${time}`;
   }
 
-  return date.toLocaleDateString("en-AU", {
-    day: "numeric",
-    month: "short",
-    year: msgDay.getFullYear() !== today.getFullYear() ? "numeric" : undefined,
-  }) + ` ${time}`;
+  return (
+    date.toLocaleDateString("en-AU", {
+      day: "numeric",
+      month: "short",
+      year: msgDay.getFullYear() !== today.getFullYear() ? "numeric" : undefined,
+    }) + ` ${time}`
+  );
 }
 
-function shouldShowTimestamp(current: AdvisoryMessage, previous: AdvisoryMessage | undefined): boolean {
+function shouldShowTimestamp(
+  current: AdvisoryMessage,
+  previous: AdvisoryMessage | undefined
+): boolean {
   if (!previous) return true;
   const currentTime = new Date(current.created_at).getTime();
   const previousTime = new Date(previous.created_at).getTime();
@@ -84,7 +92,7 @@ export function MessageThread({
   if (messages.length === 0) {
     return (
       <div className="py-8 text-center">
-        <p className="text-sm text-text-muted">No messages yet. Start the conversation below.</p>
+        <p className="text-text-muted text-sm">No messages yet. Start the conversation below.</p>
       </div>
     );
   }
@@ -102,13 +110,13 @@ export function MessageThread({
         return (
           <div key={msg.id}>
             {showTime && (
-              <p className="py-2 text-center text-[11px] font-medium text-text-muted">
+              <p className="text-text-muted py-2 text-center text-[11px] font-medium">
                 {formatTimeSeparator(new Date(msg.created_at))}
               </p>
             )}
             <ChatBubble
               side={isOwn ? "right" : "left"}
-              bgClass={isOwn ? "bg-[#31243C]" : "bg-[#2A2929]"}
+              bgClass={isOwn ? "bg-chat-advisor-own" : "bg-chat-other"}
               tailColor={isOwn ? OWN_BG : OTHER_BG}
               animate={!!shouldAnimate}
               senderName={!isOwn && !hideSenderName ? sender?.name : undefined}

@@ -2,15 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  User,
-  Bell,
-  BellRing,
-  MapPinned,
-  Database,
-  ChevronRight,
-  CreditCard,
-} from "lucide-react";
+import { User, Bell, BellRing, MapPinned, Database, ChevronRight, CreditCard } from "lucide-react";
 import { isAdminUser } from "@/lib/data/admin";
 
 export const revalidate = 0;
@@ -36,17 +28,19 @@ function NavItem({ href, icon: Icon, iconBg, iconColor, label, description }: Na
         <Icon className={`h-4 w-4 ${iconColor}`} />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-text-primary">{label}</p>
-        <p className="text-xs text-text-muted">{description}</p>
+        <p className="text-text-primary text-sm font-medium">{label}</p>
+        <p className="text-text-muted text-xs">{description}</p>
       </div>
-      <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
+      <ChevronRight className="text-text-muted group-hover:text-text-secondary h-4 w-4 shrink-0 transition-all group-hover:translate-x-0.5" />
     </Link>
   );
 }
 
 export default async function SettingsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const isAdmin = await isAdminUser(supabase, user?.id);
 
@@ -89,8 +83,8 @@ export default async function SettingsPage() {
             <NavItem
               href="/dashboard/settings/alerts"
               icon={BellRing}
-              iconBg="bg-rose-500/15"
-              iconColor="text-rose-400"
+              iconBg="bg-pink/15"
+              iconColor="text-pink"
               label="Price alerts"
               description="Notify me when categories or saleyards cross a target"
             />
@@ -112,8 +106,6 @@ export default async function SettingsPage() {
             />
           </CardContent>
         </Card>
-
-
       </div>
     </div>
   );
