@@ -260,7 +260,7 @@ export function BrangusDemoHub() {
       </div>
 
       {/* Demo notice strip (replaces the action toolbar from the live hub) */}
-      <div className="bg-brand/5 border-brand/20 mb-4 flex items-center gap-2.5 rounded-full border px-4 py-2 text-xs">
+      <div className="bg-brand/5 border-brand/20 mb-4 flex items-center gap-2.5 rounded-full border px-4 py-2 text-xs backdrop-blur-xl">
         <Sparkles className="text-brand h-3.5 w-3.5 shrink-0" />
         <p className="text-text-secondary leading-snug">
           You&apos;re exploring Brangus with sample conversations. Sign up to ask your own questions

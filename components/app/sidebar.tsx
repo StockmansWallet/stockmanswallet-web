@@ -145,7 +145,7 @@ export function Sidebar({
                   : "text-text-secondary hover:text-text-primary hover:bg-white/5 hover:backdrop-blur-xl"
               }`}
             >
-              <Sparkles className="h-4 w-4" />
+              <Sparkles className="text-brand h-4 w-4" />
               Demo Guide
             </Link>
           )}
