@@ -16,14 +16,8 @@ export function PortfolioValueCard({
   const isPositive = changePercent !== undefined && changePercent >= 0;
 
   return (
-    <div className="from-brand/15 via-brand/5 to-surface-lowest relative overflow-hidden rounded-2xl bg-gradient-to-br p-6 backdrop-blur-xl sm:p-7">
-      {/* Decorative glow */}
-      <div
-        aria-hidden
-        className="bg-brand/20 pointer-events-none absolute -top-10 -right-10 h-40 w-40 rounded-full blur-3xl"
-      />
-
-      <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="bg-surface-lowest relative overflow-hidden rounded-2xl p-6 backdrop-blur-xl sm:p-7">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <p className="text-text-muted text-xs font-medium tracking-widest uppercase">
             Total Portfolio Value

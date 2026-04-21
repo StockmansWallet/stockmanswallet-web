@@ -11,11 +11,7 @@ import { ADVISOR_ENABLED } from "@/lib/feature-flags";
 // Prevent Next.js from caching this layout - auth state must be fresh on every request
 export const dynamic = "force-dynamic";
 
-export default async function AppLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -79,15 +75,15 @@ export default async function AppLayout({
       <div
         data-print-hide
         aria-hidden
-        className="pointer-events-none fixed inset-0 -z-10 bg-background"
+        className="bg-background pointer-events-none fixed inset-0 -z-10"
         style={{
           backgroundImage: [
             // Dark bottom gradient (fades image into page background)
-            "linear-gradient(to bottom, rgba(31,27,24,0) 0%, rgba(31,27,24,0.7) 60%, rgba(31,27,24,1) 100%)",
+            "linear-gradient(to bottom, rgba(31,27,24,0) 0%, rgba(31,27,24,0.35) 25%, rgba(31,27,24,0.7) 55%, rgba(31,27,24,1) 90%)",
             // Soft brand glow in top-left
             "radial-gradient(ellipse 2200px 2200px at -500px -500px, rgba(217,118,47,0.12) 0%, transparent 70%)",
-            // Hero image, darkened to ~10% visibility via stacked black overlay
-            "linear-gradient(rgba(31,27,24,0.9), rgba(31,27,24,0.9)), url('/images/landing-bg.webp')",
+            // Hero image, darkened via stacked black overlay
+            "linear-gradient(rgba(31,27,24,0.78), rgba(31,27,24,0.78)), url('/images/landing-bg.webp')",
           ].join(","),
           backgroundSize: "100% 100%, 100% 100%, cover, cover",
           backgroundPosition: "center",
@@ -95,12 +91,16 @@ export default async function AppLayout({
         }}
       />
 
-      <div className="flex min-h-screen flex-col bg-background/0">
+      <div className="bg-background/0 flex min-h-screen flex-col">
         {isDemoUser && <DemoModeBanner />}
 
         {/* Mobile nav */}
         <div data-print-hide>
-          <MobileNav userEmail={user.email} subscriptionTier={profile?.subscription_tier || "stockman"} isAdvisor={isAdvisor} />
+          <MobileNav
+            userEmail={user.email}
+            subscriptionTier={profile?.subscription_tier || "stockman"}
+            isAdvisor={isAdvisor}
+          />
         </div>
 
         {/* Desktop top header bar - full width, sticky */}
@@ -118,13 +118,15 @@ export default async function AppLayout({
         <div className="flex flex-1">
           <div className="hidden lg:block">
             <div className="sticky top-20 h-[calc(100vh-5rem)] py-4 pl-6">
-              <Sidebar isAdmin={isAdmin} subscriptionTier={profile?.subscription_tier || "stockman"} isAdvisor={isAdvisor} />
+              <Sidebar
+                isAdmin={isAdmin}
+                subscriptionTier={profile?.subscription_tier || "stockman"}
+                isAdvisor={isAdvisor}
+              />
             </div>
           </div>
 
-          <main className="flex-1 overflow-y-auto px-6 pb-6 lg:px-8 lg:pb-8">
-            {children}
-          </main>
+          <main className="flex-1 overflow-y-auto px-6 pb-6 lg:px-8 lg:pb-8">{children}</main>
         </div>
       </div>
     </SidebarNotificationsProvider>

@@ -43,13 +43,13 @@ export function HerdComposition({ herds }: HerdCompositionProps) {
     <div className="flex items-center gap-6">
       {/* Pie chart */}
       <div className="relative shrink-0" style={{ width: 112, height: 112 }}>
-        <PieChart width={112} height={112}>
+        <PieChart width={112} height={112} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
           <Pie
             data={pieData}
-            cx={56}
-            cy={56}
+            cx="50%"
+            cy="50%"
             innerRadius={36}
-            outerRadius={55}
+            outerRadius={54}
             dataKey="value"
             nameKey="name"
             stroke="none"
