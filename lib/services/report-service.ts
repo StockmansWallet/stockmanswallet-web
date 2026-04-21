@@ -198,7 +198,12 @@ export async function generateAssetRegisterData(
   // Build property lookup (name only; livestock_owner is now a herd-level attribute).
   const propertyMap = new Map(allProperties.map((p: { id: string; property_name: string }) => [p.id, { name: p.property_name }]));
 
-  // Calculate valuations
+  // Calculate valuations as of the report's end date so the Executive Summary
+  // lines up with Portfolio Movement's closing value. Parsing the ISO date string
+  // matches how movement-service builds its closingDateObj (UTC midnight), which
+  // is what avoids the sub-day drift between the two figures.
+  const asOfDate = new Date(config.endDate);
+
   const herdDataArray: HerdReportData[] = [];
   const compositionMap = new Map<string, { value: number; headCount: number }>();
   let totalValue = 0;
@@ -208,7 +213,7 @@ export async function generateAssetRegisterData(
       herd as Parameters<typeof calculateHerdValuation>[0],
       nationalPriceMap,
       premiumMap,
-      undefined,
+      asOfDate,
       saleyardPriceMap,
       saleyardBreedPriceMap
     );
@@ -278,7 +283,7 @@ export async function generateAssetRegisterData(
     totalPortfolioValue: totalValue,
     totalHeadCount,
     averageValuePerHead: totalHeadCount > 0 ? totalValue / totalHeadCount : 0,
-    valuationDate: new Date().toISOString(),
+    valuationDate: asOfDate.toISOString(),
   };
 
   // Farm name from default property
