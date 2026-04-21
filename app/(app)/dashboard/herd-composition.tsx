@@ -71,9 +71,8 @@ export function HerdComposition({ herds }: HerdCompositionProps) {
             itemStyle={{ color: "var(--color-text-secondary)" }}
           />
         </PieChart>
-        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <span className="text-text-primary text-lg font-bold">{total.toLocaleString()}</span>
-          <span className="text-text-muted text-[10px]">head</span>
         </div>
       </div>
 
@@ -93,7 +92,7 @@ export function HerdComposition({ herds }: HerdCompositionProps) {
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-text-primary font-medium tabular-nums">
-                  {count.toLocaleString()} hd
+                  {count.toLocaleString()}
                 </span>
                 <span className="text-text-muted w-12 text-right text-xs tabular-nums">{pct}%</span>
               </div>

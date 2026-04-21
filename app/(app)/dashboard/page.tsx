@@ -28,7 +28,7 @@ import { ComingUpCard } from "@/components/app/coming-up-card";
 import { GrowthMortalityCard } from "@/components/app/growth-mortality-card";
 import { ClosestSaleyardsCard } from "@/components/app/closest-saleyards-card";
 import { CalvingAccrualCard } from "@/components/app/calving-accrual-card";
-import { MapPinned, Tags, Layers } from "lucide-react";
+import { MapPinned, Tags, Layers, ChevronRight } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
 import { StatCard } from "@/components/ui/stat-card";
 
@@ -476,9 +476,10 @@ export default async function DashboardPage() {
                       </div>
                       <Link
                         href="/dashboard/herds"
-                        className="text-brand text-xs font-medium hover:underline"
+                        className="bg-surface-raised text-text-secondary hover:bg-surface-high hover:text-text-primary inline-flex items-center gap-0.5 rounded-md px-2 py-1 text-xs font-medium transition-colors"
                       >
                         View all
+                        <ChevronRight className="h-3 w-3" />
                       </Link>
                     </div>
                   </CardHeader>

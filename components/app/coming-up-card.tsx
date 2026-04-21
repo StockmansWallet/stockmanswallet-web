@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { BookOpen } from "lucide-react";
+import { BookOpen, ChevronRight } from "lucide-react";
 
 interface YardBookItem {
   id: string;
@@ -35,22 +35,23 @@ export function ComingUpCard({ items, limit = 3 }: { items: YardBookItem[]; limi
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald/15">
-              <BookOpen className="h-3.5 w-3.5 text-emerald" />
+            <div className="bg-emerald/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+              <BookOpen className="text-emerald h-3.5 w-3.5" />
             </div>
             <CardTitle>Yard Book – Coming Up</CardTitle>
           </div>
           <Link
             href="/dashboard/tools/yard-book"
-            className="text-xs font-medium text-yard-book hover:underline"
+            className="bg-surface-raised text-text-secondary hover:bg-surface-high hover:text-text-primary inline-flex items-center gap-0.5 rounded-md px-2 py-1 text-xs font-medium transition-colors"
           >
             View all
+            <ChevronRight className="h-3 w-3" />
           </Link>
         </div>
       </CardHeader>
       {items.length === 0 ? (
         <EmptyState
-          icon={<BookOpen className="h-6 w-6 text-yard-book" />}
+          icon={<BookOpen className="text-yard-book h-6 w-6" />}
           title="Nothing coming up"
           description="Add events to your Yard Book to see them here."
           actionLabel="Open Yard Book"
@@ -65,11 +66,9 @@ export function ComingUpCard({ items, limit = 3 }: { items: YardBookItem[]; limi
               className="flex items-center justify-between py-3 transition-colors hover:opacity-80"
             >
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-text-primary">
-                  {item.title}
-                </p>
+                <p className="text-text-primary truncate text-sm font-medium">{item.title}</p>
                 {item.category_raw && (
-                  <p className="text-xs text-text-muted">{item.category_raw}</p>
+                  <p className="text-text-muted text-xs">{item.category_raw}</p>
                 )}
               </div>
               <Badge variant="default" className="ml-3 flex-shrink-0">

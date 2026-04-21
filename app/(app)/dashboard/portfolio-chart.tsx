@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import {
   AreaChart,
   Area,
@@ -12,7 +12,7 @@ import {
 } from "recharts";
 
 interface DataPoint {
-  date: string;   // ISO date string (YYYY-MM-DD)
+  date: string; // ISO date string (YYYY-MM-DD)
   value: number;
 }
 
@@ -29,7 +29,20 @@ type DateRange = "1D" | "1W" | "1M" | "3M" | "6M" | "1Y" | "All";
 
 const DATE_RANGES: DateRange[] = ["1D", "1W", "1M", "3M", "6M", "1Y", "All"];
 
-const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTH_NAMES = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
 function formatCurrency(value: number): string {
   if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
@@ -75,16 +88,16 @@ function CustomTooltip({
   const isToday = label === "Today";
 
   return (
-    <div className="rounded-lg bg-chart-tooltip-bg px-3 py-2 text-xs shadow-lg ring-1 ring-chart-tooltip-border">
+    <div className="bg-chart-tooltip-bg ring-chart-tooltip-border rounded-lg px-3 py-2 text-xs shadow-lg ring-1">
       <div className="flex items-center gap-1.5">
         <span className="text-text-muted">{label}</span>
         {isToday && (
-          <span className="rounded bg-brand/20 px-1 py-0.5 text-[9px] font-medium text-brand">
+          <span className="bg-brand/20 text-brand rounded px-1 py-0.5 text-[9px] font-medium">
             Today
           </span>
         )}
       </div>
-      <p className="mt-0.5 font-semibold tabular-nums text-white">
+      <p className="mt-0.5 font-semibold text-white tabular-nums">
         ${entry.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}
       </p>
     </div>
@@ -94,13 +107,20 @@ function CustomTooltip({
 /** Range config: days to look back and step between ticks. */
 function rangeConfig(range: DateRange): { days: number | null; stepDays: number } {
   switch (range) {
-    case "1D":  return { days: 1,   stepDays: 1 };
-    case "1W":  return { days: 7,   stepDays: 1 };
-    case "1M":  return { days: 30,  stepDays: 1 };
-    case "3M":  return { days: 90,  stepDays: 3 };
-    case "6M":  return { days: 180, stepDays: 6 };
-    case "1Y":  return { days: 365, stepDays: 12 };
-    case "All": return { days: null, stepDays: 3 };
+    case "1D":
+      return { days: 1, stepDays: 1 };
+    case "1W":
+      return { days: 7, stepDays: 1 };
+    case "1M":
+      return { days: 30, stepDays: 1 };
+    case "3M":
+      return { days: 90, stepDays: 3 };
+    case "6M":
+      return { days: 180, stepDays: 6 };
+    case "1Y":
+      return { days: 365, stepDays: 12 };
+    case "All":
+      return { days: null, stepDays: 3 };
   }
 }
 
@@ -114,7 +134,7 @@ function buildTimeAxis(
   startDateStr: string,
   todayStr: string,
   stepDays: number,
-  showYear: boolean,
+  showYear: boolean
 ): ChartPoint[] {
   // Build value lookup
   const valueMap = new Map<string, number>();
@@ -136,8 +156,14 @@ function buildTimeAxis(
       for (let offset = 1; offset <= halfStep; offset++) {
         const before = subtractDays(cursor, offset);
         const after = addDays(cursor, offset);
-        if (valueMap.has(before)) { value = valueMap.get(before)!; break; }
-        if (valueMap.has(after) && after <= todayStr) { value = valueMap.get(after)!; break; }
+        if (valueMap.has(before)) {
+          value = valueMap.get(before)!;
+          break;
+        }
+        if (valueMap.has(after) && after <= todayStr) {
+          value = valueMap.get(after)!;
+          break;
+        }
       }
     }
 
@@ -160,17 +186,69 @@ function buildTimeAxis(
   return result;
 }
 
-export function PortfolioChartRangePicker({ range, onRangeChange }: { range: DateRange; onRangeChange: (r: DateRange) => void }) {
+export function PortfolioChartRangePicker({
+  range,
+  onRangeChange,
+}: {
+  range: DateRange;
+  onRangeChange: (r: DateRange) => void;
+}) {
+  return <SlidingRangePill range={range} onRangeChange={onRangeChange} />;
+}
+
+function SlidingRangePill({
+  range,
+  onRangeChange,
+}: {
+  range: DateRange;
+  onRangeChange: (r: DateRange) => void;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRefs = useRef<Map<DateRange, HTMLButtonElement>>(new Map());
+  const [indicator, setIndicator] = useState({ left: 0, width: 0 });
+  const [ready, setReady] = useState(false);
+
+  const measure = useCallback(() => {
+    const container = containerRef.current;
+    const btn = buttonRefs.current.get(range);
+    if (!container || !btn) return;
+    const cRect = container.getBoundingClientRect();
+    const bRect = btn.getBoundingClientRect();
+    setIndicator({ left: bRect.left - cRect.left, width: bRect.width });
+    setReady(true);
+  }, [range]);
+
+  useEffect(() => {
+    measure();
+  }, [measure]);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, [measure]);
+
   return (
-    <div className="flex items-center gap-1">
+    <div
+      ref={containerRef}
+      className="relative flex items-center gap-1 rounded-full bg-white/[0.04] p-0.5"
+    >
+      <div
+        aria-hidden="true"
+        className={`bg-brand/20 absolute top-0.5 bottom-0.5 rounded-full ${ready ? "transition-all duration-250 ease-out" : ""}`}
+        style={{ left: indicator.left, width: indicator.width }}
+      />
       {DATE_RANGES.map((r) => (
         <button
           key={r}
+          ref={(el) => {
+            if (el) buttonRefs.current.set(r, el);
+          }}
           onClick={() => onRangeChange(r)}
-          className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-            range === r
-              ? "bg-brand text-white"
-              : "text-text-muted hover:bg-white/5 hover:text-text-primary"
+          aria-pressed={range === r}
+          className={`relative z-10 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+            range === r ? "text-brand" : "text-text-muted hover:text-text-secondary"
           }`}
         >
           {r}
@@ -224,28 +302,13 @@ export function PortfolioChart({ data, range }: PortfolioChartProps & { range?: 
     <div>
       {/* Inline range selector fallback when not controlled externally */}
       {range === undefined && (
-        <div className="mb-3 flex items-center justify-center gap-1">
-          {DATE_RANGES.map((r) => (
-            <button
-              key={r}
-              onClick={() => setInternalRange(r)}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                activeRange === r
-                  ? "bg-brand text-white"
-                  : "text-text-muted hover:bg-white/5 hover:text-text-primary"
-              }`}
-            >
-              {r}
-            </button>
-          ))}
+        <div className="mb-3 flex justify-center">
+          <SlidingRangePill range={activeRange} onRangeChange={setInternalRange} />
         </div>
       )}
 
       <ResponsiveContainer key={activeRange} width="100%" height={240}>
-        <AreaChart
-          data={chartData}
-          margin={{ top: 8, right: 0, bottom: 0, left: 0 }}
-        >
+        <AreaChart data={chartData} margin={{ top: 8, right: 0, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id="valueGrad" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="var(--color-brand)" stopOpacity={0.25} />
@@ -266,7 +329,7 @@ export function PortfolioChart({ data, range }: PortfolioChartProps & { range?: 
               // Show ~5-6 labels max: always first + last, evenly spaced in between.
               // Skip the label just before "Today" if it would overlap.
               const step = Math.max(Math.ceil(total / 6), 1);
-              const tooCloseToLast = !isLast && (total - 1 - index) < step / 2;
+              const tooCloseToLast = !isLast && total - 1 - index < step / 2;
               const isVisible = isFirst || isLast || (index % step === 0 && !tooCloseToLast);
               if (!isVisible) return <g />;
               return (

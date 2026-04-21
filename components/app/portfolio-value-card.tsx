@@ -20,7 +20,7 @@ export function PortfolioValueCard({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <p className="text-text-muted text-xs font-medium tracking-widest uppercase">
-            Total Portfolio Value
+            Total Herd Value
           </p>
           <p className="text-text-primary mt-2 text-4xl leading-none font-bold tabular-nums sm:text-5xl">
             ${Math.round(value).toLocaleString()}
