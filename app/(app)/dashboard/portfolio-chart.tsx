@@ -104,7 +104,9 @@ function CustomTooltip({
   );
 }
 
-/** Range config: days to look back and step between ticks. */
+/** Range config: days to look back and step between ticks.
+    Snapshots are written weekly (see dashboard page backfill), so anything
+    coarser than 7-day steps just drops detail without adding fidelity. */
 function rangeConfig(range: DateRange): { days: number | null; stepDays: number } {
   switch (range) {
     case "1D":
@@ -112,15 +114,15 @@ function rangeConfig(range: DateRange): { days: number | null; stepDays: number 
     case "1W":
       return { days: 7, stepDays: 1 };
     case "1M":
-      return { days: 30, stepDays: 1 };
+      return { days: 30, stepDays: 7 };
     case "3M":
-      return { days: 90, stepDays: 3 };
+      return { days: 90, stepDays: 7 };
     case "6M":
-      return { days: 180, stepDays: 6 };
+      return { days: 180, stepDays: 7 };
     case "1Y":
-      return { days: 365, stepDays: 12 };
+      return { days: 365, stepDays: 7 };
     case "All":
-      return { days: null, stepDays: 3 };
+      return { days: null, stepDays: 7 };
   }
 }
 
@@ -268,26 +270,12 @@ export function PortfolioChart({ data, range }: PortfolioChartProps & { range?: 
     const todayStr = data[data.length - 1].date;
     const { days, stepDays } = rangeConfig(activeRange);
 
-    let startStr: string;
-    if (days === null) {
-      startStr = data[0].date;
-    } else {
-      startStr = subtractDays(todayStr, days);
-    }
-
-    // For "All", calculate step based on total span
-    let actualStep = stepDays;
-    const startMs = new Date(startStr + "T12:00:00").getTime();
-    const endMs = new Date(todayStr + "T12:00:00").getTime();
-    const totalDays = Math.round((endMs - startMs) / 86_400_000);
-    if (days === null) {
-      actualStep = Math.max(Math.round(totalDays / 12), 1);
-    }
+    const startStr = days === null ? data[0].date : subtractDays(todayStr, days);
 
     // Show year suffix on labels when the range crosses a year boundary
     const showYear = startStr.slice(0, 4) !== todayStr.slice(0, 4);
 
-    return buildTimeAxis(data, startStr, todayStr, actualStep, showYear);
+    return buildTimeAxis(data, startStr, todayStr, stepDays, showYear);
   }, [data, activeRange]);
 
   const { minVal, maxVal } = useMemo(() => {
