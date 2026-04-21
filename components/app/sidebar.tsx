@@ -2,10 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "@/app/(auth)/actions";
-import { Crown, LogOut } from "lucide-react";
 import { SidebarBadge } from "@/components/app/sidebar-badge";
-import { tierDisplayName, type SubscriptionTier } from "@/lib/subscriptions/tiers";
 import {
   producerNavItems,
   producerIntelItems,
@@ -31,22 +28,26 @@ function NavLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
       className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
         isActive
           ? `backdrop-blur-xl ${item.activeClass ?? "bg-brand/15 text-brand"}`
-          : (item.inactiveClass ?? "text-text-secondary hover:bg-white/5 hover:text-text-primary hover:backdrop-blur-xl")
+          : (item.inactiveClass ??
+            "text-text-secondary hover:text-text-primary hover:bg-white/5 hover:backdrop-blur-xl")
       }`}
     >
       {item.icon}
       <span>{item.label}</span>
       {item.notificationTypes && item.notificationTypes.length > 0 && (
-        <SidebarBadge
-          types={item.notificationTypes}
-          suppressPrefix={item.badgeSuppressPrefix}
-        />
+        <SidebarBadge types={item.notificationTypes} suppressPrefix={item.badgeSuppressPrefix} />
       )}
     </Link>
   );
 }
 
-export function Sidebar({ isAdmin = false, subscriptionTier = "stockman", isAdvisor = false }: { isAdmin?: boolean; subscriptionTier?: string; isAdvisor?: boolean }) {
+export function Sidebar({
+  isAdmin = false,
+  isAdvisor = false,
+}: {
+  isAdmin?: boolean;
+  isAdvisor?: boolean;
+}) {
   const pathname = usePathname();
 
   const checkActive = (href: string) => {
@@ -63,9 +64,11 @@ export function Sidebar({ isAdmin = false, subscriptionTier = "stockman", isAdvi
   return (
     <aside className="flex h-full w-64 flex-col">
       {/* Scrollable navigation */}
-      <nav className="min-h-0 flex-1 overflow-y-auto scrollbar-none px-4 pt-4">
+      <nav className="scrollbar-none min-h-0 flex-1 overflow-y-auto px-4 pt-4">
         {/* Portfolio */}
-        <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-text-muted/60">Portfolio</p>
+        <p className="text-text-muted/60 mb-1.5 px-3 text-[10px] font-semibold tracking-widest uppercase">
+          Portfolio
+        </p>
         <div className="space-y-0.5">
           {mainItems.map((item) => (
             <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
@@ -74,7 +77,9 @@ export function Sidebar({ isAdmin = false, subscriptionTier = "stockman", isAdvi
 
         {/* Intelligence */}
         <div className="mx-0 mt-4 border-t border-white/5 pt-4">
-          <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-text-muted/60">Intelligence</p>
+          <p className="text-text-muted/60 mb-1.5 px-3 text-[10px] font-semibold tracking-widest uppercase">
+            Intelligence
+          </p>
           <div className="space-y-0.5">
             {intelItems.map((item) => (
               <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
@@ -85,7 +90,9 @@ export function Sidebar({ isAdmin = false, subscriptionTier = "stockman", isAdvi
         {/* Tools */}
         {toolItems.length > 0 && (
           <div className="mx-0 mt-4 border-t border-white/5 pt-4">
-            <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-text-muted/60">Tools</p>
+            <p className="text-text-muted/60 mb-1.5 px-3 text-[10px] font-semibold tracking-widest uppercase">
+              Tools
+            </p>
             <div className="space-y-0.5">
               {toolItems.map((item) => (
                 <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
@@ -97,7 +104,9 @@ export function Sidebar({ isAdmin = false, subscriptionTier = "stockman", isAdvi
         {/* Admin */}
         {isAdmin && (
           <div className="mx-0 mt-4 border-t border-white/5 pt-4">
-            <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-text-muted/60">Admin</p>
+            <p className="text-text-muted/60 mb-1.5 px-3 text-[10px] font-semibold tracking-widest uppercase">
+              Admin
+            </p>
             <div className="space-y-0.5">
               {adminItems.map((item) => (
                 <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
@@ -117,7 +126,7 @@ export function Sidebar({ isAdmin = false, subscriptionTier = "stockman", isAdvi
               className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 ${
                 checkActive(item.href)
                   ? "bg-brand/15 text-brand backdrop-blur-xl"
-                  : "text-text-secondary hover:bg-white/5 hover:text-text-primary hover:backdrop-blur-xl"
+                  : "text-text-secondary hover:text-text-primary hover:bg-white/5 hover:backdrop-blur-xl"
               }`}
             >
               {item.icon}
@@ -126,30 +135,6 @@ export function Sidebar({ isAdmin = false, subscriptionTier = "stockman", isAdvi
           ))}
         </div>
       </nav>
-
-      {/* Zone 3: Plan & Log Out */}
-      <div className="shrink-0 border-t border-white/5 px-4 pt-4 pb-2">
-        <Link
-          href="/dashboard/settings/account"
-          className="mb-1 flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-white/5"
-        >
-          <Crown className="h-4 w-4 text-brand" />
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-text-primary">Plan</p>
-            <p className="text-xs text-text-muted">{tierDisplayName(subscriptionTier as SubscriptionTier)}</p>
-          </div>
-        </Link>
-
-        <form action={signOut}>
-          <button
-            type="submit"
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-text-secondary transition-all hover:bg-white/5 hover:text-text-primary"
-          >
-            <LogOut className="h-4 w-4" />
-            Log Out
-          </button>
-        </form>
-      </div>
     </aside>
   );
 }

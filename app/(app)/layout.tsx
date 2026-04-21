@@ -111,6 +111,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             email={user.email || ""}
             roleLabel={roleDisplayName(profile?.role || "producer")}
             avatarUrl={user.user_metadata?.avatar_url || ""}
+            subscriptionTier={profile?.subscription_tier || "stockman"}
           />
         </div>
 
@@ -118,11 +119,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className="flex flex-1">
           <div className="hidden lg:block">
             <div className="sticky top-20 h-[calc(100vh-5rem)] py-4 pl-6">
-              <Sidebar
-                isAdmin={isAdmin}
-                subscriptionTier={profile?.subscription_tier || "stockman"}
-                isAdvisor={isAdvisor}
-              />
+              <Sidebar isAdmin={isAdmin} isAdvisor={isAdvisor} />
             </div>
           </div>
 
