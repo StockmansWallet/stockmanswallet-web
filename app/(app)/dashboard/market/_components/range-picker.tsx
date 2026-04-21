@@ -43,7 +43,7 @@ export function RangePicker({ value, onChange }: RangePickerProps) {
   }, [showCustom]);
 
   return (
-    <div className="relative inline-flex items-center gap-1 rounded-full bg-surface p-1">
+    <div className="bg-surface relative inline-flex items-center gap-1 rounded-full p-1">
       {PRESETS.map((k) => (
         <button
           key={k}
@@ -51,7 +51,7 @@ export function RangePicker({ value, onChange }: RangePickerProps) {
           onClick={() => onChange({ key: k })}
           className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
             value.key === k
-              ? "bg-markets text-white"
+              ? "bg-markets text-background/75"
               : "text-text-muted hover:text-text-primary"
           }`}
         >
@@ -63,7 +63,7 @@ export function RangePicker({ value, onChange }: RangePickerProps) {
         onClick={() => setShowCustom((v) => !v)}
         className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
           value.key === "Custom"
-            ? "bg-markets text-white"
+            ? "bg-markets text-background/75"
             : "text-text-muted hover:text-text-primary"
         }`}
       >
@@ -73,28 +73,28 @@ export function RangePicker({ value, onChange }: RangePickerProps) {
       {showCustom && (
         <div
           ref={popoverRef}
-          className="absolute right-0 top-[calc(100%+8px)] z-20 w-72 rounded-xl bg-surface-lowest p-4 shadow-xl ring-1 ring-white/10 backdrop-blur-xl"
+          className="bg-surface-lowest absolute top-[calc(100%+8px)] right-0 z-20 w-72 rounded-xl p-4 shadow-xl ring-1 ring-white/10 backdrop-blur-xl"
         >
-          <p className="mb-3 text-xs font-medium text-text-secondary">Custom range</p>
+          <p className="text-text-secondary mb-3 text-xs font-medium">Custom range</p>
           <div className="space-y-2.5">
-            <label className="block text-[11px] text-text-muted">
+            <label className="text-text-muted block text-[11px]">
               From
               <input
                 type="date"
                 value={start}
                 max={end || undefined}
                 onChange={(e) => setStart(e.target.value)}
-                className="mt-1 w-full rounded-lg bg-surface px-3 py-2 text-sm text-text-primary outline-none ring-1 ring-white/5 focus:ring-markets"
+                className="bg-surface text-text-primary focus:ring-markets mt-1 w-full rounded-lg px-3 py-2 text-sm ring-1 ring-white/5 outline-none"
               />
             </label>
-            <label className="block text-[11px] text-text-muted">
+            <label className="text-text-muted block text-[11px]">
               To
               <input
                 type="date"
                 value={end}
                 min={start || undefined}
                 onChange={(e) => setEnd(e.target.value)}
-                className="mt-1 w-full rounded-lg bg-surface px-3 py-2 text-sm text-text-primary outline-none ring-1 ring-white/5 focus:ring-markets"
+                className="bg-surface text-text-primary focus:ring-markets mt-1 w-full rounded-lg px-3 py-2 text-sm ring-1 ring-white/5 outline-none"
               />
             </label>
           </div>
@@ -105,7 +105,7 @@ export function RangePicker({ value, onChange }: RangePickerProps) {
                 setStart("");
                 setEnd("");
               }}
-              className="rounded-full px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text-primary"
+              className="text-text-muted hover:text-text-primary rounded-full px-3 py-1.5 text-xs font-medium"
             >
               Clear
             </button>
@@ -116,7 +116,7 @@ export function RangePicker({ value, onChange }: RangePickerProps) {
                 onChange({ key: "Custom", startISO: start, endISO: end });
                 setShowCustom(false);
               }}
-              className="rounded-full bg-markets px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-markets-dark disabled:opacity-40"
+              className="bg-markets hover:bg-markets-dark rounded-full px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors disabled:opacity-40"
             >
               Apply
             </button>
@@ -127,10 +127,7 @@ export function RangePicker({ value, onChange }: RangePickerProps) {
   );
 }
 
-export function sliceToRange<T extends { week_date: string }>(
-  points: T[],
-  value: RangeValue
-): T[] {
+export function sliceToRange<T extends { week_date: string }>(points: T[], value: RangeValue): T[] {
   if (points.length === 0) return points;
   if (value.key === "All") return points;
 

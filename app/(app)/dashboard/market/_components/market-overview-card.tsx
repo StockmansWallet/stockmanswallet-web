@@ -30,13 +30,14 @@ export function MarketOverviewCard({ yoySeries, timelineData, stateFilter }: Pro
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-markets/15">
-              <LineChartIcon className="h-3.5 w-3.5 text-markets" />
+            <div className="bg-markets/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+              <LineChartIcon className="text-markets h-3.5 w-3.5" />
             </div>
             <CardTitle>{title}</CardTitle>
           </div>
           <div className="flex items-center gap-3">
-            <div className="inline-flex items-center gap-1 rounded-full bg-surface p-1">
+            <span className="text-text-muted text-[11px]">{subtitle}</span>
+            <div className="bg-surface inline-flex items-center gap-1 rounded-full p-1">
               <ModeButton active={mode === "seasonal"} onClick={() => setMode("seasonal")}>
                 Seasonal
               </ModeButton>
@@ -44,7 +45,6 @@ export function MarketOverviewCard({ yoySeries, timelineData, stateFilter }: Pro
                 By category
               </ModeButton>
             </div>
-            <span className="text-[11px] text-text-muted">{subtitle}</span>
           </div>
         </div>
       </CardHeader>
@@ -73,7 +73,7 @@ function ModeButton({
       type="button"
       onClick={onClick}
       className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-        active ? "bg-markets text-white" : "text-text-muted hover:text-text-primary"
+        active ? "bg-markets text-background/75" : "text-text-muted hover:text-text-primary"
       }`}
     >
       {children}
