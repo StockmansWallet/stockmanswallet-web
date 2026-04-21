@@ -70,10 +70,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <DemoModeProvider isDemoUser={isDemoUser}>
       <SidebarNotificationsProvider>
-        {/* Fixed background: single div, CSS-only stack.
-          One compositing layer instead of four; no mix-blend-mode (was per-frame compositor work);
-          no next/Image (skips dev-mode image-optimisation overhead). Image is darkened inline via
-          the stacked black overlay so it reads the same as the previous opacity-10 treatment. */}
+        {/* Fixed background: single div, CSS-only stack. One compositing layer, no mix-blend-mode,
+          no next/Image. */}
         <div
           data-print-hide
           aria-hidden
@@ -82,12 +80,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             backgroundImage: [
               // Dark bottom gradient (fades image into page background)
               "linear-gradient(to bottom, rgba(20,17,15,0) 0%, rgba(20,17,15,0.35) 25%, rgba(20,17,15,0.7) 55%, rgba(20,17,15,1) 90%)",
-              // Soft brand glow in top-left
-              "radial-gradient(ellipse 2200px 2200px at -500px -500px, rgba(217,118,47,0.12) 0%, transparent 70%)",
-              // Hero image, darkened via stacked black overlay
-              "linear-gradient(rgba(20,17,15,0.78), rgba(20,17,15,0.78)), url('/images/landing-bg.webp')",
+              // Darken on the hero image (80% pure black)
+              "linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8))",
+              // Hero image
+              "url('/images/landing-bg.webp')",
             ].join(","),
-            backgroundSize: "100% 100%, 100% 100%, cover, cover",
+            backgroundSize: "100% 100%, 100% 100%, cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
           }}
