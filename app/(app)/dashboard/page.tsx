@@ -74,7 +74,14 @@ export default async function DashboardPage() {
   }
 
   const authFirstName = user?.user_metadata?.first_name || "";
-  const displayName = authFirstName || profile?.display_name?.split(" ")[0] || "Stockman";
+  const authLastName = user?.user_metadata?.last_name || "";
+  const isDemoUser = user?.email?.toLowerCase() === process.env.DEMO_EMAIL?.toLowerCase();
+  // Demo account greets with the full "Demo Stockman" name so the hero doesn't
+  // read as the off-brand "G'day, Demo!".
+  const displayName =
+    isDemoUser && authFirstName && authLastName
+      ? `${authFirstName} ${authLastName}`
+      : authFirstName || profile?.display_name?.split(" ")[0] || "Stockman";
   const todayStr = new Date().toISOString().split("T")[0];
 
   const [
