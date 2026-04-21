@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/app/(auth)/actions";
+import { clearOverlay } from "@/lib/demo-overlay";
 import { Menu, X, Crown, HelpCircle, Settings, LogOut } from "lucide-react";
 import { tierDisplayName, type SubscriptionTier } from "@/lib/subscriptions/tiers";
 import { producerMobileItems, advisorMobileItems, type NavItem } from "@/lib/navigation/nav-config";
@@ -116,7 +117,7 @@ export function MobileNav({
                 Settings
               </Link>
 
-              <form action={signOut} className="mt-2">
+              <form action={signOut} onSubmit={() => clearOverlay()} className="mt-2">
                 <button
                   type="submit"
                   className="bg-red/10 text-red hover:bg-red/15 flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors"

@@ -7,7 +7,13 @@ import { YardBookBanner } from "@/components/app/yard-book-banner";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StatCard } from "@/components/ui/stat-card";
-import { calculateProjectedWeight, calculateHerdValuation, categoryFallback, parseCalvesAtFoot, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import {
+  calculateProjectedWeight,
+  calculateHerdValuation,
+  categoryFallback,
+  parseCalvesAtFoot,
+  type CategoryPriceEntry,
+} from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 import { expandWithNearbySaleyards } from "@/lib/data/saleyard-proximity";
@@ -16,7 +22,18 @@ import { centsToDollars } from "@/lib/types/money";
 import { DeleteHerdButton } from "./delete-button";
 import { MusterRecordsSection } from "@/components/app/muster-records-section";
 import { HealthRecordsSection } from "@/components/app/health-records-section";
-import { Info, Scale, Heart, MapPin, FileText, Clock, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Info,
+  Scale,
+  Heart,
+  MapPin,
+  FileText,
+  Clock,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { DEMO_LOCAL_ID_PREFIX } from "@/lib/demo-overlay";
+import { LocalHerdDetail } from "./local-herd-detail";
 
 export const revalidate = 0;
 
@@ -24,37 +41,56 @@ export const metadata = {
   title: "Herd Details",
 };
 
-function InfoRow({ label, value, valueClassName }: { label: string; value: string | number | null | undefined; valueClassName?: string }) {
+function InfoRow({
+  label,
+  value,
+  valueClassName,
+}: {
+  label: string;
+  value: string | number | null | undefined;
+  valueClassName?: string;
+}) {
   if (value == null || value === "") return null;
   return (
     <div className="flex items-center justify-between py-3 text-sm">
       <span className="text-text-muted">{label}</span>
-      <span className={`font-medium tabular-nums ${valueClassName ?? "text-text-primary"}`}>{String(value)}</span>
+      <span className={`font-medium tabular-nums ${valueClassName ?? "text-text-primary"}`}>
+        {String(value)}
+      </span>
     </div>
   );
 }
 
 function SectionIcon({ icon: Icon }: { icon: React.ComponentType<{ className?: string }> }) {
   return (
-    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
-      <Icon className="h-3.5 w-3.5 text-brand" />
+    <div className="bg-brand/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+      <Icon className="text-brand h-3.5 w-3.5" />
     </div>
   );
 }
 
-export default async function HerdDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function HerdDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+
+  // Demo sandbox: local herds live only in the browser, so skip all Supabase
+  // fetches and render the client-side detail view instead.
+  if (id.startsWith(DEMO_LOCAL_ID_PREFIX)) {
+    return <LocalHerdDetail id={id} />;
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   // Fetch herd + breed premiums + records + sibling IDs in parallel
-  const [herdResult, { data: breedPremiumData }, { data: musterRecords }, { data: healthRecords }, { data: siblingHerds }] = await Promise.all([
+  const [
+    herdResult,
+    { data: breedPremiumData },
+    { data: musterRecords },
+    { data: healthRecords },
+    { data: siblingHerds },
+  ] = await Promise.all([
     supabase
       .from("herds")
       .select("*, properties(property_name)")
@@ -62,9 +98,7 @@ export default async function HerdDetailPage({
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
       .single(),
-    supabase
-      .from("breed_premiums")
-      .select("breed, premium_percent:premium_pct"),
+    supabase.from("breed_premiums").select("breed, premium_percent:premium_pct"),
     supabase
       .from("muster_records")
       .select("id, date, total_head_count, cattle_yard, weaners_count, branders_count, notes")
@@ -106,7 +140,11 @@ export default async function HerdDetailPage({
   if (!herd) notFound();
 
   // Fetch only the newest date's prices per saleyard+category via RPC
-  const mlaCategory = resolveMLACategory(herd.category, herd.initial_weight, herd.breeder_sub_type ?? undefined).primaryMLACategory;
+  const mlaCategory = resolveMLACategory(
+    herd.category,
+    herd.initial_weight,
+    herd.breeder_sub_type ?? undefined
+  ).primaryMLACategory;
   const fallbackCat = categoryFallback(mlaCategory);
   const categoriesToFetch = fallbackCat ? [mlaCategory, fallbackCat] : [mlaCategory];
   const resolvedSaleyard = herd.selected_saleyard
@@ -114,19 +152,30 @@ export default async function HerdDetailPage({
     : null;
   const saleyardsToFetch = resolvedSaleyard ? expandWithNearbySaleyards([resolvedSaleyard]) : [];
 
-  type PriceRow = { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string };
-  const { data: allPrices } = await supabase.rpc("latest_saleyard_prices", {
+  type PriceRow = {
+    category: string;
+    price_per_kg: number;
+    weight_range: string | null;
+    saleyard: string;
+    breed: string | null;
+    data_date: string;
+  };
+  const { data: allPrices } = (await supabase.rpc("latest_saleyard_prices", {
     p_saleyards: saleyardsToFetch,
     p_categories: categoriesToFetch,
-  }) as unknown as { data: PriceRow[] | null };
+  })) as unknown as { data: PriceRow[] | null };
 
   // Build pricing lookup maps from combined result (includes nearby saleyards for fallback)
   const nationalPriceMap = new Map<string, CategoryPriceEntry[]>();
   const saleyardPriceMap = new Map<string, CategoryPriceEntry[]>();
   const saleyardBreedPriceMap = new Map<string, CategoryPriceEntry[]>();
 
-  for (const p of (allPrices ?? [])) {
-    const priceEntry = { price_per_kg: centsToDollars(p.price_per_kg), weight_range: p.weight_range, data_date: p.data_date };
+  for (const p of allPrices ?? []) {
+    const priceEntry = {
+      price_per_kg: centsToDollars(p.price_per_kg),
+      weight_range: p.weight_range,
+      data_date: p.data_date,
+    };
     if (p.saleyard === "National" && p.breed === null) {
       const entries = nationalPriceMap.get(p.category) ?? [];
       entries.push(priceEntry);
@@ -147,7 +196,7 @@ export default async function HerdDetailPage({
   }
   // Seed with local breed premiums, then let Supabase override (matches iOS BreedPremiumService)
   const premiumMap = new Map<string, number>(Object.entries(cattleBreedPremiums));
-  for (const b of (breedPremiumData ?? [])) {
+  for (const b of breedPremiumData ?? []) {
     premiumMap.set(b.breed, b.premium_percent);
   }
 
@@ -158,7 +207,7 @@ export default async function HerdDetailPage({
     premiumMap,
     undefined,
     saleyardPriceMap,
-    saleyardBreedPriceMap,
+    saleyardBreedPriceMap
   );
   const herdValue = valuation.netValue;
   const isFallback = valuation.priceSource !== "saleyard";
@@ -189,32 +238,36 @@ export default async function HerdDetailPage({
   const calvesAtFootValue = valuation.calvesAtFootValue;
   const unbornProgenyValue = valuation.preBirthAccrual;
   const birthWeightRatio = herd.species === "Cattle" ? 0.07 : 0.08;
-  const estimatedCalfBirthValue = valuation.pricePerKg > 0
-    ? (projectedWeight ?? herd.current_weight ?? herd.initial_weight ?? 0) * birthWeightRatio * valuation.pricePerKg
-    : null;
+  const estimatedCalfBirthValue =
+    valuation.pricePerKg > 0
+      ? (projectedWeight ?? herd.current_weight ?? herd.initial_weight ?? 0) *
+        birthWeightRatio *
+        valuation.pricePerKg
+      : null;
 
   // Breeding countdown logic (matches iOS Herd.effectiveJoinedDate)
   const effectiveJoinedDateObj = getEffectiveJoinedDate(herd);
   const hasJoiningStarted = effectiveJoinedDateObj ? effectiveJoinedDateObj <= new Date() : false;
   const breedingCycleDays = 365;
-  const daysSinceJoined = hasJoiningStarted && effectiveJoinedDateObj
-    ? Math.max(0, Math.round((Date.now() - effectiveJoinedDateObj.getTime()) / 86400000))
-    : 0;
-  const daysUntilJoining = !hasJoiningStarted && effectiveJoinedDateObj
-    ? Math.max(0, Math.round((effectiveJoinedDateObj.getTime() - Date.now()) / 86400000))
-    : 0;
-  const daysUntilCalving = hasJoiningStarted
-    ? Math.max(0, breedingCycleDays - daysSinceJoined)
-    : 0;
+  const daysSinceJoined =
+    hasJoiningStarted && effectiveJoinedDateObj
+      ? Math.max(0, Math.round((Date.now() - effectiveJoinedDateObj.getTime()) / 86400000))
+      : 0;
+  const daysUntilJoining =
+    !hasJoiningStarted && effectiveJoinedDateObj
+      ? Math.max(0, Math.round((effectiveJoinedDateObj.getTime() - Date.now()) / 86400000))
+      : 0;
+  const daysUntilCalving = hasJoiningStarted ? Math.max(0, breedingCycleDays - daysSinceJoined) : 0;
   const gestationProgress = hasJoiningStarted
     ? Math.min(100, Math.max(0, (daysSinceJoined / breedingCycleDays) * 100))
     : 0;
 
   const property = herd.properties as { property_name: string } | null;
 
-  const categoryLabel = herd.sub_category && herd.sub_category !== herd.category
-    ? `${herd.category} (${herd.sub_category})`
-    : herd.category;
+  const categoryLabel =
+    herd.sub_category && herd.sub_category !== herd.category
+      ? `${herd.category} (${herd.sub_category})`
+      : herd.category;
   const avgWeight = Math.round(projectedWeight ?? herd.current_weight ?? herd.initial_weight ?? 0);
   const valuePerHead = herd.head_count ? Math.round(herdValue / herd.head_count) : 0;
 
@@ -222,7 +275,8 @@ export default async function HerdDetailPage({
   const herdIds = (siblingHerds ?? []).map((h) => h.id);
   const currentIndex = herdIds.indexOf(id);
   const prevId = currentIndex > 0 ? herdIds[currentIndex - 1] : null;
-  const nextId = currentIndex >= 0 && currentIndex < herdIds.length - 1 ? herdIds[currentIndex + 1] : null;
+  const nextId =
+    currentIndex >= 0 && currentIndex < herdIds.length - 1 ? herdIds[currentIndex + 1] : null;
   const herdPosition = currentIndex >= 0 ? currentIndex + 1 : null;
   const herdTotal = herdIds.length;
 
@@ -238,29 +292,29 @@ export default async function HerdDetailPage({
               {prevId ? (
                 <Link
                   href={`/dashboard/herds/${prevId}`}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-lowest text-text-muted transition-colors hover:bg-surface-raised hover:text-text-primary"
+                  className="bg-surface-lowest text-text-muted hover:bg-surface-raised hover:text-text-primary flex h-8 w-8 items-center justify-center rounded-full transition-colors"
                   aria-label="Previous herd"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Link>
               ) : (
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-lowest text-text-muted/30">
+                <span className="bg-surface-lowest text-text-muted/30 flex h-8 w-8 items-center justify-center rounded-full">
                   <ChevronLeft className="h-4 w-4" />
                 </span>
               )}
-              <span className="min-w-[3rem] text-center text-xs tabular-nums text-text-muted">
+              <span className="text-text-muted min-w-[3rem] text-center text-xs tabular-nums">
                 {herdPosition} of {herdTotal}
               </span>
               {nextId ? (
                 <Link
                   href={`/dashboard/herds/${nextId}`}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-lowest text-text-muted transition-colors hover:bg-surface-raised hover:text-text-primary"
+                  className="bg-surface-lowest text-text-muted hover:bg-surface-raised hover:text-text-primary flex h-8 w-8 items-center justify-center rounded-full transition-colors"
                   aria-label="Next herd"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Link>
               ) : (
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-lowest text-text-muted/30">
+                <span className="bg-surface-lowest text-text-muted/30 flex h-8 w-8 items-center justify-center rounded-full">
                   <ChevronRight className="h-4 w-4" />
                 </span>
               )}
@@ -273,18 +327,26 @@ export default async function HerdDetailPage({
       {herdValue > 0 && (
         <div className="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-5 lg:gap-4">
           <StatCard label="Herd Value" value={`$${Math.round(herdValue).toLocaleString()}`} />
-          <StatCard label="$/kg" value={valuation.pricePerKg > 0 ? `$${valuation.pricePerKg.toFixed(2)}` : "\u2014"} />
+          <StatCard
+            label="$/kg"
+            value={valuation.pricePerKg > 0 ? `$${valuation.pricePerKg.toFixed(2)}` : "\u2014"}
+          />
           <StatCard label="Avg Weight" value={avgWeight > 0 ? `${avgWeight} kg` : "\u2014"} />
-          <StatCard label="Value/Head" value={valuePerHead > 0 ? `$${valuePerHead.toLocaleString()}` : "\u2014"} />
-          {herd.head_count && <StatCard label="Head Count" value={`${herd.head_count.toLocaleString()}`} />}
+          <StatCard
+            label="Value/Head"
+            value={valuePerHead > 0 ? `$${valuePerHead.toLocaleString()}` : "\u2014"}
+          />
+          {herd.head_count && (
+            <StatCard label="Head Count" value={`${herd.head_count.toLocaleString()}`} />
+          )}
         </div>
       )}
 
       {/* Action bar */}
-      <div className="mt-3 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2 lg:mt-4">
+      <div className="bg-surface-lowest mt-3 flex items-center justify-between rounded-full px-2 py-2 lg:mt-4">
         <div className="flex items-center gap-1.5 pl-2">
           {isFallback && (
-            <span className="inline-flex items-center rounded-full bg-error/15 px-2 py-1 text-[10px] font-medium text-error">
+            <span className="bg-error/15 text-error inline-flex items-center rounded-full px-2 py-1 text-[10px] font-medium">
               {valuation.priceSource === "national" ? "National Avg" : "Est. Fallback"}
             </span>
           )}
@@ -293,14 +355,14 @@ export default async function HerdDetailPage({
           {!herd.is_sold && (
             <Link
               href={`/dashboard/herds/${id}/sell`}
-              className="inline-flex h-8 shrink-0 items-center rounded-full bg-surface-lowest px-3.5 text-xs font-medium text-text-muted transition-all hover:bg-surface-raised hover:text-text-secondary"
+              className="bg-surface-lowest text-text-muted hover:bg-surface-raised hover:text-text-secondary inline-flex h-8 shrink-0 items-center rounded-full px-3.5 text-xs font-medium transition-all"
             >
               Sell
             </Link>
           )}
           <Link
             href={`/dashboard/herds/${id}/edit`}
-            className="inline-flex h-8 shrink-0 items-center rounded-full bg-surface-lowest px-3.5 text-xs font-medium text-text-muted transition-all hover:bg-surface-raised hover:text-text-secondary"
+            className="bg-surface-lowest text-text-muted hover:bg-surface-raised hover:text-text-secondary inline-flex h-8 shrink-0 items-center rounded-full px-3.5 text-xs font-medium transition-all"
           >
             Edit
           </Link>
@@ -317,13 +379,23 @@ export default async function HerdDetailPage({
               <CardTitle>Physical Attributes</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
-            <InfoRow label="Herd Size" value={herd.head_count ? `${herd.head_count.toLocaleString()} head` : null} />
+          <CardContent className="divide-y divide-white/[0.04] px-5 pb-5">
+            <InfoRow
+              label="Herd Size"
+              value={herd.head_count ? `${herd.head_count.toLocaleString()} head` : null}
+            />
             <InfoRow label="Species" value={herd.species} />
             <InfoRow label="Breed" value={herd.breed} />
             <InfoRow label="Category" value={categoryLabel} />
             <InfoRow label="Age" value={herd.age_months ? `${herd.age_months} months` : null} />
-            <InfoRow label="Breed Premium" value={valuation.breedPremiumApplied !== 0 ? `${valuation.breedPremiumApplied > 0 ? "+" : ""}${valuation.breedPremiumApplied}%${herd.breed_premium_override != null ? " (custom)" : ""}` : null} />
+            <InfoRow
+              label="Breed Premium"
+              value={
+                valuation.breedPremiumApplied !== 0
+                  ? `${valuation.breedPremiumApplied > 0 ? "+" : ""}${valuation.breedPremiumApplied}%${herd.breed_premium_override != null ? " (custom)" : ""}`
+                  : null
+              }
+            />
             {herd.breed_premium_justification && (
               <InfoRow label="Premium Justification" value={herd.breed_premium_justification} />
             )}
@@ -345,11 +417,14 @@ export default async function HerdDetailPage({
               <CardTitle>Location</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
+          <CardContent className="divide-y divide-white/[0.04] px-5 pb-5">
             {property && (
               <div className="flex items-center justify-between py-3 text-sm">
                 <span className="text-text-muted">Property</span>
-                <Link href={`/dashboard/properties/${herd.property_id}`} className="font-medium text-brand hover:underline">
+                <Link
+                  href={`/dashboard/properties/${herd.property_id}`}
+                  className="text-brand font-medium hover:underline"
+                >
                   {property.property_name}
                 </Link>
               </div>
@@ -358,10 +433,10 @@ export default async function HerdDetailPage({
             <InfoRow label="Livestock Owner" value={herd.livestock_owner} />
             <div className="flex items-center justify-between py-3 text-sm">
               <span className="text-text-muted">Saleyard</span>
-              <span className="flex items-center gap-2 font-medium text-text-primary">
+              <span className="text-text-primary flex items-center gap-2 font-medium">
                 {herd.selected_saleyard}
                 {isStale && (
-                  <span className="inline-flex items-center rounded-full bg-warning/15 px-2 py-0.5 text-[10px] font-medium text-warning">
+                  <span className="bg-warning/15 text-warning inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium">
                     Data {staleWeeks}w old
                   </span>
                 )}
@@ -378,13 +453,27 @@ export default async function HerdDetailPage({
               <CardTitle>Weight Tracking</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
-            <InfoRow label="Initial Weight" value={herd.initial_weight ? `${herd.initial_weight} kg` : null} />
-            <InfoRow label="Current Weight" value={herd.current_weight ? `${herd.current_weight} kg` : null} />
-            {projectedWeight && <InfoRow label="Projected Weight" value={`${Math.round(projectedWeight)} kg`} />}
-            <InfoRow label="Daily Weight Gain" value={herd.daily_weight_gain ? `${herd.daily_weight_gain} kg/day` : null} />
+          <CardContent className="divide-y divide-white/[0.04] px-5 pb-5">
+            <InfoRow
+              label="Initial Weight"
+              value={herd.initial_weight ? `${herd.initial_weight} kg` : null}
+            />
+            <InfoRow
+              label="Current Weight"
+              value={herd.current_weight ? `${herd.current_weight} kg` : null}
+            />
+            {projectedWeight && (
+              <InfoRow label="Projected Weight" value={`${Math.round(projectedWeight)} kg`} />
+            )}
+            <InfoRow
+              label="Daily Weight Gain"
+              value={herd.daily_weight_gain ? `${herd.daily_weight_gain} kg/day` : null}
+            />
             {herd.mortality_rate != null && herd.mortality_rate > 0 && (
-              <InfoRow label="Mortality Rate" value={`${Math.round(herd.mortality_rate * 100)}% annually`} />
+              <InfoRow
+                label="Mortality Rate"
+                value={`${Math.round(herd.mortality_rate * 100)}% annually`}
+              />
             )}
           </CardContent>
         </Card>
@@ -398,27 +487,58 @@ export default async function HerdDetailPage({
                 <CardTitle>Breeding</CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
+            <CardContent className="divide-y divide-white/[0.04] px-5 pb-5">
               <div className="flex items-center justify-between py-3 text-sm">
                 <span className="text-text-muted">Pregnant</span>
-                <Badge variant={herd.is_pregnant ? "success" : "default"}>{herd.is_pregnant ? "Yes" : "No"}</Badge>
+                <Badge variant={herd.is_pregnant ? "success" : "default"}>
+                  {herd.is_pregnant ? "Yes" : "No"}
+                </Badge>
               </div>
-              <InfoRow label="Breeding Program" value={herd.breeding_program_type ? herd.breeding_program_type.charAt(0).toUpperCase() + herd.breeding_program_type.slice(1) : null} />
+              <InfoRow
+                label="Breeding Program"
+                value={
+                  herd.breeding_program_type
+                    ? herd.breeding_program_type.charAt(0).toUpperCase() +
+                      herd.breeding_program_type.slice(1)
+                    : null
+                }
+              />
               {herd.joining_period_start && (
                 <InfoRow
-                  label={herd.breeding_program_type === "ai" ? "Insemination Started" : "Put Bulls In"}
-                  value={new Date(herd.joining_period_start).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+                  label={
+                    herd.breeding_program_type === "ai" ? "Insemination Started" : "Put Bulls In"
+                  }
+                  value={new Date(herd.joining_period_start).toLocaleDateString("en-AU", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
                 />
               )}
               {herd.joining_period_end && (
                 <InfoRow
-                  label={herd.breeding_program_type === "ai" ? "Insemination Complete" : "Pull Bulls Out"}
-                  value={new Date(herd.joining_period_end).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+                  label={
+                    herd.breeding_program_type === "ai" ? "Insemination Complete" : "Pull Bulls Out"
+                  }
+                  value={new Date(herd.joining_period_end).toLocaleDateString("en-AU", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
                 />
               )}
-              {effectiveJoinedDateObj && (herd.breeding_program_type === "ai" || herd.breeding_program_type === "controlled") && (
-                <InfoRow label="Effective Joining Date" value={effectiveJoinedDateObj.toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })} />
-              )}
+              {effectiveJoinedDateObj &&
+                (herd.breeding_program_type === "ai" ||
+                  herd.breeding_program_type === "controlled") && (
+                  <InfoRow
+                    label="Effective Joining Date"
+                    value={effectiveJoinedDateObj.toLocaleDateString("en-AU", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  />
+                )}
               {effectiveJoinedDateObj && hasJoiningStarted && (
                 <InfoRow label="Days Since Joining" value={`${daysSinceJoined} days`} />
               )}
@@ -428,16 +548,35 @@ export default async function HerdDetailPage({
               {effectiveJoinedDateObj && (
                 <InfoRow
                   label="Expected Calving"
-                  value={new Date(effectiveJoinedDateObj.getTime() + breedingCycleDays * 86400000).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+                  value={new Date(
+                    effectiveJoinedDateObj.getTime() + breedingCycleDays * 86400000
+                  ).toLocaleDateString("en-AU", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
                 />
               )}
-              {effectiveJoinedDateObj && hasJoiningStarted && herd.is_pregnant && daysUntilCalving > 0 && (
-                <InfoRow label="Est. Days to Calving" value={`${daysUntilCalving} days`} />
-              )}
-              {effectiveJoinedDateObj && hasJoiningStarted && gestationProgress > 5 && gestationProgress < 100 && (
-                <InfoRow label="Gestation Progress" value={`${Math.round(gestationProgress)}%`} />
-              )}
-              <InfoRow label="Calving Rate" value={herd.calving_rate ? `${Math.round(herd.calving_rate > 1 ? herd.calving_rate : herd.calving_rate * 100)}%` : null} />
+              {effectiveJoinedDateObj &&
+                hasJoiningStarted &&
+                herd.is_pregnant &&
+                daysUntilCalving > 0 && (
+                  <InfoRow label="Est. Days to Calving" value={`${daysUntilCalving} days`} />
+                )}
+              {effectiveJoinedDateObj &&
+                hasJoiningStarted &&
+                gestationProgress > 5 &&
+                gestationProgress < 100 && (
+                  <InfoRow label="Gestation Progress" value={`${Math.round(gestationProgress)}%`} />
+                )}
+              <InfoRow
+                label="Calving Rate"
+                value={
+                  herd.calving_rate
+                    ? `${Math.round(herd.calving_rate > 1 ? herd.calving_rate : herd.calving_rate * 100)}%`
+                    : null
+                }
+              />
               <InfoRow label="Lactation Status" value={herd.lactation_status} />
               {calvesData && (
                 <InfoRow
@@ -446,18 +585,27 @@ export default async function HerdDetailPage({
                 />
               )}
               {estimatedCalfBirthValue != null && estimatedCalfBirthValue > 0 && (
-                <InfoRow label="Est. Value Per Calf" value={`$${Math.round(estimatedCalfBirthValue).toLocaleString()}`} />
+                <InfoRow
+                  label="Est. Value Per Calf"
+                  value={`$${Math.round(estimatedCalfBirthValue).toLocaleString()}`}
+                />
               )}
               {unbornProgenyValue > 0 && (
-                <InfoRow label="Unborn Progeny (Accruing)" value={`$${Math.round(unbornProgenyValue).toLocaleString()}`} />
+                <InfoRow
+                  label="Unborn Progeny (Accruing)"
+                  value={`$${Math.round(unbornProgenyValue).toLocaleString()}`}
+                />
               )}
               {calvesData && calvesAtFootValue > 0 && (
-                <InfoRow label={`Calves at Foot (${calvesData.headCount} head)`} value={`$${Math.round(calvesAtFootValue).toLocaleString()}`} />
+                <InfoRow
+                  label={`Calves at Foot (${calvesData.headCount} head)`}
+                  value={`$${Math.round(calvesAtFootValue).toLocaleString()}`}
+                />
               )}
               {valuation.breedingAccrual > 0 && (
                 <div className="flex items-center justify-between py-3 text-sm">
-                  <span className="font-semibold text-text-primary">Total Breeding Value</span>
-                  <span className="font-semibold tabular-nums text-success">
+                  <span className="text-text-primary font-semibold">Total Breeding Value</span>
+                  <span className="text-success font-semibold tabular-nums">
                     ${Math.round(valuation.breedingAccrual).toLocaleString()}
                   </span>
                 </div>
@@ -480,10 +628,27 @@ export default async function HerdDetailPage({
               <CardTitle>Timeline</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="px-5 pb-5 divide-y divide-white/[0.04]">
-            <InfoRow label="Days Held" value={`${Math.max(0, Math.round((Date.now() - new Date(herd.created_at).getTime()) / 86400000))} days`} />
-            <InfoRow label="Created" value={new Date(herd.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })} />
-            <InfoRow label="Last Updated" value={new Date(herd.updated_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })} />
+          <CardContent className="divide-y divide-white/[0.04] px-5 pb-5">
+            <InfoRow
+              label="Days Held"
+              value={`${Math.max(0, Math.round((Date.now() - new Date(herd.created_at).getTime()) / 86400000))} days`}
+            />
+            <InfoRow
+              label="Created"
+              value={new Date(herd.created_at).toLocaleDateString("en-AU", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })}
+            />
+            <InfoRow
+              label="Last Updated"
+              value={new Date(herd.updated_at).toLocaleDateString("en-AU", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })}
+            />
           </CardContent>
         </Card>
 
@@ -503,7 +668,9 @@ export default async function HerdDetailPage({
               </div>
             </CardHeader>
             <CardContent>
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-secondary">{herd.notes}</p>
+              <p className="text-text-secondary text-sm leading-relaxed whitespace-pre-wrap">
+                {herd.notes}
+              </p>
             </CardContent>
           </Card>
         )}

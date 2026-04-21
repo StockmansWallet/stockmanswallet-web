@@ -23,7 +23,9 @@ import {
   expandWithNearbySaleyards,
 } from "@/lib/data/saleyard-proximity";
 import { centsToDollars } from "@/lib/types/money";
-import { PortfolioValueCard } from "@/components/app/portfolio-value-card";
+import { PortfolioValueCardWithOverlay } from "@/components/app/portfolio-value-card-with-overlay";
+import { PortfolioStatStripWithOverlay } from "@/components/app/portfolio-stat-strip-with-overlay";
+import type { PriceRowFlat } from "@/app/(app)/dashboard/herds/herds-list-view";
 import { ComingUpCard } from "@/components/app/coming-up-card";
 import { GrowthMortalityCard } from "@/components/app/growth-mortality-card";
 import { ClosestSaleyardsCard } from "@/components/app/closest-saleyards-card";
@@ -429,32 +431,22 @@ export default async function DashboardPage() {
               subtitle="Here&#8217;s your herd overview."
             />
 
-            {/* Hero: Total Portfolio Value */}
-            <PortfolioValueCard
-              value={portfolioValue}
+            {/* Hero: Total Portfolio Value (demo user's local additions merged client-side) */}
+            <PortfolioValueCardWithOverlay
+              baseValue={portfolioValue}
+              baseFallbackCount={fallbackCount}
               changeDollar={changeDollar}
               changePercent={changePercent}
-              fallbackCount={fallbackCount}
+              prices={(allPrices ?? []) as PriceRowFlat[]}
+              premiumsByBreed={Object.fromEntries(premiumMap)}
             />
 
             {/* Secondary stat strip */}
-            <div className="mt-3 grid grid-cols-3 items-stretch gap-3 lg:mt-4 lg:gap-4">
-              <StatCard
-                icon={<Tags className="h-3.5 w-3.5" />}
-                label="Head"
-                value={totalHead.toLocaleString()}
-              />
-              <StatCard
-                icon={<Layers className="h-3.5 w-3.5" />}
-                label="Herds"
-                value={String(herdCount)}
-              />
-              <StatCard
-                icon={<MapPinned className="h-3.5 w-3.5" />}
-                label="Properties"
-                value={String(propertyCount)}
-              />
-            </div>
+            <PortfolioStatStripWithOverlay
+              baseTotalHead={totalHead}
+              baseHerdCount={herdCount}
+              propertyCount={propertyCount}
+            />
 
             {/* Portfolio Outlook chart - full width */}
             <div className="mt-3 lg:mt-4">

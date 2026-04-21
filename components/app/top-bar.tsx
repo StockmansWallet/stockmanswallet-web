@@ -7,6 +7,7 @@ import Image from "next/image";
 import { ChevronDown, Crown, HelpCircle, LogOut, Settings, User } from "lucide-react";
 import { signOut } from "@/app/(auth)/actions";
 import { tierDisplayName, type SubscriptionTier } from "@/lib/subscriptions/tiers";
+import { clearOverlay } from "@/lib/demo-overlay";
 
 interface TopBarProps {
   firstName?: string;
@@ -145,7 +146,7 @@ export function TopBar({
 
         <div className="border-t border-white/[0.06]" />
 
-        <form action={signOut}>
+        <form action={signOut} onSubmit={() => clearOverlay()}>
           <button
             type="submit"
             role="menuitem"

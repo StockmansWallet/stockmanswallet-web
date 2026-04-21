@@ -9,6 +9,7 @@ import { Modal } from "@/components/ui/modal";
 import { Search, ChevronUp, MapPinned, Trash2 } from "lucide-react";
 import { deleteHerds } from "./actions";
 import { resolveShortSaleyardName } from "@/lib/data/reference-data";
+import { isLocalHerdId, removeLocalHerd } from "@/lib/demo-overlay";
 
 type HerdWithProperty = {
   id: string;
@@ -41,8 +42,16 @@ type PropertyGroup = {
 
 const SPECIES_TABS = ["All", "Cattle", "Sheep", "Pig", "Goat"] as const;
 
-
-type SortKey = "name" | "breed" | "category" | "selected_saleyard" | "head_count" | "current_weight" | "value" | "price_per_kg" | null;
+type SortKey =
+  | "name"
+  | "breed"
+  | "category"
+  | "selected_saleyard"
+  | "head_count"
+  | "current_weight"
+  | "value"
+  | "price_per_kg"
+  | null;
 
 type StatAccent = "none" | "brand" | "warning" | "error" | "success";
 
@@ -66,16 +75,30 @@ function SortIcon({ active, sortDir }: { active: boolean; sortDir: "asc" | "desc
   );
 }
 
-function Stat({ label, value, accent = "none" }: { label: string; value: string; accent?: StatAccent }) {
+function Stat({
+  label,
+  value,
+  accent = "none",
+}: {
+  label: string;
+  value: string;
+  accent?: StatAccent;
+}) {
   const colour =
-    accent === "brand" ? "text-brand"
-    : accent === "warning" ? "text-warning"
-    : accent === "error" ? "text-error"
-    : accent === "success" ? "text-success"
-    : "text-text-primary";
+    accent === "brand"
+      ? "text-brand"
+      : accent === "warning"
+        ? "text-warning"
+        : accent === "error"
+          ? "text-error"
+          : accent === "success"
+            ? "text-success"
+            : "text-text-primary";
   return (
     <div className="min-w-0">
-      <p className="truncate text-[10px] font-medium uppercase tracking-wider text-text-muted">{label}</p>
+      <p className="text-text-muted truncate text-[10px] font-medium tracking-wider uppercase">
+        {label}
+      </p>
       <p className={`mt-0.5 truncate text-sm font-semibold tabular-nums ${colour}`}>{value}</p>
     </div>
   );
@@ -99,20 +122,35 @@ interface HerdCardProps {
 }
 
 function HerdCard({
-  herd, value, source, pricePerKg, accrual, nearestSaleyard, projectedWeight,
-  defaultPremium, customDelta, dataDate, isEditing, isSelected, onToggleSelect, onNavigate,
+  herd,
+  value,
+  source,
+  pricePerKg,
+  accrual,
+  nearestSaleyard,
+  projectedWeight,
+  defaultPremium,
+  customDelta,
+  dataDate,
+  isEditing,
+  isSelected,
+  onToggleSelect,
+  onNavigate,
 }: HerdCardProps) {
   const isFallback = source !== undefined && source !== "saleyard";
   const dataAgeDays = dataDate ? Math.floor((NOW_MS - new Date(dataDate).getTime()) / 86400000) : 0;
   const isStale = dataAgeDays > 42 && !isFallback;
 
-  const categoryLabel = herd.sub_category && herd.sub_category !== herd.category
-    ? `${herd.category} (${herd.sub_category})`
-    : herd.category;
+  const categoryLabel =
+    herd.sub_category && herd.sub_category !== herd.category
+      ? `${herd.category} (${herd.sub_category})`
+      : herd.category;
 
   const weightNumber = projectedWeight ?? herd.current_weight ?? 0;
-  const calvingPct = (herd.calving_rate ?? 0) > 1 ? (herd.calving_rate ?? 0) : (herd.calving_rate ?? 0) * 100;
-  const mortalityPct = (herd.mortality_rate ?? 0) > 1 ? (herd.mortality_rate ?? 0) : (herd.mortality_rate ?? 0) * 100;
+  const calvingPct =
+    (herd.calving_rate ?? 0) > 1 ? (herd.calving_rate ?? 0) : (herd.calving_rate ?? 0) * 100;
+  const mortalityPct =
+    (herd.mortality_rate ?? 0) > 1 ? (herd.mortality_rate ?? 0) : (herd.mortality_rate ?? 0) * 100;
   const dwg = herd.daily_weight_gain ?? 0;
   const headCount = herd.head_count ?? 0;
   const avgPerHead = headCount > 0 ? value / headCount : 0;
@@ -133,7 +171,10 @@ function HerdCard({
   const extras: { label: string; value: string; accent?: StatAccent }[] = [];
   if (saleyardLabel) {
     extras.push({
-      label: isStale && saleyardAccent === "warning" && !nearestSaleyard ? "Saleyard (stale)" : "Saleyard",
+      label:
+        isStale && saleyardAccent === "warning" && !nearestSaleyard
+          ? "Saleyard (stale)"
+          : "Saleyard",
       value: saleyardLabel,
       accent: saleyardAccent,
     });
@@ -148,13 +189,20 @@ function HerdCard({
     extras.push({ label: "Calving", value: `${calvingPct.toFixed(0)}%` });
   }
   if (accrual > 0) {
-    extras.push({ label: "Calf Accrual", value: `$${Math.round(accrual).toLocaleString()}`, accent: "success" });
+    extras.push({
+      label: "Calf Accrual",
+      value: `$${Math.round(accrual).toLocaleString()}`,
+      accent: "success",
+    });
   }
   if (mortalityPct > 0) {
     extras.push({ label: "Mortality", value: `${mortalityPct.toFixed(1)}% p.a.` });
   }
   if (defaultPremium !== 0) {
-    extras.push({ label: "Breed Premium", value: `${defaultPremium > 0 ? "+" : ""}${defaultPremium}%` });
+    extras.push({
+      label: "Breed Premium",
+      value: `${defaultPremium > 0 ? "+" : ""}${defaultPremium}%`,
+    });
   }
   if (customDelta !== null) {
     extras.push({
@@ -175,7 +223,7 @@ function HerdCard({
   return (
     <Card
       onClick={handleCardClick}
-      className={`cursor-pointer overflow-hidden transition-colors ${isSelected ? "ring-1 ring-brand/60" : "hover:bg-white/[0.03]"}`}
+      className={`cursor-pointer overflow-hidden transition-colors ${isSelected ? "ring-brand/60 ring-1" : "hover:bg-white/[0.03]"}`}
     >
       {/* Header: tinted row with head-count pill, name, category, value */}
       <div className="flex items-center gap-3 bg-white/[0.04] px-4 py-2.5">
@@ -186,28 +234,30 @@ function HerdCard({
               checked={isSelected}
               onChange={() => onToggleSelect(herd.id)}
               aria-label={`Select ${herd.name}`}
-              className="h-4 w-4 cursor-pointer rounded border-white/20 bg-transparent accent-brand"
+              className="accent-brand h-4 w-4 cursor-pointer rounded border-white/20 bg-transparent"
             />
           </div>
         )}
-        <span className="flex h-9 w-12 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-sm font-semibold tabular-nums text-text-primary">
+        <span className="text-text-primary flex h-9 w-12 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-sm font-semibold tabular-nums">
           {headCount.toLocaleString()}
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-            <h5 className="truncate text-sm font-semibold text-text-primary">{herd.name}</h5>
-            <p className="shrink-0 text-xs text-text-muted">
+            <h5 className="text-text-primary truncate text-sm font-semibold">{herd.name}</h5>
+            <p className="text-text-muted shrink-0 text-xs">
               {herd.breed} | {categoryLabel}
             </p>
           </div>
           {herd.livestock_owner && (
-            <p className="mt-0.5 text-[11px] text-text-muted">
+            <p className="text-text-muted mt-0.5 text-[11px]">
               <span className="text-text-muted/70">Livestock Owner:</span>{" "}
               <span className="text-text-secondary">{herd.livestock_owner}</span>
             </p>
           )}
         </div>
-        <p className={`ml-3 shrink-0 text-base font-bold tabular-nums ${isFallback ? "text-error" : "text-text-primary"}`}>
+        <p
+          className={`ml-3 shrink-0 text-base font-bold tabular-nums ${isFallback ? "text-error" : "text-text-primary"}`}
+        >
           {value > 0 ? `$${Math.round(value).toLocaleString()}` : "\u2014"}
         </p>
       </div>
@@ -217,12 +267,18 @@ function HerdCard({
         <div className="grid grid-cols-4 gap-x-3">
           <Stat label="Head" value={headCount.toLocaleString()} />
           <Stat label="Age" value={herd.age_months ? `${herd.age_months} months` : "\u2014"} />
-          <Stat label="Weight" value={weightNumber > 0 ? `${Math.round(weightNumber).toLocaleString()} kg` : "\u2014"} />
+          <Stat
+            label="Weight"
+            value={weightNumber > 0 ? `${Math.round(weightNumber).toLocaleString()} kg` : "\u2014"}
+          />
           <Stat label="Price" value={pricePerKg > 0 ? `$${pricePerKg.toFixed(2)}/kg` : "\u2014"} />
         </div>
 
         {extraRows.map((row, ri) => (
-          <div key={ri} className="mt-1.5 grid grid-cols-4 gap-x-3 border-t border-white/[0.04] pt-1.5">
+          <div
+            key={ri}
+            className="mt-1.5 grid grid-cols-4 gap-x-3 border-t border-white/[0.04] pt-1.5"
+          >
             {row.map((e) => (
               <Stat key={e.label} label={e.label} value={e.value} accent={e.accent} />
             ))}
@@ -261,9 +317,12 @@ export function HerdsTable({
   headerActions?: ReactNode;
 }) {
   const router = useRouter();
-  const navigateToHerd = useCallback((id: string) => {
-    router.push(`/dashboard/herds/${id}`);
-  }, [router]);
+  const navigateToHerd = useCallback(
+    (id: string) => {
+      router.push(`/dashboard/herds/${id}`);
+    },
+    [router]
+  );
   const [activeTab, setActiveTab] = useState<string>("All");
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>(null);
@@ -333,7 +392,12 @@ export function HerdsTable({
       byProperty.set(pid, arr);
     }
 
-    const groups: { id: string | null; name: string; isDefault: boolean; herds: HerdWithProperty[] }[] = [];
+    const groups: {
+      id: string | null;
+      name: string;
+      isDefault: boolean;
+      herds: HerdWithProperty[];
+    }[] = [];
 
     // Add groups in property order (default first, then alphabetical)
     for (const pg of propertyGroups) {
@@ -401,7 +465,13 @@ export function HerdsTable({
 
   async function handleBulkDelete() {
     setIsDeleting(true);
-    const result = await deleteHerds(Array.from(selectedIds));
+    const ids = Array.from(selectedIds);
+    // Split demo-overlay herds (local-*) from real Supabase rows. Local herds
+    // are removed from localStorage; the rest go through the server action.
+    const localIds = ids.filter((id) => isLocalHerdId(id));
+    const remoteIds = ids.filter((id) => !isLocalHerdId(id));
+    for (const id of localIds) removeLocalHerd(id);
+    const result = remoteIds.length > 0 ? await deleteHerds(remoteIds) : undefined;
     setIsDeleting(false);
     setShowDeleteConfirm(false);
     if (!result?.error) {
@@ -413,7 +483,7 @@ export function HerdsTable({
   return (
     <div>
       {/* Toolbar: species pills + manage + search */}
-      <div className="mb-4 flex flex-col gap-3 rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
+      <div className="bg-surface-lowest mb-4 flex flex-col gap-3 rounded-full px-2 py-2 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
         {/* Left: species filters */}
         <div className="flex items-center gap-1.5 overflow-x-auto">
           {SPECIES_TABS.map((tab) => {
@@ -442,14 +512,14 @@ export function HerdsTable({
         {/* Right: search + select + actions */}
         <div className="flex items-center gap-1.5">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
+            <Search className="text-text-muted pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search herds..."
               aria-label="Search herds"
-              className="h-8 w-full rounded-full bg-surface pl-9 pr-4 text-xs text-text-primary placeholder:text-text-muted outline-none transition-all focus:ring-2 focus:ring-brand/20 sm:w-48"
+              className="bg-surface text-text-primary placeholder:text-text-muted focus:ring-brand/20 h-8 w-full rounded-full pr-4 pl-9 text-xs transition-all outline-none focus:ring-2 sm:w-48"
             />
           </div>
           {herds.length > 0 && (
@@ -469,17 +539,17 @@ export function HerdsTable({
       </div>
 
       {sorted.length === 0 ? (
-        <div className="overflow-hidden rounded-2xl bg-surface-lowest backdrop-blur-md">
-          <p className="px-5 py-16 text-center text-sm text-text-muted">
+        <div className="bg-surface-lowest overflow-hidden rounded-2xl backdrop-blur-md">
+          <p className="text-text-muted px-5 py-16 text-center text-sm">
             {search ? "No herds match your search." : "No herds found."}
           </p>
         </div>
       ) : (
         <>
           {/* Single sort bar above all groups */}
-          <div className="mb-3 rounded-full bg-surface-lowest px-2 py-1.5 backdrop-blur-md">
+          <div className="bg-surface-lowest mb-3 rounded-full px-2 py-1.5 backdrop-blur-md">
             <div className="flex items-center gap-1 px-2 py-0.5">
-              <span className="mr-1.5 text-[10px] font-medium text-text-muted">Sort by</span>
+              <span className="text-text-muted mr-1.5 text-[10px] font-medium">Sort by</span>
               <div className="flex items-center gap-0.5 rounded-full bg-white/[0.03] p-0.5">
                 {SORT_OPTIONS.map((opt) => (
                   <button
@@ -509,17 +579,28 @@ export function HerdsTable({
                     {/* Property header pill */}
                     <div className="mb-2 flex items-center justify-between rounded-full bg-white/[0.06] px-4 py-2.5 backdrop-blur-md">
                       <div className="flex items-center gap-2.5">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/10">
-                          <MapPinned className="h-3.5 w-3.5 text-brand" />
+                        <div className="bg-brand/10 flex h-7 w-7 items-center justify-center rounded-lg">
+                          <MapPinned className="text-brand h-3.5 w-3.5" />
                         </div>
-                        <span className="text-sm font-semibold text-text-primary">{group.name}</span>
+                        <span className="text-text-primary text-sm font-semibold">
+                          {group.name}
+                        </span>
                         {group.isDefault && (
-                          <Badge variant="brand" className="text-[10px] px-1.5 py-0">Primary</Badge>
+                          <Badge variant="brand" className="px-1.5 py-0 text-[10px]">
+                            Primary
+                          </Badge>
                         )}
                       </div>
-                      <span className="text-xs tabular-nums text-text-muted">
-                        {groupHead.toLocaleString()} head{groupValue > 0 && (
-                          <> &middot; <span className="font-semibold text-brand">${Math.round(groupValue).toLocaleString()}</span></>
+                      <span className="text-text-muted text-xs tabular-nums">
+                        {groupHead.toLocaleString()} head
+                        {groupValue > 0 && (
+                          <>
+                            {" "}
+                            &middot;{" "}
+                            <span className="text-brand font-semibold">
+                              ${Math.round(groupValue).toLocaleString()}
+                            </span>
+                          </>
                         )}
                       </span>
                     </div>
@@ -571,7 +652,7 @@ export function HerdsTable({
                   onNavigate={navigateToHerd}
                 />
               ))}
-              <p className="mt-2 text-xs text-text-muted">
+              <p className="text-text-muted mt-2 text-xs">
                 {sorted.length === herds.length
                   ? `${herds.length} ${herds.length === 1 ? "herd" : "herds"}`
                   : `${sorted.length} of ${herds.length} herds`}
@@ -584,23 +665,19 @@ export function HerdsTable({
       {/* Floating action bar when items selected */}
       {isEditing && selectedIds.size > 0 && (
         <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
-          <div className="flex items-center gap-3 rounded-full border border-white/10 bg-bg-alt px-5 py-3 shadow-2xl">
-            <span className="text-sm font-medium text-text-primary tabular-nums">
+          <div className="bg-bg-alt flex items-center gap-3 rounded-full border border-white/10 px-5 py-3 shadow-2xl">
+            <span className="text-text-primary text-sm font-medium tabular-nums">
               {selectedIds.size} selected
             </span>
             <div className="h-4 w-px bg-white/10" />
             <button
               onClick={toggleSelectAll}
-              className="text-sm font-medium text-brand hover:text-brand/80 transition-colors"
+              className="text-brand hover:text-brand/80 text-sm font-medium transition-colors"
             >
               {allVisibleSelected ? "Deselect All" : "Select All"}
             </button>
             <div className="h-4 w-px bg-white/10" />
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => setShowDeleteConfirm(true)}
-            >
+            <Button variant="destructive" size="sm" onClick={() => setShowDeleteConfirm(true)}>
               <Trash2 className="mr-1.5 h-3.5 w-3.5" />
               Delete
             </Button>
@@ -615,10 +692,10 @@ export function HerdsTable({
         title="Delete Herds"
         size="sm"
       >
-        <p className="mb-6 text-sm text-text-secondary">
+        <p className="text-text-secondary mb-6 text-sm">
           Are you sure you want to delete <strong>{selectedIds.size}</strong>{" "}
-          {selectedIds.size === 1 ? "herd" : "herds"}? This will also remove
-          all associated muster, health, and sales records.
+          {selectedIds.size === 1 ? "herd" : "herds"}? This will also remove all associated muster,
+          health, and sales records.
         </p>
         <div className="flex items-center justify-end gap-3">
           <Button
@@ -628,12 +705,10 @@ export function HerdsTable({
           >
             Cancel
           </Button>
-          <Button
-            variant="destructive"
-            onClick={handleBulkDelete}
-            disabled={isDeleting}
-          >
-            {isDeleting ? "Deleting..." : `Delete ${selectedIds.size} ${selectedIds.size === 1 ? "Herd" : "Herds"}`}
+          <Button variant="destructive" onClick={handleBulkDelete} disabled={isDeleting}>
+            {isDeleting
+              ? "Deleting..."
+              : `Delete ${selectedIds.size} ${selectedIds.size === 1 ? "Herd" : "Herds"}`}
           </Button>
         </div>
       </Modal>

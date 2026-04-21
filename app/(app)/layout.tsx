@@ -5,6 +5,7 @@ import { MobileNav } from "@/components/app/mobile-nav";
 import { TopBar } from "@/components/app/top-bar";
 import { SidebarNotificationsProvider } from "@/components/app/sidebar-notifications-provider";
 import { DemoModeBanner } from "@/components/app/demo-mode-banner";
+import { DemoModeProvider } from "@/components/app/demo-mode-provider";
 import { isAdvisorRole, roleDisplayName } from "@/lib/types/advisory";
 import { ADVISOR_ENABLED } from "@/lib/feature-flags";
 
@@ -67,65 +68,67 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const isDemoUser = user.email?.toLowerCase() === process.env.DEMO_EMAIL?.toLowerCase();
 
   return (
-    <SidebarNotificationsProvider>
-      {/* Fixed background: single div, CSS-only stack.
+    <DemoModeProvider isDemoUser={isDemoUser}>
+      <SidebarNotificationsProvider>
+        {/* Fixed background: single div, CSS-only stack.
           One compositing layer instead of four; no mix-blend-mode (was per-frame compositor work);
           no next/Image (skips dev-mode image-optimisation overhead). Image is darkened inline via
           the stacked black overlay so it reads the same as the previous opacity-10 treatment. */}
-      <div
-        data-print-hide
-        aria-hidden
-        className="bg-background pointer-events-none fixed inset-0 -z-10"
-        style={{
-          backgroundImage: [
-            // Dark bottom gradient (fades image into page background)
-            "linear-gradient(to bottom, rgba(31,27,24,0) 0%, rgba(31,27,24,0.35) 25%, rgba(31,27,24,0.7) 55%, rgba(31,27,24,1) 90%)",
-            // Soft brand glow in top-left
-            "radial-gradient(ellipse 2200px 2200px at -500px -500px, rgba(217,118,47,0.12) 0%, transparent 70%)",
-            // Hero image, darkened via stacked black overlay
-            "linear-gradient(rgba(31,27,24,0.78), rgba(31,27,24,0.78)), url('/images/landing-bg.webp')",
-          ].join(","),
-          backgroundSize: "100% 100%, 100% 100%, cover, cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-      />
+        <div
+          data-print-hide
+          aria-hidden
+          className="bg-background pointer-events-none fixed inset-0 -z-10"
+          style={{
+            backgroundImage: [
+              // Dark bottom gradient (fades image into page background)
+              "linear-gradient(to bottom, rgba(31,27,24,0) 0%, rgba(31,27,24,0.35) 25%, rgba(31,27,24,0.7) 55%, rgba(31,27,24,1) 90%)",
+              // Soft brand glow in top-left
+              "radial-gradient(ellipse 2200px 2200px at -500px -500px, rgba(217,118,47,0.12) 0%, transparent 70%)",
+              // Hero image, darkened via stacked black overlay
+              "linear-gradient(rgba(31,27,24,0.78), rgba(31,27,24,0.78)), url('/images/landing-bg.webp')",
+            ].join(","),
+            backgroundSize: "100% 100%, 100% 100%, cover, cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
+        />
 
-      <div className="bg-background/0 flex min-h-screen flex-col">
-        {isDemoUser && <DemoModeBanner />}
+        <div className="bg-background/0 flex min-h-screen flex-col">
+          {isDemoUser && <DemoModeBanner />}
 
-        {/* Mobile nav */}
-        <div data-print-hide>
-          <MobileNav
-            userEmail={user.email}
-            subscriptionTier={profile?.subscription_tier || "stockman"}
-            isAdvisor={isAdvisor}
-          />
-        </div>
-
-        {/* Desktop top header bar - full width, sticky */}
-        <div data-print-hide className="sticky top-0 z-40">
-          <TopBar
-            firstName={user.user_metadata?.first_name || ""}
-            lastName={user.user_metadata?.last_name || ""}
-            email={user.email || ""}
-            roleLabel={roleDisplayName(profile?.role || "producer")}
-            avatarUrl={user.user_metadata?.avatar_url || ""}
-            subscriptionTier={profile?.subscription_tier || "stockman"}
-          />
-        </div>
-
-        {/* Desktop sidebar + content */}
-        <div className="flex flex-1">
-          <div className="hidden lg:block">
-            <div className="sticky top-20 h-[calc(100vh-5rem)] py-4 pl-6">
-              <Sidebar isAdmin={isAdmin} isAdvisor={isAdvisor} />
-            </div>
+          {/* Mobile nav */}
+          <div data-print-hide>
+            <MobileNav
+              userEmail={user.email}
+              subscriptionTier={profile?.subscription_tier || "stockman"}
+              isAdvisor={isAdvisor}
+            />
           </div>
 
-          <main className="flex-1 overflow-y-auto px-6 pb-6 lg:px-8 lg:pb-8">{children}</main>
+          {/* Desktop top header bar - full width, sticky */}
+          <div data-print-hide className="sticky top-0 z-40">
+            <TopBar
+              firstName={user.user_metadata?.first_name || ""}
+              lastName={user.user_metadata?.last_name || ""}
+              email={user.email || ""}
+              roleLabel={roleDisplayName(profile?.role || "producer")}
+              avatarUrl={user.user_metadata?.avatar_url || ""}
+              subscriptionTier={profile?.subscription_tier || "stockman"}
+            />
+          </div>
+
+          {/* Desktop sidebar + content */}
+          <div className="flex flex-1">
+            <div className="hidden lg:block">
+              <div className="sticky top-20 h-[calc(100vh-5rem)] py-4 pl-6">
+                <Sidebar isAdmin={isAdmin} isAdvisor={isAdvisor} isDemoUser={isDemoUser} />
+              </div>
+            </div>
+
+            <main className="flex-1 overflow-y-auto px-6 pb-6 lg:px-8 lg:pb-8">{children}</main>
+          </div>
         </div>
-      </div>
-    </SidebarNotificationsProvider>
+      </SidebarNotificationsProvider>
+    </DemoModeProvider>
   );
 }

@@ -1,14 +1,15 @@
 import { Suspense } from "react";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
-import { StatCard } from "@/components/ui/stat-card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { HerdsTable } from "./herds-table";
+import { HerdsListView, type PriceRowFlat } from "./herds-list-view";
 import { YardBookBanner } from "@/components/app/yard-book-banner";
-import { Tags, Layers, DollarSign, Scale } from "lucide-react";
-import { calculateHerdValuation, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import {
+  calculateHerdValuation,
+  categoryFallback,
+  type CategoryPriceEntry,
+} from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 import { expandWithNearbySaleyards } from "@/lib/data/saleyard-proximity";
@@ -34,9 +35,7 @@ export default async function HerdsPage() {
       .eq("is_sold", false)
       .eq("is_deleted", false)
       .order("name"),
-    supabase
-      .from("breed_premiums")
-      .select("breed, premium_percent:premium_pct"),
+    supabase.from("breed_premiums").select("breed, premium_percent:premium_pct"),
     supabase
       .from("properties")
       .select("id, property_name, is_default")
@@ -63,27 +62,58 @@ export default async function HerdsPage() {
   // Fetch only the newest date's prices per saleyard+category via RPC.
   // This avoids the 50k PostgREST row limit that silently truncates multi-saleyard queries
   // when full history is fetched, causing inconsistent valuations across pages.
-  const herdSaleyards = [...new Set((herds ?? []).map((h) => h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null).filter(Boolean))] as string[];
+  const herdSaleyards = [
+    ...new Set(
+      (herds ?? [])
+        .map((h) => (h.selected_saleyard ? resolveMLASaleyardName(h.selected_saleyard) : null))
+        .filter(Boolean)
+    ),
+  ] as string[];
   const saleyards = expandWithNearbySaleyards(herdSaleyards);
-  const primaryCategories = [...new Set((herds ?? []).map((h) => resolveMLACategory(h.category, h.initial_weight, h.breeder_sub_type ?? undefined).primaryMLACategory))];
-  const mlaCategories = [...new Set([...primaryCategories, ...primaryCategories.map(c => categoryFallback(c)).filter((c): c is string => c !== null)])];
+  const primaryCategories = [
+    ...new Set(
+      (herds ?? []).map(
+        (h) =>
+          resolveMLACategory(h.category, h.initial_weight, h.breeder_sub_type ?? undefined)
+            .primaryMLACategory
+      )
+    ),
+  ];
+  const mlaCategories = [
+    ...new Set([
+      ...primaryCategories,
+      ...primaryCategories.map((c) => categoryFallback(c)).filter((c): c is string => c !== null),
+    ]),
+  ];
 
-  type PriceRow = { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string };
+  type PriceRow = {
+    category: string;
+    price_per_kg: number;
+    weight_range: string | null;
+    saleyard: string;
+    breed: string | null;
+    data_date: string;
+  };
   const emptyPrices: PriceRow[] = [];
 
-  const { data: allPrices } = mlaCategories.length > 0
-    ? await supabase.rpc("latest_saleyard_prices", {
-        p_saleyards: saleyards,
-        p_categories: mlaCategories,
-      }) as { data: PriceRow[] | null }
-    : { data: emptyPrices };
+  const { data: allPrices } =
+    mlaCategories.length > 0
+      ? ((await supabase.rpc("latest_saleyard_prices", {
+          p_saleyards: saleyards,
+          p_categories: mlaCategories,
+        })) as { data: PriceRow[] | null })
+      : { data: emptyPrices };
 
   // Build pricing lookup maps from combined result (same keys as iOS cache)
   const nationalPriceMap = new Map<string, CategoryPriceEntry[]>();
   const saleyardPriceMap = new Map<string, CategoryPriceEntry[]>();
   const saleyardBreedPriceMap = new Map<string, CategoryPriceEntry[]>();
-  for (const p of (allPrices ?? [])) {
-    const priceEntry = { price_per_kg: centsToDollars(p.price_per_kg), weight_range: p.weight_range, data_date: p.data_date };
+  for (const p of allPrices ?? []) {
+    const priceEntry = {
+      price_per_kg: centsToDollars(p.price_per_kg),
+      weight_range: p.weight_range,
+      data_date: p.data_date,
+    };
     if (p.saleyard === "National" && p.breed === null) {
       const entries = nationalPriceMap.get(p.category) ?? [];
       entries.push(priceEntry);
@@ -104,7 +134,7 @@ export default async function HerdsPage() {
   }
   // Seed with local breed premiums, then let Supabase override (matches iOS BreedPremiumService)
   const premiumMap = new Map<string, number>(Object.entries(cattleBreedPremiums));
-  for (const b of (breedPremiumData ?? [])) {
+  for (const b of breedPremiumData ?? []) {
     premiumMap.set(b.breed, b.premium_percent);
   }
 
@@ -119,10 +149,14 @@ export default async function HerdsPage() {
   const herdDefaultBreedPremiumObj: Record<string, number> = {};
   const herdCustomBreedPremiumObj: Record<string, number> = {};
   let totalValue = 0;
-  for (const h of (herds ?? [])) {
+  for (const h of herds ?? []) {
     const result = calculateHerdValuation(
       h as Parameters<typeof calculateHerdValuation>[0],
-      nationalPriceMap, premiumMap, undefined, saleyardPriceMap, saleyardBreedPriceMap
+      nationalPriceMap,
+      premiumMap,
+      undefined,
+      saleyardPriceMap,
+      saleyardBreedPriceMap
     );
     herdValuesObj[h.id] = result.netValue;
     herdSourcesObj[h.id] = result.priceSource;
@@ -149,8 +183,7 @@ export default async function HerdsPage() {
     })
     .map((p) => ({ id: p.id, name: p.property_name, isDefault: p.is_default }));
 
-  const totalHead =
-    herds?.reduce((sum, h) => sum + (h.head_count ?? 0), 0) ?? 0;
+  const totalHead = herds?.reduce((sum, h) => sum + (h.head_count ?? 0), 0) ?? 0;
 
   const avgWeight =
     herds && herds.length > 0
@@ -171,57 +204,33 @@ export default async function HerdsPage() {
         subtitle="Manage your livestock herds."
       />
 
-      {!herds || herds.length === 0 ? (
-        <Card>
-          <EmptyState
-            title="No herds yet"
-            description="Add your first herd to start tracking your livestock."
-            actionLabel="Add Herd"
-            actionHref="/dashboard/herds/new"
-          />
-        </Card>
-      ) : (
-        <>
-          {/* Stats */}
-          <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-            <StatCard icon={<DollarSign className="h-4 w-4" />} label="Total Value" value={`$${Math.round(totalValue).toLocaleString()}`} />
-            <StatCard icon={<Tags className="h-4 w-4" />} label="Total Head" value={totalHead.toLocaleString()} />
-            <StatCard icon={<Layers className="h-4 w-4" />} label="Herds" value={String(herds.length)} />
-            <StatCard icon={<Scale className="h-4 w-4" />} label="Avg Weight" value={avgWeight > 0 ? `${avgWeight} kg` : "\u2014"} />
-          </div>
-
-          {/* Table */}
-          <HerdsTable
-            herds={herds}
-            herdValues={herdValuesObj}
-            herdSources={herdSourcesObj}
-            herdPricePerKg={herdPricePerKgObj}
-            herdBreedingAccrual={herdBreedingAccrualObj}
-            herdDataDates={herdDataDatesObj}
-            herdNearestSaleyard={herdNearestSaleyardObj}
-            herdProjectedWeight={herdProjectedWeightObj}
-            herdDefaultBreedPremium={herdDefaultBreedPremiumObj}
-            herdCustomBreedPremium={herdCustomBreedPremiumObj}
-            propertyGroups={propertyGroups}
-            headerActions={
-              <div className="flex items-center gap-1.5">
-                <Link
-                  href="/dashboard/herds/sold"
-                  className="inline-flex h-8 shrink-0 items-center rounded-full bg-surface px-3.5 text-xs font-medium text-text-muted transition-all hover:bg-surface-raised hover:text-text-secondary"
-                >
-                  Sold Herds
-                </Link>
-                <Link
-                  href="/dashboard/herds/new"
-                  className="inline-flex h-8 shrink-0 items-center rounded-full bg-brand px-3.5 text-xs font-medium text-white transition-all hover:bg-brand-dark"
-                >
-                  Add Herd
-                </Link>
-              </div>
-            }
-          />
-        </>
-      )}
+      <HerdsListView
+        herds={(herds ?? []) as unknown as Parameters<typeof HerdsListView>[0]["herds"]}
+        herdValues={herdValuesObj}
+        herdSources={herdSourcesObj}
+        herdPricePerKg={herdPricePerKgObj}
+        herdBreedingAccrual={herdBreedingAccrualObj}
+        herdDataDates={herdDataDatesObj}
+        herdNearestSaleyard={herdNearestSaleyardObj}
+        herdProjectedWeight={herdProjectedWeightObj}
+        herdDefaultBreedPremium={herdDefaultBreedPremiumObj}
+        herdCustomBreedPremium={herdCustomBreedPremiumObj}
+        propertyGroups={propertyGroups}
+        prices={(allPrices ?? []) as PriceRowFlat[]}
+        premiumsByBreed={Object.fromEntries(premiumMap)}
+        emptyState={
+          !herds || herds.length === 0 ? (
+            <Card>
+              <EmptyState
+                title="No herds yet"
+                description="Add your first herd to start tracking your livestock."
+                actionLabel="Add Herd"
+                actionHref="/dashboard/herds/new"
+              />
+            </Card>
+          ) : null
+        }
+      />
     </div>
   );
 }

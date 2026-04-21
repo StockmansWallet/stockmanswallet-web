@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useDemoMode } from "@/components/app/demo-mode-provider";
+import { addLocalHerd, DEMO_USER_ID, newLocalHerdId, type DemoLocalHerd } from "@/lib/demo-overlay";
+import { deriveSexFromCategory } from "@/lib/validation/herd-schema";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -56,9 +60,7 @@ const BREEDING_PROGRAM_OPTIONS = [
 ];
 
 // Haversine distance in km (matches iOS implementation)
-function haversineDistance(
-  lat1: number, lon1: number, lat2: number, lon2: number,
-): number {
+function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371.0;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
@@ -76,8 +78,11 @@ function haversineDistance(
 function buildSaleyardData(
   propLat: number | null,
   propLon: number | null,
-  propState: string | null,
-): { flat: { value: string; label: string }[]; groups: { header: string; options: { value: string; label: string }[] }[] } {
+  propState: string | null
+): {
+  flat: { value: string; label: string }[];
+  groups: { header: string; options: { value: string; label: string }[] }[];
+} {
   let closestNames: string[] = [];
 
   if (propLat != null && propLon != null) {
@@ -92,9 +97,7 @@ function buildSaleyardData(
       .sort((a, b) => a.dist - b.dist);
     closestNames = withDist.slice(0, 3).map((s) => s.name);
   } else if (propState) {
-    closestNames = saleyards
-      .filter((s) => saleyardToState[s] === propState)
-      .slice(0, 3);
+    closestNames = saleyards.filter((s) => saleyardToState[s] === propState).slice(0, 3);
   }
 
   const closestSet = new Set(closestNames);
@@ -168,6 +171,8 @@ interface AddHerdFormProps {
 }
 
 export function AddHerdForm({ properties, existingOwners = [], action }: AddHerdFormProps) {
+  const router = useRouter();
+  const { isDemoUser } = useDemoMode();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -202,7 +207,9 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
   // User-selected date the calves were weighed. Drives the CaF DWG anchor on save.
   // Defaults to today (equal to creation for fresh Add); user can backdate when
   // entering historical data so growth accrues over the correct period.
-  const [calvesWeighedOn, setCalvesWeighedOn] = useState(() => new Date().toISOString().slice(0, 10));
+  const [calvesWeighedOn, setCalvesWeighedOn] = useState(() =>
+    new Date().toISOString().slice(0, 10)
+  );
 
   // Section 5 - Breeding Details (breeder only, yes/no gate)
   const [breedingDetailsAnswer, setBreedingDetailsAnswer] = useState<"" | "yes" | "no">("");
@@ -244,18 +251,18 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
 
   const breedOptions = useMemo(
     () => breedsForSpecies(species).map((b) => ({ value: b, label: b })),
-    [species],
+    [species]
   );
   const categoryOptions = useMemo(
     () => categoriesForSpecies(species).map((c) => ({ value: c, label: c })),
-    [species],
+    [species]
   );
-  const autoPremium = species === "Cattle" ? cattleBreedPremiums[breed] ?? null : null;
+  const autoPremium = species === "Cattle" ? (cattleBreedPremiums[breed] ?? null) : null;
 
   // Property options for dropdown
   const propertyOptions = useMemo(
     () => properties.map((p) => ({ value: p.id, label: p.property_name })),
-    [properties],
+    [properties]
   );
 
   // Saleyard options - closest 3 to selected property at top
@@ -265,18 +272,27 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
       buildSaleyardData(
         selectedProperty?.latitude ?? null,
         selectedProperty?.longitude ?? null,
-        selectedProperty?.state ?? null,
+        selectedProperty?.state ?? null
       ),
-    [selectedProperty?.latitude, selectedProperty?.longitude, selectedProperty?.state],
+    [selectedProperty?.latitude, selectedProperty?.longitude, selectedProperty?.state]
   );
 
   // Section unlock checks
-  const section1Done = name.trim().length > 0 && species !== "" && breed !== "" && category !== "" && breedPremiumConfirmed && (!needsBreederSubType || breederSubType !== "") && (!breedPremiumOverride || breedPremiumJustification.trim().length > 0);
+  const section1Done =
+    name.trim().length > 0 &&
+    species !== "" &&
+    breed !== "" &&
+    category !== "" &&
+    breedPremiumConfirmed &&
+    (!needsBreederSubType || breederSubType !== "") &&
+    (!breedPremiumOverride || breedPremiumJustification.trim().length > 0);
   const section2Done = Number(headCount) > 0 && ageMonths !== "" && Number(initialWeight) > 0;
-  const section3Done = dailyWeightGain !== "" && mortalityRate !== "" && (!isBreeder || calvingRate !== "");
+  const section3Done =
+    dailyWeightGain !== "" && mortalityRate !== "" && (!isBreeder || calvingRate !== "");
   // Calves at Foot: if yes, detail fields must be filled before advancing
   const calvesDetailsDone = calvesHeadCount !== "" && calvesAgeMonths !== "" && calvesWeight !== "";
-  const section4FullyDone = calvesAtFootAnswer === "no" || (calvesAtFootAnswer === "yes" && calvesDetailsDone);
+  const section4FullyDone =
+    calvesAtFootAnswer === "no" || (calvesAtFootAnswer === "yes" && calvesDetailsDone);
 
   // Progressive reveal - each section waits for the previous to be confirmed
   const showSection2 = section1Done;
@@ -362,19 +378,24 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
 
   // Mark sections 2+ as attempted when they become visible
   useEffect(() => {
-    if (showSection2 && !sectionAttempted["2"]) setSectionAttempted((prev) => ({ ...prev, "2": true }));
+    if (showSection2 && !sectionAttempted["2"])
+      setSectionAttempted((prev) => ({ ...prev, "2": true }));
   }, [showSection2, sectionAttempted]);
   useEffect(() => {
-    if (showSection3 && !sectionAttempted["3"]) setSectionAttempted((prev) => ({ ...prev, "3": true }));
+    if (showSection3 && !sectionAttempted["3"])
+      setSectionAttempted((prev) => ({ ...prev, "3": true }));
   }, [showSection3, sectionAttempted]);
   useEffect(() => {
-    if (showSection4 && !sectionAttempted["4"]) setSectionAttempted((prev) => ({ ...prev, "4": true }));
+    if (showSection4 && !sectionAttempted["4"])
+      setSectionAttempted((prev) => ({ ...prev, "4": true }));
   }, [showSection4, sectionAttempted]);
   useEffect(() => {
-    if (showSection4b && !sectionAttempted["4b"]) setSectionAttempted((prev) => ({ ...prev, "4b": true }));
+    if (showSection4b && !sectionAttempted["4b"])
+      setSectionAttempted((prev) => ({ ...prev, "4b": true }));
   }, [showSection4b, sectionAttempted]);
   useEffect(() => {
-    if (showSection7 && !sectionAttempted["7"]) setSectionAttempted((prev) => ({ ...prev, "7": true }));
+    if (showSection7 && !sectionAttempted["7"])
+      setSectionAttempted((prev) => ({ ...prev, "7": true }));
   }, [showSection7, sectionAttempted]);
 
   // Reactively clear errors as the user corrects fields
@@ -394,9 +415,26 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
       return next;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name, category, breed, breederSubType, breedPremiumConfirmed, breedPremiumJustification,
-      breedPremiumOverride, headCount, ageMonths, initialWeight, dailyWeightGain, mortalityRate,
-      calvingRate, calvesAtFootAnswer, calvesHeadCount, calvesAgeMonths, calvesWeight, saleyard]);
+  }, [
+    name,
+    category,
+    breed,
+    breederSubType,
+    breedPremiumConfirmed,
+    breedPremiumJustification,
+    breedPremiumOverride,
+    headCount,
+    ageMonths,
+    initialWeight,
+    dailyWeightGain,
+    mortalityRate,
+    calvingRate,
+    calvesAtFootAnswer,
+    calvesHeadCount,
+    calvesAgeMonths,
+    calvesWeight,
+    saleyard,
+  ]);
 
   // Handlers
   function handleSpeciesChange(newSpecies: string) {
@@ -462,7 +500,8 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
     if (livestockOwner.trim()) formData.set("livestock_owner", livestockOwner.trim());
     if (breedPremiumOverride) {
       formData.set("breed_premium_override", breedPremiumOverride);
-      if (breedPremiumJustification.trim()) formData.set("breed_premium_justification", breedPremiumJustification.trim());
+      if (breedPremiumJustification.trim())
+        formData.set("breed_premium_justification", breedPremiumJustification.trim());
     }
     if (breederSubType) formData.set("breeder_sub_type", breederSubType);
     if (derivedSubCategory) formData.set("sub_category", derivedSubCategory);
@@ -489,6 +528,95 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
       }
     }
 
+    if (isDemoUser) {
+      // Demo sandbox: persist to localStorage overlay instead of Supabase.
+      // RLS blocks writes for the demo user anyway; the overlay lives until sign-out.
+      const nowIso = new Date().toISOString();
+      const derivedJoinedDate = (() => {
+        if (!isBreeder) return null;
+        if (
+          (breedingProgram === "ai" || breedingProgram === "controlled") &&
+          joiningStart &&
+          joiningEnd
+        ) {
+          const start = new Date(joiningStart).getTime();
+          const end = new Date(joiningEnd).getTime();
+          return new Date((start + end) / 2).toISOString().split("T")[0];
+        }
+        return null;
+      })();
+      const local: Omit<DemoLocalHerd, "__local"> = {
+        id: newLocalHerdId(),
+        user_id: DEMO_USER_ID,
+        name: name.trim(),
+        species,
+        breed,
+        category,
+        sub_category: derivedSubCategory ?? null,
+        sex: deriveSexFromCategory(category),
+        age_months: ageMonths ? Number(ageMonths) : 0,
+        head_count: Number(headCount || 1),
+        initial_weight: Number(initialWeight || 0),
+        current_weight: Number(initialWeight || 0),
+        daily_weight_gain: Number(dailyWeightGain || 0),
+        mortality_rate: Number(mortalityRate || 0) / 100,
+        paddock_name: paddock.trim() || null,
+        selected_saleyard: saleyard || null,
+        property_id: propertyId || null,
+        additional_info: null,
+        is_breeder: isBreeder,
+        is_pregnant: false,
+        is_sold: false,
+        is_deleted: false,
+        breed_premium_override: breedPremiumOverride ? parseFloat(breedPremiumOverride) : null,
+        breeder_sub_type: breederSubType || null,
+        livestock_owner: livestockOwner.trim() || null,
+        notes: null,
+        calving_rate: isBreeder ? Number(calvingRate || 50) / 100 : 0.85,
+        breeding_program_type: isBreeder ? breedingProgram || null : null,
+        joining_period_start:
+          isBreeder && (breedingProgram === "ai" || breedingProgram === "controlled")
+            ? joiningStart || null
+            : null,
+        joining_period_end:
+          isBreeder && (breedingProgram === "ai" || breedingProgram === "controlled")
+            ? joiningEnd || null
+            : null,
+        joined_date: derivedJoinedDate,
+        lactation_status: null,
+        calf_weight_recorded_date: null,
+        breed_premium_justification: breedPremiumOverride
+          ? breedPremiumJustification.trim() || null
+          : null,
+        animal_id_number: null,
+        previous_dwg: null,
+        dwg_change_date: null,
+        is_demo_data: true,
+        created_at: nowIso,
+        updated_at: nowIso,
+        deleted_at: null,
+      };
+      if (
+        isBreeder &&
+        calvesAtFootAnswer === "yes" &&
+        (calvesHeadCount || calvesAgeMonths || calvesWeight)
+      ) {
+        const parts: string[] = [];
+        if (calvesHeadCount) parts.push(`Calves at Foot: ${calvesHeadCount} head`);
+        if (calvesAgeMonths) parts.push(`${calvesAgeMonths} months`);
+        if (calvesWeight) parts.push(`${calvesWeight} kg`);
+        local.additional_info = parts.join(", ");
+        if (calvesWeight && Number(calvesWeight) > 0) {
+          const iso = (calvesWeighedOn ? new Date(calvesWeighedOn) : new Date()).toISOString();
+          local.calf_weight_recorded_date = iso;
+        }
+      }
+      addLocalHerd(local);
+      router.push("/dashboard/herds");
+      router.refresh();
+      return;
+    }
+
     const result = await action(formData);
     if (result?.error) {
       setError(result.error);
@@ -502,7 +630,7 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
   return (
     <div className="space-y-4 pb-4">
       {error && (
-        <div className="rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm text-error">
+        <div className="text-error rounded-xl border border-red-800 bg-red-900/20 px-4 py-3 text-sm">
           {error}
         </div>
       )}
@@ -513,7 +641,7 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Herd Identification</CardTitle>
-          <p className="mt-1 text-sm text-text-secondary">
+          <p className="text-text-secondary mt-1 text-sm">
             Give your herd a name and location and select the type.
           </p>
         </CardHeader>
@@ -576,7 +704,10 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
               options={breedOptions}
               placeholder="Select breed"
               value={breed}
-              onChange={(e) => { setBreed(e.target.value); setBreedPremiumConfirmed(false); }}
+              onChange={(e) => {
+                setBreed(e.target.value);
+                setBreedPremiumConfirmed(false);
+              }}
             />
           </div>
 
@@ -596,8 +727,15 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
               type="number"
               step="1"
               value={breedPremiumOverride}
-              onChange={(e) => { setBreedPremiumOverride(e.target.value); setBreedPremiumConfirmed(false); }}
-              placeholder={autoPremium !== null ? `Default for ${breed} is ${autoPremium}%` : "No default premium"}
+              onChange={(e) => {
+                setBreedPremiumOverride(e.target.value);
+                setBreedPremiumConfirmed(false);
+              }}
+              placeholder={
+                autoPremium !== null
+                  ? `Default for ${breed} is ${autoPremium}%`
+                  : "No default premium"
+              }
               nudgeDefault={autoPremium ?? 0}
             />
           </div>
@@ -620,10 +758,10 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
           {/* Breed premium footer: divider, info left, confirm right */}
           {breed && (
             <>
-              <div className="border-t border-border" />
+              <div className="border-border border-t" />
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 {/* Info text - left side */}
-                <div className="flex items-start gap-2 text-xs text-text-muted sm:max-w-[60%]">
+                <div className="text-text-muted flex items-start gap-2 text-xs sm:max-w-[60%]">
                   <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                   <span>
                     {(() => {
@@ -640,9 +778,8 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
                       );
                     })()}
                     <br />
-                    Override the default to reflect your local market,
-                    bloodline quality, or program status. Use a positive value
-                    for premium or negative for discount.
+                    Override the default to reflect your local market, bloodline quality, or program
+                    status. Use a positive value for premium or negative for discount.
                   </span>
                 </div>
 
@@ -654,36 +791,46 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
                     aria-checked={breedPremiumConfirmed}
                     aria-label="Confirm breed premium"
                     onClick={() => setBreedPremiumConfirmed(!breedPremiumConfirmed)}
-                    className={`flex shrink-0 items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors hover:bg-surface-secondary/80 ${
+                    className={`hover:bg-surface-secondary/80 flex shrink-0 items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors ${
                       breedPremiumConfirmed
                         ? "border-border bg-surface-secondary"
                         : showError("1", "breedPremiumConfirmed")
-                          ? "border-error/60 ring-1 ring-inset ring-error/60 bg-surface-secondary"
-                          : "border-brand/40 shadow-[0_0_8px_#FF800040] bg-surface-secondary"
+                          ? "border-error/60 ring-error/60 bg-surface-secondary ring-1 ring-inset"
+                          : "border-brand/40 bg-surface-secondary shadow-[0_0_8px_#FF800040]"
                     }`}
                   >
                     <span
                       className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
-                        breedPremiumConfirmed
-                          ? "border-brand bg-brand"
-                          : "border-text-muted"
+                        breedPremiumConfirmed ? "border-brand bg-brand" : "border-text-muted"
                       }`}
                     >
                       {breedPremiumConfirmed && (
-                        <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <svg
+                          className="h-3 w-3 text-white"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={3}
+                        >
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       )}
                     </span>
-                    <span className="text-sm text-text-primary">
+                    <span className="text-text-primary text-sm">
                       Confirm{" "}
                       {autoPremium !== null && !breedPremiumOverride && (
-                        <span className="text-warning">{autoPremium > 0 ? "+" : ""}{autoPremium}%</span>
+                        <span className="text-warning">
+                          {autoPremium > 0 ? "+" : ""}
+                          {autoPremium}%
+                        </span>
                       )}
                       {breedPremiumOverride && (
-                        <span className="text-warning">{Number(breedPremiumOverride) > 0 ? "+" : ""}{breedPremiumOverride}%</span>
-                      )}
-                      {" "}breed premium
+                        <span className="text-warning">
+                          {Number(breedPremiumOverride) > 0 ? "+" : ""}
+                          {breedPremiumOverride}%
+                        </span>
+                      )}{" "}
+                      breed premium
                     </span>
                   </button>
                 </div>
@@ -693,7 +840,7 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
 
           {/* Section incomplete message */}
           {sectionAttempted["1"] && !section1Done && (
-            <p className="mt-2 flex items-center gap-2 text-xs text-error">
+            <p className="text-error mt-2 flex items-center gap-2 text-xs">
               <AlertCircle className="h-3.5 w-3.5 shrink-0" />
               Complete the required fields above to continue.
             </p>
@@ -752,13 +899,13 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
 
             {/* Weight validation feedback */}
             {weightValidation && weightValidation.status === "error" && (
-              <div className="flex items-start gap-2 rounded-lg border border-red-800 bg-red-900/20 px-3 py-2 text-xs text-error">
+              <div className="text-error flex items-start gap-2 rounded-lg border border-red-800 bg-red-900/20 px-3 py-2 text-xs">
                 <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 <span>{weightValidation.message}</span>
               </div>
             )}
             {weightValidation && weightValidation.status === "warning" && (
-              <div className="flex items-start gap-2 rounded-lg border border-amber-800 bg-amber-900/20 px-3 py-2 text-xs text-warning">
+              <div className="text-warning flex items-start gap-2 rounded-lg border border-amber-800 bg-amber-900/20 px-3 py-2 text-xs">
                 <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 <span>{weightValidation.message}</span>
               </div>
@@ -766,17 +913,18 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
 
             {/* Derived sub-category label */}
             {derivedSubCategory && weightValidation?.status !== "error" && (
-              <p className="flex items-center gap-2 text-xs text-text-muted">
+              <p className="text-text-muted flex items-center gap-2 text-xs">
                 <Info className="h-3.5 w-3.5 shrink-0" />
                 <span>
-                  MLA category: <span className="font-medium text-text-primary">{derivedSubCategory}</span>
+                  MLA category:{" "}
+                  <span className="text-text-primary font-medium">{derivedSubCategory}</span>
                 </span>
               </p>
             )}
 
             {/* Section incomplete message */}
             {sectionAttempted["2"] && !section2Done && (
-              <p className="mt-2 flex items-center gap-2 text-xs text-error">
+              <p className="text-error mt-2 flex items-center gap-2 text-xs">
                 <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                 Complete the required fields above to continue.
               </p>
@@ -794,7 +942,9 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
             <CardTitle className="text-base">Growth & Mortality</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 px-5 pb-5">
-            <div className={`grid grid-cols-1 gap-4 ${isBreeder ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
+            <div
+              className={`grid grid-cols-1 gap-4 ${isBreeder ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}
+            >
               {isBreeder && (
                 <Input
                   id="calving_rate"
@@ -824,7 +974,9 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
                 value={dailyWeightGain}
                 onChange={(e) => setDailyWeightGain(e.target.value)}
                 placeholder="Annual average kg/day"
-                helperText={!showError("3", "dailyWeightGain") ? "Annual average, not seasonal" : undefined}
+                helperText={
+                  !showError("3", "dailyWeightGain") ? "Annual average, not seasonal" : undefined
+                }
               />
               <Input
                 id="mortality_rate"
@@ -844,7 +996,7 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
 
             {/* Section incomplete message */}
             {sectionAttempted["3"] && !section3Done && (
-              <p className="mt-2 flex items-center gap-2 text-xs text-error">
+              <p className="text-error mt-2 flex items-center gap-2 text-xs">
                 <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                 Complete the required fields above to continue.
               </p>
@@ -860,7 +1012,7 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Calves at Foot</CardTitle>
-            <p className="mt-1 text-sm text-text-secondary">
+            <p className="text-text-secondary mt-1 text-sm">
               Does this herd have any calves at foot?
             </p>
           </CardHeader>
@@ -897,7 +1049,7 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Calf Details</CardTitle>
-            <p className="mt-1 text-sm text-text-secondary">
+            <p className="text-text-secondary mt-1 text-sm">
               Record the calves currently with this herd.
             </p>
           </CardHeader>
@@ -955,17 +1107,17 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
               helperText="Leave as today unless backfilling historical data."
             />
 
-            <p className="flex items-start gap-2 text-xs text-text-muted">
+            <p className="text-text-muted flex items-start gap-2 text-xs">
               <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
               <span>
-                Calving accrual commences at the midpoint of the joining period,
-                reaching 100% at calving (approximately 9 months).
+                Calving accrual commences at the midpoint of the joining period, reaching 100% at
+                calving (approximately 9 months).
               </span>
             </p>
 
             {/* Section incomplete message */}
             {sectionAttempted["4b"] && !calvesDetailsDone && (
-              <p className="mt-2 flex items-center gap-2 text-xs text-error">
+              <p className="text-error mt-2 flex items-center gap-2 text-xs">
                 <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                 Complete the required fields above to continue.
               </p>
@@ -981,9 +1133,7 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Breeding Details</CardTitle>
-            <p className="mt-1 text-sm text-text-secondary">
-              Do you want to add breeding details?
-            </p>
+            <p className="text-text-secondary mt-1 text-sm">Do you want to add breeding details?</p>
           </CardHeader>
           <CardContent className="px-5 pb-5">
             <div className="flex gap-3">
@@ -1018,7 +1168,7 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Breeding Program</CardTitle>
-            <p className="mt-1 text-sm text-text-secondary">How is this herd bred?</p>
+            <p className="text-text-secondary mt-1 text-sm">How is this herd bred?</p>
           </CardHeader>
           <CardContent className="space-y-4 px-5 pb-5">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -1060,13 +1210,17 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Property & Ownership</CardTitle>
-            <p className="mt-1 text-sm text-text-secondary">Where this herd is running, and who owns the livestock.</p>
+            <p className="text-text-secondary mt-1 text-sm">
+              Where this herd is running, and who owns the livestock.
+            </p>
           </CardHeader>
           <CardContent className="space-y-4 px-5 pb-5">
             {properties.length === 0 ? (
-              <p className="flex items-start gap-2 text-xs text-text-muted">
+              <p className="text-text-muted flex items-start gap-2 text-xs">
                 <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                <span>No properties found. You can add a property later from the Properties page.</span>
+                <span>
+                  No properties found. You can add a property later from the Properties page.
+                </span>
               </p>
             ) : (
               <Select
@@ -1103,7 +1257,9 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Saleyard</CardTitle>
-            <p className="mt-1 text-sm text-text-secondary">Select the saleyard used for valuation.</p>
+            <p className="text-text-secondary mt-1 text-sm">
+              Select the saleyard used for valuation.
+            </p>
           </CardHeader>
           <CardContent className="space-y-4 px-5 pb-5">
             <Select
@@ -1119,9 +1275,11 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
               onChange={(e) => setSaleyard(e.target.value)}
             />
 
-            <p className="flex items-start gap-2 text-xs text-text-muted">
+            <p className="text-text-muted flex items-start gap-2 text-xs">
               <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-              <span>Your herd is valued using the selected saleyard. You can change this anytime.</span>
+              <span>
+                Your herd is valued using the selected saleyard. You can change this anytime.
+              </span>
             </p>
           </CardContent>
         </Card>
@@ -1130,7 +1288,7 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
       {/* ----------------------------------------------------------------- */}
       {/* Sticky save bar                                                    */}
       {/* ----------------------------------------------------------------- */}
-      <div className="sticky bottom-0 z-30 -mx-6 bg-background/80 backdrop-blur-xl lg:-mx-8">
+      <div className="bg-background/80 sticky bottom-0 z-30 -mx-6 backdrop-blur-xl lg:-mx-8">
         <div className="flex items-center justify-end px-6 py-3 lg:px-8">
           <Button type="button" size="md" disabled={submitting} onClick={handleSave}>
             {submitting ? "Saving..." : "Save Herd"}

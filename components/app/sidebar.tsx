@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Sparkles } from "lucide-react";
 import { SidebarBadge } from "@/components/app/sidebar-badge";
 import {
   producerNavItems,
@@ -44,9 +45,11 @@ function NavLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
 export function Sidebar({
   isAdmin = false,
   isAdvisor = false,
+  isDemoUser = false,
 }: {
   isAdmin?: boolean;
   isAdvisor?: boolean;
+  isDemoUser?: boolean;
 }) {
   const pathname = usePathname();
 
@@ -133,6 +136,19 @@ export function Sidebar({
               {item.label}
             </Link>
           ))}
+          {isDemoUser && (
+            <Link
+              href="/dashboard/demo-guide"
+              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 ${
+                checkActive("/dashboard/demo-guide")
+                  ? "bg-brand/15 text-brand backdrop-blur-xl"
+                  : "text-text-secondary hover:text-text-primary hover:bg-white/5 hover:backdrop-blur-xl"
+              }`}
+            >
+              <Sparkles className="h-4 w-4" />
+              Demo Guide
+            </Link>
+          )}
         </div>
       </nav>
     </aside>

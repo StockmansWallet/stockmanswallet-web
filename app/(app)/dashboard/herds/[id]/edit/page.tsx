@@ -5,23 +5,55 @@ import { HerdForm } from "@/components/app/herd-form";
 import { MusterRecordsSection } from "@/components/app/muster-records-section";
 import { HealthRecordsSection } from "@/components/app/health-records-section";
 import { updateHerd } from "../../actions";
+import { DEMO_LOCAL_ID_PREFIX } from "@/lib/demo-overlay";
+import { LocalHerdEditView } from "./local-herd-edit";
 
 export const metadata = {
   title: "Edit Herd",
 };
 
-export default async function EditHerdPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function EditHerdPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: herd }, { data: properties }, { data: musterRecords }, { data: healthRecords }, { data: ownerRows }] = await Promise.all([
+  // Demo sandbox: local herds are edited entirely in the browser.
+  if (id.startsWith(DEMO_LOCAL_ID_PREFIX)) {
+    const [{ data: properties }, { data: ownerRows }] = await Promise.all([
+      supabase
+        .from("properties")
+        .select("id, property_name")
+        .eq("user_id", user!.id)
+        .eq("is_deleted", false)
+        .order("property_name"),
+      supabase
+        .from("herds")
+        .select("livestock_owner")
+        .eq("user_id", user!.id)
+        .eq("is_deleted", false)
+        .not("livestock_owner", "is", null),
+    ]);
+    const existingOwners = [
+      ...new Set(
+        (ownerRows ?? [])
+          .map((r: { livestock_owner: string | null }) => (r.livestock_owner ?? "").trim())
+          .filter((s: string) => s.length > 0)
+      ),
+    ].sort((a, b) => a.localeCompare(b));
+    return (
+      <LocalHerdEditView id={id} properties={properties ?? []} existingOwners={existingOwners} />
+    );
+  }
+
+  const [
+    { data: herd },
+    { data: properties },
+    { data: musterRecords },
+    { data: healthRecords },
+    { data: ownerRows },
+  ] = await Promise.all([
     supabase
       .from("herds")
       .select("*")
@@ -72,10 +104,7 @@ export default async function EditHerdPage({
 
   return (
     <div className="max-w-4xl pb-24">
-      <PageHeader
-        title={`Edit: ${herd.name}`}
-        subtitle={[herd.species, herd.breed].join(" · ")}
-      />
+      <PageHeader title={`Edit: ${herd.name}`} subtitle={[herd.species, herd.breed].join(" · ")} />
       <HerdForm
         herd={herd}
         properties={properties ?? []}
