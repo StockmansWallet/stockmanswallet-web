@@ -1,35 +1,14 @@
-import type { Metadata } from 'next'
-import Image from 'next/image'
-import { VoiceBriefNav } from './voice-brief-nav'
-import { ScriptNav } from './script-nav'
+import type { Metadata } from "next";
+import Image from "next/image";
+import { VoiceBriefNav } from "./voice-brief-nav";
+import { ScriptNav } from "./script-nav";
 
 export const metadata: Metadata = {
   title: "Voice Artist Brief | Stockman's Wallet",
   description:
-    'Voice over artist casting brief for Brangus, the AI stock agent character in Stockman\'s Wallet.',
+    "Voice over artist casting brief for Brangus, the AI stock agent character in Stockman's Wallet.",
   robots: { index: false, follow: false },
-}
-
-/* ------------------------------------------------------------------ */
-/*  Image placeholder                                                  */
-/* ------------------------------------------------------------------ */
-function ImagePlaceholder({
-  description,
-  aspect = 'wide',
-}: {
-  description: string
-  aspect?: 'landscape' | 'wide'
-}) {
-  return (
-    <div
-      className={`${aspect === 'wide' ? 'aspect-[21/9]' : 'aspect-[16/9]'} flex items-center justify-center rounded-2xl border border-dashed border-brand/20 bg-brand/[0.03] p-8`}
-    >
-      <p className="max-w-md text-center text-sm leading-relaxed text-brand/50">
-        {description}
-      </p>
-    </div>
-  )
-}
+};
 
 /* ------------------------------------------------------------------ */
 /*  Sample script                                                      */
@@ -42,12 +21,12 @@ function SampleScript({
   purpose,
   script,
 }: {
-  number: number
-  title: string
-  duration: string
-  register: string
-  purpose: string
-  script: string
+  number: number;
+  title: string;
+  duration: string;
+  register: string;
+  purpose: string;
+  script: string;
 }) {
   return (
     <div
@@ -56,32 +35,29 @@ function SampleScript({
     >
       {/* Header */}
       <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand/15 text-xs font-bold tabular-nums text-brand">
+        <span className="bg-brand/15 text-brand flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold tabular-nums">
           {number}
         </span>
         <h4 className="font-serif text-lg font-semibold text-white">{title}</h4>
         <div className="ml-auto flex items-center gap-2">
-          <span className="rounded-full border border-white/[0.06] px-2.5 py-0.5 text-[11px] uppercase tracking-wider text-text-muted">
+          <span className="text-text-muted rounded-full border border-white/[0.06] px-2.5 py-0.5 text-[11px] tracking-wider uppercase">
             {register}
           </span>
-          <span className="text-sm tabular-nums text-text-muted">{duration}</span>
+          <span className="text-text-muted text-sm tabular-nums">{duration}</span>
         </div>
       </div>
       {/* Purpose */}
-      <p className="mb-4 pl-10 text-sm text-text-muted">{purpose}</p>
+      <p className="text-text-muted mb-4 pl-10 text-sm">{purpose}</p>
       {/* Script body */}
       <div className="ml-3 border-l-2 border-white/[0.06] pl-6">
-        {script.split('\n\n').map((paragraph, i) => (
-          <p
-            key={i}
-            className="mb-3 text-[15px] leading-[1.85] text-text-secondary last:mb-0"
-          >
+        {script.split("\n\n").map((paragraph, i) => (
+          <p key={i} className="text-text-secondary mb-3 text-[15px] leading-[1.85] last:mb-0">
             {paragraph}
           </p>
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -96,36 +72,37 @@ export default function BrangusVoiceBriefPage() {
           HERO
           Cinematic first impression. Image + headline + single CTA.
           ───────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pb-16 pt-24 lg:pb-24 lg:pt-32">
+      <section className="relative overflow-hidden pt-24 pb-16 lg:pt-32 lg:pb-24">
         {/* Background glow */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute left-1/2 top-1/3 h-[900px] w-[900px] -translate-x-[55%] -translate-y-[35%] rounded-full bg-brand/[0.04] blur-[140px]" />
+          <div className="bg-brand/[0.04] absolute top-1/3 left-1/2 h-[900px] w-[900px] -translate-x-[55%] -translate-y-[35%] rounded-full blur-[140px]" />
         </div>
 
         <div className="relative mx-auto max-w-5xl px-6 lg:px-8">
           <div className="flex flex-col items-center gap-10 lg:flex-row lg:items-end lg:gap-20">
             {/* Copy */}
             <div className="order-2 max-w-lg text-center lg:order-1 lg:pb-8 lg:text-left">
-
-              <p className="mb-3 text-xs font-medium uppercase tracking-[0.25em] text-brand">
+              <p className="text-brand mb-3 text-xs font-medium tracking-[0.25em] uppercase">
                 Voice Artist Casting Brief
               </p>
               <h1 className="mb-5 font-serif text-5xl font-semibold tracking-tight text-white sm:text-6xl lg:text-7xl">
                 Meet Brangus.
               </h1>
-              <p className="text-lg leading-relaxed text-text-secondary">
-                We are looking for a voice to bring him to life. Marketing videos, social media, how-to content, TV spots. This is an ongoing role. The right voice becomes the character.
+              <p className="text-text-secondary text-lg leading-relaxed">
+                We are looking for a voice to bring him to life. Marketing videos, social media,
+                how-to content, TV spots. This is an ongoing role. The right voice becomes the
+                character.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center lg:justify-start">
                 <a
                   href="#submit"
-                  className="inline-flex cursor-pointer items-center justify-center rounded-full bg-brand px-7 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-light"
+                  className="bg-brand hover:bg-brand-light inline-flex cursor-pointer items-center justify-center rounded-full px-7 py-3 text-sm font-semibold text-white transition-colors"
                 >
                   Submit an Audition
                 </a>
                 <a
                   href="#scripts"
-                  className="inline-flex cursor-pointer items-center justify-center rounded-full border border-white/10 px-7 py-3 text-sm font-medium text-text-secondary transition-colors hover:border-white/20 hover:text-white"
+                  className="text-text-secondary inline-flex cursor-pointer items-center justify-center rounded-full border border-white/10 px-7 py-3 text-sm font-medium transition-colors hover:border-white/20 hover:text-white"
                 >
                   Read the Scripts
                 </a>
@@ -134,7 +111,7 @@ export default function BrangusVoiceBriefPage() {
 
             {/* Character image */}
             <div className="relative order-1 w-56 shrink-0 sm:w-72 lg:order-2 lg:w-[340px]">
-              <div className="absolute -inset-10 rounded-3xl bg-brand/[0.06] blur-3xl" />
+              <div className="bg-brand/[0.06] absolute -inset-10 rounded-3xl blur-3xl" />
               <Image
                 src="/images/brangus-post-dirt.webp"
                 alt="Brangus, an anthropomorphised Brangus Bull in a blue work shirt and jeans, leaning on a fence post"
@@ -155,12 +132,12 @@ export default function BrangusVoiceBriefPage() {
       <div className="border-y border-white/[0.06] bg-white/[0.015]">
         <div className="mx-auto flex max-w-3xl flex-col items-center justify-center gap-6 px-6 py-5 sm:flex-row sm:gap-12 lg:gap-16">
           {[
-            { label: 'Species', value: 'Brangus Bull' },
-            { label: 'Experience', value: '30 years in the yards' },
-            { label: 'Personality', value: 'Larrikin. Sharp. Genuine.' },
+            { label: "Species", value: "Brangus Bull" },
+            { label: "Experience", value: "30 years in the yards" },
+            { label: "Personality", value: "Larrikin. Sharp. Genuine." },
           ].map((item) => (
             <div key={item.label} className="text-center">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-text-muted">{item.label}</p>
+              <p className="text-text-muted text-[10px] tracking-[0.2em] uppercase">{item.label}</p>
               <p className="mt-0.5 text-sm font-medium text-white">{item.value}</p>
             </div>
           ))}
@@ -173,35 +150,34 @@ export default function BrangusVoiceBriefPage() {
           ───────────────────────────────────────────────────────────── */}
       <section id="character" className="scroll-mt-20 py-20">
         <div className="mx-auto max-w-2xl px-6 lg:px-8">
-          <h2 className="mb-10 text-xs font-medium uppercase tracking-[0.25em] text-brand">
+          <h2 className="text-brand mb-10 text-xs font-medium tracking-[0.25em] uppercase">
             The Character
           </h2>
 
-          <p className="mb-6 font-serif text-[26px] font-medium leading-[1.45] text-white sm:text-[28px]">
-            Brangus is a 30-year veteran stock agent across Queensland and New South Wales. He knows every saleyard from Roma to Wagga.
+          <p className="mb-6 font-serif text-[26px] leading-[1.45] font-medium text-white sm:text-[28px]">
+            Brangus is a 30-year veteran stock agent across Queensland and New South Wales. He knows
+            every saleyard from Roma to Wagga.
           </p>
 
-          <p className="text-[17px] leading-[1.8] text-text-secondary">
-            He is a larrikin with a dry wit, but underneath the humour he genuinely cares about farmers, their families, and their livelihoods. He tells it straight. Never sugarcoats. He is a mate first, an advisor second.
+          <p className="text-text-secondary text-[17px] leading-[1.8]">
+            He is a larrikin with a dry wit, but underneath the humour he genuinely cares about
+            farmers, their families, and their livelihoods. He tells it straight. Never sugarcoats.
+            He is a mate first, an advisor second.
           </p>
         </div>
 
         {/* Pull-quote - wider, bolder */}
         <div className="mx-auto mt-16 max-w-3xl px-6 lg:px-8">
           <blockquote className="relative rounded-2xl border border-white/[0.04] bg-white/[0.02] px-8 py-10 sm:px-12 sm:py-12">
-            <span className="absolute -top-4 left-8 font-serif text-6xl leading-none text-brand/30 sm:left-12">&ldquo;</span>
+            <span className="text-brand/30 absolute -top-4 left-8 font-serif text-6xl leading-none sm:left-12">
+              &ldquo;
+            </span>
             <p className="font-serif text-xl leading-[1.6] text-white sm:text-2xl">
-              Think: the sharpest bloke at the Roma saleyards Christmas party. The one who has the whole pub laughing, then gives you dead-serious advice about your herd that saves you ten grand.
+              Think: the sharpest bloke at the Roma saleyards Christmas party. The one who has the
+              whole pub laughing, then gives you dead-serious advice about your herd that saves you
+              ten grand.
             </p>
           </blockquote>
-        </div>
-
-        {/* IMAGE: Brangus at the pub or saleyard */}
-        <div className="mx-auto mt-16 max-w-3xl px-6 lg:px-8">
-          <ImagePlaceholder
-            description="Brangus laughing mid-yarn at a country pub or leaning on the saleyard rails with a Great Northern in hand. Full larrikin energy. Warm, candid, the bloke everyone gravitates to. The artist should feel the humour and the warmth."
-            aspect="wide"
-          />
         </div>
       </section>
 
@@ -212,11 +188,11 @@ export default function BrangusVoiceBriefPage() {
           ───────────────────────────────────────────────────────────── */}
       <section id="voice" className="scroll-mt-20 bg-white/[0.015] py-20">
         <div className="mx-auto max-w-2xl px-6 lg:px-8">
-          <h2 className="mb-10 text-xs font-medium uppercase tracking-[0.25em] text-brand">
+          <h2 className="text-brand mb-10 text-xs font-medium tracking-[0.25em] uppercase">
             The Voice
           </h2>
 
-          <p className="mb-12 font-serif text-[26px] font-medium leading-[1.45] text-white sm:text-[28px]">
+          <p className="mb-12 font-serif text-[26px] leading-[1.45] font-medium text-white sm:text-[28px]">
             Brangus is a big, solid bull. You should feel his size through the sound alone.
           </p>
 
@@ -224,34 +200,43 @@ export default function BrangusVoiceBriefPage() {
           <div className="mb-14 space-y-8">
             {[
               {
-                quality: 'Deep and resonant',
-                detail: 'Low register with chest voice and natural sub-bass warmth. The voice has weight, body, substance.',
+                quality: "Deep and resonant",
+                detail:
+                  "Low register with chest voice and natural sub-bass warmth. The voice has weight, body, substance.",
               },
               {
-                quality: 'Weathered but not rough',
-                detail: 'Texture and grain from decades of outdoor work, dust, sun, and early mornings. Not harsh or scratchy. Smooth and rough at the same time. The voice equivalent of well-worn leather.',
+                quality: "Weathered but not rough",
+                detail:
+                  "Texture and grain from decades of outdoor work, dust, sun, and early mornings. Not harsh or scratchy. Smooth and rough at the same time. The voice equivalent of well-worn leather.",
               },
               {
-                quality: 'Strong yet reassuring',
-                detail: 'Could command a room if needed, but his default is calm, steady, approachable. Strength in the foundation, not the volume. A firm handshake that is also warm.',
+                quality: "Strong yet reassuring",
+                detail:
+                  "Could command a room if needed, but his default is calm, steady, approachable. Strength in the foundation, not the volume. A firm handshake that is also warm.",
               },
             ].map((item) => (
-              <div key={item.quality} className="border-l-2 border-brand/30 pl-6">
-                <p className="mb-1.5 font-serif text-[17px] font-semibold text-white">{item.quality}</p>
-                <p className="text-[15px] leading-[1.8] text-text-secondary">{item.detail}</p>
+              <div key={item.quality} className="border-brand/30 border-l-2 pl-6">
+                <p className="mb-1.5 font-serif text-[17px] font-semibold text-white">
+                  {item.quality}
+                </p>
+                <p className="text-text-secondary text-[15px] leading-[1.8]">{item.detail}</p>
               </div>
             ))}
           </div>
 
-          <p className="mb-16 rounded-xl border border-white/[0.06] px-5 py-4 text-sm italic leading-relaxed text-text-muted">
-            Reference (territory, not imitation): Sam Elliott&apos;s warmth and gravity, but Australian, rural, less cinematic. The biggest bloke at the saleyard who somehow has the gentlest way of explaining things.
+          <p className="text-text-muted mb-16 rounded-xl border border-white/[0.06] px-5 py-4 text-sm leading-relaxed italic">
+            Reference (territory, not imitation): Sam Elliott&apos;s warmth and gravity, but
+            Australian, rural, less cinematic. The biggest bloke at the saleyard who somehow has the
+            gentlest way of explaining things.
           </p>
 
           {/* Accent + Delivery */}
           <div className="mb-16 grid gap-10 sm:grid-cols-2">
             <div>
-              <h3 className="mb-4 font-serif text-sm font-semibold uppercase tracking-wider text-white">Accent</h3>
-              <ul className="space-y-2.5 text-[15px] leading-relaxed text-text-secondary">
+              <h3 className="mb-4 font-serif text-sm font-semibold tracking-wider text-white uppercase">
+                Accent
+              </h3>
+              <ul className="text-text-secondary space-y-2.5 text-[15px] leading-relaxed">
                 <li>Rural/regional Queensland</li>
                 <li>North QLD ideal, broad rural QLD works</li>
                 <li>Natural and lived-in, not performed</li>
@@ -259,8 +244,10 @@ export default function BrangusVoiceBriefPage() {
               </ul>
             </div>
             <div>
-              <h3 className="mb-4 font-serif text-sm font-semibold uppercase tracking-wider text-white">Delivery</h3>
-              <ul className="space-y-2.5 text-[15px] leading-relaxed text-text-secondary">
+              <h3 className="mb-4 font-serif text-sm font-semibold tracking-wider text-white uppercase">
+                Delivery
+              </h3>
+              <ul className="text-text-secondary space-y-2.5 text-[15px] leading-relaxed">
                 <li>Conversational and relaxed</li>
                 <li>Confident but not cocky</li>
                 <li>Dry wit, deadpan humour</li>
@@ -271,57 +258,91 @@ export default function BrangusVoiceBriefPage() {
           </div>
 
           {/* Vocal Range */}
-          <h3 className="mb-5 font-serif text-sm font-semibold uppercase tracking-wider text-white">
+          <h3 className="mb-5 font-serif text-sm font-semibold tracking-wider text-white uppercase">
             Vocal Range
           </h3>
           <div className="mb-14 divide-y divide-white/[0.04] rounded-xl border border-white/[0.04] bg-white/[0.02]">
             {[
-              ['Default', 'Low-to-mid range, warm, grounded, natural chest resonance.'],
-              ['Excited', 'Lifts slightly, faster pace. "Tell you what, those numbers are looking sharp."'],
-              ['Serious', 'Drops, slows, measured. "Look, I\'m not going to dress this up."'],
-              ['Banter', 'Deadpan. Comedy from what he says, not voice changes.'],
-              ['Encouraging', 'Warm, genuine. A mate saying "good on ya" and meaning it.'],
+              ["Default", "Low-to-mid range, warm, grounded, natural chest resonance."],
+              [
+                "Excited",
+                'Lifts slightly, faster pace. "Tell you what, those numbers are looking sharp."',
+              ],
+              ["Serious", 'Drops, slows, measured. "Look, I\'m not going to dress this up."'],
+              ["Banter", "Deadpan. Comedy from what he says, not voice changes."],
+              ["Encouraging", 'Warm, genuine. A mate saying "good on ya" and meaning it.'],
             ].map(([mood, desc]) => (
               <div key={mood} className="flex gap-5 px-5 py-3.5">
-                <span className="w-24 shrink-0 text-sm font-medium text-brand">{mood}</span>
-                <p className="text-sm leading-relaxed text-text-secondary">{desc}</p>
+                <span className="text-brand w-24 shrink-0 text-sm font-medium">{mood}</span>
+                <p className="text-text-secondary text-sm leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
 
           {/* Language - how he talks */}
-          <h3 className="mb-5 font-serif text-sm font-semibold uppercase tracking-wider text-white">
+          <h3 className="mb-5 font-serif text-sm font-semibold tracking-wider text-white uppercase">
             Language
           </h3>
-          <p className="mb-6 text-[15px] leading-[1.8] text-text-secondary">
-            Natural Australian English with rural and livestock vocabulary. The slang should feel organic, not forced.
+          <p className="text-text-secondary mb-6 text-[15px] leading-[1.8]">
+            Natural Australian English with rural and livestock vocabulary. The slang should feel
+            organic, not forced.
           </p>
           <div className="mb-14 grid gap-6 sm:grid-cols-2">
             {[
               {
-                label: 'Openers',
-                items: ['"Here\'s the go"', '"Tell you what"', '"Look"', '"Right-o"', '"Yeah"', '"Straight up"'],
+                label: "Openers",
+                items: [
+                  '"Here\'s the go"',
+                  '"Tell you what"',
+                  '"Look"',
+                  '"Right-o"',
+                  '"Yeah"',
+                  '"Straight up"',
+                ],
               },
               {
-                label: 'Natural slang',
-                items: ['"reckon"', '"mate"', '"no worries"', '"fair dinkum"', '"too easy"', '"dead set"', '"sweet as"', '"good on ya"'],
+                label: "Natural slang",
+                items: [
+                  '"reckon"',
+                  '"mate"',
+                  '"no worries"',
+                  '"fair dinkum"',
+                  '"too easy"',
+                  '"dead set"',
+                  '"sweet as"',
+                  '"good on ya"',
+                ],
               },
               {
-                label: 'Livestock',
-                items: ['"on the hoof"', '"turn them off"', '"top end of the market"', '"solid line"', '"tidy little lot"', '"in good nick"'],
+                label: "Livestock",
+                items: [
+                  '"on the hoof"',
+                  '"turn them off"',
+                  '"top end of the market"',
+                  '"solid line"',
+                  '"tidy little lot"',
+                  '"in good nick"',
+                ],
               },
               {
-                label: 'Reactions',
-                items: ['"Not bad at all"', '"That\'s a tidy return"', '"Bit skinny"', '"Better than a poke in the eye"'],
+                label: "Reactions",
+                items: [
+                  '"Not bad at all"',
+                  '"That\'s a tidy return"',
+                  '"Bit skinny"',
+                  '"Better than a poke in the eye"',
+                ],
               },
             ].map((group) => (
               <div key={group.label}>
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-brand">{group.label}</p>
+                <p className="text-brand mb-2 text-[11px] font-semibold tracking-[0.15em] uppercase">
+                  {group.label}
+                </p>
                 <div className="flex flex-wrap gap-1.5">
                   {group.items.map((item) => (
                     <span
                       key={item}
-                      className="rounded-md bg-white/[0.04] px-2.5 py-1 text-sm text-text-secondary"
+                      className="text-text-secondary rounded-md bg-white/[0.04] px-2.5 py-1 text-sm"
                     >
                       {item}
                     </span>
@@ -332,11 +353,11 @@ export default function BrangusVoiceBriefPage() {
           </div>
 
           {/* What he does NOT sound like */}
-          <div className="rounded-xl border border-error/10 bg-error/[0.03] px-5 py-4">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-error/70">
+          <div className="border-error/10 bg-error/[0.03] rounded-xl border px-5 py-4">
+            <p className="text-error/70 mb-3 text-xs font-semibold tracking-wider uppercase">
               What he does not sound like
             </p>
-            <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-text-muted">
+            <div className="text-text-muted flex flex-wrap gap-x-4 gap-y-1.5 text-sm">
               <span>City newsreader</span>
               <span className="text-white/10">|</span>
               <span>Over-the-top ocker</span>
@@ -349,14 +370,6 @@ export default function BrangusVoiceBriefPage() {
             </div>
           </div>
         </div>
-
-        {/* IMAGE: Brangus looking thoughtful */}
-        <div className="mx-auto mt-16 max-w-3xl px-6 lg:px-8">
-          <ImagePlaceholder
-            description="Brangus looking out over a dry paddock at golden hour, leaning on a fence rail with a furrowed brow. The measured, steady side of the character. Not grim, just a bloke thinking something through. Warm light, dust in the air."
-            aspect="wide"
-          />
-        </div>
       </section>
 
       {/* ─────────────────────────────────────────────────────────────
@@ -366,13 +379,14 @@ export default function BrangusVoiceBriefPage() {
           ───────────────────────────────────────────────────────────── */}
       <section id="scripts" className="scroll-mt-20 py-20">
         <div className="mx-auto max-w-2xl px-6 lg:px-8">
-          <h2 className="mb-4 text-xs font-medium uppercase tracking-[0.25em] text-brand">
+          <h2 className="text-brand mb-4 text-xs font-medium tracking-[0.25em] uppercase">
             Sample Scripts
           </h2>
           <p className="mb-4 font-serif text-xl leading-[1.6] text-white sm:text-[22px]">
-            Eight short scripts, each testing a different register. Read all of them, then <strong>pick three that you connect with</strong> and record those.
+            Eight short scripts, each testing a different register. Read all of them, then{" "}
+            <strong>pick three that you connect with</strong> and record those.
           </p>
-          <p className="mb-10 text-sm text-text-muted">
+          <p className="text-text-muted mb-10 text-sm">
             Which three you choose tells us something too.
           </p>
 
@@ -424,14 +438,6 @@ export default function BrangusVoiceBriefPage() {
               script={`You reckon you want to know about me? Not much to tell. Just a bloke who's spent too long at saleyards and not enough time at the beach. My mate Lenny reckons I should take a holiday. I told him I'd think about it. That was three years ago.`}
             />
 
-            {/* IMAGE: Brangus explaining something */}
-            <div className="!my-8">
-              <ImagePlaceholder
-                description="Brangus in a working pose. Pointing at a whiteboard, gesturing with his hands, or showing someone something on a clipboard at the yards. The 'let me walk you through this' energy. Instructional, patient, authoritative but approachable."
-                aspect="landscape"
-              />
-            </div>
-
             <SampleScript
               number={6}
               title="Social Media Hook"
@@ -469,7 +475,7 @@ export default function BrangusVoiceBriefPage() {
           ───────────────────────────────────────────────────────────── */}
       <section id="audition" className="scroll-mt-20 bg-white/[0.015] py-20">
         <div className="mx-auto max-w-2xl px-6 lg:px-8">
-          <h2 className="mb-4 text-xs font-medium uppercase tracking-[0.25em] text-brand">
+          <h2 className="text-brand mb-4 text-xs font-medium tracking-[0.25em] uppercase">
             How to Nail It
           </h2>
           <p className="mb-12 font-serif text-xl leading-[1.6] text-white sm:text-[22px]">
@@ -479,38 +485,38 @@ export default function BrangusVoiceBriefPage() {
           <div className="space-y-8">
             {[
               {
-                num: '01',
-                bold: 'Don\'t perform him.',
-                rest: 'Just be him. The less it sounds like acting, the better. We want to believe this bloke actually exists.',
+                num: "01",
+                bold: "Don't perform him.",
+                rest: "Just be him. The less it sounds like acting, the better. We want to believe this bloke actually exists.",
               },
               {
-                num: '02',
-                bold: 'Make it yours.',
-                rest: 'Adjust wording if something doesn\'t sit naturally. We want your version of this bloke, not a robotic read.',
+                num: "02",
+                bold: "Make it yours.",
+                rest: "Adjust wording if something doesn't sit naturally. We want your version of this bloke, not a robotic read.",
               },
               {
-                num: '03',
-                bold: 'Lean into your background.',
-                rest: 'Rural or regional experience is gold. If you grew up around cattle, saleyards, or small towns, that is your edge. Authenticity is everything.',
+                num: "03",
+                bold: "Lean into your background.",
+                rest: "Rural or regional experience is gold. If you grew up around cattle, saleyards, or small towns, that is your edge. Authenticity is everything.",
               },
               {
-                num: '04',
-                bold: 'Think long-term.',
-                rest: 'This is not a one-off gig. We want a voice you\'d hear every day and never get sick of. Sustainable, not showy.',
+                num: "04",
+                bold: "Think long-term.",
+                rest: "This is not a one-off gig. We want a voice you'd hear every day and never get sick of. Sustainable, not showy.",
               },
               {
-                num: '05',
-                bold: 'Talk to one person.',
-                rest: 'Conversational, not a booth voice. Like you\'re talking to a mate over a beer, not an audience at a conference.',
+                num: "05",
+                bold: "Talk to one person.",
+                rest: "Conversational, not a booth voice. Like you're talking to a mate over a beer, not an audience at a conference.",
               },
             ].map((note) => (
               <div key={note.num} className="flex gap-5">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-brand/20 font-serif text-sm font-medium tabular-nums text-brand">
+                <span className="border-brand/20 text-brand flex h-9 w-9 shrink-0 items-center justify-center rounded-full border font-serif text-sm font-medium tabular-nums">
                   {note.num}
                 </span>
                 <div>
                   <p className="font-serif text-[17px] font-semibold text-white">{note.bold}</p>
-                  <p className="mt-1 text-[15px] leading-[1.75] text-text-secondary">{note.rest}</p>
+                  <p className="text-text-secondary mt-1 text-[15px] leading-[1.75]">{note.rest}</p>
                 </div>
               </div>
             ))}
@@ -525,7 +531,7 @@ export default function BrangusVoiceBriefPage() {
           ───────────────────────────────────────────────────────────── */}
       <section id="submit" className="scroll-mt-20 py-20">
         <div className="mx-auto max-w-2xl px-6 lg:px-8">
-          <h2 className="mb-4 text-xs font-medium uppercase tracking-[0.25em] text-brand">
+          <h2 className="text-brand mb-4 text-xs font-medium tracking-[0.25em] uppercase">
             How to Submit
           </h2>
           <p className="mb-12 font-serif text-xl leading-[1.6] text-white sm:text-[22px]">
@@ -535,24 +541,31 @@ export default function BrangusVoiceBriefPage() {
           {/* The creative work */}
           <div className="mb-6 space-y-4">
             <div className="flex gap-5">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/15 text-sm font-semibold tabular-nums text-brand">
+              <span className="bg-brand/15 text-brand flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold tabular-nums">
                 1
               </span>
               <div>
-                <p className="font-serif text-[17px] font-semibold text-white">Record three scripts</p>
-                <p className="mt-1 text-[15px] leading-[1.75] text-text-secondary">
-                  Pick three from the eight above that feel right to you. Which three you choose tells us something too.
+                <p className="font-serif text-[17px] font-semibold text-white">
+                  Record three scripts
+                </p>
+                <p className="text-text-secondary mt-1 text-[15px] leading-[1.75]">
+                  Pick three from the eight above that feel right to you. Which three you choose
+                  tells us something too.
                 </p>
               </div>
             </div>
             <div className="flex gap-5">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/15 text-sm font-semibold tabular-nums text-brand">
+              <span className="bg-brand/15 text-brand flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold tabular-nums">
                 2
               </span>
               <div>
-                <p className="font-serif text-[17px] font-semibold text-white">Freestyle <span className="font-sans text-sm font-normal text-text-muted">(optional)</span></p>
-                <p className="mt-1 text-[15px] leading-[1.75] text-text-secondary">
-                  30 seconds ad-libbing as Brangus. Whatever comes naturally. This is where we hear you, not the script.
+                <p className="font-serif text-[17px] font-semibold text-white">
+                  Freestyle{" "}
+                  <span className="text-text-muted font-sans text-sm font-normal">(optional)</span>
+                </p>
+                <p className="text-text-secondary mt-1 text-[15px] leading-[1.75]">
+                  30 seconds ad-libbing as Brangus. Whatever comes naturally. This is where we hear
+                  you, not the script.
                 </p>
               </div>
             </div>
@@ -561,19 +574,21 @@ export default function BrangusVoiceBriefPage() {
           {/* The logistics - same number style, compact descriptions */}
           <div className="space-y-3">
             <div className="flex gap-5">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/15 text-sm font-semibold tabular-nums text-brand">
+              <span className="bg-brand/15 text-brand flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold tabular-nums">
                 3
               </span>
               <div className="flex items-center">
-                <p className="text-[15px] text-text-secondary">Your rate card and availability</p>
+                <p className="text-text-secondary text-[15px]">Your rate card and availability</p>
               </div>
             </div>
             <div className="flex gap-5">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/15 text-sm font-semibold tabular-nums text-brand">
+              <span className="bg-brand/15 text-brand flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold tabular-nums">
                 4
               </span>
               <div className="flex items-center">
-                <p className="text-[15px] text-text-secondary">Any relevant rural or regional voice work</p>
+                <p className="text-text-secondary text-[15px]">
+                  Any relevant rural or regional voice work
+                </p>
               </div>
             </div>
           </div>
@@ -581,12 +596,12 @@ export default function BrangusVoiceBriefPage() {
           {/* CTA */}
           <a
             href="mailto:brangus@stockmanswallet.com.au?subject=Brangus%20VO%20Audition"
-            className="mt-12 block cursor-pointer rounded-2xl border border-brand/30 bg-brand/[0.06] px-8 py-6 text-center transition-all hover:border-brand/50 hover:bg-brand/[0.1]"
+            className="border-brand/30 bg-brand/[0.06] hover:border-brand/50 hover:bg-brand/[0.1] mt-12 block cursor-pointer rounded-2xl border px-8 py-6 text-center transition-all"
           >
-            <p className="font-serif text-base font-semibold text-brand sm:text-2xl">
+            <p className="text-brand font-serif text-base font-semibold sm:text-2xl">
               brangus@stockmanswallet.com.au
             </p>
-            <p className="mt-2 text-sm text-text-muted">
+            <p className="text-text-muted mt-2 text-sm">
               Subject: Brangus VO Audition - [Your Name]
             </p>
           </a>
@@ -594,19 +609,24 @@ export default function BrangusVoiceBriefPage() {
           {/* Usage scope */}
           <div className="mt-12 grid gap-x-16 gap-y-4 sm:grid-cols-2">
             <div>
-              <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted">Primary use</h3>
-              <p className="text-sm leading-relaxed text-text-secondary">
-                Social media (Instagram, TikTok, YouTube), marketing videos, how-to content, App Store previews
+              <h3 className="text-text-muted mb-2 text-[11px] font-semibold tracking-[0.15em] uppercase">
+                Primary use
+              </h3>
+              <p className="text-text-secondary text-sm leading-relaxed">
+                Social media (Instagram, TikTok, YouTube), marketing videos, how-to content, App
+                Store previews
               </p>
             </div>
             <div>
-              <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted">Secondary use</h3>
-              <p className="text-sm leading-relaxed text-text-secondary">
+              <h3 className="text-text-muted mb-2 text-[11px] font-semibold tracking-[0.15em] uppercase">
+                Secondary use
+              </h3>
+              <p className="text-text-secondary text-sm leading-relaxed">
                 TV ads (15s and 30s spots), trade shows and events, podcast content
               </p>
             </div>
           </div>
-          <p className="mt-4 text-xs text-text-muted">
+          <p className="text-text-muted mt-4 text-xs">
             Mostly short-form social (15-60 seconds). Instructional content may run 2-5 minutes.
           </p>
         </div>
@@ -620,14 +640,18 @@ export default function BrangusVoiceBriefPage() {
           <p className="font-serif text-lg text-white">
             The right voice brings him to life beyond the screen.
           </p>
-          <p className="mt-3 text-sm leading-relaxed text-text-muted">
-            Stockman&apos;s Wallet helps Australian livestock producers track and value their herds using live market data. Brangus is the heart of the app.
+          <p className="text-text-muted mt-3 text-sm leading-relaxed">
+            Stockman&apos;s Wallet helps Australian livestock producers track and value their herds
+            using live market data. Brangus is the heart of the app.
           </p>
-          <a href="https://stockmanswallet.com.au" className="mt-3 inline-block text-sm text-text-muted transition-colors hover:text-white">
+          <a
+            href="https://stockmanswallet.com.au"
+            className="text-text-muted mt-3 inline-block text-sm transition-colors hover:text-white"
+          >
             stockmanswallet.com.au
           </a>
         </div>
       </footer>
     </main>
-  )
+  );
 }
