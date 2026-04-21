@@ -454,8 +454,16 @@ export function AssetRegisterTemplate({
           </div>
         </section>
 
+        {/* Basis of Report disclaimer */}
+        <div className="mt-6 break-inside-avoid rounded-xl border border-[#8B7355]/25 px-4 py-3">
+          <p className="text-[9px] font-semibold uppercase tracking-widest text-[#6B5B45]">Basis of Report</p>
+          <p className="mt-1 text-[10px] leading-snug text-[#271F16]/70">
+            Values shown are indicative gross market values only and exclude selling costs unless stated otherwise. This report is for general information only and should not be relied on as professional advice.
+          </p>
+        </div>
+
         {/* End-of-report footer (inline, always visible) */}
-        <div className="mt-6 pt-2 text-[7px] text-[#6B5B45]">
+        <div className="mt-3 pt-2 text-[7px] text-[#6B5B45]">
           <div className="flex items-center justify-between">
             <p>Stockman&apos;s Wallet &nbsp;|&nbsp; Intelligent Livestock Valuation &nbsp;|&nbsp; www.stockmanswallet.com.au</p>
             <p>Generated {fmtDate(new Date().toISOString())}</p>

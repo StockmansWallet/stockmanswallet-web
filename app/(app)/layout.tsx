@@ -81,11 +81,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           style={{
             backgroundImage: [
               // Dark bottom gradient (fades image into page background)
-              "linear-gradient(to bottom, rgba(31,27,24,0) 0%, rgba(31,27,24,0.35) 25%, rgba(31,27,24,0.7) 55%, rgba(31,27,24,1) 90%)",
+              "linear-gradient(to bottom, rgba(20,17,15,0) 0%, rgba(20,17,15,0.35) 25%, rgba(20,17,15,0.7) 55%, rgba(20,17,15,1) 90%)",
               // Soft brand glow in top-left
               "radial-gradient(ellipse 2200px 2200px at -500px -500px, rgba(217,118,47,0.12) 0%, transparent 70%)",
               // Hero image, darkened via stacked black overlay
-              "linear-gradient(rgba(31,27,24,0.78), rgba(31,27,24,0.78)), url('/images/landing-bg.webp')",
+              "linear-gradient(rgba(20,17,15,0.78), rgba(20,17,15,0.78)), url('/images/landing-bg.webp')",
             ].join(","),
             backgroundSize: "100% 100%, 100% 100%, cover, cover",
             backgroundPosition: "center",

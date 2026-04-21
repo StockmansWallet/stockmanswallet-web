@@ -9,9 +9,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         className="bg-background pointer-events-none fixed inset-0 -z-10"
         style={{
           backgroundImage: [
-            "linear-gradient(to bottom, rgba(31,27,24,0) 0%, rgba(31,27,24,0.35) 25%, rgba(31,27,24,0.7) 55%, rgba(31,27,24,1) 90%)",
+            "linear-gradient(to bottom, rgba(20,17,15,0) 0%, rgba(20,17,15,0.35) 25%, rgba(20,17,15,0.7) 55%, rgba(20,17,15,1) 90%)",
             "radial-gradient(ellipse 2200px 2200px at -500px -500px, rgba(217,118,47,0.12) 0%, transparent 70%)",
-            "linear-gradient(rgba(31,27,24,0.78), rgba(31,27,24,0.78)), url('/images/landing-bg.webp')",
+            "linear-gradient(rgba(20,17,15,0.78), rgba(20,17,15,0.78)), url('/images/landing-bg.webp')",
           ].join(","),
           backgroundSize: "100% 100%, 100% 100%, cover, cover",
           backgroundPosition: "center",

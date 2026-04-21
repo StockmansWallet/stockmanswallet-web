@@ -5,7 +5,8 @@
 // overflow. Each group maps to a report type (Asset, Lender, etc.) and
 // exposes PDF, Excel and CSV in a three-column row.
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useSearchParams } from "next/navigation";
 import { ChevronDown, Download, FileSpreadsheet, FileText, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -46,13 +47,40 @@ export function ReportDownloadMenu({ groups, label = "Download" }: ReportDownloa
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const [menuPos, setMenuPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    const updatePos = () => {
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      setMenuPos({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      });
+    };
+    updatePos();
+    window.addEventListener("resize", updatePos);
+    window.addEventListener("scroll", updatePos, true);
+    return () => {
+      window.removeEventListener("resize", updatePos);
+      window.removeEventListener("scroll", updatePos, true);
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
     function onPointer(e: PointerEvent) {
       const target = e.target as Node;
-      if (containerRef.current?.contains(target)) return;
+      if (menuRef.current?.contains(target)) return;
+      if (triggerRef.current?.contains(target)) return;
       setOpen(false);
     }
     function onKey(e: KeyboardEvent) {
@@ -72,7 +100,9 @@ export function ReportDownloadMenu({ groups, label = "Download" }: ReportDownloa
     setError(null);
     try {
       const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) {
         setError("Please sign in again to download.");
         return;
@@ -94,71 +124,82 @@ export function ReportDownloadMenu({ groups, label = "Download" }: ReportDownloa
 
   const visibleGroups = groups.filter((g) => (g.pdf ?? true) || (g.table ?? true));
 
+  const menu =
+    open && mounted ? (
+      <div
+        ref={menuRef}
+        role="menu"
+        aria-label="Download reports"
+        className="fixed z-[60] w-72 overflow-hidden rounded-xl border border-white/[0.08] p-3 shadow-2xl"
+        style={{
+          top: menuPos.top,
+          right: menuPos.right,
+          backgroundColor: "rgba(26, 26, 26, 0.55)",
+          backdropFilter: "blur(28px) saturate(1.6)",
+          WebkitBackdropFilter: "blur(28px) saturate(1.6)",
+        }}
+      >
+        <div className="flex flex-col gap-3">
+          {visibleGroups.map((group) => (
+            <div key={group.reportType} className="flex flex-col">
+              <p className="text-text-muted mb-1.5 px-1 text-[10px] font-semibold tracking-widest uppercase">
+                {group.label}
+              </p>
+              <div className="grid grid-cols-3 gap-1.5">
+                {(group.pdf ?? true) && (
+                  <FormatRow
+                    icon={<FileText className="h-3.5 w-3.5" aria-hidden="true" />}
+                    formatLabel="PDF"
+                    busy={busy === `${group.reportType}:pdf`}
+                    onClick={() => handleDownload(group, "pdf")}
+                  />
+                )}
+                {(group.table ?? true) && (
+                  <>
+                    <FormatRow
+                      icon={<FileSpreadsheet className="h-3.5 w-3.5" aria-hidden="true" />}
+                      formatLabel="Excel"
+                      busy={busy === `${group.reportType}:xlsx`}
+                      onClick={() => handleDownload(group, "xlsx")}
+                    />
+                    <FormatRow
+                      icon={<Download className="h-3.5 w-3.5" aria-hidden="true" />}
+                      formatLabel="CSV"
+                      busy={busy === `${group.reportType}:csv`}
+                      onClick={() => handleDownload(group, "csv")}
+                    />
+                  </>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+        {error && (
+          <p role="alert" className="text-error mt-2 px-1 text-[11px]">
+            {error}
+          </p>
+        )}
+      </div>
+    ) : null;
+
   return (
-    <div ref={containerRef} className="relative">
+    <>
       <button
+        ref={triggerRef}
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="flex shrink-0 items-center gap-1.5 rounded-full bg-warning/15 px-3.5 py-2 text-xs font-semibold text-warning transition-colors hover:bg-warning/25"
+        className="bg-warning/15 text-warning hover:bg-warning/25 flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition-colors"
       >
         <Download className="h-3.5 w-3.5" aria-hidden="true" />
         <span>{label}</span>
-        <ChevronDown className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true" />
+        <ChevronDown
+          className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`}
+          aria-hidden="true"
+        />
       </button>
-
-      {open && (
-        <div
-          role="menu"
-          aria-label="Download reports"
-          className="absolute right-0 top-full z-40 mt-2 w-72 overflow-hidden rounded-xl border border-white/[0.08] p-3 shadow-2xl"
-          style={{
-            backgroundColor: "rgba(26, 26, 26, 0.55)",
-            backdropFilter: "blur(28px) saturate(1.6)",
-            WebkitBackdropFilter: "blur(28px) saturate(1.6)",
-          }}
-        >
-          <div className="flex flex-col gap-3">
-            {visibleGroups.map((group) => (
-              <div key={group.reportType} className="flex flex-col">
-                <p className="mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-widest text-text-muted">
-                  {group.label}
-                </p>
-                <div className="grid grid-cols-3 gap-1.5">
-                  {(group.pdf ?? true) && (
-                    <FormatRow
-                      icon={<FileText className="h-3.5 w-3.5" aria-hidden="true" />}
-                      formatLabel="PDF"
-                      busy={busy === `${group.reportType}:pdf`}
-                      onClick={() => handleDownload(group, "pdf")}
-                    />
-                  )}
-                  {(group.table ?? true) && (
-                    <>
-                      <FormatRow
-                        icon={<FileSpreadsheet className="h-3.5 w-3.5" aria-hidden="true" />}
-                        formatLabel="Excel"
-                        busy={busy === `${group.reportType}:xlsx`}
-                        onClick={() => handleDownload(group, "xlsx")}
-                      />
-                      <FormatRow
-                        icon={<Download className="h-3.5 w-3.5" aria-hidden="true" />}
-                        formatLabel="CSV"
-                        busy={busy === `${group.reportType}:csv`}
-                        onClick={() => handleDownload(group, "csv")}
-                      />
-                    </>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-          {error && (
-            <p role="alert" className="mt-2 px-1 text-[11px] text-error">{error}</p>
-          )}
-        </div>
-      )}
-    </div>
+      {mounted && menu && createPortal(menu, document.body)}
+    </>
   );
 }
 
@@ -178,7 +219,7 @@ function FormatRow({
       role="menuitem"
       onClick={onClick}
       disabled={busy}
-      className="flex items-center justify-center gap-1.5 rounded-lg bg-white/[0.04] px-2.5 py-2 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.08] hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-60"
+      className="text-text-secondary hover:text-text-primary flex items-center justify-center gap-1.5 rounded-lg bg-white/[0.04] px-2.5 py-2 text-xs font-medium transition-colors hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
     >
       {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> : icon}
       <span>{formatLabel}</span>
@@ -189,7 +230,7 @@ function FormatRow({
 async function downloadPdf(
   jwt: string,
   group: ReportDownloadGroup,
-  searchParams: ReadonlyParams,
+  searchParams: ReadonlyParams
 ): Promise<void> {
   const config: Record<string, string> = {};
   for (const key of FORWARD_KEYS) {
@@ -214,7 +255,10 @@ async function downloadPdf(
     const payload = await response.json().catch(() => ({}));
     throw new Error(payload.error ?? `Request failed: ${response.status}`);
   }
-  const { signedUrl, filename } = (await response.json()) as { signedUrl: string; filename: string };
+  const { signedUrl, filename } = (await response.json()) as {
+    signedUrl: string;
+    filename: string;
+  };
   triggerAnchorDownload(signedUrl, filename);
 }
 
@@ -222,7 +266,7 @@ async function downloadTable(
   jwt: string,
   group: ReportDownloadGroup,
   format: "csv" | "xlsx",
-  searchParams: ReadonlyParams,
+  searchParams: ReadonlyParams
 ): Promise<void> {
   const config: Record<string, string> = {};
   for (const key of TABLE_FORWARD_KEYS) {

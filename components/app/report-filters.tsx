@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Calendar, ChevronDown } from "lucide-react";
 import { DatePicker } from "@/components/ui/date-picker";
 import { formatDateAU, todaySydney } from "@/lib/dates";
@@ -97,7 +98,7 @@ export function ReportFilters({ properties, showPropertyFilter = true }: ReportF
     <div className="flex flex-wrap items-center gap-2">
       {/* Date range presets */}
       <div className="flex items-center gap-1 rounded-full bg-white/[0.04] p-0.5">
-        <Calendar className="ml-2 h-3.5 w-3.5 text-text-muted" aria-hidden="true" />
+        <Calendar className="text-text-muted ml-2 h-3.5 w-3.5" aria-hidden="true" />
         {DATE_PRESETS.map((preset) => (
           <button
             key={preset.value}
@@ -200,20 +201,21 @@ function CustomRangeButton({
         aria-expanded={open}
         aria-pressed={active}
         className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-          active
-            ? "bg-warning/20 text-warning"
-            : "text-text-muted hover:text-text-secondary"
+          active ? "bg-warning/20 text-warning" : "text-text-muted hover:text-text-secondary"
         }`}
       >
         <span>{chipLabel}</span>
-        <ChevronDown className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true" />
+        <ChevronDown
+          className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`}
+          aria-hidden="true"
+        />
       </button>
 
       {open && (
         <div
           role="dialog"
           aria-label="Custom date range"
-          className="absolute left-0 top-full z-40 mt-2 w-72 rounded-2xl bg-bg-alt p-4 shadow-2xl ring-1 ring-inset ring-ring-subtle"
+          className="bg-bg-alt ring-ring-subtle absolute top-full left-0 z-40 mt-2 w-72 rounded-2xl p-4 shadow-2xl ring-1 ring-inset"
         >
           <div className="flex flex-col gap-3">
             <DatePicker
@@ -233,14 +235,14 @@ function CustomRangeButton({
           <div className="mt-4 flex items-center justify-end gap-2 border-t border-white/10 pt-3">
             <button
               onClick={() => setOpen(false)}
-              className="rounded-full px-3 py-1.5 text-xs font-medium text-text-muted transition-colors hover:text-text-secondary"
+              className="text-text-muted hover:text-text-secondary rounded-full px-3 py-1.5 text-xs font-medium transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleApply}
               disabled={!canApply}
-              className="rounded-full bg-warning/20 px-4 py-1.5 text-xs font-semibold text-warning transition-colors hover:bg-warning/30 disabled:cursor-not-allowed disabled:opacity-50"
+              className="bg-warning/20 text-warning hover:bg-warning/30 rounded-full px-4 py-1.5 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
             >
               Apply
             </button>
@@ -264,24 +266,75 @@ function PropertyDropdown({
   onToggle: (id: string) => void;
   onClear: () => void;
 }) {
+  const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [menuPos, setMenuPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    const updatePos = () => {
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      setMenuPos({ top: rect.bottom + 4, left: rect.left });
+    };
+    updatePos();
+    window.addEventListener("resize", updatePos);
+    window.addEventListener("scroll", updatePos, true);
+    return () => {
+      window.removeEventListener("resize", updatePos);
+      window.removeEventListener("scroll", updatePos, true);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    function onPointer(e: PointerEvent) {
+      const target = e.target as Node;
+      if (menuRef.current?.contains(target)) return;
+      if (triggerRef.current?.contains(target)) return;
+      setOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("pointerdown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
   const label =
     selected.length === 0
       ? "All Properties"
       : selected.length === 1
-        ? properties.find((p) => p.id === selected[0])?.property_name ?? "1 Property"
+        ? (properties.find((p) => p.id === selected[0])?.property_name ?? "1 Property")
         : `${selected.length} Properties`;
 
-  return (
-    <details className="group">
-      <summary className="flex cursor-pointer list-none items-center gap-1.5 rounded-full bg-white/[0.04] px-4 py-2 text-xs font-medium text-text-secondary transition-colors hover:bg-white/[0.07]">
-        {label}
-        <ChevronDown className="h-3 w-3 text-text-muted transition-transform group-open:rotate-180" />
-      </summary>
-      <div className="absolute z-20 mt-1 w-56 rounded-xl border border-white/10 bg-bg-alt p-1 shadow-lg">
+  const menu =
+    open && mounted ? (
+      <div
+        ref={menuRef}
+        className="fixed z-[60] w-56 overflow-hidden rounded-xl border border-white/[0.08] p-1 shadow-2xl"
+        style={{
+          top: menuPos.top,
+          left: menuPos.left,
+          backgroundColor: "rgba(26, 26, 26, 0.55)",
+          backdropFilter: "blur(28px) saturate(1.6)",
+          WebkitBackdropFilter: "blur(28px) saturate(1.6)",
+        }}
+      >
         {selected.length > 0 && (
           <button
             onClick={onClear}
-            className="w-full rounded-lg px-3 py-1.5 text-left text-xs text-warning hover:bg-white/[0.04]"
+            className="text-warning w-full rounded-lg px-3 py-1.5 text-left text-xs hover:bg-white/[0.04]"
           >
             Clear filter
           </button>
@@ -290,18 +343,22 @@ function PropertyDropdown({
           <button
             key={prop.id}
             onClick={() => onToggle(prop.id)}
-            className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-left text-xs text-text-secondary hover:bg-white/[0.04]"
+            className="text-text-secondary flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-left text-xs hover:bg-white/[0.04]"
           >
             <span
               className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border ${
-                selected.includes(prop.id)
-                  ? "border-warning bg-warning/20"
-                  : "border-white/20"
+                selected.includes(prop.id) ? "border-warning bg-warning/20" : "border-white/20"
               }`}
             >
               {selected.includes(prop.id) && (
-                <svg className="h-2.5 w-2.5 text-warning" viewBox="0 0 12 12" fill="none">
-                  <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <svg className="text-warning h-2.5 w-2.5" viewBox="0 0 12 12" fill="none">
+                  <path
+                    d="M2 6l3 3 5-5"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               )}
             </span>
@@ -309,6 +366,24 @@ function PropertyDropdown({
           </button>
         ))}
       </div>
-    </details>
+    ) : null;
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className="text-text-secondary flex cursor-pointer items-center gap-1.5 rounded-full bg-white/[0.04] px-4 py-2 text-xs font-medium transition-colors hover:bg-white/[0.07]"
+      >
+        {label}
+        <ChevronDown
+          className={`text-text-muted h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      {mounted && menu && createPortal(menu, document.body)}
+    </>
   );
 }

@@ -160,7 +160,7 @@ export function TopBar({
     ) : null;
 
   return (
-    <header className="bg-surface-lowest hidden h-20 shrink-0 items-center justify-between border-b border-white/[0.04] px-8 backdrop-blur-xl lg:flex">
+    <header className="bg-surface-lowest hidden h-20 shrink-0 items-center justify-between px-8 backdrop-blur-xl lg:flex">
       {/* Logo */}
       <Link href="/dashboard" className="flex items-center gap-2.5">
         <Image

@@ -19,7 +19,12 @@ interface AssetRegisterTabsProps {
   selectedPropertyIds: string[];
 }
 
-export function AssetRegisterTabs({ herdData, startDate, endDate, selectedPropertyIds }: AssetRegisterTabsProps) {
+export function AssetRegisterTabs({
+  herdData,
+  startDate,
+  endDate,
+  selectedPropertyIds,
+}: AssetRegisterTabsProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -29,21 +34,27 @@ export function AssetRegisterTabs({ herdData, startDate, endDate, selectedProper
   // visible immediately; Livestock Assets is a reference view behind ?tab=livestock.
   const activeTab: TabId = tabParam === "livestock" ? "livestock" : "movement";
 
-  const setActiveTab = useCallback((tab: TabId) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (tab === "movement") {
-      params.delete("tab");
-    } else {
-      params.set("tab", tab);
-    }
-    const qs = params.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  }, [router, pathname, searchParams]);
+  const setActiveTab = useCallback(
+    (tab: TabId) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (tab === "movement") {
+        params.delete("tab");
+      } else {
+        params.set("tab", tab);
+      }
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [router, pathname, searchParams]
+  );
 
-  const tabs = useMemo<{ id: TabId; label: string }[]>(() => [
-    { id: "movement", label: "Portfolio Movement" },
-    { id: "livestock", label: "Livestock Assets" },
-  ], []);
+  const tabs = useMemo<{ id: TabId; label: string }[]>(
+    () => [
+      { id: "movement", label: "Portfolio Movement" },
+      { id: "livestock", label: "Livestock Assets" },
+    ],
+    []
+  );
 
   // Sliding pill indicator (matches existing Tabs component styling)
   const containerRef = useRef<HTMLDivElement>(null);
@@ -61,7 +72,9 @@ export function AssetRegisterTabs({ herdData, startDate, endDate, selectedProper
     setReady(true);
   }, [activeTab]);
 
-  useEffect(() => { measure(); }, [measure]);
+  useEffect(() => {
+    measure();
+  }, [measure]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -75,24 +88,26 @@ export function AssetRegisterTabs({ herdData, startDate, endDate, selectedProper
       {/* Tab bar */}
       <div
         ref={containerRef}
-        className="relative mb-4 flex gap-1 rounded-full bg-surface p-1 backdrop-blur-md"
+        className="bg-surface relative mb-4 flex gap-1 rounded-full p-1 backdrop-blur-md"
         role="tablist"
         aria-label="Asset Register sections"
       >
         <div
-          className={`absolute top-1 bottom-1 rounded-full bg-surface-high shadow-sm ${ready ? "transition-all duration-250 ease-out" : ""}`}
+          className={`bg-warning/15 absolute top-1 bottom-1 rounded-full shadow-sm ${ready ? "transition-all duration-250 ease-out" : ""}`}
           style={{ left: indicator.left, width: indicator.width }}
           aria-hidden="true"
         />
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            ref={(el) => { if (el) buttonRefs.current.set(tab.id, el); }}
+            ref={(el) => {
+              if (el) buttonRefs.current.set(tab.id, el);
+            }}
             onClick={() => setActiveTab(tab.id)}
             role="tab"
             aria-selected={activeTab === tab.id}
             className={`relative z-10 flex-1 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-150 ${
-              activeTab === tab.id ? "text-text-primary" : "text-text-muted hover:text-text-secondary"
+              activeTab === tab.id ? "text-warning" : "text-text-muted hover:text-text-secondary"
             }`}
           >
             {tab.label}

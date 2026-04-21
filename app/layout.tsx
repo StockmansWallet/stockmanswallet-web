@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Caveat, Geist_Mono, Nunito } from "next/font/google";
-import { PaletteToggle } from "@/components/dev/palette-toggle";
 import "./globals.css";
 
 const geistMono = Geist_Mono({
@@ -61,7 +60,6 @@ export default function RootLayout({
         className={`${geistMono.variable} ${nunito.variable} ${caveat.variable} font-sans antialiased`}
       >
         {children}
-        <PaletteToggle />
       </body>
     </html>
   );
