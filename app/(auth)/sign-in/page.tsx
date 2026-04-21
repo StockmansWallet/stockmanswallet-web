@@ -58,7 +58,7 @@ function SignInForm() {
             type="email"
             required
             placeholder="you@example.com"
-            className="text-text-primary placeholder:text-text-muted focus:border-brand focus:ring-brand/20 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm transition-all outline-none focus:ring-2 dark:border-white/10 dark:bg-white/5"
+            className="text-text-primary placeholder:text-text-muted focus:border-brand focus:ring-brand/20 w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm backdrop-blur-xl transition-all outline-none focus:ring-2"
           />
         </div>
 
@@ -72,7 +72,7 @@ function SignInForm() {
             type="password"
             required
             placeholder="Your password"
-            className="text-text-primary placeholder:text-text-muted focus:border-brand focus:ring-brand/20 w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm transition-all outline-none focus:ring-2 dark:border-white/10 dark:bg-white/5"
+            className="text-text-primary placeholder:text-text-muted focus:border-brand focus:ring-brand/20 w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm backdrop-blur-xl transition-all outline-none focus:ring-2"
           />
         </div>
 
@@ -125,7 +125,7 @@ function SignInForm() {
         <form action={signInWithGoogle}>
           <button
             type="submit"
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-black/10 bg-white px-4 py-3 text-sm font-semibold text-black transition-all hover:bg-gray-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-semibold text-white backdrop-blur-xl transition-all hover:bg-white/15"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24">
               <path
@@ -157,11 +157,11 @@ function SignInForm() {
         </Link>
       </p>
 
-      <div className="mt-4 text-center">
+      <div className="mt-4">
         <form action={signInAsDemo}>
           <button
             type="submit"
-            className="text-brand hover:text-brand-dark text-sm font-medium underline-offset-4 transition-colors hover:underline"
+            className="bg-brand hover:bg-brand-dark w-full rounded-full px-4 py-3 text-sm font-semibold text-white transition-all"
           >
             Try Demo
           </button>
