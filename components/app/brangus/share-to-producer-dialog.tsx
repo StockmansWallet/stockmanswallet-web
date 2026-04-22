@@ -5,6 +5,7 @@
 // one + add an optional note, and sends via the shared-chats-service.
 
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Search, Send, X, Check, Loader2, User2 } from "lucide-react";
 import {
   fetchShareablePicks,
@@ -46,6 +47,11 @@ export function ShareToProducerDialog({
   const [sending, setSending] = useState(false);
   const [sentName, setSentName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Portal mount guard: createPortal requires document.body which is only
+  // available client-side. Set after first mount so SSR pre-renders nothing.
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => { setIsMounted(true); }, []);
 
   // Reset state whenever the dialog opens so stale selections don't persist.
   useEffect(() => {
@@ -123,11 +129,14 @@ export function ShareToProducerDialog({
     onClose,
   ]);
 
-  if (!open) return null;
+  if (!open || !isMounted) return null;
 
-  return (
+  // Portal to document.body so the dialog escapes any parent overflow/transform
+  // stacking context (e.g. the Card that wraps BrangusChat) and the full-page
+  // backdrop-blur applies correctly to the Brangus wallpaper and all content.
+  const dialog = (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-md"
       role="dialog"
       aria-modal="true"
       aria-label="Share with a producer"
@@ -135,7 +144,7 @@ export function ShareToProducerDialog({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-surface relative mx-4 flex w-full max-w-md flex-col overflow-hidden rounded-2xl border border-white/[0.08] shadow-2xl">
+      <div className="bg-surface/95 relative mx-4 flex w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-white/[0.10] shadow-2xl backdrop-blur-xl">
         <header className="flex items-center justify-between border-b border-white/[0.06] px-5 py-4">
           <div>
             <h2 className="text-text-primary text-base font-semibold">Share with a producer</h2>
@@ -192,7 +201,7 @@ export function ShareToProducerDialog({
               </div>
             </div>
 
-            <div className="max-h-[50vh] min-h-[180px] overflow-y-auto border-t border-white/[0.06]">
+            <div className="max-h-[220px] overflow-y-auto border-t border-white/[0.06]">
               {loading ? (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="text-brangus h-5 w-5 animate-spin" />
@@ -276,4 +285,6 @@ export function ShareToProducerDialog({
       </div>
     </div>
   );
+
+  return createPortal(dialog, document.body);
 }
