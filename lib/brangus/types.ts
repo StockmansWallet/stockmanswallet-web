@@ -155,8 +155,16 @@ export interface YardBookRow {
   id: string;
   title: string;
   event_date: string;
+  event_time: string | null;
+  is_all_day: boolean;
   category_raw: string;
   is_completed: boolean;
+  completed_date: string | null;
+  is_recurring: boolean;
+  recurrence_rule_raw: string | null;
+  recurrence_interval: number | null;
+  linked_herd_ids: string[] | null;
+  property_id: string | null;
   notes: string | null;
 }
 

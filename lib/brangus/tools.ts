@@ -1052,43 +1052,87 @@ function lookupFreightEstimates(herdName: string | undefined, store: ChatDataSto
 
 // MARK: - Yard Book
 
+// Format a single Yard Book row for the tool_result. Resolves linked herd UUIDs
+// to their real display names from the portfolio so Brangus does not hallucinate
+// placeholder names like "Breeder X" when describing events.
+function formatYardBookItem(
+  item: ChatDataStore["yardBookItems"][number],
+  store: ChatDataStore,
+  showCompleted: boolean
+): string {
+  let line = `- [${item.category_raw}] ${item.title}, ${item.event_date.split("T")[0]}`;
+  if (!item.is_all_day && item.event_time) {
+    const time = item.event_time.split("T")[1]?.slice(0, 5);
+    if (time) line += ` at ${time}`;
+  }
+  if (showCompleted && item.completed_date) {
+    line += `, completed ${item.completed_date.split("T")[0]}`;
+  }
+  if (item.is_recurring && item.recurrence_rule_raw) {
+    line += `, repeats ${item.recurrence_rule_raw.toLowerCase()}`;
+  }
+  if (item.linked_herd_ids && item.linked_herd_ids.length > 0) {
+    const herdNames = item.linked_herd_ids
+      .map((id) => store.herds.find((h) => h.id === id)?.name)
+      .filter((n): n is string => Boolean(n));
+    if (herdNames.length > 0) {
+      line += `, herds: ${herdNames.join(", ")}`;
+    }
+  }
+  if (item.property_id) {
+    const prop = store.properties.find((p) => p.id === item.property_id);
+    if (prop) line += `, property: ${prop.property_name}`;
+  }
+  if (item.notes) line += `, notes: ${item.notes}`;
+  return line;
+}
+
 function lookupYardBook(store: ChatDataStore): string {
-  if (store.yardBookItems.length === 0) return "No Yard Book events found.";
+  if (store.yardBookItems.length === 0) return "YARD BOOK:\nNo events in the Yard Book";
 
   // Parse YYYY-MM-DD as local midnight (not UTC) to avoid date-shift in AEST
   const todayLocal = new Date();
   todayLocal.setHours(0, 0, 0, 0);
-  const overdue = store.yardBookItems.filter((i) => {
-    if (i.is_completed) return false;
-    const [y, m, d] = i.event_date.split("T")[0].split("-").map(Number);
-    return new Date(y, m - 1, d) < todayLocal;
-  });
-  const upcoming = store.yardBookItems.filter((i) => {
-    if (i.is_completed) return false;
-    const [y, m, d] = i.event_date.split("T")[0].split("-").map(Number);
-    return new Date(y, m - 1, d) >= todayLocal;
-  });
-  const completed = store.yardBookItems.filter((i) => i.is_completed);
+  const overdue = store.yardBookItems
+    .filter((i) => {
+      if (i.is_completed) return false;
+      const [y, m, d] = i.event_date.split("T")[0].split("-").map(Number);
+      return new Date(y, m - 1, d) < todayLocal;
+    })
+    .sort((a, b) => a.event_date.localeCompare(b.event_date));
+  const upcoming = store.yardBookItems
+    .filter((i) => {
+      if (i.is_completed) return false;
+      const [y, m, d] = i.event_date.split("T")[0].split("-").map(Number);
+      return new Date(y, m - 1, d) >= todayLocal;
+    })
+    .sort((a, b) => a.event_date.localeCompare(b.event_date));
+  const completed = store.yardBookItems
+    .filter((i) => i.is_completed)
+    .sort((a, b) => (b.completed_date ?? b.event_date).localeCompare(a.completed_date ?? a.event_date));
 
-  const lines = ["YARD BOOK:"];
+  const lines = ["YARD BOOK (operational calendar):"];
 
   if (overdue.length > 0) {
     lines.push(`\nOVERDUE (${overdue.length}):`);
-    for (const item of overdue) {
-      lines.push(`- ${item.title} (${item.event_date}, ${item.category_raw})`);
+    for (const item of overdue.slice(0, 10)) {
+      lines.push(formatYardBookItem(item, store, false));
     }
+    if (overdue.length > 10) lines.push(`(${overdue.length - 10} more overdue items not shown)`);
   }
   if (upcoming.length > 0) {
     lines.push(`\nUPCOMING (${upcoming.length}):`);
-    for (const item of upcoming.slice(0, 10)) {
-      lines.push(`- ${item.title} (${item.event_date}, ${item.category_raw})`);
+    for (const item of upcoming.slice(0, 30)) {
+      lines.push(formatYardBookItem(item, store, false));
     }
+    if (upcoming.length > 30) lines.push(`(${upcoming.length - 30} more upcoming items not shown)`);
   }
   if (completed.length > 0) {
-    lines.push(`\nRECENTLY COMPLETED (${Math.min(completed.length, 5)}):`);
-    for (const item of completed.slice(0, 5)) {
-      lines.push(`- ${item.title} (${item.event_date}, ${item.category_raw})`);
+    lines.push(`\nRECENTLY COMPLETED (${completed.length} total):`);
+    for (const item of completed.slice(0, 10)) {
+      lines.push(formatYardBookItem(item, store, true));
     }
+    if (completed.length > 10) lines.push(`(${completed.length - 10} more completed items not shown)`);
   }
 
   return lines.join("\n");
@@ -1386,7 +1430,24 @@ function executeCreateYardBookEvent(input: Record<string, unknown>, store: ChatD
   const category = input.category as string;
   if (!title || !date || !category) return "Error: title, date, and category are required.";
 
-  // Store the pending event for the caller to persist
+  // Validate requested herd names against the portfolio. Names that don't match
+  // are dropped from the event, and the unmatched list is echoed back to Brangus
+  // so it doesn't repeat invented names in its reply (BRG-Yardbook hallucination fix).
+  const requestedNames = (input.linked_herd_names as string[] | undefined) ?? [];
+  const activeHerds = store.herds.filter((h) => !h.is_sold);
+  const matchedNames: string[] = [];
+  const unmatchedNames: string[] = [];
+  for (const name of requestedNames) {
+    const hit = activeHerds.find(
+      (h) => h.name.toLowerCase() === name.toLowerCase()
+    );
+    if (hit) {
+      if (!matchedNames.includes(hit.name)) matchedNames.push(hit.name);
+    } else {
+      unmatchedNames.push(name);
+    }
+  }
+
   store.pendingYardBookEvents.push({
     title,
     date,
@@ -1395,10 +1456,18 @@ function executeCreateYardBookEvent(input: Record<string, unknown>, store: ChatD
     notes: input.notes as string | undefined,
     is_recurring: (input.is_recurring as boolean) ?? false,
     recurrence_rule: input.recurrence_rule as string | undefined,
-    linked_herd_names: input.linked_herd_names as string[] | undefined,
+    linked_herd_names: matchedNames.length > 0 ? matchedNames : undefined,
   });
 
-  return `Created Yard Book event: "${title}" on ${date} (${category}).`;
+  let result = `Created Yard Book event: "${title}" on ${date} (${category}).`;
+  if (matchedNames.length > 0) {
+    result += ` Linked to: ${matchedNames.join(", ")}.`;
+  }
+  if (unmatchedNames.length > 0) {
+    const available = activeHerds.map((h) => h.name).join(", ");
+    result += `\n\nWARNING: these requested herd names did not match any herd and were NOT linked: ${unmatchedNames.join(", ")}. Do not mention them in your reply. Valid herd names you can link: ${available}.`;
+  }
+  return result;
 }
 
 function executeManageYardBookEvent(input: Record<string, unknown>, store: ChatDataStore): string {
