@@ -10,6 +10,7 @@ import { BrangusChat } from "@/components/app/brangus-chat";
 import { ConversationList } from "@/components/app/brangus/conversation-list";
 import { SharedChatList } from "@/components/app/brangus/shared-chat-list";
 import { SharedChatPanel } from "@/components/app/brangus/shared-chat-panel";
+import { createClient } from "@/lib/supabase/client";
 import { fetchMessages } from "@/lib/brangus/conversation-service";
 import { fetchInboxSharedChats } from "@/lib/brangus/shared-chats-service";
 import type { BrangusConversationRow, BrangusMessageRow } from "@/lib/brangus/conversation-service";
@@ -36,6 +37,11 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
   // Unread badge count for the Shared tab. Declared here (above the callbacks
   // that use setSharedUnread) so the setter is in scope at callback definition.
   const [sharedUnread, setSharedUnread] = useState(0);
+
+  // Increments each time a new shared chat arrives via realtime. SharedChatList
+  // watches this so it re-fetches while the tab is open, rather than waiting
+  // for the user to switch away and back.
+  const [sharedListRefreshKey, setSharedListRefreshKey] = useState(0);
 
   // Toolbar portal container (callback ref so it triggers re-render when set)
   const [toolbarEl, setToolbarEl] = useState<HTMLDivElement | null>(null);
@@ -136,20 +142,88 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
     setSharedUnread((n) => Math.max(0, n - 1));
   }, []);
 
-  // Refresh unread count on each tab switch so new shares appear without a
-  // full page reload.
+  // Triple-layer realtime for the Shared tab badge:
+  //   1. Supabase Realtime postgres_changes for instant badge updates when a
+  //      new share arrives (INSERT) or a chat is marked read (UPDATE).
+  //   2. Tab-visibility re-fetch catches any realtime events missed while the
+  //      tab was in the background.
+  //   3. 15s polling as a safety net for flaky websocket connections.
+  //
+  // Runs once on mount; does not depend on activeTab so the badge stays live
+  // even while the user is on the Chat or Saved tabs.
   useEffect(() => {
+    const supabase = createClient();
     let cancelled = false;
-    fetchInboxSharedChats()
-      .then((rows) => {
-        if (cancelled) return;
-        setSharedUnread(rows.filter((r) => !r.is_read).length);
-      })
-      .catch(() => {});
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    async function refreshUnread() {
+      if (cancelled) return;
+      try {
+        const rows = await fetchInboxSharedChats();
+        if (!cancelled) setSharedUnread(rows.filter((r) => !r.is_read).length);
+      } catch {
+        // Best-effort; badge stays at last known value
+      }
+    }
+
+    async function init() {
+      await refreshUnread();
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || cancelled) return;
+
+      // setAuth is required on cookie-auth clients so RLS-filtered
+      // postgres_changes events are delivered over the websocket.
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        supabase.realtime.setAuth(session.access_token);
+      }
+
+      channel = supabase
+        .channel(`brangus-shared-${user.id.slice(0, 8)}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "brangus_shared_chats",
+            filter: `recipient_user_id=eq.${user.id}`,
+          },
+          () => {
+            // New share received: update badge and refresh the list (if open).
+            refreshUnread();
+            setSharedListRefreshKey((k) => k + 1);
+          },
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "brangus_shared_chats",
+            filter: `recipient_user_id=eq.${user.id}`,
+          },
+          () => { refreshUnread(); },
+        )
+        .subscribe();
+    }
+
+    init();
+
+    function handleVisibility() {
+      if (document.visibilityState === "visible") refreshUnread();
+    }
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    const interval = setInterval(refreshUnread, 15_000);
+
     return () => {
       cancelled = true;
+      if (channel) supabase.removeChannel(channel);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      clearInterval(interval);
     };
-  }, [activeTab]);
+  }, []); // intentionally empty: runs once on mount
 
   const tabs: { id: TabId; label: string; badge?: number }[] = [
     { id: "chat", label: "Chat" },
@@ -281,7 +355,10 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
         ) : (
           <Card className="h-full overflow-y-auto rounded-2xl">
             <CardContent className="p-2">
-              <SharedChatList onSelect={handleSelectSharedChat} />
+              <SharedChatList
+                onSelect={handleSelectSharedChat}
+                refreshSignal={sharedListRefreshKey}
+              />
             </CardContent>
           </Card>
         )}

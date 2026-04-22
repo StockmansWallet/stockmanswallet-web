@@ -16,6 +16,9 @@ import {
 
 interface SharedChatListProps {
   onSelect: (chat: SharedChatRow) => void;
+  // Incremented by BrangusHub when a new shared chat arrives via realtime.
+  // The list re-fetches when this changes so it stays live while the tab is open.
+  refreshSignal?: number;
 }
 
 function timeAgo(dateStr: string): string {
@@ -37,14 +40,15 @@ function preview(row: SharedChatRow): string | null {
   return null;
 }
 
-export function SharedChatList({ onSelect }: SharedChatListProps) {
+export function SharedChatList({ onSelect, refreshSignal }: SharedChatListProps) {
   const [rows, setRows] = useState<SharedChatRow[] | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
 
-  // Fetch inbox once on mount. Intentionally uses an IIFE instead of a named
-  // callback so ESLint's react-hooks/set-state-in-effect rule doesn't fire on
-  // the mount-time setState (we're hydrating from a network source, which is
-  // exactly the subscribe-from-external-system case the rule permits).
+  // Fetch (or re-fetch) the inbox whenever the component mounts or the parent
+  // signals that a new share has arrived via realtime. Using refreshSignal in
+  // the deps means this also runs on initial mount (signal = 0) and again each
+  // time the hub increments it. The IIFE form keeps the async logic clean
+  // without triggering react-hooks/exhaustive-deps warnings on setState.
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -54,7 +58,7 @@ export function SharedChatList({ onSelect }: SharedChatListProps) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [refreshSignal]);
 
   const handleDelete = useCallback(
     async (e: React.MouseEvent, id: string) => {
