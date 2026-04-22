@@ -289,6 +289,59 @@ export const toolDefinitions = [
       required: ["query"],
     },
   },
+  {
+    name: "record_sale",
+    description:
+      "Records a livestock sale against one of the user's herds. Use ONLY when the user explicitly says they have sold animals or want to log/record a sale (e.g. 'I just sold 50 steers at $5/kg', 'log that sale', 'record it'). Do NOT use for hypothetical scenarios — use calculate_price_scenario for 'what if' questions. After recording, the sale appears in the app's sales history and the herd head count is updated automatically.",
+    input_schema: {
+      type: "object",
+      properties: {
+        herd_name: {
+          type: "string",
+          description: "Name of the herd being sold from. Must match a herd in the portfolio index.",
+        },
+        head_count: {
+          type: "integer",
+          description: "Number of head sold. Must be greater than 0 and not exceed the herd's current head count.",
+        },
+        pricing_type: {
+          type: "string",
+          enum: ["per_kg", "per_head"],
+          description: "How the sale was priced: 'per_kg' for liveweight, 'per_head' for a fixed price per animal.",
+        },
+        price_per_kg: {
+          type: "number",
+          description: "Sale price in dollars per kg liveweight (e.g. 4.85 for $4.85/kg). Required when pricing_type is 'per_kg'.",
+        },
+        price_per_head: {
+          type: "number",
+          description: "Sale price in dollars per head (e.g. 1200 for $1,200/head). Required when pricing_type is 'per_head'.",
+        },
+        sale_date: {
+          type: "string",
+          description: "Date of sale in YYYY-MM-DD format. Derive from TODAY'S DATE in the system prompt if the user says 'today' or a relative term.",
+        },
+        average_weight_kg: {
+          type: "number",
+          description: "Average liveweight per head in kg at time of sale. If not provided, the herd's current projected weight is used.",
+        },
+        sale_type: {
+          type: "string",
+          enum: ["Saleyard", "Private Sale", "Other"],
+          description: "Type of sale. Optional.",
+        },
+        sale_location: {
+          type: "string",
+          description: "Saleyard name or buyer name. Optional.",
+        },
+        notes: {
+          type: "string",
+          description: "Any additional notes about the sale. Optional.",
+        },
+      },
+      required: ["herd_name", "head_count", "pricing_type", "sale_date"],
+    },
+  },
 ];
 
 // Display-only tools (no tool_result sent back to API)
@@ -318,6 +371,8 @@ export async function executeTool(
       return executeRememberFact(input);
     case "search_past_chats":
       return executeSearchPastChats(input);
+    case "record_sale":
+      return executeRecordSale(input, store);
     default:
       return `Error: Unknown tool '${toolName}'`;
   }
@@ -2263,4 +2318,96 @@ export async function fetchUserMemories(): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+// MARK: - Record Sale Tool
+
+function executeRecordSale(input: Record<string, unknown>, store: ChatDataStore): string {
+  const herdName = input.herd_name as string;
+  if (!herdName) return "Error: herd_name is required.";
+
+  const activeHerds = store.herds.filter((h) => !h.is_sold);
+  const herd = activeHerds.find(
+    (h) =>
+      h.name.toLowerCase().includes(herdName.toLowerCase()) ||
+      herdName.toLowerCase().includes(h.name.toLowerCase()),
+  );
+  if (!herd) {
+    const available = activeHerds.map((h) => h.name).join(", ");
+    return `No active herd found matching '${herdName}'. Available herds: ${available}`;
+  }
+
+  const headCount =
+    typeof input.head_count === "number" ? Math.floor(input.head_count) : null;
+  if (!headCount || headCount <= 0) return "Error: head_count must be a positive integer.";
+  if (headCount > herd.head_count)
+    return `Error: head_count (${headCount}) exceeds current herd size (${herd.head_count} head).`;
+
+  const pricingType = input.pricing_type as string;
+  if (pricingType !== "per_kg" && pricingType !== "per_head")
+    return "Error: pricing_type must be 'per_kg' or 'per_head'.";
+
+  const saleDateStr = input.sale_date as string;
+  if (!saleDateStr || !/^\d{4}-\d{2}-\d{2}$/.test(saleDateStr))
+    return "Error: sale_date must be in YYYY-MM-DD format.";
+
+  // Average weight: use provided or fall back to herd's current initial weight
+  const avgWeight =
+    typeof input.average_weight_kg === "number" && (input.average_weight_kg as number) > 0
+      ? (input.average_weight_kg as number)
+      : herd.current_weight ?? herd.initial_weight;
+
+  let pricePerKg: number;
+  let pricePerHead: number | undefined;
+  let totalGrossValue: number;
+
+  if (pricingType === "per_kg") {
+    const ppkg = input.price_per_kg as number;
+    if (!ppkg || ppkg <= 0) return "Error: price_per_kg is required when pricing_type is 'per_kg'.";
+    pricePerKg = ppkg;
+    totalGrossValue = headCount * avgWeight * pricePerKg;
+  } else {
+    const pph = input.price_per_head as number;
+    if (!pph || pph <= 0) return "Error: price_per_head is required when pricing_type is 'per_head'.";
+    pricePerHead = pph;
+    pricePerKg = avgWeight > 0 ? pph / avgWeight : 0;
+    totalGrossValue = headCount * pph;
+  }
+
+  const isFullSale = headCount === herd.head_count;
+
+  store.pendingSaleRecords.push({
+    herd_id: herd.id,
+    herd_name: herd.name,
+    sale_date: saleDateStr,
+    head_count: headCount,
+    pricing_type: pricingType,
+    price_per_kg: pricePerKg,
+    price_per_head: pricePerHead,
+    average_weight_kg: avgWeight,
+    total_gross_value: totalGrossValue,
+    sale_type: input.sale_type as string | undefined,
+    sale_location: input.sale_location as string | undefined,
+    notes: input.notes as string | undefined,
+    is_full_sale: isFullSale,
+    remaining_head_count: isFullSale ? 0 : herd.head_count - headCount,
+  });
+
+  const locationPart = input.sale_location ? ` at ${input.sale_location}` : "";
+  const pricePart =
+    pricingType === "per_kg"
+      ? `$${pricePerKg.toFixed(2)}/kg at avg ${avgWeight.toFixed(0)}kg`
+      : `$${pricePerHead!.toFixed(0)}/head`;
+  const totalFormatted = totalGrossValue.toLocaleString("en-AU", {
+    style: "currency",
+    currency: "AUD",
+    maximumFractionDigits: 0,
+  });
+
+  let result = `Sale recorded: ${headCount} head from '${herd.name}'${locationPart} on ${saleDateStr} at ${pricePart}. Total gross: ${totalFormatted}.`;
+  result += isFullSale
+    ? " Herd marked as sold."
+    : ` Remaining in herd: ${herd.head_count - headCount} head.`;
+
+  return result;
 }

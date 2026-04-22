@@ -895,6 +895,7 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
     weatherData,
     pendingYardBookEvents: [],
     pendingYardBookActions: [],
+    pendingSaleRecords: [],
   };
 }
 

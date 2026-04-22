@@ -425,6 +425,51 @@ export function BrangusChat({
       }
     }
     dataStore.pendingYardBookActions = [];
+
+    // Record sales logged through Brangus chat
+    for (const sale of dataStore.pendingSaleRecords) {
+      const now = new Date().toISOString();
+      await supabase.from("sales_records").insert({
+        id: crypto.randomUUID(),
+        user_id: user.id,
+        herd_id: sale.herd_id,
+        sale_date: new Date(sale.sale_date).toISOString(),
+        head_count: sale.head_count,
+        average_weight: sale.average_weight_kg,
+        price_per_kg: sale.price_per_kg,
+        price_per_head: sale.price_per_head ?? null,
+        pricing_type: sale.pricing_type,
+        sale_type: sale.sale_type ?? null,
+        sale_location: sale.sale_location ?? null,
+        total_gross_value: sale.total_gross_value,
+        freight_cost: 0,
+        freight_distance: 0,
+        net_value: sale.total_gross_value,
+        notes: sale.notes ?? null,
+        is_deleted: false,
+        is_demo_data: false,
+        created_at: now,
+        updated_at: now,
+      });
+      // Update herd: mark sold (full sale) or reduce head count (partial sale)
+      if (sale.is_full_sale) {
+        await supabase
+          .from("herds")
+          .update({
+            is_sold: true,
+            sold_date: new Date(sale.sale_date).toISOString(),
+            sold_price: sale.price_per_kg,
+            updated_at: now,
+          })
+          .eq("id", sale.herd_id);
+      } else {
+        await supabase
+          .from("herds")
+          .update({ head_count: sale.remaining_head_count, updated_at: now })
+          .eq("id", sale.herd_id);
+      }
+    }
+    dataStore.pendingSaleRecords = [];
   }, []);
 
   const handleSend = useCallback(

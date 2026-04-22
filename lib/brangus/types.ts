@@ -92,6 +92,7 @@ export interface ChatDataStore {
   // Pending mutations from tool calls (persisted after response)
   pendingYardBookEvents: PendingYardBookEvent[];
   pendingYardBookActions: PendingYardBookAction[];
+  pendingSaleRecords: PendingSaleRecord[];
 }
 
 // MARK: - Supabase Row Types (subset of columns needed for chat)
@@ -289,4 +290,21 @@ export interface PendingYardBookAction {
   action: string;
   itemId: string;
   title: string;
+}
+
+export interface PendingSaleRecord {
+  herd_id: string;
+  herd_name: string;
+  sale_date: string;
+  head_count: number;
+  pricing_type: string;
+  price_per_kg: number;
+  price_per_head?: number;
+  average_weight_kg: number;
+  total_gross_value: number;
+  sale_type?: string;
+  sale_location?: string;
+  notes?: string;
+  is_full_sale: boolean;
+  remaining_head_count: number;
 }
