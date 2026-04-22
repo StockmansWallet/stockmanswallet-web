@@ -27,14 +27,16 @@ export default function Hero() {
       id="hero"
       className="relative flex min-h-[100dvh] items-center overflow-hidden"
     >
-      {/* Background image */}
-      <Image
-        src="/images/landing-bg.webp"
-        alt=""
-        fill
-        priority
-        className="absolute inset-0 object-cover opacity-20"
-      />
+      {/* Background image - fixed so content scrolls over it */}
+      <div className="pointer-events-none fixed inset-0 -z-10">
+        <Image
+          src="/images/landing-bg.webp"
+          alt=""
+          fill
+          priority
+          className="object-cover opacity-20"
+        />
+      </div>
 
       {/* Subtle top-left radial gradient - centre pushed far off-screen so only the soft tail is visible */}
       <div
