@@ -135,9 +135,11 @@ export function MessageThread({
         return (
           <div key={msg.id}>
             {showTime && (
-              <p className="text-text-muted py-2 text-center text-[11px] font-medium">
-                {formatTimeSeparator(new Date(msg.created_at))}
-              </p>
+              <div className="flex justify-center py-2">
+                <span className="bg-surface-lowest text-text-muted rounded-full px-3 py-1 text-[11px] font-medium backdrop-blur-xl">
+                  {formatTimeSeparator(new Date(msg.created_at))}
+                </span>
+              </div>
             )}
             <ChatBubble
               side={isOwn ? "right" : "left"}

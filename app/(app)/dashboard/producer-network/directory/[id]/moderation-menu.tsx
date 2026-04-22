@@ -2,15 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Info, Ban, Flag, ShieldOff, UserMinus } from "lucide-react";
+import { Settings, Ban, Flag, ShieldOff, UserMinus } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/app/advisory/confirm-modal";
-import {
-  blockUser,
-  unblockUser,
-  reportUser,
-} from "./moderation-actions";
+import { blockUser, unblockUser, reportUser } from "./moderation-actions";
 import { disconnectProducer } from "@/app/(app)/dashboard/producer-network/connections/[id]/actions";
 
 interface ModerationMenuProps {
@@ -26,9 +22,18 @@ interface ModerationMenuProps {
   connectionIdForDisconnect?: string;
 }
 
-type Panel = "closed" | "root" | "block-confirm" | "report" | "unblock-confirm" | "disconnect-confirm";
+type Panel =
+  | "closed"
+  | "root"
+  | "block-confirm"
+  | "report"
+  | "unblock-confirm"
+  | "disconnect-confirm";
 
-const REPORT_REASONS: Array<{ value: "spam" | "abusive" | "impersonation" | "other"; label: string }> = [
+const REPORT_REASONS: Array<{
+  value: "spam" | "abusive" | "impersonation" | "other";
+  label: string;
+}> = [
   { value: "spam", label: "Spam or unwanted contact" },
   { value: "abusive", label: "Abusive or threatening behaviour" },
   { value: "impersonation", label: "Impersonation or fake account" },
@@ -45,7 +50,8 @@ export function ModerationMenu({
   const [panel, setPanel] = useState<Panel>("closed");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [reportReason, setReportReason] = useState<typeof REPORT_REASONS[number]["value"]>("spam");
+  const [reportReason, setReportReason] =
+    useState<(typeof REPORT_REASONS)[number]["value"]>("spam");
   const [reportDescription, setReportDescription] = useState("");
   const [reportSent, setReportSent] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -131,20 +137,27 @@ export function ModerationMenu({
           onClick={() => setPanel(panel === "root" ? "closed" : "root")}
           aria-label="Profile actions"
           aria-expanded={panel === "root"}
-          className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-lowest text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary"
+          className="bg-surface-lowest text-text-secondary hover:bg-surface-raised hover:text-text-primary flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-xl transition-colors"
         >
-          <Info className="h-4 w-4" aria-hidden="true" />
+          <Settings className="h-4 w-4" aria-hidden="true" />
         </button>
 
         {panel === "root" && (
-          <div className="absolute right-0 top-full z-20 mt-1 w-56 overflow-hidden rounded-xl border border-white/10 bg-bg-alt shadow-xl">
+          <div
+            className="absolute top-full right-0 z-20 mt-1 w-56 overflow-hidden rounded-xl border border-white/[0.08] shadow-2xl"
+            style={{
+              background: "rgba(26, 26, 26, 0.55)",
+              backdropFilter: "blur(28px) saturate(1.6)",
+              WebkitBackdropFilter: "blur(28px) saturate(1.6)",
+            }}
+          >
             {connectionIdForDisconnect && (
               <button
                 type="button"
                 onClick={() => setPanel("disconnect-confirm")}
-                className="flex w-full items-center gap-2 border-b border-white/[0.06] px-3 py-2.5 text-left text-sm text-text-primary transition-colors hover:bg-white/[0.04]"
+                className="text-text-primary flex w-full items-center gap-2 border-b border-white/[0.06] px-3 py-2.5 text-left text-sm transition-colors hover:bg-white/[0.04]"
               >
-                <UserMinus className="h-4 w-4 text-text-muted" aria-hidden="true" />
+                <UserMinus className="text-text-muted h-4 w-4" aria-hidden="true" />
                 Disconnect
               </button>
             )}
@@ -152,16 +165,16 @@ export function ModerationMenu({
               <button
                 type="button"
                 onClick={() => setPanel("unblock-confirm")}
-                className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-text-primary transition-colors hover:bg-white/[0.04]"
+                className="text-text-primary flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm transition-colors hover:bg-white/[0.04]"
               >
-                <ShieldOff className="h-4 w-4 text-text-muted" aria-hidden="true" />
+                <ShieldOff className="text-text-muted h-4 w-4" aria-hidden="true" />
                 Unblock
               </button>
             ) : (
               <button
                 type="button"
                 onClick={() => setPanel("block-confirm")}
-                className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-error transition-colors hover:bg-error/[0.06]"
+                className="text-error hover:bg-error/[0.06] flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm transition-colors"
               >
                 <Ban className="h-4 w-4" aria-hidden="true" />
                 Block producer
@@ -170,9 +183,9 @@ export function ModerationMenu({
             <button
               type="button"
               onClick={() => setPanel("report")}
-              className="flex w-full items-center gap-2 border-t border-white/[0.06] px-3 py-2.5 text-left text-sm text-text-primary transition-colors hover:bg-white/[0.04]"
+              className="text-text-primary flex w-full items-center gap-2 border-t border-white/[0.06] px-3 py-2.5 text-left text-sm transition-colors hover:bg-white/[0.04]"
             >
-              <Flag className="h-4 w-4 text-text-muted" aria-hidden="true" />
+              <Flag className="text-text-muted h-4 w-4" aria-hidden="true" />
               Report producer
             </button>
           </div>
@@ -210,11 +223,17 @@ export function ModerationMenu({
         loading={loading}
       />
 
-      <Modal open={panel === "report"} onClose={resetReport} title={`Report ${targetName}`} size="md">
+      <Modal
+        open={panel === "report"}
+        onClose={resetReport}
+        title={`Report ${targetName}`}
+        size="md"
+      >
         {reportSent ? (
           <div className="space-y-4">
-            <p className="text-sm text-text-secondary">
-              Thanks. The report has been filed and will be reviewed by the Stockman&apos;s Wallet team.
+            <p className="text-text-secondary text-sm">
+              Thanks. The report has been filed and will be reviewed by the Stockman&apos;s Wallet
+              team.
             </p>
             <div className="flex justify-end">
               <Button variant="primary" size="sm" onClick={resetReport}>
@@ -225,12 +244,12 @@ export function ModerationMenu({
         ) : (
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-xs font-semibold uppercase text-text-muted">Reason</label>
+              <label className="text-text-muted text-xs font-semibold uppercase">Reason</label>
               <div className="space-y-1.5">
                 {REPORT_REASONS.map((r) => (
                   <label
                     key={r.value}
-                    className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-white/[0.06] bg-surface-lowest px-3 py-2 transition-colors hover:bg-surface"
+                    className="bg-surface-lowest hover:bg-surface flex cursor-pointer items-center gap-2.5 rounded-lg border border-white/[0.06] px-3 py-2 transition-colors"
                   >
                     <input
                       type="radio"
@@ -240,24 +259,28 @@ export function ModerationMenu({
                       onChange={() => setReportReason(r.value)}
                       className="accent-orange-500"
                     />
-                    <span className="text-sm text-text-primary">{r.label}</span>
+                    <span className="text-text-primary text-sm">{r.label}</span>
                   </label>
                 ))}
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-semibold uppercase text-text-muted">Details (optional)</label>
+              <label className="text-text-muted text-xs font-semibold uppercase">
+                Details (optional)
+              </label>
               <textarea
                 value={reportDescription}
                 onChange={(e) => setReportDescription(e.target.value)}
                 rows={3}
                 maxLength={1000}
                 placeholder="Describe what happened..."
-                className="w-full resize-none rounded-xl border border-white/10 bg-surface-lowest p-3 text-sm text-text-primary placeholder:text-text-muted focus:border-producer-network/40 focus:outline-none focus:ring-1 focus:ring-producer-network/20"
+                className="bg-surface-lowest text-text-primary placeholder:text-text-muted focus:border-producer-network/40 focus:ring-producer-network/20 w-full resize-none rounded-xl border border-white/10 p-3 text-sm focus:ring-1 focus:outline-none"
               />
             </div>
             {error && (
-              <p role="alert" className="text-xs text-error">{error}</p>
+              <p role="alert" className="text-error text-xs">
+                {error}
+              </p>
             )}
             <div className="flex justify-end gap-2">
               <Button
