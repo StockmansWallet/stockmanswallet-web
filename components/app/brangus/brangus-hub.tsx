@@ -281,8 +281,7 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
 
       {/* Chat tab (always mounted, hidden when inactive) */}
       <div
-        className={activeTab !== "chat" ? "hidden" : ""}
-        style={{ height: "calc(100vh - 19rem)" }}
+        className={activeTab !== "chat" ? "hidden h-[calc(100vh-23.5rem)] sm:h-[calc(100vh-22rem)]" : "h-[calc(100vh-23.5rem)] sm:h-[calc(100vh-22rem)]"}
       >
         <Card className="flex h-full flex-col overflow-hidden rounded-3xl">
           {loadingConv ? (
