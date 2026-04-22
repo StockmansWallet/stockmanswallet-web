@@ -80,8 +80,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             backgroundImage: [
               // Dark bottom gradient (fades image into page background)
               "linear-gradient(to bottom, rgba(20,17,15,0) 0%, rgba(20,17,15,0.35) 25%, rgba(20,17,15,0.7) 55%, rgba(20,17,15,1) 90%)",
-              // Darken on the hero image (80% pure black)
-              "linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8))",
+              // Darken on the hero image (65% pure black)
+              "linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65))",
               // Hero image
               "url('/images/landing-bg.webp')",
             ].join(","),
