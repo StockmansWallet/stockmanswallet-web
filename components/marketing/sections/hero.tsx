@@ -25,10 +25,10 @@ export default function Hero() {
     <section
       ref={sectionRef}
       id="hero"
-      className="relative flex min-h-[100dvh] items-center overflow-hidden"
+      className="relative flex min-h-[100dvh] items-center overflow-x-clip"
     >
       {/* Background image - fixed so content scrolls over it */}
-      <div className="pointer-events-none fixed inset-0 -z-10">
+      <div className="pointer-events-none fixed inset-0">
         <Image
           src="/images/landing-bg.webp"
           alt=""
