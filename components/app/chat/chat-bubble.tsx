@@ -17,6 +17,12 @@ interface ChatBubbleProps {
   avatarUrl?: string;
   /** Initials to show if no avatarUrl (e.g. "LE" for Leon Ernst) */
   avatarInitials?: string;
+  /**
+   * When true and no avatar is rendered, reserve the avatar's horizontal
+   * space so consecutive same-sender bubbles (iMessage-style grouping) stay
+   * aligned with the group's last bubble that does show the avatar.
+   */
+  reserveAvatarSpace?: boolean;
   children: ReactNode;
 }
 
@@ -52,6 +58,7 @@ export function ChatBubble({
   animationType = "bounce",
   avatarUrl,
   avatarInitials,
+  reserveAvatarSpace = false,
   children,
 }: ChatBubbleProps) {
   const isRight = side === "right";
@@ -69,31 +76,31 @@ export function ChatBubble({
     />
   ) : avatarInitials ? (
     <div className="-mb-8 flex h-12 w-12 shrink-0 items-center justify-center self-end rounded-full bg-white/10">
-      <span className="text-sm font-bold text-text-primary">{avatarInitials}</span>
+      <span className="text-text-primary text-sm font-bold">{avatarInitials}</span>
     </div>
+  ) : reserveAvatarSpace ? (
+    <div className="h-12 w-12 shrink-0 self-end" aria-hidden="true" />
   ) : null;
 
   return (
     <div
       className={`flex items-end gap-2 ${isRight ? "justify-end pl-14" : "justify-start pr-14"} ${animClass}`}
-      style={animate && animationType === "bounce" ? { transformOrigin: isRight ? "bottom right" : "bottom left" } : undefined}
+      style={
+        animate && animationType === "bounce"
+          ? { transformOrigin: isRight ? "bottom right" : "bottom left" }
+          : undefined
+      }
     >
       {!isRight && avatar}
       <div className="relative max-w-[80%] overflow-visible">
-        <div
-          className={`rounded-3xl px-4 py-2.5 text-sm leading-relaxed ${bgClass} ${textClass}`}
-        >
+        <div className={`rounded-3xl px-4 py-2.5 text-sm leading-relaxed ${bgClass} ${textClass}`}>
           {(senderName || timestamp) && (
             <div className="mb-0.5 flex items-center gap-2">
-              {senderName && (
-                <span className="text-xs font-semibold opacity-70">{senderName}</span>
-              )}
-              {timestamp && (
-                <span className="text-[10px] opacity-40">{timestamp}</span>
-              )}
+              {senderName && <span className="text-xs font-semibold opacity-70">{senderName}</span>}
+              {timestamp && <span className="text-[10px] opacity-40">{timestamp}</span>}
             </div>
           )}
-          <div className="whitespace-pre-wrap break-words">{children}</div>
+          <div className="break-words whitespace-pre-wrap">{children}</div>
         </div>
         <BubbleTail side={side} color={tailColor} />
       </div>

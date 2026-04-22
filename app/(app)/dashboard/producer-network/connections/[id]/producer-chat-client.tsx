@@ -20,6 +20,7 @@ interface ProducerChatClientProps {
   currentUserId: string;
   messages: AdvisoryMessage[];
   participants: Record<string, { name: string; role: string }>;
+  avatars?: Record<string, { url?: string | null; initials?: string }>;
 }
 
 export function ProducerChatClient({
@@ -27,6 +28,7 @@ export function ProducerChatClient({
   currentUserId,
   messages: initialMessages,
   participants,
+  avatars,
 }: ProducerChatClientProps) {
   const [messages, setMessages] = useState<AdvisoryMessage[]>(initialMessages);
   const [animatedIds, setAnimatedIds] = useState<Set<string>>(new Set());
@@ -35,9 +37,11 @@ export function ProducerChatClient({
 
   const { peerIsTyping, notifyTyping } = useTypingIndicator(`chat:${connectionId}`, currentUserId);
 
-  // Auto-scroll to bottom on new messages
+  // Auto-scroll to bottom on new messages. block: "end" aligns the end-ref
+  // to the viewport bottom; the default ("start") would scroll the ref to
+  // the top and clip the first bubble off the top of the card.
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, peerIsTyping]);
 
   // Poll for new messages
@@ -112,7 +116,7 @@ export function ProducerChatClient({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="flex-1 overflow-y-auto px-1 pt-2 pb-2">
+      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-2">
         <div className="space-y-3">
           <MessageThread
             messages={messages}
@@ -122,13 +126,14 @@ export function ProducerChatClient({
             hideSenderName
             otherBgClass="bg-producer-network-dark"
             otherTailColor={OTHER_BG}
+            avatars={avatars}
           />
           {peerIsTyping && <TypingIndicator bgColor={OTHER_BG} dotClass="bg-white/50" />}
           <div ref={messagesEndRef} />
         </div>
       </div>
 
-      <div className="shrink-0 border-t border-white/6 pt-3">
+      <div className="relative z-10 shrink-0 border-t border-white/6 p-4 shadow-[0_-6px_12px_-4px_rgba(0,0,0,0.4)]">
         {/* Pending-attachment preview sits above the input so the sender
             can see what's queued and remove it before hitting send. */}
         {pendingAttachment && (

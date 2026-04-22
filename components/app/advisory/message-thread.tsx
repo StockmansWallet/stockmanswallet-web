@@ -28,6 +28,11 @@ interface MessageThreadProps {
    */
   otherBgClass?: string;
   otherTailColor?: string;
+  /**
+   * Per-user avatar metadata. When provided, renders the sender's photo (or
+   * initials fallback) beside each bubble, matching the Brangus chat style.
+   */
+  avatars?: Record<string, { url?: string | null; initials?: string }>;
 }
 
 const messageTypeLabels: Record<
@@ -99,6 +104,7 @@ export function MessageThread({
   hideSenderName = false,
   otherBgClass = "bg-chat-other",
   otherTailColor = DEFAULT_OTHER_BG,
+  avatars,
 }: MessageThreadProps) {
   if (messages.length === 0) {
     return (
@@ -116,7 +122,15 @@ export function MessageThread({
         const shouldAnimate = animatedMessageIds?.has(msg.id);
         const sender = participants[msg.sender_user_id];
         const prev = i > 0 ? messages[i - 1] : undefined;
+        const next = i < messages.length - 1 ? messages[i + 1] : undefined;
         const showTime = shouldShowTimestamp(msg, prev);
+        // iMessage-style grouping: only show the avatar on the last bubble of
+        // a consecutive same-sender run. A run ends when the next message is
+        // from a different sender or when a timestamp separator will appear
+        // before it. Avoids the -mb-8 hanging avatars stacking on each other.
+        const nextBreaksGroup =
+          !next || next.sender_user_id !== msg.sender_user_id || shouldShowTimestamp(next, msg);
+        const showAvatar = nextBreaksGroup;
 
         return (
           <div key={msg.id}>
@@ -131,6 +145,9 @@ export function MessageThread({
               tailColor={isOwn ? OWN_BG : otherTailColor}
               animate={!!shouldAnimate}
               senderName={!isOwn && !hideSenderName ? sender?.name : undefined}
+              avatarUrl={showAvatar ? (avatars?.[msg.sender_user_id]?.url ?? undefined) : undefined}
+              avatarInitials={showAvatar ? avatars?.[msg.sender_user_id]?.initials : undefined}
+              reserveAvatarSpace={!!avatars && !showAvatar}
             >
               {msg.message_type !== "general_note" && (
                 <Badge variant={typeConfig.variant} className="mb-1">

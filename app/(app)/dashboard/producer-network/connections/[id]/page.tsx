@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { ProducerChatClient } from "./producer-chat-client";
 import { ModerationMenu } from "@/app/(app)/dashboard/producer-network/directory/[id]/moderation-menu";
 import { MarkConnectionNotificationsRead } from "@/components/app/mark-connection-notifications-read";
@@ -64,8 +64,16 @@ export default async function ProducerConnectionDetailPage({
     .single();
 
   const otherName = otherProfile?.display_name ?? conn.requester_name;
-  const avatarMap = await fetchUserAvatars([otherUserId]);
+  const myName = myProfile?.display_name ?? "You";
+  const avatarMap = await fetchUserAvatars([otherUserId, user.id]);
   const otherAvatarUrl = avatarMap.get(otherUserId) ?? null;
+  const myAvatarUrl = avatarMap.get(user.id) ?? null;
+
+  const initialsFrom = (name: string) => (name.trim().charAt(0) || "?").toUpperCase();
+  const chatAvatars: Record<string, { url?: string | null; initials?: string }> = {
+    [otherUserId]: { url: otherAvatarUrl, initials: initialsFrom(otherName) },
+    [user.id]: { url: myAvatarUrl, initials: initialsFrom(myName) },
+  };
 
   // Is this peer blocked by the viewer? Show the block state inside the
   // moderation menu so they can toggle it without leaving the chat.
@@ -79,7 +87,7 @@ export default async function ProducerConnectionDetailPage({
 
   const participants: Record<string, { name: string; role: string }> = {
     [otherUserId]: { name: otherName, role: "producer" },
-    [user.id]: { name: myProfile?.display_name ?? "You", role: "producer" },
+    [user.id]: { name: myName, role: "producer" },
   };
 
   return (
@@ -118,15 +126,14 @@ export default async function ProducerConnectionDetailPage({
         </div>
       </div>
 
-      <Card className="flex min-h-0 flex-1 flex-col rounded-3xl">
-        <CardContent className="flex min-h-0 flex-1 flex-col px-5 pt-5 pb-5">
-          <ProducerChatClient
-            connectionId={id}
-            currentUserId={user.id}
-            messages={(messages ?? []) as AdvisoryMessage[]}
-            participants={participants}
-          />
-        </CardContent>
+      <Card className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl">
+        <ProducerChatClient
+          connectionId={id}
+          currentUserId={user.id}
+          messages={(messages ?? []) as AdvisoryMessage[]}
+          participants={participants}
+          avatars={chatAvatars}
+        />
       </Card>
     </div>
   );
