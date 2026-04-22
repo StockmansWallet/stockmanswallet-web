@@ -27,35 +27,6 @@ export default function Hero() {
       id="hero"
       className="relative flex min-h-[100dvh] items-center overflow-x-clip"
     >
-      {/* Background image - fixed so content scrolls over it */}
-      <div className="pointer-events-none fixed inset-0">
-        <Image
-          src="/images/landing-bg.webp"
-          alt=""
-          fill
-          priority
-          className="object-cover opacity-10"
-        />
-      </div>
-
-      {/* Subtle top-left radial gradient - centre pushed far off-screen so only the soft tail is visible */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 2200px 2200px at -500px -500px, rgba(217,118,47,0.12) 0%, transparent 70%)",
-        }}
-      />
-
-      {/* Noise texture to eliminate gradient banding */}
-      <div
-        className="pointer-events-none absolute inset-0 mix-blend-soft-light"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`,
-          opacity: 0.1,
-        }}
-      />
-
       {/* Content */}
       <div className="relative mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
         <div className="grid items-center gap-16 lg:grid-cols-2 lg:gap-20">

@@ -211,13 +211,6 @@ export default function Pricing() {
                     </li>
                   ))}
                 </ul>
-
-                <a
-                  href="#signup"
-                  className={`focus-visible:ring-brand ${accent.bgDark} ${accent.bgDarkHover} mt-6 flex h-10 items-center justify-center rounded-full text-sm font-semibold text-white transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none`}
-                >
-                  Join Waitlist
-                </a>
               </div>
             ))}
           </motion.div>
