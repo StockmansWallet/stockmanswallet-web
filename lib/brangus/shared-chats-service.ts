@@ -58,7 +58,39 @@ export async function fetchInboxSharedChats(): Promise<SharedChatRow[]> {
   const currentUserId = userData.user?.id;
   if (!currentUserId) return [];
 
-  return (data ?? []).filter((row) => row.recipient_user_id === currentUserId) as SharedChatRow[];
+  const rows = (data ?? []).filter(
+    (row) => row.recipient_user_id === currentUserId,
+  ) as SharedChatRow[];
+
+  // Backfill any missing sender names from user_profiles. Covers shares that
+  // were created before sender_display_name was reliably populated, and keeps
+  // names current if a sender updates their profile. A single batched query
+  // fetches all missing names at once.
+  const missingIds = [
+    ...new Set(
+      rows
+        .filter((r) => !r.sender_display_name?.trim())
+        .map((r) => r.sender_user_id),
+    ),
+  ];
+
+  if (missingIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("user_profiles")
+      .select("user_id, display_name")
+      .in("user_id", missingIds);
+
+    if (profiles && profiles.length > 0) {
+      const nameMap = new Map(profiles.map((p) => [p.user_id, p.display_name as string]));
+      return rows.map((r) =>
+        !r.sender_display_name?.trim() && nameMap.has(r.sender_user_id)
+          ? { ...r, sender_display_name: nameMap.get(r.sender_user_id) ?? null }
+          : r,
+      );
+    }
+  }
+
+  return rows;
 }
 
 // MARK: - Send share (sender)
