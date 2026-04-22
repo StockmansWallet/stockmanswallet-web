@@ -24,7 +24,7 @@ function NavLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
   const inactive =
     item.inactiveClass ??
     `${inactiveBase} ${item.hoverClass ?? "hover:bg-brand-dark hover:text-white"}`;
-  const active = item.activeClass ?? "bg-brand/15 text-brand";
+  const active = item.activeClass ?? "bg-brand/15 text-brand backdrop-blur-sm";
 
   return (
     <Link
@@ -68,73 +68,77 @@ export function Sidebar({
     <aside className="flex h-full w-64 flex-col">
       {/* Scrollable navigation */}
       <nav className="scrollbar-none min-h-0 flex-1 overflow-y-auto px-4 pt-4">
-        {/* Portfolio */}
-        <p className="text-text-muted/60 mb-1.5 px-3 text-[10px] font-semibold tracking-widest uppercase">
-          Portfolio
-        </p>
-        <div className="space-y-1">
-          {mainItems.map((item) => (
-            <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
-          ))}
-        </div>
-
-        {/* Intelligence */}
-        <div className="mx-0 mt-4 border-t border-white/5 pt-4">
-          <p className="text-text-muted/60 mb-1.5 px-3 text-[10px] font-semibold tracking-widest uppercase">
-            Intelligence
-          </p>
-          <div className="space-y-1">
-            {intelItems.map((item) => (
-              <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
-            ))}
-          </div>
-        </div>
-
-        {/* Tools */}
-        {toolItems.length > 0 && (
-          <div className="mx-0 mt-4 border-t border-white/5 pt-4">
-            <p className="text-text-muted/60 mb-1.5 px-3 text-[10px] font-semibold tracking-widest uppercase">
-              Tools
+        <div className="space-y-2">
+          {/* Portfolio */}
+          <div className="rounded-xl bg-white/[0.04] p-2 backdrop-blur-md">
+            <p className="text-text-muted/60 mb-1 px-3 pt-1 text-[10px] font-semibold tracking-widest uppercase">
+              Portfolio
             </p>
-            <div className="space-y-1">
-              {toolItems.map((item) => (
+            <div className="space-y-0.5">
+              {mainItems.map((item) => (
                 <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
               ))}
             </div>
           </div>
-        )}
 
-        {/* Admin */}
-        {isAdmin && (
-          <div className="mx-0 mt-4 border-t border-white/5 pt-4">
-            <p className="text-text-muted/60 mb-1.5 px-3 text-[10px] font-semibold tracking-widest uppercase">
-              Admin
+          {/* Intelligence */}
+          <div className="rounded-xl bg-white/[0.04] p-2 backdrop-blur-md">
+            <p className="text-text-muted/60 mb-1 px-3 pt-1 text-[10px] font-semibold tracking-widest uppercase">
+              Intelligence
             </p>
-            <div className="space-y-1">
-              {adminItems.map((item) => (
+            <div className="space-y-0.5">
+              {intelItems.map((item) => (
                 <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
               ))}
             </div>
           </div>
-        )}
 
-        {/* Help & Settings. Per-feature badges on the nav items above
-            (Producer Network, Yard Book) replaced the old aggregate
-            Notifications entry. */}
-        <div className="mt-4 space-y-1 border-t border-white/5 pt-4">
-          {bottomNavItems.map((item) => (
-            <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
-          ))}
-          {isDemoUser && (
-            <NavLink
-              item={{
-                label: "Demo Guide",
-                href: "/dashboard/demo-guide",
-                icon: <Sparkles className="text-brand h-5 w-5" />,
-              }}
-              isActive={checkActive("/dashboard/demo-guide")}
-            />
+          {/* Tools */}
+          {toolItems.length > 0 && (
+            <div className="rounded-xl bg-white/[0.04] p-2 backdrop-blur-md">
+              <p className="text-text-muted/60 mb-1 px-3 pt-1 text-[10px] font-semibold tracking-widest uppercase">
+                Tools
+              </p>
+              <div className="space-y-0.5">
+                {toolItems.map((item) => (
+                  <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
+                ))}
+              </div>
+            </div>
           )}
+
+          {/* Admin */}
+          {isAdmin && (
+            <div className="rounded-xl bg-white/[0.04] p-2 backdrop-blur-md">
+              <p className="text-text-muted/60 mb-1 px-3 pt-1 text-[10px] font-semibold tracking-widest uppercase">
+                Admin
+              </p>
+              <div className="space-y-0.5">
+                {adminItems.map((item) => (
+                  <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Help & Settings */}
+          <div className="rounded-xl bg-white/[0.04] p-2 backdrop-blur-md">
+            <div className="space-y-0.5">
+              {bottomNavItems.map((item) => (
+                <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
+              ))}
+              {isDemoUser && (
+                <NavLink
+                  item={{
+                    label: "Demo Guide",
+                    href: "/dashboard/demo-guide",
+                    icon: <Sparkles className="text-brand h-5 w-5" />,
+                  }}
+                  isActive={checkActive("/dashboard/demo-guide")}
+                />
+              )}
+            </div>
+          </div>
         </div>
       </nav>
     </aside>

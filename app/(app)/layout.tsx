@@ -8,6 +8,7 @@ import { DemoModeBanner } from "@/components/app/demo-mode-banner";
 import { DemoModeProvider } from "@/components/app/demo-mode-provider";
 import { isAdvisorRole, roleDisplayName } from "@/lib/types/advisory";
 import { ADVISOR_ENABLED } from "@/lib/feature-flags";
+import PageBackground from "@/components/marketing/ui/page-background";
 
 // Prevent Next.js from caching this layout - auth state must be fresh on every request
 export const dynamic = "force-dynamic";
@@ -70,26 +71,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <DemoModeProvider isDemoUser={isDemoUser}>
       <SidebarNotificationsProvider>
-        {/* Fixed background: single div, CSS-only stack. One compositing layer, no mix-blend-mode,
-          no next/Image. */}
-        <div
-          data-print-hide
-          aria-hidden
-          className="bg-background pointer-events-none fixed inset-0 -z-10"
-          style={{
-            backgroundImage: [
-              // Dark bottom gradient (fades image into page background)
-              "linear-gradient(to bottom, rgba(20,17,15,0) 0%, rgba(20,17,15,0.35) 25%, rgba(20,17,15,0.7) 55%, rgba(20,17,15,1) 90%)",
-              // Darken on the hero image (65% pure black)
-              "linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65))",
-              // Hero image
-              "url('/images/landing-bg.webp')",
-            ].join(","),
-            backgroundSize: "100% 100%, 100% 100%, cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
-        />
+        <PageBackground />
 
         <div className="bg-background/0 flex min-h-screen flex-col">
           {isDemoUser && <DemoModeBanner />}
