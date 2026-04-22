@@ -1,25 +1,25 @@
-'use client'
+"use client";
 
-import { useRef } from 'react'
-import Image from 'next/image'
-import dynamic from 'next/dynamic'
-import { motion, useScroll, useTransform } from 'framer-motion'
-import LandingButton from '@/components/marketing/ui/landing-button'
-import { useWaitlist } from '@/components/marketing/ui/waitlist-provider'
-import tallyAnimData from '@/public/animations/tally.json'
+import { useRef } from "react";
+import Image from "next/image";
+import dynamic from "next/dynamic";
+import { motion, useScroll, useTransform } from "framer-motion";
+import LandingButton from "@/components/marketing/ui/landing-button";
+import { useWaitlist } from "@/components/marketing/ui/waitlist-provider";
+import tallyAnimData from "@/public/animations/tally.json";
 
-const Lottie = dynamic(() => import('lottie-react'), { ssr: false })
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
 export default function Hero() {
-  const { openWaitlist } = useWaitlist()
-  const sectionRef = useRef<HTMLElement>(null)
+  const { openWaitlist } = useWaitlist();
+  const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ['start start', 'end start'],
-  })
+    offset: ["start start", "end start"],
+  });
 
-  const phoneY = useTransform(scrollYProgress, [0, 1], [0, 80])
-  const textY = useTransform(scrollYProgress, [0, 1], [0, -40])
+  const phoneY = useTransform(scrollYProgress, [0, 1], [0, 80]);
+  const textY = useTransform(scrollYProgress, [0, 1], [0, -40]);
 
   return (
     <section
@@ -36,14 +36,12 @@ export default function Hero() {
         className="absolute inset-0 object-cover opacity-20"
       />
 
-      {/* Dark overlay to keep text readable - more transparent at top so image shows through */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-background/70 to-background" />
-
       {/* Subtle top-left radial gradient - centre pushed far off-screen so only the soft tail is visible */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
-          background: 'radial-gradient(ellipse 2200px 2200px at -500px -500px, rgba(217,118,47,0.12) 0%, transparent 70%)',
+          background:
+            "radial-gradient(ellipse 2200px 2200px at -500px -500px, rgba(217,118,47,0.12) 0%, transparent 70%)",
         }}
       />
 
@@ -60,10 +58,7 @@ export default function Hero() {
       <div className="relative mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
         <div className="grid items-center gap-16 lg:grid-cols-2 lg:gap-20">
           {/* Text Column */}
-          <motion.div
-            style={{ y: textY }}
-            className="flex flex-col items-start"
-          >
+          <motion.div style={{ y: textY }} className="flex flex-col items-start">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -81,11 +76,9 @@ export default function Hero() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
-              className="text-[clamp(1.8rem,3.5vw,3rem)] font-semibold leading-[1.1] tracking-tight text-white text-balance"
+              className="text-[clamp(1.8rem,3.5vw,3rem)] leading-[1.1] font-semibold tracking-tight text-balance text-white"
             >
-              <span className="text-brand">
-                Live. Stock. Market.
-              </span>
+              <span className="text-brand">Live. Stock. Market.</span>
               <br />
               Paddock to Portfolio
               <br />
@@ -96,9 +89,15 @@ export default function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="mt-6 max-w-lg text-base leading-relaxed text-text-secondary sm:text-lg"
+              className="text-text-secondary mt-6 max-w-lg text-base leading-relaxed sm:text-lg"
             >
-              Stockman&apos;s Wallet is a livestock valuation platform built for Australian producers and rural advisors. By linking your herds to live market data, it measures biological and market movements, compares sale options, and supports better decisions with advanced industry intelligence.{' '}<span className="inline-block whitespace-nowrap font-semibold text-brand">Manage livestock as a portfolio.</span>
+              Stockman&apos;s Wallet is a livestock valuation platform built for Australian
+              producers and rural advisors. By linking your herds to live market data, it measures
+              biological and market movements, compares sale options, and supports better decisions
+              with advanced industry intelligence.{" "}
+              <span className="text-brand inline-block font-semibold whitespace-nowrap">
+                Manage livestock as a portfolio.
+              </span>
             </motion.p>
 
             <motion.div
@@ -110,7 +109,7 @@ export default function Hero() {
               <LandingButton size="lg" onClick={openWaitlist}>
                 Join Waitlist
               </LandingButton>
-              <p className="mt-3 text-xs text-text-muted">
+              <p className="text-text-muted mt-3 text-xs">
                 Join the waitlist. We&apos;ll email you before launch with early access details.
               </p>
             </motion.div>
@@ -128,15 +127,12 @@ export default function Hero() {
                 height={40}
                 className="h-10 w-auto opacity-75 transition-opacity hover:opacity-100"
               />
-              <span className="text-sm text-text-muted">Coming May 2026</span>
+              <span className="text-text-muted text-sm">Coming May 2026</span>
             </motion.div>
           </motion.div>
 
           {/* Phone Column */}
-          <motion.div
-            style={{ y: phoneY }}
-            className="relative flex items-center justify-center"
-          >
+          <motion.div style={{ y: phoneY }} className="relative flex items-center justify-center">
             {/* Phone mockup */}
             <motion.div
               initial={{ opacity: 0, y: 40, scale: 0.95 }}
@@ -159,25 +155,40 @@ export default function Hero() {
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7, delay: 0.8 }}
-              className="absolute left-4 top-[25%] z-20 hidden w-72 rounded-2xl p-5 shadow-2xl lg:block xl:-left-8"
-              style={{ backgroundColor: 'rgba(124, 167, 73, 0.08)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(124, 167, 73, 0.15)' }}
+              className="absolute top-[25%] left-4 z-20 hidden w-72 rounded-2xl p-5 shadow-2xl lg:block xl:-left-8"
+              style={{
+                backgroundColor: "rgba(124, 167, 73, 0.08)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                border: "1px solid rgba(124, 167, 73, 0.15)",
+              }}
             >
               <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-success/15">
-                  <svg className="h-4.5 w-4.5 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                <div className="bg-success/15 flex h-9 w-9 items-center justify-center rounded-xl">
+                  <svg
+                    className="text-success h-4.5 w-4.5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"
+                    />
                   </svg>
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-white">Sell vs Hold</p>
-                  <p className="text-[10px] text-text-muted">#4 Yearling Steers</p>
+                  <p className="text-text-muted text-[10px]">#4 Yearling Steers</p>
                 </div>
               </div>
               <div className="mt-3 flex items-baseline gap-2">
-                <p className="text-2xl font-bold text-success">+$14,820</p>
-                <p className="text-[11px] text-text-muted">potential gain over 90 days</p>
+                <p className="text-success text-2xl font-bold">+$14,820</p>
+                <p className="text-text-muted text-[11px]">potential gain over 90 days</p>
               </div>
-              <p className="mt-1.5 text-[11px] leading-snug text-text-secondary">
+              <p className="text-text-secondary mt-1.5 text-[11px] leading-snug">
                 #4 Yearling Steers is worth $190,650 today. Holding 90 days projects to $205,470.
               </p>
             </motion.div>
@@ -187,32 +198,46 @@ export default function Hero() {
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7, delay: 1.0 }}
-              className="absolute right-4 top-[45%] z-20 hidden w-72 rounded-2xl p-5 shadow-2xl lg:block xl:-right-8"
-              style={{ backgroundColor: 'rgba(19, 153, 236, 0.08)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(19, 153, 236, 0.15)' }}
+              className="absolute top-[45%] right-4 z-20 hidden w-72 rounded-2xl p-5 shadow-2xl lg:block xl:-right-8"
+              style={{
+                backgroundColor: "rgba(19, 153, 236, 0.08)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                border: "1px solid rgba(19, 153, 236, 0.15)",
+              }}
             >
               <div className="flex items-center gap-2.5">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#1399EC]/15">
-                  <svg className="h-4.5 w-4.5 text-[#64BBF5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0H21M3.375 14.25h3.75L8.25 9h4.5m0 0l1.125 5.25M12.75 9h4.875c.621 0 1.125.504 1.125 1.125v3.375" />
+                  <svg
+                    className="h-4.5 w-4.5 text-[#64BBF5]"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0H21M3.375 14.25h3.75L8.25 9h4.5m0 0l1.125 5.25M12.75 9h4.875c.621 0 1.125.504 1.125 1.125v3.375"
+                    />
                   </svg>
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-white">Freight IQ</p>
-                  <p className="text-[10px] text-text-muted">87 Heifers to Emerald</p>
+                  <p className="text-text-muted text-[10px]">87 Heifers to Emerald</p>
                 </div>
               </div>
               <div className="mt-3 flex items-baseline gap-2">
                 <p className="text-2xl font-bold text-[#64BBF5]">$5,958</p>
-                <p className="text-[11px] text-text-muted">+ $596 GST</p>
+                <p className="text-text-muted text-[11px]">+ $596 GST</p>
               </div>
-              <p className="mt-1.5 text-[11px] leading-snug text-text-secondary">
+              <p className="text-text-secondary mt-1.5 text-[11px] leading-snug">
                 $68.48 per head, 662 km from Stockman Downs to Emerald.
               </p>
             </motion.div>
           </motion.div>
         </div>
       </div>
-
     </section>
-  )
+  );
 }
