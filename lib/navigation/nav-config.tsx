@@ -147,6 +147,9 @@ export const producerIntelItems: NavItem[] = [
     href: "/dashboard/brangus",
     icon: <MessageCircle className="h-5 w-5" />,
     ...nav("brangus"),
+    notificationTypes: ["brangus_shared_chat"],
+    // Suppress while on the Brangus page - the Shared tab badge takes over.
+    badgeSuppressPrefix: "/dashboard/brangus",
   },
   {
     label: "Insights",
@@ -240,6 +243,8 @@ export const advisorIntelItems: NavItem[] = [
     href: "/dashboard/brangus",
     icon: <MessageCircle className="h-5 w-5" />,
     ...nav("brangus"),
+    notificationTypes: ["brangus_shared_chat"],
+    badgeSuppressPrefix: "/dashboard/brangus",
   },
   {
     label: "Insights",
