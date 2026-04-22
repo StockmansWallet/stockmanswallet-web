@@ -3,15 +3,20 @@
 // List of Brangus conversations shared with the current user by other producers.
 // Lives inside the "Shared" tab on the Brangus hub. Unread rows are emphasised
 // with the producer-network accent so users spot new shares at a glance.
+// Clicking a row calls onSelect to open the SharedChatPanel in-place rather
+// than navigating away from the hub.
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 import { Users, Trash2, Inbox, Loader2 } from "lucide-react";
 import {
   fetchInboxSharedChats,
   softDeleteSharedChat,
   type SharedChatRow,
 } from "@/lib/brangus/shared-chats-service";
+
+interface SharedChatListProps {
+  onSelect: (chat: SharedChatRow) => void;
+}
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -32,7 +37,7 @@ function preview(row: SharedChatRow): string | null {
   return null;
 }
 
-export function SharedChatList() {
+export function SharedChatList({ onSelect }: SharedChatListProps) {
   const [rows, setRows] = useState<SharedChatRow[] | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
 
@@ -91,9 +96,12 @@ export function SharedChatList() {
         const p = preview(row);
         return (
           <li key={row.id} className="group relative">
-            <Link
-              href={`/dashboard/brangus/shared/${row.id}`}
-              className={`flex items-start gap-3 px-4 py-3 transition-colors hover:bg-white/[0.03] ${
+            {/* Main row: button opens the panel in-place inside the hub.
+                Padding-right leaves room for the delete button that appears
+                on hover without the two overlapping. */}
+            <button
+              onClick={() => onSelect(row)}
+              className={`flex w-full items-start gap-3 px-4 py-3 pr-12 text-left transition-colors hover:bg-white/[0.03] ${
                 !row.is_read ? "bg-producer-network/[0.04]" : ""
               }`}
             >
@@ -132,20 +140,22 @@ export function SharedChatList() {
                   <p className="text-text-muted mt-0.5 line-clamp-2 text-xs">{p}</p>
                 )}
               </div>
+            </button>
 
-              <button
-                onClick={(e) => handleDelete(e, row.id)}
-                disabled={deleting === row.id}
-                className="text-text-muted hover:text-destructive mt-1 shrink-0 rounded-full p-1.5 opacity-0 transition-opacity group-hover:opacity-100"
-                aria-label="Remove from Shared"
-              >
-                {deleting === row.id ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Trash2 className="h-3.5 w-3.5" />
-                )}
-              </button>
-            </Link>
+            {/* Delete button: absolutely positioned so it doesn't nest inside
+                the row button (nested interactive elements are invalid HTML). */}
+            <button
+              onClick={(e) => handleDelete(e, row.id)}
+              disabled={deleting === row.id}
+              className="text-text-muted hover:text-destructive absolute top-3 right-3 shrink-0 rounded-full p-1.5 opacity-0 transition-opacity group-hover:opacity-100 disabled:cursor-not-allowed"
+              aria-label="Remove from Shared"
+            >
+              {deleting === row.id ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Trash2 className="h-3.5 w-3.5" />
+              )}
+            </button>
           </li>
         );
       })}

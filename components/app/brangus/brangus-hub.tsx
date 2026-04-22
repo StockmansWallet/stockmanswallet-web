@@ -9,9 +9,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { BrangusChat } from "@/components/app/brangus-chat";
 import { ConversationList } from "@/components/app/brangus/conversation-list";
 import { SharedChatList } from "@/components/app/brangus/shared-chat-list";
+import { SharedChatPanel } from "@/components/app/brangus/shared-chat-panel";
 import { fetchMessages } from "@/lib/brangus/conversation-service";
 import { fetchInboxSharedChats } from "@/lib/brangus/shared-chats-service";
 import type { BrangusConversationRow, BrangusMessageRow } from "@/lib/brangus/conversation-service";
+import type { SharedChatRow } from "@/lib/brangus/shared-chats-service";
 
 type TabId = "chat" | "saved" | "shared";
 
@@ -26,6 +28,14 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
   const [loadingConv, setLoadingConv] = useState(false);
   const [chatResetKey, setChatResetKey] = useState(0);
   const [activeTab, setActiveTab] = useState<TabId>("chat");
+
+  // Shared chat selected in the Shared tab. When set, the list is replaced with
+  // the SharedChatPanel so the viewer reads it in-place without leaving the hub.
+  const [activeSharedChat, setActiveSharedChat] = useState<SharedChatRow | null>(null);
+
+  // Unread badge count for the Shared tab. Declared here (above the callbacks
+  // that use setSharedUnread) so the setter is in scope at callback definition.
+  const [sharedUnread, setSharedUnread] = useState(0);
 
   // Toolbar portal container (callback ref so it triggers re-render when set)
   const [toolbarEl, setToolbarEl] = useState<HTMLDivElement | null>(null);
@@ -106,9 +116,28 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
     [activeConvId]
   );
 
-  // Unread count for the Shared tab - drives the badge and refreshes on tab
-  // switch so the user sees new shares without a full page reload.
-  const [sharedUnread, setSharedUnread] = useState(0);
+  const handleSelectSharedChat = useCallback((chat: SharedChatRow) => {
+    setActiveSharedChat(chat);
+    // Decrement badge immediately if the chat was unread (the panel marks it
+    // read asynchronously, but the badge should clear right away).
+    if (!chat.is_read) {
+      setSharedUnread((n) => Math.max(0, n - 1));
+    }
+  }, []);
+
+  const handleSharedChatBack = useCallback(() => {
+    setActiveSharedChat(null);
+  }, []);
+
+  const handleSharedChatRemoved = useCallback(() => {
+    setActiveSharedChat(null);
+    // SharedChatList re-fetches on mount, but also decrement the badge in case
+    // the removed chat was unread.
+    setSharedUnread((n) => Math.max(0, n - 1));
+  }, []);
+
+  // Refresh unread count on each tab switch so new shares appear without a
+  // full page reload.
   useEffect(() => {
     let cancelled = false;
     fetchInboxSharedChats()
@@ -233,16 +262,29 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
 
       {/* Shared tab (always mounted, hidden when inactive).
           Chats other producers have shared with the current user. Unread
-          count drives the badge on the tab bar above. */}
+          count drives the badge on the tab bar above.
+          When activeSharedChat is set, the list is replaced with the panel so
+          the chat renders in-place with the same bubble layout as the live chat. */}
       <div
         className={activeTab !== "shared" ? "hidden" : ""}
         style={{ height: "calc(100vh - 19rem)" }}
       >
-        <Card className="h-full overflow-y-auto rounded-2xl">
-          <CardContent className="p-2">
-            <SharedChatList />
-          </CardContent>
-        </Card>
+        {activeSharedChat ? (
+          <Card className="flex h-full flex-col overflow-hidden rounded-3xl">
+            <SharedChatPanel
+              chat={activeSharedChat}
+              viewerIsRecipient={true}
+              onBack={handleSharedChatBack}
+              onRemoved={handleSharedChatRemoved}
+            />
+          </Card>
+        ) : (
+          <Card className="h-full overflow-y-auto rounded-2xl">
+            <CardContent className="p-2">
+              <SharedChatList onSelect={handleSelectSharedChat} />
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

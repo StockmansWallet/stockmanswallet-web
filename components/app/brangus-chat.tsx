@@ -221,17 +221,32 @@ export function BrangusChat({
   const [showShareToProducer, setShowShareToProducer] = useState(false);
   const [senderDisplayName, setSenderDisplayName] = useState<string | null>(null);
   useEffect(() => {
-    // Best-effort fetch the signed-in user's display name for the shared-chat
-    // header on the recipient side. Fires once per mount.
+    // Fetch the signed-in user's display name for the shared-chat header on
+    // the recipient side. user_profiles.display_name is the canonical source
+    // (same field the Producer Directory shows), so sharer names match what
+    // the recipient would see browsing the network. Falls back to auth
+    // metadata, then to the email local-part, so a name always renders.
     (async () => {
       const { createClient } = await import("@/lib/supabase/client");
       const supabase = createClient();
-      const { data } = await supabase.auth.getUser();
-      const meta = data.user?.user_metadata ?? {};
+      const { data: userData } = await supabase.auth.getUser();
+      const user = userData.user;
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("display_name, company_name")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const meta = user.user_metadata ?? {};
       const name =
-        (typeof meta.display_name === "string" ? meta.display_name : null) ??
-        (typeof meta.full_name === "string" ? meta.full_name : null) ??
-        null;
+        (profile?.display_name?.trim() || null) ??
+        (typeof meta.display_name === "string" ? meta.display_name.trim() || null : null) ??
+        (typeof meta.full_name === "string" ? meta.full_name.trim() || null : null) ??
+        (profile?.company_name?.trim() || null) ??
+        (user.email ? user.email.split("@")[0] : null);
+
       setSenderDisplayName(name);
     })();
   }, []);

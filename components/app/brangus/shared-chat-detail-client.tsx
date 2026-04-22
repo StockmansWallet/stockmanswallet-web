@@ -57,9 +57,9 @@ export function SharedChatDetailClient({ row, viewerIsRecipient }: Props) {
   });
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-1 flex-col overflow-hidden">
+    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 px-4 py-4">
       {/* Toolbar */}
-      <div className="flex items-center gap-2 border-b border-white/6 px-4 py-2">
+      <div className="flex items-center gap-2">
         <Link
           href="/dashboard/brangus"
           className="bg-surface-lowest text-text-secondary hover:bg-surface-raised hover:text-text-primary flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
@@ -71,7 +71,7 @@ export function SharedChatDetailClient({ row, viewerIsRecipient }: Props) {
         <button
           onClick={handleDelete}
           disabled={deleting}
-          className="text-text-muted hover:text-destructive flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
+          className="bg-surface-lowest text-text-secondary hover:bg-surface-raised hover:text-destructive flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
           aria-label="Remove from Shared"
         >
           {deleting ? (
@@ -83,8 +83,8 @@ export function SharedChatDetailClient({ row, viewerIsRecipient }: Props) {
         </button>
       </div>
 
-      {/* Header card */}
-      <div className="bg-producer-network/[0.06] border-b border-white/6 px-4 py-4">
+      {/* Header card - solid surface so it reads against the Brangus wallpaper. */}
+      <div className="bg-surface border-producer-network/30 rounded-2xl border px-4 py-4 shadow-sm">
         <div className="flex items-start gap-3">
           <div className="bg-producer-network/20 text-producer-network flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
             <MessageSquare className="h-5 w-5" />
@@ -92,39 +92,48 @@ export function SharedChatDetailClient({ row, viewerIsRecipient }: Props) {
           <div className="min-w-0 flex-1">
             <p className="text-text-primary text-sm font-semibold">
               {viewerIsRecipient
-                ? `Shared by ${row.sender_display_name ?? "another producer"}`
-                : `You shared this on ${formattedDate}`}
+                ? `Shared by ${row.sender_display_name?.trim() || "a fellow producer"}`
+                : "You shared this chat"}
             </p>
-            {viewerIsRecipient && (
-              <p className="text-text-muted text-xs">{formattedDate}</p>
-            )}
-            {row.note && (
-              <p className="text-text-secondary mt-2 text-sm">{row.note}</p>
-            )}
+            <p className="text-text-muted text-xs">{formattedDate}</p>
             {row.title && (
               <p className="text-text-primary mt-2 text-sm font-semibold">{row.title}</p>
+            )}
+            {row.note && (
+              <div className="border-producer-network/40 bg-producer-network/5 mt-3 rounded-lg border-l-2 px-3 py-2">
+                <p className="text-text-muted text-[10px] font-semibold tracking-wider uppercase">
+                  Note from sender
+                </p>
+                <p className="text-text-secondary mt-0.5 text-sm">{row.note}</p>
+              </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4">
+      {/* Messages - same Card shell as the live chat for visual parity. */}
+      <div className="bg-surface flex-1 overflow-y-auto rounded-2xl px-4 py-4 shadow-sm">
         <div className="mx-auto max-w-2xl space-y-3">
-          {row.messages.map((msg, i) => {
-            const isUser = msg.role === "user";
-            return (
-              <ChatBubble
-                key={i}
-                side={isUser ? "right" : "left"}
-                bgClass={isUser ? "bg-chat-user" : "bg-brangus-dark"}
-                tailColor={isUser ? USER_BG : BRANGUS_BG}
-                textClass="text-white"
-              >
-                {isUser ? msg.content : <FormattedResponse text={msg.content} />}
-              </ChatBubble>
-            );
-          })}
+          {row.messages.length === 0 ? (
+            <p className="text-text-muted py-8 text-center text-sm">
+              This shared chat has no messages.
+            </p>
+          ) : (
+            row.messages.map((msg, i) => {
+              const isUser = msg.role === "user";
+              return (
+                <ChatBubble
+                  key={i}
+                  side={isUser ? "right" : "left"}
+                  bgClass={isUser ? "bg-chat-user" : "bg-brangus-dark"}
+                  tailColor={isUser ? USER_BG : BRANGUS_BG}
+                  textClass="text-white"
+                >
+                  {isUser ? msg.content : <FormattedResponse text={msg.content} />}
+                </ChatBubble>
+              );
+            })
+          )}
         </div>
       </div>
     </div>
