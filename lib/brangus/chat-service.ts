@@ -119,6 +119,15 @@ EMPTY PORTFOLIO:
 - When they ask about their livestock, valuations, freight, sales, or anything portfolio-driven, tell them warmly that they need to add at least one herd first and point them to the Herds tab (/dashboard/herds), click 'Add Herd'.
 - Market prices, EYCI trend, seasonal patterns, weather, and general 'how do I...' questions are fine to answer as normal - the empty portfolio only blocks portfolio-dependent answers.
 
+VALUATION INTEGRITY (BRG-010):
+- The PORTFOLIO INDEX section in this prompt does NOT contain a portfolio dollar total. You MUST call lookup_portfolio_data (type: portfolio_summary) to get the AMV-engine computed total. Never quote "from the index" or "from context" for a portfolio dollar figure - the engine value is the only correct one and it lives in the tool result.
+- The Dashboard is always the user's source of truth for portfolio value. If the tool returns a value and you are uncertain, acknowledge it honestly rather than assert confidence.
+
+DISCREPANCY ACKNOWLEDGMENT (BRG-010):
+- If the user tells you their Dashboard shows a DIFFERENT number from your tool result, do NOT insist your number is correct. Never suggest the user is wrong about their own dashboard.
+- Instead, acknowledge the discrepancy and investigate together: "Interesting - my data is showing X but if your Dashboard is showing Y, let me see if I can figure out what's going on." Then use the tool to break down by herd, check if the timing differs, or flag any anomalies.
+- The user's dashboard is the authoritative figure. Your tool result should match it. If they differ, something is worth investigating - do not dismiss the user's report.
+
 IN-CONVERSATION RECALL:
 When the user asks "What did you just say about X?", "What were those numbers again?", "Can you recap that?", "Run that by me again?" or any similar phrase asking you to repeat or summarise something from EARLIER IN THIS SAME CHAT - give a TEXT RECAP from the relevant earlier turn. Do NOT call any tools. Do NOT treat it as a continuation of whatever topic came immediately before. Find the earlier response about X and summarise it naturally.
 Example: User asks about heifers (Turn 2), then freight (Turn 3), then "What did you say about my heifers?" (Turn 4). That is a recall request - recap the heifer breakdown from Turn 2, not a new freight or valuation query.`;
@@ -266,8 +275,11 @@ export function buildSystemPrompt(store: ChatDataStore, serverConfig?: BrangusCo
   sections.push(getConfig(config, "tool_instructions", FALLBACK_TOOL_INSTRUCTIONS));
 
   // 4. Portfolio index (always dynamic, built client-side)
+  // BRG-010 fix: never embed a dollar total here. Always direct Brangus to the tool.
   const indexLines = ["PORTFOLIO INDEX (use lookup_portfolio_data tool for details):"];
-  indexLines.push(`Total portfolio value: $${Math.round(store.portfolioValue).toLocaleString()}`);
+  indexLines.push(
+    "Total portfolio value: call lookup_portfolio_data (type: portfolio_summary) — never quote a cached figure",
+  );
   indexLines.push(`Active herds: ${activeHerdsList.length}`);
   indexLines.push(`Total head: ${totalHead}`);
   indexLines.push(`Properties: ${store.properties.length}`);
@@ -312,7 +324,7 @@ export function buildSystemPrompt(store: ChatDataStore, serverConfig?: BrangusCo
     indexLines.push("DATA QUALITY ALERTS:");
     for (const herd of adgAnomalies as { name: string; daily_weight_gain: number }[]) {
       indexLines.push(
-        `  - ${herd.name}: daily weight gain is ${herd.daily_weight_gain.toFixed(1)} kg/day - this is biologically implausible for cattle (max realistic: ~${ADG_THRESHOLD.toFixed(1)} kg/day). Weight projection and valuation for this herd may be inaccurate. Gently flag this to the user as a possible data entry error when it is relevant.`
+        `  - ${herd.name}: daily weight gain is ${herd.daily_weight_gain.toFixed(1)} kg/day — biologically impossible for cattle (max realistic: ~${ADG_THRESHOLD.toFixed(1)} kg/day). ALWAYS flag this proactively whenever you reference this herd's valuation, weight, or ADG. Do not wait to be asked. This is a data entry error — the weight projection and valuation will be inaccurate until corrected.`
       );
     }
   }
