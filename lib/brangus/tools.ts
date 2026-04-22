@@ -117,7 +117,7 @@ export const toolDefinitions = [
         calves_at_foot: {
           type: "boolean",
           description:
-            "Optional. Set to true when transporting breeders with calves at foot - the engine uses the fixed cow-calf density (18 head/deck). Set to false when the breeder herd is dry. Default true for Breeder category, ignored otherwise.",
+            "Optional. Set to true when transporting breeders with calves at foot - the engine uses the fixed cow-calf density (18 head/deck). CRITICAL: when calves_at_foot=true, head_count = number of COWS only. The calf rides with its mother and is NOT a separate head. DO NOT add calves to head_count. Example: 50 cows with calves at foot → head_count=50, not 100. The 18 HPD already accounts for the calf on the deck. Set to false when the breeder herd is dry.",
         },
       },
       required: [],
