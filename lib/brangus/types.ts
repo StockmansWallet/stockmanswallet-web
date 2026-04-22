@@ -71,6 +71,11 @@ export interface ChatDataStore {
   portfolioValue: number;
   nationalPriceMap: Map<string, CategoryPriceEntry[]>;
   saleyardPriceMap: Map<string, CategoryPriceEntry[]>;
+  // Breed-specific saleyard prices keyed as `${category}|${breed}|${saleyard}`.
+  // Dashboard passes this to the AMV engine so Angus-at-Roma style direct
+  // prices resolve ahead of the national-plus-premium fallback. Brangus must
+  // pass the same map or its totals diverge from the Dashboard (BRG-013 CAT-06).
+  saleyardBreedPriceMap: Map<string, CategoryPriceEntry[]>;
   premiumMap: Map<string, number>;
 
   // Grid IQ data (for Brangus tool lookups)

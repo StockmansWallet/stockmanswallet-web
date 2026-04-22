@@ -141,6 +141,7 @@ TOOL TIPS:
 - Prices in $/kg with source and date
 - Freight is GST-exclusive, mention cost per head and per deck
 - The freight calculator is called "Freight IQ", the calendar is "Yard Book"
+- property_details returns the FULL property record: PIC, acreage, coordinates, address, suburb, region, default saleyard + distance, and every herd running on the property. When the user asks "tell me about my properties" (or any broad property question), surface these attributes, not just the name and head count - PIC and acreage are what producers care about
 
 PAST CONVERSATIONS:
 When you find results from search_past_chats, reference them naturally like a mate would. Say things like "Yeah, you mentioned back in February..." or "We had a yarn about that a few weeks back..." - NOT "According to my search results..." or "I found in our previous conversation that...". If no results come back, just say you don't recall and move on.
@@ -864,6 +865,7 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
     portfolioValue,
     nationalPriceMap,
     saleyardPriceMap,
+    saleyardBreedPriceMap,
     premiumMap,
     seasonalData,
     gridIQAnalyses: gridIQAnalyses ?? [],

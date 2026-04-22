@@ -399,7 +399,8 @@ function valuationForHerd(
     store.nationalPriceMap,
     store.premiumMap,
     undefined,
-    store.saleyardPriceMap
+    store.saleyardPriceMap,
+    store.saleyardBreedPriceMap
   );
 }
 
@@ -604,6 +605,9 @@ function formatProperty(prop: ChatDataStore["properties"][0], herds: ChatDataSto
   if (prop.suburb) lines.push(`Suburb: ${prop.suburb}`);
   if (prop.region) lines.push(`Region: ${prop.region}`);
   if (prop.acreage && prop.acreage > 0) lines.push(`Acreage: ${Math.round(prop.acreage)} acres`);
+  if (prop.latitude != null && prop.longitude != null) {
+    lines.push(`Coordinates: ${prop.latitude.toFixed(4)}, ${prop.longitude.toFixed(4)}`);
+  }
   if (prop.default_saleyard) {
     let saleyardLine = `Default saleyard: ${prop.default_saleyard}`;
     if (prop.default_saleyard_distance && prop.default_saleyard_distance > 0) {
@@ -1527,7 +1531,8 @@ function executePriceScenario(input: Record<string, unknown>, store: ChatDataSto
       store.nationalPriceMap,
       store.premiumMap,
       undefined,
-      store.saleyardPriceMap
+      store.saleyardPriceMap,
+      store.saleyardBreedPriceMap
     );
 
     const currentPricePerKg = currentResult.pricePerKg;
