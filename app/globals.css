@@ -4,14 +4,16 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* All interactive elements should show pointer cursor */
-button,
-[role="button"],
-a,
-input[type="submit"],
-input[type="button"],
-select,
-summary {
-  cursor: pointer;
+@layer utilities {
+  button,
+  [role="button"],
+  a,
+  input[type="submit"],
+  input[type="button"],
+  select,
+  summary {
+    cursor: pointer;
+  }
 }
 
 :root {
@@ -115,6 +117,30 @@ summary {
   --hue-neutral-light: #b8ada8;
   --hue-neutral-dark: #5f5551;
   --hue-neutral-text: #3f3834;
+
+  /* Feature accent tokens - one source of truth per feature.
+     Update a hue here and it propagates to the landing page,
+     tab buttons, headings, bullets, arrows, and any future use. */
+  --feature-dashboard: var(--hue-gold);
+  --feature-dashboard-light: var(--hue-gold-light);
+  --feature-herds: var(--hue-gold);
+  --feature-herds-light: var(--hue-gold-light);
+  --feature-reports: var(--color-reports);
+  --feature-reports-light: var(--color-reports-light);
+  --feature-advisory: var(--hue-indigo);
+  --feature-advisory-light: var(--hue-indigo-light);
+  --feature-yardbook: var(--color-yard-book);
+  --feature-yardbook-light: var(--color-yard-book-light);
+  --feature-freight: var(--color-freight-iq);
+  --feature-freight-light: var(--color-freight-iq-light);
+  --feature-network: var(--color-producer-network);
+  --feature-network-light: var(--color-producer-network-light);
+  --feature-gridiq: var(--color-grid-iq);
+  --feature-gridiq-light: var(--color-grid-iq-light);
+  --feature-markets: var(--color-markets);
+  --feature-markets-light: var(--color-markets-light);
+  --feature-insights: var(--color-insights);
+  --feature-insights-light: var(--color-insights-light);
 }
 
 @theme inline {
