@@ -91,7 +91,7 @@ export default async function ProducerConnectionDetailPage({
   };
 
   return (
-    <div className="flex h-[calc(100vh-6rem)] max-w-4xl flex-col pt-12 pb-4">
+    <div className="flex h-[calc(100vh-6rem)] max-w-4xl flex-col pt-12 pb-10">
       <MarkConnectionNotificationsRead connectionId={id} />
       {/* Header sits at pt-8 from outer so the name has breathing room
           above it, and pb-2 below so the chat card sits close underneath. */}

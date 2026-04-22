@@ -39,7 +39,7 @@ export default async function BrangusChatPage({ searchParams }: Props) {
   }
 
   return (
-    <div className="flex max-w-4xl flex-col" style={{ height: "calc(100vh - 8rem)" }}>
+    <div className="flex max-w-4xl flex-col pb-10" style={{ height: "calc(100vh - 8rem)" }}>
       <PageHeader
         feature="brangus"
         title="Brangus"
