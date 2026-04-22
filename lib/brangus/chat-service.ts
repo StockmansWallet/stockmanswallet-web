@@ -144,6 +144,9 @@ You have tools. Use them when the conversation turns to data:
 7. calculate_price_scenario: Calculates the impact of a price change on the portfolio. Use when the user asks "what if prices drop/rise by X", "what would happen if the market moves", or any hypothetical pricing scenario. price_change_per_kg is in dollars (e.g. -0.20 for a 20c/kg drop, 0.50 for a 50c/kg rise). Optional herd_name to limit to one herd.
 8. remember_fact: Saves a personal fact about the user for future conversations. Use when the user shares something personal worth remembering: partner's or kids' names, significant events (droughts, floods, big sales), property quirks, preferences, or anything that makes them who they are. Do NOT save portfolio data (herd counts, prices, property names) - save the human stuff. Categories: personal, property, livestock, preference, history, general.
 9. search_past_chats: Searches previous conversations with this user. Use when they reference a past discussion, e.g. "remember when we talked about...", "what did you say about the heifers last time", "we discussed freight costs a while back". Do NOT use this for every message. Only when the user clearly references something from a previous chat.
+10. record_sale: Records a livestock sale against a herd in the portfolio. Use ONLY when the user explicitly says they sold animals or wants to log/record a sale (e.g. "I just sold 50 steers at $5/kg", "log that sale", "record it for me"). Do NOT use for hypothetical scenarios - those go through calculate_price_scenario. After recording: the sale appears in sales history, head count updated (partial) or herd marked sold (full). Required: herd_name, head_count, pricing_type ('per_kg' or 'per_head'), sale_date (YYYY-MM-DD). Provide price_per_kg or price_per_head to match pricing_type. Optional: average_weight_kg (defaults to current projected weight), sale_type ('Saleyard', 'Private Sale', 'Other'), sale_location, notes.
+11. record_treatment: Logs a health treatment against a herd. Use ONLY when the user explicitly says they treated, drenched, or vaccinated animals or wants to log a treatment (e.g. "I just drenched Sonny with Cydectin", "log that we vaccinated the heifers yesterday"). Do NOT use for scheduling future treatments - use create_yard_book_event instead. Required: herd_name, treatment_type ('drenching', 'vaccination', 'parasite_treatment', 'other'), date (YYYY-MM-DD). Optional: product_name (product or brand used), notes.
+12. record_muster: Logs a muster event against a herd. Use ONLY when the user explicitly says they mustered animals or wants to log a muster (e.g. "just finished mustering Sonny, counted 980", "log the muster", "record that we mustered yesterday"). Required: herd_name, date (YYYY-MM-DD), head_count_observed. Optional: cattle_yard (yards location), notes.
 
 CRITICAL - USE THE PORTFOLIO INDEX:
 You have a PORTFOLIO INDEX in your system prompt listing every herd with its name, head count, species, breed, category, and saleyard. USE IT. When the user says "my steers" or "weaner heifers" or any description of their livestock, MATCH it to a herd in the index and call the tools immediately. Do NOT ask the user which herd they mean if there is an obvious match. Do NOT ask for their saleyard if it is already listed in the index. Only ask for clarification if there are genuinely multiple matches and you cannot determine which one they mean.
@@ -896,6 +899,8 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
     pendingYardBookEvents: [],
     pendingYardBookActions: [],
     pendingSaleRecords: [],
+    pendingTreatmentRecords: [],
+    pendingMusterRecords: [],
   };
 }
 

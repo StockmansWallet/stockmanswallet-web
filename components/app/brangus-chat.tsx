@@ -470,6 +470,43 @@ export function BrangusChat({
       }
     }
     dataStore.pendingSaleRecords = [];
+
+    // Record health treatments logged through Brangus chat
+    for (const treatment of dataStore.pendingTreatmentRecords) {
+      const now = new Date().toISOString();
+      await supabase.from("health_records").insert({
+        id: crypto.randomUUID(),
+        user_id: user.id,
+        herd_id: treatment.herd_id,
+        date: new Date(treatment.date).toISOString(),
+        treatment_type_raw: treatment.treatment_type_raw,
+        notes: treatment.notes ?? null,
+        is_deleted: false,
+        is_demo_data: false,
+        created_at: now,
+        updated_at: now,
+      });
+    }
+    dataStore.pendingTreatmentRecords = [];
+
+    // Record muster events logged through Brangus chat
+    for (const muster of dataStore.pendingMusterRecords) {
+      const now = new Date().toISOString();
+      await supabase.from("muster_records").insert({
+        id: crypto.randomUUID(),
+        user_id: user.id,
+        herd_id: muster.herd_id,
+        date: new Date(muster.date).toISOString(),
+        total_head_count: muster.total_head_count,
+        cattle_yard: muster.cattle_yard ?? null,
+        notes: muster.notes ?? null,
+        is_deleted: false,
+        is_demo_data: false,
+        created_at: now,
+        updated_at: now,
+      });
+    }
+    dataStore.pendingMusterRecords = [];
   }, []);
 
   const handleSend = useCallback(

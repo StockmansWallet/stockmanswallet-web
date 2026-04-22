@@ -342,6 +342,72 @@ export const toolDefinitions = [
       required: ["herd_name", "head_count", "pricing_type", "sale_date"],
     },
   },
+  {
+    name: "record_treatment",
+    description:
+      "Logs a health treatment (drench, vaccination, parasite treatment, or other) against one of the user's herds. Use ONLY when the user explicitly says they treated, drenched, or vaccinated animals or wants to log a treatment (e.g. 'I just drenched Sonny with Cydectin', 'log that we vaccinated the heifers yesterday'). Do NOT use for scheduling future treatments - use create_yard_book_event instead. After recording, the treatment appears in the herd's health records in the app.",
+    input_schema: {
+      type: "object",
+      properties: {
+        herd_name: {
+          type: "string",
+          description: "Name of the herd that was treated. Must match a herd in the portfolio index.",
+        },
+        treatment_type: {
+          type: "string",
+          enum: ["drenching", "vaccination", "parasite_treatment", "other"],
+          description:
+            "Type of treatment: 'drenching' for worm/internal parasite drenches, 'vaccination' for vaccines, 'parasite_treatment' for external parasites (tick, lice, fluke), 'other' for anything else.",
+        },
+        date: {
+          type: "string",
+          description:
+            "Date of treatment in YYYY-MM-DD format. Derive from TODAY'S DATE in the system prompt if the user says 'today' or 'yesterday'.",
+        },
+        product_name: {
+          type: "string",
+          description: "Product or brand name used (e.g. 'Cydectin', 'Ivomec', '5-in-1 vaccine'). Optional.",
+        },
+        notes: {
+          type: "string",
+          description: "Any additional notes about the treatment. Optional.",
+        },
+      },
+      required: ["herd_name", "treatment_type", "date"],
+    },
+  },
+  {
+    name: "record_muster",
+    description:
+      "Logs a muster event against one of the user's herds. Use ONLY when the user explicitly says they mustered animals or wants to log a muster (e.g. 'just finished mustering Sonny, counted 980', 'log the muster', 'record that we mustered yesterday'). After recording, the muster appears in the herd's muster history in the app.",
+    input_schema: {
+      type: "object",
+      properties: {
+        herd_name: {
+          type: "string",
+          description: "Name of the herd that was mustered. Must match a herd in the portfolio index.",
+        },
+        date: {
+          type: "string",
+          description:
+            "Date of the muster in YYYY-MM-DD format. Derive from TODAY'S DATE in the system prompt if the user says 'today' or 'yesterday'.",
+        },
+        head_count_observed: {
+          type: "integer",
+          description: "Number of head counted during the muster. Required.",
+        },
+        cattle_yard: {
+          type: "string",
+          description: "Name of the yards used (e.g. 'Snake Paddock Yards', 'House Paddock'). Optional.",
+        },
+        notes: {
+          type: "string",
+          description: "Any additional notes about the muster. Optional.",
+        },
+      },
+      required: ["herd_name", "date", "head_count_observed"],
+    },
+  },
 ];
 
 // Display-only tools (no tool_result sent back to API)
@@ -373,6 +439,10 @@ export async function executeTool(
       return executeSearchPastChats(input);
     case "record_sale":
       return executeRecordSale(input, store);
+    case "record_treatment":
+      return executeRecordTreatment(input, store);
+    case "record_muster":
+      return executeRecordMuster(input, store);
     default:
       return `Error: Unknown tool '${toolName}'`;
   }
@@ -2410,4 +2480,93 @@ function executeRecordSale(input: Record<string, unknown>, store: ChatDataStore)
     : ` Remaining in herd: ${herd.head_count - headCount} head.`;
 
   return result;
+}
+
+// MARK: - record_treatment handler
+
+const TREATMENT_TYPE_MAP: Record<string, string> = {
+  drenching: "Drenching",
+  vaccination: "Vaccination",
+  parasite_treatment: "Parasite Treatment",
+  other: "Other",
+};
+
+function executeRecordTreatment(input: Record<string, unknown>, store: ChatDataStore): string {
+  const activeHerds = store.herds.filter((h) => !h.is_sold);
+  const herdName = input.herd_name as string;
+  if (!herdName?.trim()) return "Error: Missing herd_name.";
+
+  const herd = activeHerds.find(
+    (h) =>
+      h.name.toLowerCase().includes(herdName.toLowerCase()) ||
+      herdName.toLowerCase().includes(h.name.toLowerCase()),
+  );
+  if (!herd) {
+    const available = activeHerds.map((h) => h.name).join(", ");
+    return `No active herd found matching '${herdName}'. Available herds: ${available}`;
+  }
+
+  const treatmentTypeRaw = input.treatment_type as string;
+  if (!treatmentTypeRaw) return "Error: Missing treatment_type.";
+  const treatmentTypeLabel = TREATMENT_TYPE_MAP[treatmentTypeRaw] ?? "Other";
+
+  const dateStr = input.date as string;
+  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr))
+    return "Error: date must be in YYYY-MM-DD format.";
+
+  const productName = input.product_name as string | undefined;
+  const notes = input.notes as string | undefined;
+  const combinedNotes = [productName, notes].filter(Boolean).join(" - ") || undefined;
+
+  store.pendingTreatmentRecords.push({
+    herd_id: herd.id,
+    herd_name: herd.name,
+    date: dateStr,
+    treatment_type_raw: treatmentTypeLabel,
+    notes: combinedNotes,
+  });
+
+  const productPart = productName ? ` (${productName})` : "";
+  return `Treatment recorded: ${treatmentTypeLabel}${productPart} for '${herd.name}' on ${dateStr}. Check the herd's health records in the app to confirm.`;
+}
+
+// MARK: - record_muster handler
+
+function executeRecordMuster(input: Record<string, unknown>, store: ChatDataStore): string {
+  const activeHerds = store.herds.filter((h) => !h.is_sold);
+  const herdName = input.herd_name as string;
+  if (!herdName?.trim()) return "Error: Missing herd_name.";
+
+  const herd = activeHerds.find(
+    (h) =>
+      h.name.toLowerCase().includes(herdName.toLowerCase()) ||
+      herdName.toLowerCase().includes(h.name.toLowerCase()),
+  );
+  if (!herd) {
+    const available = activeHerds.map((h) => h.name).join(", ");
+    return `No active herd found matching '${herdName}'. Available herds: ${available}`;
+  }
+
+  const dateStr = input.date as string;
+  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr))
+    return "Error: date must be in YYYY-MM-DD format.";
+
+  const headCount =
+    typeof input.head_count_observed === "number" ? Math.floor(input.head_count_observed) : null;
+  if (!headCount || headCount <= 0) return "Error: head_count_observed must be a positive integer.";
+
+  const cattleYard = input.cattle_yard as string | undefined;
+  const notes = input.notes as string | undefined;
+
+  store.pendingMusterRecords.push({
+    herd_id: herd.id,
+    herd_name: herd.name,
+    date: dateStr,
+    total_head_count: headCount,
+    cattle_yard: cattleYard,
+    notes,
+  });
+
+  const yardPart = cattleYard ? ` at ${cattleYard}` : "";
+  return `Muster recorded: ${headCount} head observed${yardPart} for '${herd.name}' on ${dateStr}. Check the herd's muster records in the app to confirm.`;
 }
