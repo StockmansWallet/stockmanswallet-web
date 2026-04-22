@@ -1,10 +1,10 @@
-import Image from 'next/image'
-import Link from 'next/link'
-import { NAV_LINKS } from '@/lib/marketing/constants'
+import Image from "next/image";
+import Link from "next/link";
+import { NAV_LINKS } from "@/lib/marketing/constants";
 
 export function Footer() {
   return (
-    <footer className="border-t border-white/5 bg-bg-deep">
+    <footer className="bg-bg-deep border-t border-white/5 backdrop-blur-md">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-8 md:grid-cols-3">
           {/* Brand */}
@@ -19,20 +19,23 @@ export function Footer() {
               />
               <span className="text-lg font-bold text-white">Stockman&apos;s Wallet</span>
             </div>
-            <p className="mt-3 text-sm leading-relaxed text-text-secondary">
-              Intelligent Livestock Valuation. Real market data, real-time herd valuations, and AI-powered capital timing intelligence for Australian producers.
+            <p className="text-text-secondary mt-3 text-sm leading-relaxed">
+              Intelligent Livestock Valuation. Real market data, real-time herd valuations, and
+              AI-powered capital timing intelligence for Australian producers.
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-text-tertiary">Quick Links</h4>
+            <h4 className="text-text-tertiary mb-4 text-sm font-semibold tracking-wider uppercase">
+              Quick Links
+            </h4>
             <nav className="flex flex-col gap-2">
               {NAV_LINKS.map((link) => (
                 <a
                   key={link.href}
                   href={link.href}
-                  className="text-sm text-text-secondary transition-colors hover:text-white"
+                  className="text-text-secondary text-sm transition-colors hover:text-white"
                 >
                   {link.label}
                 </a>
@@ -42,19 +45,27 @@ export function Footer() {
 
           {/* Legal */}
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-text-tertiary">Legal</h4>
+            <h4 className="text-text-tertiary mb-4 text-sm font-semibold tracking-wider uppercase">
+              Legal
+            </h4>
             <nav className="flex flex-col gap-2">
-              <Link href="/privacy" className="text-sm text-text-secondary transition-colors hover:text-white">
+              <Link
+                href="/privacy"
+                className="text-text-secondary text-sm transition-colors hover:text-white"
+              >
                 Privacy Policy
               </Link>
-              <Link href="/terms" className="text-sm text-text-secondary transition-colors hover:text-white">
+              <Link
+                href="/terms"
+                className="text-text-secondary text-sm transition-colors hover:text-white"
+              >
                 Terms of Service
               </Link>
             </nav>
             <div className="mt-6">
               <a
                 href="mailto:support@stockmanswallet.com.au"
-                className="text-sm text-text-secondary transition-colors hover:text-brand"
+                className="text-text-secondary hover:text-brand text-sm transition-colors"
               >
                 support@stockmanswallet.com.au
               </a>
@@ -63,14 +74,12 @@ export function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-white/5 pt-8 sm:flex-row">
-          <p className="text-xs text-text-tertiary">
+          <p className="text-text-tertiary text-xs">
             &copy; 2026 Stockman&apos;s Wallet Pty Ltd. All rights reserved.
           </p>
-          <p className="text-xs text-text-tertiary">
-            Made in Queensland, Australia.
-          </p>
+          <p className="text-text-tertiary text-xs">Made in Queensland, Australia.</p>
         </div>
       </div>
     </footer>
-  )
+  );
 }

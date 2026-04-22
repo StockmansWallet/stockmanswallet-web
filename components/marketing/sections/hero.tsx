@@ -34,7 +34,7 @@ export default function Hero() {
           alt=""
           fill
           priority
-          className="object-cover opacity-20"
+          className="object-cover opacity-10"
         />
       </div>
 
@@ -108,7 +108,7 @@ export default function Hero() {
               transition={{ duration: 0.6, delay: 0.5 }}
               className="mt-10"
             >
-              <LandingButton size="lg" onClick={openWaitlist}>
+              <LandingButton size="sm" onClick={openWaitlist}>
                 Join Waitlist
               </LandingButton>
               <p className="text-text-muted mt-3 text-xs">

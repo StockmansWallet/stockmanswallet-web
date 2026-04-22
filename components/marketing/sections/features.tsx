@@ -24,6 +24,7 @@ interface FeatureTab {
   description: string;
   color: string;
   colorLight: string;
+  colorDark: string;
   bullets: string[];
   mockup: string;
   video?: string;
@@ -38,8 +39,9 @@ const FEATURE_TABS: FeatureTab[] = [
     tagline: "Your herds at a glance",
     description:
       "View your total livestock portfolio in one place. Track live market-linked pricing, monitor performance over time, and understand where your capital is concentrated across the herd.",
-    color: "#FF8000",
-    colorLight: "#F4A871",
+    color: "var(--feature-dashboard)",
+    colorLight: "var(--feature-dashboard-light)",
+    colorDark: "var(--feature-dashboard-dark)",
     bullets: [
       "See your total livestock portfolio value update in real time",
       "Track live market-linked pricing across every herd",
@@ -56,8 +58,9 @@ const FEATURE_TABS: FeatureTab[] = [
     tagline: "Live financial assets",
     description:
       "Turn each herd into a live financial asset. Market-linked valuations reflect breed premiums, daily weight gain, breeding activity, and projected biological change, so your balance sheet keeps pace with the paddock.",
-    color: "#FF8000",
-    colorLight: "#F4A871",
+    color: "var(--feature-herds)",
+    colorLight: "var(--feature-herds-light)",
+    colorDark: "var(--feature-herds-dark)",
     bullets: [
       "Add and manage herds as financial assets within your portfolio",
       "Match each herd to live market data with breed premium adjustments",
@@ -74,8 +77,9 @@ const FEATURE_TABS: FeatureTab[] = [
     tagline: "Bank-ready in one tap",
     description:
       "Generate professional reports your bank manager, accountant, or advisor can actually use. Asset registers, sales summaries, and branded valuation reports, filtered by date range and property, exported as PDF or shared via email.",
-    color: "#D4A053",
-    colorLight: "#E8C07A",
+    color: "var(--feature-reports)",
+    colorLight: "var(--feature-reports-light)",
+    colorDark: "var(--feature-reports-dark)",
     bullets: [
       "Build asset registers with full herd-by-herd valuations and price source tracking",
       "Generate accountant-ready summaries with portfolio overview, composition, and sales history",
@@ -95,8 +99,9 @@ const FEATURE_TABS: FeatureTab[] = [
           tagline: "Your portfolio, your terms",
           description:
             "Give your banker, agent, accountant, or insurer a window into your portfolio, on your terms. Advisors request time-limited access, you approve or deny, and they get read-only tools purpose-built for professional analysis.",
-          color: "#1E5C8C",
-          colorLight: "#2F8CD9",
+          color: "var(--feature-advisory)",
+          colorLight: "var(--feature-advisory-light)",
+          colorDark: "var(--feature-advisory-dark)",
           bullets: [
             "Grant read-only portfolio access to trusted advisors",
             "Approve or deny access requests and revoke at any time",
@@ -115,8 +120,9 @@ const FEATURE_TABS: FeatureTab[] = [
     tagline: "Your digital run sheet",
     description:
       "Your digital run sheet. Track every mustering, vet visit, breeding event, maintenance job, and personal reminder in one place, with colour-coded categories, recurring schedules, and horizon-based grouping so nothing falls through the cracks.",
-    color: "#87B11B",
-    colorLight: "#A3CC3D",
+    color: "var(--feature-yardbook)",
+    colorLight: "var(--feature-yardbook-light)",
+    colorDark: "var(--feature-yardbook-dark)",
     bullets: [
       "Create events across five categories: Health, Mustering, Maintenance, Breeding, and Admin",
       "Set recurring schedules and reminder offsets so you are always ahead",
@@ -133,8 +139,9 @@ const FEATURE_TABS: FeatureTab[] = [
     tagline: "Know the cost before you commit",
     description:
       "Estimate transport costs before you commit cattle to market. Industry-standard loading densities, real driving distances, and full cost breakdowns so you can compare markets net of freight and find the best return.",
-    color: "#1399EC",
-    colorLight: "#64BBF5",
+    color: "var(--feature-freight)",
+    colorLight: "var(--feature-freight-light)",
+    colorDark: "var(--feature-freight-dark)",
     bullets: [
       "11 transport categories with weight-based escalation pricing",
       "Real driving distances calculated via Apple Maps",
@@ -151,8 +158,9 @@ const FEATURE_TABS: FeatureTab[] = [
     tagline: "Connect with your region",
     description:
       "Connect with other producers in your region. Build a trusted peer network to share operational insights, compare notes on markets and conditions, and collaborate on the challenges only another farmer understands.",
-    color: "#7C6DD8",
-    colorLight: "#A094E8",
+    color: "var(--feature-network)",
+    colorLight: "var(--feature-network-light)",
+    colorDark: "var(--feature-network-dark)",
     bullets: [
       "Browse a directory of producers and send connection requests",
       "Build a permanent network of trusted peers across your region",
@@ -169,8 +177,9 @@ const FEATURE_TABS: FeatureTab[] = [
     tagline: "Market vs processor",
     description:
       "Compare the saleyard against the processor before you sell. Upload grids via photo or PDF, let AI extract the data, build a test consignment from your portfolio, and see which channel nets the best return. Then track kill sheets to sharpen future decisions.",
-    color: "#00B4A0",
-    colorLight: "#33D4C0",
+    color: "var(--feature-gridiq)",
+    colorLight: "var(--feature-gridiq-light)",
+    colorDark: "var(--feature-gridiq-dark)",
     bullets: [
       "AI-powered grid extraction from photos, PDFs, and spreadsheets",
       "Net market vs net processor comparison including freight",
@@ -188,8 +197,9 @@ const FEATURE_TABS: FeatureTab[] = [
     tagline: "Live market intelligence",
     description:
       "Live market data at your fingertips. National indicators, saleyard category prices, and trend signals, updated daily so you can time your decisions with confidence.",
-    color: "#E8594E",
-    colorLight: "#F08070",
+    color: "var(--feature-markets)",
+    colorLight: "var(--feature-markets-light)",
+    colorDark: "var(--feature-markets-dark)",
     bullets: [
       "National price indicators for beef cattle, sheep, pigs, and goats with trend signals",
       "Saleyard category prices aggregated across Australian markets",
@@ -206,8 +216,9 @@ const FEATURE_TABS: FeatureTab[] = [
     tagline: "Brangus Powered Decisions",
     description:
       "Brangus evaluates your portfolio every day against live market conditions and surfaces the calls that matter. Sell vs hold, optimal timing, weight targets, best market, price sensitivity, calving forecasts and much more.",
-    color: "#FF8000",
-    colorLight: "#F4A871",
+    color: "var(--feature-insights)",
+    colorLight: "var(--feature-insights-light)",
+    colorDark: "var(--feature-insights-dark)",
     bullets: [
       "Daily evaluation of your portfolio against current market data",
       "Sell vs hold analysis with projected gains over 30, 60, and 90 days",
@@ -306,7 +317,11 @@ export default function Features() {
           <button
             onClick={goPrev}
             aria-label="Previous feature"
-            className="border-brand/30 bg-brand/15 text-brand shadow-brand/10 hover:bg-brand/25 hover:shadow-brand/20 focus-visible:ring-brand absolute top-1/2 -left-2 z-20 hidden -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border p-4 shadow-lg backdrop-blur-sm transition-colors focus-visible:ring-2 focus-visible:outline-none lg:-left-24 lg:flex"
+            className="absolute top-1/2 -left-2 z-20 hidden -translate-y-1/2 cursor-pointer items-center justify-center rounded-full p-4 backdrop-blur-sm transition-colors focus-visible:ring-2 focus-visible:outline-none lg:-left-24 lg:flex"
+            style={{
+              color: feature.colorLight,
+              backgroundColor: `color-mix(in srgb, ${feature.color} 15%, transparent)`,
+            }}
           >
             <svg
               className="h-6 w-6"
@@ -321,7 +336,11 @@ export default function Features() {
           <button
             onClick={goNext}
             aria-label="Next feature"
-            className="border-brand/30 bg-brand/15 text-brand shadow-brand/10 hover:bg-brand/25 hover:shadow-brand/20 focus-visible:ring-brand absolute top-1/2 -right-2 z-20 hidden -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border p-4 shadow-lg backdrop-blur-sm transition-colors focus-visible:ring-2 focus-visible:outline-none lg:-right-24 lg:flex"
+            className="absolute top-1/2 -right-2 z-20 hidden -translate-y-1/2 cursor-pointer items-center justify-center rounded-full p-4 backdrop-blur-sm transition-colors focus-visible:ring-2 focus-visible:outline-none lg:-right-24 lg:flex"
+            style={{
+              color: feature.colorLight,
+              backgroundColor: `color-mix(in srgb, ${feature.color} 15%, transparent)`,
+            }}
           >
             <svg
               className="h-6 w-6"
@@ -346,11 +365,14 @@ export default function Features() {
               >
                 <span
                   className="text-sm font-medium tracking-wider uppercase"
-                  style={{ color: feature.colorLight }}
+                  style={{ color: feature.colorDark }}
                 >
                   {feature.tagline}
                 </span>
-                <h3 className="mt-3 flex items-center gap-3 text-2xl font-semibold text-white sm:text-3xl">
+                <h3
+                  className="mt-3 flex items-center gap-3 text-2xl font-semibold sm:text-3xl"
+                  style={{ color: feature.color }}
+                >
                   {feature.name}
                   {feature.comingSoon && (
                     <span
@@ -371,21 +393,24 @@ export default function Features() {
                 <ul className="mt-6 space-y-3">
                   {feature.bullets.map((bullet) => (
                     <li key={bullet} className="flex items-start gap-3">
-                      <svg
-                        aria-hidden="true"
-                        className="mt-0.5 h-5 w-5 shrink-0"
-                        style={{ color: feature.color }}
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={2}
+                      <div
+                        className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full backdrop-blur-sm"
+                        style={{
+                          backgroundColor: `color-mix(in srgb, ${feature.color} 15%, transparent)`,
+                        }}
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
+                        <svg
+                          aria-hidden="true"
+                          className="h-3 w-3"
+                          style={{ color: feature.colorLight }}
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth={3}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
                       <span className="text-text-secondary text-sm">{bullet}</span>
                     </li>
                   ))}
@@ -396,7 +421,11 @@ export default function Features() {
                   <button
                     onClick={goPrev}
                     aria-label="Previous feature"
-                    className="border-brand/30 bg-brand/15 text-brand hover:bg-brand/25 focus-visible:ring-brand flex cursor-pointer items-center justify-center rounded-full border p-3 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                    className="flex cursor-pointer items-center justify-center rounded-full p-3 backdrop-blur-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                    style={{
+                      color: feature.colorLight,
+                      backgroundColor: `color-mix(in srgb, ${feature.color} 15%, transparent)`,
+                    }}
                   >
                     <svg
                       className="h-5 w-5"
@@ -418,7 +447,11 @@ export default function Features() {
                   <button
                     onClick={goNext}
                     aria-label="Next feature"
-                    className="border-brand/30 bg-brand/15 text-brand hover:bg-brand/25 focus-visible:ring-brand flex cursor-pointer items-center justify-center rounded-full border p-3 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                    className="flex cursor-pointer items-center justify-center rounded-full p-3 backdrop-blur-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                    style={{
+                      color: feature.colorLight,
+                      backgroundColor: `color-mix(in srgb, ${feature.color} 15%, transparent)`,
+                    }}
                   >
                     <svg
                       className="h-5 w-5"

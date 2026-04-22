@@ -28,6 +28,8 @@ const ACCENT = {
     text: "text-brand",
     bg: "bg-brand",
     bgHover: "hover:bg-brand-light",
+    bgDark: "bg-brand-dark",
+    bgDarkHover: "hover:bg-brand",
     border: "border-brand/30",
     cardBg: "bg-brand/[0.04]",
     glow: "shadow-[0_0_60px_rgba(217,118,47,0.08)]",
@@ -37,6 +39,8 @@ const ACCENT = {
     text: "text-[#2F8CD9]",
     bg: "bg-[#2F8CD9]",
     bgHover: "hover:bg-[#4AA0E6]",
+    bgDark: "bg-[#2b4fa8]",
+    bgDarkHover: "hover:bg-[#2F8CD9]",
     border: "border-[#2F8CD9]/30",
     cardBg: "bg-[#2F8CD9]/[0.04]",
     glow: "shadow-[0_0_60px_rgba(47,140,217,0.08)]",
@@ -210,11 +214,7 @@ export default function Pricing() {
 
                 <a
                   href="#signup"
-                  className={`focus-visible:ring-brand mt-6 flex h-10 items-center justify-center rounded-full text-sm font-semibold transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none ${
-                    tier.highlighted
-                      ? `${accent.bg} text-white ${accent.bgHover}`
-                      : "border border-white/10 text-white hover:bg-white/5"
-                  }`}
+                  className={`focus-visible:ring-brand ${accent.bgDark} ${accent.bgDarkHover} mt-6 flex h-10 items-center justify-center rounded-full text-sm font-semibold text-white transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none`}
                 >
                   Join Waitlist
                 </a>

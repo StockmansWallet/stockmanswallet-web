@@ -123,24 +123,34 @@
      tab buttons, headings, bullets, arrows, and any future use. */
   --feature-dashboard: var(--hue-gold);
   --feature-dashboard-light: var(--hue-gold-light);
+  --feature-dashboard-dark: var(--hue-gold-dark);
   --feature-herds: var(--hue-gold);
   --feature-herds-light: var(--hue-gold-light);
+  --feature-herds-dark: var(--hue-gold-dark);
   --feature-reports: var(--color-reports);
   --feature-reports-light: var(--color-reports-light);
+  --feature-reports-dark: var(--color-reports-dark);
   --feature-advisory: var(--hue-indigo);
   --feature-advisory-light: var(--hue-indigo-light);
+  --feature-advisory-dark: var(--hue-indigo-dark);
   --feature-yardbook: var(--color-yard-book);
   --feature-yardbook-light: var(--color-yard-book-light);
+  --feature-yardbook-dark: var(--color-yard-book-dark);
   --feature-freight: var(--color-freight-iq);
   --feature-freight-light: var(--color-freight-iq-light);
+  --feature-freight-dark: var(--color-freight-iq-dark);
   --feature-network: var(--color-producer-network);
   --feature-network-light: var(--color-producer-network-light);
+  --feature-network-dark: var(--color-producer-network-dark);
   --feature-gridiq: var(--color-grid-iq);
   --feature-gridiq-light: var(--color-grid-iq-light);
+  --feature-gridiq-dark: var(--color-grid-iq-dark);
   --feature-markets: var(--color-markets);
   --feature-markets-light: var(--color-markets-light);
+  --feature-markets-dark: var(--color-markets-dark);
   --feature-insights: var(--color-insights);
   --feature-insights-light: var(--color-insights-light);
+  --feature-insights-dark: var(--color-insights-dark);
 }
 
 @theme inline {

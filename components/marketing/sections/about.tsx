@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
-import Image from 'next/image'
-import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { TEAM_MEMBERS } from '@/lib/marketing/constants'
-import LandingButton from '@/components/marketing/ui/landing-button'
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { TEAM_MEMBERS } from "@/lib/marketing/constants";
+import LandingButton from "@/components/marketing/ui/landing-button";
 
 export default function About() {
   return (
@@ -17,14 +17,15 @@ export default function About() {
           transition={{ duration: 0.6 }}
           className="text-center"
         >
-          <span className="text-sm font-medium uppercase tracking-wider text-brand">About Us</span>
-          <h2 className="mt-3 text-3xl font-semibold text-white text-balance sm:text-4xl lg:text-5xl">
+          <span className="text-brand text-sm font-medium tracking-wider uppercase">About Us</span>
+          <h2 className="mt-3 text-3xl font-semibold text-balance text-white sm:text-4xl lg:text-5xl">
             Built by Australians,
             <br className="hidden sm:block" />
-            for Australian producers
+            <span className="text-brand">for Australian producers</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-text-secondary">
-            We believe livestock producers deserve the same quality of financial tools available to equity investors. Real data, intelligent analysis, professional-grade reporting.
+          <p className="text-text-secondary mx-auto mt-4 max-w-2xl text-base leading-relaxed">
+            We believe livestock producers deserve the same quality of financial tools available to
+            equity investors. Real data, intelligent analysis, professional-grade reporting.
           </p>
         </motion.div>
 
@@ -50,10 +51,10 @@ export default function About() {
                 alt={member.name}
                 width={72}
                 height={72}
-                className="h-14 w-14 rounded-full object-cover ring-2 ring-white/10 sm:h-16 sm:w-16 lg:h-[72px] lg:w-[72px]"
+                className="h-14 w-14 rounded-full object-cover sm:h-16 sm:w-16 lg:h-[72px] lg:w-[72px]"
               />
               <p className="mt-2.5 text-sm font-medium text-white">{member.name}</p>
-              <p className="text-xs text-text-muted">{member.role.replace('Chief ', '')}</p>
+              <p className="text-text-muted text-xs">{member.role.replace("Chief ", "")}</p>
             </motion.div>
           ))}
         </motion.div>
@@ -66,11 +67,11 @@ export default function About() {
           transition={{ duration: 0.4, delay: 0.5 }}
           className="mt-10 flex justify-center"
         >
-          <LandingButton variant="secondary" size="sm" href="/about">
+          <LandingButton variant="secondary" size="sm" href="/about" className="backdrop-blur-sm">
             Learn more about us
           </LandingButton>
         </motion.div>
       </div>
     </section>
-  )
+  );
 }

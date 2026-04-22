@@ -1,42 +1,48 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { NAV_LINKS } from '@/lib/marketing/constants'
-import LandingButton from '@/components/marketing/ui/landing-button'
-import { useWaitlist } from '@/components/marketing/ui/waitlist-provider'
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { NAV_LINKS } from "@/lib/marketing/constants";
+import LandingButton from "@/components/marketing/ui/landing-button";
+import { useWaitlist } from "@/components/marketing/ui/waitlist-provider";
 
 export function Header() {
-  const { openWaitlist } = useWaitlist()
-  const [scrolled, setScrolled] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const { openWaitlist } = useWaitlist();
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     function onScroll() {
-      setScrolled(window.scrollY > 20)
+      setScrolled(window.scrollY > 20);
     }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     if (mobileOpen) {
-      document.body.style.overflow = 'hidden'
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = ''
+      document.body.style.overflow = "";
     }
-    return () => { document.body.style.overflow = '' }
-  }, [mobileOpen])
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
 
   return (
     <header
       className="fixed top-0 z-50 w-full transition-all duration-700 ease-in-out"
-      style={scrolled ? {
-        backgroundColor: 'rgba(15, 12, 8, 0.35)',
-        backdropFilter: 'blur(24px) saturate(1.2)',
-        WebkitBackdropFilter: 'blur(24px) saturate(1.2)',
-      } : undefined}
+      style={
+        scrolled
+          ? {
+              backgroundColor: "rgba(15, 12, 8, 0.35)",
+              backdropFilter: "blur(24px) saturate(1.2)",
+              WebkitBackdropFilter: "blur(24px) saturate(1.2)",
+            }
+          : undefined
+      }
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
@@ -57,7 +63,7 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="rounded-[10px] px-3 py-2 text-sm font-medium text-text-secondary transition-colors hover:text-white hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+              className="text-text-secondary focus-visible:ring-brand rounded-[10px] px-3 py-2 text-sm font-medium transition-colors hover:bg-white/5 hover:text-white focus-visible:ring-2 focus-visible:outline-none"
             >
               {link.label}
             </Link>
@@ -73,17 +79,27 @@ export function Header() {
 
         {/* Mobile Hamburger */}
         <button
-          className="flex h-11 w-11 items-center justify-center rounded-[10px] text-text-secondary hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand lg:hidden"
+          className="text-text-secondary focus-visible:ring-brand flex h-11 w-11 items-center justify-center rounded-[10px] hover:bg-white/5 focus-visible:ring-2 focus-visible:outline-none lg:hidden"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
         >
           {mobileOpen ? (
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           ) : (
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
             </svg>
           )}
         </button>
@@ -98,14 +114,21 @@ export function Header() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className="rounded-[10px] px-3 py-3 text-base font-medium text-text-secondary transition-colors hover:text-white hover:bg-white/5"
+                className="text-text-secondary rounded-[10px] px-3 py-3 text-base font-medium transition-colors hover:bg-white/5 hover:text-white"
               >
                 {link.label}
               </Link>
             ))}
 
             <div className="mt-2 border-t border-white/5 pt-4">
-              <LandingButton className="w-full" onClick={() => { setMobileOpen(false); openWaitlist() }}>
+              <LandingButton
+                size="sm"
+                className="w-full"
+                onClick={() => {
+                  setMobileOpen(false);
+                  openWaitlist();
+                }}
+              >
                 Join Waitlist
               </LandingButton>
             </div>
@@ -113,5 +136,5 @@ export function Header() {
         </div>
       )}
     </header>
-  )
+  );
 }

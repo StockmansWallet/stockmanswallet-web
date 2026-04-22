@@ -1,11 +1,11 @@
-'use client'
+"use client";
 
-import { motion } from 'framer-motion'
-import LandingButton from '@/components/marketing/ui/landing-button'
-import { useWaitlist } from '@/components/marketing/ui/waitlist-provider'
+import { motion } from "framer-motion";
+import LandingButton from "@/components/marketing/ui/landing-button";
+import { useWaitlist } from "@/components/marketing/ui/waitlist-provider";
 
 export default function AboutCTA() {
-  const { openWaitlist } = useWaitlist()
+  const { openWaitlist } = useWaitlist();
 
   return (
     <section className="relative py-24 lg:py-32">
@@ -16,19 +16,15 @@ export default function AboutCTA() {
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
         >
-          <span className="text-sm font-medium uppercase tracking-wider text-brand">
-            Join Us
-          </span>
+          <span className="text-brand text-sm font-medium tracking-wider uppercase">Join Us</span>
           <h2 className="mt-4 text-3xl font-semibold text-white sm:text-4xl lg:text-5xl">
             Be Part of the Future of
             <br />
-            <span className="text-brand">
-              Australian Livestock.
-            </span>
+            <span className="text-brand">Australian Livestock.</span>
           </h2>
-          <p className="mx-auto mt-6 max-w-lg text-base text-text-secondary">
-            Join the waitlist for early access. Founding members receive exclusive pricing
-            and priority onboarding when we launch in May 2026.
+          <p className="text-text-secondary mx-auto mt-6 max-w-lg text-base">
+            Join the waitlist for early access. Founding members receive exclusive pricing and
+            priority onboarding when we launch in May 2026.
           </p>
         </motion.div>
 
@@ -39,7 +35,7 @@ export default function AboutCTA() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mx-auto mt-10 flex justify-center"
         >
-          <LandingButton size="lg" onClick={openWaitlist}>
+          <LandingButton size="sm" onClick={openWaitlist}>
             Join Waitlist
           </LandingButton>
         </motion.div>
@@ -49,17 +45,17 @@ export default function AboutCTA() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="mt-6 text-xs text-text-muted"
+          className="text-text-muted mt-6 text-xs"
         >
-          Questions? Reach out at{' '}
+          Questions? Reach out at{" "}
           <a
             href="mailto:hello@stockmanswallet.com.au"
-            className="text-brand transition-colors hover:text-brand-light"
+            className="text-brand hover:text-brand-light transition-colors"
           >
             hello@stockmanswallet.com.au
           </a>
         </motion.p>
       </div>
     </section>
-  )
+  );
 }
