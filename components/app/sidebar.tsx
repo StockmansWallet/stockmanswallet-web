@@ -67,10 +67,10 @@ export function Sidebar({
   return (
     <aside className="flex h-full w-64 flex-col">
       {/* Scrollable navigation */}
-      <nav className="scrollbar-none min-h-0 flex-1 overflow-y-auto px-4 pt-4">
-        <div className="space-y-2">
+      <nav className="scrollbar-none min-h-0 flex-1 overflow-y-auto px-4 pt-16">
+        <div className="space-y-3 lg:space-y-4">
           {/* Portfolio */}
-          <div className="rounded-xl bg-white/[0.04] p-2 backdrop-blur-md">
+          <div className="rounded-2xl bg-white/[0.04] p-2 backdrop-blur-md">
             <p className="text-text-muted/60 mb-1 px-3 pt-1 text-[10px] font-semibold tracking-widest uppercase">
               Portfolio
             </p>
@@ -82,7 +82,7 @@ export function Sidebar({
           </div>
 
           {/* Intelligence */}
-          <div className="rounded-xl bg-white/[0.04] p-2 backdrop-blur-md">
+          <div className="rounded-2xl bg-white/[0.04] p-2 backdrop-blur-md">
             <p className="text-text-muted/60 mb-1 px-3 pt-1 text-[10px] font-semibold tracking-widest uppercase">
               Intelligence
             </p>
@@ -95,7 +95,7 @@ export function Sidebar({
 
           {/* Tools */}
           {toolItems.length > 0 && (
-            <div className="rounded-xl bg-white/[0.04] p-2 backdrop-blur-md">
+            <div className="rounded-2xl bg-white/[0.04] p-2 backdrop-blur-md">
               <p className="text-text-muted/60 mb-1 px-3 pt-1 text-[10px] font-semibold tracking-widest uppercase">
                 Tools
               </p>
@@ -109,7 +109,7 @@ export function Sidebar({
 
           {/* Admin */}
           {isAdmin && (
-            <div className="rounded-xl bg-white/[0.04] p-2 backdrop-blur-md">
+            <div className="rounded-2xl bg-white/[0.04] p-2 backdrop-blur-md">
               <p className="text-text-muted/60 mb-1 px-3 pt-1 text-[10px] font-semibold tracking-widest uppercase">
                 Admin
               </p>
@@ -122,7 +122,7 @@ export function Sidebar({
           )}
 
           {/* Help & Settings */}
-          <div className="rounded-xl bg-white/[0.04] p-2 backdrop-blur-md">
+          <div className="rounded-2xl bg-white/[0.04] p-2 backdrop-blur-md">
             <div className="space-y-0.5">
               {bottomNavItems.map((item) => (
                 <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />

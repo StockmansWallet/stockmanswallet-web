@@ -107,7 +107,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               </div>
             </div>
 
-            <main className="flex-1 overflow-y-auto px-6 pb-6 lg:px-8 lg:pb-8">{children}</main>
+            <main className="flex-1 overflow-y-auto px-6 pb-6 lg:pr-8 lg:pb-8 lg:pl-0">
+              {children}
+            </main>
           </div>
         </div>
       </SidebarNotificationsProvider>
