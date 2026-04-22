@@ -20,16 +20,16 @@ function NavLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
   // Active: feature tint + feature text + frosted-glass blur.
   // Hover (when not active): feature -dark fill + white text.
   // Both states pull from nav-config.tsx so every item stays in step.
-  const inactiveBase = "text-text-secondary hover:backdrop-blur-xl";
+  const inactiveBase = "text-text-secondary";
   const inactive =
     item.inactiveClass ??
     `${inactiveBase} ${item.hoverClass ?? "hover:bg-brand-dark hover:text-white"}`;
-  const active = `backdrop-blur-xl ${item.activeClass ?? "bg-brand/15 text-brand"}`;
+  const active = item.activeClass ?? "bg-brand/15 text-brand";
 
   return (
     <Link
       href={item.href}
-      className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 ${
+      className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 ${
         isActive ? active : inactive
       }`}
     >
