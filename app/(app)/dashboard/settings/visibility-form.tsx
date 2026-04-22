@@ -66,8 +66,8 @@ export function VisibilityForm({
           checked={values.is_discoverable_to_producers}
           onChange={(c) => handleToggle("is_discoverable_to_producers", c)}
           disabled={saving === "is_discoverable_to_producers"}
-          label="Visible to Producers"
-          description="Other producers on Stockman's Wallet can find you in the Producer Network."
+          label="Searchable by Producers"
+          description="Other producers can search for you in the Producer Directory to send a connection request."
           color="green"
         />
       )}
@@ -75,7 +75,7 @@ export function VisibilityForm({
       <p className="text-text-muted text-xs leading-relaxed">
         {isAdvisor
           ? "Control whether producers can find you in the advisor directory."
-          : "Control whether other producers can find you on Stockman's Wallet. You can turn this off at any time."}
+          : "Control whether other producers can search for you on Stockman's Wallet. You can turn this off at any time."}
       </p>
     </div>
   );

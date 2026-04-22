@@ -1,20 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Handshake, UserCheck, Clock, Users2, MapPin, ChevronRight } from "lucide-react";
+import { Handshake, UserCheck, Clock, Users2 } from "lucide-react";
 import { ProducerRequestCard } from "@/components/app/producer-network/producer-request-card";
 import { ProducerPeerCard } from "@/components/app/producer-network/producer-peer-card";
 import { ProducerSearch } from "@/components/app/producer-network/producer-search";
 import { ProducerConnectionsRealtime } from "@/components/app/producer-network/producer-connections-realtime";
-import { ProducerCard } from "@/components/app/producer-network/producer-card";
 import { MarkNotificationsRead } from "@/components/app/mark-notifications-read";
-import { loadOutgoingBlocks } from "@/lib/data/user-blocks";
 import { fetchUserAvatars } from "@/lib/auth/fetch-user-avatars";
-import { enrichProducers } from "@/lib/data/producer-enrichment";
-import type { ConnectionRequest, DirectoryProducer } from "@/lib/types/advisory";
+import type { ConnectionRequest } from "@/lib/types/advisory";
 
 export const revalidate = 0;
 
@@ -122,55 +118,9 @@ export default async function ProducerNetworkPage() {
     return new Date(bt).getTime() - new Date(at).getTime();
   });
 
-  // Discovery: producers in the caller's state, capped at 4, excluding
-  // self and anyone with any existing peer history. Hidden entirely
-  // when there are no leads to show.
-  const { data: myProfile } = await supabase
-    .from("user_profiles")
-    .select("state")
-    .eq("user_id", user.id)
-    .maybeSingle();
-  const myState = myProfile?.state ?? null;
-
-  let nearbyProducers: DirectoryProducer[] = [];
-  if (myState) {
-    const blockedIds = await loadOutgoingBlocks(supabase, user.id);
-    const excludeIds = [
-      user.id,
-      ...allConns.map(otherIdFor),
-      ...blockedIds,
-    ];
-
-    const { data: nearby } = await supabase
-      .from("user_profiles")
-      .select("user_id, display_name, company_name, property_name, role, state, region, bio")
-      .eq("role", "producer")
-      .eq("state", myState)
-      .not("user_id", "in", `(${excludeIds.join(",")})`)
-      .order("display_name")
-      .limit(4);
-
-    const baseNearby = (nearby ?? []) as DirectoryProducer[];
-    // Enrich so the per-row meta line can show species beside state,
-    // matching the directory page.
-    const nearbyEnrichment = await enrichProducers(
-      supabase,
-      baseNearby.map((p) => p.user_id),
-    );
-    nearbyProducers = baseNearby.map((p) => ({
-      ...p,
-      primary_species: nearbyEnrichment.get(p.user_id)?.primary_species ?? null,
-    }));
-  }
-
   // Avatar URLs live on auth.users.user_metadata, not user_profiles, so
-  // we go through the service-role client. Fetched for every user shown
-  // on this page: connections, outgoing pending, incoming requests, and
-  // nearby-producer preview rows.
-  const avatarFetchIds = Array.from(
-    new Set([...avatarIds, ...nearbyProducers.map((p) => p.user_id)]),
-  );
-  const avatarMap = await fetchUserAvatars(avatarFetchIds);
+  // we go through the service-role client.
+  const avatarMap = await fetchUserAvatars(avatarIds);
 
   return (
     <div className="max-w-4xl">
@@ -225,8 +175,8 @@ export default async function ProducerNetworkPage() {
           <EmptyState
             icon={<Users2 className="h-6 w-6 text-producer-network-light" />}
             title="No connections yet"
-            description="Search above, or browse the full directory to find other producers."
-            actionLabel="Browse Directory"
+            description="Search for producers by name or property to send a connection request."
+            actionLabel="Search Directory"
             actionHref="/dashboard/producer-network/directory"
             variant="amber"
           />
@@ -307,37 +257,6 @@ export default async function ProducerNetworkPage() {
               );
             })}
           </div>
-        </div>
-      )}
-
-      {/* Discovery footer. Hidden if the user has no state on file or
-          no same-state producers left to show. */}
-      {nearbyProducers.length > 0 && myState && (
-        <div className="mb-6">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-sm font-semibold text-text-primary">
-              <MapPin className="h-4 w-4 text-producer-network-light" aria-hidden="true" />
-              In your region ({myState})
-            </h2>
-            <Link
-              href={`/dashboard/producer-network/directory?state=${encodeURIComponent(myState)}`}
-              className="inline-flex items-center gap-1 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-xs font-medium text-producer-network-light transition-colors hover:bg-surface-raised"
-            >
-              See all
-              <ChevronRight className="h-3 w-3" aria-hidden="true" />
-            </Link>
-          </div>
-          <Card>
-            <div className="divide-y divide-white/[0.06]">
-              {nearbyProducers.map((p) => (
-                <ProducerCard
-                  key={p.user_id}
-                  producer={p}
-                  avatarUrl={avatarMap.get(p.user_id) ?? null}
-                />
-              ))}
-            </div>
-          </Card>
         </div>
       )}
 

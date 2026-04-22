@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Search } from "lucide-react";
+import { Search, Users2 } from "lucide-react";
 import { ProducerCard } from "@/components/app/producer-network/producer-card";
 import { ProducerDirectorySearch } from "./producer-directory-search";
 import { sanitiseSearchQuery } from "@/lib/utils/search-sanitise";
@@ -35,60 +35,71 @@ export default async function ProducerDirectoryPage({
   const stateFilter = STATE_VALUES.includes(params.state as (typeof STATE_VALUES)[number])
     ? (params.state as string)
     : "";
-  const speciesFilter = SPECIES_VALUES.includes(params.species as PrimarySpecies)
+  const speciesFilter: PrimarySpecies | "" = SPECIES_VALUES.includes(params.species as PrimarySpecies)
     ? (params.species as PrimarySpecies)
-    : ("" as "");
-
-  // Producers the viewer has blocked shouldn't appear in the directory.
-  const blockedIds = await loadOutgoingBlocks(supabase, user.id);
-
-  let query = supabase
-    .from("user_profiles")
-    .select("user_id, display_name, company_name, property_name, role, state, region, bio")
-    .eq("role", "producer")
-    .neq("user_id", user.id);
-
-  if (blockedIds.size > 0) {
-    query = query.not("user_id", "in", `(${Array.from(blockedIds).join(",")})`);
-  }
-
-  if (stateFilter) {
-    query = query.eq("state", stateFilter);
-  }
+    : "";
 
   const sanitised = sanitiseSearchQuery(searchQuery);
-  if (sanitised) {
-    query = query.or(
-      `display_name.ilike.%${sanitised}%,company_name.ilike.%${sanitised}%`,
+
+  // Search-first: require at least one filter before running any query.
+  // Producers don't appear in a flat list by default - you have to search
+  // for them. This respects discoverability as an opt-in to being found,
+  // not opt-in to appearing on a public list.
+  const hasFilter = Boolean(sanitised || stateFilter || speciesFilter);
+
+  let filteredProducers: DirectoryProducer[] = [];
+  let avatarMap = new Map<string, string | null>();
+
+  if (hasFilter) {
+    const blockedIds = await loadOutgoingBlocks(supabase, user.id);
+
+    let query = supabase
+      .from("user_profiles")
+      .select("user_id, display_name, company_name, property_name, role, state, region, bio")
+      .eq("role", "producer")
+      .eq("is_discoverable_to_producers", true)
+      .neq("user_id", user.id);
+
+    if (blockedIds.size > 0) {
+      query = query.not("user_id", "in", `(${Array.from(blockedIds).join(",")})`);
+    }
+
+    if (stateFilter) {
+      query = query.eq("state", stateFilter);
+    }
+
+    if (sanitised) {
+      query = query.or(
+        `display_name.ilike.%${sanitised}%,company_name.ilike.%${sanitised}%,property_name.ilike.%${sanitised}%`,
+      );
+    }
+
+    const { data: rawProducers } = await query.order("display_name");
+    const baseProducers = (rawProducers ?? []) as DirectoryProducer[];
+
+    // Enrich with species + herd-size bucket. Species filter applied after
+    // enrichment since it lives in the herds table, not user_profiles.
+    const enrichment = await enrichProducers(
+      supabase,
+      baseProducers.map((f) => f.user_id),
     );
+
+    const enriched: DirectoryProducer[] = baseProducers.map((f) => {
+      const e = enrichment.get(f.user_id);
+      return {
+        ...f,
+        primary_species: e?.primary_species ?? null,
+        herd_size_bucket: e?.herd_size_bucket ?? null,
+        property_count: e?.property_count ?? null,
+      };
+    });
+
+    filteredProducers = speciesFilter
+      ? enriched.filter((f) => f.primary_species === speciesFilter)
+      : enriched;
+
+    avatarMap = await fetchUserAvatars(filteredProducers.map((f) => f.user_id));
   }
-
-  const { data: rawProducers } = await query.order("display_name");
-  const baseProducers = (rawProducers ?? []) as DirectoryProducer[];
-
-  // Enrich every card with species + herd-size bucket (+ property count).
-  // Species filter is applied after enrichment since species lives in
-  // the herds table, not user_profiles.
-  const enrichment = await enrichProducers(
-    supabase,
-    baseProducers.map((f) => f.user_id),
-  );
-
-  const enrichedProducers: DirectoryProducer[] = baseProducers.map((f) => {
-    const e = enrichment.get(f.user_id);
-    return {
-      ...f,
-      primary_species: e?.primary_species ?? null,
-      herd_size_bucket: e?.herd_size_bucket ?? null,
-      property_count: e?.property_count ?? null,
-    };
-  });
-
-  const filteredProducers = speciesFilter
-    ? enrichedProducers.filter((f) => f.primary_species === speciesFilter)
-    : enrichedProducers;
-
-  const avatarMap = await fetchUserAvatars(filteredProducers.map((f) => f.user_id));
 
   return (
     <div className="max-w-4xl">
@@ -106,16 +117,21 @@ export default async function ProducerDirectoryPage({
         currentSpecies={speciesFilter as string}
       />
 
-      {filteredProducers.length === 0 ? (
+      {!hasFilter ? (
         <Card>
           <EmptyState
             icon={<Search className="h-6 w-6 text-producer-network-light" />}
+            title="Search to find producers"
+            description="Type a name, property, or use the filters above to find producers to connect with."
+            variant="amber"
+          />
+        </Card>
+      ) : filteredProducers.length === 0 ? (
+        <Card>
+          <EmptyState
+            icon={<Users2 className="h-6 w-6 text-producer-network-light" />}
             title="No producers found"
-            description={
-              searchQuery || stateFilter || speciesFilter
-                ? "No producers match your filters. Try clearing one."
-                : "No other producers are registered yet."
-            }
+            description="No producers match your search. Try a different name or clear a filter."
             variant="amber"
           />
         </Card>

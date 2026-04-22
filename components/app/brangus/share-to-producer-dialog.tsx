@@ -212,7 +212,7 @@ export function ShareToProducerDialog({
                   <p className="text-text-secondary text-sm font-medium">No producers found</p>
                   <p className="text-text-muted text-xs">
                     {producers.length === 0
-                      ? "Once other producers join the network, you'll be able to share chats with them."
+                      ? "Connect with producers in the Producer Network first, then you can share chats with them."
                       : "Try a different search term."}
                   </p>
                 </div>

@@ -208,9 +208,10 @@ export async function fetchSharedChat(id: string): Promise<SharedChatRow | null>
   return (data as SharedChatRow | null) ?? null;
 }
 
-// MARK: - Fetch discoverable producers for the picker
-// Reuses the same filter the Producer Network directory uses so visibility is
-// consistent. Excludes the current user.
+// MARK: - Fetch connected producers for the share picker
+// Only returns producers with whom the current user has an approved
+// producer_peer connection. You can only share chats with people you've
+// already connected with - prevents sharing with arbitrary strangers.
 export interface SharePickerProducer {
   user_id: string;
   display_name: string;
@@ -225,12 +226,29 @@ export async function fetchShareablePicks(): Promise<SharePickerProducer[]> {
   const uid = userData.user?.id;
   if (!uid) return [];
 
+  // Step 1: find all approved peer connections for the current user.
+  const { data: connections } = await supabase
+    .from("connection_requests")
+    .select("requester_user_id, target_user_id")
+    .eq("connection_type", "producer_peer")
+    .eq("status", "approved")
+    .or(`requester_user_id.eq.${uid},target_user_id.eq.${uid}`);
+
+  if (!connections || connections.length === 0) return [];
+
+  // Step 2: extract the other party from each connection.
+  const connectedIds = connections.map((c) =>
+    c.requester_user_id === uid ? c.target_user_id : c.requester_user_id,
+  );
+
+  // Step 3: fetch profiles for those users. The RLS "connected producer" policy
+  // allows this even if the connected user has turned off discoverability.
   const { data, error } = await supabase
     .from("user_profiles")
     .select("user_id, display_name, property_name, state, region")
-    .eq("role", "producer")
-    .neq("user_id", uid)
+    .in("user_id", connectedIds)
     .order("display_name");
+
   if (error) {
     console.error("fetchShareablePicks error:", error.message);
     return [];
