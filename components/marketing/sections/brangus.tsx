@@ -187,19 +187,19 @@ export default function Brangus() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <span className="text-brand text-sm font-medium tracking-wider uppercase">
+            <span className="text-sm font-medium tracking-wider text-[#4c7fff] uppercase">
               Portfolio Intelligence
             </span>
             <h2 className="mt-3 text-3xl font-semibold text-balance sm:text-4xl lg:text-5xl">
-              <span className="text-brand">Meet Brangus.</span>
+              <span className="text-[#4c7fff]">Meet Brangus.</span>
               <br />
               <span className="text-white">Your intelligent livestock advisor.</span>
               <br />
               <span
-                className="inline-block whitespace-nowrap text-[#4A90D9]"
+                className="text-brand inline-block whitespace-nowrap"
                 style={{
                   fontFamily: "var(--font-caveat), Caveat, cursive",
-                  transform: "rotate(-3.5deg) translateX(2.5em)",
+                  transform: "rotate(-3.5deg) translateX(4.5em)",
                   fontSize: "0.85em",
                   marginTop: "0.15em",
                   fontWeight: 700,
@@ -223,10 +223,10 @@ export default function Brangus() {
                 "Manages your Yard Book via conversation",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3">
-                  <div className="bg-brand/15 mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
+                  <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#4c7fff]/15 backdrop-blur-sm">
                     <svg
                       aria-hidden="true"
-                      className="text-brand h-3 w-3"
+                      className="h-3 w-3 text-[#4c7fff]"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
@@ -263,12 +263,12 @@ export default function Brangus() {
                     animate={{ opacity: 1, scale: [0, 1.05, 1] }}
                     transition={{ duration: 0.45, delay: 0.15, ease: "easeOut" }}
                     style={{ transformOrigin: "bottom right" }}
-                    className="relative max-w-[85%] rounded-2xl bg-[#44372D] px-4 py-2.5 sm:max-w-[75%]"
+                    className="relative max-w-[85%] rounded-2xl bg-[#3d4550] px-4 py-2.5 sm:max-w-[75%]"
                   >
                     <p className="text-xs leading-relaxed text-white/90 sm:text-sm">
                       {current.userMessage}
                     </p>
-                    <BubbleTail side="right" color="#44372D" />
+                    <BubbleTail side="right" color="#3d4550" />
                   </motion.div>
                   <motion.div
                     key={`user-av-${currentIndex}`}
@@ -313,12 +313,12 @@ export default function Brangus() {
                     }
                     transition={{ duration: 0.45, delay: 0.1, ease: "easeOut" }}
                     style={{ transformOrigin: "bottom left" }}
-                    className="bg-brand relative max-w-[85%] rounded-2xl px-4 py-2.5 sm:max-w-[75%]"
+                    className="relative max-w-[85%] rounded-2xl bg-[#2b4fa8] px-4 py-2.5 sm:max-w-[75%]"
                   >
                     <p className="text-xs leading-relaxed whitespace-pre-line text-white sm:text-sm">
                       {current.assistantMessage}
                     </p>
-                    <BubbleTail side="left" color="#FF8000" />
+                    <BubbleTail side="left" color="#2b4fa8" />
                   </motion.div>
                 </div>
 
@@ -336,7 +336,7 @@ export default function Brangus() {
             </div>
 
             {/* Glow */}
-            <div className="bg-brand/[0.04] absolute -inset-6 -z-10 rounded-3xl blur-3xl" />
+            <div className="absolute -inset-6 -z-10 rounded-3xl bg-[#4c7fff]/[0.04] blur-3xl" />
           </motion.div>
         </div>
       </div>
