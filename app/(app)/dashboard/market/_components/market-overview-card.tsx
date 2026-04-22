@@ -73,7 +73,7 @@ function ModeButton({
       type="button"
       onClick={onClick}
       className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-        active ? "bg-markets text-background/75" : "text-text-muted hover:text-text-primary"
+        active ? "bg-markets text-white" : "text-text-muted hover:text-text-primary"
       }`}
     >
       {children}

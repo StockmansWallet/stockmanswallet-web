@@ -30,7 +30,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-brand text-white hover:bg-brand-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
+    "bg-brand-dark text-white hover:bg-brand-text active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   secondary: "bg-surface-high text-text-secondary hover:bg-surface-raised active:scale-[0.97]",
   ghost: "text-text-secondary hover:bg-surface-raised hover:text-text-primary",
   destructive:
@@ -59,7 +59,7 @@ const variantClasses: Record<ButtonVariant, string> = {
   reports:
     "bg-reports text-white hover:bg-reports-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   "freight-iq":
-    "bg-freight-iq text-white hover:bg-freight-iq-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
+    "bg-freight-iq-dark text-white hover:bg-freight-iq-text active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   "grid-iq":
     "bg-grid-iq text-white hover:bg-grid-iq-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   "producer-network":

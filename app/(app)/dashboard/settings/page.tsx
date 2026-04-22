@@ -83,8 +83,8 @@ export default async function SettingsPage() {
             <NavItem
               href="/dashboard/settings/alerts"
               icon={BellRing}
-              iconBg="bg-pink/15"
-              iconColor="text-pink"
+              iconBg="bg-markets/15"
+              iconColor="text-markets"
               label="Price alerts"
               description="Notify me when categories or saleyards cross a target"
             />

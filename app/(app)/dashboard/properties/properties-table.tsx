@@ -45,29 +45,29 @@ export function PropertiesTable({
   return (
     <div>
       {/* Toolbar */}
-      <div className="mb-4 flex flex-col gap-3 rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
+      <div className="bg-surface-lowest mb-4 flex flex-col gap-3 rounded-full px-2 py-2 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-1.5 overflow-x-auto">
-          <span className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-brand/15 px-3.5 text-xs font-medium text-brand">
+          <span className="bg-brand/15 text-brand inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-xs font-medium">
             All
-            <span className="tabular-nums text-brand/70">{properties.length}</span>
+            <span className="text-brand/70 tabular-nums">{properties.length}</span>
           </span>
         </div>
 
         <div className="flex items-center gap-1.5">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
+            <Search className="text-text-muted pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search properties..."
               aria-label="Search properties"
-              className="h-8 w-full rounded-full bg-surface pl-9 pr-4 text-xs text-text-primary placeholder:text-text-muted outline-none transition-all focus:ring-2 focus:ring-brand/20 sm:w-48"
+              className="bg-surface text-text-primary placeholder:text-text-muted focus:ring-brand/20 h-8 w-full rounded-full pr-4 pl-9 text-xs transition-all outline-none focus:ring-2 sm:w-48"
             />
           </div>
           <Link
             href="/dashboard/properties/new"
-            className="inline-flex h-8 shrink-0 items-center rounded-full bg-brand px-3.5 text-xs font-medium text-white transition-all hover:bg-brand-dark"
+            className="bg-brand-dark hover:bg-brand-text inline-flex h-8 shrink-0 items-center rounded-full px-3.5 text-xs font-medium text-white transition-all"
           >
             Add Property
           </Link>
@@ -76,13 +76,13 @@ export function PropertiesTable({
 
       {/* List */}
       {filtered.length === 0 ? (
-        <div className="overflow-hidden rounded-2xl bg-surface-lowest backdrop-blur-xl">
-          <p className="px-5 py-16 text-center text-sm text-text-muted">
+        <div className="bg-surface-lowest overflow-hidden rounded-2xl backdrop-blur-xl">
+          <p className="text-text-muted px-5 py-16 text-center text-sm">
             {search ? "No properties match your search." : "No properties found."}
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl bg-surface-lowest backdrop-blur-xl">
+        <div className="bg-surface-lowest overflow-hidden rounded-2xl backdrop-blur-xl">
           <div className="divide-y divide-white/[0.06]">
             {filtered.map((property) => {
               const herds = herdCounts[property.id] ?? 0;
@@ -95,23 +95,27 @@ export function PropertiesTable({
                   className="group flex cursor-pointer items-center gap-3 px-5 py-3.5 transition-colors hover:bg-white/[0.03]"
                 >
                   {/* Icon */}
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/15">
-                    <MapPinned className="h-4 w-4 text-brand" />
+                  <div className="bg-brand/15 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
+                    <MapPinned className="text-brand h-4 w-4" />
                   </div>
 
                   {/* Name + details */}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="truncate text-sm font-medium text-text-primary">{property.property_name}</p>
+                      <p className="text-text-primary truncate text-sm font-medium">
+                        {property.property_name}
+                      </p>
                       {property.is_default && (
-                        <Badge variant="brand" className="text-[10px] px-1.5 py-0">Primary</Badge>
+                        <Badge variant="brand" className="px-1.5 py-0 text-[10px]">
+                          Primary
+                        </Badge>
                       )}
                     </div>
-                    <p className="truncate text-xs text-text-muted">
+                    <p className="text-text-muted truncate text-xs">
                       {[
                         property.suburb && property.postcode
                           ? `${property.suburb}, ${property.postcode}`
-                          : property.suburb ?? property.postcode,
+                          : (property.suburb ?? property.postcode),
                         property.property_pic ? `PIC: ${property.property_pic}` : null,
                         property.acreage ? `${property.acreage.toLocaleString()} acres` : null,
                       ]
@@ -123,21 +127,20 @@ export function PropertiesTable({
                   {/* Right side: state badge + herd/head counts */}
                   <div className="flex shrink-0 items-center gap-3">
                     {herds > 0 && (
-                      <span className="text-sm font-semibold tabular-nums text-brand">
-                        {herds} {herds === 1 ? "herd" : "herds"}{head > 0 ? ` / ${head.toLocaleString()} head` : ""}
+                      <span className="text-brand text-sm font-semibold tabular-nums">
+                        {herds} {herds === 1 ? "herd" : "herds"}
+                        {head > 0 ? ` / ${head.toLocaleString()} head` : ""}
                       </span>
                     )}
-                    {property.state && (
-                      <Badge variant="default">{property.state}</Badge>
-                    )}
-                    <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-all group-hover:translate-x-0.5 group-hover:text-text-secondary" />
+                    {property.state && <Badge variant="default">{property.state}</Badge>}
+                    <ChevronRight className="text-text-muted group-hover:text-text-secondary h-4 w-4 shrink-0 transition-all group-hover:translate-x-0.5" />
                   </div>
                 </div>
               );
             })}
           </div>
-          <div className="border-t border-border-subtle px-5 py-3">
-            <p className="text-xs text-text-muted">
+          <div className="border-border-subtle border-t px-5 py-3">
+            <p className="text-text-muted text-xs">
               {filtered.length === properties.length
                 ? `${properties.length} ${properties.length === 1 ? "property" : "properties"}`
                 : `${filtered.length} of ${properties.length} properties`}

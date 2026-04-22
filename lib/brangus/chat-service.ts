@@ -5,7 +5,7 @@
 import { createClient } from "../supabase/client";
 import { calculateHerdValue, categoryFallback, defaultFallbackPrice, type CategoryPriceEntry } from "../engines/valuation-engine";
 import { resolveMLACategory } from "../data/weight-mapping";
-import { cattleBreedPremiums } from "../data/reference-data";
+import { cattleBreedPremiums, saleyardToState } from "../data/reference-data";
 import { toolDefinitions, executeTool, DISPLAY_ONLY_TOOLS, generateAutoCards } from "./tools";
 import { fetchAllPropertyWeather } from "../services/weather-service";
 import { centsToDollars } from "../types/money";
@@ -100,13 +100,19 @@ CRITICAL - BE PROACTIVE, NOT LAZY:
 - When the user mentions their livestock by description ("my steers", "the weaners", "breeding cows"), match it to a herd in the portfolio index and act on it immediately
 - NEVER ask "which herd?" or "what's your saleyard?" when there is an obvious match or the data is already in the index
 - If there is only one herd matching the description, just use it. If there are multiple possible matches, pick the most likely one and mention which herd you used
-- Be the stock agent who already knows the client's operation - not the call centre worker reading from a script`;
+- Be the stock agent who already knows the client's operation - not the call centre worker reading from a script
+
+EMPTY PORTFOLIO:
+- If the PORTFOLIO INDEX shows 'Active herds: 0' (or no herd index), the user has not added any herds yet.
+- In that case, do NOT run lookup_portfolio_data for herd/valuation/freight queries, do NOT invent placeholder herds, and do NOT quote portfolio numbers.
+- When they ask about their livestock, valuations, freight, sales, or anything portfolio-driven, tell them warmly that they need to add at least one herd first and point them to the Herds tab (/dashboard/herds), click 'Add Herd'.
+- Market prices, EYCI trend, seasonal patterns, weather, and general 'how do I...' questions are fine to answer as normal - the empty portfolio only blocks portfolio-dependent answers.`;
 
 const FALLBACK_TOOL_INSTRUCTIONS = `YOUR TOOLS:
 You have tools. Use them when the conversation turns to data:
 
-1. lookup_portfolio_data: Gets data from the user's portfolio. Call before citing any number. Query types: portfolio_summary, herd_details, all_herds_summary, property_details, market_prices, seasonal_pricing, sales_history, freight_estimates, yard_book, health_records, property_weather.
-2. calculate_freight: Calculates freight costs via Freight IQ. YOU MUST CALL THIS TOOL every time the user asks about freight, transport, or trucking costs. You have no freight arithmetic capability - never calculate cost, distance, deck count, or cost-per-head yourself. Always prefer destination_saleyard over distance_km so the engine routes real road distance from the property to the saleyard via OSRM. Only pass distance_km when the user gives you an explicit number and there is no matching saleyard. If the user specifies a carrier rate different from the default (e.g. "$2.75 a deck-km", "$3 per deck-km"), pass it via rate_per_deck_per_km. For breeder herds, set calves_at_foot=true when the user says calves are at foot so the engine applies the fixed cow-calf density. Show GST (+10%) alongside the total returned by the tool.
+1. lookup_portfolio_data: Gets data from the user's portfolio. Call before citing any number. Query types: portfolio_summary, herd_details, all_herds_summary, property_details, market_prices, historical_prices, seasonal_pricing, saleyard_comparison, sales_history, freight_estimates, yard_book, health_records, property_weather. For "how has the market moved / been tracking / trend over the last N months" questions, use historical_prices with optional months (1-12). For "what would this herd be worth at yard X instead of yard Y", use saleyard_comparison with herd_name + saleyards array - you have live MLA pricing for EVERY Australian saleyard, the user does NOT need to 'link' a yard to their account, never tell them to add one.
+2. calculate_freight: Calculates freight costs via Freight IQ. YOU MUST CALL THIS TOOL every time the user asks about freight, transport, or trucking costs - FOR EVERY DESTINATION, EVERY TIME. You have no freight arithmetic capability - never calculate cost, distance, deck count, or cost-per-head yourself. You CANNOT reuse or rescale a prior tool result for a different yard, even if the herd, rate, and category are identical - distances differ, and distance drives everything. If the user asks about more than one destination (e.g. "what about Bendigo, Wagga, Yass, and Scone?"), pass ALL of them in the 'destinations' array in ONE call. The tool returns one result per yard. Prefer destination_saleyard (single) or destinations (batch) over distance_km so the engine routes real road distance from the property via OSRM. Only pass distance_km when the user gives you an explicit number and there is no matching saleyard. If the user specifies a carrier rate different from the default (e.g. "$2.75 a deck-km", "$3 per deck-km"), pass it via rate_per_deck_per_km. For breeder herds, set calves_at_foot=true when the user says calves are at foot so the engine applies the fixed cow-calf density. Show GST (+10%) alongside the total returned by the tool.
 3. create_yard_book_event: Creates Yard Book events. Infer category and parse dates naturally. CRITICAL DATE RULE: Always derive the YYYY-MM-DD date from TODAY'S DATE above. If the user says "Monday", count forward from today's day-of-week to find the exact calendar date. Double-check the day-of-week matches before submitting. Never guess or approximate dates.
 4. manage_yard_book_event: Completes or deletes Yard Book events. Complete without asking, confirm before deleting.
 5. lookup_grid_iq_data: Retrieves Grid IQ data - processor grid comparisons, kill sheet results, Kill Score, GCR, and Grid Risk. Query types: grid_iq_summary, analysis_details, kill_history, grid_details, compare_channels.
@@ -123,7 +129,9 @@ You are terrible at arithmetic. NEVER calculate prices, values, totals, differen
 
 TOOL TIPS:
 - market_prices also has national indices (EYCI, WYCI, OTH)
-- seasonal_pricing has historical monthly averages
+- historical_prices returns the 12-month EYCI/WYCI trend users see in the Markets tab price detail sheet
+- seasonal_pricing has typical monthly averages
+- saleyard_comparison values a herd at multiple yards side-by-side (covers ALL Australian yards)
 - Prices in $/kg with source and date
 - Freight is GST-exclusive, mention cost per head and per deck
 - The freight calculator is called "Freight IQ", the calendar is "Yard Book"
@@ -296,6 +304,36 @@ export function buildSystemPrompt(store: ChatDataStore, serverConfig?: BrangusCo
   // Debug: Add Grid IQ summary to portfolio index
   if (store.gridIQAnalyses.length > 0 || store.killSheets.length > 0 || store.processorGrids.length > 0) {
     indexLines.push(`Grid IQ: ${store.gridIQAnalyses.length} analyses, ${store.killSheets.length} kill sheets, ${store.processorGrids.length} grids (use lookup_grid_iq_data tool)`);
+  }
+
+  // Debug: Empty portfolio guidance - surface an explicit instruction so Brangus
+  // doesn't invent herd data or push the user to run lookups on an empty portfolio.
+  // Mirrors iOS buildPortfolioIndex empty-portfolio block.
+  if (activeHerdsList.length === 0) {
+    indexLines.push("");
+    indexLines.push("EMPTY PORTFOLIO:");
+    indexLines.push("- The user has not added any herds yet.");
+    indexLines.push("- Do NOT run lookup_portfolio_data for herd/valuation/freight queries - there is nothing to return.");
+    indexLines.push("- Do NOT invent placeholder herds or example numbers.");
+    indexLines.push("- When they ask about their livestock, valuations, freight, sales, or anything portfolio-driven, tell them warmly that they need to add at least one herd first, and point them to the Herds tab (/dashboard/herds) and click 'Add Herd'.");
+    indexLines.push("- After they've added a herd the chat context refreshes automatically, so they can come straight back and ask again.");
+    indexLines.push("- Portfolio-independent questions (market prices, EYCI trend, seasonal patterns, weather, general 'how do I...' help) are fine to answer as normal.");
+  }
+
+  // Debug: Surface the full saleyard network so Brangus never refuses a
+  // "value these at another yard" question with 'that yard isn't linked to your account'.
+  // The AMV engine fetches live MLA prices for any yard below on demand. Mirrors iOS buildAvailableSaleyardsBlock.
+  indexLines.push("");
+  indexLines.push("AVAILABLE SALEYARDS (live MLA pricing for ALL of these via saleyard_override / saleyard_comparison - the user does NOT need them linked to their account):");
+  const stateOrder = ["NSW", "QLD", "VIC", "SA", "WA", "TAS", "NT", "ACT"];
+  const grouped: Record<string, string[]> = {};
+  for (const [name, state] of Object.entries(saleyardToState)) {
+    (grouped[state] ??= []).push(name);
+  }
+  for (const state of stateOrder) {
+    const names = grouped[state];
+    if (!names || names.length === 0) continue;
+    indexLines.push(`${state}: ${names.sort().join(", ")}`);
   }
 
   sections.push(indexLines.join("\n"));

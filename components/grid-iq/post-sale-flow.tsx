@@ -227,7 +227,7 @@ export function PostSaleFlow({
               <CardContent className="flex flex-col items-center gap-2 py-6 text-center">
                 <FileText className="h-8 w-8 text-text-muted" />
                 <p className="text-sm text-text-muted">No unlinked kill sheets available.</p>
-                <Button size="sm" variant="teal" onClick={() => setUploadOpen(true)}>
+                <Button size="sm" variant="grid-iq" onClick={() => setUploadOpen(true)}>
                   <Upload className="mr-1.5 h-3.5 w-3.5" />Upload Kill Sheet
                 </Button>
               </CardContent>
@@ -312,7 +312,7 @@ export function PostSaleFlow({
               <Upload className="mr-1.5 h-3.5 w-3.5" />Upload New
             </Button>
             <Button
-              variant="teal"
+              variant="grid-iq"
               disabled={
                 !selectedKillSheetId ||
                 isPending ||
@@ -422,7 +422,7 @@ export function PostSaleFlow({
               <ChevronLeft className="mr-1 h-3.5 w-3.5" />Back
             </Button>
             <Button
-              variant="teal"
+              variant="grid-iq"
               disabled={isPending || adjustedAllocations.every((a) => a.headCount <= 0)}
               onClick={handleConfirmSale}
             >

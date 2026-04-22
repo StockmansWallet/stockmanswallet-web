@@ -22,7 +22,7 @@ function labelConfig(label: KillScoreLabel) {
     case "Excellent":
       return { color: "text-success", bg: "bg-success/15", icon: Star };
     case "Good":
-      return { color: "text-teal", bg: "bg-teal/15", icon: CheckCircle };
+      return { color: "text-grid-iq", bg: "bg-grid-iq/15", icon: CheckCircle };
     case "Fair":
       return { color: "text-warning", bg: "bg-warning/15", icon: MinusCircle };
     case "Poor":
@@ -52,7 +52,7 @@ export function KillScoreCard({
         </div>
         <div>
           <p className={`text-sm font-bold ${config.color}`}>{killScore.toFixed(0)}</p>
-          <p className="text-[10px] text-text-muted">{label}</p>
+          <p className="text-text-muted text-[10px]">{label}</p>
         </div>
       </div>
     );
@@ -61,10 +61,26 @@ export function KillScoreCard({
   // Debug: Build metrics array for the breakdown grid
   const metrics: { label: string; value: string; weight: string }[] = [];
   if (gcr !== null) metrics.push({ label: "GCR", value: `${gcr.toFixed(1)}%`, weight: "40%" });
-  if (gridCompliance !== null) metrics.push({ label: "Grid Compliance", value: `${gridCompliance.toFixed(1)}%`, weight: "20%" });
-  if (realisationFactor !== null) metrics.push({ label: "Realisation Factor", value: `${(realisationFactor * 100).toFixed(1)}%`, weight: "20%" });
-  if (fatCompliance !== null) metrics.push({ label: "Fat Compliance", value: `${fatCompliance.toFixed(1)}%`, weight: "10%" });
-  if (dentitionCompliance !== null) metrics.push({ label: "Dentition", value: `${dentitionCompliance.toFixed(1)}%`, weight: "10%" });
+  if (gridCompliance !== null)
+    metrics.push({
+      label: "Grid Compliance",
+      value: `${gridCompliance.toFixed(1)}%`,
+      weight: "20%",
+    });
+  if (realisationFactor !== null)
+    metrics.push({
+      label: "Realisation Factor",
+      value: `${(realisationFactor * 100).toFixed(1)}%`,
+      weight: "20%",
+    });
+  if (fatCompliance !== null)
+    metrics.push({ label: "Fat Compliance", value: `${fatCompliance.toFixed(1)}%`, weight: "10%" });
+  if (dentitionCompliance !== null)
+    metrics.push({
+      label: "Dentition",
+      value: `${dentitionCompliance.toFixed(1)}%`,
+      weight: "10%",
+    });
 
   return (
     <Card>
@@ -72,12 +88,10 @@ export function KillScoreCard({
         {/* Header with score */}
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-text-muted">Kill Score</p>
+            <p className="text-text-muted text-xs font-medium">Kill Score</p>
             <div className="mt-1 flex items-center gap-2">
-              <span className={`text-2xl font-bold ${config.color}`}>
-                {killScore.toFixed(0)}
-              </span>
-              <span className="text-sm text-text-muted">/100</span>
+              <span className={`text-2xl font-bold ${config.color}`}>{killScore.toFixed(0)}</span>
+              <span className="text-text-muted text-sm">/100</span>
             </div>
           </div>
           <div className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 ${config.bg}`}>
@@ -87,21 +101,21 @@ export function KillScoreCard({
         </div>
 
         {/* Legend */}
-        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-text-muted">
+        <div className="text-text-muted mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px]">
           <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-success" />
+            <span className="bg-success h-2 w-2 rounded-full" />
             85+ Excellent
           </span>
           <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-teal" />
+            <span className="bg-grid-iq h-2 w-2 rounded-full" />
             70-84 Good
           </span>
           <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-warning" />
+            <span className="bg-warning h-2 w-2 rounded-full" />
             50-69 Fair
           </span>
           <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-error" />
+            <span className="bg-error h-2 w-2 rounded-full" />
             &lt;50 Poor
           </span>
         </div>
@@ -111,20 +125,20 @@ export function KillScoreCard({
           <div className="mt-4 grid grid-cols-2 gap-3">
             {gcr !== null && (
               <div className="rounded-lg bg-white/[0.04] p-3">
-                <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
+                <p className="text-text-muted text-[10px] font-medium tracking-wider uppercase">
                   Grid Capture Ratio
                 </p>
-                <p className="mt-1 text-lg font-bold text-text-primary">
-                  {gcr.toFixed(1)}%
-                </p>
+                <p className="text-text-primary mt-1 text-lg font-bold">{gcr.toFixed(1)}%</p>
               </div>
             )}
             {gridRisk !== null && (
               <div className="rounded-lg bg-white/[0.04] p-3">
-                <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
+                <p className="text-text-muted text-[10px] font-medium tracking-wider uppercase">
                   Grid Risk
                 </p>
-                <p className={`mt-1 text-lg font-bold ${gridRisk > 30 ? "text-error" : gridRisk > 15 ? "text-warning" : "text-success"}`}>
+                <p
+                  className={`mt-1 text-lg font-bold ${gridRisk > 30 ? "text-error" : gridRisk > 15 ? "text-warning" : "text-success"}`}
+                >
                   {gridRisk.toFixed(1)}%
                 </p>
               </div>
@@ -135,16 +149,16 @@ export function KillScoreCard({
         {/* Metric breakdown */}
         {metrics.length > 0 && (
           <div className="mt-4 space-y-2 border-t border-white/5 pt-4">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
+            <p className="text-text-muted text-[10px] font-medium tracking-wider uppercase">
               Score Breakdown
             </p>
             {metrics.map((m) => (
               <div key={m.label} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-text-secondary">{m.label}</span>
-                  <span className="text-[10px] text-text-muted">({m.weight})</span>
+                  <span className="text-text-secondary text-xs">{m.label}</span>
+                  <span className="text-text-muted text-[10px]">({m.weight})</span>
                 </div>
-                <span className="text-xs font-semibold text-text-primary">{m.value}</span>
+                <span className="text-text-primary text-xs font-semibold">{m.value}</span>
               </div>
             ))}
           </div>

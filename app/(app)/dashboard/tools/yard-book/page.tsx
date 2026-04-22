@@ -77,7 +77,7 @@ export default async function YardBookPage() {
             description="Add tasks, events, and reminders to your run sheet."
             actionLabel="Add Item"
             actionHref="/dashboard/tools/yard-book/new"
-            variant="teal"
+            variant="yard-book"
           />
         </Card>
       ) : (

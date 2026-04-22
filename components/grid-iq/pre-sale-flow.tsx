@@ -296,9 +296,9 @@ export function PreSaleFlow({
                       <span
                         className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all ${
                           isActive
-                            ? "bg-teal ring-teal/20 text-black ring-4"
+                            ? "bg-grid-iq ring-grid-iq/20 text-black ring-4"
                             : isComplete
-                              ? "bg-teal/20 text-teal"
+                              ? "bg-grid-iq/20 text-grid-iq"
                               : "text-text-muted bg-white/[0.08]"
                         }`}
                       >
@@ -319,7 +319,7 @@ export function PreSaleFlow({
                     {idx < 2 && (
                       <div
                         className={`mx-2 h-px flex-1 transition-colors ${
-                          step > s ? "bg-teal/40" : "bg-white/[0.08]"
+                          step > s ? "bg-grid-iq/40" : "bg-white/[0.08]"
                         }`}
                       />
                     )}
@@ -351,7 +351,7 @@ export function PreSaleFlow({
                   type="text"
                   value={consignmentName}
                   onChange={(e) => setConsignmentName(e.target.value)}
-                  className="text-text-primary placeholder:text-text-muted focus:border-teal/50 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm focus:outline-none"
+                  className="text-text-primary placeholder:text-text-muted focus:border-grid-iq/50 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm focus:outline-none"
                   placeholder="e.g. Cull Cows - Canal Creek Paddock"
                 />
               </div>
@@ -362,7 +362,7 @@ export function PreSaleFlow({
             <CardContent className="space-y-3 p-4">
               <div className="flex items-center justify-between">
                 <p className="text-text-primary text-xs font-semibold">Herd Allocations</p>
-                <Badge className="bg-teal/15 text-teal">{totalHead} head</Badge>
+                <Badge className="bg-grid-iq/15 text-grid-iq">{totalHead} head</Badge>
               </div>
 
               {herds.length === 0 ? (
@@ -370,7 +370,7 @@ export function PreSaleFlow({
                   <Target className="text-text-muted h-6 w-6" />
                   <p className="text-text-muted text-xs">No cattle herds in your portfolio.</p>
                   <Link href="/dashboard/herds">
-                    <Button size="sm" variant="teal">
+                    <Button size="sm" variant="grid-iq">
                       Add Herd
                     </Button>
                   </Link>
@@ -394,7 +394,7 @@ export function PreSaleFlow({
                             onChange={(e) =>
                               updateAllocation(alloc.key, "herdGroupId", e.target.value)
                             }
-                            className="text-text-primary focus:border-teal/50 h-10 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 text-sm focus:outline-none"
+                            className="text-text-primary focus:border-grid-iq/50 h-10 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 text-sm focus:outline-none"
                           >
                             <option value="">Select herd...</option>
                             {herds
@@ -420,7 +420,7 @@ export function PreSaleFlow({
                                 parseInt(e.target.value) || 0
                               )
                             }
-                            className="text-text-primary focus:border-teal/50 h-10 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 text-sm focus:outline-none"
+                            className="text-text-primary focus:border-grid-iq/50 h-10 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 text-sm focus:outline-none"
                             placeholder="0"
                           />
                         </div>
@@ -452,7 +452,7 @@ export function PreSaleFlow({
                     variant="ghost"
                     size="sm"
                     onClick={addAllocation}
-                    className="text-text-muted hover:border-teal/30 hover:text-teal w-full rounded-xl border border-dashed border-white/[0.08] bg-white/[0.02] text-xs hover:bg-white/[0.04]"
+                    className="text-text-muted hover:border-grid-iq/30 hover:text-grid-iq w-full rounded-xl border border-dashed border-white/[0.08] bg-white/[0.02] text-xs hover:bg-white/[0.04]"
                   >
                     <Plus className="mr-1 h-3 w-3" />
                     Add Herd Group
@@ -463,7 +463,7 @@ export function PreSaleFlow({
           </Card>
 
           <div className="flex justify-end">
-            <Button variant="teal" disabled={!canAdvanceFromStep1} onClick={() => setStep(2)}>
+            <Button variant="grid-iq" disabled={!canAdvanceFromStep1} onClick={() => setStep(2)}>
               Next <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
@@ -524,7 +524,7 @@ export function PreSaleFlow({
                       if (g && g.processor_id !== id) setSelectedGridId(null);
                     }
                   }}
-                  className="text-text-primary focus:border-teal/50 h-10 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 text-sm focus:outline-none"
+                  className="text-text-primary focus:border-grid-iq/50 h-10 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 text-sm focus:outline-none"
                 >
                   <option value="">All processors</option>
                   {processors.map((p) => (
@@ -538,7 +538,7 @@ export function PreSaleFlow({
                   Don&apos;t see yours?{" "}
                   <Link
                     href="/dashboard/tools/grid-iq/processors/new"
-                    className="text-teal hover:underline"
+                    className="text-grid-iq hover:underline"
                   >
                     Add a processor
                   </Link>{" "}
@@ -570,7 +570,7 @@ export function PreSaleFlow({
                   <CardContent className="flex flex-col items-center gap-2 py-6 text-center">
                     <Grid3x3 className="text-text-muted h-8 w-8" />
                     <p className="text-text-muted text-sm">No processor grids uploaded yet.</p>
-                    <Button size="sm" variant="teal" onClick={() => setUploadOpen("grid")}>
+                    <Button size="sm" variant="grid-iq" onClick={() => setUploadOpen("grid")}>
                       <Upload className="mr-1.5 h-3.5 w-3.5" />
                       Upload Grid
                     </Button>
@@ -584,7 +584,7 @@ export function PreSaleFlow({
                   <CardContent className="flex flex-col items-center gap-2 py-6 text-center">
                     <Grid3x3 className="text-text-muted h-8 w-8" />
                     <p className="text-text-muted text-sm">No grids yet for this processor.</p>
-                    <Button size="sm" variant="teal" onClick={() => setUploadOpen("grid")}>
+                    <Button size="sm" variant="grid-iq" onClick={() => setUploadOpen("grid")}>
                       <Upload className="mr-1.5 h-3.5 w-3.5" />
                       Upload Grid
                     </Button>
@@ -601,18 +601,18 @@ export function PreSaleFlow({
                     <Card
                       key={grid.id}
                       className={`cursor-pointer transition-all ${
-                        selected ? "border-teal/50 bg-teal/10" : "hover:bg-white/[0.04]"
+                        selected ? "border-grid-iq/50 bg-grid-iq/10" : "hover:bg-white/[0.04]"
                       }`}
                       onClick={() => handleGridSelect(selected ? null : grid.id)}
                     >
                       <CardContent className="flex items-center gap-3 p-3">
                         <div
                           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                            selected ? "bg-teal/20" : "bg-white/[0.06]"
+                            selected ? "bg-grid-iq/20" : "bg-white/[0.06]"
                           }`}
                         >
                           <Grid3x3
-                            className={`h-4 w-4 ${selected ? "text-teal" : "text-text-muted"}`}
+                            className={`h-4 w-4 ${selected ? "text-grid-iq" : "text-text-muted"}`}
                           />
                         </div>
                         <div className="min-w-0 flex-1">
@@ -632,7 +632,7 @@ export function PreSaleFlow({
                           </Badge>
                         )}
                         {selected && (
-                          <div className="bg-teal flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
+                          <div className="bg-grid-iq flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
                             <Check className="h-3 w-3 text-white" />
                           </div>
                         )}
@@ -645,16 +645,16 @@ export function PreSaleFlow({
           })()}
 
           {/* Optional refinement: use past kills to personalise */}
-          <Card className="border-teal/20">
+          <Card className="border-grid-iq/20">
             <CardContent className="p-0">
               <button
                 type="button"
                 onClick={() => setShowKillSheetPicker((v) => !v)}
                 className="flex w-full items-center gap-2.5 px-4 py-3 text-left transition-colors hover:bg-white/[0.03]"
               >
-                <Info className="text-teal h-4 w-4 shrink-0" />
+                <Info className="text-grid-iq h-4 w-4 shrink-0" />
                 <div className="flex-1">
-                  <p className="text-teal text-sm font-medium">
+                  <p className="text-grid-iq text-sm font-medium">
                     Use my past kills to improve accuracy
                   </p>
                   <p className="text-text-secondary mt-0.5 text-xs">
@@ -676,7 +676,7 @@ export function PreSaleFlow({
                     <div className="mb-3 flex flex-col items-center gap-2 py-4 text-center">
                       <FileText className="text-text-muted h-8 w-8" />
                       <p className="text-text-muted text-sm">No kill sheets uploaded yet.</p>
-                      <Button size="sm" variant="teal" onClick={() => setUploadOpen("killsheet")}>
+                      <Button size="sm" variant="grid-iq" onClick={() => setUploadOpen("killsheet")}>
                         <Upload className="mr-1.5 h-3.5 w-3.5" />
                         Upload Kill Sheet
                       </Button>
@@ -691,7 +691,7 @@ export function PreSaleFlow({
                             <Card
                               key={ks.id}
                               className={`cursor-pointer transition-all ${
-                                isSelected ? "border-teal/50 bg-teal/10" : "hover:bg-white/[0.04]"
+                                isSelected ? "border-grid-iq/50 bg-grid-iq/10" : "hover:bg-white/[0.04]"
                               }`}
                               onClick={() => toggleKillSheet(ks.id)}
                             >
@@ -699,7 +699,7 @@ export function PreSaleFlow({
                                 <div
                                   className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border ${
                                     isSelected
-                                      ? "border-teal bg-teal"
+                                      ? "border-grid-iq bg-grid-iq"
                                       : "border-white/[0.15] bg-white/[0.04]"
                                   }`}
                                 >
@@ -707,7 +707,7 @@ export function PreSaleFlow({
                                 </div>
                                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.06]">
                                   <FileText
-                                    className={`h-4 w-4 ${isSelected ? "text-teal" : "text-text-muted"}`}
+                                    className={`h-4 w-4 ${isSelected ? "text-grid-iq" : "text-text-muted"}`}
                                   />
                                 </div>
                                 <div className="min-w-0 flex-1">
@@ -778,7 +778,7 @@ export function PreSaleFlow({
               <ChevronLeft className="mr-1 h-3.5 w-3.5" />
               Back
             </Button>
-            <Button variant="teal" disabled={!canAdvanceFromStep2} onClick={() => setStep(3)}>
+            <Button variant="grid-iq" disabled={!canAdvanceFromStep2} onClick={() => setStep(3)}>
               Next <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
@@ -807,7 +807,7 @@ export function PreSaleFlow({
                     type="text"
                     value={processorName}
                     onChange={(e) => setProcessorName(e.target.value)}
-                    className="text-text-primary placeholder:text-text-muted focus:border-teal/50 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm focus:outline-none"
+                    className="text-text-primary placeholder:text-text-muted focus:border-grid-iq/50 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm focus:outline-none"
                     placeholder="e.g. JBS Dinmore"
                   />
                 </div>
@@ -817,7 +817,7 @@ export function PreSaleFlow({
                     type="text"
                     value={plantLocation}
                     onChange={(e) => setPlantLocation(e.target.value)}
-                    className="text-text-primary placeholder:text-text-muted focus:border-teal/50 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm focus:outline-none"
+                    className="text-text-primary placeholder:text-text-muted focus:border-grid-iq/50 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm focus:outline-none"
                     placeholder="e.g. Dinmore, QLD"
                   />
                 </div>
@@ -829,7 +829,7 @@ export function PreSaleFlow({
                     type="text"
                     value={bookingReference}
                     onChange={(e) => setBookingReference(e.target.value)}
-                    className="text-text-primary placeholder:text-text-muted focus:border-teal/50 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm focus:outline-none"
+                    className="text-text-primary placeholder:text-text-muted focus:border-grid-iq/50 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm focus:outline-none"
                   />
                 </div>
                 <div>
@@ -838,7 +838,7 @@ export function PreSaleFlow({
                     type="date"
                     value={killDate}
                     onChange={(e) => setKillDate(e.target.value)}
-                    className="text-text-primary focus:border-teal/50 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm focus:outline-none"
+                    className="text-text-primary focus:border-grid-iq/50 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm focus:outline-none"
                   />
                 </div>
               </div>
@@ -853,14 +853,14 @@ export function PreSaleFlow({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={2}
-                className="text-text-primary placeholder:text-text-muted focus:border-teal/50 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm focus:outline-none"
+                className="text-text-primary placeholder:text-text-muted focus:border-grid-iq/50 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm focus:outline-none"
                 placeholder="Any additional notes about this consignment..."
               />
             </CardContent>
           </Card>
 
           {/* Summary + Generate */}
-          <Card className="border-teal/20">
+          <Card className="border-grid-iq/20">
             <CardContent className="p-4">
               <p className="text-text-primary mb-3 text-xs font-semibold">Analysis Summary</p>
               <div className="mb-4 flex flex-col gap-1.5 text-xs">
@@ -894,7 +894,7 @@ export function PreSaleFlow({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-text-muted">Mode</span>
-                  <Badge className="bg-teal/15 text-teal">Pre-sale comparison</Badge>
+                  <Badge className="bg-grid-iq/15 text-grid-iq">Pre-sale comparison</Badge>
                 </div>
               </div>
 
@@ -916,7 +916,7 @@ export function PreSaleFlow({
                   Back
                 </Button>
                 <Button
-                  variant="teal"
+                  variant="grid-iq"
                   disabled={!canGenerate || isPending}
                   onClick={handleGenerate}
                 >

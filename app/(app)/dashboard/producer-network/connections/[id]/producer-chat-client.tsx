@@ -11,7 +11,9 @@ import { sendProducerMessage, fetchProducerMessages } from "./actions";
 import type { AdvisoryMessage, MessageAttachment } from "@/lib/types/advisory";
 
 const POLL_INTERVAL = 5000;
-const OTHER_BG = "var(--color-chat-other)";
+// Peer bubble uses the Producer Network accent (sage, -dark variant for
+// filled-area legibility, matching the Brangus chat pattern).
+const OTHER_BG = "var(--color-producer-network-dark)";
 
 interface ProducerChatClientProps {
   connectionId: string;
@@ -118,6 +120,8 @@ export function ProducerChatClient({
             participants={participants}
             animatedMessageIds={animatedIds}
             hideSenderName
+            otherBgClass="bg-producer-network-dark"
+            otherTailColor={OTHER_BG}
           />
           {peerIsTyping && <TypingIndicator bgColor={OTHER_BG} dotClass="bg-white/50" />}
           <div ref={messagesEndRef} />

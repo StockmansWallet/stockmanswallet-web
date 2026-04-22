@@ -189,7 +189,7 @@ export function ReportDownloadMenu({ groups, label = "Download" }: ReportDownloa
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="bg-warning/15 text-warning hover:bg-warning/25 flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition-colors"
+        className="bg-reports/15 text-reports hover:bg-reports/25 flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition-colors"
       >
         <Download className="h-3.5 w-3.5" aria-hidden="true" />
         <span>{label}</span>

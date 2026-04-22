@@ -88,7 +88,7 @@ export default async function PriceAlertsPage() {
       </div>
       <PageHeader
         title="Price alerts"
-        titleClassName="text-4xl font-bold text-pink"
+        titleClassName="text-4xl font-bold text-markets"
         subtitle="Get notified when categories or saleyards cross your target price."
       />
 

@@ -3,7 +3,7 @@
 
 import { calculateHerdValuation, parseCalvesAtFoot, type HerdValuationResult } from "../engines/valuation-engine";
 import { calculateFreightEstimate } from "../engines/freight-engine";
-import { saleyardCoordinates } from "../data/reference-data";
+import { saleyardCoordinates, resolveMLASaleyardName } from "../data/reference-data";
 import { resolveMLACategory } from "../data/weight-mapping";
 import { fetchWeatherForLocation } from "../services/weather-service";
 import { getRoadDistanceKm } from "../services/distance-service";
@@ -17,7 +17,7 @@ export const toolDefinitions = [
   {
     name: "lookup_portfolio_data",
     description:
-      "Retrieves specific portfolio, market, weather, and operational data from the app. This is your PRIMARY tool - call it for ANY question about herds, properties, prices, market indices, freight, sales, weather, or the yard book. You MUST call this tool before citing any specific numbers (prices, weights, head counts, values, dates, temperatures) in your response. Herd valuations returned by this tool come straight from the AMV (Adjusted Market Value) engine and already include breed premium, projected weight (ADG accrual), pre-birth accrual, calves at foot, and mortality deduction. NEVER recompute these figures yourself - quote them as returned. If the user asks about weather, temperature, rain, forecast, or conditions at a property, use query_type 'property_weather'. Always look up data first. Never rely on the portfolio index alone.",
+      "Retrieves specific portfolio, market, weather, and operational data from the app. This is your PRIMARY tool - call it for ANY question about herds, properties, prices, market indices, freight, sales, weather, or the yard book. You MUST call this tool before citing any specific numbers (prices, weights, head counts, values, dates, temperatures) in your response. Herd valuations returned by this tool come straight from the AMV (Adjusted Market Value) engine and already include breed premium, projected weight (ADG accrual), pre-birth accrual, calves at foot, and mortality deduction. NEVER recompute these figures yourself - quote them as returned. If the user asks about market indices (EYCI, WYCI, OTH), current prices, today's market, or what categories are worth, use query_type 'market_prices' - this mirrors what the Markets tab shows. If the user asks how the market has MOVED over TIME ('trend', 'last 3 months', 'how has EYCI been tracking', 'price history', 'past six months', 'is the market up or down lately'), use query_type 'historical_prices' - returns the 12-month MLA indicator trend. If the user asks about typical seasonal patterns or the best month to sell, use query_type 'seasonal_pricing'. SALEYARD COMPARISONS: if the user asks 'what would my X be worth at Y instead of Z', 'compare Roma vs Dalby', 'is Gracemere better than Charters Towers for these', or any 'what if I sold at a different yard' question, use query_type 'saleyard_comparison' with herd_name + the list of saleyards. You have LIVE MLA pricing for EVERY saleyard in Australia via the AVAILABLE SALEYARDS list in the portfolio index - the user does NOT need the saleyard 'linked' to their account, it does NOT need to be in their settings, and you should NEVER ask them to add it. Just call the tool. If the user asks about weather, temperature, rain, forecast, or conditions at a property, use query_type 'property_weather'. Always look up data first. Never rely on the portfolio index alone.",
     input_schema: {
       type: "object",
       properties: {
@@ -29,7 +29,9 @@ export const toolDefinitions = [
             "all_herds_summary",
             "property_details",
             "market_prices",
+            "historical_prices",
             "seasonal_pricing",
+            "saleyard_comparison",
             "sales_history",
             "freight_estimates",
             "yard_book",
@@ -40,11 +42,15 @@ export const toolDefinitions = [
         },
         herd_name: {
           type: "string",
-          description: "Specific herd name for herd_details, freight_estimates, health_records.",
+          description: "Specific herd name for herd_details, freight_estimates, health_records, saleyard_comparison.",
         },
         category: {
           type: "string",
-          description: "Livestock category for market_prices, seasonal_pricing (e.g. 'Yearling Steer')",
+          description: "Livestock category for market_prices, seasonal_pricing, historical_prices (e.g. 'Yearling Steer'). Omit for historical_prices to get the EYCI/WYCI national indicator trend.",
+        },
+        months: {
+          type: "integer",
+          description: "Number of months of history to return for historical_prices (1-12). Default 3. Use 1 for 'recent' / 'last month', 3 for 'last few months' / 'quarter', 6 for 'half year', 12 for 'past year' / 'annual'.",
         },
         property_name: {
           type: "string",
@@ -56,7 +62,12 @@ export const toolDefinitions = [
         },
         saleyard_override: {
           type: "string",
-          description: "Optional MLA saleyard name (e.g. 'Roma', 'Armidale', 'Charters Towers'). Only use when the user explicitly asks to value a herd at a DIFFERENT saleyard than the one configured on the herd. Applies to query_type 'herd_details', 'all_herds_summary', and 'portfolio_summary'. Recomputes the AMV with that saleyard's price. Omit otherwise.",
+          description: "Optional MLA saleyard name (e.g. 'Gracemere', 'Roma', 'Armidale', 'Charters Towers', or a full name like 'Gracemere Central Queensland Livestock Exchange'). Use when the user asks to value a herd at a DIFFERENT saleyard than the one configured on the herd. Applies to query_type 'herd_details', 'all_herds_summary', and 'portfolio_summary'. The engine fetches live MLA pricing for ANY Australian saleyard on demand - the saleyard does NOT need to be linked to the user's account. Recomputes the AMV with that saleyard's price, falling through to nearest yards / state / national average automatically when a direct quote isn't available. Omit for normal valuations. For side-by-side comparisons across multiple yards, prefer query_type 'saleyard_comparison'.",
+        },
+        saleyards: {
+          type: "array",
+          items: { type: "string" },
+          description: "List of MLA saleyard names for query_type 'saleyard_comparison' (e.g. ['Gracemere', 'Charters Towers', 'Roma']). Accepts short or full names. Pass 2-6 yards. The herd's configured saleyard is automatically included as the baseline - do NOT duplicate it.",
         },
       },
       required: ["query_type"],
@@ -65,7 +76,7 @@ export const toolDefinitions = [
   {
     name: "calculate_freight",
     description:
-      "Calculates exact freight costs using the app's Freight IQ engine. You MUST call this tool every time the user asks about freight, transport, or trucking costs, even for rough estimates. NEVER calculate freight yourself, NEVER estimate distances in your head, NEVER apply your own rate. The engine handles deck loading density, cow-and-calf pair detection, distance routing via OSRM, and GST. Prefer destination_saleyard (routes real road distance from the property to the saleyard) over distance_km (only a last resort when no saleyard matches). If the user specifies a rate different from the default, pass it via rate_per_deck_per_km. For breeder herds where the user says calves are at foot, set calves_at_foot=true so the engine uses the fixed 18 head/deck cow-calf density.",
+      "Calculates exact freight costs using the app's Freight IQ engine. You MUST call this tool every time the user asks about freight, transport, or trucking costs - FOR EVERY DESTINATION, EVERY TIME. No exceptions. The fact that you calculated freight to one yard does NOT let you guess the cost to another yard - different distances, different categories, different loading densities. NEVER calculate freight yourself, NEVER estimate distances in your head, NEVER apply your own rate, NEVER re-use a prior tool result and rescale it. If the user asks about multiple saleyards (e.g. 'compare freight to Roma, Dalby, Gracemere' or 'what would it cost to send these to Bendigo, Wagga, Yass, Scone?'), pass ALL of them in one call via the 'destinations' array - the tool returns one result per yard in a single response. The engine handles deck loading density, cow-and-calf pair detection, distance routing via OSRM, and GST. Prefer destination_saleyard (single) or destinations (batch) over distance_km so the engine routes real road distance from the property. Only pass distance_km when the user gives you an explicit number and there is no matching saleyard. If the user specifies a rate different from the default, pass it via rate_per_deck_per_km. For breeder herds where the user says calves are at foot, set calves_at_foot=true so the engine uses the fixed 18 head/deck cow-calf density.",
     input_schema: {
       type: "object",
       properties: {
@@ -85,7 +96,13 @@ export const toolDefinitions = [
         destination_saleyard: {
           type: "string",
           description:
-            "Destination saleyard name. PREFERRED. The engine routes from the origin property to the saleyard using real road distances via OSRM. Always use this when the destination matches a known saleyard.",
+            "Single destination saleyard name. Use when the user asks about ONE destination. The engine routes from the origin property to the saleyard using real road distances via OSRM. Use this when the destination matches a known saleyard. For multiple yards, use 'destinations' instead.",
+        },
+        destinations: {
+          type: "array",
+          items: { type: "string" },
+          description:
+            "Array of saleyard names for batch freight comparison (e.g. ['Roma', 'Dalby', 'Gracemere', 'Charters Towers']). Use whenever the user asks about more than one destination. The tool runs the engine for each yard and returns all results in one response. Saves round-trips and guarantees every yard gets an engine-calculated figure. Takes precedence over destination_saleyard when both are supplied.",
         },
         distance_km: {
           type: "number",
@@ -331,8 +348,19 @@ async function executeLookup(input: Record<string, unknown>, store: ChatDataStor
       return lookupPropertyDetails(input.property_name as string, store);
     case "market_prices":
       return lookupMarketPrices(input.category as string | undefined, store);
+    case "historical_prices":
+      return await lookupHistoricalPrices(
+        input.category as string | undefined,
+        input.months as number | undefined
+      );
     case "seasonal_pricing":
       return lookupSeasonalPricing(input.category as string | undefined, store);
+    case "saleyard_comparison":
+      return await lookupSaleyardComparison(
+        input.herd_name as string | undefined,
+        (input.saleyards as string[] | undefined) ?? [],
+        store
+      );
     case "sales_history":
       return lookupSalesHistory(store);
     case "freight_estimates":
@@ -669,6 +697,203 @@ function lookupMarketPrices(category: string | undefined, store: ChatDataStore):
   return lines.join("\n");
 }
 
+// MARK: - Historical Prices
+// Returns the 12-month EYCI/WYCI trend users see in the Markets tab price detail sheet.
+// Mirrors iOS lookupHistoricalPrices. Pulls from Supabase mla_historical_indicators,
+// which caches MLA API daily snapshots.
+async function lookupHistoricalPrices(
+  category: string | undefined,
+  monthsInput: number | undefined
+): Promise<string> {
+  const requestedMonths = Math.max(1, Math.min(monthsInput ?? 3, 12));
+  const trimmedCategory = (category ?? "").trim();
+
+  // Category -> indicator routing matches iOS MarketDataService.fetchHistoricalPrices:
+  // Yearling/Weaner -> EYCI, everything else -> WYCI, omitted category -> EYCI.
+  let indicatorId = 0;
+  let indicatorCode = "EYCI";
+  let indicatorName = "Eastern Young Cattle Indicator";
+  if (trimmedCategory) {
+    const mlaCat = resolveMLACategory(trimmedCategory, 0).primaryMLACategory || trimmedCategory;
+    const isYoungCattle = /yearling|weaner/i.test(mlaCat);
+    if (!isYoungCattle) {
+      indicatorId = 1;
+      indicatorCode = "WYCI";
+      indicatorName = "Western Young Cattle Indicator";
+    }
+  }
+
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - requestedMonths * 30);
+  const cutoffStr = cutoff.toISOString().slice(0, 10);
+
+  let rows: Array<{ calendar_date: string; value: number }> = [];
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("mla_historical_indicators")
+      .select("calendar_date, value")
+      .eq("indicator_id", indicatorId)
+      .gte("calendar_date", cutoffStr)
+      .order("calendar_date", { ascending: true });
+
+    if (error) throw error;
+    rows = (data ?? []) as Array<{ calendar_date: string; value: number }>;
+  } catch (err) {
+    console.error("Brangus lookupHistoricalPrices error:", err);
+    return `HISTORICAL PRICES: Unable to load ${indicatorCode} history right now. The MLA feed may be offline, try again in a moment.`;
+  }
+
+  if (rows.length === 0) {
+    return `HISTORICAL PRICES: No ${indicatorCode} data available for the last ${requestedMonths} month${requestedMonths === 1 ? "" : "s"}.`;
+  }
+
+  const values = rows.map((r) => r.value).filter((v) => typeof v === "number" && !isNaN(v));
+  if (values.length === 0) {
+    return `HISTORICAL PRICES: Insufficient data points for ${indicatorCode}.`;
+  }
+
+  const first = rows[0];
+  const last = rows[rows.length - 1];
+  const high = Math.max(...values);
+  const low = Math.min(...values);
+  const avg = values.reduce((s, v) => s + v, 0) / values.length;
+  const change = last.value - first.value;
+  const pctChange = first.value > 0 ? (change / first.value) * 100 : 0;
+  const direction = change > 0.5 ? "up" : change < -0.5 ? "down" : "flat";
+
+  const fmtDate = (iso: string) =>
+    new Date(iso + "T00:00:00").toLocaleDateString("en-AU", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+
+  const fmtVal = (v: number) => `${v.toFixed(2)} c/kg cwt`;
+
+  const categoryLabel = trimmedCategory || "National young cattle market";
+  const sign = change >= 0 ? "+" : "";
+
+  const lines: string[] = [];
+  lines.push(`HISTORICAL PRICES - ${categoryLabel} (${indicatorCode} - ${indicatorName}):`);
+  lines.push(
+    `Window: ${fmtDate(first.calendar_date)} to ${fmtDate(last.calendar_date)} (${requestedMonths} month${requestedMonths === 1 ? "" : "s"}, ${rows.length} data points)`
+  );
+  lines.push(`Start: ${fmtVal(first.value)}`);
+  lines.push(`Current: ${fmtVal(last.value)} (as of ${fmtDate(last.calendar_date)})`);
+  lines.push(`High: ${fmtVal(high)}`);
+  lines.push(`Low: ${fmtVal(low)}`);
+  lines.push(`Average: ${fmtVal(avg)}`);
+  lines.push(
+    `Change over window: ${sign}${change.toFixed(2)} c/kg cwt (${sign}${pctChange.toFixed(1)}%, trend: ${direction})`
+  );
+  lines.push(
+    `NOTE: ${indicatorCode} values are in c/kg carcase weight (cwt), not $/kg liveweight. Quote the numbers as shown - do NOT convert to $/kg or apply dressing percentages unless the user asks.`
+  );
+
+  return lines.join("\n");
+}
+
+// MARK: - Saleyard Comparison
+// Values a single herd at each supplied saleyard side-by-side. The herd's configured
+// saleyard is always included as the baseline. Mirrors iOS lookupSaleyardComparison.
+async function lookupSaleyardComparison(
+  herdName: string | undefined,
+  saleyards: string[],
+  store: ChatDataStore
+): Promise<string> {
+  if (!herdName) {
+    return "Error: Missing herd_name. Provide the herd name from the portfolio index.";
+  }
+  const herd = findHerd(herdName, store.herds);
+  if (!herd) {
+    const available = store.herds.filter((h) => !h.is_sold).map((h) => h.name).join(", ");
+    return `No herd found matching '${herdName}'. Available herds: ${available}`;
+  }
+
+  // Normalise + dedupe yards, with the herd's own saleyard as baseline.
+  const baseline = herd.selected_saleyard ? resolveMLASaleyardName(herd.selected_saleyard) : null;
+  const ordered: string[] = [];
+  const seen = new Set<string>();
+  if (baseline) {
+    ordered.push(baseline);
+    seen.add(baseline.toLowerCase());
+  }
+  for (const raw of saleyards) {
+    const trimmed = (raw ?? "").trim();
+    if (!trimmed) continue;
+    const resolved = resolveMLASaleyardName(trimmed);
+    const key = resolved.toLowerCase();
+    if (seen.has(key)) continue;
+    ordered.push(resolved);
+    seen.add(key);
+  }
+
+  if (ordered.length === 0) {
+    return "Error: No saleyards to compare. Provide at least one saleyard name in the 'saleyards' parameter.";
+  }
+
+  const lines: string[] = [];
+  lines.push(`SALEYARD COMPARISON - ${herd.name}:`);
+  lines.push(
+    `Head: ${herd.head_count}, initial ${Math.round(herd.initial_weight ?? herd.current_weight ?? 0)}kg, ${herd.breed} ${herd.category}`
+  );
+  lines.push("All values come from the AMV engine (same figures as the Dashboard). Quote them as returned - do NOT recompute.");
+  lines.push("");
+
+  type Row = { yard: string; v: HerdValuationResult | null };
+  const rows: Row[] = [];
+  for (const yard of ordered) {
+    const isBaseline = baseline ? yard.toLowerCase() === baseline.toLowerCase() : false;
+    const v = valuationForHerd(herd, store, isBaseline ? null : yard);
+    rows.push({ yard, v });
+  }
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const label = i === 0 && baseline ? "baseline (herd's saleyard)" : "comparison";
+    let line = `- ${row.yard} [${label}]:`;
+    if (row.v) {
+      const perHead = herd.head_count > 0 ? row.v.netValue / herd.head_count : 0;
+      line += ` $${row.v.pricePerKg.toFixed(3)}/kg breed-adj`;
+      line += `, projected ${Math.round(row.v.projectedWeight)}kg`;
+      line += `, $${fmtDollars(perHead)}/head`;
+      line += `, total $${fmtDollars(row.v.netValue)}`;
+      line += `, source: ${row.v.priceSource}${row.v.nearestSaleyardUsed ? ` (nearest: ${row.v.nearestSaleyardUsed})` : ""}`;
+      if (row.v.dataDate) line += `, MLA ${row.v.dataDate}`;
+    } else {
+      line += " valuation unavailable (engine returned no result)";
+    }
+    lines.push(line);
+  }
+
+  // Spread so Brangus can cite the bottom line directly.
+  const valid = rows
+    .filter((r): r is Row & { v: HerdValuationResult } => r.v !== null)
+    .map((r) => ({
+      yard: r.yard,
+      total: r.v.netValue,
+      perHead: herd.head_count > 0 ? r.v.netValue / herd.head_count : 0,
+    }));
+  if (valid.length >= 2) {
+    const best = valid.reduce((a, b) => (b.total > a.total ? b : a));
+    const worst = valid.reduce((a, b) => (b.total < a.total ? b : a));
+    if (best.yard !== worst.yard) {
+      const totalDiff = best.total - worst.total;
+      const perHeadDiff = best.perHead - worst.perHead;
+      lines.push("");
+      lines.push(
+        `SPREAD: ${best.yard} is $${fmtDollars(totalDiff)} higher than ${worst.yard} total ($${fmtDollars(perHeadDiff)}/head).`
+      );
+      lines.push(
+        "REMINDER: Freight differs between yards. If the user is weighing a sale decision, offer to run calculate_freight for each destination so they can net the freight cost off the price spread."
+      );
+    }
+  }
+
+  return lines.join("\n");
+}
+
 // MARK: - Seasonal Pricing (simplified - returns current prices as proxy)
 
 function lookupSeasonalPricing(category: string | undefined, store: ChatDataStore): string {
@@ -991,6 +1216,44 @@ function formatWeatherData(data: { propertyName: string; locationDescription: st
 // MARK: - Calculate Freight Tool
 
 async function executeFreight(input: Record<string, unknown>, store: ChatDataStore): Promise<string> {
+  // Batch path - Brangus asked about multiple destinations in one call.
+  // Run each through the single-destination path and concatenate, so every
+  // yard gets an engine-calculated figure rather than a Brangus-inferred one.
+  const destinationsRaw = input.destinations;
+  if (Array.isArray(destinationsRaw) && destinationsRaw.length > 0) {
+    const cleaned = (destinationsRaw as unknown[])
+      .map((d) => (typeof d === "string" ? d.trim() : ""))
+      .filter((d) => d.length > 0);
+    const seen = new Set<string>();
+    const deduped: string[] = [];
+    for (const name of cleaned) {
+      const key = name.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      deduped.push(name);
+    }
+    if (deduped.length === 0) {
+      return "Error: 'destinations' was empty. Provide at least one saleyard name.";
+    }
+    const sections: string[] = [
+      `FREIGHT BATCH - ${deduped.length} destination${deduped.length === 1 ? "" : "s"}:`,
+    ];
+    for (let i = 0; i < deduped.length; i++) {
+      const singleInput = { ...input };
+      delete singleInput.destinations;
+      singleInput.destination_saleyard = deduped[i];
+      const result = await executeSingleFreight(singleInput, store);
+      sections.push(`\n--- Destination ${i + 1} of ${deduped.length} ---\n${result}`);
+    }
+    return sections.join("\n");
+  }
+
+  return executeSingleFreight(input, store);
+}
+
+// Extracted single-destination freight execution so the batch path can reuse it
+// without duplicating herd-vs-manual resolution, distance lookup, or engine invocation.
+async function executeSingleFreight(input: Record<string, unknown>, store: ChatDataStore): Promise<string> {
   let headCount: number;
   let weightKg: number;
   let category: string;

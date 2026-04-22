@@ -56,14 +56,15 @@ export default async function FreightHistoryPage() {
     <div className="max-w-4xl">
       <Link
         href="/dashboard/tools/freight"
-        className="mb-4 inline-flex items-center gap-1.5 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
+        className="bg-surface-lowest text-text-secondary hover:text-text-primary mb-4 inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors"
       >
         <ChevronLeft className="h-4 w-4" /> Freight IQ
       </Link>
 
-      <PageHeader feature="freight-iq"
+      <PageHeader
+        feature="freight-iq"
         title="Saved Estimates"
-        titleClassName="text-4xl font-bold text-info"
+        titleClassName="text-4xl font-bold text-freight-iq"
         subtitle="Freight calculations you've bookmarked from iOS or web"
         subtitleClassName="text-sm font-medium text-text-secondary"
       />
@@ -75,7 +76,7 @@ export default async function FreightHistoryPage() {
           description="Estimates you save from a Freight IQ calculation will appear here."
           actionLabel="New Estimate"
           actionHref="/dashboard/tools/freight"
-          variant="sky"
+          variant="freight-iq"
         />
       ) : (
         <SavedEstimatesList estimates={estimates} />

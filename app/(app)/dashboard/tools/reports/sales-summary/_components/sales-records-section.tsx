@@ -55,7 +55,7 @@ export function SalesRecordsSection({ salesData }: { salesData: SaleReportData[]
         <p className="text-xs font-bold uppercase tracking-wider text-white/60">Total</p>
         <span className="text-sm tabular-nums text-white/60">
           {totalHead.toLocaleString()} head &middot;{" "}
-          <span className="text-base font-bold text-warning">{fmt(totalNet)}</span>
+          <span className="text-base font-bold text-reports">{fmt(totalNet)}</span>
         </span>
       </div>
     </div>
@@ -72,7 +72,7 @@ function MonthGroup({ label, sales }: { label: string; sales: SaleReportData[] }
         <h4 className="text-sm font-semibold text-white">{label}</h4>
         <span className="text-xs tabular-nums text-white/60">
           {groupHead.toLocaleString()} head &middot;{" "}
-          <span className="font-semibold text-warning">{fmt(groupNet)}</span>
+          <span className="font-semibold text-reports">{fmt(groupNet)}</span>
         </span>
       </div>
 

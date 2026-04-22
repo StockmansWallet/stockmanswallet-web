@@ -1,7 +1,17 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ArrowRight, Share2, Check, Trash2, DollarSign, Truck, Info, AlertTriangle, CheckCircle2 } from "lucide-react";
+import {
+  ArrowRight,
+  Share2,
+  Check,
+  Trash2,
+  DollarSign,
+  Truck,
+  Info,
+  AlertTriangle,
+  CheckCircle2,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { buildFreightShareText } from "@/lib/freight/share-formatter";
@@ -97,7 +107,9 @@ export function SavedEstimatesList({ estimates }: { estimates: SavedEstimate[] }
   return (
     <div className="space-y-3">
       {error && (
-        <p className="text-sm text-error" role="alert">{error}</p>
+        <p className="text-error text-sm" role="alert">
+          {error}
+        </p>
       )}
       {list.map((estimate) => {
         const isExpanded = expandedId === estimate.id;
@@ -112,35 +124,53 @@ export function SavedEstimatesList({ estimates }: { estimates: SavedEstimate[] }
                 className="flex w-full flex-col gap-2 px-5 py-4 text-left transition-colors hover:bg-white/[0.02]"
                 aria-expanded={isExpanded}
               >
-                <div className="flex items-center gap-2 text-sm font-semibold text-text-primary">
+                <div className="text-text-primary flex items-center gap-2 text-sm font-semibold">
                   <span className="truncate">{estimate.originPropertyName}</span>
-                  <ArrowRight className="h-3.5 w-3.5 shrink-0 text-info" />
+                  <ArrowRight className="text-freight-iq h-3.5 w-3.5 shrink-0" />
                   <span className="truncate">{estimate.destinationName}</span>
                 </div>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-muted">
+                <div className="text-text-muted flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
                   {estimate.herdName && <span>{estimate.herdName}</span>}
                   <span>{estimate.headCount} head</span>
                   <span>{Math.round(estimate.distanceKm)} km</span>
-                  <span className="ml-auto font-semibold text-info">
+                  <span className="text-freight-iq ml-auto font-semibold">
                     {formatCurrency(estimate.totalCost)}
-                    <span className="ml-1 text-[10px] font-medium text-text-muted">+GST</span>
+                    <span className="text-text-muted ml-1 text-[10px] font-medium">+GST</span>
                   </span>
                 </div>
-                <div className="text-[11px] text-text-muted">{formatDate(estimate.savedAt)}</div>
+                <div className="text-text-muted text-[11px]">{formatDate(estimate.savedAt)}</div>
               </button>
 
               {isExpanded && (
-                <div className="border-t border-white/[0.06] px-5 py-4 space-y-4">
+                <div className="space-y-4 border-t border-white/[0.06] px-5 py-4">
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    <DetailStat icon={<DollarSign className="h-4 w-4" />} label="Total" value={formatCurrency(estimate.totalCost)} />
-                    <DetailStat icon={<span className="text-xs font-bold">hd</span>} label="Per Head" value={formatCurrency(estimate.costPerHead)} />
-                    <DetailStat icon={<Truck className="h-4 w-4" />} label="Per Deck" value={formatCurrency(estimate.costPerDeck)} />
-                    <DetailStat icon={<Truck className="h-4 w-4" />} label="Decks" value={estimate.decksRequired.toString()} />
+                    <DetailStat
+                      icon={<DollarSign className="h-4 w-4" />}
+                      label="Total"
+                      value={formatCurrency(estimate.totalCost)}
+                    />
+                    <DetailStat
+                      icon={<span className="text-xs font-bold">hd</span>}
+                      label="Per Head"
+                      value={formatCurrency(estimate.costPerHead)}
+                    />
+                    <DetailStat
+                      icon={<Truck className="h-4 w-4" />}
+                      label="Per Deck"
+                      value={formatCurrency(estimate.costPerDeck)}
+                    />
+                    <DetailStat
+                      icon={<Truck className="h-4 w-4" />}
+                      label="Decks"
+                      value={estimate.decksRequired.toString()}
+                    />
                   </div>
 
                   <div>
-                    <p className="text-xs font-medium text-text-muted">Assumptions</p>
-                    <p className="mt-1 text-xs leading-relaxed text-text-secondary">{estimate.assumptionsSummary}</p>
+                    <p className="text-text-muted text-xs font-medium">Assumptions</p>
+                    <p className="text-text-secondary mt-1 text-xs leading-relaxed">
+                      {estimate.assumptionsSummary}
+                    </p>
                   </div>
 
                   {estimate.efficiencyPrompt && (
@@ -164,9 +194,13 @@ export function SavedEstimatesList({ estimates }: { estimates: SavedEstimate[] }
                       onClick={() => handleShare(estimate)}
                     >
                       {isCopied ? (
-                        <><Check className="mr-1.5 h-4 w-4" /> Copied</>
+                        <>
+                          <Check className="mr-1.5 h-4 w-4" /> Copied
+                        </>
                       ) : (
-                        <><Share2 className="mr-1.5 h-4 w-4" /> Share</>
+                        <>
+                          <Share2 className="mr-1.5 h-4 w-4" /> Share
+                        </>
                       )}
                     </Button>
                     <Button
@@ -189,29 +223,43 @@ export function SavedEstimatesList({ estimates }: { estimates: SavedEstimate[] }
   );
 }
 
-function DetailStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function DetailStat({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
   return (
-    <div className="rounded-xl bg-white/5 p-3 ring-1 ring-inset ring-white/[0.06]">
-      <div className="flex items-center gap-1.5 text-text-muted">
+    <div className="rounded-xl bg-white/5 p-3 ring-1 ring-white/[0.06] ring-inset">
+      <div className="text-text-muted flex items-center gap-1.5">
         <span className="flex h-5 w-5 items-center justify-center">{icon}</span>
         <span className="text-[11px] font-medium">{label}</span>
       </div>
-      <p className="mt-1 text-sm font-semibold text-text-primary">{value}</p>
+      <p className="text-text-primary mt-1 text-sm font-semibold">{value}</p>
     </div>
   );
 }
 
 function Alert({ type, message }: { type: "warning" | "info" | "success"; message: string }) {
   const styles = {
-    warning: { bg: "bg-warning/10 ring-warning/20", icon: <AlertTriangle className="h-4 w-4 text-warning" /> },
-    info: { bg: "bg-info/10 ring-info/20", icon: <Info className="h-4 w-4 text-info" /> },
-    success: { bg: "bg-success/10 ring-success/20", icon: <CheckCircle2 className="h-4 w-4 text-success" /> },
+    warning: {
+      bg: "bg-warning/10 ring-warning/20",
+      icon: <AlertTriangle className="text-warning h-4 w-4" />,
+    },
+    info: { bg: "bg-info/10 ring-info/20", icon: <Info className="text-info h-4 w-4" /> },
+    success: {
+      bg: "bg-success/10 ring-success/20",
+      icon: <CheckCircle2 className="text-success h-4 w-4" />,
+    },
   };
   const s = styles[type];
   return (
     <div className={`flex items-start gap-3 rounded-xl p-3 ring-1 ring-inset ${s.bg}`}>
       <div className="mt-0.5 shrink-0">{s.icon}</div>
-      <p className="text-xs leading-relaxed text-text-secondary">{message}</p>
+      <p className="text-text-secondary text-xs leading-relaxed">{message}</p>
     </div>
   );
 }

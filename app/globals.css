@@ -19,126 +19,176 @@ summary {
 }
 
 /* ================================================================
-   HUE PALETTE - Apple iOS dark-mode System Colors, calibrated.
+   MASTER HUE PALETTE - warm-leaning, dark-mode calibrated.
+   Each hue has four tints:
+     --hue-X         bright, for icons / chart dots / accents
+     --hue-X-light   lifted, for hover fills / soft washes
+     --hue-X-dark    AA 4.5:1 against white text, for button fills
+     --hue-X-text    strict AA, for backgrounds under body copy
    Raw hex values live at :root so components use --color-* tokens
    (exposed via @theme inline below) while the hex stays editable
    in one place.
    ================================================================ */
 :root {
-  --hue-orange: #ff9f0a; /* Apple systemOrange */
-  --hue-orange-light: #ffbb55;
-  --hue-orange-dark: #cc7e08;
+  /* Stockman Gold - brand accent. Warm amber tuned for a dark base;
+     evokes Australian sunrise and the premium feel of livestock wealth.
+     Distinct from the hi-vis orange used for Freight IQ. */
+  --hue-gold: #e5a83a;
+  --hue-gold-light: #f5c268;
+  --hue-gold-dark: #8f6820;
+  --hue-gold-text: #6b4e15;
 
-  --hue-gold: #ffd60a; /* Apple systemYellow */
-  --hue-gold-light: #ffe55c;
-  --hue-gold-dark: #cca808;
+  /* Hi-Vis Orange - Freight IQ. Road signs, trucks, movement. */
+  --hue-orange: #ff8c42;
+  --hue-orange-light: #ffae7a;
+  --hue-orange-dark: #b35f1d;
+  --hue-orange-text: #8a4814;
 
-  --hue-lime: #a8d72f; /* Apple-calibrated lime (no Apple equivalent) */
-  --hue-lime-light: #c3e26b;
-  --hue-lime-dark: #86ac25;
+  /* Notebook Crimson - Yard Book (reminders). Apple Reminders
+     convention, also the ribbon bookmark of a leather journal. */
+  --hue-red: #e5484d;
+  --hue-red-light: #f0787b;
+  --hue-red-dark: #9e2a2e;
+  --hue-red-text: #751f22;
 
-  --hue-emerald: #30d158; /* Apple systemGreen */
-  --hue-emerald-light: #5fdc7c;
-  --hue-emerald-dark: #26a746;
+  /* Marble Rose - Grid IQ (MSA grading). Evokes beef marbling and
+     the pink of a quality carcase without being literal red. */
+  --hue-pink: #f5739f;
+  --hue-pink-light: #fba1be;
+  --hue-pink-dark: #a52d5c;
+  --hue-pink-text: #7a1f42;
 
-  --hue-teal: #40cbe0; /* Apple systemTeal */
-  --hue-teal-light: #73d8e8;
-  --hue-teal-dark: #33a2b3;
+  /* Legacy rose lane retained for chart parity and any consumer that
+     still references it; tuned to sit between red and pink. */
+  --hue-rose: #e8446a;
+  --hue-rose-light: #f08196;
+  --hue-rose-dark: #a82b4e;
+  --hue-rose-text: #7d2039;
 
-  --hue-sky: #0a84ff; /* Apple systemBlue */
-  --hue-sky-light: #52a6ff;
-  --hue-sky-dark: #0869cc;
+  /* Insight Violet - Insights. The lightbulb / pattern-finding hue. */
+  --hue-violet: #9e7bff;
+  --hue-violet-light: #baa1ff;
+  --hue-violet-dark: #5e35b8;
+  --hue-violet-text: #43248a;
 
-  --hue-indigo: #5e5ce6; /* Apple systemIndigo */
-  --hue-indigo-light: #8583ed;
-  --hue-indigo-dark: #4b49b8;
+  /* Ledger Navy - Reports. Documents, accounting, trust. */
+  --hue-indigo: #4c7fff;
+  --hue-indigo-light: #7fa3ff;
+  --hue-indigo-dark: #2b4fa8;
+  --hue-indigo-text: #1c3876;
 
-  --hue-violet: #bf5af2; /* Apple systemPurple */
-  --hue-violet-light: #d080f5;
-  --hue-violet-dark: #9848c1;
+  /* Sky Cyan - Brangus (AI chat). Assistant convention plus a nod to
+     the blue sheen on a Brangus coat under open sky. */
+  --hue-sky: #56c2ff;
+  --hue-sky-light: #85d4ff;
+  --hue-sky-dark: #0c6f9e;
+  --hue-sky-text: #0b5075;
 
-  --hue-pink: #ff375f; /* Apple systemPink */
-  --hue-pink-light: #ff6988;
-  --hue-pink-dark: #cc2c4c;
+  /* Community Teal - Producer Network. Connection, handshake warmth;
+     sits clearly apart from the Markets emerald. */
+  --hue-teal: #3fb8af;
+  --hue-teal-light: #6fcec7;
+  --hue-teal-dark: #1a7a72;
+  --hue-teal-text: #115a54;
 
-  --hue-red: #ff453a; /* Apple systemRed */
-  --hue-red-light: #ff7b73;
-  --hue-red-dark: #cc372e;
+  /* Market Emerald - Markets. Trending up, financial green. */
+  --hue-emerald: #30a46c;
+  --hue-emerald-light: #5cc48e;
+  --hue-emerald-dark: #1e7549;
+  --hue-emerald-text: #155637;
 
-  /* Text-safe variants - darker shades passing WCAG AA on white text */
-  --hue-orange-text: #b45d00;
-  --hue-gold-text: #8a7000;
-  --hue-lime-text: #567312;
-  --hue-emerald-text: #14803a;
-  --hue-teal-text: #166b75;
-  --hue-sky-text: #0058b3;
-  --hue-indigo-text: #3d3ba8;
-  --hue-violet-text: #8029b8;
-  --hue-pink-text: #b4244c;
-  --hue-red-text: #b82a24;
+  /* Paddock Sage - Producer Network. Warm olive-sage, grounded/mature;
+     evokes shared paddock and farmer-to-farmer trust. */
+  --hue-sage: #8fa86b;
+  --hue-sage-light: #abc28c;
+  --hue-sage-dark: #5f7945;
+  --hue-sage-text: #445a2f;
+
+  /* Lime retained for chart parity. */
+  --hue-lime: #9fc51a;
+  --hue-lime-light: #bed658;
+  --hue-lime-dark: #607500;
+  --hue-lime-text: #4a5a00;
+
+  /* Warm neutral - muted utility accent. */
+  --hue-neutral: #9c8e88;
+  --hue-neutral-light: #b8ada8;
+  --hue-neutral-dark: #5f5551;
+  --hue-neutral-text: #3f3834;
 }
 
 @theme inline {
   /* ================================================================
      HUE PALETTE
-     10 vivid hues, matched in lightness + chroma to #FF8000 so they
-     read as one family. Each hue has default / light / dark tints.
+     Warm-leaning hues. Each has bright / light / dark / text tints.
+     Values live at :root as --hue-* so components reference tokens
+     here while raw hex stays editable in one place.
      ================================================================ */
 
-  /* Hues — values live at :root as --hue-* so they can be overridden
-     at runtime by palette toggles (see html[data-palette="apple"]). */
   --color-orange: var(--hue-orange);
   --color-orange-light: var(--hue-orange-light);
   --color-orange-dark: var(--hue-orange-dark);
+  --color-orange-text: var(--hue-orange-text);
 
   --color-gold: var(--hue-gold);
   --color-gold-light: var(--hue-gold-light);
   --color-gold-dark: var(--hue-gold-dark);
+  --color-gold-text: var(--hue-gold-text);
 
   --color-lime: var(--hue-lime);
   --color-lime-light: var(--hue-lime-light);
   --color-lime-dark: var(--hue-lime-dark);
+  --color-lime-text: var(--hue-lime-text);
 
   --color-emerald: var(--hue-emerald);
   --color-emerald-light: var(--hue-emerald-light);
   --color-emerald-dark: var(--hue-emerald-dark);
+  --color-emerald-text: var(--hue-emerald-text);
+
+  --color-sage: var(--hue-sage);
+  --color-sage-light: var(--hue-sage-light);
+  --color-sage-dark: var(--hue-sage-dark);
+  --color-sage-text: var(--hue-sage-text);
 
   --color-teal: var(--hue-teal);
   --color-teal-light: var(--hue-teal-light);
   --color-teal-dark: var(--hue-teal-dark);
+  --color-teal-text: var(--hue-teal-text);
 
   --color-sky: var(--hue-sky);
   --color-sky-light: var(--hue-sky-light);
   --color-sky-dark: var(--hue-sky-dark);
+  --color-sky-text: var(--hue-sky-text);
 
   --color-indigo: var(--hue-indigo);
   --color-indigo-light: var(--hue-indigo-light);
   --color-indigo-dark: var(--hue-indigo-dark);
+  --color-indigo-text: var(--hue-indigo-text);
 
   --color-violet: var(--hue-violet);
   --color-violet-light: var(--hue-violet-light);
   --color-violet-dark: var(--hue-violet-dark);
+  --color-violet-text: var(--hue-violet-text);
+
+  --color-rose: var(--hue-rose);
+  --color-rose-light: var(--hue-rose-light);
+  --color-rose-dark: var(--hue-rose-dark);
+  --color-rose-text: var(--hue-rose-text);
 
   --color-pink: var(--hue-pink);
   --color-pink-light: var(--hue-pink-light);
   --color-pink-dark: var(--hue-pink-dark);
+  --color-pink-text: var(--hue-pink-text);
 
   --color-red: var(--hue-red);
   --color-red-light: var(--hue-red-light);
   --color-red-dark: var(--hue-red-dark);
-
-  /* Text-safe accents: darker variants with WCAG AA (>= 4.5:1) against
-     white text. Use ONLY where an accent backs white body text. */
-  --color-orange-text: var(--hue-orange-text);
-  --color-gold-text: var(--hue-gold-text);
-  --color-lime-text: var(--hue-lime-text);
-  --color-emerald-text: var(--hue-emerald-text);
-  --color-teal-text: var(--hue-teal-text);
-  --color-sky-text: var(--hue-sky-text);
-  --color-indigo-text: var(--hue-indigo-text);
-  --color-violet-text: var(--hue-violet-text);
-  --color-pink-text: var(--hue-pink-text);
   --color-red-text: var(--hue-red-text);
+
+  --color-neutral: var(--hue-neutral);
+  --color-neutral-light: var(--hue-neutral-light);
+  --color-neutral-dark: var(--hue-neutral-dark);
+  --color-neutral-text: var(--hue-neutral-text);
 
   /* ================================================================
      NEUTRALS - surfaces, borders, text
@@ -166,12 +216,12 @@ summary {
   --color-text-quaternary: rgba(255, 255, 255, 0.2);
 
   /* ================================================================
-     BRAND - alias to orange
+     BRAND - Stockman Gold
      ================================================================ */
-  --color-brand: var(--color-orange);
-  --color-brand-light: var(--color-orange-light);
-  --color-brand-dark: var(--color-orange-dark);
-  --color-brand-text: var(--color-orange-text);
+  --color-brand: var(--color-gold);
+  --color-brand-light: var(--color-gold-light);
+  --color-brand-dark: var(--color-gold-dark);
+  --color-brand-text: var(--color-gold-text);
 
   /* ================================================================
      SEMANTIC STATUS - alias to hue palette
@@ -198,46 +248,86 @@ summary {
 
   /* ================================================================
      FEATURE / PRODUCT ACCENTS - alias to hue palette
+     Each feature has its own lane. -dark variants are AA 4.5:1
+     against white text; use them for pill fills and buttons. Use the
+     base token for icons / dots / chart accents.
      ================================================================ */
-  --color-brangus: var(--color-orange);
-  --color-brangus-light: var(--color-orange-light);
-  --color-brangus-dark: var(--color-orange-dark);
+  /* Brangus (AI chat) - Ledger Navy */
+  --color-brangus: var(--color-indigo);
+  --color-brangus-light: var(--color-indigo-light);
+  --color-brangus-dark: var(--color-indigo-dark);
+  --color-brangus-text: var(--color-indigo-text);
+
+  /* Insights - Insight Violet */
   --color-insights: var(--color-violet);
   --color-insights-light: var(--color-violet-light);
   --color-insights-dark: var(--color-violet-dark);
-  --color-markets: var(--color-pink);
-  --color-markets-light: var(--color-pink-light);
-  --color-markets-dark: var(--color-pink-dark);
-  --color-yard-book: var(--color-teal);
-  --color-yard-book-light: var(--color-teal-light);
-  --color-yard-book-dark: var(--color-teal-dark);
-  --color-reports: var(--color-gold);
-  --color-reports-light: var(--color-gold-light);
-  --color-reports-dark: var(--color-gold-dark);
+  --color-insights-text: var(--color-violet-text);
+
+  /* Markets - Notebook Crimson */
+  --color-markets: var(--color-red);
+  --color-markets-light: var(--color-red-light);
+  --color-markets-dark: var(--color-red-dark);
+  --color-markets-text: var(--color-red-text);
+
+  /* Yard Book (reminders) - Paddock Emerald */
+  --color-yard-book: var(--color-emerald);
+  --color-yard-book-light: var(--color-emerald-light);
+  --color-yard-book-dark: var(--color-emerald-dark);
+  --color-yard-book-text: var(--color-emerald-text);
+
+  /* Reports - Hi-Vis Orange */
+  --color-reports: var(--color-orange);
+  --color-reports-light: var(--color-orange-light);
+  --color-reports-dark: var(--color-orange-dark);
+  --color-reports-text: var(--color-orange-text);
+
+  /* Freight IQ - Sky Cyan */
   --color-freight-iq: var(--color-sky);
   --color-freight-iq-light: var(--color-sky-light);
   --color-freight-iq-dark: var(--color-sky-dark);
-  --color-grid-iq: var(--color-emerald);
-  --color-grid-iq-light: var(--color-emerald-light);
-  --color-grid-iq-dark: var(--color-emerald-dark);
-  --color-producer-network: var(--color-lime);
-  --color-producer-network-light: var(--color-lime-light);
-  --color-producer-network-dark: var(--color-lime-dark);
-  --color-advisor: var(--color-indigo);
-  --color-advisor-light: var(--color-indigo-light);
-  --color-advisor-dark: var(--color-indigo-dark);
+  --color-freight-iq-text: var(--color-sky-text);
+
+  /* Grid IQ (MSA grading) - Community Teal */
+  --color-grid-iq: var(--color-teal);
+  --color-grid-iq-light: var(--color-teal-light);
+  --color-grid-iq-dark: var(--color-teal-dark);
+  --color-grid-iq-text: var(--color-teal-text);
+
+  /* Producer Network - Paddock Sage */
+  --color-producer-network: var(--color-sage);
+  --color-producer-network-light: var(--color-sage-light);
+  --color-producer-network-dark: var(--color-sage-dark);
+  --color-producer-network-text: var(--color-sage-text);
+
+  /* Help Centre - neutral info blue, distinct from Brangus sky. */
+  --color-help-centre: var(--color-neutral);
+  --color-help-centre-light: var(--color-neutral-light);
+  --color-help-centre-dark: var(--color-neutral-dark);
+  --color-help-centre-text: var(--color-neutral-text);
+
+  /* Community - alias of Producer Network. */
+  --color-community: var(--color-sage);
+  --color-community-light: var(--color-sage-light);
+  --color-community-dark: var(--color-sage-dark);
+  --color-community-text: var(--color-sage-text);
+
+  --color-advisor: var(--color-violet);
+  --color-advisor-light: var(--color-violet-light);
+  --color-advisor-dark: var(--color-violet-dark);
+  --color-advisor-text: var(--color-violet-text);
 
   /* ================================================================
      CHAT BUBBLES
-     - chat-user: own bubble in Brangus / producer-peer chats
-     - chat-other: peer bubble used across all chats (neutral grey)
-     - chat-advisor-own: own bubble in advisor / connection chat (purple)
+     - chat-user: own bubble across every chat (Brangus, producer, advisor)
+     - chat-other: peer bubble default for chats that don't override
      - chat-advisor-accent: send-button accent in advisor chat (rose)
-     Brangus (assistant) uses --color-sky-text.
+     Brangus (assistant) bubble uses --color-brangus-dark; producer peer uses
+     --color-producer-network-dark. Override per chat via the MessageThread
+     otherBgClass / otherTailColor props, not by adding new tokens.
      ================================================================ */
   --color-chat-user: #3d4550;
   --color-chat-other: #2a2929;
-  --color-chat-advisor-own: #31243c;
   --color-chat-advisor-accent: #b0657a;
   --color-chat-advisor-accent-hover: #8a4d5e;
 
@@ -306,125 +396,6 @@ summary {
     var(--font-nunito), "Nunito", system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
   --font-serif: var(--font-lora), "Lora", "Georgia", "Times New Roman", serif;
-}
-
-/* ================================================================
-   OUTBACK PALETTE (A/B toggle via html[data-palette="outback"])
-   Earthy but vivid. Saturated enough to feel alive, muted enough to
-   feel grounded. R.M. Williams / Akubra territory - rural premium.
-   ================================================================ */
-html[data-palette="outback"] {
-  --hue-orange: #db7a2c; /* Burnt ochre */
-  --hue-orange-light: #e99f63;
-  --hue-orange-dark: #b1601d;
-
-  --hue-gold: #d9a53a; /* Honey amber */
-  --hue-gold-light: #e5bd6d;
-  --hue-gold-dark: #ae8321;
-
-  --hue-lime: #7fa539; /* Bush olive */
-  --hue-lime-light: #a5c569;
-  --hue-lime-dark: #638226;
-
-  --hue-emerald: #2fa868; /* Eucalyptus */
-  --hue-emerald-light: #5fc38a;
-  --hue-emerald-dark: #1f7b4b;
-
-  --hue-teal: #319aa1; /* Billabong */
-  --hue-teal-light: #64b6bb;
-  --hue-teal-dark: #216f74;
-
-  --hue-sky: #2f7cc2; /* Outback dusk */
-  --hue-sky-light: #5f9cd4;
-  --hue-sky-dark: #225a90;
-
-  --hue-indigo: #584bb9; /* Ironstone */
-  --hue-indigo-light: #7e74cb;
-  --hue-indigo-dark: #403688;
-
-  --hue-violet: #a14bb5; /* Dusty mulberry */
-  --hue-violet-light: #be7bcd;
-  --hue-violet-dark: #763585;
-
-  --hue-pink: #d55a5a; /* Terracotta rose */
-  --hue-pink-light: #e18989;
-  --hue-pink-dark: #a03f3f;
-
-  --hue-red: #c14032; /* Rust red */
-  --hue-red-light: #d57266;
-  --hue-red-dark: #922e24;
-
-  /* Text-safe variants (WCAG AA on white text) */
-  --hue-orange-text: #8a4c17;
-  --hue-gold-text: #6e5410;
-  --hue-lime-text: #3f5416;
-  --hue-emerald-text: #165c38;
-  --hue-teal-text: #14585c;
-  --hue-sky-text: #1a4269;
-  --hue-indigo-text: #322a73;
-  --hue-violet-text: #5e2a6b;
-  --hue-pink-text: #7d2828;
-  --hue-red-text: #7f2218;
-}
-
-/* ================================================================
-   GEMINI PALETTE (A/B toggle via html[data-palette="gemini"])
-   High-vis vivid palette tuned to read on the dark warm-brown
-   background (#201813). Each hue is one of Gemini's named swatches.
-   Toggle lives in <PaletteToggle /> (dev only).
-   ================================================================ */
-html[data-palette="gemini"] {
-  --hue-orange: #ff9500; /* Burned Orange - hero CTA */
-  --hue-orange-light: #ffb14a;
-  --hue-orange-dark: #cc7700;
-
-  --hue-gold: #ffcc00; /* Harvest Gold - hero highlight */
-  --hue-gold-light: #ffdd55;
-  --hue-gold-dark: #cca300;
-
-  --hue-lime: #4cd964; /* Growth Green - punchy lime */
-  --hue-lime-light: #7be38b;
-  --hue-lime-dark: #3aae50;
-
-  --hue-emerald: #2dbe4e; /* Derived darker Growth Green */
-  --hue-emerald-light: #5cd07a;
-  --hue-emerald-dark: #1f8d39;
-
-  --hue-teal: #00d7c4; /* Bright Teal - shifted to green to separate from sky */
-  --hue-teal-light: #4fe3d4;
-  --hue-teal-dark: #00aa9c;
-
-  --hue-sky: #007fff; /* Deep Azure - lifted so it doesn't get lost */
-  --hue-sky-light: #32b3e6; /* Sky Blue - lighter cyan-blue */
-  --hue-sky-dark: #0066cc;
-
-  --hue-indigo: #5e5ce6; /* Electric Indigo - kept electric, not muddy */
-  --hue-indigo-light: #8583ed;
-  --hue-indigo-dark: #4a48b8;
-
-  --hue-violet: #948aff; /* Dusty Rose - vivid soft violet */
-  --hue-violet-light: #b3acff;
-  --hue-violet-dark: #6f64e6;
-
-  --hue-pink: #bf5af2; /* Royal Purple - magenta-purple, harmonises with red */
-  --hue-pink-light: #d080f5;
-  --hue-pink-dark: #9848c1;
-
-  --hue-red: #ff3b30; /* Deep Coral - pure alert red for dark themes */
-  --hue-red-light: #ff6c63;
-  --hue-red-dark: #cc2f26;
-
-  /* Text-safe variants (WCAG AA against white text on the swatch fill) */
-  --hue-orange-text: #a35f00;
-  --hue-gold-text: #856900;
-  --hue-lime-text: #1f7a30;
-  --hue-emerald-text: #155f24;
-  --hue-teal-text: #006e64;
-  --hue-sky-text: #0058b3;
-  --hue-indigo-text: #3d3ba8;
-  --hue-violet-text: #4e44a8;
-  --hue-pink-text: #7d2db0;
-  --hue-red-text: #b3201a;
 }
 
 /* ================================================================

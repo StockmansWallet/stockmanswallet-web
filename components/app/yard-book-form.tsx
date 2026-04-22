@@ -178,7 +178,7 @@ export function YardBookForm({ item, herds, properties, action, submitLabel }: Y
                     name="is_all_day"
                     checked={isAllDay}
                     onChange={(e) => setIsAllDay(e.target.checked)}
-                    className="text-emerald accent-emerald h-4 w-4 rounded border-black/20"
+                    className="text-yard-book accent-yard-book h-4 w-4 rounded border-black/20"
                   />
                   All day event
                 </label>
@@ -234,7 +234,7 @@ export function YardBookForm({ item, herds, properties, action, submitLabel }: Y
               rows={3}
               defaultValue={item?.notes ?? ""}
               placeholder="Any additional notes..."
-              className="text-text-primary placeholder:text-text-muted focus:ring-emerald/60 w-full rounded-xl bg-white/5 px-4 py-3 text-sm transition-all outline-none focus:bg-white/8 focus:ring-1 focus:ring-inset"
+              className="text-text-primary placeholder:text-text-muted focus:ring-yard-book/60 w-full rounded-xl bg-white/5 px-4 py-3 text-sm transition-all outline-none focus:bg-white/8 focus:ring-1 focus:ring-inset"
             />
           </section>
         </div>
@@ -251,7 +251,7 @@ export function YardBookForm({ item, herds, properties, action, submitLabel }: Y
                 type="checkbox"
                 checked={enableReminders}
                 onChange={(e) => setEnableReminders(e.target.checked)}
-                className="text-emerald accent-emerald h-4 w-4 rounded border-black/20"
+                className="text-yard-book accent-yard-book h-4 w-4 rounded border-black/20"
               />
               Enable reminders
             </label>
@@ -266,7 +266,7 @@ export function YardBookForm({ item, herds, properties, action, submitLabel }: Y
                       onClick={() => toggleOffset(opt.value)}
                       className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                         isActive
-                          ? "bg-emerald/15 text-emerald"
+                          ? "bg-yard-book/15 text-yard-book"
                           : "text-text-muted hover:text-text-secondary bg-white/5 hover:bg-white/8"
                       }`}
                     >
@@ -289,7 +289,7 @@ export function YardBookForm({ item, herds, properties, action, submitLabel }: Y
                 name="is_recurring"
                 checked={isRecurring}
                 onChange={(e) => setIsRecurring(e.target.checked)}
-                className="text-emerald accent-emerald h-4 w-4 rounded border-black/20"
+                className="text-yard-book accent-yard-book h-4 w-4 rounded border-black/20"
               />
               Recurring event
             </label>
@@ -321,7 +321,7 @@ export function YardBookForm({ item, herds, properties, action, submitLabel }: Y
                       onClick={() => toggleHerd(herd.id)}
                       className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                         isActive
-                          ? "bg-emerald/15 text-emerald"
+                          ? "bg-yard-book/15 text-yard-book"
                           : "text-text-muted hover:text-text-secondary bg-white/5 hover:bg-white/8"
                       }`}
                     >

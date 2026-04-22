@@ -4,14 +4,16 @@
 // Both tabs stay mounted so chat state is preserved when switching
 
 import { useState, useCallback, useRef, useEffect } from "react";
-import { MessageCircle, MessageSquarePlus } from "lucide-react";
+import { MessageCircle, MessageCirclePlus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { BrangusChat } from "@/components/app/brangus-chat";
 import { ConversationList } from "@/components/app/brangus/conversation-list";
+import { SharedChatList } from "@/components/app/brangus/shared-chat-list";
 import { fetchMessages } from "@/lib/brangus/conversation-service";
+import { fetchInboxSharedChats } from "@/lib/brangus/shared-chats-service";
 import type { BrangusConversationRow, BrangusMessageRow } from "@/lib/brangus/conversation-service";
 
-type TabId = "chat" | "saved";
+type TabId = "chat" | "saved" | "shared";
 
 interface BrangusHubProps {
   conversations: BrangusConversationRow[];
@@ -104,9 +106,26 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
     [activeConvId]
   );
 
-  const tabs: { id: TabId; label: string }[] = [
+  // Unread count for the Shared tab - drives the badge and refreshes on tab
+  // switch so the user sees new shares without a full page reload.
+  const [sharedUnread, setSharedUnread] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
+    fetchInboxSharedChats()
+      .then((rows) => {
+        if (cancelled) return;
+        setSharedUnread(rows.filter((r) => !r.is_read).length);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab]);
+
+  const tabs: { id: TabId; label: string; badge?: number }[] = [
     { id: "chat", label: "Chat" },
     { id: "saved", label: "Saved Chats" },
+    { id: "shared", label: "Shared", badge: sharedUnread },
   ];
 
   return (
@@ -127,13 +146,18 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
               if (el) buttonRefs.current.set(tab.id, el);
             }}
             onClick={() => setActiveTab(tab.id)}
-            className={`relative z-10 flex-1 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-150 ${
+            className={`relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-150 ${
               activeTab === tab.id
                 ? "text-text-primary"
                 : "text-text-muted hover:text-text-secondary"
             }`}
           >
-            {tab.label}
+            <span>{tab.label}</span>
+            {tab.badge && tab.badge > 0 ? (
+              <span className="bg-producer-network inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white">
+                {tab.badge > 9 ? "9+" : tab.badge}
+              </span>
+            ) : null}
           </button>
         ))}
       </div>
@@ -145,9 +169,9 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
         <div ref={setToolbarEl} className="flex items-center gap-1.5" />
         <button
           onClick={handleNewChat}
-          className="bg-brangus hover:bg-brangus-dark inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold text-white transition-colors"
+          className="bg-brangus-dark hover:bg-brangus-text inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold text-white transition-colors"
         >
-          <MessageSquarePlus className="h-3.5 w-3.5" aria-hidden="true" />
+          <MessageCirclePlus className="h-3.5 w-3.5" aria-hidden="true" />
           <span>New Chat</span>
         </button>
       </div>
@@ -205,6 +229,20 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
             </CardContent>
           </Card>
         )}
+      </div>
+
+      {/* Shared tab (always mounted, hidden when inactive).
+          Chats other producers have shared with the current user. Unread
+          count drives the badge on the tab bar above. */}
+      <div
+        className={activeTab !== "shared" ? "hidden" : ""}
+        style={{ height: "calc(100vh - 19rem)" }}
+      >
+        <Card className="h-full overflow-y-auto rounded-2xl">
+          <CardContent className="p-2">
+            <SharedChatList />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

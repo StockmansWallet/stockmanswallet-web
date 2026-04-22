@@ -93,7 +93,7 @@ export function AssetRegisterTabs({
         aria-label="Asset Register sections"
       >
         <div
-          className={`bg-warning/15 absolute top-1 bottom-1 rounded-full shadow-sm ${ready ? "transition-all duration-250 ease-out" : ""}`}
+          className={`bg-reports/15 absolute top-1 bottom-1 rounded-full shadow-sm ${ready ? "transition-all duration-250 ease-out" : ""}`}
           style={{ left: indicator.left, width: indicator.width }}
           aria-hidden="true"
         />
@@ -107,7 +107,7 @@ export function AssetRegisterTabs({
             role="tab"
             aria-selected={activeTab === tab.id}
             className={`relative z-10 flex-1 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-150 ${
-              activeTab === tab.id ? "text-warning" : "text-text-muted hover:text-text-secondary"
+              activeTab === tab.id ? "text-reports" : "text-text-muted hover:text-text-secondary"
             }`}
           >
             {tab.label}

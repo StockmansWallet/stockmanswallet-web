@@ -18,7 +18,7 @@ import {
   type DemoConversation,
 } from "@/lib/brangus/demo-chats";
 
-const BRANGUS_BG = "var(--color-sky-text)";
+const BRANGUS_BG = "var(--color-brangus-dark)";
 const USER_BG = "var(--color-chat-user)";
 const BRANGUS_AVATAR = "/images/brangus-chat-profile.webp";
 const DEMO_USER_AVATAR = "/images/demo-user-profile.webp";
@@ -89,7 +89,7 @@ function DemoChatView({
               <ChatBubble
                 key={msg.id}
                 side={isUser ? "right" : "left"}
-                bgClass={isUser ? "bg-chat-user" : "bg-sky-text"}
+                bgClass={isUser ? "bg-chat-user" : "bg-brangus-dark"}
                 tailColor={isUser ? USER_BG : BRANGUS_BG}
                 textClass={isUser ? "text-white" : "text-white"}
                 avatarUrl={isUser ? DEMO_USER_AVATAR : BRANGUS_AVATAR}
@@ -117,7 +117,7 @@ function DemoChatView({
           </div>
           <Link
             href="/sign-up"
-            className="bg-brangus hover:bg-brangus-dark inline-flex h-8 shrink-0 items-center rounded-full px-3 text-xs font-semibold text-white transition-colors"
+            className="bg-brangus-dark hover:bg-brangus-text inline-flex h-8 shrink-0 items-center rounded-full px-3 text-xs font-semibold text-white transition-colors"
           >
             Sign up to chat live
           </Link>

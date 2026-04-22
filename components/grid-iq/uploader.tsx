@@ -282,7 +282,7 @@ export function GridIQUploader({
             onClick={() => setUploadType("grid")}
             className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
               uploadType === "grid"
-                ? "bg-teal/15 text-teal"
+                ? "bg-grid-iq/15 text-grid-iq"
                 : "text-text-muted hover:text-text-primary"
             }`}
           >
@@ -294,7 +294,7 @@ export function GridIQUploader({
             onClick={() => setUploadType("killsheet")}
             className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
               uploadType === "killsheet"
-                ? "bg-teal/15 text-teal"
+                ? "bg-grid-iq/15 text-grid-iq"
                 : "text-text-muted hover:text-text-primary"
             }`}
           >
@@ -315,12 +315,12 @@ export function GridIQUploader({
               onClick={() => inputRef.current?.click()}
               className={`flex cursor-pointer flex-col items-center rounded-xl border-2 border-dashed py-14 transition-all ${
                 isDragging
-                  ? "border-teal/50 bg-teal/5"
-                  : "border-white/10 hover:border-teal/30 hover:bg-teal/[0.02]"
+                  ? "border-grid-iq/50 bg-grid-iq/5"
+                  : "border-white/10 hover:border-grid-iq/30 hover:bg-grid-iq/[0.02]"
               }`}
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-teal/10">
-                <Upload className="h-6 w-6 text-teal" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-grid-iq/10">
+                <Upload className="h-6 w-6 text-grid-iq" />
               </div>
               <p className="mt-4 text-sm font-medium text-text-primary">
                 {isDragging
@@ -372,7 +372,7 @@ export function GridIQUploader({
                     {formatFileSize(file.size)} .{" "}
                     {file.name.split(".").pop()?.toUpperCase() || "File"}
                   </p>
-                  <p className="mt-1 text-xs text-teal">
+                  <p className="mt-1 text-xs text-grid-iq">
                     {uploadType === "grid"
                       ? "Processor Grid"
                       : "Kill Sheet"}
@@ -418,7 +418,7 @@ export function GridIQUploader({
                     {processors.length === 0 && (
                       <Link
                         href="/dashboard/tools/grid-iq/processors/new"
-                        className="text-[11px] text-teal hover:underline"
+                        className="text-[11px] text-grid-iq hover:underline"
                       >
                         + Add processor
                       </Link>
@@ -430,7 +430,7 @@ export function GridIQUploader({
                       onChange={(e) =>
                         setSelectedProcessorId(e.target.value || null)
                       }
-                      className="mt-1.5 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary focus:border-teal/50 focus:outline-none"
+                      className="mt-1.5 w-full rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-sm text-text-primary focus:border-grid-iq/50 focus:outline-none"
                     >
                       <option value="">Not linked (set later)</option>
                       {processors.map((p) => (
@@ -742,7 +742,7 @@ function EditField({
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-56 rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-sm font-medium text-text-primary text-right outline-none focus:border-teal/50 focus:ring-1 focus:ring-teal/25"
+        className="w-56 rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-sm font-medium text-text-primary text-right outline-none focus:border-grid-iq/50 focus:ring-1 focus:ring-grid-iq/25"
       />
     </div>
   );

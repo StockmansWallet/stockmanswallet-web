@@ -107,7 +107,7 @@ export function ReportExportButton({ label, reportType, extraConfig }: ReportExp
         onClick={handleClick}
         disabled={loading}
         aria-label={`Download ${label} PDF`}
-        className="flex shrink-0 items-center gap-1.5 rounded-full bg-warning/15 px-3.5 py-2 text-xs font-semibold text-warning transition-colors hover:bg-warning/25 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex shrink-0 items-center gap-1.5 rounded-full bg-reports/15 px-3.5 py-2 text-xs font-semibold text-reports transition-colors hover:bg-reports/25 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />

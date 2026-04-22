@@ -17,20 +17,20 @@ import {
 } from "@/lib/navigation/nav-config";
 
 function NavLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
+  // Active: feature tint + feature text + frosted-glass blur.
+  // Hover (when not active): feature -dark fill + white text.
+  // Both states pull from nav-config.tsx so every item stays in step.
+  const inactiveBase = "text-text-secondary hover:backdrop-blur-xl";
+  const inactive =
+    item.inactiveClass ??
+    `${inactiveBase} ${item.hoverClass ?? "hover:bg-brand-dark hover:text-white"}`;
+  const active = `backdrop-blur-xl ${item.activeClass ?? "bg-brand/15 text-brand"}`;
+
   return (
     <Link
       href={item.href}
-      // Active items get backdrop-blur-xl so the tinted pill reads as the
-      // same "frosted glass" material the cards and top bar use. Feature-
-      // coloured overrides from nav-config.tsx (Brangus amber, Markets
-      // green, Reports amber etc.) still apply on top. Inactive items
-      // also get backdrop-blur-xl on hover so the hover pill feels like
-      // the same material, just not yet committed to the active state.
-      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
-        isActive
-          ? `backdrop-blur-xl ${item.activeClass ?? "bg-brand/15 text-brand"}`
-          : (item.inactiveClass ??
-            "text-text-secondary hover:text-text-primary hover:bg-white/5 hover:backdrop-blur-xl")
+      className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 ${
+        isActive ? active : inactive
       }`}
     >
       {item.icon}
@@ -72,7 +72,7 @@ export function Sidebar({
         <p className="text-text-muted/60 mb-1.5 px-3 text-[10px] font-semibold tracking-widest uppercase">
           Portfolio
         </p>
-        <div className="space-y-0.5">
+        <div className="space-y-1">
           {mainItems.map((item) => (
             <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
           ))}
@@ -83,7 +83,7 @@ export function Sidebar({
           <p className="text-text-muted/60 mb-1.5 px-3 text-[10px] font-semibold tracking-widest uppercase">
             Intelligence
           </p>
-          <div className="space-y-0.5">
+          <div className="space-y-1">
             {intelItems.map((item) => (
               <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
             ))}
@@ -96,7 +96,7 @@ export function Sidebar({
             <p className="text-text-muted/60 mb-1.5 px-3 text-[10px] font-semibold tracking-widest uppercase">
               Tools
             </p>
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               {toolItems.map((item) => (
                 <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
               ))}
@@ -110,7 +110,7 @@ export function Sidebar({
             <p className="text-text-muted/60 mb-1.5 px-3 text-[10px] font-semibold tracking-widest uppercase">
               Admin
             </p>
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               {adminItems.map((item) => (
                 <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
               ))}
@@ -121,33 +121,19 @@ export function Sidebar({
         {/* Help & Settings. Per-feature badges on the nav items above
             (Producer Network, Yard Book) replaced the old aggregate
             Notifications entry. */}
-        <div className="mt-4 border-t border-white/5 pt-4">
+        <div className="mt-4 space-y-1 border-t border-white/5 pt-4">
           {bottomNavItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 ${
-                checkActive(item.href)
-                  ? "bg-brand/15 text-brand backdrop-blur-xl"
-                  : "text-text-secondary hover:text-text-primary hover:bg-white/5 hover:backdrop-blur-xl"
-              }`}
-            >
-              {item.icon}
-              {item.label}
-            </Link>
+            <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
           ))}
           {isDemoUser && (
-            <Link
-              href="/dashboard/demo-guide"
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 ${
-                checkActive("/dashboard/demo-guide")
-                  ? "bg-brand/15 text-brand backdrop-blur-xl"
-                  : "text-text-secondary hover:text-text-primary hover:bg-white/5 hover:backdrop-blur-xl"
-              }`}
-            >
-              <Sparkles className="text-brand h-4 w-4" />
-              Demo Guide
-            </Link>
+            <NavLink
+              item={{
+                label: "Demo Guide",
+                href: "/dashboard/demo-guide",
+                icon: <Sparkles className="text-brand h-5 w-5" />,
+              }}
+              isActive={checkActive("/dashboard/demo-guide")}
+            />
           )}
         </div>
       </nav>

@@ -18,7 +18,9 @@ import {
   Share2,
   Mail,
   MessageCircle,
+  Users,
 } from "lucide-react";
+import { ShareToProducerDialog } from "@/components/app/brangus/share-to-producer-dialog";
 import {
   sendMessage,
   buildSystemPrompt,
@@ -57,8 +59,9 @@ const SUGGESTED_PROMPTS = [
   "Give me a breakdown of all my herds",
 ];
 
-// Brangus bubble - palette sky blue (text-safe variant), matching his work shirt
-const BRANGUS_BG = "var(--color-sky-text)";
+// Brangus bubble - uses the -dark fill variant so filled areas don't read
+// over-bright against text of the same hue (simultaneous-contrast effect).
+const BRANGUS_BG = "var(--color-brangus-dark)";
 // User bubble - semantic token (cool-toned stone grey)
 const USER_BG = "var(--color-chat-user)";
 // Profile images
@@ -204,9 +207,34 @@ export function BrangusChat({
   const [showShareMenu, setShowShareMenu] = useState(false);
   const shareTriggerRef = useRef<HTMLButtonElement>(null);
   const shareMenuRef = useRef<HTMLDivElement>(null);
-  const [shareMenuPos, setShareMenuPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
+  const [shareMenuPos, setShareMenuPos] = useState<{ top: number; right: number }>({
+    top: 0,
+    right: 0,
+  });
   const [shareMenuMounted, setShareMenuMounted] = useState(false);
-  useEffect(() => { setShareMenuMounted(true); }, []);
+  useEffect(() => {
+    setShareMenuMounted(true);
+  }, []);
+
+  // "Share with a producer" dialog state. Opens from the share menu and posts
+  // a frozen snapshot of the current conversation into brangus_shared_chats.
+  const [showShareToProducer, setShowShareToProducer] = useState(false);
+  const [senderDisplayName, setSenderDisplayName] = useState<string | null>(null);
+  useEffect(() => {
+    // Best-effort fetch the signed-in user's display name for the shared-chat
+    // header on the recipient side. Fires once per mount.
+    (async () => {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      const { data } = await supabase.auth.getUser();
+      const meta = data.user?.user_metadata ?? {};
+      const name =
+        (typeof meta.display_name === "string" ? meta.display_name : null) ??
+        (typeof meta.full_name === "string" ? meta.full_name : null) ??
+        null;
+      setSenderDisplayName(name);
+    })();
+  }, []);
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [userInitials, setUserInitials] = useState("SW");
@@ -660,8 +688,8 @@ export function BrangusChat({
               aria-label="Share conversation"
               className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold transition-colors ${
                 canExport
-                  ? "bg-warning/15 text-warning hover:bg-warning/25"
-                  : "bg-warning/10 text-warning/40 cursor-not-allowed"
+                  ? "bg-brangus/15 text-brangus hover:bg-brangus/25"
+                  : "bg-brangus/10 text-brangus/40 cursor-not-allowed"
               }`}
             >
               <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
@@ -703,6 +731,18 @@ export function BrangusChat({
                 )}
                 <span>{copied ? "Copied" : "Copy text"}</span>
               </button>
+              <button
+                role="menuitem"
+                onClick={() => {
+                  setShowShareToProducer(true);
+                  setShowShareMenu(false);
+                }}
+                className={menuItemClass}
+              >
+                <Users className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>Share with a producer</span>
+              </button>
+              <div className="my-1 border-t border-white/[0.06]" />
               <button
                 role="menuitem"
                 onClick={() => {
@@ -754,6 +794,21 @@ export function BrangusChat({
         );
       })()}
 
+      {/* Share with a producer - frozen snapshot posted into brangus_shared_chats.
+          Recipient sees it in their Brangus Shared tab rendered as chat bubbles. */}
+      <ShareToProducerDialog
+        open={showShareToProducer}
+        onClose={() => setShowShareToProducer(false)}
+        conversationId={conversationIdRef.current}
+        conversationTitle={null}
+        messages={messages.map((m) => ({
+          role: m.role,
+          content: m.content,
+          timestamp: m.timestamp,
+        }))}
+        senderDisplayName={senderDisplayName}
+      />
+
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto px-4 pt-4 pb-2">
         {messages.length === 0 && !isLoading ? (
@@ -767,7 +822,7 @@ export function BrangusChat({
                 <ChatBubble
                   key={msg.id}
                   side={isUser ? "right" : "left"}
-                  bgClass={isUser ? "bg-chat-user" : "bg-sky-text"}
+                  bgClass={isUser ? "bg-chat-user" : "bg-brangus-dark"}
                   tailColor={isUser ? USER_BG : BRANGUS_BG}
                   textClass={isUser ? "text-white" : "text-white"}
                   avatarUrl={isUser ? userAvatarUrl : BRANGUS_AVATAR}
@@ -808,7 +863,7 @@ export function BrangusChat({
             placeholder="Ask Brangus anything..."
             disabled={!store}
             loading={isLoading}
-            accentClass="bg-brangus hover:bg-brangus-dark"
+            accentClass="bg-brangus-dark hover:bg-brangus-text"
             isListening={isListening}
             onMicTap={handleMicTap}
             micSupported={micSupported}

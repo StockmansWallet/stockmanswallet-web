@@ -49,7 +49,7 @@ export default function AccountantReportPage() {
     <div className="max-w-3xl">
       <PageHeader feature="reports"
         title="Accountant Report"
-        titleClassName="text-4xl font-bold text-warning"
+        titleClassName="text-4xl font-bold text-reports"
         subtitle="Financial year reconciliation statement for your accountant."
       />
 
@@ -124,7 +124,7 @@ export default function AccountantReportPage() {
                     })}
                   </p>
                 </div>
-                <Badge className="bg-warning/15 text-warning">Statement</Badge>
+                <Badge className="bg-reports/15 text-reports">Statement</Badge>
               </div>
             </CardHeader>
             <CardContent className="px-5 pb-5">

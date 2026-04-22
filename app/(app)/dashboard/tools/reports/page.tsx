@@ -49,7 +49,7 @@ export default function ReportsPage() {
     <div className="max-w-4xl">
       <PageHeader feature="reports"
         title="Reports"
-        titleClassName="text-4xl font-bold text-warning"
+        titleClassName="text-4xl font-bold text-reports"
         subtitle="Generate and export reports"
         subtitleClassName="text-sm font-medium text-text-secondary"
       />
@@ -59,7 +59,7 @@ export default function ReportsPage() {
           <Link href={report.href}>
             <Card className="group h-full transition-all hover:bg-white/[0.07]">
               <CardContent className="flex items-start gap-4 p-5">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning/15 text-warning">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-reports/15 text-reports">
                   {report.icon}
                 </div>
                 <div className="min-w-0 flex-1">

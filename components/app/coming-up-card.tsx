@@ -35,8 +35,8 @@ export function ComingUpCard({ items, limit = 3 }: { items: YardBookItem[]; limi
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="bg-emerald/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
-              <BookOpen className="text-emerald h-3.5 w-3.5" />
+            <div className="bg-yard-book/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+              <BookOpen className="text-yard-book h-3.5 w-3.5" />
             </div>
             <CardTitle>Yard Book – Coming Up</CardTitle>
           </div>

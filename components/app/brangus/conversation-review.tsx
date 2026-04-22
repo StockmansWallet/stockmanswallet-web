@@ -10,8 +10,8 @@ import { ChatBubble } from "@/components/app/chat/chat-bubble";
 import { formatConversationForExport } from "@/lib/brangus/conversation-service";
 import type { BrangusConversationRow, BrangusMessageRow } from "@/lib/brangus/conversation-service";
 
-// Brangus bubble - palette sky blue (text-safe variant), matching his work shirt
-const BRANGUS_BG = "var(--color-sky-text)";
+// Brangus bubble - tracks the feature palette so future swaps propagate.
+const BRANGUS_BG = "var(--color-brangus-dark)";
 // User bubble - cool-toned stone grey that pairs with Brangus's blue
 const USER_BG = "var(--color-chat-user)";
 
@@ -99,7 +99,7 @@ export function ConversationReview({ conversation, messages }: ConversationRevie
               <ChatBubble
                 key={msg.id}
                 side={isUser ? "right" : "left"}
-                bgClass={isUser ? "bg-chat-user" : "bg-sky-text"}
+                bgClass={isUser ? "bg-chat-user" : "bg-brangus-dark"}
                 tailColor={isUser ? USER_BG : BRANGUS_BG}
                 textClass={isUser ? "text-white" : "text-white"}
               >

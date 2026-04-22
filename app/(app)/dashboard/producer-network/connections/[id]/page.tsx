@@ -19,7 +19,9 @@ export default async function ProducerConnectionDetailPage({
 }) {
   const { id } = await params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in");
 
   const { data: connection } = await supabase
@@ -81,36 +83,43 @@ export default async function ProducerConnectionDetailPage({
   };
 
   return (
-    <div className="flex h-[calc(100vh-6rem)] max-w-4xl flex-col pb-4 pt-8">
+    <div className="flex h-[calc(100vh-6rem)] max-w-4xl flex-col pt-12 pb-4">
       <MarkConnectionNotificationsRead connectionId={id} />
-      {/* Header: avatar + name + company inline, moderation menu on the right. */}
-      <div className="mb-4 flex items-center gap-3">
-        <UserAvatar
-          name={otherName}
-          avatarUrl={otherAvatarUrl}
-          sizeClass="h-12 w-12"
-          initialClass="text-base font-bold"
-        />
-        <div className="min-w-0 flex-1">
-          <h1 className="truncate text-xl font-bold text-text-primary">{otherName}</h1>
-          {(otherProfile?.property_name || otherProfile?.company_name) && (
-            <p className="truncate text-sm text-text-secondary">
-              {otherProfile?.property_name ?? otherProfile?.company_name}
-            </p>
-          )}
-        </div>
-        <div className="shrink-0">
-          <ModerationMenu
-            targetUserId={otherUserId}
-            targetName={otherName}
-            alreadyBlocked={alreadyBlocked}
-            connectionIdForDisconnect={id}
-          />
+      {/* Header sits at pt-8 from outer so the name has breathing room
+          above it, and pb-2 below so the chat card sits close underneath. */}
+      <div className="pb-2">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-start gap-4">
+            <UserAvatar
+              name={otherName}
+              avatarUrl={otherAvatarUrl}
+              sizeClass="h-12 w-12 shrink-0"
+              initialClass="text-base font-bold"
+            />
+            <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
+              <h1 className="text-producer-network-light truncate text-4xl font-bold">
+                {otherName}
+              </h1>
+              {(otherProfile?.property_name || otherProfile?.company_name) && (
+                <p className="text-text-secondary truncate text-sm font-medium">
+                  {otherProfile?.property_name ?? otherProfile?.company_name}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="shrink-0">
+            <ModerationMenu
+              targetUserId={otherUserId}
+              targetName={otherName}
+              alreadyBlocked={alreadyBlocked}
+              connectionIdForDisconnect={id}
+            />
+          </div>
         </div>
       </div>
 
       <Card className="flex min-h-0 flex-1 flex-col rounded-3xl">
-        <CardContent className="flex min-h-0 flex-1 flex-col px-5 pb-5 pt-5">
+        <CardContent className="flex min-h-0 flex-1 flex-col px-5 pt-5 pb-5">
           <ProducerChatClient
             connectionId={id}
             currentUserId={user.id}

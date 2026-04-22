@@ -21,6 +21,13 @@ interface MessageThreadProps {
    * default because the chat can include automated agent notes.
    */
   hideSenderName?: boolean;
+  /**
+   * Accent for the peer's bubble (left side). Defaults to the shared
+   * `chat-other` neutral surface. Feature chats (producer network, advisor)
+   * pass their own tint + matching tail colour.
+   */
+  otherBgClass?: string;
+  otherTailColor?: string;
 }
 
 const messageTypeLabels: Record<
@@ -33,9 +40,11 @@ const messageTypeLabels: Record<
   general_note: { label: "Note", variant: "default" },
 };
 
-// Solid opaque tokens so tails match the bubble fill perfectly
-const OWN_BG = "var(--color-chat-advisor-own)";
-const OTHER_BG = "var(--color-chat-other)";
+// Own bubble colour is unified across the whole app (Brangus, producer,
+// advisor). Single source of truth lives at --color-chat-user in globals.css;
+// change that token to restyle every chat at once.
+const OWN_BG = "var(--color-chat-user)";
+const DEFAULT_OTHER_BG = "var(--color-chat-other)";
 
 const FIVE_MINUTES = 5 * 60 * 1000;
 
@@ -88,6 +97,8 @@ export function MessageThread({
   participants,
   animatedMessageIds,
   hideSenderName = false,
+  otherBgClass = "bg-chat-other",
+  otherTailColor = DEFAULT_OTHER_BG,
 }: MessageThreadProps) {
   if (messages.length === 0) {
     return (
@@ -116,8 +127,8 @@ export function MessageThread({
             )}
             <ChatBubble
               side={isOwn ? "right" : "left"}
-              bgClass={isOwn ? "bg-chat-advisor-own" : "bg-chat-other"}
-              tailColor={isOwn ? OWN_BG : OTHER_BG}
+              bgClass={isOwn ? "bg-chat-user" : otherBgClass}
+              tailColor={isOwn ? OWN_BG : otherTailColor}
               animate={!!shouldAnimate}
               senderName={!isOwn && !hideSenderName ? sender?.name : undefined}
             >

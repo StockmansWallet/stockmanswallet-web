@@ -6,7 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { calculateFreightEstimate, DEFAULT_RATE_PER_DECK_PER_KM } from "@/lib/engines/freight-engine";
+import {
+  calculateFreightEstimate,
+  DEFAULT_RATE_PER_DECK_PER_KM,
+} from "@/lib/engines/freight-engine";
 import { headsPerDeckForWeight } from "@/lib/data/freight-categories";
 import { resolveFreightCategory } from "@/lib/engines/freight-engine";
 import { parseCalvesAtFoot } from "@/lib/engines/valuation-engine";
@@ -66,11 +69,8 @@ interface FreightCalculatorProps {
 
 const saleyardOptions = saleyards.map((s) => ({
   value: s,
-  label: saleyardLocality[s]
-    ? `${saleyardLocality[s].split(",")[0].trim()} - ${s}`
-    : s,
+  label: saleyardLocality[s] ? `${saleyardLocality[s].split(",")[0].trim()} - ${s}` : s,
 }));
-
 
 // --- Helpers ---
 
@@ -86,33 +86,41 @@ function buildAssumptionsLine(result: FreightEstimate): string {
 
 function SectionIcon({ icon: Icon }: { icon: React.ComponentType<{ className?: string }> }) {
   return (
-    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-info/15">
-      <Icon className="h-3.5 w-3.5 text-info" />
+    <div className="bg-freight-iq/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+      <Icon className="text-freight-iq h-3.5 w-3.5" />
     </div>
   );
 }
 
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="rounded-xl bg-white/5 p-4 ring-1 ring-inset ring-white/[0.06]">
-      <p className="text-xs font-medium text-text-muted">{label}</p>
-      <p className="mt-1 text-lg font-bold text-text-primary">{value}</p>
-      {sub && <p className="mt-0.5 text-xs text-text-muted">{sub}</p>}
+    <div className="rounded-xl bg-white/5 p-4 ring-1 ring-white/[0.06] ring-inset">
+      <p className="text-text-muted text-xs font-medium">{label}</p>
+      <p className="text-text-primary mt-1 text-lg font-bold">{value}</p>
+      {sub && <p className="text-text-muted mt-0.5 text-xs">{sub}</p>}
     </div>
   );
 }
 
 function AlertCard({ type, message }: { type: "warning" | "info" | "success"; message: string }) {
   const styles = {
-    warning: { bg: "bg-warning/10 ring-warning/20", icon: <AlertTriangle className="h-4 w-4 text-warning" /> },
-    info: { bg: "bg-info/10 ring-info/20", icon: <Info className="h-4 w-4 text-info" /> },
-    success: { bg: "bg-success/10 ring-success/20", icon: <CheckCircle2 className="h-4 w-4 text-success" /> },
+    warning: {
+      bg: "bg-warning/10 ring-warning/20",
+      icon: <AlertTriangle className="text-warning h-4 w-4" />,
+    },
+    info: { bg: "bg-info/10 ring-info/20", icon: <Info className="text-info h-4 w-4" /> },
+    success: {
+      bg: "bg-success/10 ring-success/20",
+      icon: <CheckCircle2 className="text-success h-4 w-4" />,
+    },
   };
   const s = styles[type];
   return (
-    <div className={`flex items-start gap-3 rounded-xl p-4 ring-1 ring-inset ${s.bg}`}>
+    <div
+      className={`flex items-start gap-3 rounded-xl p-4 ring-1 backdrop-blur-md ring-inset ${s.bg}`}
+    >
       <div className="mt-0.5 shrink-0">{s.icon}</div>
-      <p className="text-sm leading-relaxed text-text-secondary">{message}</p>
+      <p className="text-text-secondary text-sm leading-relaxed">{message}</p>
     </div>
   );
 }
@@ -160,11 +168,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     return "Manual destination";
   }, [selectedSaleyard, customAddress]);
 
-  const herdLabel = isCustomJob
-    ? "Custom job"
-    : selectedHerd
-      ? selectedHerd.name
-      : "";
+  const herdLabel = isCustomJob ? "Custom job" : selectedHerd ? selectedHerd.name : "";
 
   // Build herd options
   const herdOptions = [
@@ -210,15 +214,23 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
       setCalvesAtFoot(true);
       if (isBreeder) {
         const calfData = parseCalvesAtFoot(herd.additional_info);
-        const loadingUnits = calfData ? Math.max(1, herd.head_count - calfData.headCount) : herd.head_count;
+        const loadingUnits = calfData
+          ? Math.max(1, herd.head_count - calfData.headCount)
+          : herd.head_count;
         setHeadCount(loadingUnits.toString());
       } else {
         setHeadCount(herd.head_count.toString());
       }
-      const mapping = resolveFreightCategory(herd.category, herd.sex, herd.current_weight, isBreeder);
-      const hpd = mapping.category.id === "cow_calf_units"
-        ? mapping.category.headsPerDeck
-        : headsPerDeckForWeight(herd.current_weight);
+      const mapping = resolveFreightCategory(
+        herd.category,
+        herd.sex,
+        herd.current_weight,
+        isBreeder
+      );
+      const hpd =
+        mapping.category.id === "cow_calf_units"
+          ? mapping.category.headsPerDeck
+          : headsPerDeckForWeight(herd.current_weight);
       setHeadPerDeck(hpd.toString());
       if (herd.property_id) {
         setSelectedPropertyId(herd.property_id);
@@ -254,7 +266,10 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     const prop = properties.find((p) => p.id === selectedPropertyId);
     if (prop?.latitude && prop?.longitude) {
       const { distanceKm } = await getRoadDistanceKm(
-        prop.latitude, prop.longitude, addressResult.latitude, addressResult.longitude,
+        prop.latitude,
+        prop.longitude,
+        addressResult.latitude,
+        addressResult.longitude
       );
       setDistance(distanceKm.toString());
       setCalculatedDistance(distanceKm);
@@ -274,7 +289,12 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     const prop = properties.find((p) => p.id === propId);
     const coords = saleyardCoordinates[saleyard];
     if (prop?.latitude && prop?.longitude && coords) {
-      const { distanceKm } = await getRoadDistanceKm(prop.latitude, prop.longitude, coords.lat, coords.lon);
+      const { distanceKm } = await getRoadDistanceKm(
+        prop.latitude,
+        prop.longitude,
+        coords.lat,
+        coords.lon
+      );
       setDistance(distanceKm.toString());
       setCalculatedDistance(distanceKm);
       const saleyardName = saleyard.split(",")[0].trim();
@@ -286,7 +306,12 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
   // Weight-based head per deck, with cow-calf fixed density exception
   function categoryAwareHpd(w: number): number {
     if (selectedHerd) {
-      const mapping = resolveFreightCategory(selectedHerd.category, selectedHerd.sex, w, calvesAtFoot);
+      const mapping = resolveFreightCategory(
+        selectedHerd.category,
+        selectedHerd.sex,
+        w,
+        calvesAtFoot
+      );
       if (mapping.category.id === "cow_calf_units") {
         return mapping.category.headsPerDeck;
       }
@@ -317,7 +342,14 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
 
     // Validate required fields before calculating
     const herdRequired = !isCustomJob;
-    if (!selectedPropertyId || (herdRequired && !selectedHerdId) || !weight || !headCount || !distance) return;
+    if (
+      !selectedPropertyId ||
+      (herdRequired && !selectedHerdId) ||
+      !weight ||
+      !headCount ||
+      !distance
+    )
+      return;
 
     const hpdOverride = Number(headPerDeck) || undefined;
 
@@ -441,7 +473,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
               <SectionIcon icon={Navigation} />
               <div>
                 <CardTitle>Origin & Herd</CardTitle>
-                <p className="mt-0.5 text-xs text-text-muted">
+                <p className="text-text-muted mt-0.5 text-xs">
                   Choose one of your herds or set up a custom scenario.
                 </p>
               </div>
@@ -460,8 +492,10 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                   hint={attempted && !selectedPropertyId}
                 />
                 {selectedHerd && (
-                  <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-muted">
-                    <span>{selectedHerd.breed} {selectedHerd.category}</span>
+                  <div className="text-text-muted mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                    <span>
+                      {selectedHerd.breed} {selectedHerd.category}
+                    </span>
                     <span>{selectedHerd.head_count} head</span>
                     <span>{Math.round(selectedHerd.current_weight)}kg avg</span>
                     <span>{selectedHerd.sex}</span>
@@ -479,21 +513,18 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                   hint={attempted && !isCustomJob && !selectedHerdId}
                   disabled={isCustomJob}
                 />
-                <label className="mt-3 flex cursor-pointer items-start gap-2.5 rounded-xl bg-white/[0.03] px-4 py-2.5 ring-1 ring-inset ring-white/[0.06] transition-colors hover:bg-white/[0.05]">
-                  <input
-                    type="checkbox"
-                    checked={isCustomJob}
-                    onChange={(e) => handleCustomJobToggle(e.target.checked)}
-                    className="mt-1 h-4 w-4 shrink-0 rounded border-white/20 bg-white/[0.04] text-info focus:ring-info/50"
-                  />
-                  <span>
-                    <span className="text-sm font-medium text-info">Custom Job</span>
-                    <br />
-                    <span className="text-xs text-text-muted">(enter weight and head count manually)</span>
-                  </span>
-                </label>
               </div>
             </div>
+            <label className="mt-4 flex cursor-pointer items-center gap-3 rounded-xl bg-white/[0.03] px-4 py-3 ring-1 ring-white/[0.06] transition-colors ring-inset hover:bg-white/[0.05]">
+              <input
+                type="checkbox"
+                checked={isCustomJob}
+                onChange={(e) => handleCustomJobToggle(e.target.checked)}
+                className="text-freight-iq focus:ring-freight-iq/50 h-4 w-4 shrink-0 rounded border-white/20 bg-white/[0.04]"
+              />
+              <span className="text-freight-iq text-sm font-medium">Custom Job</span>
+              <span className="text-text-muted text-xs">Enter weight and head count manually</span>
+            </label>
           </CardContent>
         </Card>
 
@@ -505,8 +536,9 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 <SectionIcon icon={MapPin} />
                 <div>
                   <CardTitle>Destination</CardTitle>
-                  <p className="mt-0.5 text-xs text-text-muted">
-                    Select a saleyard or custom address to auto-calculate distance, or enter manually.
+                  <p className="text-text-muted mt-0.5 text-xs">
+                    Select a saleyard or custom address to auto-calculate distance, or enter
+                    manually.
                   </p>
                 </div>
               </div>
@@ -524,14 +556,17 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                   hint={attempted && !selectedSaleyard && !customAddress}
                 />
                 <div>
-                  <label htmlFor="custom_address" className="mb-1.5 block text-sm font-medium text-text-secondary">
+                  <label
+                    htmlFor="custom_address"
+                    className="text-text-secondary mb-1.5 block text-sm font-medium"
+                  >
                     Custom Address
                   </label>
                   <AddressAutocomplete
                     defaultValue={customAddress}
                     onSelect={handleAddressSelect}
                     placeholder="Search address..."
-                    className="rounded-xl border-0 bg-surface py-3 pl-9 pr-4 ring-0 focus:ring-1 focus:ring-inset focus:ring-freight-iq/60 focus:bg-surface-raised"
+                    className="bg-surface focus:ring-freight-iq/60 focus:bg-surface-raised rounded-xl border-0 py-3 pr-4 pl-9 ring-0 focus:ring-1 focus:ring-inset"
                   />
                 </div>
               </div>
@@ -544,18 +579,21 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                   min={0}
                   required
                   value={distance}
-                  onChange={(e) => { setDistance(e.target.value); setResult(null); }}
+                  onChange={(e) => {
+                    setDistance(e.target.value);
+                    setResult(null);
+                  }}
                   placeholder="e.g. 200"
                   hint={attempted && !distance}
                   helperText="Enter the one-way road distance"
                 />
                 {calculatedDistance !== null && (
-                  <div className="flex flex-col justify-center rounded-xl bg-success/5 px-4 py-3 ring-1 ring-inset ring-success/20">
-                    <p className="text-xs font-medium text-success">Calculated Distance</p>
-                    <p className="mt-0.5 text-lg font-bold text-success">
+                  <div className="bg-success/5 ring-success/20 flex flex-col justify-center rounded-xl px-4 py-3 ring-1 ring-inset">
+                    <p className="text-success text-xs font-medium">Calculated Distance</p>
+                    <p className="text-success mt-0.5 text-lg font-bold">
                       {Math.round(calculatedDistance)} km
                     </p>
-                    <p className="mt-0.5 truncate text-xs text-text-muted">
+                    <p className="text-text-muted mt-0.5 truncate text-xs">
                       {calculatedDistanceLabel}
                     </p>
                   </div>
@@ -573,7 +611,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 <SectionIcon icon={Truck} />
                 <div>
                   <CardTitle>Freight Assumptions</CardTitle>
-                  <p className="mt-0.5 text-xs text-text-muted">
+                  <p className="text-text-muted mt-0.5 text-xs">
                     Confirm or adjust the values below before calculating.
                   </p>
                 </div>
@@ -602,7 +640,10 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                   min={1}
                   required
                   value={headCount}
-                  onChange={(e) => { setHeadCount(e.target.value); setResult(null); }}
+                  onChange={(e) => {
+                    setHeadCount(e.target.value);
+                    setResult(null);
+                  }}
                   placeholder="100"
                   hint={attempted && !headCount}
                 />
@@ -614,7 +655,10 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                   min={0}
                   required
                   value={distance}
-                  onChange={(e) => { setDistance(e.target.value); setResult(null); }}
+                  onChange={(e) => {
+                    setDistance(e.target.value);
+                    setResult(null);
+                  }}
                   placeholder="200"
                   hint={attempted && !distance}
                 />
@@ -625,7 +669,10 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                   type="number"
                   min={1}
                   value={headPerDeck}
-                  onChange={(e) => { setHeadPerDeck(e.target.value); setResult(null); }}
+                  onChange={(e) => {
+                    setHeadPerDeck(e.target.value);
+                    setResult(null);
+                  }}
                   placeholder={previewHpd?.toString() ?? "26"}
                   helperText={previewHpd ? `${previewHpd} at this weight` : undefined}
                 />
@@ -637,28 +684,33 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                   step="0.01"
                   min={0}
                   value={rate}
-                  onChange={(e) => { setRate(e.target.value); setResult(null); }}
+                  onChange={(e) => {
+                    setRate(e.target.value);
+                    setResult(null);
+                  }}
                 />
               </div>
-              <p className="mt-4 text-xs leading-relaxed text-text-muted">
-                Default rate and head per deck values are based on national averages.
-                Adjust to match your local carrier's requirements.
+              <p className="text-text-muted mt-4 text-xs leading-relaxed">
+                Default rate and head per deck values are based on national averages. Adjust to
+                match your local carrier's requirements.
               </p>
 
               {/* Loading Density Reference */}
               <button
                 type="button"
                 onClick={() => setDensityOpen(!densityOpen)}
-                className="mt-3 flex items-center gap-1.5 text-xs font-medium text-info transition-colors hover:text-info"
+                className="text-freight-iq hover:text-freight-iq mt-3 flex items-center gap-1.5 text-xs font-medium transition-colors"
               >
-                <ChevronDown className={`h-3.5 w-3.5 transition-transform ${densityOpen ? "rotate-180" : ""}`} />
+                <ChevronDown
+                  className={`h-3.5 w-3.5 transition-transform ${densityOpen ? "rotate-180" : ""}`}
+                />
                 Loading Density Reference
               </button>
               {densityOpen && (
-                <div className="mt-2 overflow-hidden rounded-xl bg-white/[0.03] ring-1 ring-inset ring-white/[0.06]">
+                <div className="mt-2 overflow-hidden rounded-xl bg-white/[0.03] ring-1 ring-white/[0.06] ring-inset">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="border-b border-white/[0.06] text-left text-text-muted">
+                      <tr className="text-text-muted border-b border-white/[0.06] text-left">
                         <th className="px-3 py-2 font-medium">Weight Range</th>
                         <th className="px-3 py-2 text-right font-medium">Head/Deck</th>
                       </tr>
@@ -676,13 +728,15 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                         { range: "650+ kg", hpd: 18 },
                       ].map((band) => (
                         <tr key={band.range} className="border-b border-white/[0.04] last:border-0">
-                          <td className="px-3 py-1.5 text-text-secondary">{band.range}</td>
-                          <td className="px-3 py-1.5 text-right font-mono text-text-primary">{band.hpd}</td>
+                          <td className="text-text-secondary px-3 py-1.5">{band.range}</td>
+                          <td className="text-text-primary px-3 py-1.5 text-right font-mono">
+                            {band.hpd}
+                          </td>
                         </tr>
                       ))}
                       <tr className="border-t border-white/[0.08]">
-                        <td className="px-3 py-1.5 text-text-secondary">Cow & Calf Units</td>
-                        <td className="px-3 py-1.5 text-right font-mono text-text-primary">18</td>
+                        <td className="text-text-secondary px-3 py-1.5">Cow & Calf Units</td>
+                        <td className="text-text-primary px-3 py-1.5 text-right font-mono">18</td>
                       </tr>
                     </tbody>
                   </table>
@@ -691,7 +745,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
 
               {/* Calves at Foot toggle - only for Breeder category */}
               {selectedHerd?.category === "Breeder" && (
-                <label className="mt-4 flex cursor-pointer items-start gap-2.5 rounded-xl bg-white/[0.03] px-4 py-3 ring-1 ring-inset ring-white/[0.06] transition-colors hover:bg-white/[0.05]">
+                <label className="mt-4 flex cursor-pointer items-start gap-2.5 rounded-xl bg-white/[0.03] px-4 py-3 ring-1 ring-white/[0.06] transition-colors ring-inset hover:bg-white/[0.05]">
                   <input
                     type="checkbox"
                     checked={calvesAtFoot}
@@ -706,12 +760,12 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                         setHeadPerDeck(headsPerDeckForWeight(w).toString());
                       }
                     }}
-                    className="mt-1 h-4 w-4 shrink-0 rounded border-white/20 bg-white/[0.04] text-info focus:ring-info/50"
+                    className="text-freight-iq focus:ring-freight-iq/50 mt-1 h-4 w-4 shrink-0 rounded border-white/20 bg-white/[0.04]"
                   />
                   <span>
-                    <span className="text-sm font-medium text-text-primary">Calves at foot</span>
+                    <span className="text-text-primary text-sm font-medium">Calves at foot</span>
                     <br />
-                    <span className="text-xs text-text-muted">
+                    <span className="text-text-muted text-xs">
                       {calvesAtFoot
                         ? "Loaded at Cow & Calf density (18 head/deck). Turn off if calves have not dropped."
                         : "Using standard weight-based loading density."}
@@ -726,7 +780,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
         {/* Actions - appears after distance entered */}
         {selectedPropertyId && (selectedHerdId || isCustomJob) && distance && (
           <div className="flex items-center gap-3">
-            <Button type="submit" variant="sky">
+            <Button type="submit" variant="freight-iq">
               Calculate Freight
             </Button>
             {(result || selectedHerdId) && (
@@ -748,14 +802,14 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
         {result ? (
           <div className="space-y-4">
             {/* Hero Cost */}
-            <Card className="bg-info/5 ring-info/20">
+            <Card className="bg-freight-iq/5 ring-freight-iq/20">
               <CardContent className="p-6 text-center">
-                <p className="text-xs font-medium uppercase tracking-wider text-text-muted">
+                <p className="text-text-muted text-xs font-medium tracking-wider uppercase">
                   Freight Estimate
                 </p>
-                <p className="mt-1 text-4xl font-bold text-info">
+                <p className="text-freight-iq mt-1 text-4xl font-bold">
                   ${Math.round(result.totalCost).toLocaleString()}
-                  <span className="ml-1.5 text-base font-medium text-text-muted">+GST</span>
+                  <span className="text-text-muted ml-1.5 text-base font-medium">+GST</span>
                 </p>
               </CardContent>
             </Card>
@@ -764,19 +818,35 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
             <Card>
               <CardContent className="divide-y divide-white/[0.06] p-0">
                 {[
-                  { label: "Freight Cost", icon: <DollarSign className="h-4 w-4" />, value: `$${Math.round(result.totalCost).toLocaleString()}` },
-                  { label: "Cost Per Head", icon: <span className="text-xs font-bold">hd</span>, value: `$${Math.round(result.costPerHead).toLocaleString()}` },
-                  { label: "Cost Per Deck", icon: <Truck className="h-4 w-4" />, value: `$${Math.round(result.costPerDeck).toLocaleString()}` },
-                  { label: "Required Decks", icon: <Truck className="h-4 w-4" />, value: result.decksRequired.toString() },
+                  {
+                    label: "Freight Cost",
+                    icon: <DollarSign className="h-4 w-4" />,
+                    value: `$${Math.round(result.totalCost).toLocaleString()}`,
+                  },
+                  {
+                    label: "Cost Per Head",
+                    icon: <span className="text-xs font-bold">hd</span>,
+                    value: `$${Math.round(result.costPerHead).toLocaleString()}`,
+                  },
+                  {
+                    label: "Cost Per Deck",
+                    icon: <Truck className="h-4 w-4" />,
+                    value: `$${Math.round(result.costPerDeck).toLocaleString()}`,
+                  },
+                  {
+                    label: "Required Decks",
+                    icon: <Truck className="h-4 w-4" />,
+                    value: result.decksRequired.toString(),
+                  },
                 ].map((row) => (
                   <div key={row.label} className="flex items-center justify-between px-4 py-3">
                     <div className="flex items-center gap-2.5">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 text-text-muted">
+                      <div className="text-text-muted flex h-7 w-7 items-center justify-center rounded-lg bg-white/5">
                         {row.icon}
                       </div>
-                      <span className="text-sm font-medium text-text-primary">{row.label}</span>
+                      <span className="text-text-primary text-sm font-medium">{row.label}</span>
                     </div>
-                    <span className="text-sm font-semibold text-text-primary">{row.value}</span>
+                    <span className="text-text-primary text-sm font-semibold">{row.value}</span>
                   </div>
                 ))}
               </CardContent>
@@ -784,14 +854,19 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
 
             {/* Assumptions */}
             <div className="px-1">
-              <p className="text-xs font-medium text-text-muted">Assumptions</p>
-              <p className="mt-1 text-xs leading-relaxed text-text-muted">
-                {result.freightCategory.displayName} · {result.headsPerDeck} head/deck · {Math.round(result.averageWeightKg)}kg avg weight · ${result.ratePerDeckPerKm.toFixed(2)}/deck/km · {Math.round(result.distanceKm)} km
+              <p className="text-text-muted text-xs font-medium">Assumptions</p>
+              <p className="text-text-muted mt-1 text-xs leading-relaxed">
+                {result.freightCategory.displayName} · {result.headsPerDeck} head/deck ·{" "}
+                {Math.round(result.averageWeightKg)}kg avg weight · $
+                {result.ratePerDeckPerKm.toFixed(2)}/deck/km · {Math.round(result.distanceKm)} km
               </p>
             </div>
 
             {/* Alerts */}
-            {(result.efficiencyPrompt || result.shortCartNotice || result.categoryWarning || result.breederAutoDetectNotice) && (
+            {(result.efficiencyPrompt ||
+              result.shortCartNotice ||
+              result.categoryWarning ||
+              result.breederAutoDetectNotice) && (
               <div className="space-y-3">
                 {result.efficiencyPrompt && (
                   <AlertCard type="success" message={result.efficiencyPrompt} />
@@ -813,37 +888,48 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
               <div className="grid grid-cols-2 gap-2">
                 <Button
                   type="button"
-                  variant={didSave ? "ghost" : "sky"}
+                  variant={didSave ? "ghost" : "freight-iq"}
                   onClick={handleSave}
                   disabled={didSave || isSaving}
                   aria-live="polite"
                 >
                   {didSave ? (
-                    <><BookmarkCheck className="mr-1.5 h-4 w-4" /> Saved</>
+                    <>
+                      <BookmarkCheck className="mr-1.5 h-4 w-4" /> Saved
+                    </>
                   ) : (
-                    <><Bookmark className="mr-1.5 h-4 w-4" /> {isSaving ? "Saving..." : "Save Estimate"}</>
+                    <>
+                      <Bookmark className="mr-1.5 h-4 w-4" />{" "}
+                      {isSaving ? "Saving..." : "Save Estimate"}
+                    </>
                   )}
                 </Button>
                 <Button
                   type="button"
                   variant="ghost"
-                  className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
+                  className="bg-freight-iq/15 text-freight-iq hover:bg-freight-iq/25 ring-freight-iq/20 ring-1 backdrop-blur-md ring-inset"
                   onClick={handleShare}
                   aria-live="polite"
                 >
                   {shareStatus === "copied" ? (
-                    <><Check className="mr-1.5 h-4 w-4" /> Copied</>
+                    <>
+                      <Check className="mr-1.5 h-4 w-4" /> Copied
+                    </>
                   ) : (
-                    <><Share2 className="mr-1.5 h-4 w-4" /> Share</>
+                    <>
+                      <Share2 className="mr-1.5 h-4 w-4" /> Share
+                    </>
                   )}
                 </Button>
               </div>
               {saveError && (
-                <p className="text-xs text-error" role="alert">{saveError}</p>
+                <p className="text-error text-xs" role="alert">
+                  {saveError}
+                </p>
               )}
               <Link
                 href="/dashboard/tools/freight/history"
-                className="mt-1 inline-flex items-center gap-1.5 self-center text-xs font-medium text-text-muted hover:text-text-secondary"
+                className="text-freight-iq mt-3 inline-flex h-9 items-center gap-1.5 self-center rounded-full bg-white/[0.03] px-4 text-[13px] font-semibold ring-1 ring-white/[0.06] backdrop-blur-md transition-colors ring-inset hover:bg-white/[0.06]"
               >
                 <History className="h-3.5 w-3.5" /> View saved estimates
               </Link>
@@ -853,10 +939,10 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
           <Card className="hidden lg:block">
             <CardContent className="p-6 text-center">
               <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/5">
-                <Truck className="h-5 w-5 text-text-muted" />
+                <Truck className="text-text-muted h-5 w-5" />
               </div>
-              <p className="mt-3 text-sm font-medium text-text-secondary">Freight Estimate</p>
-              <p className="mt-1 text-xs text-text-muted">
+              <p className="text-text-secondary mt-3 text-sm font-medium">Freight Estimate</p>
+              <p className="text-text-muted mt-1 text-xs">
                 Fill in the details and hit calculate to see your freight cost breakdown.
               </p>
             </CardContent>

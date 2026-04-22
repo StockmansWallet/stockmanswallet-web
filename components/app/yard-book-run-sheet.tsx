@@ -200,7 +200,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
             onClick={() => setFilterCategory(null)}
             className={`inline-flex h-8 shrink-0 items-center rounded-full px-3.5 text-xs font-medium transition-all ${
               filterCategory === null
-                ? "bg-emerald/15 text-emerald"
+                ? "bg-yard-book/15 text-yard-book"
                 : "bg-surface text-text-muted hover:bg-surface-raised hover:text-text-secondary"
             }`}
           >
@@ -266,7 +266,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
                 <h3 className={`text-xs font-semibold tracking-wider uppercase ${group.textClass}`}>
                   {group.title}
                 </h3>
-                <span className="bg-emerald/15 text-emerald inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-semibold tabular-nums">
+                <span className="bg-yard-book/15 text-yard-book inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-semibold tabular-nums">
                   {group.items.length}
                 </span>
               </div>
