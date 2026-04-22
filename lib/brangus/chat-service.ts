@@ -137,7 +137,10 @@ TOOL TIPS:
 - The freight calculator is called "Freight IQ", the calendar is "Yard Book"
 
 PAST CONVERSATIONS:
-When you find results from search_past_chats, reference them naturally like a mate would. Say things like "Yeah, you mentioned back in February..." or "We had a yarn about that a few weeks back..." - NOT "According to my search results..." or "I found in our previous conversation that...". If no results come back, just say you don't recall and move on.`;
+When you find results from search_past_chats, reference them naturally like a mate would. Say things like "Yeah, you mentioned back in February..." or "We had a yarn about that a few weeks back..." - NOT "According to my search results..." or "I found in our previous conversation that...". If no results come back, just say you don't recall and move on.
+
+SALEYARD DISCLOSURE RULE (mandatory):
+Every market data response (prices, seasonal patterns, valuations) MUST open with a clear statement of where the data came from. Read the DATA SOURCE or source label in the tool result and quote it directly. Example: "These prices are from MLA data at Gracemere" or "This is based on national average saleyard data." If the tool result shows "national average" as the source, say so explicitly so the user knows it is not their local market. NEVER present market data as generic or unattributed.`;
 
 const FALLBACK_APP_GUIDANCE_WEB = `APP GUIDANCE (for "how do I..." questions):
 You can help users navigate Stockman's Wallet. When they ask how to do something in the app, give clear directions.
@@ -280,6 +283,23 @@ export function buildSystemPrompt(store: ChatDataStore, serverConfig?: BrangusCo
   }
 
   indexLines.push("</user_data>");
+
+  // ADG anomaly detection - flag cattle herds with biologically impossible daily weight gain
+  // (>3.0 kg/day for cattle). Likely data entry errors that cause incorrect valuations.
+  const ADG_THRESHOLD = 3.0;
+  const adgAnomalies = activeHerdsList.filter(
+    (h: { species: string; daily_weight_gain: number }) =>
+      h.species?.toLowerCase() === "cattle" && h.daily_weight_gain > ADG_THRESHOLD
+  );
+  if (adgAnomalies.length > 0) {
+    indexLines.push("");
+    indexLines.push("DATA QUALITY ALERTS:");
+    for (const herd of adgAnomalies as { name: string; daily_weight_gain: number }[]) {
+      indexLines.push(
+        `  - ${herd.name}: daily weight gain is ${herd.daily_weight_gain.toFixed(1)} kg/day - this is biologically implausible for cattle (max realistic: ~${ADG_THRESHOLD.toFixed(1)} kg/day). Weight projection and valuation for this herd may be inaccurate. Gently flag this to the user as a possible data entry error when it is relevant.`
+      );
+    }
+  }
 
   // Parse YYYY-MM-DD as local midnight (not UTC) to avoid date-shift in AEST
   const todayMidnight = new Date();
@@ -824,7 +844,8 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
   const weatherData = await fetchAllPropertyWeather(properties ?? []);
 
   // Fetch seasonal data - try historical_market_prices first, fall back to synthetic patterns
-  const seasonalData = await fetchSeasonalData(mlaCategories, supabase);
+  // Pass preferred saleyards (from active herds) so data reflects the user's actual market (BRG-001 fix)
+  const seasonalData = await fetchSeasonalData(mlaCategories, supabase, saleyards);
 
   return {
     herds: herds ?? [],
@@ -866,54 +887,73 @@ const SEASONAL_MULTIPLIERS: Record<number, number> = {
   12: 1.01,  // Dec - pre-holiday
 };
 
+// BRG-001/BRG-015 fix: resolution order - preferred saleyards -> state-blended -> national
+// Returns sourceLabel so Brangus can always attribute the data clearly
 async function fetchSeasonalData(
   mlaCategories: string[],
-  supabase: ReturnType<typeof createClient>
+  supabase: ReturnType<typeof createClient>,
+  preferredSaleyards: string[] = []
 ): Promise<SeasonalCategoryData[]> {
   if (mlaCategories.length === 0) return [];
 
+  // Helper: aggregate rows into per-category monthly averages
+  function aggregateRows(rows: { category: string; price_per_kg: number; price_date: string }[]): Map<string, Map<number, { sum: number; count: number }>> {
+    const catMap = new Map<string, Map<number, { sum: number; count: number }>>();
+    for (const row of rows) {
+      const priceDateStr = row.price_date as string;
+      const priceDate = /^\d{4}-\d{2}-\d{2}$/.test(priceDateStr)
+        ? (() => { const [y, m, d] = priceDateStr.split("-").map(Number); return new Date(y, m - 1, d); })()
+        : new Date(priceDateStr);
+      const month = priceDate.getMonth() + 1;
+      if (!catMap.has(row.category)) catMap.set(row.category, new Map());
+      const monthMap = catMap.get(row.category)!;
+      const existing = monthMap.get(month) ?? { sum: 0, count: 0 };
+      monthMap.set(month, { sum: existing.sum + row.price_per_kg, count: existing.count + 1 });
+    }
+    return catMap;
+  }
+
+  function buildFromCatMap(catMap: Map<string, Map<number, { sum: number; count: number }>>, sourceLabel: string): SeasonalCategoryData[] {
+    const results: SeasonalCategoryData[] = [];
+    for (const [category, monthMap] of catMap) {
+      const monthlyAvg: Record<number, number> = {};
+      let bestMonth: number | null = null;
+      let bestPrice = -1;
+      for (const [month, data] of monthMap) {
+        const avg = Math.round((data.sum / data.count) * 100) / 100;
+        monthlyAvg[month] = avg;
+        if (avg > bestPrice) { bestPrice = avg; bestMonth = month; }
+      }
+      results.push({ category, monthlyAvg, bestMonth, isFallback: false, sourceLabel });
+    }
+    return results;
+  }
+
   try {
-    // Try historical_market_prices table (same as iOS BrangusHistoricalPricing)
+    // Step 1: Try preferred saleyards first for most accurate local data
+    if (preferredSaleyards.length > 0) {
+      const { data: rows, error } = await supabase
+        .from("historical_market_prices")
+        .select("category, price_per_kg, price_date")
+        .in("category", mlaCategories)
+        .in("saleyard", preferredSaleyards);
+
+      if (!error && rows && rows.length > 0) {
+        const catMap = aggregateRows(rows as { category: string; price_per_kg: number; price_date: string }[]);
+        const results = buildFromCatMap(catMap, preferredSaleyards.join(", "));
+        if (results.length > 0) return results;
+      }
+    }
+
+    // Step 2: All saleyards (state-blended)
     const { data: rows, error } = await supabase
       .from("historical_market_prices")
       .select("category, price_per_kg, price_date")
       .in("category", mlaCategories);
 
     if (!error && rows && rows.length > 0) {
-      // Aggregate by category + calendar month
-      const catMap = new Map<string, Map<number, { sum: number; count: number }>>();
-
-      for (const row of rows) {
-        // Parse date-only string as local time to get correct month
-        const priceDateStr = row.price_date as string;
-        const priceDate = /^\d{4}-\d{2}-\d{2}$/.test(priceDateStr)
-          ? (() => { const [y, m, d] = priceDateStr.split("-").map(Number); return new Date(y, m - 1, d); })()
-          : new Date(priceDateStr);
-        const month = priceDate.getMonth() + 1; // 1-12
-        if (!catMap.has(row.category)) catMap.set(row.category, new Map());
-        const monthMap = catMap.get(row.category)!;
-        const existing = monthMap.get(month) ?? { sum: 0, count: 0 };
-        monthMap.set(month, { sum: existing.sum + row.price_per_kg, count: existing.count + 1 });
-      }
-
-      const results: SeasonalCategoryData[] = [];
-      for (const [category, monthMap] of catMap) {
-        const monthlyAvg: Record<number, number> = {};
-        let bestMonth: number | null = null;
-        let bestPrice = -1;
-
-        for (const [month, data] of monthMap) {
-          const avg = Math.round((data.sum / data.count) * 100) / 100;
-          monthlyAvg[month] = avg;
-          if (avg > bestPrice) {
-            bestPrice = avg;
-            bestMonth = month;
-          }
-        }
-
-        results.push({ category, monthlyAvg, bestMonth, isFallback: false });
-      }
-
+      const catMap = aggregateRows(rows as { category: string; price_per_kg: number; price_date: string }[]);
+      const results = buildFromCatMap(catMap, "national (multi-state average)");
       if (results.length > 0) return results;
     }
   } catch {
@@ -945,7 +985,7 @@ function buildFallbackSeasonalData(categories: string[]): SeasonalCategoryData[]
       }
     }
 
-    results.push({ category, monthlyAvg, bestMonth, isFallback: true });
+    results.push({ category, monthlyAvg, bestMonth, isFallback: true, sourceLabel: "Estimated (typical Australian cattle market patterns)" });
   }
 
   return results;

@@ -920,17 +920,23 @@ function lookupSeasonalPricing(category: string | undefined, store: ChatDataStor
     return `No seasonal data for '${category}'. Available categories: ${available}`;
   }
 
-  // Detect if all entries are fallback
+  // Detect if all entries are fallback estimates
   const allFallback = filtered.every((s) => s.isFallback);
+
+  // Build a clear source disclosure from unique source labels (BRG-015 fix)
+  const uniqueSources = [...new Set(filtered.map((s) => s.sourceLabel))].sort();
+  const sourceDisclosure = uniqueSources.join("; ");
+
   const lines: string[] = [];
 
   if (allFallback) {
     lines.push("SEASONAL PRICE PATTERNS (estimated monthly averages, $/kg):");
-    lines.push("Based on typical Australian cattle market patterns. Real historical data not yet available.");
-    lines.push("NOTE: These are estimates. Cite them as 'typical seasonal patterns' not 'MLA data'.");
+    lines.push(`DATA SOURCE: ${sourceDisclosure}`);
+    lines.push("NOTE: These are estimates based on typical patterns, not MLA saleyard records. Cite as 'typical seasonal patterns', NOT 'MLA data' or 'historical data'.");
   } else {
     lines.push("SEASONAL PRICE PATTERNS (historical monthly averages from 2020-2026, $/kg):");
-    lines.push("Based on 6 years of MLA saleyard data.");
+    lines.push(`DATA SOURCE: ${sourceDisclosure}`);
+    lines.push(`DISCLOSURE RULE: You MUST state the data source (${uniqueSources[0] ?? "these saleyards"}) in your first sentence when citing these figures. Example: "Based on MLA data from ${uniqueSources[0] ?? "these saleyards"}, the best month to sell is..."`);
   }
   lines.push("INSTRUCTION: When the user asks about sale timing or historical prices, you MUST quote these specific monthly $/kg figures. Never give vague answers like 'historically prices tend to be higher' without citing the actual data below.");
 

@@ -255,6 +255,8 @@ export interface SeasonalCategoryData {
   monthlyAvg: Record<number, number>; // month (1-12) → $/kg
   bestMonth: number | null;
   isFallback: boolean;
+  // BRG-015 fix: explicit source label so Brangus can always attribute the data
+  sourceLabel: string;
 }
 
 // MARK: - Pending Mutations
