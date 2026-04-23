@@ -948,12 +948,12 @@ export function BrangusChat({
         </div>
       )}
 
-      {/* Summary card strip - persistent bottom strip, full width for edge-to-edge scrolling */}
-      {sessionCards.length > 0 && (
-        <div data-print-cards className="border-t border-white/10 py-2">
-          <QuickInsightRow insights={sessionCards} onCardAction={handleCardAction} />
-        </div>
-      )}
+      {/* Summary card strip - persistent bottom strip, full width for edge-to-edge scrolling.
+          The strip is always rendered (even when empty) so that the first card has a visible
+          target area to slide into and layout doesn't jump when cards first appear. */}
+      <div data-print-cards className="border-t border-white/10 py-2">
+        <QuickInsightRow insights={sessionCards} onCardAction={handleCardAction} />
+      </div>
 
       {/* Input area */}
       <div data-print-hide className="border-t border-white/10 p-4">
