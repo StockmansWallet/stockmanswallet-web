@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+import { AnimatePresence, motion } from "framer-motion";
+import logoAnimData from "@/public/animations/StockmansLogoAnim.json";
 import { updatePassword } from "../actions";
+
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
+const panelSpring = { type: "spring", stiffness: 320, damping: 30, mass: 0.85 } as const;
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -15,16 +21,21 @@ export default function ResetPasswordPage() {
     setError(null);
 
     const formData = new FormData(e.currentTarget);
-    const password = formData.get("password") as string;
-    const confirm = formData.get("confirm") as string;
+    const password = String(formData.get("password") ?? "");
+    const confirm = String(formData.get("confirm") ?? "");
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+    if (!password || !confirm) {
+      setError("Fill in both fields to continue.");
+      return;
+    }
+
+    if (password.length < 12) {
+      setError("Password must be at least 12 characters.");
       return;
     }
 
     if (password !== confirm) {
-      setError("Passwords do not match.");
+      setError("Passwords don't match.");
       return;
     }
 
@@ -34,85 +45,114 @@ export default function ResetPasswordPage() {
     if (result?.error) {
       setError(result.error);
       setLoading(false);
-    } else {
-      setSuccess(true);
-      setTimeout(() => router.push("/dashboard"), 1500);
+      return;
     }
+
+    setSuccess(true);
+    setTimeout(() => router.push("/dashboard"), 1500);
   }
 
   if (success) {
     return (
-      <div className="text-center">
-        <h1 className="mb-2 text-2xl font-bold text-text-primary">Password updated</h1>
-        <p className="text-sm text-text-muted">Redirecting to dashboard...</p>
-      </div>
+      <main className="fixed inset-0 z-10 overflow-y-auto">
+        <div className="mx-auto flex min-h-screen w-full max-w-[34rem] items-center justify-center px-5 py-10 sm:px-6 sm:py-14">
+          <div className="w-full space-y-6 text-center sm:space-y-7">
+            <div className="mx-auto w-full max-w-[14rem] drop-shadow-[0_8px_30px_rgba(0,0,0,0.28)] sm:max-w-[16rem]">
+              <Lottie animationData={logoAnimData} loop={false} className="h-auto w-full" />
+            </div>
+
+            <div className="px-2">
+              <h1 className="text-[clamp(2rem,6vw,3rem)] font-semibold tracking-tight text-white">
+                Password updated.
+              </h1>
+              <p className="mt-3 text-[clamp(1rem,3.2vw,1.28rem)] leading-relaxed text-white/72">
+                Taking you to your yard now.
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
     );
   }
 
   return (
-    <>
-      <h1 className="mb-1 text-center text-2xl font-bold text-text-primary">
-        Set new password
-      </h1>
-      <p className="mb-6 text-center text-sm text-text-muted">
-        Enter your new password below.
-      </p>
+    <main className="fixed inset-0 z-10 overflow-y-auto">
+      <div className="mx-auto flex min-h-screen w-full max-w-[34rem] items-center justify-center px-5 py-10 sm:px-6 sm:py-14">
+        <div className="w-full space-y-6 text-center sm:space-y-7">
+          <div className="mx-auto w-full max-w-[14rem] drop-shadow-[0_8px_30px_rgba(0,0,0,0.28)] sm:max-w-[16rem]">
+            <Lottie animationData={logoAnimData} loop={false} className="h-auto w-full" />
+          </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label
-            htmlFor="password"
-            className="mb-1 block text-sm font-medium text-text-secondary"
-          >
-            New password
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            minLength={12}
-            maxLength={128}
-            placeholder="At least 12 characters"
-            autoComplete="new-password"
-            className="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-white/10 dark:bg-white/5"
-          />
+          <div className="px-2">
+            <h1 className="text-[clamp(2rem,6vw,3rem)] font-semibold tracking-tight text-white">
+              Set a new password.
+            </h1>
+            <p className="mt-3 text-[clamp(1rem,3.2vw,1.28rem)] leading-relaxed text-white/72">
+              Pick something at least 12 characters long.
+            </p>
+          </div>
+
+          <div className="rounded-[2rem] border border-white/10 bg-[#4a4d40]/72 p-4 shadow-[0_24px_80px_rgba(0,0,0,0.34)] backdrop-blur-xl sm:p-5">
+            <form onSubmit={handleSubmit} noValidate className="space-y-3">
+              <AnimatePresence initial={false}>
+                {error && (
+                  <motion.div
+                    key="reset-error"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={panelSpring}
+                    style={{ overflow: "hidden" }}
+                  >
+                    <p
+                      role="alert"
+                      className="rounded-[1.1rem] border border-red-400/20 bg-red-950/30 px-4 py-3 text-sm text-red-100"
+                    >
+                      {error}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div className="space-y-2 text-left">
+                <label htmlFor="password" className="block text-sm font-medium text-white/78">
+                  New password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="At least 12 characters"
+                  className="focus:border-brand/70 focus:ring-brand/20 w-full rounded-2xl border border-white/10 bg-white/12 px-4 py-3.5 text-base text-white transition-colors outline-none placeholder:text-white/40 focus:bg-white/15 focus:ring-2"
+                />
+              </div>
+
+              <div className="space-y-2 text-left">
+                <label htmlFor="confirm" className="block text-sm font-medium text-white/78">
+                  Confirm password
+                </label>
+                <input
+                  id="confirm"
+                  name="confirm"
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="Re-enter your password"
+                  className="focus:border-brand/70 focus:ring-brand/20 w-full rounded-2xl border border-white/10 bg-white/12 px-4 py-3.5 text-base text-white transition-colors outline-none placeholder:text-white/40 focus:bg-white/15 focus:ring-2"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="bg-brand hover:bg-brand-dark flex min-h-16 w-full items-center justify-center rounded-[1.55rem] px-5 py-4 text-base font-semibold text-white transition-colors active:scale-[0.99] disabled:opacity-60"
+              >
+                {loading ? "Updating..." : "Update password"}
+              </button>
+            </form>
+          </div>
         </div>
-
-        <div>
-          <label
-            htmlFor="confirm"
-            className="mb-1 block text-sm font-medium text-text-secondary"
-          >
-            Confirm password
-          </label>
-          <input
-            id="confirm"
-            name="confirm"
-            type="password"
-            required
-            minLength={12}
-            maxLength={128}
-            placeholder="Re-enter your password"
-            autoComplete="new-password"
-            className="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-all focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-white/10 dark:bg-white/5"
-          />
-        </div>
-
-        {error && (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-error dark:bg-red-900/20 dark:text-error">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-xl bg-brand px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-brand-dark disabled:opacity-60"
-        >
-          {loading ? "Updating..." : "Update password"}
-        </button>
-      </form>
-    </>
+      </div>
+    </main>
   );
 }
