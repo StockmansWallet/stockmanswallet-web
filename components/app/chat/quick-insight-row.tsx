@@ -5,9 +5,28 @@
 
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { ChevronRight } from "lucide-react";
 import type { QuickInsight, CardAction } from "@/lib/brangus/types";
+
+// Width over which the edge fade runs out. Keep this in sync with the
+// mask-image gradient stops below.
+const FADE_PX = 28;
+
+// Build a horizontal mask-image gradient that fades the content at whichever
+// edges the user can still scroll past. Opaque in the middle, transparent at
+// the live edges. When both edges are inert (no overflow in either direction)
+// we return `undefined` so the browser doesn't apply a mask at all.
+function buildEdgeMask(canScrollLeft: boolean, canScrollRight: boolean): string | undefined {
+  if (!canScrollLeft && !canScrollRight) return undefined;
+  const left = canScrollLeft
+    ? `transparent 0, rgba(0,0,0,0.4) ${Math.round(FADE_PX * 0.35)}px, #000 ${FADE_PX}px`
+    : `#000 0`;
+  const right = canScrollRight
+    ? `#000 calc(100% - ${FADE_PX}px), rgba(0,0,0,0.4) calc(100% - ${Math.round(FADE_PX * 0.35)}px), transparent 100%`
+    : `#000 100%`;
+  return `linear-gradient(to right, ${left}, ${right})`;
+}
 
 // Abbreviate common terms so card text fits without truncation
 function compact(text: string): string {
@@ -83,11 +102,37 @@ export function QuickInsightRow({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [edgeState, setEdgeState] = useState<{ left: boolean; right: boolean }>({
+    left: false,
+    right: false,
+  });
   const dragStartRef = useRef<{
     x: number;
     scrollLeft: number;
     moved: boolean;
   } | null>(null);
+
+  // Drive the edge-fade mask off the scroll position. Treat a 1px threshold as
+  // "at the edge" so tiny sub-pixel scroll offsets don't leave a stray fade.
+  const recalcEdges = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const canLeft = el.scrollLeft > 1;
+    const canRight = el.scrollLeft + el.clientWidth < el.scrollWidth - 1;
+    setEdgeState((prev) => (prev.left === canLeft && prev.right === canRight ? prev : { left: canLeft, right: canRight }));
+  }, []);
+
+  // Recalculate on mount, when the container resizes, and when the set of
+  // insights changes. ResizeObserver covers both viewport resizes and changes
+  // to the surrounding chat layout.
+  useEffect(() => {
+    recalcEdges();
+    const el = containerRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => recalcEdges());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [recalcEdges, insights.length]);
 
   // Click-and-drag horizontal scrolling for mouse users
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -108,7 +153,8 @@ export function QuickInsightRow({
     const dx = e.clientX - start.x;
     if (Math.abs(dx) > 5) start.moved = true;
     el.scrollLeft = start.scrollLeft - dx;
-  }, []);
+    recalcEdges();
+  }, [recalcEdges]);
 
   const handleMouseUp = useCallback(() => {
     // Small delay so onClick on cards can check if we were dragging
@@ -127,10 +173,24 @@ export function QuickInsightRow({
     [onCardAction]
   );
 
+  // Apple-style edge fade: the content at whichever edge is still scrollable
+  // fades into the background, signalling "there's more here" without a mouse-
+  // only affordance. Pointer events pass straight through because the mask is
+  // applied to the scroll container itself, not an overlay.
+  const maskImage = buildEdgeMask(edgeState.left, edgeState.right);
+  const maskStyle: React.CSSProperties | undefined = maskImage
+    ? ({
+        maskImage,
+        WebkitMaskImage: maskImage,
+      } as React.CSSProperties)
+    : undefined;
+
   return (
     <div
       ref={containerRef}
       className={`flex gap-2 overflow-x-auto pb-1 px-3 scrollbar-none ${isDragging ? "cursor-grabbing select-none" : "cursor-grab"}`}
+      style={maskStyle}
+      onScroll={recalcEdges}
       onMouseDown={handleMouseDown}
       onMouseMove={isDragging ? handleMouseMove : undefined}
       onMouseUp={handleMouseUp}
