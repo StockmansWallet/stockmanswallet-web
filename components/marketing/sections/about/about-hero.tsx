@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-import { motion } from 'framer-motion'
+import { motion } from "framer-motion";
 
 export default function AboutHero() {
   return (
@@ -10,7 +10,7 @@ export default function AboutHero() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'radial-gradient(ellipse 1200px 800px at 50% 30%, rgba(217,118,47,0.06) 0%, transparent 70%)',
+            "radial-gradient(ellipse 1200px 800px at 50% 30%, rgba(216,150,61,0.06) 0%, transparent 70%)",
         }}
       />
 
@@ -22,26 +22,21 @@ export default function AboutHero() {
           transition={{ duration: 0.7 }}
           className="mx-auto max-w-3xl text-center"
         >
-          <span className="text-sm font-medium uppercase tracking-wider text-brand">
-            Our Story
-          </span>
+          <span className="text-brand text-sm font-medium tracking-wider uppercase">Our Story</span>
 
           <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-5xl">
             Capital Intelligence
             <br />
-            for{' '}
-            <span className="text-brand">
-              Australian Agriculture
-            </span>
+            for <span className="text-brand">Australian Agriculture</span>
           </h1>
 
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-text-secondary">
-            Founded on a simple observation: livestock producers manage millions of
-            dollars in biological assets, yet lack the financial tools that equity
-            investors take for granted. Stockman&apos;s Wallet changes that.
+          <p className="text-text-secondary mx-auto mt-6 max-w-2xl text-lg leading-relaxed">
+            Founded on a simple observation: livestock producers manage millions of dollars in
+            biological assets, yet lack the financial tools that equity investors take for granted.
+            Stockman&apos;s Wallet changes that.
           </p>
         </motion.div>
       </div>
     </section>
-  )
+  );
 }

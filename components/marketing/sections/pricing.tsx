@@ -32,7 +32,7 @@ const ACCENT = {
     bgDarkHover: "hover:bg-brand",
     border: "border-brand/30",
     cardBg: "bg-brand/[0.04]",
-    glow: "shadow-[0_0_60px_rgba(217,118,47,0.08)]",
+    glow: "shadow-[0_0_60px_rgba(216,150,61,0.08)]",
     check: "text-brand",
   },
   advisor: {

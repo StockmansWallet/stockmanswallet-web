@@ -35,10 +35,10 @@
   /* Stockman Gold - brand accent. Warm amber tuned for a dark base;
      evokes Australian sunrise and the premium feel of livestock wealth.
      Distinct from the hi-vis orange used for Freight IQ. */
-  --hue-gold: #e5a83a;
-  --hue-gold-light: #f5c268;
-  --hue-gold-dark: #8f6820;
-  --hue-gold-text: #6b4e15;
+  --hue-gold: #d8963d;
+  --hue-gold-light: #eaae5c;
+  --hue-gold-dark: #7c5519;
+  --hue-gold-text: #5b3f13;
 
   /* Hi-Vis Orange - Freight IQ. Road signs, trucks, movement. */
   --hue-orange: #ff8c42;

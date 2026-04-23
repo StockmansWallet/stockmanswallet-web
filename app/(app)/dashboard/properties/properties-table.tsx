@@ -67,7 +67,7 @@ export function PropertiesTable({
           </div>
           <Link
             href="/dashboard/properties/new"
-            className="bg-brand-dark hover:bg-brand-text inline-flex h-8 shrink-0 items-center rounded-full px-3.5 text-xs font-medium text-white transition-all"
+            className="bg-brand hover:bg-brand-dark inline-flex h-8 shrink-0 items-center rounded-full px-3.5 text-xs font-medium text-white transition-all"
           >
             Add Property
           </Link>

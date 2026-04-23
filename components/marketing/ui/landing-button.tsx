@@ -28,7 +28,7 @@ export default function LandingButton({
     "inline-flex items-center justify-center font-semibold rounded-full transition-colors duration-150 active:scale-[0.97] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary";
 
   const variants: Record<ButtonVariant, string> = {
-    primary: "bg-brand-dark text-white hover:bg-brand",
+    primary: "bg-brand text-white hover:bg-brand-dark",
     secondary: "border border-brand text-brand hover:bg-brand/10",
     ghost: "text-white/70 hover:text-white hover:bg-white/5",
   };
