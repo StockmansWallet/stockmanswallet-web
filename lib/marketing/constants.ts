@@ -12,8 +12,8 @@ export const FEATURES: Feature[] = [
     id: 'dashboard',
     name: 'Dashboard',
     description: 'View your total livestock portfolio in one place. Track live market-linked pricing, monitor performance over time, and understand where your capital is concentrated across the herd.',
-    accentColor: '#FF8000',
-    accentColorLight: '#F4A871',
+    accentColor: '#E78822',
+    accentColorLight: '#EDA659',
     bullets: [
       'See your total livestock portfolio value update in real time',
       'Track live market-linked pricing across every herd',
@@ -27,8 +27,8 @@ export const FEATURES: Feature[] = [
     id: 'herd-valuation',
     name: 'Herd Valuation',
     description: 'Turn each herd into a live financial asset. Market-linked valuations reflect breed premiums, daily weight gain, breeding activity, and projected biological change, so your balance sheet keeps pace with the paddock.',
-    accentColor: '#FF8000',
-    accentColorLight: '#F4A871',
+    accentColor: '#E78822',
+    accentColorLight: '#EDA659',
     bullets: [
       'Add and manage herds as financial assets within your portfolio',
       'Match each herd to live market data with breed premium adjustments',
@@ -147,8 +147,8 @@ export const FEATURES: Feature[] = [
     id: 'insights',
     name: 'Insights',
     description: 'Your AI stock advisor evaluates your portfolio every day against live market conditions and surfaces the calls that matter. Sell vs hold, optimal timing, weight targets, best market, price sensitivity, and calving forecasts.',
-    accentColor: '#FF8000',
-    accentColorLight: '#F4A871',
+    accentColor: '#E78822',
+    accentColorLight: '#EDA659',
     bullets: [
       'Daily AI evaluation of your portfolio against current market data',
       'Sell vs hold analysis with projected gains over 30, 60, and 90 days',

@@ -796,7 +796,7 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
                         ? "border-border bg-surface-secondary"
                         : showError("1", "breedPremiumConfirmed")
                           ? "border-error/60 ring-error/60 bg-surface-secondary ring-1 ring-inset"
-                          : "border-brand/40 bg-surface-secondary shadow-[0_0_8px_#FF800040]"
+                          : "border-brand/40 bg-surface-secondary shadow-[0_0_8px_#E7882240]"
                     }`}
                   >
                     <span

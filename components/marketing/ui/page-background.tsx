@@ -4,7 +4,7 @@ export default function PageBackground() {
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
       <Image src="/images/landing-bg.webp" alt="" fill priority className="object-cover" />
-      <div className="absolute inset-0 bg-[#171513]/90" />
+      <div className="absolute inset-0 bg-[#171513]/84" />
       <div
         className="absolute inset-0 mix-blend-soft-light"
         style={{

@@ -197,7 +197,7 @@ function GroupedSelect({
               : open
                 ? "ring-1 ring-inset ring-brand/60 bg-surface-raised"
                 : hint
-                  ? "ring-1 ring-inset ring-brand/40 shadow-[0_0_8px_#FF800040] focus:ring-brand/60 focus:shadow-[0_0_12px_#FF800059] focus:bg-surface-raised"
+                  ? "ring-1 ring-inset ring-brand/40 shadow-[0_0_8px_#E7882240] focus:ring-brand/60 focus:shadow-[0_0_12px_#E7882259] focus:bg-surface-raised"
                   : "focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
         }`}
       >
@@ -270,7 +270,7 @@ const NativeSelect = forwardRef<HTMLSelectElement, SelectProps>(
               error
                 ? "ring-1 ring-inset ring-error/60 focus:ring-error"
                 : hint
-                  ? "ring-1 ring-inset ring-brand/40 shadow-[0_0_8px_#FF800040] focus:ring-brand/60 focus:shadow-[0_0_12px_#FF800059] focus:bg-surface-raised"
+                  ? "ring-1 ring-inset ring-brand/40 shadow-[0_0_8px_#E7882240] focus:ring-brand/60 focus:shadow-[0_0_12px_#E7882259] focus:bg-surface-raised"
                   : "focus:ring-1 focus:ring-inset focus:ring-brand/60 focus:bg-surface-raised"
             } ${className}`}
             {...props}

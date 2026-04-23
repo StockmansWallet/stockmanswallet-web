@@ -9,7 +9,7 @@ const ALL_TABS = [
   {
     id: "producer" as const,
     label: "Producers",
-    colour: "#FF8000",
+    colour: "#E78822",
     icon: "M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25",
   },
   {
@@ -32,7 +32,7 @@ const ACCENT = {
     bgDarkHover: "hover:bg-brand",
     border: "border-brand/30",
     cardBg: "bg-brand/[0.04]",
-    glow: "shadow-[0_0_60px_rgba(216,150,61,0.08)]",
+    glow: "shadow-[0_0_60px_rgba(231,136,34,0.08)]",
     check: "text-brand",
   },
   advisor: {
