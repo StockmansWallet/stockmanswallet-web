@@ -46,3 +46,6 @@ next-env.d.ts
 
 # supabase
 /supabase/.temp/
+
+# curl cookie jars (may contain session tokens)
+cookies.txt
