@@ -6,7 +6,7 @@ import PageBackground from "@/components/marketing/ui/page-background";
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <WaitlistProvider>
-      <div className="bg-bg-primary flex min-h-screen flex-col">
+      <div className="flex min-h-screen flex-col">
         <PageBackground />
         <Header />
         <main className="flex-1">{children}</main>
