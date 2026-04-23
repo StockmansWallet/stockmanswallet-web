@@ -43,6 +43,7 @@ import type {
   QuickInsight,
   CardAction,
 } from "@/lib/brangus/types";
+import { hydrateCardsFromMessages } from "@/lib/brangus/cards";
 import { createClient } from "@/lib/supabase/client";
 import { ChatBubble } from "@/components/app/chat/chat-bubble";
 import { ChatInput } from "@/components/app/chat/chat-input";
@@ -133,27 +134,8 @@ interface BrangusChatProps {
   prefill?: string;
 }
 
-// Restore QuickInsight cards from saved cards_json
-function hydrateCards(messages: SavedMessage[]): QuickInsight[] {
-  const cards: QuickInsight[] = [];
-  for (const m of messages) {
-    if (m.cards_json && Array.isArray(m.cards_json)) {
-      for (const c of m.cards_json) {
-        const card = c as Record<string, unknown>;
-        if (card.label && card.value && card.sentiment) {
-          cards.push({
-            id: (card.id as string) || crypto.randomUUID(),
-            label: card.label as string,
-            value: card.value as string,
-            subtitle: (card.subtitle as string) || undefined,
-            sentiment: card.sentiment as "positive" | "negative" | "neutral",
-          });
-        }
-      }
-    }
-  }
-  return cards;
-}
+// Card hydration lives in lib/brangus/cards.ts so saved-chat review and
+// shared-chat detail can pull the same parsed shape.
 
 export function BrangusChat({
   conversationId: existingConvId,
@@ -201,7 +183,7 @@ export function BrangusChat({
   // Accumulated summary cards for the persistent bottom strip - grows across the session
   // Hydrate from saved messages when loading a saved conversation
   const [sessionCards, setSessionCards] = useState<QuickInsight[]>(() =>
-    hydrateCards(initialMessages ?? [])
+    hydrateCardsFromMessages(initialMessages ?? [])
   );
   const [copied, setCopied] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
@@ -906,6 +888,7 @@ export function BrangusChat({
           content: m.content,
           timestamp: m.timestamp,
         }))}
+        cards={sessionCards}
         senderDisplayName={senderDisplayName}
       />
 

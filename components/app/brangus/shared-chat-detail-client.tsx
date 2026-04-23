@@ -4,11 +4,13 @@
 // read on first mount (recipient only), and offers a soft-delete for the
 // viewer's side. Sender sees the same transcript but no read-on-open sync.
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Trash2, MessageSquare, Loader2 } from "lucide-react";
 import { ChatBubble } from "@/components/app/chat/chat-bubble";
+import { QuickInsightRow } from "@/components/app/chat/quick-insight-row";
+import { hydrateCardsFromJson } from "@/lib/brangus/cards";
 import {
   markSharedChatRead,
   softDeleteSharedChat,
@@ -26,6 +28,11 @@ interface Props {
 export function SharedChatDetailClient({ row, viewerIsRecipient }: Props) {
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
+
+  // Hydrate the sender-captured summary card strip. Rows created before the
+  // 2026-04-24 migration have cards_json = null, in which case this is empty
+  // and we skip the strip altogether.
+  const cards = useMemo(() => hydrateCardsFromJson(row.cards_json), [row.cards_json]);
 
   // Recipient marks the row read on first open so the Shared tab badge clears
   // across devices.
@@ -112,29 +119,40 @@ export function SharedChatDetailClient({ row, viewerIsRecipient }: Props) {
       </div>
 
       {/* Messages - same Card shell as the live chat for visual parity. */}
-      <div className="bg-surface flex-1 overflow-y-auto rounded-2xl px-4 py-4 shadow-sm">
-        <div className="mx-auto max-w-2xl space-y-3">
-          {row.messages.length === 0 ? (
-            <p className="text-text-muted py-8 text-center text-sm">
-              This shared chat has no messages.
-            </p>
-          ) : (
-            row.messages.map((msg, i) => {
-              const isUser = msg.role === "user";
-              return (
-                <ChatBubble
-                  key={i}
-                  side={isUser ? "right" : "left"}
-                  bgClass={isUser ? "bg-chat-user" : "bg-brangus-dark"}
-                  tailColor={isUser ? USER_BG : BRANGUS_BG}
-                  textClass="text-white"
-                >
-                  {isUser ? msg.content : <FormattedResponse text={msg.content} />}
-                </ChatBubble>
-              );
-            })
-          )}
+      <div className="bg-surface flex flex-1 flex-col overflow-hidden rounded-2xl shadow-sm">
+        <div className="flex-1 overflow-y-auto px-4 py-4">
+          <div className="mx-auto max-w-2xl space-y-3">
+            {row.messages.length === 0 ? (
+              <p className="text-text-muted py-8 text-center text-sm">
+                This shared chat has no messages.
+              </p>
+            ) : (
+              row.messages.map((msg, i) => {
+                const isUser = msg.role === "user";
+                return (
+                  <ChatBubble
+                    key={i}
+                    side={isUser ? "right" : "left"}
+                    bgClass={isUser ? "bg-chat-user" : "bg-brangus-dark"}
+                    tailColor={isUser ? USER_BG : BRANGUS_BG}
+                    textClass="text-white"
+                  >
+                    {isUser ? msg.content : <FormattedResponse text={msg.content} />}
+                  </ChatBubble>
+                );
+              })
+            )}
+          </div>
         </div>
+
+        {/* Summary cards - aggregate strip captured at send time. Matches the
+            live chat's persistent bottom strip so the recipient sees the
+            headline figures the sender was looking at. */}
+        {cards.length > 0 && (
+          <div className="border-t border-white/10 py-2">
+            <QuickInsightRow insights={cards} />
+          </div>
+        )}
       </div>
     </div>
   );

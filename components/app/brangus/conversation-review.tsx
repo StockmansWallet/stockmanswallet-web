@@ -3,10 +3,12 @@
 // Read-only review of a past Brangus conversation with export options
 // Matches iOS review mode: no input bar, just message history
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { ChevronLeft, Copy, Download, Check } from "lucide-react";
 import { ChatBubble } from "@/components/app/chat/chat-bubble";
+import { QuickInsightRow } from "@/components/app/chat/quick-insight-row";
+import { hydrateCardsFromMessages } from "@/lib/brangus/cards";
 import { formatConversationForExport } from "@/lib/brangus/conversation-service";
 import type { BrangusConversationRow, BrangusMessageRow } from "@/lib/brangus/conversation-service";
 
@@ -27,6 +29,11 @@ export function ConversationReview({ conversation, messages }: ConversationRevie
   useEffect(() => {
     bottomRef.current?.scrollIntoView();
   }, []);
+
+  // Aggregate any per-message cards_json into a single strip. The live chat
+  // accumulates cards in session order; reviewing a saved chat should surface
+  // the same strip so users can see the key figures at a glance.
+  const cards = useMemo(() => hydrateCardsFromMessages(messages), [messages]);
 
   const exportText = formatConversationForExport(
     conversation.title,
@@ -110,6 +117,14 @@ export function ConversationReview({ conversation, messages }: ConversationRevie
           <div ref={bottomRef} />
         </div>
       </div>
+
+      {/* Summary cards strip - matches the live chat's persistent bottom strip
+          so reviewing a saved chat reads the same as when it happened. */}
+      {cards.length > 0 && (
+        <div className="border-t border-white/10 py-2">
+          <QuickInsightRow insights={cards} />
+        </div>
+      )}
     </div>
   );
 }

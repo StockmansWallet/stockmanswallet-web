@@ -12,6 +12,7 @@ import {
   shareConversation,
   type SharePickerProducer,
 } from "@/lib/brangus/shared-chats-service";
+import type { QuickInsight } from "@/lib/brangus/types";
 
 // Debug: Keep this decoupled from BrangusMessageRow/ChatMessage so both the
 // live chat (ChatMessage) and the saved-conversation review (BrangusMessageRow)
@@ -28,6 +29,13 @@ interface ShareToProducerDialogProps {
   conversationId: string | null;
   conversationTitle: string | null;
   messages: ShareableMessage[];
+  /**
+   * Summary cards accumulated during the session. Shipped alongside the
+   * message snapshot so the recipient sees the same headline figures the
+   * sender was looking at. Empty or undefined = no strip on the recipient's
+   * side.
+   */
+  cards?: QuickInsight[];
   senderDisplayName: string | null;
 }
 
@@ -37,6 +45,7 @@ export function ShareToProducerDialog({
   conversationId,
   conversationTitle,
   messages,
+  cards,
   senderDisplayName,
 }: ShareToProducerDialogProps) {
   const [loading, setLoading] = useState(true);
@@ -106,6 +115,7 @@ export function ShareToProducerDialog({
         title: conversationTitle,
         senderDisplayName,
         messages: normalised,
+        cards,
         note,
       });
       const recipient = producers.find((p) => p.user_id === selectedId);
@@ -124,6 +134,7 @@ export function ShareToProducerDialog({
     conversationTitle,
     senderDisplayName,
     messages,
+    cards,
     note,
     producers,
     onClose,

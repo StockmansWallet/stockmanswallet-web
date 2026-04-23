@@ -4,6 +4,7 @@
 // deleted flag. is_read is recipient-only per policy in the migration.
 
 import { createClient } from "../supabase/client";
+import type { QuickInsight } from "./types";
 
 // Debug: Minimal shape shareConversation() pulls off each message. Both the
 // live chat (ChatMessage with Date) and the saved-conversation review
@@ -28,6 +29,12 @@ export interface SharedChatRow {
   title: string | null;
   sender_display_name: string | null;
   messages: SharedChatMessage[];
+  /**
+   * Aggregate QuickInsight cards captured at send time. Older rows from
+   * before 2026-04-24 have this as null. The detail viewer renders the strip
+   * iff this is a non-empty array, so nulls are a no-op and nothing breaks.
+   */
+  cards_json: unknown | null;
   note: string | null;
   is_read: boolean;
   is_deleted_by_sender: boolean;
@@ -102,6 +109,13 @@ export async function shareConversation(params: {
   title?: string | null;
   senderDisplayName?: string | null;
   messages: ShareMessageInput[];
+  /**
+   * Aggregate summary cards from the live session. Stored as a single JSONB
+   * array on the shared row; the recipient's viewer hydrates them back into
+   * a QuickInsightRow below the transcript. Omit or pass an empty array if
+   * the conversation has no cards - the column will be stored as NULL.
+   */
+  cards?: QuickInsight[];
   note?: string | null;
 }): Promise<string> {
   const supabase = createClient();
@@ -123,6 +137,13 @@ export async function shareConversation(params: {
     timestamp: m.created_at,
   }));
 
+  // Serialise the cards to a plain JSON array. An empty array stores as NULL
+  // so the DB check constraint (array-or-null) accepts old rows identically.
+  const cardsJson =
+    params.cards && params.cards.length > 0
+      ? (params.cards as unknown as Record<string, unknown>[])
+      : null;
+
   const { data, error } = await supabase
     .from("brangus_shared_chats")
     .insert({
@@ -132,6 +153,7 @@ export async function shareConversation(params: {
       title: params.title ?? null,
       sender_display_name: params.senderDisplayName ?? null,
       messages: snapshot,
+      cards_json: cardsJson,
       note: (params.note ?? "").trim() || null,
     })
     .select("id")
