@@ -2,14 +2,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SettingsLoading() {
   return (
-    <div className="max-w-4xl">
-      {/* PageHeader */}
-      <div className="pt-6 pb-4">
-        <Skeleton className="mb-2 h-8 w-28" />
-        <Skeleton className="h-4 w-56" />
-      </div>
-
-      <div className="space-y-6">
+    <div>
+      <div className="space-y-4">
         {/* Nav card */}
         <div className="bg-surface-lowest overflow-hidden rounded-2xl">
           {Array.from({ length: 6 }).map((_, i) => (

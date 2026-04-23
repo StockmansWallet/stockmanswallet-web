@@ -2,9 +2,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PropertyDetailLoading() {
   return (
-    <div className="max-w-4xl">
+    <div>
       {/* Property header */}
-      <div className="mt-6 mb-6 flex items-end gap-4">
+      <div className="mb-4 flex items-end gap-4">
         <Skeleton className="h-14 w-14 rounded-2xl" />
         <div>
           <Skeleton className="mb-2 h-7 w-48" />

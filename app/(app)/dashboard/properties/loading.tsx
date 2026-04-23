@@ -2,13 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PropertiesLoading() {
   return (
-    <div className="max-w-4xl">
-      {/* PageHeader */}
-      <div className="pt-6 pb-4">
-        <Skeleton className="mb-2 h-9 w-36" />
-        <Skeleton className="h-4 w-64" />
-      </div>
-
+    <div>
       {/* Stat cards (3 cols) */}
       <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
         {Array.from({ length: 3 }).map((_, i) => (
@@ -20,7 +14,7 @@ export default function PropertiesLoading() {
       </div>
 
       {/* Toolbar pill */}
-      <div className="bg-surface-lowest mb-4 flex items-center justify-between rounded-full px-2 py-2 backdrop-blur-md">
+      <div className="bg-surface-lowest mb-4 flex items-center justify-between rounded-full px-2 py-2">
         <Skeleton className="h-8 w-16 rounded-full" />
         <div className="flex items-center gap-1.5">
           <Skeleton className="h-8 w-48 rounded-full" />

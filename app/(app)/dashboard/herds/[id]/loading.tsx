@@ -23,13 +23,7 @@ function SkeletonInfoCard({ rows = 4 }: { rows?: number }) {
 
 export default function HerdDetailLoading() {
   return (
-    <div className="max-w-4xl">
-      {/* PageHeader */}
-      <div className="pt-6 pb-4">
-        <Skeleton className="mb-2 h-9 w-56" />
-        <Skeleton className="h-4 w-52" />
-      </div>
-
+    <div>
       {/* Stat cards (5 cols) */}
       <div className="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-5 lg:gap-4">
         {Array.from({ length: 5 }).map((_, i) => (
@@ -41,7 +35,7 @@ export default function HerdDetailLoading() {
       </div>
 
       {/* Action bar */}
-      <div className="bg-surface-lowest mt-3 flex items-center justify-between rounded-full px-2 py-2 backdrop-blur-md lg:mt-4">
+      <div className="bg-surface-lowest mt-3 flex items-center justify-between rounded-full px-2 py-2 lg:mt-4">
         <div className="flex items-center gap-1.5 pl-2">
           <Skeleton className="h-5 w-20 rounded-full" />
         </div>
@@ -52,7 +46,7 @@ export default function HerdDetailLoading() {
         </div>
       </div>
 
-      {/* Info cards (single column) */}
+      {/* Info cards */}
       <div className="mt-3 flex flex-col gap-4 lg:mt-4">
         <SkeletonInfoCard rows={6} />
         <SkeletonInfoCard rows={3} />

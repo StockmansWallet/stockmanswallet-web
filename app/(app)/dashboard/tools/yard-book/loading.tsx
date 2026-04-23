@@ -2,17 +2,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function YardBookLoading() {
   return (
-    <div className="max-w-4xl">
-      {/* PageHeader */}
-      <div className="flex items-end justify-between pt-6 pb-4">
-        <div>
-          <Skeleton className="mb-2 h-8 w-28" />
-          <Skeleton className="h-4 w-64" />
-        </div>
-        <Skeleton className="h-10 w-24 rounded-xl" />
-      </div>
-
-      {/* Stat cards (match blurred StatCard style) */}
+    <div>
+      {/* Stat cards */}
       <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="bg-surface-lowest rounded-2xl p-5">
@@ -23,7 +14,7 @@ export default function YardBookLoading() {
       </div>
 
       {/* Category toolbar pill */}
-      <div className="bg-surface-lowest mb-4 flex items-center justify-between rounded-full px-2 py-2 backdrop-blur-md">
+      <div className="bg-surface-lowest mb-4 flex items-center justify-between rounded-full px-2 py-2">
         <div className="flex items-center gap-1.5 overflow-x-auto">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-8 w-20 rounded-full" />
@@ -33,7 +24,7 @@ export default function YardBookLoading() {
       </div>
 
       {/* Horizon sections */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         {[6, 3].map((count, section) => (
           <div key={section}>
             <div className="mb-2 flex items-center gap-2">

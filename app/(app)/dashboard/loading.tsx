@@ -2,13 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardLoading() {
   return (
-    <div className="max-w-4xl">
-      {/* Page header */}
-      <div className="pt-6 pb-4">
-        <Skeleton className="mb-2 h-9 w-56" />
-        <Skeleton className="h-4 w-48" />
-      </div>
-
+    <div>
       {/* Top row: value + stats (4 cols) */}
       <div className="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-4 lg:gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
