@@ -4,7 +4,6 @@ import { Card } from "@/components/ui/card";
 import { ProducerChatClient } from "./producer-chat-client";
 import { ModerationMenu } from "@/app/(app)/dashboard/producer-network/directory/[id]/moderation-menu";
 import { MarkConnectionNotificationsRead } from "@/components/app/mark-connection-notifications-read";
-import { UserAvatar } from "@/components/app/user-avatar";
 import { fetchUserAvatars } from "@/lib/auth/fetch-user-avatars";
 import type { ConnectionRequest, AdvisoryMessage } from "@/lib/types/advisory";
 
@@ -91,19 +90,13 @@ export default async function ProducerConnectionDetailPage({
   };
 
   return (
-    <div className="flex h-[calc(100vh-6rem)] max-w-4xl flex-col pt-12 pb-10">
+    <div className="flex h-[calc(100vh-6rem)] max-w-4xl flex-col pb-10">
       <MarkConnectionNotificationsRead connectionId={id} />
-      {/* Header sits at pt-8 from outer so the name has breathing room
-          above it, and pb-2 below so the chat card sits close underneath. */}
-      <div className="pb-2">
+      {/* Match the Producer Network landing-page header rhythm so the chat
+          page starts at the same visual height as the inbox view. */}
+      <div className="pb-4 pt-6">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 items-start gap-4">
-            <UserAvatar
-              name={otherName}
-              avatarUrl={otherAvatarUrl}
-              sizeClass="h-12 w-12 shrink-0"
-              initialClass="text-base font-bold"
-            />
+          <div className="min-w-0">
             <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
               <h1 className="text-producer-network-light truncate text-4xl font-bold">
                 {otherName}
