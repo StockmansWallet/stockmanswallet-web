@@ -59,9 +59,9 @@ function herdSheet(herds: HerdReportData[]): ExportSheet {
       h.category,
       h.headCount,
       h.ageMonths,
-      Math.round(h.weight * 10) / 10,
+      Math.round(h.weight * 100) / 100,
       Math.round(h.dailyWeightGain * 100) / 100,
-      Math.round(h.pricePerKg * 1000) / 1000,
+      Math.round(h.pricePerKg * 10000) / 10000,
       premium,
       money(h.netValue / Math.max(h.headCount, 1)),
       money(h.netValue),
@@ -72,11 +72,55 @@ function herdSheet(herds: HerdReportData[]): ExportSheet {
     ];
   });
 
+  // Lee (test user) feedback, 2026-04-23: centre headings for numeric columns,
+  // format head / $ / $/head columns with comma separators, widen columns so
+  // headings fit without truncating.
+  //
+  //  idx 0  Property              text,   left
+  //      1  Herd                  text,   left
+  //      2  Livestock Owner       text,   left
+  //      3  Category              text,   left
+  //      4  Head Count            int,    centre heading, #,##0
+  //      5  Age (months)          int,    centre heading, #,##0
+  //      6  Weight (kg)           2dp,    centre heading, #,##0.00
+  //      7  DWG (kg/day)          2dp,    centre heading, 0.00
+  //      8  $/kg                  4dp,    centre heading, $#,##0.0000
+  //      9  Breed Premium (%)     0dp,    centre heading, 0"%"
+  //     10  Avg / Head            money,  centre heading, $#,##0.00
+  //     11  Net Value             money,  centre heading, $#,##0.00
+  //     12  Calf Accrual          money,  centre heading, $#,##0.00
+  //     13  Calving Rate (%)      int,    centre heading, 0"%"
+  //     14  Mortality (% p.a.)    1dp,    centre heading, 0.0"%"
+  //     15  Valuation Source      text,   left
+  const columnFormats: (string | undefined)[] = [
+    undefined, undefined, undefined, undefined,
+    "#,##0",
+    "#,##0",
+    "#,##0.00",
+    "0.00",
+    "$#,##0.0000",
+    "0\"%\"",
+    "$#,##0.00",
+    "$#,##0.00",
+    "$#,##0.00",
+    "0\"%\"",
+    "0.0\"%\"",
+    undefined,
+  ];
+  const headerAlignments: ("left" | "center" | "right")[] = [
+    "left", "left", "left", "left",
+    "center", "center", "center", "center", "center",
+    "center", "center", "center", "center", "center", "center",
+    "left",
+  ];
+
   return {
     name: "Livestock Assets",
     headers,
     rows,
-    columnWidths: [18, 22, 18, 22, 12, 12, 12, 12, 10, 16, 14, 14, 14, 16, 16, 36],
+    columnWidths: [20, 24, 20, 24, 12, 13, 13, 14, 14, 16, 15, 15, 15, 17, 17, 36],
+    columnFormats,
+    headerAlignments,
   };
 }
 
@@ -210,7 +254,12 @@ function movementBridgeSheet(m: PortfolioMovementSummary): ExportSheet {
       head ?? "",
       head !== null && head !== 0 ? money(value / head) : "",
     ]),
-    columnWidths: [30, 16, 12, 16],
+    columnWidths: [30, 18, 12, 16],
+    // Per Lee's feedback: right-justify the numeric column headings, format
+    // the $ columns with comma separators, bold the opening and closing rows.
+    columnFormats: [undefined, "$#,##0.00", "#,##0", "$#,##0.00"],
+    headerAlignments: ["left", "right", "right", "right"],
+    boldRows: [0, bridge.length - 1],
   };
 }
 

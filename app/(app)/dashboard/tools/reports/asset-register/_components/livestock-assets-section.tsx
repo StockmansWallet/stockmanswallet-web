@@ -135,8 +135,8 @@ function HerdCard({ herd: h }: { herd: HerdReportData }) {
         <div className="grid grid-cols-4 gap-x-3">
           <Stat label="Head Count" value={`${h.headCount}`} />
           <Stat label="Age" value={`${h.ageMonths} months`} />
-          <Stat label="Weight" value={`${h.weight.toFixed(1)} kg`} />
-          <Stat label="Price" value={`$${h.pricePerKg.toFixed(3)}/kg`} />
+          <Stat label="Weight" value={`${h.weight.toFixed(2)} kg`} />
+          <Stat label="Price" value={`$${h.pricePerKg.toFixed(4)}/kg`} />
         </div>
 
         {/* Supplementary metrics: rows of 4 */}

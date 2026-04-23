@@ -4,6 +4,12 @@
 
 export type CellValue = string | number | null;
 
+/** Alignment hint for XLSX header cells. Applied per column. */
+export type HeaderAlignment = "left" | "center" | "right";
+
+/** Row indices (0-based within `rows`) that should render bold in XLSX. */
+export type BoldRows = number[];
+
 export interface ExportSheet {
   /** Sheet name for XLSX. Unused for CSV. */
   name: string;
@@ -13,6 +19,19 @@ export interface ExportSheet {
   rows: CellValue[][];
   /** Optional per-column width hint (in characters) for XLSX. */
   columnWidths?: number[];
+  /**
+   * Optional per-column Excel number format strings (eg. "#,##0.00" or "#,##0").
+   * Applied to numeric cells only; string cells are left untouched. Length should
+   * match `headers`; undefined entries fall back to Excel's default for numbers.
+   */
+  columnFormats?: (string | undefined)[];
+  /**
+   * Optional per-column header alignment. Length should match `headers`. When
+   * omitted, headers default to left-aligned.
+   */
+  headerAlignments?: (HeaderAlignment | undefined)[];
+  /** Data rows (0-based) that should render bold in XLSX. */
+  boldRows?: BoldRows;
 }
 
 export interface ExportWorkbook {

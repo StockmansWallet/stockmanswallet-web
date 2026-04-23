@@ -163,6 +163,12 @@ export async function generateAssetRegisterData(
   userId: string,
   config: ReportConfiguration
 ): Promise<ReportData> {
+  // Valuation as-at the end of the report period, anchored to Australia/Sydney.
+  // The same instant is used to filter out herds that did not yet exist at the
+  // report's valuation date. Without this filter an Accountant Report for
+  // FY2025 would pick up herds created in FY2026 and show current-year values.
+  const asOfDate = endOfDaySydney(config.endDate);
+
   // Fetch herds, properties, premiums, and user details in parallel
   const [{ data: herds }, { data: properties }, premiumMap, userDetails] = await Promise.all([
     supabase
@@ -171,6 +177,7 @@ export async function generateAssetRegisterData(
       .eq("user_id", userId)
       .eq("is_sold", false)
       .eq("is_deleted", false)
+      .lte("created_at", asOfDate.toISOString())
       .order("name"),
     supabase
       .from("properties")
@@ -199,11 +206,10 @@ export async function generateAssetRegisterData(
   // Build property lookup (name only; livestock_owner is now a herd-level attribute).
   const propertyMap = new Map(allProperties.map((p: { id: string; property_name: string }) => [p.id, { name: p.property_name }]));
 
-  // Valuation as-at the end of the report period, anchored to Australia/Sydney.
+  // asOfDate is declared earlier (used as the herd creation cutoff).
   // Using endOfDaySydney ensures DWG accrues through the full selected day
   // regardless of server timezone, and guarantees the displayed Valuation Date
   // matches the configured period end without sub-day drift.
-  const asOfDate = endOfDaySydney(config.endDate);
 
   const herdDataArray: HerdReportData[] = [];
   const compositionMap = new Map<string, { value: number; headCount: number }>();

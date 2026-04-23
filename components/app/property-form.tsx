@@ -174,16 +174,12 @@ export function PropertyForm({
               defaultValue={property?.region ?? ""}
               placeholder="e.g. Central Queensland"
             />
-            <Select
-              id="lga"
-              name="lga"
-              label="Local Government Area"
-              options={lgaFlat}
-              groups={lgaGroups}
-              custom={!!lgaGroups}
-              placeholder="Select Local Government Area"
-              value={lga}
-              onChange={(e) => setLga(e.target.value)}
+            <Input
+              id="property_type"
+              name="property_type"
+              label="Property Type"
+              defaultValue={property?.property_type ?? ""}
+              placeholder="e.g. Grazing, Mixed Farming"
             />
             <Input
               id="acreage"
@@ -193,13 +189,6 @@ export function PropertyForm({
               step="any"
               defaultValue={property?.acreage ?? ""}
               placeholder="e.g. 5000"
-            />
-            <Input
-              id="property_type"
-              name="property_type"
-              label="Property Type"
-              defaultValue={property?.property_type ?? ""}
-              placeholder="e.g. Grazing, Mixed Farming"
             />
           </div>
         </CardContent>
@@ -257,6 +246,18 @@ export function PropertyForm({
                 setState(e.target.value);
                 setLga("");
               }}
+            />
+            <Select
+              id="lga"
+              name="lga"
+              label="Local Government Area"
+              options={lgaFlat}
+              groups={lgaGroups}
+              custom={!!lgaGroups}
+              placeholder={state ? "Select Local Government Area" : "Enter address first"}
+              disabled={!state}
+              value={lga}
+              onChange={(e) => setLga(e.target.value)}
             />
             {/* Coordinates auto-filled from address selection */}
             <input type="hidden" name="latitude" value={latitude} />

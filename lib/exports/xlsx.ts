@@ -50,24 +50,31 @@ export async function workbookToXlsx(wb: ExportWorkbook): Promise<Uint8Array> {
       cell.value = header;
       cell.font = HEADER_FONT;
       cell.fill = HEADER_FILL;
-      cell.alignment = { vertical: "middle", horizontal: "left" };
+      const headerAlign = sheet.headerAlignments?.[i] ?? "left";
+      cell.alignment = { vertical: "middle", horizontal: headerAlign };
     });
     headerRow.commit();
     row += 1;
 
     // Data rows
-    for (const dataRow of sheet.rows) {
+    const boldRows = new Set(sheet.boldRows ?? []);
+    sheet.rows.forEach((dataRow, rowIndex) => {
       const excelRow = ws.getRow(row);
       dataRow.forEach((value, i) => {
         const cell = excelRow.getCell(i + 1);
         cell.value = value;
         if (typeof value === "number") {
           cell.alignment = { horizontal: "right" };
+          const fmt = sheet.columnFormats?.[i];
+          if (fmt) cell.numFmt = fmt;
+        }
+        if (boldRows.has(rowIndex)) {
+          cell.font = { ...(cell.font ?? {}), bold: true };
         }
       });
       excelRow.commit();
       row += 1;
-    }
+    });
 
     // Column widths
     if (sheet.columnWidths) {

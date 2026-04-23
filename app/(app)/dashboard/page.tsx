@@ -23,6 +23,7 @@ import {
   expandWithNearbySaleyards,
 } from "@/lib/data/saleyard-proximity";
 import { centsToDollars } from "@/lib/types/money";
+import { endOfDaySydney, todaySydney } from "@/lib/dates";
 import { PortfolioValueCardWithOverlay } from "@/components/app/portfolio-value-card-with-overlay";
 import { PortfolioStatStripWithOverlay } from "@/components/app/portfolio-stat-strip-with-overlay";
 import type { PriceRowFlat } from "@/app/(app)/dashboard/herds/herds-list-view";
@@ -219,6 +220,10 @@ export default async function DashboardPage() {
 
   // Portfolio value using full iOS valuation formula with price source tracking.
   // Each herd uses its own selected_saleyard for price resolution.
+  // Anchor the as-of instant to end-of-day Sydney for today so the dashboard
+  // value is stable through the day and matches the Asset Register /
+  // Value-vs-Land-Area reports when their end date equals today.
+  const dashboardAsOf = endOfDaySydney(todaySydney());
   let portfolioValue = 0;
   let fallbackCount = 0;
   let totalPreBirthAccrual = 0;
@@ -228,7 +233,7 @@ export default async function DashboardPage() {
       h as Parameters<typeof calculateHerdValuation>[0],
       nationalPriceMap,
       premiumMap,
-      undefined,
+      dashboardAsOf,
       saleyardPriceMap,
       saleyardBreedPriceMap
     );
@@ -247,7 +252,7 @@ export default async function DashboardPage() {
         { ...h, selected_saleyard: yard } as Parameters<typeof calculateHerdValuation>[0],
         nationalPriceMap,
         premiumMap,
-        undefined,
+        dashboardAsOf,
         saleyardPriceMap,
         saleyardBreedPriceMap
       );

@@ -138,8 +138,8 @@ function HerdCard({ herd }: { herd: HerdReportData }) {
       <div className="grid grid-cols-4 gap-x-3 px-4 py-2">
         <PrintStat label="Head Count" value={`${herd.headCount}`} />
         <PrintStat label="Age" value={`${herd.ageMonths} months`} />
-        <PrintStat label="Weight" value={`${herd.weight.toFixed(1)} kg`} />
-        <PrintStat label="Price" value={`$${herd.pricePerKg.toFixed(3)}/kg`} />
+        <PrintStat label="Weight" value={`${herd.weight.toFixed(2)} kg`} />
+        <PrintStat label="Price" value={`$${herd.pricePerKg.toFixed(4)}/kg`} />
       </div>
 
       {/* Supplementary metrics: rows of 4 */}

@@ -16,6 +16,17 @@
   }
 }
 
+/* Recharts SVG containers pick up a browser focus outline when clicked,
+   which renders as a blue rectangle around the whole chart area. The
+   charts themselves are not keyboard-interactive targets, so suppress
+   the outline on the wrapper elements. */
+.recharts-wrapper,
+.recharts-wrapper:focus,
+.recharts-surface,
+.recharts-surface:focus {
+  outline: none;
+}
+
 :root {
   color-scheme: dark;
 }
