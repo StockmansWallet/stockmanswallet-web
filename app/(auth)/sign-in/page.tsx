@@ -1,37 +1,53 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowLeft, Mail } from "lucide-react";
+import logoAnimData from "@/public/animations/StockmansLogoAnim.json";
 import { signIn, signInAsDemo, signInWithApple, signInWithGoogle } from "../actions";
+
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
+const panelSpring = { type: "spring", stiffness: 320, damping: 30, mass: 0.85 } as const;
 
 export default function SignInPage() {
   return (
     <Suspense fallback={null}>
-      <SignInForm />
+      <SignInScreen />
     </Suspense>
   );
 }
 
-function SignInForm() {
+function SignInScreen() {
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  // Debug: Demo sign-in is a Server Action that can't return values, so failures
-  // redirect back here with ?error=demo-failed. Surface that message on mount.
-  useEffect(() => {
-    const code = searchParams.get("error");
-    if (code === "demo-failed") setError("Couldn't start demo. Please try again.");
-    else if (code === "demo-not-configured") setError("Demo account is not configured.");
-  }, [searchParams]);
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const queryErrorCode = searchParams.get("error");
+  const queryError =
+    queryErrorCode === "demo-failed"
+      ? "Couldn't start the demo yard. Please try again."
+      : queryErrorCode === "demo-not-configured"
+        ? "The demo yard isn't configured right now."
+        : queryErrorCode;
+  const displayError = error ?? queryError;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-    setLoading(true);
 
     const formData = new FormData(e.currentTarget);
+    const email = String(formData.get("email") ?? "").trim();
+    const password = String(formData.get("password") ?? "");
+
+    if (!email || !password) {
+      setError("Enter your email and password to continue.");
+      return;
+    }
+
+    setLoading(true);
     const result = await signIn(formData);
 
     if (result?.error) {
@@ -41,129 +57,207 @@ function SignInForm() {
   }
 
   return (
-    <>
-      <h1 className="text-text-primary mb-1 text-center text-2xl font-bold">Welcome back</h1>
-      <p className="text-text-muted mb-6 text-center text-sm">
-        Sign in to your Stockman&apos;s Wallet account
-      </p>
+    <main className="fixed inset-0 z-10 overflow-y-auto">
+      <div className="mx-auto flex min-h-screen w-full max-w-[34rem] items-center justify-center px-5 py-10 sm:px-6 sm:py-14">
+        <div className="w-full space-y-6 text-center sm:space-y-7">
+          <div className="mx-auto w-full max-w-[14rem] drop-shadow-[0_8px_30px_rgba(0,0,0,0.28)] sm:max-w-[16rem]">
+            <Lottie animationData={logoAnimData} loop={false} className="h-auto w-full" />
+          </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="text-text-secondary mb-1 block text-sm font-medium">
-            Email
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            placeholder="you@example.com"
-            className="text-text-primary placeholder:text-text-muted focus:border-brand focus:ring-brand/20 w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm backdrop-blur-xl transition-all outline-none focus:ring-2"
-          />
+          <div className="px-2">
+            <h1 className="text-[clamp(2rem,6vw,3rem)] font-semibold tracking-tight text-white">
+              G&apos;day, Stockman.
+            </h1>
+            <p className="mt-3 text-[clamp(1rem,3.2vw,1.28rem)] leading-relaxed text-white/72">
+              Have a poke around with the demo yard, or continue with your account.
+            </p>
+          </div>
+
+          <div className="rounded-[2rem] border border-white/10 bg-[#4a4d40]/72 p-4 shadow-[0_24px_80px_rgba(0,0,0,0.34)] backdrop-blur-xl sm:p-5">
+            <div className="space-y-3">
+              <form action={signInWithApple}>
+                <button
+                  type="submit"
+                  className="flex min-h-16 w-full items-center justify-center gap-3 rounded-[1.55rem] bg-white px-5 py-4 text-base font-semibold text-black shadow-[0_10px_30px_rgba(255,255,255,0.18)] transition-colors hover:bg-white/95 active:scale-[0.99]"
+                >
+                  <svg className="h-6 w-6" viewBox="0 0 17 20" fill="currentColor" aria-hidden>
+                    <path d="M13.545 10.239c-.022-2.234 1.823-3.306 1.906-3.358-.037-.054-1.494-1.403-2.856-1.403-1.216 0-2.478.727-3.09.727-.646 0-1.616-.708-2.664-.69-1.37.02-2.634.798-3.34 2.026-1.424 2.468-.364 6.124 1.022 8.127.678.98 1.485 2.08 2.547 2.04 1.022-.041 1.408-.661 2.643-.661 1.216 0 1.562.661 2.623.64 1.1-.018 1.795-1 2.468-1.983.778-1.135 1.098-2.234 1.118-2.291-.025-.011-2.145-.824-2.168-3.269l-.209.095zm-2.034-6.008c.563-.683.943-1.631.84-2.576-.811.033-1.795.541-2.376 1.222-.522.603-.979 1.567-.855 2.492.905.07 1.829-.461 2.391-1.138z" />
+                  </svg>
+                  Continue with Apple
+                </button>
+              </form>
+
+              <form action={signInWithGoogle}>
+                <button
+                  type="submit"
+                  className="flex min-h-16 w-full items-center justify-center gap-3 rounded-[1.55rem] border border-white/16 bg-black/18 px-5 py-4 text-base font-semibold text-white transition-colors hover:bg-black/24 active:scale-[0.99]"
+                >
+                  <svg className="h-6 w-6" viewBox="0 0 24 24" aria-hidden>
+                    <path
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+                      fill="#4285F4"
+                    />
+                    <path
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                      fill="#34A853"
+                    />
+                    <path
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z"
+                      fill="#FBBC05"
+                    />
+                    <path
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                      fill="#EA4335"
+                    />
+                  </svg>
+                  Continue with Google
+                </button>
+              </form>
+
+              <AnimatePresence initial={false}>
+                {displayError && (
+                  <motion.div
+                    key="sign-in-error"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={panelSpring}
+                    style={{ overflow: "hidden" }}
+                  >
+                    <p
+                      role="alert"
+                      className="rounded-[1.1rem] border border-red-400/20 bg-red-950/30 px-4 py-3 text-sm text-red-100"
+                    >
+                      {displayError}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <form onSubmit={handleSubmit} noValidate>
+                <AnimatePresence initial={false}>
+                  {showEmailForm && (
+                    <motion.div
+                      key="email-fields"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={panelSpring}
+                      style={{ overflow: "hidden" }}
+                    >
+                      <div className="space-y-3 pb-3">
+                        <div className="space-y-2 text-left">
+                          <label
+                            htmlFor="email"
+                            className="block text-sm font-medium text-white/78"
+                          >
+                            Email
+                          </label>
+                          <input
+                            id="email"
+                            name="email"
+                            type="email"
+                            autoComplete="email"
+                            placeholder="you@example.com"
+                            className="focus:border-brand/70 focus:ring-brand/20 w-full rounded-2xl border border-white/10 bg-white/12 px-4 py-3.5 text-base text-white transition-colors outline-none placeholder:text-white/40 focus:bg-white/15 focus:ring-2"
+                          />
+                        </div>
+
+                        <div className="space-y-2 text-left">
+                          <label
+                            htmlFor="password"
+                            className="block text-sm font-medium text-white/78"
+                          >
+                            Password
+                          </label>
+                          <input
+                            id="password"
+                            name="password"
+                            type="password"
+                            autoComplete="current-password"
+                            placeholder="Your password"
+                            className="focus:border-brand/70 focus:ring-brand/20 w-full rounded-2xl border border-white/10 bg-white/12 px-4 py-3.5 text-base text-white transition-colors outline-none placeholder:text-white/40 focus:bg-white/15 focus:ring-2"
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <button
+                  type={showEmailForm ? "submit" : "button"}
+                  onClick={() => {
+                    if (!showEmailForm) {
+                      setError(null);
+                      setShowEmailForm(true);
+                    }
+                  }}
+                  disabled={loading}
+                  className="flex min-h-16 w-full items-center justify-center gap-3 rounded-[1.55rem] border border-white/14 bg-black/14 px-5 py-4 text-base font-semibold text-white transition-colors hover:bg-black/22 active:scale-[0.99] disabled:opacity-60"
+                >
+                  <Mail className="h-5 w-5" />
+                  {loading ? "Signing in..." : "Continue with email"}
+                </button>
+
+                <AnimatePresence initial={false}>
+                  {showEmailForm && (
+                    <motion.div
+                      key="email-actions"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={panelSpring}
+                      style={{ overflow: "hidden" }}
+                    >
+                      <div className="flex items-center justify-between gap-3 pt-3 text-sm">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setError(null);
+                            setShowEmailForm(false);
+                          }}
+                          className="inline-flex items-center gap-1.5 text-white/68 transition-colors hover:text-white"
+                        >
+                          <ArrowLeft className="h-4 w-4" />
+                          Back
+                        </button>
+
+                        <Link
+                          href="/forgot-password"
+                          className="text-brand hover:text-brand-light font-medium transition-colors"
+                        >
+                          Forgot password?
+                        </Link>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </form>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <form action={signInAsDemo}>
+              <button
+                type="submit"
+                className="text-brand hover:text-brand-light text-[1.05rem] font-semibold tracking-[0.02em] transition-colors"
+              >
+                Demo
+              </button>
+            </form>
+
+            <p className="mt-3 text-sm text-white/60">
+              Need an account?{" "}
+              <Link
+                href="/sign-up"
+                className="hover:text-brand-light font-medium text-white transition-colors"
+              >
+                Sign up
+              </Link>
+            </p>
+          </div>
         </div>
-
-        <div>
-          <label htmlFor="password" className="text-text-secondary mb-1 block text-sm font-medium">
-            Password
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            placeholder="Your password"
-            className="text-text-primary placeholder:text-text-muted focus:border-brand focus:ring-brand/20 w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm backdrop-blur-xl transition-all outline-none focus:ring-2"
-          />
-        </div>
-
-        <div className="text-right">
-          <Link
-            href="/forgot-password"
-            className="text-brand hover:text-brand-light text-xs font-medium"
-          >
-            Forgot password?
-          </Link>
-        </div>
-
-        {error && (
-          <p className="text-error rounded-lg border border-red-500/20 bg-red-900/20 px-3 py-2 text-sm">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-brand hover:bg-brand-dark w-full rounded-full px-4 py-3 text-sm font-semibold text-white transition-all disabled:opacity-60"
-        >
-          {loading ? "Signing in..." : "Sign in"}
-        </button>
-      </form>
-
-      <div className="my-6 flex items-center gap-3">
-        <div className="flex-1 border-t border-white/10" />
-        <span className="text-text-muted text-xs">or</span>
-        <div className="flex-1 border-t border-white/10" />
       </div>
-
-      <div className="space-y-3">
-        <form action={signInWithApple}>
-          <button
-            type="submit"
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-semibold text-black transition-all hover:bg-white/90"
-          >
-            <svg className="h-4 w-4" viewBox="0 0 17 20" fill="currentColor">
-              <path d="M13.545 10.239c-.022-2.234 1.823-3.306 1.906-3.358-.037-.054-1.494-1.403-2.856-1.403-1.216 0-2.478.727-3.09.727-.646 0-1.616-.708-2.664-.69-1.37.02-2.634.798-3.34 2.026-1.424 2.468-.364 6.124 1.022 8.127.678.98 1.485 2.08 2.547 2.04 1.022-.041 1.408-.661 2.643-.661 1.216 0 1.562.661 2.623.64 1.1-.018 1.795-1 2.468-1.983.778-1.135 1.098-2.234 1.118-2.291-.025-.011-2.145-.824-2.168-3.269l-.209.095zm-2.034-6.008c.563-.683.943-1.631.84-2.576-.811.033-1.795.541-2.376 1.222-.522.603-.979 1.567-.855 2.492.905.07 1.829-.461 2.391-1.138z" />
-            </svg>
-            Continue with Apple
-          </button>
-        </form>
-
-        <form action={signInWithGoogle}>
-          <button
-            type="submit"
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-3 text-sm font-semibold text-white backdrop-blur-xl transition-all hover:bg-white/15"
-          >
-            <svg className="h-4 w-4" viewBox="0 0 24 24">
-              <path
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
-                fill="#4285F4"
-              />
-              <path
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                fill="#34A853"
-              />
-              <path
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z"
-                fill="#FBBC05"
-              />
-              <path
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                fill="#EA4335"
-              />
-            </svg>
-            Continue with Google
-          </button>
-        </form>
-      </div>
-
-      <p className="text-text-muted mt-6 text-center text-sm">
-        Don&apos;t have an account?{" "}
-        <Link href="/sign-up" className="text-brand hover:text-brand-light font-medium">
-          Sign up
-        </Link>
-      </p>
-
-      <div className="mt-4">
-        <form action={signInAsDemo}>
-          <button
-            type="submit"
-            className="bg-brand hover:bg-brand-dark w-full rounded-full px-4 py-3 text-sm font-semibold text-white transition-all"
-          >
-            Try Demo
-          </button>
-        </form>
-      </div>
-    </>
+    </main>
   );
 }
