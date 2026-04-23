@@ -37,7 +37,7 @@ const sources = [
 
 export default function DataSourcesPage() {
   return (
-    <div className="max-w-3xl">
+    <div>
       <PageHeader
         title="Data Sources"
         titleHref="/dashboard/help"
@@ -45,9 +45,9 @@ export default function DataSourcesPage() {
         subtitleClassName="text-sm font-medium text-text-secondary"
       />
 
-      <p className="mb-6 text-sm text-text-muted">
-        Stockman&apos;s Wallet uses the following data sources to power valuations,
-        market prices, and other features.
+      <p className="text-text-muted mb-6 text-sm">
+        Stockman&apos;s Wallet uses the following data sources to power valuations, market prices,
+        and other features.
       </p>
 
       <div className="space-y-3">
@@ -55,14 +55,12 @@ export default function DataSourcesPage() {
           <Card key={source.title}>
             <CardContent className="px-5 py-4">
               <div className="flex items-start gap-4">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-brand/15 text-brand">
+                <div className="bg-brand/15 text-brand flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full">
                   {source.icon}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-sm font-semibold text-text-primary">
-                    {source.title}
-                  </h2>
-                  <p className="mt-1 text-xs leading-relaxed text-text-muted">
+                  <h2 className="text-text-primary text-sm font-semibold">{source.title}</h2>
+                  <p className="text-text-muted mt-1 text-xs leading-relaxed">
                     {source.description}
                   </p>
                   {source.link && (
@@ -70,7 +68,7 @@ export default function DataSourcesPage() {
                       href={source.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-2 inline-flex text-xs font-medium text-brand hover:underline"
+                      className="text-brand mt-2 inline-flex text-xs font-medium hover:underline"
                     >
                       Visit website
                     </a>

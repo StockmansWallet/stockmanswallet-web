@@ -4,7 +4,7 @@ export default function DashboardLoading() {
   return (
     <div className="max-w-4xl">
       {/* Page header */}
-      <div className="pb-4 pt-6">
+      <div className="pt-6 pb-4">
         <Skeleton className="mb-2 h-9 w-56" />
         <Skeleton className="h-4 w-48" />
       </div>
@@ -12,7 +12,7 @@ export default function DashboardLoading() {
       {/* Top row: value + stats (4 cols) */}
       <div className="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-4 lg:gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="rounded-2xl bg-surface-lowest p-5 backdrop-blur-xl">
+          <div key={i} className="bg-surface-lowest rounded-2xl p-5">
             <Skeleton className="mx-auto mb-2 h-3 w-20" />
             <Skeleton className="mx-auto h-6 w-28" />
           </div>
@@ -20,7 +20,7 @@ export default function DashboardLoading() {
       </div>
 
       {/* Portfolio Outlook chart */}
-      <div className="mt-3 rounded-2xl bg-surface-lowest p-5 backdrop-blur-xl lg:mt-4">
+      <div className="bg-surface-lowest mt-3 rounded-2xl p-5 lg:mt-4">
         <div className="mb-4 flex items-center justify-between">
           <Skeleton className="h-5 w-40" />
           <Skeleton className="h-3 w-32" />
@@ -29,7 +29,7 @@ export default function DashboardLoading() {
       </div>
 
       {/* Saleyard selector */}
-      <div className="mt-3 rounded-2xl bg-surface-lowest p-5 backdrop-blur-xl lg:mt-4">
+      <div className="bg-surface-lowest mt-3 rounded-2xl p-5 lg:mt-4">
         <Skeleton className="h-5 w-36" />
       </div>
 
@@ -38,7 +38,7 @@ export default function DashboardLoading() {
         {/* Left column */}
         <div className="flex flex-col gap-3 lg:gap-4">
           {/* Herd Composition */}
-          <div className="rounded-2xl bg-surface-lowest p-5 backdrop-blur-xl">
+          <div className="bg-surface-lowest rounded-2xl p-5">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Skeleton className="h-7 w-7 rounded-lg" />
@@ -59,7 +59,7 @@ export default function DashboardLoading() {
           </div>
 
           {/* Coming Up */}
-          <div className="rounded-2xl bg-surface-lowest p-5 backdrop-blur-xl">
+          <div className="bg-surface-lowest rounded-2xl p-5">
             <div className="flex items-center gap-2">
               <Skeleton className="h-7 w-7 rounded-lg" />
               <Skeleton className="h-5 w-24" />
@@ -75,7 +75,7 @@ export default function DashboardLoading() {
           </div>
 
           {/* Growth & Mortality */}
-          <div className="rounded-2xl bg-surface-lowest p-5 backdrop-blur-xl">
+          <div className="bg-surface-lowest rounded-2xl p-5">
             <div className="flex items-center gap-2">
               <Skeleton className="h-7 w-7 rounded-lg" />
               <Skeleton className="h-5 w-36" />
@@ -94,7 +94,7 @@ export default function DashboardLoading() {
         {/* Right column */}
         <div className="flex flex-col gap-3 lg:gap-4">
           {/* Insights */}
-          <div className="rounded-2xl bg-surface-lowest p-5 backdrop-blur-xl">
+          <div className="bg-surface-lowest rounded-2xl p-5">
             <div className="flex items-center gap-2">
               <Skeleton className="h-7 w-7 rounded-lg" />
               <Skeleton className="h-5 w-20" />
@@ -107,7 +107,7 @@ export default function DashboardLoading() {
           </div>
 
           {/* Largest Herds */}
-          <div className="rounded-2xl bg-surface-lowest p-5 backdrop-blur-xl">
+          <div className="bg-surface-lowest rounded-2xl p-5">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Skeleton className="h-7 w-7 rounded-lg" />

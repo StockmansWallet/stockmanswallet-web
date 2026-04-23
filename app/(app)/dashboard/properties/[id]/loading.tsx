@@ -4,7 +4,7 @@ export default function PropertyDetailLoading() {
   return (
     <div className="max-w-4xl">
       {/* Property header */}
-      <div className="mb-6 mt-6 flex items-end gap-4">
+      <div className="mt-6 mb-6 flex items-end gap-4">
         <Skeleton className="h-14 w-14 rounded-2xl" />
         <div>
           <Skeleton className="mb-2 h-7 w-48" />
@@ -15,7 +15,7 @@ export default function PropertyDetailLoading() {
       {/* Stats row (3 cols) */}
       <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="rounded-2xl bg-surface-lowest p-4 backdrop-blur-xl">
+          <div key={i} className="bg-surface-lowest rounded-2xl p-4">
             <div className="flex items-center gap-3">
               <Skeleton className="h-10 w-10 rounded-xl" />
               <div>
@@ -30,7 +30,7 @@ export default function PropertyDetailLoading() {
       {/* Form cards */}
       <div className="space-y-4">
         {/* Property Details card */}
-        <div className="rounded-2xl bg-surface-lowest p-5 backdrop-blur-xl">
+        <div className="bg-surface-lowest rounded-2xl p-5">
           <div className="mb-4 flex items-center gap-2">
             <Skeleton className="h-7 w-7 rounded-lg" />
             <Skeleton className="h-5 w-32" />
@@ -46,7 +46,7 @@ export default function PropertyDetailLoading() {
         </div>
 
         {/* Location card */}
-        <div className="rounded-2xl bg-surface-lowest p-5 backdrop-blur-xl">
+        <div className="bg-surface-lowest rounded-2xl p-5">
           <div className="mb-4 flex items-center gap-2">
             <Skeleton className="h-7 w-7 rounded-lg" />
             <Skeleton className="h-5 w-20" />
@@ -66,7 +66,7 @@ export default function PropertyDetailLoading() {
         </div>
 
         {/* Notes card */}
-        <div className="rounded-2xl bg-surface-lowest p-5 backdrop-blur-xl">
+        <div className="bg-surface-lowest rounded-2xl p-5">
           <div className="mb-4 flex items-center gap-2">
             <Skeleton className="h-7 w-7 rounded-lg" />
             <Skeleton className="h-5 w-16" />
@@ -75,7 +75,7 @@ export default function PropertyDetailLoading() {
         </div>
 
         {/* Action bar */}
-        <div className="flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md">
+        <div className="bg-surface-lowest flex items-center justify-between rounded-full px-2 py-2 backdrop-blur-md">
           <Skeleton className="h-8 w-16 rounded-full" />
           <div className="flex items-center gap-1.5">
             <Skeleton className="h-8 w-16 rounded-full" />

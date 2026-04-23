@@ -244,7 +244,7 @@
   --color-foreground: #ffffff;
   --color-bg-alt: #1a1a1a;
 
-  --color-surface-lowest: rgba(255, 255, 255, 0.05);
+  --color-surface-lowest: rgba(255, 255, 255, 0.03);
   --color-surface: rgba(255, 255, 255, 0.05);
   --color-surface-raised: rgba(255, 255, 255, 0.08);
   --color-surface-high: rgba(255, 255, 255, 0.12);

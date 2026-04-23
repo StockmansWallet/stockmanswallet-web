@@ -1288,8 +1288,8 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
       {/* ----------------------------------------------------------------- */}
       {/* Sticky save bar                                                    */}
       {/* ----------------------------------------------------------------- */}
-      <div className="bg-background/80 sticky bottom-0 z-30 -mx-6 backdrop-blur-xl lg:-mx-8">
-        <div className="flex items-center justify-end px-6 py-3 lg:px-8">
+      <div className="sticky bottom-0 z-30 border-t border-white/10 bg-[#1F1B18]">
+        <div className="flex items-center justify-end py-3">
           <Button type="button" size="md" disabled={submitting} onClick={handleSave}>
             {submitting ? "Saving..." : "Save Herd"}
           </Button>

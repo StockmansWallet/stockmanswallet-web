@@ -21,7 +21,7 @@ export default async function MlaUploadPage() {
   }
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <PageHeader
         title="MLA CSV Upload"
         titleClassName="text-4xl font-bold text-success"

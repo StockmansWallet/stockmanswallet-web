@@ -76,13 +76,13 @@ export function PropertiesTable({
 
       {/* List */}
       {filtered.length === 0 ? (
-        <div className="bg-surface-lowest overflow-hidden rounded-2xl backdrop-blur-xl">
+        <div className="bg-surface-lowest overflow-hidden rounded-2xl">
           <p className="text-text-muted px-5 py-16 text-center text-sm">
             {search ? "No properties match your search." : "No properties found."}
           </p>
         </div>
       ) : (
-        <div className="bg-surface-lowest overflow-hidden rounded-2xl backdrop-blur-xl">
+        <div className="bg-surface-lowest overflow-hidden rounded-2xl">
           <div className="divide-y divide-white/[0.06]">
             {filtered.map((property) => {
               const herds = herdCounts[property.id] ?? 0;

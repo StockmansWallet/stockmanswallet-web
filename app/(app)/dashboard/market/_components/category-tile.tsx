@@ -14,24 +14,24 @@ export function CategoryTile({ summary, exposure }: CategoryTileProps) {
   return (
     <Link
       href={`/dashboard/market/category/${summary.slug}`}
-      className="group block rounded-2xl bg-surface-lowest p-4 backdrop-blur-xl transition-colors hover:bg-surface"
+      className="group bg-surface-lowest hover:bg-surface block rounded-2xl p-4 transition-colors"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-text-primary">{summary.category}</p>
-          <p className="text-[11px] text-text-muted">
+          <p className="text-text-primary truncate text-sm font-semibold">{summary.category}</p>
+          <p className="text-text-muted text-[11px]">
             {summary.saleyard_count} saleyards
             {exposure ? ` - ${exposure.head_count} hd in portfolio` : ""}
           </p>
         </div>
-        <ArrowRight className="h-4 w-4 shrink-0 text-text-muted opacity-0 transition-opacity group-hover:opacity-100" />
+        <ArrowRight className="text-text-muted h-4 w-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100" />
       </div>
 
       <div className="mt-3 flex items-end justify-between gap-3">
         <div>
-          <p className="text-2xl font-semibold tabular-nums text-text-primary">
+          <p className="text-text-primary text-2xl font-semibold tabular-nums">
             ${summary.latest_price.toFixed(2)}
-            <span className="ml-1 text-sm font-normal text-text-muted">/kg</span>
+            <span className="text-text-muted ml-1 text-sm font-normal">/kg</span>
           </p>
         </div>
         <Sparkline points={summary.sparkline} positive={positive} />

@@ -4,7 +4,7 @@ export default function PropertiesLoading() {
   return (
     <div className="max-w-4xl">
       {/* PageHeader */}
-      <div className="pb-4 pt-6">
+      <div className="pt-6 pb-4">
         <Skeleton className="mb-2 h-9 w-36" />
         <Skeleton className="h-4 w-64" />
       </div>
@@ -12,7 +12,7 @@ export default function PropertiesLoading() {
       {/* Stat cards (3 cols) */}
       <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="rounded-2xl bg-surface-lowest p-5 backdrop-blur-xl">
+          <div key={i} className="bg-surface-lowest rounded-2xl p-5">
             <Skeleton className="mx-auto mb-2 h-3 w-20" />
             <Skeleton className="mx-auto h-6 w-24" />
           </div>
@@ -20,7 +20,7 @@ export default function PropertiesLoading() {
       </div>
 
       {/* Toolbar pill */}
-      <div className="mb-4 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md">
+      <div className="bg-surface-lowest mb-4 flex items-center justify-between rounded-full px-2 py-2 backdrop-blur-md">
         <Skeleton className="h-8 w-16 rounded-full" />
         <div className="flex items-center gap-1.5">
           <Skeleton className="h-8 w-48 rounded-full" />
@@ -29,7 +29,7 @@ export default function PropertiesLoading() {
       </div>
 
       {/* Property list */}
-      <div className="overflow-hidden rounded-2xl bg-surface-lowest backdrop-blur-xl">
+      <div className="bg-surface-lowest overflow-hidden rounded-2xl">
         <div className="divide-y divide-white/[0.06]">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3 px-5 py-3.5">
@@ -44,7 +44,7 @@ export default function PropertiesLoading() {
             </div>
           ))}
         </div>
-        <div className="border-t border-border-subtle px-5 py-3">
+        <div className="border-border-subtle border-t px-5 py-3">
           <Skeleton className="h-3 w-20" />
         </div>
       </div>

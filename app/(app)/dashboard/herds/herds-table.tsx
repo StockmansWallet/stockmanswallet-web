@@ -539,7 +539,7 @@ export function HerdsTable({
       </div>
 
       {sorted.length === 0 ? (
-        <div className="bg-surface-lowest overflow-hidden rounded-2xl backdrop-blur-md">
+        <div className="bg-surface-lowest overflow-hidden rounded-2xl">
           <p className="text-text-muted px-5 py-16 text-center text-sm">
             {search ? "No herds match your search." : "No herds found."}
           </p>

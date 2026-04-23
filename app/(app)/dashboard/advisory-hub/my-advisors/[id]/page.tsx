@@ -57,9 +57,8 @@ export default async function ProducerConnectionDetailPage({
   const conn = connection as ConnectionRequest;
   const isActive = hasActivePermission(conn);
 
-  const advisorUserId = conn.requester_user_id === user.id
-    ? conn.target_user_id
-    : conn.requester_user_id;
+  const advisorUserId =
+    conn.requester_user_id === user.id ? conn.target_user_id : conn.requester_user_id;
 
   const { data: advisorProfile } = await supabase
     .from("user_profiles")
@@ -88,7 +87,9 @@ export default async function ProducerConnectionDetailPage({
     .toUpperCase();
 
   const connectedDate = new Date(conn.created_at).toLocaleDateString("en-AU", {
-    day: "numeric", month: "short", year: "numeric",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
   });
 
   const { data: messages } = await supabase
@@ -109,14 +110,14 @@ export default async function ProducerConnectionDetailPage({
   };
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <ConnectionRealtime userId={user.id} />
 
       {/* Back nav */}
-      <div className="pb-4 pt-6">
+      <div className="pt-6 pb-4">
         <Link
           href="/dashboard/advisory-hub/my-advisors"
-          className="inline-flex items-center gap-1 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-sm text-text-muted transition-colors hover:bg-surface-low hover:text-text-secondary"
+          className="bg-surface-lowest text-text-muted hover:bg-surface-low hover:text-text-secondary inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm transition-colors"
         >
           <ChevronLeft className="h-4 w-4" />
           My Advisors
@@ -134,16 +135,14 @@ export default async function ProducerConnectionDetailPage({
             className="h-14 w-14 shrink-0 rounded-full object-cover"
           />
         ) : (
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-advisor/15">
-            <span className="text-lg font-bold text-advisor">{initials}</span>
+          <div className="bg-advisor/15 flex h-14 w-14 shrink-0 items-center justify-center rounded-full">
+            <span className="text-advisor text-lg font-bold">{initials}</span>
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <h1 className="text-2xl font-bold text-text-primary">{advisorName}</h1>
+          <h1 className="text-text-primary text-2xl font-bold">{advisorName}</h1>
           <div className="mt-1 flex flex-wrap items-center gap-2">
-            {categoryConfig && (
-              <Badge variant="default">{categoryConfig.label}</Badge>
-            )}
+            {categoryConfig && <Badge variant="default">{categoryConfig.label}</Badge>}
             <Badge variant={isActive ? "success" : "default"}>
               {isActive ? "Sharing" : "Not sharing"}
             </Badge>

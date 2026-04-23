@@ -43,7 +43,7 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
   const category = await resolveSlug("category", slug);
   if (!category) notFound();
 
-  const stateFilter = AU_STATES.includes(sp.state as typeof AU_STATES[number])
+  const stateFilter = AU_STATES.includes(sp.state as (typeof AU_STATES)[number])
     ? (sp.state as string)
     : undefined;
 
@@ -130,31 +130,43 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
     if (!latest) return null;
     const scope = stateFilter ? `${category} in ${stateFilter}` : `${category} across the country`;
     const parts: string[] = [];
-    parts.push(`Mate, ${scope} is sitting at $${latest.avg_price.toFixed(2)}/kg as of ${formatAUDate(latest.week_date)}.`);
+    parts.push(
+      `Mate, ${scope} is sitting at $${latest.avg_price.toFixed(2)}/kg as of ${formatAUDate(latest.week_date)}.`
+    );
 
     const pct4w = pickPct(4);
     const pct12w = pickPct(12);
     const pct52w = pickPct(52);
     const changeBits: string[] = [];
     if (pct4w !== null) {
-      changeBits.push(`${pct4w >= 0 ? "up" : "down"} ${Math.abs(pct4w).toFixed(1)}% over the past month`);
+      changeBits.push(
+        `${pct4w >= 0 ? "up" : "down"} ${Math.abs(pct4w).toFixed(1)}% over the past month`
+      );
     }
     if (pct12w !== null) {
-      changeBits.push(`${pct12w >= 0 ? "up" : "down"} ${Math.abs(pct12w).toFixed(1)}% over 12 weeks`);
+      changeBits.push(
+        `${pct12w >= 0 ? "up" : "down"} ${Math.abs(pct12w).toFixed(1)}% over 12 weeks`
+      );
     }
     if (pct52w !== null) {
-      changeBits.push(`${pct52w >= 0 ? "up" : "down"} ${Math.abs(pct52w).toFixed(1)}% year-on-year`);
+      changeBits.push(
+        `${pct52w >= 0 ? "up" : "down"} ${Math.abs(pct52w).toFixed(1)}% year-on-year`
+      );
     }
     if (changeBits.length > 0) {
       parts.push(`It's ${changeBits.join(", ")}.`);
     }
 
     if (allTimeHigh && allTimeLow) {
-      parts.push(`All-time high was $${allTimeHigh.avg_price.toFixed(2)} back in ${formatAUDate(allTimeHigh.week_date)}, low $${allTimeLow.avg_price.toFixed(2)} on ${formatAUDate(allTimeLow.week_date)}.`);
+      parts.push(
+        `All-time high was $${allTimeHigh.avg_price.toFixed(2)} back in ${formatAUDate(allTimeHigh.week_date)}, low $${allTimeLow.avg_price.toFixed(2)} on ${formatAUDate(allTimeLow.week_date)}.`
+      );
     }
 
     if (exposure) {
-      parts.push(`I've got ${exposure.head_count} head in this category across ${exposure.herd_count} herd${exposure.herd_count === 1 ? "" : "s"}.`);
+      parts.push(
+        `I've got ${exposure.head_count} head in this category across ${exposure.herd_count} herd${exposure.herd_count === 1 ? "" : "s"}.`
+      );
     }
 
     parts.push("What's driving this? Worth selling now or is there more upside to wait for?");
@@ -164,13 +176,17 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
   return (
     <div className="max-w-4xl">
       <BackLink href="/dashboard/market" />
-      <PageHeader feature="markets"
+      <PageHeader
+        feature="markets"
         title={category}
         subtitle={`Weighted saleyard average for ${category.toLowerCase()}${stateFilter ? ` in ${stateFilter}` : ""}.`}
         actions={
           <div className="flex items-center gap-2">
             {brangusPrefill && <AskBrangusButton prefill={brangusPrefill} />}
-            <CsvExportButton rows={csvRows} filename={`market-${slug}${stateFilter ? `-${stateFilter.toLowerCase()}` : ""}.csv`} />
+            <CsvExportButton
+              rows={csvRows}
+              filename={`market-${slug}${stateFilter ? `-${stateFilter.toLowerCase()}` : ""}.csv`}
+            />
           </div>
         }
       />
@@ -181,7 +197,7 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
 
       {series.length === 0 ? (
         <Card>
-          <CardContent className="py-10 text-center text-sm text-text-muted">
+          <CardContent className="text-text-muted py-10 text-center text-sm">
             No price data for this category{stateFilter ? ` in ${stateFilter}` : ""}.
           </CardContent>
         </Card>
@@ -189,10 +205,26 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
         <div className="space-y-5">
           {/* Stats strip */}
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <StatBlock label="Latest" value={latest ? `$${latest.avg_price.toFixed(2)}` : "-"} sub={latest ? `/kg - ${formatAUDate(latest.week_date)}` : ""} />
-            <StatBlock label="4-week change" chip={<ChangeChip value={pickPct(4)} size="sm" />} sub="vs 4 weeks ago" />
-            <StatBlock label="All-time high" value={allTimeHigh ? `$${allTimeHigh.avg_price.toFixed(2)}` : "-"} sub={allTimeHigh ? formatAUDate(allTimeHigh.week_date) : ""} />
-            <StatBlock label="All-time low" value={allTimeLow ? `$${allTimeLow.avg_price.toFixed(2)}` : "-"} sub={allTimeLow ? formatAUDate(allTimeLow.week_date) : ""} />
+            <StatBlock
+              label="Latest"
+              value={latest ? `$${latest.avg_price.toFixed(2)}` : "-"}
+              sub={latest ? `/kg - ${formatAUDate(latest.week_date)}` : ""}
+            />
+            <StatBlock
+              label="4-week change"
+              chip={<ChangeChip value={pickPct(4)} size="sm" />}
+              sub="vs 4 weeks ago"
+            />
+            <StatBlock
+              label="All-time high"
+              value={allTimeHigh ? `$${allTimeHigh.avg_price.toFixed(2)}` : "-"}
+              sub={allTimeHigh ? formatAUDate(allTimeHigh.week_date) : ""}
+            />
+            <StatBlock
+              label="All-time low"
+              value={allTimeLow ? `$${allTimeLow.avg_price.toFixed(2)}` : "-"}
+              sub={allTimeLow ? formatAUDate(allTimeLow.week_date) : ""}
+            />
           </div>
 
           {/* Chart */}
@@ -200,12 +232,12 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-markets/15">
-                    <TrendingUp className="h-3.5 w-3.5 text-markets" />
+                  <div className="bg-markets/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+                    <TrendingUp className="text-markets h-3.5 w-3.5" />
                   </div>
                   <CardTitle>Price history</CardTitle>
                 </div>
-                <span className="text-[11px] text-text-muted">
+                <span className="text-text-muted text-[11px]">
                   Grey band: 5-year seasonal range (10th-90th percentile)
                 </span>
               </div>
@@ -218,9 +250,11 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
                 defaultRange={{ key: "1Y" }}
               />
               {exposure && (
-                <p className="mt-3 rounded-lg bg-advisor/10 px-3 py-2 text-xs text-advisor">
-                  Your portfolio: {exposure.head_count} head across {exposure.herd_count} herd{exposure.herd_count === 1 ? "" : "s"} in this category
-                  {exposure.avg_weight > 0 ? ` (avg ${Math.round(exposure.avg_weight)} kg/hd)` : ""}.
+                <p className="bg-advisor/10 text-advisor mt-3 rounded-lg px-3 py-2 text-xs">
+                  Your portfolio: {exposure.head_count} head across {exposure.herd_count} herd
+                  {exposure.herd_count === 1 ? "" : "s"} in this category
+                  {exposure.avg_weight > 0 ? ` (avg ${Math.round(exposure.avg_weight)} kg/hd)` : ""}
+                  .
                 </p>
               )}
             </CardContent>
@@ -230,15 +264,15 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2.5">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-markets/15">
-                  <Calendar className="h-3.5 w-3.5 text-markets" />
+                <div className="bg-markets/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+                  <Calendar className="text-markets h-3.5 w-3.5" />
                 </div>
                 <CardTitle>Seasonality</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
               <SeasonalityHeatmap years={seasonality.years} cells={seasonality.cells} />
-              <p className="mt-3 text-[11px] text-text-muted">
+              <p className="text-text-muted mt-3 text-[11px]">
                 Monthly averages by year. Darker = higher price.
               </p>
             </CardContent>
@@ -249,17 +283,21 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-markets/15">
-                    <MapPin className="h-3.5 w-3.5 text-markets" />
+                  <div className="bg-markets/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+                    <MapPin className="text-markets h-3.5 w-3.5" />
                   </div>
                   <CardTitle>Top saleyards</CardTitle>
                 </div>
-                <span className="text-[11px] text-text-muted">Latest sale, ranked by avg price</span>
+                <span className="text-text-muted text-[11px]">
+                  Latest sale, ranked by avg price
+                </span>
               </div>
             </CardHeader>
             <CardContent className="px-0 pb-0">
               {topYards.length === 0 ? (
-                <p className="px-5 py-6 text-center text-sm text-text-muted">No saleyard data available.</p>
+                <p className="text-text-muted px-5 py-6 text-center text-sm">
+                  No saleyard data available.
+                </p>
               ) : (
                 <div className="divide-y divide-white/[0.04]">
                   {topYards.map((y) => (
@@ -269,14 +307,17 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
                       className="group flex items-center justify-between gap-3 px-5 py-3 transition-colors hover:bg-white/[0.02]"
                     >
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-text-primary">{y.saleyard}</p>
-                        <p className="text-[11px] text-text-muted">{y.state}</p>
+                        <p className="text-text-primary truncate text-sm font-medium">
+                          {y.saleyard}
+                        </p>
+                        <p className="text-text-muted text-[11px]">{y.state}</p>
                       </div>
                       <div className="flex shrink-0 items-center gap-3">
-                        <p className="text-sm font-semibold tabular-nums text-text-primary">
-                          ${y.avg_price.toFixed(2)}<span className="ml-1 text-xs font-normal text-text-muted">/kg</span>
+                        <p className="text-text-primary text-sm font-semibold tabular-nums">
+                          ${y.avg_price.toFixed(2)}
+                          <span className="text-text-muted ml-1 text-xs font-normal">/kg</span>
                         </p>
-                        <ArrowRight className="h-4 w-4 text-text-muted opacity-0 transition-opacity group-hover:opacity-100" />
+                        <ArrowRight className="text-text-muted h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
                       </div>
                     </Link>
                   ))}
@@ -285,7 +326,7 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
             </CardContent>
           </Card>
 
-          <p className="text-[11px] text-text-muted">
+          <p className="text-text-muted text-[11px]">
             {seriesMap.size} weekly observations since {formatAUDate(series[0].week_date)}.
           </p>
         </div>
@@ -294,18 +335,28 @@ export default async function CategoryDetailPage({ params, searchParams }: Props
   );
 }
 
-function StatBlock({ label, value, chip, sub }: { label: string; value?: string; chip?: React.ReactNode; sub?: string }) {
+function StatBlock({
+  label,
+  value,
+  chip,
+  sub,
+}: {
+  label: string;
+  value?: string;
+  chip?: React.ReactNode;
+  sub?: string;
+}) {
   return (
-    <div className="rounded-2xl bg-surface-lowest p-4 backdrop-blur-xl">
-      <p className="text-[11px] uppercase tracking-wide text-text-muted">{label}</p>
+    <div className="bg-surface-lowest rounded-2xl p-4">
+      <p className="text-text-muted text-[11px] tracking-wide uppercase">{label}</p>
       <div className="mt-1">
         {value ? (
-          <p className="text-xl font-semibold tabular-nums text-text-primary">{value}</p>
+          <p className="text-text-primary text-xl font-semibold tabular-nums">{value}</p>
         ) : (
           chip
         )}
       </div>
-      {sub && <p className="mt-0.5 text-[11px] text-text-muted">{sub}</p>}
+      {sub && <p className="text-text-muted mt-0.5 text-[11px]">{sub}</p>}
     </div>
   );
 }

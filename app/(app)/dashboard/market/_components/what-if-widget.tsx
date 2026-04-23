@@ -45,43 +45,49 @@ export function WhatIfWidget({ summaries }: WhatIfWidgetProps) {
   const avg12wGross = avg12w != null ? avg12w * totalKg : null;
 
   return (
-    <div className="rounded-2xl bg-surface-lowest p-5 backdrop-blur-xl">
+    <div className="bg-surface-lowest rounded-2xl p-5">
       <div className="mb-4 flex items-center gap-2.5">
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-markets/15">
-          <Calculator className="h-3.5 w-3.5 text-markets" />
+        <div className="bg-markets/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+          <Calculator className="text-markets h-3.5 w-3.5" />
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-text-primary">What-if calculator</h2>
-          <p className="text-xs text-text-muted">Indicative gross at current and recent averages.</p>
+          <h2 className="text-text-primary text-sm font-semibold">What-if calculator</h2>
+          <p className="text-text-muted text-xs">
+            Indicative gross at current and recent averages.
+          </p>
         </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
         <label className="block">
-          <span className="text-[11px] uppercase tracking-wide text-text-muted">Category</span>
+          <span className="text-text-muted text-[11px] tracking-wide uppercase">Category</span>
           <select
             value={categorySlug}
             onChange={(e) => setCategorySlug(e.target.value)}
-            className="mt-1 w-full rounded-lg bg-surface px-3 py-2 text-sm text-text-primary outline-none ring-1 ring-white/5 focus:ring-markets"
+            className="bg-surface text-text-primary focus:ring-markets mt-1 w-full rounded-lg px-3 py-2 text-sm ring-1 ring-white/5 outline-none"
           >
             {summaries.map((s) => (
-              <option key={s.slug} value={s.slug}>{s.category}</option>
+              <option key={s.slug} value={s.slug}>
+                {s.category}
+              </option>
             ))}
           </select>
         </label>
         <label className="block">
-          <span className="text-[11px] uppercase tracking-wide text-text-muted">Head</span>
+          <span className="text-text-muted text-[11px] tracking-wide uppercase">Head</span>
           <input
             type="number"
             inputMode="numeric"
             min="1"
             value={head}
             onChange={(e) => setHead(e.target.value)}
-            className="mt-1 w-full rounded-lg bg-surface px-3 py-2 text-sm text-text-primary tabular-nums outline-none ring-1 ring-white/5 focus:ring-markets"
+            className="bg-surface text-text-primary focus:ring-markets mt-1 w-full rounded-lg px-3 py-2 text-sm tabular-nums ring-1 ring-white/5 outline-none"
           />
         </label>
         <label className="block">
-          <span className="text-[11px] uppercase tracking-wide text-text-muted">Weight (kg/hd)</span>
+          <span className="text-text-muted text-[11px] tracking-wide uppercase">
+            Weight (kg/hd)
+          </span>
           <input
             type="number"
             inputMode="decimal"
@@ -89,19 +95,26 @@ export function WhatIfWidget({ summaries }: WhatIfWidgetProps) {
             step="10"
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
-            className="mt-1 w-full rounded-lg bg-surface px-3 py-2 text-sm text-text-primary tabular-nums outline-none ring-1 ring-white/5 focus:ring-markets"
+            className="bg-surface text-text-primary focus:ring-markets mt-1 w-full rounded-lg px-3 py-2 text-sm tabular-nums ring-1 ring-white/5 outline-none"
           />
         </label>
       </div>
 
       <div className="mt-4 grid gap-2 sm:grid-cols-3">
-        <ResultRow label="At latest" price={selected.latest_price} gross={latestGross} format={format} highlight />
+        <ResultRow
+          label="At latest"
+          price={selected.latest_price}
+          gross={latestGross}
+          format={format}
+          highlight
+        />
         <ResultRow label="4-wk avg" price={avg4w} gross={avg4wGross} format={format} />
         <ResultRow label="12-wk avg" price={avg12w} gross={avg12wGross} format={format} />
       </div>
 
-      <p className="mt-3 text-[11px] text-text-muted">
-        Uses saleyard averages for the selected category. Does not account for breed premiums, grid adjustments, or freight.
+      <p className="text-text-muted mt-3 text-[11px]">
+        Uses saleyard averages for the selected category. Does not account for breed premiums, grid
+        adjustments, or freight.
       </p>
     </div>
   );
@@ -121,12 +134,14 @@ function ResultRow({
   highlight?: boolean;
 }) {
   return (
-    <div className={`rounded-xl px-3.5 py-2.5 ${highlight ? "bg-markets/10 ring-1 ring-markets/30" : "bg-surface"}`}>
-      <p className="text-[11px] text-text-muted">{label}</p>
-      <p className="mt-0.5 text-lg font-semibold tabular-nums text-text-primary">
+    <div
+      className={`rounded-xl px-3.5 py-2.5 ${highlight ? "bg-markets/10 ring-markets/30 ring-1" : "bg-surface"}`}
+    >
+      <p className="text-text-muted text-[11px]">{label}</p>
+      <p className="text-text-primary mt-0.5 text-lg font-semibold tabular-nums">
         {gross != null ? format(gross) : "-"}
       </p>
-      <p className="text-[11px] text-text-muted tabular-nums">
+      <p className="text-text-muted text-[11px] tabular-nums">
         {price != null ? `$${price.toFixed(2)}/kg` : "no data"}
       </p>
     </div>

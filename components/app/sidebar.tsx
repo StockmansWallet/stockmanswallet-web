@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Sparkles } from "lucide-react";
+import { ChevronRight, Sparkles } from "lucide-react";
 import { SidebarBadge } from "@/components/app/sidebar-badge";
 import {
   producerNavItems,
@@ -17,9 +18,6 @@ import {
 } from "@/lib/navigation/nav-config";
 
 function NavLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
-  // Active: feature tint + feature text + frosted-glass blur.
-  // Hover (when not active): feature -dark fill + white text.
-  // Both states pull from nav-config.tsx so every item stays in step.
   const inactiveBase = "text-text-secondary";
   const inactive =
     item.inactiveClass ??
@@ -42,20 +40,32 @@ function NavLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
   );
 }
 
+interface SidebarProps {
+  isAdmin?: boolean;
+  isAdvisor?: boolean;
+  isDemoUser?: boolean;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  roleLabel?: string;
+  avatarUrl?: string;
+  subscriptionTier?: string;
+}
+
 export function Sidebar({
   isAdmin = false,
   isAdvisor = false,
   isDemoUser = false,
-}: {
-  isAdmin?: boolean;
-  isAdvisor?: boolean;
-  isDemoUser?: boolean;
-}) {
+  firstName = "",
+  lastName = "",
+  email = "",
+  roleLabel = "",
+  avatarUrl = "",
+}: SidebarProps) {
   const pathname = usePathname();
 
   const checkActive = (href: string) => {
     if (pathname === href) return true;
-    // Avoid prefix collisions: /dashboard/advisor should not match /dashboard/advisor/clients
     if (href === "/dashboard" || href === "/dashboard/advisor") return false;
     return pathname.startsWith(href);
   };
@@ -64,13 +74,32 @@ export function Sidebar({
   const intelItems = isAdvisor ? advisorIntelItems : producerIntelItems;
   const toolItems = isAdvisor ? advisorToolItems : producerToolItems;
 
+  const initials =
+    firstName && lastName ? `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() : "SW";
+  const displayName = firstName && lastName ? `${firstName} ${lastName}` : email || "";
+
   return (
-    <aside className="flex h-full w-64 flex-col">
-      {/* Scrollable navigation */}
-      <nav className="scrollbar-none min-h-0 flex-1 overflow-y-auto px-4 pt-16">
+    <aside className="flex w-64 flex-col rounded-3xl bg-[#1F1B18]">
+      {/* Logo */}
+      <Link
+        href="/dashboard"
+        className="flex items-center justify-center gap-2.5 rounded-t-3xl px-4 pt-4 pb-1 transition-opacity hover:opacity-90"
+      >
+        <Image
+          src="/images/sw-logo-tally.svg"
+          alt="Stockman's Wallet"
+          width={36}
+          height={36}
+          className="h-9 w-9"
+          priority
+        />
+        <span className="text-base font-bold text-white">Stockman&apos;s Wallet</span>
+      </Link>
+
+      {/* Navigation groups */}
+      <nav className="scrollbar-none px-3 pt-3 lg:px-4 lg:pt-4">
         <div className="space-y-3 lg:space-y-4">
-          {/* Portfolio */}
-          <div className="rounded-2xl bg-white/[0.04] p-2 backdrop-blur-md">
+          <div className="rounded-2xl bg-white/[0.04] p-2">
             <p className="text-text-muted/60 mb-1 px-3 pt-1 text-[10px] font-semibold tracking-widest uppercase">
               Portfolio
             </p>
@@ -81,8 +110,7 @@ export function Sidebar({
             </div>
           </div>
 
-          {/* Intelligence */}
-          <div className="rounded-2xl bg-white/[0.04] p-2 backdrop-blur-md">
+          <div className="rounded-2xl bg-white/[0.04] p-2">
             <p className="text-text-muted/60 mb-1 px-3 pt-1 text-[10px] font-semibold tracking-widest uppercase">
               Intelligence
             </p>
@@ -93,9 +121,8 @@ export function Sidebar({
             </div>
           </div>
 
-          {/* Tools */}
           {toolItems.length > 0 && (
-            <div className="rounded-2xl bg-white/[0.04] p-2 backdrop-blur-md">
+            <div className="rounded-2xl bg-white/[0.04] p-2">
               <p className="text-text-muted/60 mb-1 px-3 pt-1 text-[10px] font-semibold tracking-widest uppercase">
                 Tools
               </p>
@@ -107,9 +134,8 @@ export function Sidebar({
             </div>
           )}
 
-          {/* Admin */}
           {isAdmin && (
-            <div className="rounded-2xl bg-white/[0.04] p-2 backdrop-blur-md">
+            <div className="rounded-2xl bg-white/[0.04] p-2">
               <p className="text-text-muted/60 mb-1 px-3 pt-1 text-[10px] font-semibold tracking-widest uppercase">
                 Admin
               </p>
@@ -121,8 +147,7 @@ export function Sidebar({
             </div>
           )}
 
-          {/* Help & Settings */}
-          <div className="rounded-2xl bg-white/[0.04] p-2 backdrop-blur-md">
+          <div className="rounded-2xl bg-white/[0.04] p-2">
             <div className="space-y-0.5">
               {bottomNavItems.map((item) => (
                 <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
@@ -141,6 +166,33 @@ export function Sidebar({
           </div>
         </div>
       </nav>
+
+      {/* User card - links to profile */}
+      <div className="p-3 lg:p-4">
+        <Link
+          href="/dashboard/settings/profile"
+          className="flex w-full items-center gap-2.5 rounded-xl bg-white/[0.04] p-2 transition-colors hover:bg-white/[0.06]"
+        >
+          {avatarUrl ? (
+            <Image
+              src={avatarUrl}
+              alt={displayName}
+              width={36}
+              height={36}
+              className="h-9 w-9 shrink-0 rounded-full object-cover"
+            />
+          ) : (
+            <div className="bg-brand/15 text-brand flex h-9 w-9 shrink-0 items-center justify-center rounded-full">
+              <span className="text-sm font-bold">{initials}</span>
+            </div>
+          )}
+          <div className="min-w-0 flex-1 text-left">
+            <p className="text-text-primary truncate text-sm font-semibold">{displayName}</p>
+            {roleLabel && <p className="text-text-muted truncate text-xs">{roleLabel}</p>}
+          </div>
+          <ChevronRight className="text-text-muted h-4 w-4 shrink-0" />
+        </Link>
+      </div>
     </aside>
   );
 }

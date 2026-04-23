@@ -30,7 +30,7 @@ export default async function WhatsNewPage() {
   const groups = groupByDate((updates ?? []) as WhatsNewEntry[]);
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <PageHeader
         title="What's New"
         titleClassName="text-4xl font-bold text-brand"
@@ -40,8 +40,8 @@ export default async function WhatsNewPage() {
       {groups.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <Sparkles className="mx-auto mb-3 h-8 w-8 text-text-muted" />
-            <p className="text-sm text-text-muted">
+            <Sparkles className="text-text-muted mx-auto mb-3 h-8 w-8" />
+            <p className="text-text-muted text-sm">
               No announcements yet. Check back soon for updates.
             </p>
           </CardContent>
@@ -51,7 +51,7 @@ export default async function WhatsNewPage() {
           {groups.map((group) => (
             <Card key={group.dateKey}>
               <CardContent className="px-5 py-4">
-                <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-muted">
+                <p className="text-text-muted mb-3 text-xs font-medium tracking-wide uppercase">
                   {group.dateLabel}
                 </p>
                 <div className="space-y-4">
@@ -79,15 +79,15 @@ function WhatsNewItem({ entry }: { entry: WhatsNewEntry }) {
   return (
     <div>
       <div className="flex items-center gap-2">
-        <h3 className="text-sm font-semibold text-text-primary">{entry.title}</h3>
+        <h3 className="text-text-primary text-sm font-semibold">{entry.title}</h3>
         <Badge variant="default" className="text-[10px]">
           {platformLabel}
         </Badge>
       </div>
       <ul className="mt-1.5 space-y-0.5">
         {bullets.map((b, i) => (
-          <li key={i} className="flex items-start gap-2 text-xs text-text-muted">
-            <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-brand" />
+          <li key={i} className="text-text-muted flex items-start gap-2 text-xs">
+            <span className="bg-brand mt-1.5 h-1 w-1 flex-shrink-0 rounded-full" />
             {b}
           </li>
         ))}

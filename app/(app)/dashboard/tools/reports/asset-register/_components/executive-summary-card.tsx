@@ -13,7 +13,7 @@ export function ExecutiveSummaryCard({
 }) {
   return (
     <div className="overflow-hidden rounded-xl">
-      <div className="bg-white/[0.06] px-5 py-4 backdrop-blur-xl">
+      <div className="bg-white/[0.06] px-5 py-4">
         <p className="text-text-muted text-[10px] font-semibold tracking-widest uppercase">
           Executive Summary
         </p>

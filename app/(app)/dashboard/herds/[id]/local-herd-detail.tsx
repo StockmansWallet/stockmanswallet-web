@@ -57,7 +57,7 @@ export function LocalHerdDetail({ id }: { id: string }) {
 
   if (!herd) {
     return (
-      <div className="max-w-3xl">
+      <div>
         <Link
           href="/dashboard/herds"
           className="text-text-muted hover:text-text-primary inline-flex items-center gap-1.5 text-sm"

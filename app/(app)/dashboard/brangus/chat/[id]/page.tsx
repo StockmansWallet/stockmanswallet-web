@@ -36,7 +36,7 @@ export default async function BrangusConversationPage({
   const messages = await fetchMessagesServer(id);
 
   return (
-    <div className="flex max-w-3xl flex-col pb-10" style={{ height: "calc(100vh - 8rem)" }}>
+    <div className="flex flex-col" style={{ height: "calc(100vh - 8rem)" }}>
       <PageHeader
         feature="brangus"
         title="Brangus"

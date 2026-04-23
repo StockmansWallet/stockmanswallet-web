@@ -76,7 +76,7 @@ const steps = [
 
 export default function GettingStartedPage() {
   return (
-    <div className="max-w-3xl">
+    <div>
       <PageHeader
         title="Getting Started"
         titleHref="/dashboard/help"
@@ -84,7 +84,7 @@ export default function GettingStartedPage() {
         subtitleClassName="text-sm font-medium text-text-secondary"
       />
 
-      <p className="mb-6 text-sm text-text-muted">
+      <p className="text-text-muted mb-6 text-sm">
         Follow these steps to get the most out of Stockman&apos;s Wallet.
       </p>
 
@@ -93,22 +93,20 @@ export default function GettingStartedPage() {
           <Card key={step.number}>
             <CardContent className="px-5 py-4">
               <div className="flex items-start gap-4">
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-brand/15">
-                  <span className="text-sm font-bold text-brand">{step.number}</span>
+                <div className="bg-brand/15 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full">
+                  <span className="text-brand text-sm font-bold">{step.number}</span>
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <div className="text-text-muted">{step.icon}</div>
-                    <h3 className="text-sm font-semibold text-text-primary">
-                      {step.title}
-                    </h3>
+                    <h3 className="text-text-primary text-sm font-semibold">{step.title}</h3>
                   </div>
-                  <p className="mt-1.5 text-xs leading-relaxed text-text-muted">
+                  <p className="text-text-muted mt-1.5 text-xs leading-relaxed">
                     {step.description}
                   </p>
                   <Link
                     href={step.href}
-                    className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-brand hover:underline"
+                    className="text-brand mt-2 inline-flex items-center gap-1 text-xs font-medium hover:underline"
                   >
                     {step.actionLabel}
                     <ChevronRight className="h-3 w-3" />
@@ -123,10 +121,10 @@ export default function GettingStartedPage() {
       <Card className="mt-6">
         <CardContent className="px-5 py-4">
           <div className="flex items-start gap-3">
-            <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand" />
+            <CheckCircle2 className="text-brand mt-0.5 h-5 w-5 flex-shrink-0" />
             <div>
-              <p className="text-sm font-medium text-text-primary">Need more help?</p>
-              <p className="mt-0.5 text-xs text-text-muted">
+              <p className="text-text-primary text-sm font-medium">Need more help?</p>
+              <p className="text-text-muted mt-0.5 text-xs">
                 Visit the{" "}
                 <Link href="/dashboard/help" className="text-brand hover:underline">
                   Help Center

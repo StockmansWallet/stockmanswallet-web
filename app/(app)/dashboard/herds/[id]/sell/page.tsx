@@ -2,7 +2,12 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { SellStockForm } from "@/components/app/sell-stock-form";
-import { calculateProjectedWeight, calculateHerdValuation, categoryFallback, type CategoryPriceEntry } from "@/lib/engines/valuation-engine";
+import {
+  calculateProjectedWeight,
+  calculateHerdValuation,
+  categoryFallback,
+  type CategoryPriceEntry,
+} from "@/lib/engines/valuation-engine";
 import { resolveMLACategory } from "@/lib/data/weight-mapping";
 import { cattleBreedPremiums, resolveMLASaleyardName } from "@/lib/data/reference-data";
 import { centsToDollars } from "@/lib/types/money";
@@ -13,11 +18,7 @@ export const metadata = {
   title: "Sell Stock",
 };
 
-export default async function SellStockPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function SellStockPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
   const {
@@ -29,14 +30,14 @@ export default async function SellStockPage({
   const [herdResult, { data: breedPremiumData }] = await Promise.all([
     supabase
       .from("herds")
-      .select("id, name, breed, category, species, head_count, current_weight, initial_weight, daily_weight_gain, dwg_change_date, previous_dwg, selected_saleyard, additional_info, age_months, is_sold, is_deleted, created_at, updated_at, breed_premium_override, mortality_rate, is_breeder, is_pregnant, joined_date, calving_rate, breeding_program_type, joining_period_start, joining_period_end, calf_weight_recorded_date, breeder_sub_type, sub_category")
+      .select(
+        "id, name, breed, category, species, head_count, current_weight, initial_weight, daily_weight_gain, dwg_change_date, previous_dwg, selected_saleyard, additional_info, age_months, is_sold, is_deleted, created_at, updated_at, breed_premium_override, mortality_rate, is_breeder, is_pregnant, joined_date, calving_rate, breeding_program_type, joining_period_start, joining_period_end, calf_weight_recorded_date, breeder_sub_type, sub_category"
+      )
       .eq("id", id)
       .eq("user_id", user.id)
       .eq("is_deleted", false)
       .single(),
-    supabase
-      .from("breed_premiums")
-      .select("breed, premium_percent:premium_pct"),
+    supabase.from("breed_premiums").select("breed, premium_percent:premium_pct"),
   ]);
 
   const herd = herdResult.data;
@@ -59,15 +60,17 @@ export default async function SellStockPage({
   }
 
   // Fetch pricing for suggested price pre-fill
-  const mlaCategory = resolveMLACategory(herd.category, herd.initial_weight, herd.breeder_sub_type ?? undefined).primaryMLACategory;
+  const mlaCategory = resolveMLACategory(
+    herd.category,
+    herd.initial_weight,
+    herd.breeder_sub_type ?? undefined
+  ).primaryMLACategory;
   const fallbackCat = categoryFallback(mlaCategory);
   const categoriesToFetch = fallbackCat ? [mlaCategory, fallbackCat] : [mlaCategory];
   const resolvedSaleyard = herd.selected_saleyard
     ? resolveMLASaleyardName(herd.selected_saleyard)
     : null;
-  const saleyardsToFetch = resolvedSaleyard
-    ? [resolvedSaleyard, "National"]
-    : ["National"];
+  const saleyardsToFetch = resolvedSaleyard ? [resolvedSaleyard, "National"] : ["National"];
 
   const { data: allPrices } = await supabase
     .from("category_prices")
@@ -86,7 +89,11 @@ export default async function SellStockPage({
   }
 
   for (const p of allPrices ?? []) {
-    const priceEntry = { price_per_kg: centsToDollars(p.price_per_kg), weight_range: p.weight_range, data_date: p.data_date };
+    const priceEntry = {
+      price_per_kg: centsToDollars(p.price_per_kg),
+      weight_range: p.weight_range,
+      data_date: p.data_date,
+    };
     if (p.saleyard === "National" && p.breed === null) {
       const entries = nationalPriceMap.get(p.category) ?? [];
       entries.push(priceEntry);
@@ -117,15 +124,12 @@ export default async function SellStockPage({
     premiumMap,
     undefined,
     saleyardPriceMap,
-    saleyardBreedPriceMap,
+    saleyardBreedPriceMap
   );
 
   return (
-    <div className="max-w-3xl">
-      <PageHeader
-        title="Sell Stock"
-        subtitle={`${herd.name} - ${herd.breed} ${herd.category}`}
-      />
+    <div>
+      <PageHeader title="Sell Stock" subtitle={`${herd.name} - ${herd.breed} ${herd.category}`} />
       <SellStockForm
         herd={{
           id: herd.id,

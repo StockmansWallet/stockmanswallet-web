@@ -78,10 +78,14 @@ export default async function SaleyardDetailPage({ params }: Props) {
     if (!latest) return null;
     const parts: string[] = [];
     const where = state ? `${saleyard} (${state})` : saleyard;
-    parts.push(`Mate, ${where} is averaging $${latest.avg_price.toFixed(2)}/kg as of ${formatAUDate(latest.week_date)}.`);
+    parts.push(
+      `Mate, ${where} is averaging $${latest.avg_price.toFixed(2)}/kg as of ${formatAUDate(latest.week_date)}.`
+    );
 
     if (summary4wPct !== null) {
-      parts.push(`Overall it's ${summary4wPct >= 0 ? "up" : "down"} ${Math.abs(summary4wPct).toFixed(1)}% over the past 4 weeks.`);
+      parts.push(
+        `Overall it's ${summary4wPct >= 0 ? "up" : "down"} ${Math.abs(summary4wPct).toFixed(1)}% over the past 4 weeks.`
+      );
     }
 
     const topCats = categoryRows.slice(0, 3);
@@ -93,7 +97,9 @@ export default async function SaleyardDetailPage({ params }: Props) {
     }
 
     parts.push(`Categories traded here in the past 2 years: ${categoriesPresent.length}.`);
-    parts.push("What's this yard telling us? Is it a good option to send stock to, and which classes are performing best?");
+    parts.push(
+      "What's this yard telling us? Is it a good option to send stock to, and which classes are performing best?"
+    );
     return parts.join(" ");
   })();
 
@@ -115,7 +121,8 @@ export default async function SaleyardDetailPage({ params }: Props) {
   return (
     <div className="max-w-4xl">
       <BackLink href="/dashboard/market/pulse" label="All saleyards" />
-      <PageHeader feature="markets"
+      <PageHeader
+        feature="markets"
         title={saleyard}
         subtitle={state ? `${state} - weekly history by category` : "Weekly history by category"}
         actions={
@@ -128,7 +135,7 @@ export default async function SaleyardDetailPage({ params }: Props) {
 
       {all.length === 0 ? (
         <Card>
-          <CardContent className="py-10 text-center text-sm text-text-muted">
+          <CardContent className="text-text-muted py-10 text-center text-sm">
             No data available for this saleyard.
           </CardContent>
         </Card>
@@ -136,30 +143,33 @@ export default async function SaleyardDetailPage({ params }: Props) {
         <div className="space-y-5">
           {/* Overall stats */}
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-            <div className="rounded-2xl bg-surface-lowest p-4 backdrop-blur-xl">
-              <p className="text-[11px] uppercase tracking-wide text-text-muted">Latest</p>
+            <div className="bg-surface-lowest rounded-2xl p-4">
+              <p className="text-text-muted text-[11px] tracking-wide uppercase">Latest</p>
               {latest && (
                 <>
-                  <p className="mt-1 text-xl font-semibold tabular-nums text-text-primary">
-                    ${latest.avg_price.toFixed(2)}<span className="ml-1 text-sm font-normal text-text-muted">/kg</span>
+                  <p className="text-text-primary mt-1 text-xl font-semibold tabular-nums">
+                    ${latest.avg_price.toFixed(2)}
+                    <span className="text-text-muted ml-1 text-sm font-normal">/kg</span>
                   </p>
-                  <p className="text-[11px] text-text-muted">{formatAUDate(latest.week_date)}</p>
+                  <p className="text-text-muted text-[11px]">{formatAUDate(latest.week_date)}</p>
                 </>
               )}
             </div>
-            <div className="rounded-2xl bg-surface-lowest p-4 backdrop-blur-xl">
-              <p className="text-[11px] uppercase tracking-wide text-text-muted">4-week change</p>
+            <div className="bg-surface-lowest rounded-2xl p-4">
+              <p className="text-text-muted text-[11px] tracking-wide uppercase">4-week change</p>
               <div className="mt-1.5">
                 <ChangeChip value={summary4wPct} size="sm" />
               </div>
-              <p className="mt-1 text-[11px] text-text-muted">All categories weighted</p>
+              <p className="text-text-muted mt-1 text-[11px]">All categories weighted</p>
             </div>
-            <div className="col-span-2 rounded-2xl bg-surface-lowest p-4 backdrop-blur-xl md:col-span-1">
-              <p className="text-[11px] uppercase tracking-wide text-text-muted">Categories traded</p>
-              <p className="mt-1 text-xl font-semibold tabular-nums text-text-primary">
+            <div className="bg-surface-lowest col-span-2 rounded-2xl p-4 md:col-span-1">
+              <p className="text-text-muted text-[11px] tracking-wide uppercase">
+                Categories traded
+              </p>
+              <p className="text-text-primary mt-1 text-xl font-semibold tabular-nums">
                 {categoriesPresent.length}
               </p>
-              <p className="text-[11px] text-text-muted">Past 2 years</p>
+              <p className="text-text-muted text-[11px]">Past 2 years</p>
             </div>
           </div>
 
@@ -167,8 +177,8 @@ export default async function SaleyardDetailPage({ params }: Props) {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2.5">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-markets/15">
-                  <TrendingUp className="h-3.5 w-3.5 text-markets" />
+                <div className="bg-markets/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+                  <TrendingUp className="text-markets h-3.5 w-3.5" />
                 </div>
                 <CardTitle>Overall trend</CardTitle>
               </div>
@@ -187,8 +197,8 @@ export default async function SaleyardDetailPage({ params }: Props) {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2.5">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-markets/15">
-                  <Activity className="h-3.5 w-3.5 text-markets" />
+                <div className="bg-markets/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+                  <Activity className="text-markets h-3.5 w-3.5" />
                 </div>
                 <CardTitle>By category</CardTitle>
               </div>
@@ -201,17 +211,22 @@ export default async function SaleyardDetailPage({ params }: Props) {
                     href={`/dashboard/market/category/${slugify(row.category)}`}
                     className="group grid grid-cols-[1.3fr_0.9fr_1fr_1.2fr_auto] items-center gap-3 px-5 py-3.5 transition-colors hover:bg-white/[0.02]"
                   >
-                    <p className="truncate text-sm font-medium text-text-primary">{row.category}</p>
-                    <p className="text-right text-sm font-semibold tabular-nums text-text-primary">
+                    <p className="text-text-primary truncate text-sm font-medium">{row.category}</p>
+                    <p className="text-text-primary text-right text-sm font-semibold tabular-nums">
                       ${row.latest_price.toFixed(2)}
-                      <span className="ml-1 text-xs font-normal text-text-muted">/kg</span>
+                      <span className="text-text-muted ml-1 text-xs font-normal">/kg</span>
                     </p>
-                    <Sparkline points={row.sparkline} width={110} height={28} positive={(row.change_4w_pct ?? 0) >= 0} />
+                    <Sparkline
+                      points={row.sparkline}
+                      width={110}
+                      height={28}
+                      positive={(row.change_4w_pct ?? 0) >= 0}
+                    />
                     <div className="flex flex-wrap gap-1.5">
                       <ChangeChip label="1w" value={row.change_1w_pct} />
                       <ChangeChip label="4w" value={row.change_4w_pct} />
                     </div>
-                    <ArrowRight className="h-4 w-4 shrink-0 text-text-muted opacity-0 transition-opacity group-hover:opacity-100" />
+                    <ArrowRight className="text-text-muted h-4 w-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100" />
                   </Link>
                 ))}
               </div>

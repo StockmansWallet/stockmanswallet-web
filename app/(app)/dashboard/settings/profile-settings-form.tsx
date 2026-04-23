@@ -72,7 +72,7 @@ export function ProfileSettingsForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4">
       {message && (
         <div
           role={message.type === "error" ? "alert" : "status"}

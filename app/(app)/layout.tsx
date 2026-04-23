@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/app/sidebar";
 import { MobileNav } from "@/components/app/mobile-nav";
-import { TopBar } from "@/components/app/top-bar";
 import { SidebarNotificationsProvider } from "@/components/app/sidebar-notifications-provider";
 import { DemoModeBanner } from "@/components/app/demo-mode-banner";
 import { DemoModeProvider } from "@/components/app/demo-mode-provider";
@@ -85,30 +84,30 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             />
           </div>
 
-          {/* Desktop top header bar - full width, sticky */}
-          <div data-print-hide className="sticky top-0 z-40">
-            <TopBar
-              firstName={user.user_metadata?.first_name || ""}
-              lastName={user.user_metadata?.last_name || ""}
-              email={user.email || ""}
-              roleLabel={roleDisplayName(profile?.role || "producer")}
-              avatarUrl={
-                isDemoUser ? "/images/demo-user-profile.webp" : user.user_metadata?.avatar_url || ""
-              }
-              subscriptionTier={profile?.subscription_tier || "stockman"}
-            />
-          </div>
-
           {/* Desktop sidebar + content */}
-          <div className="flex flex-1">
+          <div className="flex flex-1 gap-3 p-3 lg:gap-4 lg:p-4">
             <div className="hidden lg:block">
-              <div className="sticky top-20 h-[calc(100vh-5rem)] py-4 pl-6">
-                <Sidebar isAdmin={isAdmin} isAdvisor={isAdvisor} isDemoUser={isDemoUser} />
+              <div className="sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto">
+                <Sidebar
+                  isAdmin={isAdmin}
+                  isAdvisor={isAdvisor}
+                  isDemoUser={isDemoUser}
+                  firstName={user.user_metadata?.first_name || ""}
+                  lastName={user.user_metadata?.last_name || ""}
+                  email={user.email || ""}
+                  roleLabel={roleDisplayName(profile?.role || "producer")}
+                  avatarUrl={
+                    isDemoUser
+                      ? "/images/demo-user-profile.webp"
+                      : user.user_metadata?.avatar_url || ""
+                  }
+                  subscriptionTier={profile?.subscription_tier || "stockman"}
+                />
               </div>
             </div>
 
-            <main className="flex-1 overflow-y-auto px-6 pb-6 lg:pr-8 lg:pb-8 lg:pl-0">
-              {children}
+            <main className="min-w-0 flex-1">
+              <div className="max-w-4xl rounded-3xl bg-[#1F1B18] p-3 lg:p-4">{children}</div>
             </main>
           </div>
         </div>

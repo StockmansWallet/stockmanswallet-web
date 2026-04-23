@@ -60,7 +60,9 @@ export function ShareToProducerDialog({
   // Portal mount guard: createPortal requires document.body which is only
   // available client-side. Set after first mount so SSR pre-renders nothing.
   const [isMounted, setIsMounted] = useState(false);
-  useEffect(() => { setIsMounted(true); }, []);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Reset state whenever the dialog opens so stale selections don't persist.
   useEffect(() => {
@@ -91,10 +93,10 @@ export function ShareToProducerDialog({
     const q = search.trim().toLowerCase();
     if (!q) return true;
     return (
-      p.display_name.toLowerCase().includes(q)
-      || (p.property_name?.toLowerCase().includes(q) ?? false)
-      || (p.region?.toLowerCase().includes(q) ?? false)
-      || (p.state?.toLowerCase().includes(q) ?? false)
+      p.display_name.toLowerCase().includes(q) ||
+      (p.property_name?.toLowerCase().includes(q) ?? false) ||
+      (p.region?.toLowerCase().includes(q) ?? false) ||
+      (p.state?.toLowerCase().includes(q) ?? false)
     );
   });
 
@@ -155,7 +157,7 @@ export function ShareToProducerDialog({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-surface/95 relative mx-4 flex w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-white/[0.10] shadow-2xl backdrop-blur-xl">
+      <div className="bg-surface/95 relative mx-4 flex w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-white/[0.10] shadow-2xl backdrop-blur-2xl">
         <header className="flex items-center justify-between border-b border-white/[0.06] px-5 py-4">
           <div>
             <h2 className="text-text-primary text-base font-semibold">Share with a producer</h2>
@@ -194,7 +196,7 @@ export function ShareToProducerDialog({
                 <textarea
                   value={note}
                   onChange={(e) => setNote(e.target.value.slice(0, 280))}
-                  placeholder="e.g. thought you&apos;d find this useful"
+                  placeholder="e.g. thought you'd find this useful"
                   rows={2}
                   className="bg-surface-lowest text-text-primary mt-1.5 w-full resize-none rounded-lg border border-white/[0.08] px-3 py-2 text-sm outline-none placeholder:text-white/30 focus:border-white/[0.16]"
                 />
@@ -231,7 +233,10 @@ export function ShareToProducerDialog({
                 <ul className="divide-y divide-white/[0.04]">
                   {filtered.map((p) => {
                     const isSelected = selectedId === p.user_id;
-                    const subline = [p.property_name, [p.region, p.state].filter(Boolean).join(", ")]
+                    const subline = [
+                      p.property_name,
+                      [p.region, p.state].filter(Boolean).join(", "),
+                    ]
                       .filter(Boolean)
                       .join(" - ");
                     return (

@@ -16,11 +16,15 @@ export const metadata = { title: "Profile - Settings" };
 
 export default async function ProfileSettingsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select("role, contact_email, contact_phone, bio, is_discoverable_to_producers, is_listed_in_directory, company_name, property_name, state, region")
+    .select(
+      "role, contact_email, contact_phone, bio, is_discoverable_to_producers, is_listed_in_directory, company_name, property_name, state, region"
+    )
     .eq("user_id", user!.id)
     .single();
 
@@ -33,11 +37,11 @@ export default async function ProfileSettingsPage() {
   const enrichment = enrichmentMap?.get(user!.id);
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <div className="mb-4 sm:hidden">
         <Link
           href="/dashboard/settings"
-          className="inline-flex items-center gap-1.5 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-raised hover:text-text-primary"
+          className="bg-surface-lowest text-text-secondary hover:bg-surface-raised hover:text-text-primary inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
         >
           <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
           Settings
@@ -50,7 +54,7 @@ export default async function ProfileSettingsPage() {
         subtitle="Your personal information, contact details, and visibility."
       />
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         <ProfileAvatar
           avatarUrl={user?.user_metadata?.avatar_url ?? ""}
           firstName={user?.user_metadata?.first_name ?? ""}
@@ -84,8 +88,8 @@ export default async function ProfileSettingsPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
-                <Eye className="h-3.5 w-3.5 text-brand" aria-hidden="true" />
+              <div className="bg-brand/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+                <Eye className="text-brand h-3.5 w-3.5" aria-hidden="true" />
               </div>
               <CardTitle>{isAdvisor ? "Directory Visibility" : "Discoverability"}</CardTitle>
             </div>

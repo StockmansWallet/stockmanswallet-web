@@ -103,7 +103,7 @@ export default async function EditHerdPage({ params }: { params: Promise<{ id: s
   ].sort((a, b) => a.localeCompare(b));
 
   return (
-    <div className="max-w-4xl pb-24">
+    <div>
       <PageHeader title={`Edit: ${herd.name}`} subtitle={[herd.species, herd.breed].join(" · ")} />
       <HerdForm
         herd={herd}

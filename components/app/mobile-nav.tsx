@@ -30,7 +30,7 @@ export function MobileNav({
   return (
     <>
       {/* Mobile header */}
-      <header className="bg-bg-alt flex items-center justify-between px-4 py-3 lg:hidden">
+      <header className="flex items-center justify-between bg-[#1F1B18] px-4 py-3 lg:hidden">
         <Link href="/dashboard">
           <Image
             src="/images/sw-logo.svg"
@@ -52,7 +52,7 @@ export function MobileNav({
       {open && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} />
-          <nav className="bg-bg-alt absolute top-0 right-0 flex h-full w-72 flex-col p-4 shadow-2xl">
+          <nav className="absolute top-0 right-0 flex h-full w-72 flex-col bg-[#1F1B18] p-4 shadow-2xl">
             <div className="mb-4 flex justify-end">
               <button
                 onClick={() => setOpen(false)}

@@ -169,12 +169,16 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
     async function init() {
       await refreshUnread();
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user || cancelled) return;
 
       // setAuth is required on cookie-auth clients so RLS-filtered
       // postgres_changes events are delivered over the websocket.
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (session?.access_token) {
         supabase.realtime.setAuth(session.access_token);
       }
@@ -193,7 +197,7 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
             // New share received: update badge and refresh the list (if open).
             refreshUnread();
             setSharedListRefreshKey((k) => k + 1);
-          },
+          }
         )
         .on(
           "postgres_changes",
@@ -203,7 +207,9 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
             table: "brangus_shared_chats",
             filter: `recipient_user_id=eq.${user.id}`,
           },
-          () => { refreshUnread(); },
+          () => {
+            refreshUnread();
+          }
         )
         .subscribe();
     }
@@ -239,7 +245,7 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
         className="bg-surface relative mb-4 flex gap-1 rounded-full p-1 backdrop-blur-md"
       >
         <div
-          className={`bg-surface-high absolute top-1 bottom-1 rounded-full shadow-sm ${ready ? "transition-all duration-250 ease-out" : ""}`}
+          className={`bg-brangus/15 absolute top-1 bottom-1 rounded-full ${ready ? "transition-all duration-250 ease-out" : ""}`}
           style={{ left: indicator.left, width: indicator.width }}
         />
         {tabs.map((tab) => (
@@ -250,9 +256,7 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
             }}
             onClick={() => setActiveTab(tab.id)}
             className={`relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-150 ${
-              activeTab === tab.id
-                ? "text-text-primary"
-                : "text-text-muted hover:text-text-secondary"
+              activeTab === tab.id ? "text-brangus" : "text-text-muted hover:text-text-secondary"
             }`}
           >
             <span>{tab.label}</span>
@@ -281,7 +285,11 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
 
       {/* Chat tab (always mounted, hidden when inactive) */}
       <div
-        className={activeTab !== "chat" ? "hidden h-[calc(100vh-23.5rem)] sm:h-[calc(100vh-22rem)]" : "h-[calc(100vh-23.5rem)] sm:h-[calc(100vh-22rem)]"}
+        className={
+          activeTab !== "chat"
+            ? "hidden h-[calc(100vh-23.5rem)] sm:h-[calc(100vh-22rem)]"
+            : "h-[calc(100vh-23.5rem)] sm:h-[calc(100vh-22rem)]"
+        }
       >
         <Card className="flex h-full flex-col overflow-hidden rounded-3xl">
           {loadingConv ? (

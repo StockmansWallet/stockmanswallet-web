@@ -28,7 +28,7 @@ export default async function WaitlistPage() {
   }
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <PageHeader
         title="Waitlist"
         titleClassName="text-4xl font-bold text-grid-iq"

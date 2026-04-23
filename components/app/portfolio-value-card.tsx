@@ -16,7 +16,7 @@ export function PortfolioValueCard({
   const isPositive = changePercent !== undefined && changePercent >= 0;
 
   return (
-    <div className="bg-surface-lowest relative overflow-hidden rounded-2xl p-6 backdrop-blur-xl sm:p-7">
+    <div className="bg-surface-lowest relative overflow-hidden rounded-2xl p-6 sm:p-7">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <p className="text-text-muted text-xs font-medium tracking-widest uppercase">

@@ -6,29 +6,18 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 
 function Card({ children, className = "", ...props }: CardProps) {
   return (
-    <div
-      className={`rounded-2xl bg-surface-lowest backdrop-blur-xl ${className}`}
-      {...props}
-    >
+    <div className={`bg-surface-lowest rounded-2xl ${className}`} {...props}>
       {children}
     </div>
   );
 }
 
 function CardHeader({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return (
-    <div className={`px-5 pt-5 pb-4 ${className}`}>
-      {children}
-    </div>
-  );
+  return <div className={`px-5 pt-5 pb-4 ${className}`}>{children}</div>;
 }
 
 function CardTitle({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return (
-    <h2 className={`text-sm font-semibold text-text-primary ${className}`}>
-      {children}
-    </h2>
-  );
+  return <h2 className={`text-text-primary text-sm font-semibold ${className}`}>{children}</h2>;
 }
 
 function CardContent({ children, className }: { children: ReactNode; className?: string }) {

@@ -14,11 +14,7 @@ export const metadata = {
   title: "Advisor Profile",
 };
 
-export default async function AdvisorProfilePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function AdvisorProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
   const {
@@ -39,7 +35,9 @@ export default async function AdvisorProfilePage({
   const { data: existingConnections } = await supabase
     .from("connection_requests")
     .select("id, status")
-    .or(`and(requester_user_id.eq.${user.id},target_user_id.eq.${id}),and(requester_user_id.eq.${id},target_user_id.eq.${user.id})`)
+    .or(
+      `and(requester_user_id.eq.${user.id},target_user_id.eq.${id}),and(requester_user_id.eq.${id},target_user_id.eq.${user.id})`
+    )
     .in("status", ["pending", "approved"]);
 
   const existingConnection = existingConnections?.[0] ?? null;
@@ -48,14 +46,14 @@ export default async function AdvisorProfilePage({
   const categoryColour = categoryConfig?.colorClass ?? "text-advisor";
 
   return (
-    <div className="max-w-2xl">
+    <div>
       <ConnectionRealtime userId={user.id} />
 
       {/* Back nav */}
-      <div className="pb-4 pt-6">
+      <div className="pt-6 pb-4">
         <Link
           href="/dashboard/advisory-hub/directory"
-          className="inline-flex items-center gap-1 rounded-lg bg-surface-lowest px-2.5 py-1.5 text-sm text-text-muted transition-colors hover:bg-surface-low hover:text-text-secondary"
+          className="bg-surface-lowest text-text-muted hover:bg-surface-low hover:text-text-secondary inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm transition-colors"
         >
           <ChevronLeft className="h-4 w-4" />
           Advisor Directory
@@ -67,31 +65,32 @@ export default async function AdvisorProfilePage({
         {/* Header with gradient */}
         <div className="bg-gradient-to-r from-white/[0.04] to-transparent p-6">
           <div className="flex items-center gap-4">
-            <div className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl ${categoryBg} shadow-sm`}>
+            <div
+              className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl ${categoryBg} shadow-sm`}
+            >
               {categoryConfig ? (
                 <categoryConfig.icon className={`h-8 w-8 ${categoryColour}`} />
               ) : (
-                <span className="text-xl font-bold text-advisor">{advisor.display_name?.charAt(0)}</span>
+                <span className="text-advisor text-xl font-bold">
+                  {advisor.display_name?.charAt(0)}
+                </span>
               )}
             </div>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-text-primary">
-                {advisor.display_name}
-              </h1>
+              <h1 className="text-text-primary text-2xl font-bold">{advisor.display_name}</h1>
               <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                {categoryConfig && (
-                  <Badge variant="default">{categoryConfig.label}</Badge>
-                )}
+                {categoryConfig && <Badge variant="default">{categoryConfig.label}</Badge>}
                 {advisor.company_name && (
-                  <span className="flex items-center gap-1.5 text-sm text-text-secondary">
+                  <span className="text-text-secondary flex items-center gap-1.5 text-sm">
                     <Building2 className="h-3.5 w-3.5" />
                     {advisor.company_name}
                   </span>
                 )}
                 {advisor.state && (
-                  <span className="flex items-center gap-1 text-sm text-text-muted">
+                  <span className="text-text-muted flex items-center gap-1 text-sm">
                     <MapPin className="h-3.5 w-3.5" />
-                    {advisor.state}{advisor.region ? `, ${advisor.region}` : ""}
+                    {advisor.state}
+                    {advisor.region ? `, ${advisor.region}` : ""}
                   </span>
                 )}
               </div>
@@ -103,20 +102,20 @@ export default async function AdvisorProfilePage({
           {/* Bio */}
           {advisor.bio && (
             <div>
-              <h3 className="mb-2 text-xs font-semibold text-text-muted">About</h3>
-              <p className="text-sm leading-relaxed text-text-secondary">{advisor.bio}</p>
+              <h3 className="text-text-muted mb-2 text-xs font-semibold">About</h3>
+              <p className="text-text-secondary text-sm leading-relaxed">{advisor.bio}</p>
             </div>
           )}
 
           {/* Contact info */}
           {(advisor.contact_email || advisor.contact_phone) && (
             <div>
-              <h3 className="mb-2.5 text-xs font-semibold text-text-muted">Contact</h3>
+              <h3 className="text-text-muted mb-2.5 text-xs font-semibold">Contact</h3>
               <div className="space-y-2">
                 {advisor.contact_email && (
                   <a
                     href={`mailto:${advisor.contact_email}`}
-                    className="flex items-center gap-2.5 rounded-lg bg-white/[0.03] px-3.5 py-2.5 text-sm text-advisor transition-colors hover:bg-white/[0.06]"
+                    className="text-advisor flex items-center gap-2.5 rounded-lg bg-white/[0.03] px-3.5 py-2.5 text-sm transition-colors hover:bg-white/[0.06]"
                   >
                     <Mail className="h-4 w-4" />
                     {advisor.contact_email}
@@ -125,7 +124,7 @@ export default async function AdvisorProfilePage({
                 {advisor.contact_phone && (
                   <a
                     href={`tel:${advisor.contact_phone.replace(/\s/g, "")}`}
-                    className="flex items-center gap-2.5 rounded-lg bg-white/[0.03] px-3.5 py-2.5 text-sm text-advisor transition-colors hover:bg-white/[0.06]"
+                    className="text-advisor flex items-center gap-2.5 rounded-lg bg-white/[0.03] px-3.5 py-2.5 text-sm transition-colors hover:bg-white/[0.06]"
                   >
                     <Phone className="h-4 w-4" />
                     {advisor.contact_phone}

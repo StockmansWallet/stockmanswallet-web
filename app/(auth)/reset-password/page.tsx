@@ -92,7 +92,7 @@ export default function ResetPasswordPage() {
             </p>
           </div>
 
-          <div className="rounded-[2rem] border border-white/10 bg-[#4a4d40]/72 p-4 shadow-[0_24px_80px_rgba(0,0,0,0.34)] backdrop-blur-xl sm:p-5">
+          <div className="rounded-[2rem] border border-white/10 bg-[#4a4d40]/72 p-4 shadow-[0_24px_80px_rgba(0,0,0,0.34)] backdrop-blur-2xl sm:p-5">
             <form onSubmit={handleSubmit} noValidate className="space-y-3">
               <AnimatePresence initial={false}>
                 {error && (

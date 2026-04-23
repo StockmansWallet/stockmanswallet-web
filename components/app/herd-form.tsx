@@ -741,8 +741,8 @@ export function HerdForm({
 
       {/* Sticky bottom action bar */}
       {(submitLabel || cancelHref) && (
-        <div className="border-border bg-background/80 fixed inset-x-0 bottom-0 z-30 border-t backdrop-blur-xl">
-          <div className="mx-auto flex max-w-6xl items-center justify-end gap-3 px-6 py-3 lg:px-8">
+        <div className="border-border sticky bottom-0 z-30 border-t bg-[#1F1B18]">
+          <div className="flex items-center justify-end gap-3 py-3">
             {cancelHref && (
               <Link href={cancelHref}>
                 <Button

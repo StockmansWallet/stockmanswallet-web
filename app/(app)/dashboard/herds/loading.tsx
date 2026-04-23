@@ -4,7 +4,7 @@ export default function HerdsLoading() {
   return (
     <div className="max-w-4xl">
       {/* PageHeader */}
-      <div className="pb-4 pt-6">
+      <div className="pt-6 pb-4">
         <Skeleton className="mb-2 h-9 w-24" />
         <Skeleton className="h-4 w-56" />
       </div>
@@ -12,7 +12,7 @@ export default function HerdsLoading() {
       {/* Stat cards */}
       <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="rounded-2xl bg-surface-lowest p-5 backdrop-blur-xl">
+          <div key={i} className="bg-surface-lowest rounded-2xl p-5">
             <Skeleton className="mx-auto mb-2 h-3 w-20" />
             <Skeleton className="mx-auto h-6 w-28" />
           </div>
@@ -20,7 +20,7 @@ export default function HerdsLoading() {
       </div>
 
       {/* Toolbar pill (species tabs + search + actions) */}
-      <div className="mb-4 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md">
+      <div className="bg-surface-lowest mb-4 flex items-center justify-between rounded-full px-2 py-2 backdrop-blur-md">
         <div className="flex items-center gap-1.5">
           <Skeleton className="h-8 w-16 rounded-full" />
           <Skeleton className="h-8 w-20 rounded-full" />
@@ -34,7 +34,7 @@ export default function HerdsLoading() {
       </div>
 
       {/* Sort-bar pill */}
-      <div className="mb-3 rounded-full bg-surface-lowest px-4 py-2 backdrop-blur-md">
+      <div className="bg-surface-lowest mb-3 rounded-full px-4 py-2 backdrop-blur-md">
         <div className="flex items-center gap-1.5">
           <Skeleton className="h-3 w-10" />
           {Array.from({ length: 5 }).map((_, i) => (
@@ -67,7 +67,7 @@ export default function HerdsLoading() {
 
 function HerdCardSkeleton() {
   return (
-    <div className="overflow-hidden rounded-2xl bg-surface-lowest backdrop-blur-xl">
+    <div className="bg-surface-lowest overflow-hidden rounded-2xl">
       {/* Tinted header row: head-count pill + name + category + value */}
       <div className="flex items-center gap-3 bg-white/[0.04] px-4 py-2.5">
         <Skeleton className="h-9 w-12 rounded-lg" />

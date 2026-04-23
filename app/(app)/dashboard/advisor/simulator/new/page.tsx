@@ -41,15 +41,13 @@ export default async function SimulatorNewHerdPage() {
     .single();
 
   return (
-    <div className="max-w-3xl">
-      <PageHeader feature="advisor"
+    <div>
+      <PageHeader
+        feature="advisor"
         title="Add Herd"
         subtitle="Add a herd to your simulator sandbox."
       />
-      <AddHerdForm
-        properties={property ? [property] : []}
-        action={createSimulatorHerdFromForm}
-      />
+      <AddHerdForm properties={property ? [property] : []} action={createSimulatorHerdFromForm} />
     </div>
   );
 }

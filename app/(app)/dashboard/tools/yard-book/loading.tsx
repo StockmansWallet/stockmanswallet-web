@@ -4,7 +4,7 @@ export default function YardBookLoading() {
   return (
     <div className="max-w-4xl">
       {/* PageHeader */}
-      <div className="flex items-end justify-between pb-4 pt-6">
+      <div className="flex items-end justify-between pt-6 pb-4">
         <div>
           <Skeleton className="mb-2 h-8 w-28" />
           <Skeleton className="h-4 w-64" />
@@ -15,7 +15,7 @@ export default function YardBookLoading() {
       {/* Stat cards (match blurred StatCard style) */}
       <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="rounded-2xl bg-surface-lowest p-5 backdrop-blur-xl">
+          <div key={i} className="bg-surface-lowest rounded-2xl p-5">
             <Skeleton className="mx-auto mb-2 h-3 w-20" />
             <Skeleton className="mx-auto h-6 w-28" />
           </div>
@@ -23,7 +23,7 @@ export default function YardBookLoading() {
       </div>
 
       {/* Category toolbar pill */}
-      <div className="mb-4 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md">
+      <div className="bg-surface-lowest mb-4 flex items-center justify-between rounded-full px-2 py-2 backdrop-blur-md">
         <div className="flex items-center gap-1.5 overflow-x-auto">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-8 w-20 rounded-full" />
@@ -44,7 +44,7 @@ export default function YardBookLoading() {
               {Array.from({ length: count }).map((_, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-3 backdrop-blur-xl"
+                  className="flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-3"
                 >
                   <Skeleton className="h-9 w-9 rounded-full" />
                   <div className="flex-1">

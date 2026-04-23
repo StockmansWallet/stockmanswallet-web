@@ -38,7 +38,7 @@ export default async function NewHerdPage() {
   ].sort((a, b) => a.localeCompare(b));
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <PageHeader
         title="Add Herd"
         subtitle="Create a new herd to track your livestock."
