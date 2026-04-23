@@ -91,6 +91,11 @@ function QuickInsightCard({
   );
 }
 
+// Distance from the right edge (in px) within which we still consider the
+// user to be "following the tail" and auto-scroll new cards into view. Set
+// just over a card's width so a small back-scroll still counts.
+const TAIL_THRESHOLD_PX = 80;
+
 export function QuickInsightRow({
   insights,
   onCardAction,
@@ -112,6 +117,17 @@ export function QuickInsightRow({
     moved: boolean;
   } | null>(null);
 
+  // Snapshot of scroll geometry from the last settled state. Refreshed whenever
+  // the user scrolls and at the end of each growth handling pass, so when the
+  // insights list lengthens we can ask "was the user at the tail BEFORE this
+  // change?" without having to measure pre-render.
+  const lastScrollStateRef = useRef<{
+    scrollLeft: number;
+    scrollWidth: number;
+    clientWidth: number;
+  }>({ scrollLeft: 0, scrollWidth: 0, clientWidth: 0 });
+  const prevCountRef = useRef<number>(insights.length);
+
   // Drive the edge-fade mask off the scroll position. Treat a 1px threshold as
   // "at the edge" so tiny sub-pixel scroll offsets don't leave a stray fade.
   const recalcEdges = useCallback(() => {
@@ -120,11 +136,15 @@ export function QuickInsightRow({
     const canLeft = el.scrollLeft > 1;
     const canRight = el.scrollLeft + el.clientWidth < el.scrollWidth - 1;
     setEdgeState((prev) => (prev.left === canLeft && prev.right === canRight ? prev : { left: canLeft, right: canRight }));
+    lastScrollStateRef.current = {
+      scrollLeft: el.scrollLeft,
+      scrollWidth: el.scrollWidth,
+      clientWidth: el.clientWidth,
+    };
   }, []);
 
-  // Recalculate on mount, when the container resizes, and when the set of
-  // insights changes. ResizeObserver covers both viewport resizes and changes
-  // to the surrounding chat layout.
+  // Recalculate on mount and when the container resizes. ResizeObserver
+  // covers both viewport resizes and changes to the surrounding chat layout.
   useEffect(() => {
     recalcEdges();
     const el = containerRef.current;
@@ -132,7 +152,29 @@ export function QuickInsightRow({
     const ro = new ResizeObserver(() => recalcEdges());
     ro.observe(el);
     return () => ro.disconnect();
-  }, [recalcEdges, insights.length]);
+  }, [recalcEdges]);
+
+  // When new cards land on the right, smooth-scroll to reveal them so the
+  // older cards visibly slide leftwards; the motion is the user's cue that
+  // new content just arrived. Only follow the tail when the user was already
+  // at (or near) the right edge - if they've scrolled back to read earlier
+  // cards, we leave their view alone.
+  useEffect(() => {
+    const prevCount = prevCountRef.current;
+    prevCountRef.current = insights.length;
+    const el = containerRef.current;
+    if (!el) return;
+    if (insights.length > prevCount) {
+      const prev = lastScrollStateRef.current;
+      const wasAtTail =
+        prev.scrollWidth === 0 ||
+        prev.scrollLeft + prev.clientWidth >= prev.scrollWidth - TAIL_THRESHOLD_PX;
+      if (wasAtTail) {
+        el.scrollTo({ left: el.scrollWidth, behavior: "smooth" });
+      }
+    }
+    recalcEdges();
+  }, [insights.length, recalcEdges]);
 
   // Click-and-drag horizontal scrolling for mouse users
   const handleMouseDown = useCallback((e: React.MouseEvent) => {

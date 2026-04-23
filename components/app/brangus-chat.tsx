@@ -563,9 +563,12 @@ export function BrangusChat({
         postTypingIdRef.current = assistantMessage.id;
         setMessages((prev) => [...prev, assistantMessage]);
 
-        // Append summary cards to the persistent bottom strip
+        // Append summary cards to the persistent bottom strip. New cards land
+        // on the right so the row animates its older cards leftward to make
+        // room; that motion is the affordance signalling "new content arrived
+        // on the right" rather than hiding them at the far-left edge.
         if (quickInsights && quickInsights.length > 0) {
-          setSessionCards((prev) => [...quickInsights, ...prev]);
+          setSessionCards((prev) => [...prev, ...quickInsights]);
         }
         setConversationHistory(updatedHistory);
 
