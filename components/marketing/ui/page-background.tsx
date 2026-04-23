@@ -1,15 +1,18 @@
 import Image from "next/image";
 
+// Matches iOS OnboardingSignInPage.signInBackground: deep base + landing photo +
+// warm vertical gradient (lighter at top, darker at bottom) so the sky stays
+// present and the lower half supports foreground text and cards.
 export default function PageBackground() {
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
+      <div className="absolute inset-0 bg-[#1C1B1B]" />
       <Image src="/images/landing-bg.webp" alt="" fill priority className="object-cover" />
-      <div className="absolute inset-0 bg-[#171513]/84" />
       <div
-        className="absolute inset-0 mix-blend-soft-light"
+        className="absolute inset-0"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`,
-          opacity: 0.1,
+          background:
+            "linear-gradient(to bottom, rgba(15,15,15,0.32) 0%, rgba(15,15,15,0.46) 24%, rgba(15,15,15,0.60) 52%, rgba(15,15,15,0.80) 80%, rgba(15,15,15,0.94) 100%)",
         }}
       />
     </div>

@@ -69,7 +69,9 @@ function SignInScreen() {
               G&apos;day, Stockman.
             </h1>
             <p className="mt-3 text-[clamp(1rem,3.2vw,1.28rem)] leading-relaxed text-white/72">
-              Have a poke around with the demo yard, or continue with your account.
+              Have a poke around with the demo yard,
+              <br />
+              or continue with your account.
             </p>
           </div>
 
