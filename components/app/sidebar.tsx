@@ -2,8 +2,12 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { ChevronRight, Sparkles } from "lucide-react";
+import tallyAnimData from "@/public/animations/tally.json";
+
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 import { SidebarBadge } from "@/components/app/sidebar-badge";
 import {
   producerNavItems,
@@ -83,17 +87,10 @@ export function Sidebar({
       {/* Logo */}
       <Link
         href="/dashboard"
-        className="flex items-center justify-center gap-2.5 rounded-t-3xl px-4 pt-4 pb-1 transition-opacity hover:opacity-90"
+        aria-label="Stockman's Wallet"
+        className="flex items-center justify-center rounded-t-3xl px-4 pt-4 pb-1 transition-opacity hover:opacity-90"
       >
-        <Image
-          src="/images/sw-logo-tally.svg"
-          alt="Stockman's Wallet"
-          width={36}
-          height={36}
-          className="h-9 w-9"
-          priority
-        />
-        <span className="text-base font-bold text-white">Stockman&apos;s Wallet</span>
+        <Lottie animationData={tallyAnimData} loop={false} className="h-12 w-auto" />
       </Link>
 
       {/* Navigation groups */}
