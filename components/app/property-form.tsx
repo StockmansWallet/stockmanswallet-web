@@ -5,9 +5,10 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AddressAutocomplete, { type AddressResult } from "@/components/app/address-autocomplete";
-import { Home, MapPin, FileText } from "lucide-react";
+import { Home, MapPin, FileText, Star } from "lucide-react";
 
 import type { Database } from "@/lib/types/database";
 import { lgasForState } from "@/lib/data/lga-data";
@@ -34,6 +35,8 @@ interface PropertyFormProps {
   deleteButton?: ReactNode;
   /** When true, renders the bottom actions as a rounded-full pill bar. */
   actionBarLayout?: boolean;
+  /** Whether the user has any other non-deleted properties. Controls whether the primary toggle is shown. */
+  hasOtherProperties?: boolean;
 }
 
 export function PropertyForm({
@@ -43,6 +46,7 @@ export function PropertyForm({
   cancelHref,
   deleteButton,
   actionBarLayout,
+  hasOtherProperties,
 }: PropertyFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -300,6 +304,41 @@ export function PropertyForm({
           />
         </CardContent>
       </Card>
+
+      {/* Primary Property */}
+      {/* Hidden when this row is already primary (only way to demote is to promote another) */}
+      {/* Hidden on first-property creation since the server auto-promotes */}
+      {!property?.is_default && (property || hasOtherProperties) && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <div className="bg-brand/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+                <Star className="text-brand h-3.5 w-3.5" />
+              </div>
+              <CardTitle>Primary Property</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="px-5 pb-5">
+            <Switch
+              id="is_primary"
+              name="is_primary"
+              label="Set as primary property"
+              description="The primary property is used as the default for new herds. Setting this on will replace your current primary."
+              color="brand"
+            />
+          </CardContent>
+        </Card>
+      )}
+      {property?.is_default && (
+        <Card>
+          <CardContent className="flex items-center gap-2.5 px-5 py-4">
+            <Star className="text-brand h-4 w-4 shrink-0" />
+            <p className="text-text-secondary text-sm">
+              This is your primary property. To change it, edit a different property and set it as primary.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Actions */}
       {actionBarLayout ? (
