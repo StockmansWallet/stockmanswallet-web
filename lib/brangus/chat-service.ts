@@ -6,6 +6,7 @@ import { createClient } from "../supabase/client";
 import { calculateHerdValue, categoryFallback, defaultFallbackPrice, type CategoryPriceEntry } from "../engines/valuation-engine";
 import { resolveMLACategory } from "../data/weight-mapping";
 import { cattleBreedPremiums, saleyardToState } from "../data/reference-data";
+import { expandWithNearbySaleyards } from "../data/saleyard-proximity";
 import { toolDefinitions, executeTool, DISPLAY_ONLY_TOOLS, generateAutoCards } from "./tools";
 import { fetchAllPropertyWeather } from "../services/weather-service";
 import { centsToDollars } from "../types/money";
@@ -334,7 +335,15 @@ export function buildSystemPrompt(store: ChatDataStore, serverConfig?: BrangusCo
       const species = sanitisePromptField(herd.species, 40);
       const breed = sanitisePromptField(herd.breed, 60);
       const category = sanitisePromptField(herd.category, 40);
-      indexLines.push(`  - ${name}: ${herd.head_count} head, ${species} ${breed}, ${category}`);
+      // BRG-012: surface breeder_sub_type so heifer/cow queries pick up Breeder rows
+      // (e.g. Brahman Breeder Heifer must surface when the user asks about heifers).
+      const subType = herd.breeder_sub_type
+        ? sanitisePromptField(herd.breeder_sub_type, 40)
+        : "";
+      const subTypeSuffix = subType ? ` (${subType})` : "";
+      indexLines.push(
+        `  - ${name}: ${herd.head_count} head, ${species} ${breed}, ${category}${subTypeSuffix}`
+      );
     }
   }
 
@@ -853,7 +862,11 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
   // Fetch saleyard-specific prices now that herds are loaded
   // Filter by user's saleyards + MLA categories to stay under PostgREST 1000-row limit
   const activeHerdsList = (herds ?? []).filter((h: { is_sold: boolean }) => !h.is_sold);
-  const saleyards = [...new Set(activeHerdsList.map((h: { selected_saleyard: string | null }) => h.selected_saleyard).filter(Boolean))] as string[];
+  const herdSaleyards = [...new Set(activeHerdsList.map((h: { selected_saleyard: string | null }) => h.selected_saleyard).filter(Boolean))] as string[];
+  // BRG-001: include nearest saleyards in the same fetch so the engine's nearest-saleyard
+  // fallback (and saleyard override requests against a non-herd yard) hit the map instead
+  // of falling through to the national average. Mirrors the iOS prefetch behaviour.
+  const saleyards = expandWithNearbySaleyards(herdSaleyards, 3);
   const primaryCategories = [...new Set(activeHerdsList.map((h: { category: string; initial_weight?: number; breeder_sub_type?: string }) => resolveMLACategory(h.category, h.initial_weight ?? 0, h.breeder_sub_type ?? undefined).primaryMLACategory))];
   const mlaCategories = [...new Set([...primaryCategories, ...primaryCategories.map(c => categoryFallback(c)).filter((c): c is string => c !== null)])];
   if (saleyards.length > 0 && mlaCategories.length > 0) {
