@@ -992,9 +992,18 @@ async function fetchSeasonalData(
 ): Promise<SeasonalCategoryData[]> {
   if (mlaCategories.length === 0) return [];
 
+  // BRG-015: per-category metadata (sample size + date window) collected during
+  // aggregation so the seasonal section can quote "X records from Mmm yyyy to Mmm yyyy"
+  // when a producer asks how reliable a figure is.
+  type CategoryMetadata = { sampleSize: number; earliest: string; latest: string };
+
   // Helper: aggregate rows into per-category monthly averages
-  function aggregateRows(rows: { category: string; price_per_kg: number; price_date: string }[]): Map<string, Map<number, { sum: number; count: number }>> {
+  function aggregateRows(rows: { category: string; price_per_kg: number; price_date: string }[]): {
+    catMap: Map<string, Map<number, { sum: number; count: number }>>;
+    metaMap: Map<string, CategoryMetadata>;
+  } {
     const catMap = new Map<string, Map<number, { sum: number; count: number }>>();
+    const metaMap = new Map<string, CategoryMetadata>();
     for (const row of rows) {
       const priceDateStr = row.price_date as string;
       const priceDate = /^\d{4}-\d{2}-\d{2}$/.test(priceDateStr)
@@ -1005,11 +1014,24 @@ async function fetchSeasonalData(
       const monthMap = catMap.get(row.category)!;
       const existing = monthMap.get(month) ?? { sum: 0, count: 0 };
       monthMap.set(month, { sum: existing.sum + row.price_per_kg, count: existing.count + 1 });
+
+      const meta = metaMap.get(row.category);
+      if (!meta) {
+        metaMap.set(row.category, { sampleSize: 1, earliest: priceDateStr, latest: priceDateStr });
+      } else {
+        meta.sampleSize += 1;
+        if (priceDateStr < meta.earliest) meta.earliest = priceDateStr;
+        if (priceDateStr > meta.latest) meta.latest = priceDateStr;
+      }
     }
-    return catMap;
+    return { catMap, metaMap };
   }
 
-  function buildFromCatMap(catMap: Map<string, Map<number, { sum: number; count: number }>>, sourceLabel: string): SeasonalCategoryData[] {
+  function buildFromCatMap(
+    catMap: Map<string, Map<number, { sum: number; count: number }>>,
+    metaMap: Map<string, CategoryMetadata>,
+    sourceLabel: string
+  ): SeasonalCategoryData[] {
     const results: SeasonalCategoryData[] = [];
     for (const [category, monthMap] of catMap) {
       const monthlyAvg: Record<number, number> = {};
@@ -1020,7 +1042,17 @@ async function fetchSeasonalData(
         monthlyAvg[month] = avg;
         if (avg > bestPrice) { bestPrice = avg; bestMonth = month; }
       }
-      results.push({ category, monthlyAvg, bestMonth, isFallback: false, sourceLabel });
+      const meta = metaMap.get(category);
+      results.push({
+        category,
+        monthlyAvg,
+        bestMonth,
+        isFallback: false,
+        sourceLabel,
+        sampleSize: meta?.sampleSize,
+        earliestDate: meta?.earliest,
+        latestDate: meta?.latest,
+      });
     }
     return results;
   }
@@ -1035,8 +1067,8 @@ async function fetchSeasonalData(
         .in("saleyard", preferredSaleyards);
 
       if (!error && rows && rows.length > 0) {
-        const catMap = aggregateRows(rows as { category: string; price_per_kg: number; price_date: string }[]);
-        const results = buildFromCatMap(catMap, preferredSaleyards.join(", "));
+        const { catMap, metaMap } = aggregateRows(rows as { category: string; price_per_kg: number; price_date: string }[]);
+        const results = buildFromCatMap(catMap, metaMap, preferredSaleyards.join(", "));
         if (results.length > 0) return results;
       }
     }
@@ -1048,8 +1080,8 @@ async function fetchSeasonalData(
       .in("category", mlaCategories);
 
     if (!error && rows && rows.length > 0) {
-      const catMap = aggregateRows(rows as { category: string; price_per_kg: number; price_date: string }[]);
-      const results = buildFromCatMap(catMap, "national (multi-state average)");
+      const { catMap, metaMap } = aggregateRows(rows as { category: string; price_per_kg: number; price_date: string }[]);
+      const results = buildFromCatMap(catMap, metaMap, "national (multi-state average)");
       if (results.length > 0) return results;
     }
   } catch {

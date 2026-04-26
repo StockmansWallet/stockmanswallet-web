@@ -273,6 +273,11 @@ export interface SeasonalCategoryData {
   isFallback: boolean;
   // BRG-015 fix: explicit source label so Brangus can always attribute the data
   sourceLabel: string;
+  // BRG-015 (CAT-03 R2): sample size + date range so Brangus can answer
+  // "how reliable is that figure?" without guessing. Null on fallback (synthetic) data.
+  sampleSize?: number;
+  earliestDate?: string; // ISO YYYY-MM-DD
+  latestDate?: string;
 }
 
 // MARK: - Pending Mutations

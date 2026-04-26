@@ -17,7 +17,7 @@ export const toolDefinitions = [
   {
     name: "lookup_portfolio_data",
     description:
-      "Retrieves specific portfolio, market, weather, and operational data from the app. This is your PRIMARY tool - call it for ANY question about herds, properties, prices, market indices, freight, sales, weather, or the yard book. You MUST call this tool before citing any specific numbers (prices, weights, head counts, values, dates, temperatures) in your response. Herd valuations returned by this tool come straight from the AMV (Adjusted Market Value) engine and already include breed premium, projected weight (ADG accrual), pre-birth accrual, calves at foot, and mortality deduction. NEVER recompute these figures yourself - quote them as returned. BREEDER SUB-TYPES: Breeder-category herds carry a sub-type of either 'Heifer' or 'Cow'. When a user asks about HEIFERS, include Breeder herds with sub-type Heifer in the answer (they are heifers, just flagged for breeding). When a user asks about COWS, include Breeder herds with sub-type Cow plus any Dry Cow herds. Treat the parenthesised sub-type in the per-herd line (e.g. 'Breeder (Heifer)') as authoritative for this grouping. Never silently exclude a Breeder herd from a heifer or cow answer based on its top-level category. If the user asks about market indices (EYCI, WYCI, OTH), current prices, today's market, or what categories are worth, use query_type 'market_prices' - this mirrors what the Markets tab shows. If the user asks how the market has MOVED over TIME ('trend', 'last 3 months', 'how has EYCI been tracking', 'price history', 'past six months', 'is the market up or down lately'), use query_type 'historical_prices' - returns the 12-month MLA indicator trend. If the user asks about typical seasonal patterns or the best month to sell, use query_type 'seasonal_pricing'. SALEYARD COMPARISONS: if the user asks 'what would my X be worth at Y instead of Z', 'compare Roma vs Dalby', 'is Gracemere better than Charters Towers for these', or any 'what if I sold at a different yard' question, use query_type 'saleyard_comparison' with herd_name + the list of saleyards. You have LIVE MLA pricing for EVERY saleyard in Australia via the AVAILABLE SALEYARDS list in the portfolio index - the user does NOT need the saleyard 'linked' to their account, it does NOT need to be in their settings, and you should NEVER ask them to add it. Just call the tool. If the user asks about weather, temperature, rain, forecast, or conditions at a property, use query_type 'property_weather'. Always look up data first. Never rely on the portfolio index alone.",
+      "Retrieves specific portfolio, market, weather, and operational data from the app. This is your PRIMARY tool - call it for ANY question about herds, properties, prices, market indices, freight, sales, weather, or the yard book. You MUST call this tool before citing any specific numbers (prices, weights, head counts, values, dates, temperatures) in your response. Herd valuations returned by this tool come straight from the AMV (Adjusted Market Value) engine and already include breed premium, projected weight (ADG accrual), pre-birth accrual, calves at foot, and mortality deduction. NEVER recompute these figures yourself - quote them as returned. BREEDER SUB-TYPES: Breeder-category herds carry a sub-type of either 'Heifer' or 'Cow'. When a user asks about HEIFERS, include Breeder herds with sub-type Heifer in the answer (they are heifers, just flagged for breeding). When a user asks about COWS, include Breeder herds with sub-type Cow plus any Dry Cow herds. Treat the parenthesised sub-type in the per-herd line (e.g. 'Breeder (Heifer)') as authoritative for this grouping. Never silently exclude a Breeder herd from a heifer or cow answer based on its top-level category. If the user asks about market indices (EYCI, WYCI, OTH), current prices, today's market, or what categories are worth, use query_type 'market_prices' - this mirrors what the Markets tab shows. If the user asks how the market has MOVED over TIME ('trend', 'last 3 months', 'how has EYCI been tracking', 'price history', 'past six months', 'is the market up or down lately', 'compared to last year', 'this time last year'), use query_type 'historical_prices' - returns the 12-month MLA indicator trend. CRITICAL FOR DIRECTIONAL / YEAR-ON-YEAR QUESTIONS: market_prices is single-saleyard and category-level only - it cannot tell you which way 'the market' is moving on its own. For 'is the market going up or down?' or 'how does X compare to last year?', ALWAYS call historical_prices for the national EYCI/WYCI trend in addition to market_prices, and disclose any single-yard limitation upfront ('Looking at [yard] data...') if you cite a market_prices figure in that broader context. If the user asks about typical seasonal patterns or the best month to sell, use query_type 'seasonal_pricing'. SALEYARD COMPARISONS: if the user asks 'what would my X be worth at Y instead of Z', 'compare Roma vs Dalby', 'is Gracemere better than Charters Towers for these', or any 'what if I sold at a different yard' question, use query_type 'saleyard_comparison' with herd_name + the list of saleyards. You have LIVE MLA pricing for EVERY saleyard in Australia via the AVAILABLE SALEYARDS list in the portfolio index - the user does NOT need the saleyard 'linked' to their account, it does NOT need to be in their settings, and you should NEVER ask them to add it. Just call the tool. If the user asks about weather, temperature, rain, forecast, or conditions at a property, use query_type 'property_weather'. Always look up data first. Never rely on the portfolio index alone.",
     input_schema: {
       type: "object",
       properties: {
@@ -809,11 +809,17 @@ function lookupMarketPrices(category: string | undefined, store: ChatDataStore):
   };
 
   // 1. Saleyard-specific prices (most relevant to user)
+  // BRG-001 (CAT-03 R2): track unique saleyards so we can warn the model when only
+  // one yard is loaded, which has caused it to generalise to "the cattle market"
+  // without disclosing the limitation. The fix is to surface the constraint and
+  // route directional/YoY questions to historical_prices for national context.
+  const saleyardsSeen = new Set<string>();
   if (store.saleyardPriceMap.size > 0) {
     const saleyardLines: string[] = [];
     for (const [key, entries] of store.saleyardPriceMap) {
       const [cat, saleyard] = key.split("|");
       if (!matchesCategory(cat)) continue;
+      saleyardsSeen.add(saleyard);
       for (const e of entries) {
         const rangeLabel = e.weight_range ? ` (${e.weight_range}kg)` : "";
         const dateLabel = e.data_date ? ` [${e.data_date}]` : "";
@@ -859,6 +865,14 @@ function lookupMarketPrices(category: string | undefined, store: ChatDataStore):
     // Remind Brangus to prefer saleyard prices
     lines.push("");
     lines.push("NOTE: Always cite saleyard-specific prices when available. National averages are broader context only.");
+    // BRG-001 (CAT-03 R2): when only one yard's data is loaded for current state,
+    // the model has been generalising from a single yard to "the cattle market"
+    // without disclosing the limitation upfront. Make the constraint loud here and
+    // steer direction/YoY questions to historical_prices (national EYCI/WYCI).
+    if (saleyardsSeen.size === 1) {
+      const onlyYard = Array.from(saleyardsSeen)[0];
+      lines.push(`SINGLE-YARD WARNING: Only ${onlyYard} data is loaded for the CURRENT category prices above. Do NOT generalise from this one yard to broad statements like 'the cattle market is doing X'. For 'is the market going up or down', 'how does X compare to last year', or any directional/year-on-year question, ALSO call historical_prices to get the national EYCI/WYCI indicator trend, and ALWAYS open with 'Looking at ${onlyYard} data' (or similar) when quoting any of the figures above in those broader contexts.`);
+    }
   }
 
   return lines.join("\n");
@@ -1124,6 +1138,25 @@ function lookupSeasonalPricing(category: string | undefined, store: ChatDataStor
       const spread = bestPrice - worst.price;
       line += `, WORST MONTH: ${monthNames[worst.month]} at $${worst.price.toFixed(2)}/kg`;
       line += `, SPREAD: $${spread.toFixed(2)}/kg]`;
+    }
+    // BRG-015 (CAT-03 R2): append sample size + actual date window so Brangus can
+    // answer "how reliable is that figure?" without guessing. Skipped on fallback
+    // (synthetic) entries where there is no real sample.
+    if (entry.sampleSize && entry.sampleSize > 0) {
+      const formatWindowDate = (iso: string | undefined): string | null => {
+        if (!iso) return null;
+        const m = iso.match(/^(\d{4})-(\d{2})/);
+        if (!m) return null;
+        const monthIdx = Number(m[2]);
+        if (Number.isNaN(monthIdx) || monthIdx < 1 || monthIdx > 12) return null;
+        return `${monthNames[monthIdx]} ${m[1]}`;
+      };
+      let windowText = `[SAMPLE: ${entry.sampleSize} records`;
+      const earliest = formatWindowDate(entry.earliestDate);
+      const latest = formatWindowDate(entry.latestDate);
+      if (earliest && latest) windowText += ` from ${earliest} to ${latest}`;
+      windowText += "]";
+      line += ` ${windowText}`;
     }
     lines.push(line);
   }
