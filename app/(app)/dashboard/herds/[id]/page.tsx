@@ -101,14 +101,14 @@ export default async function HerdDetailPage({ params }: { params: Promise<{ id:
     supabase.from("breed_premiums").select("breed, premium_percent:premium_pct"),
     supabase
       .from("muster_records")
-      .select("id, date, total_head_count, cattle_yard, weaners_count, branders_count, notes")
+      .select("id, date, total_head_count, cattle_yard, weaners_count, branders_count, notes, photo_paths")
       .eq("herd_id", id)
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
       .order("date", { ascending: false }),
     supabase
       .from("health_records")
-      .select("id, date, treatment_type, notes")
+      .select("id, date, treatment_type, notes, photo_paths")
       .eq("herd_id", id)
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
@@ -263,6 +263,36 @@ export default async function HerdDetailPage({ params }: { params: Promise<{ id:
     : 0;
 
   const property = herd.properties as { property_name: string } | null;
+
+  // Sign every record photo in one batch so the section components can render
+  // private storage objects without needing client-side auth round-trips.
+  const allPhotoPaths = [
+    ...(musterRecords ?? []).flatMap((r) => (r.photo_paths as string[] | null) ?? []),
+    ...(healthRecords ?? []).flatMap((r) => (r.photo_paths as string[] | null) ?? []),
+  ];
+  const signedUrlMap = new Map<string, string>();
+  if (allPhotoPaths.length > 0) {
+    const { data: signed } = await supabase.storage
+      .from("record-photos")
+      .createSignedUrls(allPhotoPaths, 60 * 60);
+    for (const entry of signed ?? []) {
+      if (entry.path && entry.signedUrl) {
+        signedUrlMap.set(entry.path, entry.signedUrl);
+      }
+    }
+  }
+  const attachPhotos = <T extends { photo_paths: string[] | null }>(record: T) => {
+    const paths = record.photo_paths ?? [];
+    const photos = paths
+      .map((path) => {
+        const url = signedUrlMap.get(path);
+        return url ? { path, url } : null;
+      })
+      .filter((p): p is { path: string; url: string } => p !== null);
+    return { ...record, photos };
+  };
+  const musterRecordsWithPhotos = (musterRecords ?? []).map(attachPhotos);
+  const healthRecordsWithPhotos = (healthRecords ?? []).map(attachPhotos);
 
   const categoryLabel =
     herd.sub_category && herd.sub_category !== herd.category
@@ -653,10 +683,20 @@ export default async function HerdDetailPage({ params }: { params: Promise<{ id:
         </Card>
 
         {/* 6. Mustering Records */}
-        <MusterRecordsSection herdId={id} records={musterRecords ?? []} editable />
+        <MusterRecordsSection
+          herdId={id}
+          userId={user!.id}
+          records={musterRecordsWithPhotos}
+          editable
+        />
 
         {/* 7. Health Records */}
-        <HealthRecordsSection herdId={id} records={healthRecords ?? []} editable />
+        <HealthRecordsSection
+          herdId={id}
+          userId={user!.id}
+          records={healthRecordsWithPhotos}
+          editable
+        />
 
         {/* 8. Notes */}
         {herd.notes && (

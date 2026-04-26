@@ -69,14 +69,14 @@ export default async function EditHerdPage({ params }: { params: Promise<{ id: s
       .order("property_name"),
     supabase
       .from("muster_records")
-      .select("id, date, total_head_count, cattle_yard, weaners_count, branders_count, notes")
+      .select("id, date, total_head_count, cattle_yard, weaners_count, branders_count, notes, photo_paths")
       .eq("herd_id", id)
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
       .order("date", { ascending: false }),
     supabase
       .from("health_records")
-      .select("id, date, treatment_type, notes")
+      .select("id, date, treatment_type, notes, photo_paths")
       .eq("herd_id", id)
       .eq("user_id", user!.id)
       .eq("is_deleted", false)
@@ -92,6 +92,36 @@ export default async function EditHerdPage({ params }: { params: Promise<{ id: s
   if (!herd) notFound();
 
   const boundUpdate = updateHerd.bind(null, id);
+
+  // Sign every record photo in one batch so the section components can render
+  // private storage objects directly.
+  const allPhotoPaths = [
+    ...(musterRecords ?? []).flatMap((r) => (r.photo_paths as string[] | null) ?? []),
+    ...(healthRecords ?? []).flatMap((r) => (r.photo_paths as string[] | null) ?? []),
+  ];
+  const signedUrlMap = new Map<string, string>();
+  if (allPhotoPaths.length > 0) {
+    const { data: signed } = await supabase.storage
+      .from("record-photos")
+      .createSignedUrls(allPhotoPaths, 60 * 60);
+    for (const entry of signed ?? []) {
+      if (entry.path && entry.signedUrl) {
+        signedUrlMap.set(entry.path, entry.signedUrl);
+      }
+    }
+  }
+  const attachPhotos = <T extends { photo_paths: string[] | null }>(record: T) => {
+    const paths = record.photo_paths ?? [];
+    const photos = paths
+      .map((path) => {
+        const url = signedUrlMap.get(path);
+        return url ? { path, url } : null;
+      })
+      .filter((p): p is { path: string; url: string } => p !== null);
+    return { ...record, photos };
+  };
+  const musterRecordsWithPhotos = (musterRecords ?? []).map(attachPhotos);
+  const healthRecordsWithPhotos = (healthRecords ?? []).map(attachPhotos);
 
   // Distinct list of previously-used livestock owners to power the typeahead.
   const existingOwners = [
@@ -115,8 +145,18 @@ export default async function EditHerdPage({ params }: { params: Promise<{ id: s
       />
 
       <div className="mt-4 space-y-4">
-        <MusterRecordsSection herdId={id} records={musterRecords ?? []} editable />
-        <HealthRecordsSection herdId={id} records={healthRecords ?? []} editable />
+        <MusterRecordsSection
+          herdId={id}
+          userId={user!.id}
+          records={musterRecordsWithPhotos}
+          editable
+        />
+        <HealthRecordsSection
+          herdId={id}
+          userId={user!.id}
+          records={healthRecordsWithPhotos}
+          editable
+        />
       </div>
     </div>
   );

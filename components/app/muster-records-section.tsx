@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,11 @@ import {
   updateMusterRecord,
   deleteMusterRecord,
 } from "@/app/(app)/dashboard/herds/record-actions";
+import {
+  RecordPhotoUploader,
+  type RecordPhoto,
+} from "./record-photo-uploader";
+import { RecordPhotoStrip } from "./record-photo-strip";
 
 interface MusterRecord {
   id: string;
@@ -19,6 +24,7 @@ interface MusterRecord {
   weaners_count: number | null;
   branders_count: number | null;
   notes: string | null;
+  photos: RecordPhoto[];
 }
 
 function SectionIcon({ icon: Icon }: { icon: React.ComponentType<{ className?: string }> }) {
@@ -38,15 +44,21 @@ function formatDate(dateStr: string) {
 
 function MusterForm({
   herdId,
+  userId,
   record,
   onClose,
 }: {
   herdId: string;
+  userId: string;
   record?: MusterRecord;
   onClose: () => void;
 }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const recordId = useMemo(() => record?.id ?? crypto.randomUUID(), [record?.id]);
+  const [photoPaths, setPhotoPaths] = useState<string[]>(
+    () => record?.photos.map((p) => p.path) ?? [],
+  );
   const now = new Date();
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
@@ -62,10 +74,11 @@ function MusterForm({
       weaners_count: Number(fd.get("weaners_count")) || null,
       branders_count: Number(fd.get("branders_count")) || null,
       notes: (fd.get("notes") as string) || null,
+      photo_paths: photoPaths,
     };
     const result = record
       ? await updateMusterRecord(record.id, herdId, data)
-      : await createMusterRecord(herdId, data);
+      : await createMusterRecord(herdId, { id: recordId, ...data });
     if ("error" in result && result.error) {
       setError(result.error);
       setSaving(false);
@@ -91,6 +104,13 @@ function MusterForm({
         placeholder="Notes..."
         className="w-full rounded-xl bg-white/5 px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted outline-none ring-1 ring-inset ring-white/10 focus:ring-brand/60"
       />
+      <RecordPhotoUploader
+        userId={userId}
+        recordId={recordId}
+        kind="muster"
+        initialPhotos={record?.photos ?? []}
+        onChange={setPhotoPaths}
+      />
       <div className="flex items-center gap-2">
         <Button type="submit" size="sm" disabled={saving}>{saving ? "Saving..." : record ? "Update" : "Add Record"}</Button>
         <Button
@@ -109,10 +129,12 @@ function MusterForm({
 
 export function MusterRecordsSection({
   herdId,
+  userId,
   records: initialRecords,
   editable = false,
 }: {
   herdId: string;
+  userId: string;
   records: MusterRecord[];
   editable?: boolean;
 }) {
@@ -145,7 +167,7 @@ export function MusterRecordsSection({
       <CardContent className="px-5 pb-5">
         {showForm && !editingId && (
           <div className="mb-4">
-            <MusterForm herdId={herdId} onClose={() => setShowForm(false)} />
+            <MusterForm herdId={herdId} userId={userId} onClose={() => setShowForm(false)} />
           </div>
         )}
         {records.length === 0 && !showForm ? (
@@ -156,7 +178,7 @@ export function MusterRecordsSection({
               <div key={r.id}>
                 {editingId === r.id ? (
                   <div className="py-3">
-                    <MusterForm herdId={herdId} record={r} onClose={() => setEditingId(null)} />
+                    <MusterForm herdId={herdId} userId={userId} record={r} onClose={() => setEditingId(null)} />
                   </div>
                 ) : (
                   <div className="flex items-start justify-between gap-3 py-3">
@@ -169,6 +191,7 @@ export function MusterRecordsSection({
                         {r.cattle_yard && <span>{r.cattle_yard}</span>}
                       </div>
                       {r.notes && <p className="mt-1 text-xs text-text-muted">{r.notes}</p>}
+                      <RecordPhotoStrip photos={r.photos} />
                     </div>
                     {editable && (
                       <div className="flex shrink-0 items-center gap-1">

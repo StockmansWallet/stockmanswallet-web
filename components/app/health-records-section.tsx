@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,11 @@ import {
   updateHealthRecord,
   deleteHealthRecord,
 } from "@/app/(app)/dashboard/herds/record-actions";
+import {
+  RecordPhotoUploader,
+  type RecordPhoto,
+} from "./record-photo-uploader";
+import { RecordPhotoStrip } from "./record-photo-strip";
 
 type TreatmentType = "Vaccination" | "Drenching" | "Parasite Treatment" | "Other";
 
@@ -19,6 +24,7 @@ interface HealthRecord {
   date: string;
   treatment_type: TreatmentType;
   notes: string | null;
+  photos: RecordPhoto[];
 }
 
 const TREATMENT_OPTIONS = [
@@ -52,15 +58,21 @@ function formatDate(dateStr: string) {
 
 function HealthForm({
   herdId,
+  userId,
   record,
   onClose,
 }: {
   herdId: string;
+  userId: string;
   record?: HealthRecord;
   onClose: () => void;
 }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const recordId = useMemo(() => record?.id ?? crypto.randomUUID(), [record?.id]);
+  const [photoPaths, setPhotoPaths] = useState<string[]>(
+    () => record?.photos.map((p) => p.path) ?? [],
+  );
   const now = new Date();
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
@@ -73,10 +85,11 @@ function HealthForm({
       date: (fd.get("date") as string) || today,
       treatment_type: (fd.get("treatment_type") as TreatmentType) || "Other",
       notes: (fd.get("notes") as string) || null,
+      photo_paths: photoPaths,
     };
     const result = record
       ? await updateHealthRecord(record.id, herdId, data)
-      : await createHealthRecord(herdId, data);
+      : await createHealthRecord(herdId, { id: recordId, ...data });
     if ("error" in result && result.error) {
       setError(result.error);
       setSaving(false);
@@ -105,6 +118,13 @@ function HealthForm({
         placeholder="Treatment details..."
         className="w-full rounded-xl bg-white/5 px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted outline-none ring-1 ring-inset ring-white/10 focus:ring-brand/60"
       />
+      <RecordPhotoUploader
+        userId={userId}
+        recordId={recordId}
+        kind="health"
+        initialPhotos={record?.photos ?? []}
+        onChange={setPhotoPaths}
+      />
       <div className="flex items-center gap-2">
         <Button type="submit" size="sm" disabled={saving}>{saving ? "Saving..." : record ? "Update" : "Add Record"}</Button>
         <Button
@@ -123,10 +143,12 @@ function HealthForm({
 
 export function HealthRecordsSection({
   herdId,
+  userId,
   records: initialRecords,
   editable = false,
 }: {
   herdId: string;
+  userId: string;
   records: HealthRecord[];
   editable?: boolean;
 }) {
@@ -159,7 +181,7 @@ export function HealthRecordsSection({
       <CardContent className="px-5 pb-5">
         {showForm && !editingId && (
           <div className="mb-4">
-            <HealthForm herdId={herdId} onClose={() => setShowForm(false)} />
+            <HealthForm herdId={herdId} userId={userId} onClose={() => setShowForm(false)} />
           </div>
         )}
         {records.length === 0 && !showForm ? (
@@ -172,7 +194,7 @@ export function HealthRecordsSection({
                 <div key={r.id}>
                   {editingId === r.id ? (
                     <div className="py-3">
-                      <HealthForm herdId={herdId} record={r} onClose={() => setEditingId(null)} />
+                      <HealthForm herdId={herdId} userId={userId} record={r} onClose={() => setEditingId(null)} />
                     </div>
                   ) : (
                     <div className="flex items-start justify-between gap-3 py-3">
@@ -184,6 +206,7 @@ export function HealthRecordsSection({
                           <p className="text-sm font-medium text-text-primary">{formatDate(r.date)}</p>
                           <p className="mt-0.5 text-xs text-text-muted">{r.treatment_type}</p>
                           {r.notes && <p className="mt-0.5 text-xs text-text-muted">{r.notes}</p>}
+                          <RecordPhotoStrip photos={r.photos} />
                         </div>
                       </div>
                       {editable && (
