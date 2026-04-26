@@ -11,9 +11,12 @@ import {
   ChevronRight,
   Eye,
   EyeOff,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui/modal";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
+import { deleteYardBookItem } from "@/app/(app)/dashboard/tools/yard-book/actions";
 import type { Database } from "@/lib/types/database";
 import type { YardBookCategory } from "@/lib/types/models";
 
@@ -284,11 +287,17 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
                     .filter(Boolean);
 
                   return (
-                    <Link
+                    <div
                       key={item.id}
-                      href={`/dashboard/tools/yard-book/${item.id}`}
-                      className="group flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-3 transition-all hover:bg-white/[0.06]"
+                      className="group relative flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-3 transition-all hover:bg-white/[0.06]"
                     >
+                      {/* Tap target overlay (entire row navigates to detail) */}
+                      <Link
+                        href={`/dashboard/tools/yard-book/${item.id}`}
+                        aria-label={`Open ${item.title}`}
+                        className="absolute inset-0 rounded-xl"
+                      />
+
                       {/* Category icon */}
                       <div
                         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${catConfig.iconBg}`}
@@ -297,7 +306,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
                       </div>
 
                       {/* Content */}
-                      <div className="min-w-0 flex-1">
+                      <div className="pointer-events-none min-w-0 flex-1">
                         <p
                           className={`text-sm font-medium ${
                             item.is_completed ? "text-text-muted line-through" : "text-text-primary"
@@ -332,7 +341,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
                       </div>
 
                       {/* Countdown or completed badge */}
-                      <div className="shrink-0">
+                      <div className="pointer-events-none shrink-0">
                         {item.is_completed ? (
                           <CheckCircle2 className="text-success h-5 w-5" />
                         ) : (
@@ -344,9 +353,12 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
                         )}
                       </div>
 
+                      {/* Delete button (sits above the link overlay) */}
+                      <RowDeleteButton id={item.id} title={item.title} />
+
                       {/* Chevron */}
-                      <ChevronRight className="text-text-muted h-4 w-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100" />
-                    </Link>
+                      <ChevronRight className="text-text-muted pointer-events-none h-4 w-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100" />
+                    </div>
                   );
                 })}
               </div>
@@ -355,5 +367,66 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
         </div>
       )}
     </div>
+  );
+}
+
+function RowDeleteButton({ id, title }: { id: string; title: string }) {
+  const [open, setOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleDelete() {
+    setDeleting(true);
+    const result = await deleteYardBookItem(id);
+    // Server action redirects on success; only reached on error
+    if (result?.error) {
+      setDeleting(false);
+      setOpen(false);
+    }
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen(true);
+        }}
+        aria-label={`Delete ${title}`}
+        className="text-text-muted hover:bg-error/15 hover:text-error relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-md opacity-60 transition-all group-hover:opacity-100 focus-visible:opacity-100"
+      >
+        <Trash2 className="h-4 w-4" />
+      </button>
+
+      <Modal
+        open={open}
+        onClose={() => (deleting ? null : setOpen(false))}
+        title="Delete Item"
+        size="sm"
+      >
+        <p className="text-text-secondary mb-6 text-sm">
+          Are you sure you want to delete <strong>{title}</strong>? This action
+          cannot be undone.
+        </p>
+        <div className="flex items-center justify-end gap-3">
+          <Button
+            variant="ghost"
+            className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
+            onClick={() => setOpen(false)}
+            disabled={deleting}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={deleting}
+          >
+            {deleting ? "Deleting..." : "Delete Item"}
+          </Button>
+        </div>
+      </Modal>
+    </>
   );
 }
