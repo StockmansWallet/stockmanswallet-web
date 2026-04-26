@@ -19,11 +19,24 @@ const BRANGUS_AVATAR = "/images/brangus-chat-profile.webp";
 interface SharedChatPanelProps {
   chat: SharedChatRow;
   viewerIsRecipient: boolean;
+  /**
+   * Display name of the other party - the sender when viewerIsRecipient is true,
+   * the recipient when false. Optional because inbox rows already carry
+   * sender_display_name on the chat itself; passed explicitly for sent rows
+   * where the recipient's name comes from a separate user_profiles lookup.
+   */
+  recipientDisplayName?: string | null;
   onBack: () => void;
   onRemoved: (id: string) => void;
 }
 
-export function SharedChatPanel({ chat, viewerIsRecipient, onBack, onRemoved }: SharedChatPanelProps) {
+export function SharedChatPanel({
+  chat,
+  viewerIsRecipient,
+  recipientDisplayName,
+  onBack,
+  onRemoved,
+}: SharedChatPanelProps) {
   const [deleting, setDeleting] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -63,6 +76,10 @@ export function SharedChatPanel({ chat, viewerIsRecipient, onBack, onRemoved }: 
   });
 
   const senderName = chat.sender_display_name?.trim() || "a fellow producer";
+  const recipientName = recipientDisplayName?.trim() || "another producer";
+  const headerLabel = viewerIsRecipient
+    ? `Shared by ${senderName}`
+    : `You shared this chat with ${recipientName}`;
 
   return (
     <div data-print-chat className="flex flex-1 flex-col overflow-hidden">
@@ -74,9 +91,7 @@ export function SharedChatPanel({ chat, viewerIsRecipient, onBack, onRemoved }: 
           <MessageSquare className="h-4 w-4" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-text-primary truncate text-sm font-semibold">
-            {viewerIsRecipient ? `Shared by ${senderName}` : "You shared this chat"}
-          </p>
+          <p className="text-text-primary truncate text-sm font-semibold">{headerLabel}</p>
           <p className="text-text-muted text-xs">{formattedDate}</p>
           {chat.title && (
             <p className="text-text-primary mt-1 truncate text-xs font-medium">{chat.title}</p>

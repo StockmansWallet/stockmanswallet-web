@@ -100,6 +100,55 @@ export async function fetchInboxSharedChats(): Promise<SharedChatRow[]> {
   return rows;
 }
 
+// MARK: - Fetch sent (sender's record of what they've shared)
+// Returns rows where the current user is the sender and hasn't soft-deleted them.
+// Recipient display name is hydrated from user_profiles via a single batched
+// lookup, mirroring the sender-name backfill pattern used by the inbox fetch.
+export interface SentSharedChatRow extends SharedChatRow {
+  recipient_display_name: string | null;
+}
+
+export async function fetchSentSharedChats(): Promise<SentSharedChatRow[]> {
+  const supabase = createClient();
+  const { data: userData } = await supabase.auth.getUser();
+  const currentUserId = userData.user?.id;
+  if (!currentUserId) return [];
+
+  const { data, error } = await supabase
+    .from("brangus_shared_chats")
+    .select("*")
+    .eq("sender_user_id", currentUserId)
+    .eq("is_deleted_by_sender", false)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("fetchSentSharedChats error:", error.message);
+    return [];
+  }
+
+  const rows = (data ?? []) as SharedChatRow[];
+  if (rows.length === 0) return [];
+
+  // Look up recipient display names in one batched query. RLS for the
+  // "connected producer" policy lets us read display_name for users we have an
+  // approved producer_peer connection with - which is exactly the set we
+  // could have shared to in the first place.
+  const recipientIds = [...new Set(rows.map((r) => r.recipient_user_id))];
+  const { data: profiles } = await supabase
+    .from("user_profiles")
+    .select("user_id, display_name")
+    .in("user_id", recipientIds);
+
+  const nameMap = new Map<string, string>(
+    (profiles ?? []).map((p) => [p.user_id as string, p.display_name as string]),
+  );
+
+  return rows.map((r) => ({
+    ...r,
+    recipient_display_name: nameMap.get(r.recipient_user_id) ?? null,
+  }));
+}
+
 // MARK: - Send share (sender)
 // Builds a frozen snapshot from the caller's messages and inserts a row.
 // Throws on failure so the caller can surface a toast.

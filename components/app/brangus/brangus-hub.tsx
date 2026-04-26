@@ -9,12 +9,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { BrangusChat } from "@/components/app/brangus-chat";
 import { ConversationList } from "@/components/app/brangus/conversation-list";
 import { SharedChatList } from "@/components/app/brangus/shared-chat-list";
+import { SentChatList } from "@/components/app/brangus/sent-chat-list";
 import { SharedChatPanel } from "@/components/app/brangus/shared-chat-panel";
 import { createClient } from "@/lib/supabase/client";
 import { fetchMessages } from "@/lib/brangus/conversation-service";
 import { fetchInboxSharedChats } from "@/lib/brangus/shared-chats-service";
 import type { BrangusConversationRow, BrangusMessageRow } from "@/lib/brangus/conversation-service";
-import type { SharedChatRow } from "@/lib/brangus/shared-chats-service";
+import type {
+  SharedChatRow,
+  SentSharedChatRow,
+} from "@/lib/brangus/shared-chats-service";
 
 type TabId = "chat" | "saved" | "shared";
 
@@ -38,7 +42,12 @@ export function BrangusHub({
 
   // Shared chat selected in the Shared tab. When set, the list is replaced with
   // the SharedChatPanel so the viewer reads it in-place without leaving the hub.
+  // sharedSubTab toggles between "Inbox" (received) and "Sent" (this user shared)
+  // and resets activeSharedChat so the user lands back in the relevant list.
+  type SharedSubTab = "inbox" | "sent";
+  const [sharedSubTab, setSharedSubTab] = useState<SharedSubTab>("inbox");
   const [activeSharedChat, setActiveSharedChat] = useState<SharedChatRow | null>(null);
+  const [activeSentRecipient, setActiveSentRecipient] = useState<string | null>(null);
 
   // Unread badge count for the Shared tab. Declared here (above the callbacks
   // that use setSharedUnread) so the setter is in scope at callback definition.
@@ -130,6 +139,7 @@ export function BrangusHub({
 
   const handleSelectSharedChat = useCallback((chat: SharedChatRow) => {
     setActiveSharedChat(chat);
+    setActiveSentRecipient(null);
     // Decrement badge immediately if the chat was unread (the panel marks it
     // read asynchronously, but the badge should clear right away).
     if (!chat.is_read) {
@@ -137,15 +147,33 @@ export function BrangusHub({
     }
   }, []);
 
+  const handleSelectSentChat = useCallback((chat: SentSharedChatRow) => {
+    // Reuse the same SharedChatPanel - just thread the recipient name through.
+    setActiveSharedChat(chat);
+    setActiveSentRecipient(chat.recipient_display_name);
+  }, []);
+
   const handleSharedChatBack = useCallback(() => {
     setActiveSharedChat(null);
+    setActiveSentRecipient(null);
   }, []);
 
   const handleSharedChatRemoved = useCallback(() => {
     setActiveSharedChat(null);
+    setActiveSentRecipient(null);
     // SharedChatList re-fetches on mount, but also decrement the badge in case
-    // the removed chat was unread.
-    setSharedUnread((n) => Math.max(0, n - 1));
+    // the removed chat was unread (only relevant on the inbox path).
+    if (sharedSubTab === "inbox") {
+      setSharedUnread((n) => Math.max(0, n - 1));
+    }
+  }, [sharedSubTab]);
+
+  const handleSwitchSharedSubTab = useCallback((next: SharedSubTab) => {
+    setSharedSubTab(next);
+    // Switching sub-tabs always clears the open chat so the viewer lands back
+    // in the relevant list rather than seeing a stale detail panel.
+    setActiveSharedChat(null);
+    setActiveSentRecipient(null);
   }, []);
 
   // Triple-layer realtime for the Shared tab badge:
@@ -350,8 +378,8 @@ export function BrangusHub({
       </div>
 
       {/* Shared tab (always mounted, hidden when inactive).
-          Chats other producers have shared with the current user. Unread
-          count drives the badge on the tab bar above.
+          Sub-tabs: Inbox (received) and Sent (this user shared). Inbox unread
+          count drives the badge on the parent tab bar.
           When activeSharedChat is set, the list is replaced with the panel so
           the chat renders in-place with the same bubble layout as the live chat. */}
       <div
@@ -362,20 +390,55 @@ export function BrangusHub({
           <Card className="flex h-full flex-col overflow-hidden rounded-3xl">
             <SharedChatPanel
               chat={activeSharedChat}
-              viewerIsRecipient={true}
+              viewerIsRecipient={sharedSubTab === "inbox"}
+              recipientDisplayName={activeSentRecipient}
               onBack={handleSharedChatBack}
               onRemoved={handleSharedChatRemoved}
             />
           </Card>
         ) : (
-          <Card className="h-full overflow-y-auto rounded-2xl">
-            <CardContent className="p-2">
-              <SharedChatList
-                onSelect={handleSelectSharedChat}
-                refreshSignal={sharedListRefreshKey}
-              />
-            </CardContent>
-          </Card>
+          <div className="flex h-full flex-col gap-2">
+            {/* Inbox / Sent sub-tab toggle. Sits inside the Shared tab so the
+                top-level tab bar stays stable. Matches the segmented-pill
+                pattern used elsewhere in the app for two-state filters. */}
+            <div className="bg-surface-lowest flex shrink-0 items-center gap-1 self-start rounded-full p-1">
+              <button
+                onClick={() => handleSwitchSharedSubTab("inbox")}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                  sharedSubTab === "inbox"
+                    ? "bg-brangus-dark text-white"
+                    : "text-text-muted hover:text-text-secondary"
+                }`}
+              >
+                Inbox{sharedUnread > 0 ? ` (${sharedUnread})` : ""}
+              </button>
+              <button
+                onClick={() => handleSwitchSharedSubTab("sent")}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                  sharedSubTab === "sent"
+                    ? "bg-brangus-dark text-white"
+                    : "text-text-muted hover:text-text-secondary"
+                }`}
+              >
+                Sent
+              </button>
+            </div>
+            <Card className="flex-1 overflow-y-auto rounded-2xl">
+              <CardContent className="p-2">
+                {sharedSubTab === "inbox" ? (
+                  <SharedChatList
+                    onSelect={handleSelectSharedChat}
+                    refreshSignal={sharedListRefreshKey}
+                  />
+                ) : (
+                  <SentChatList
+                    onSelect={handleSelectSentChat}
+                    refreshSignal={sharedListRefreshKey}
+                  />
+                )}
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </div>
