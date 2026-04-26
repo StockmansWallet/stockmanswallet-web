@@ -815,3 +815,60 @@ select option {
 .pac-logo::after {
   display: none !important;
 }
+
+/* ---------------------------------------------------------------------- */
+/* Google Maps InfoWindow tightening                                      */
+/* The default Maps InfoWindow has a chunky top header to host the close  */
+/* button. We hide the close button (the popup closes on map click or     */
+/* marker re-click) and squeeze padding so saleyard popovers don't carry  */
+/* a big empty band above the content.                                    */
+/* ---------------------------------------------------------------------- */
+
+/* Container holding the infowindow content + tail. */
+.gm-style .gm-style-iw-c {
+  padding: 12px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18) !important;
+}
+
+/* Inner scroll container - kill the awkward inner padding default. */
+.gm-style .gm-style-iw-d {
+  overflow: visible !important;
+  padding: 0 !important;
+}
+
+/* Built-in close button (X). Hidden because clicking the map / re-clicking
+   the marker closes the popup; the X only adds visual noise. */
+.gm-style .gm-ui-hover-effect {
+  display: none !important;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Saleyards map hover labels                                             */
+/* CSS-driven hover label that fades in immediately on marker hover - no  */
+/* native title-attribute delay (which is ~500ms on most browsers).       */
+/* ---------------------------------------------------------------------- */
+
+.saleyard-marker-label {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: rgba(17, 24, 39, 0.92);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 80ms ease-out;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+.saleyard-marker:hover .saleyard-marker-label {
+  opacity: 1;
+}

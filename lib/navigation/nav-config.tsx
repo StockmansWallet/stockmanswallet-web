@@ -16,6 +16,7 @@ import {
   Handshake,
   ClipboardList,
   Search,
+  Map as MapIcon,
 } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
 import { ADVISOR_ENABLED } from "@/lib/feature-flags";
@@ -136,6 +137,12 @@ export const producerNavItems: NavItem[] = [
     label: "Properties",
     href: "/dashboard/properties",
     icon: <MapPinned className="h-5 w-5" />,
+    ...nav(),
+  },
+  {
+    label: "Saleyards",
+    href: "/dashboard/saleyards",
+    icon: <MapIcon className="h-5 w-5" />,
     ...nav(),
   },
 ];
