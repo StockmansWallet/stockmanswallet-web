@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MapPin, ChevronDown, X, Search } from "lucide-react";
 import {
@@ -9,12 +9,13 @@ import {
   saleyardCoordinates,
   saleyardLocality,
 } from "@/lib/data/reference-data";
+import { useActiveSaleyards } from "@/lib/data/use-active-saleyards";
 
 const stateOrder = ["NSW", "QLD", "VIC", "SA", "WA", "TAS", "Other"] as const;
 
-function groupedSaleyards() {
+function groupedSaleyards(visible: readonly string[]) {
   const groups: Record<string, string[]> = {};
-  for (const s of saleyards) {
+  for (const s of visible) {
     const state = saleyardToState[s] ?? "Other";
     if (!groups[state]) groups[state] = [];
     groups[state].push(s);
@@ -49,11 +50,12 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 
 /** Returns up to 3 closest saleyards to a property, using coordinates or state fallback */
 function closestSaleyards(
-  property: { latitude?: number | null; longitude?: number | null; state?: string | null } | null
+  property: { latitude?: number | null; longitude?: number | null; state?: string | null } | null,
+  visible: readonly string[]
 ): string[] {
   if (!property) return [];
   if (property.latitude != null && property.longitude != null) {
-    const distances = saleyards
+    const distances = visible
       .filter((s) => saleyardCoordinates[s])
       .map((s) => ({
         name: s,
@@ -68,7 +70,7 @@ function closestSaleyards(
     return distances.slice(0, 3).map((d) => d.name);
   }
   if (property.state) {
-    return saleyards.filter((s) => saleyardToState[s] === property.state).slice(0, 3);
+    return visible.filter((s) => saleyardToState[s] === property.state).slice(0, 3);
   }
   return [];
 }
@@ -124,10 +126,19 @@ export function DashboardSaleyardSelector({
     setSearch("");
   }
 
-  const nearbyYards = closestSaleyards(primaryProperty ?? null);
+  // Hide MLA yards with stale (>365d) data. Empty active set means "still
+  // loading or fetch failed" - fall back to the full canonical list so the
+  // selector stays usable rather than appearing empty.
+  const activeSaleyards = useActiveSaleyards();
+  const visibleYards = useMemo(
+    () => (activeSaleyards.size === 0 ? saleyards : saleyards.filter((s) => activeSaleyards.has(s))),
+    [activeSaleyards]
+  );
+
+  const nearbyYards = closestSaleyards(primaryProperty ?? null, visibleYards);
   const nearbySet = new Set(nearbyYards);
 
-  const groups = groupedSaleyards();
+  const groups = groupedSaleyards(visibleYards);
   const lowerSearch = search.toLowerCase();
 
   const filteredNearby = nearbyYards.filter((y) => y.toLowerCase().includes(lowerSearch));

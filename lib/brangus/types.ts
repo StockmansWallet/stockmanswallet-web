@@ -89,6 +89,12 @@ export interface ChatDataStore {
   // Weather data for property_weather lookups (fetched from Open-Meteo)
   weatherData: PropertyWeatherData[];
 
+  // Active MLA saleyards (data fresher than 365 days). Used to filter the
+  // AVAILABLE SALEYARDS prompt block so Brangus only offers yards we have
+  // recent prices for. Empty set means "still loading or fetch failed" -
+  // the prompt builder falls back to the full canonical list in that case.
+  activeSaleyards: Set<string>;
+
   // Pending mutations from tool calls (persisted after response)
   pendingYardBookEvents: PendingYardBookEvent[];
   pendingYardBookActions: PendingYardBookAction[];

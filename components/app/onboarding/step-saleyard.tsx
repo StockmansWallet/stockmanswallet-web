@@ -6,6 +6,7 @@ import {
   saleyardLocality,
   saleyardToState,
 } from "@/lib/data/reference-data";
+import { useActiveSaleyards } from "@/lib/data/use-active-saleyards";
 import { Search, Building2, ChevronRight } from "lucide-react";
 
 export function StepSaleyard({
@@ -20,21 +21,29 @@ export function StepSaleyard({
   const [showBrowse, setShowBrowse] = useState(false);
   const [search, setSearch] = useState("");
 
+  // Hide MLA yards with stale (>365d) data. Empty set during the initial
+  // async load means show all - the picker stays usable while loading.
+  const activeSaleyards = useActiveSaleyards();
+  const visibleYards = useMemo(
+    () => (activeSaleyards.size === 0 ? saleyards : saleyards.filter((s) => activeSaleyards.has(s))),
+    [activeSaleyards]
+  );
+
   // Get the 3 closest saleyards by state match
   const closeSaleyards = useMemo(() => {
-    if (!propertyState) return saleyards.slice(0, 3);
-    const stateMatches = saleyards.filter(
+    if (!propertyState) return visibleYards.slice(0, 3);
+    const stateMatches = visibleYards.filter(
       (s) => saleyardToState[s] === propertyState
     );
     return stateMatches.slice(0, 3);
-  }, [propertyState]);
+  }, [propertyState, visibleYards]);
 
   // Filtered list for browse mode
   const filtered = useMemo(() => {
-    if (!search.trim()) return [...saleyards];
+    if (!search.trim()) return [...visibleYards];
     const lower = search.toLowerCase();
-    return saleyards.filter((s) => s.toLowerCase().includes(lower));
-  }, [search]);
+    return visibleYards.filter((s) => s.toLowerCase().includes(lower));
+  }, [search, visibleYards]);
 
   // Check if current selection is in close saleyards or the National option
   const isSelectionInClose = value

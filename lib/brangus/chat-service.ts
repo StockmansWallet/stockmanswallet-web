@@ -247,6 +247,7 @@ SALEYARD DISCLOSURE RULE (mandatory):
 - If the tool result shows "national average" as the source, say so explicitly so the user knows it is not their local market.
 - NEVER present market data as generic or unattributed. The farmer needs to know which market the numbers come from to make good decisions.
 - NEVER claim a saleyard is "linked to your account", "the account default", "linked to your account setup", or any similar phrasing. There is no account-level default saleyard concept. Saleyards live in two places only: (1) per-herd selected_saleyard, set when the user adds or edits a herd, and (2) per-property default_saleyard, set when the user creates or edits a property. When market_prices returns several saleyards, that is the union of yards linked to the user's individual herds, not a single "account default". State where the data came from by naming the actual saleyard and (if relevant) which herd or property it belongs to, never an inferred account-level link.
+- STALE SALEYARD DISCLOSURE: the AVAILABLE SALEYARDS list above only includes yards with MLA reports in the last 365 days. If the user explicitly names a saleyard not in that list (e.g. Toowoomba, Warrnambool, Emerald, Pakenham), the lookup tools still accept it and return whatever historical data exists, but you MUST open your reply with a clear disclosure that the data is stale. Read the data_date in the tool result and quote it: e.g. "That data is from 30 June 2024, more than a year old, so treat it as historical context rather than current market." Never present old data as current. If the user asks why the yard isn't selectable in the herd picker, the answer is that it stopped reporting fresh prices; it'll reappear once new MLA data lands.
 
 IN-CONVERSATION RECALL (BRG-016):
 When the user asks "What did you just say about X?", "What were those numbers again?", "Can you recap what you said about the heifers?", "Run that by me again" or any similar phrase asking you to repeat or summarise something from EARLIER IN THIS SAME CHAT - give a TEXT RECAP from the relevant earlier turn. Do NOT call any tools. Do NOT treat it as a continuation of whatever topic came immediately before. Find the earlier response about X and summarise it in your own words.
@@ -524,14 +525,22 @@ export function buildSystemPrompt(store: ChatDataStore, serverConfig?: BrangusCo
     indexLines.push("- Portfolio-independent questions (market prices, EYCI trend, seasonal patterns, weather, general 'how do I...' help) are fine to answer as normal.");
   }
 
-  // Debug: Surface the full saleyard network so Brangus never refuses a
+  // Debug: Surface the active saleyard network so Brangus never refuses a
   // "value these at another yard" question with 'that yard isn't linked to your account'.
-  // The AMV engine fetches live MLA prices for any yard below on demand. Mirrors iOS buildAvailableSaleyardsBlock.
+  // The AMV engine fetches live MLA prices for any active yard below on demand.
+  // Stale yards (>365d since last MLA report) are excluded so users aren't
+  // routed to dead data; if a user explicitly types a stale yard name, the
+  // tools still accept it but Brangus discloses the data is old.
+  // Mirrors iOS buildAvailableSaleyardsBlock.
   indexLines.push("");
   indexLines.push("AVAILABLE SALEYARDS (live MLA pricing for ALL of these via saleyard_override / saleyard_comparison - the user does NOT need them linked to their account):");
   const stateOrder = ["NSW", "QLD", "VIC", "SA", "WA", "TAS", "NT", "ACT"];
   const grouped: Record<string, string[]> = {};
+  // Empty activeSaleyards set means the fetch failed - fall back to the full
+  // canonical list rather than leaving Brangus with no yards to offer.
+  const useFilter = store.activeSaleyards.size > 0;
   for (const [name, state] of Object.entries(saleyardToState)) {
+    if (useFilter && !store.activeSaleyards.has(name)) continue;
     (grouped[state] ??= []).push(name);
   }
   for (const state of stateOrder) {
@@ -1042,6 +1051,17 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
   // Pass preferred saleyards (from active herds) so data reflects the user's actual market (BRG-001 fix)
   const seasonalData = await fetchSeasonalData(mlaCategories, supabase, saleyards);
 
+  // Active saleyards = MLA yards with category_prices data within the last 365
+  // days. Filters the AVAILABLE SALEYARDS prompt block so Brangus only offers
+  // yards we have recent prices for. Empty set on failure -> prompt builder
+  // falls back to the full canonical list.
+  const { data: activeYardRows } = await supabase
+    .from("active_saleyards")
+    .select("name");
+  const activeSaleyards = new Set<string>(
+    (activeYardRows ?? []).map((r: { name: string }) => r.name),
+  );
+
   return {
     herds: herds ?? [],
     properties: properties ?? [],
@@ -1060,6 +1080,7 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
     killSheets: killSheets ?? [],
     processorGrids: processorGrids ?? [],
     weatherData,
+    activeSaleyards,
     pendingYardBookEvents: [],
     pendingYardBookActions: [],
     pendingSaleRecords: [],

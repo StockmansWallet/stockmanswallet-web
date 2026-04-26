@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useActiveSaleyards } from "@/lib/data/use-active-saleyards";
 import { useRouter } from "next/navigation";
 import { useDemoMode } from "@/components/app/demo-mode-provider";
 import { addLocalHerd, DEMO_USER_ID, newLocalHerdId, type DemoLocalHerd } from "@/lib/demo-overlay";
@@ -74,19 +75,27 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c;
 }
 
-// Build saleyard options - flat list for fallback + groups for custom dropdown
+// Build saleyard options - flat list for fallback + groups for custom dropdown.
+// `activeSet` filters out MLA yards with stale (>365d) data so they aren't
+// pickable; pass an empty set to disable the filter (used during the initial
+// async load so the picker is never blank).
 function buildSaleyardData(
   propLat: number | null,
   propLon: number | null,
-  propState: string | null
+  propState: string | null,
+  activeSet: Set<string>
 ): {
   flat: { value: string; label: string }[];
   groups: { header: string; options: { value: string; label: string }[] }[];
 } {
+  // Filter the canonical list to only active yards. Empty activeSet means
+  // "still loading or fetch failed" - fall back to the full list so the
+  // picker stays usable.
+  const visible = activeSet.size === 0 ? saleyards : saleyards.filter((s) => activeSet.has(s));
   let closestNames: string[] = [];
 
   if (propLat != null && propLon != null) {
-    const withDist = saleyards
+    const withDist = visible
       .map((s) => {
         const coords = saleyardCoordinates[s];
         const dist = coords
@@ -97,7 +106,7 @@ function buildSaleyardData(
       .sort((a, b) => a.dist - b.dist);
     closestNames = withDist.slice(0, 3).map((s) => s.name);
   } else if (propState) {
-    closestNames = saleyards.filter((s) => saleyardToState[s] === propState).slice(0, 3);
+    closestNames = visible.filter((s) => saleyardToState[s] === propState).slice(0, 3);
   }
 
   const closestSet = new Set(closestNames);
@@ -113,7 +122,7 @@ function buildSaleyardData(
 
   // Remaining sorted by state then name
   const stateOrder = ["NSW", "QLD", "VIC", "SA", "WA", "TAS", "Other"];
-  const remaining = saleyards.filter((s) => !closestSet.has(s));
+  const remaining = visible.filter((s) => !closestSet.has(s));
   remaining.sort((a, b) => {
     const stateA = saleyardToState[a] ?? "Other";
     const stateB = saleyardToState[b] ?? "Other";
@@ -265,16 +274,24 @@ export function AddHerdForm({ properties, existingOwners = [], action }: AddHerd
     [properties]
   );
 
-  // Saleyard options - closest 3 to selected property at top
+  // Saleyard options - closest 3 to selected property at top.
+  // Active set hides MLA yards with stale data (>365d) from the picker.
   const selectedProperty = properties.find((p) => p.id === propertyId);
+  const activeSaleyards = useActiveSaleyards();
   const saleyardData = useMemo(
     () =>
       buildSaleyardData(
         selectedProperty?.latitude ?? null,
         selectedProperty?.longitude ?? null,
-        selectedProperty?.state ?? null
+        selectedProperty?.state ?? null,
+        activeSaleyards
       ),
-    [selectedProperty?.latitude, selectedProperty?.longitude, selectedProperty?.state]
+    [
+      selectedProperty?.latitude,
+      selectedProperty?.longitude,
+      selectedProperty?.state,
+      activeSaleyards,
+    ]
   );
 
   // Section unlock checks
