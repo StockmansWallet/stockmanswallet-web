@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { BrangusChat } from "@/components/app/brangus-chat";
 import { ChevronLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { isAdvisorRole } from "@/lib/types/advisory";
 
 export const metadata = { title: "Chat - Brangus" };
 
@@ -27,16 +28,23 @@ export default async function BrangusChatPage({ searchParams }: Props) {
   const prefill =
     typeof sp.prefill === "string" && sp.prefill.trim().length > 0 ? sp.prefill.trim() : undefined;
 
-  // Count past conversations to determine greeting style
+  // Count past conversations to determine greeting style + look up role for advisor branching
   let pastConversationCount = 0;
+  let isAdvisor = false;
   if (user) {
-    const { count } = await supabase
-      .from("brangus_conversations")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .eq("is_deleted", false);
+    const [{ count }, { data: profile }] = await Promise.all([
+      supabase
+        .from("brangus_conversations")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("is_deleted", false),
+      supabase.from("user_profiles").select("role").eq("user_id", user.id).single(),
+    ]);
     pastConversationCount = count ?? 0;
+    isAdvisor = profile?.role ? isAdvisorRole(profile.role) : false;
   }
+  const userFirstName =
+    typeof user?.user_metadata?.first_name === "string" ? user.user_metadata.first_name : undefined;
 
   return (
     <div className="flex max-w-4xl flex-col pb-10" style={{ height: "calc(100vh - 8rem)" }}>
@@ -57,7 +65,12 @@ export default async function BrangusChatPage({ searchParams }: Props) {
       />
 
       <Card className="flex flex-1 flex-col overflow-hidden rounded-3xl">
-        <BrangusChat pastConversationCount={pastConversationCount} prefill={prefill} />
+        <BrangusChat
+          pastConversationCount={pastConversationCount}
+          prefill={prefill}
+          isAdvisor={isAdvisor}
+          userFirstName={userFirstName}
+        />
       </Card>
     </div>
   );

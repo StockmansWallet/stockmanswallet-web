@@ -20,9 +20,15 @@ type TabId = "chat" | "saved" | "shared";
 
 interface BrangusHubProps {
   conversations: BrangusConversationRow[];
+  isAdvisor?: boolean;
+  userFirstName?: string;
 }
 
-export function BrangusHub({ conversations: initialConversations }: BrangusHubProps) {
+export function BrangusHub({
+  conversations: initialConversations,
+  isAdvisor = false,
+  userFirstName,
+}: BrangusHubProps) {
   const [conversations, setConversations] = useState(initialConversations);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [activeMessages, setActiveMessages] = useState<BrangusMessageRow[] | null>(null);
@@ -305,6 +311,8 @@ export function BrangusHub({ conversations: initialConversations }: BrangusHubPr
               onConversationCreated={handleConversationCreated}
               onConversationUpdated={handleConversationUpdated}
               toolbarContainer={toolbarEl}
+              isAdvisor={isAdvisor}
+              userFirstName={userFirstName}
             />
           )}
         </Card>

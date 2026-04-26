@@ -69,9 +69,28 @@ const USER_BG = "var(--color-chat-user)";
 const BRANGUS_AVATAR = "/images/brangus-chat-profile.webp";
 
 // Brangus welcome greetings - first-time users get an intro, returning users get casual greetings
-function buildWelcomeGreeting(pastConversations: number): string {
+function buildWelcomeGreeting(
+  pastConversations: number,
+  options: { isAdvisor?: boolean; userFirstName?: string } = {},
+): string {
   const hour = new Date().getHours();
   const tod = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
+
+  // Advisor users get the same intro every chat - the example questions are the most useful
+  // part of the greeting and reset the advisor's framing for each client session. Skips the
+  // returning-user pool because advisor flow values consistency over novelty.
+  if (options.isAdvisor) {
+    const name =
+      options.userFirstName && options.userFirstName.trim().length > 0
+        ? options.userFirstName.trim()
+        : "mate";
+    return `G'day ${name}, I'm Brangus, your Stockman's Wallet portfolio advisor. I'm here to help analyse client portfolios and shape the numbers for review, reporting, and decision-making.
+
+Try asking me:
+1. Summarise this client's portfolio for this year's annual review.
+2. Show me the impact of a 10% reduction in calving rate to this client's breeder herd.
+3. Which herds are carrying the most value and risk for this client?`;
+  }
 
   // First-time user - introduce Brangus
   if (pastConversations === 0) {
@@ -132,6 +151,10 @@ interface BrangusChatProps {
   toolbarContainer?: HTMLElement | null;
   /** Pre-filled first user message. Auto-sent once the portfolio store has loaded. */
   prefill?: string;
+  /** True when the current user has an advisor role - routes to advisor-flavoured greeting. */
+  isAdvisor?: boolean;
+  /** First name of the current user - interpolated into the advisor greeting. */
+  userFirstName?: string;
 }
 
 // Card hydration lives in lib/brangus/cards.ts so saved-chat review and
@@ -145,6 +168,8 @@ export function BrangusChat({
   onConversationUpdated,
   toolbarContainer,
   prefill,
+  isAdvisor = false,
+  userFirstName,
 }: BrangusChatProps = {}) {
   // Hydrate UI messages from saved conversation (if resuming)
   const hydratedMessages: ChatMessage[] = (initialMessages ?? []).map((m) => ({
@@ -166,7 +191,7 @@ export function BrangusChat({
           {
             id: "welcome",
             role: "assistant" as const,
-            content: buildWelcomeGreeting(pastConversationCount),
+            content: buildWelcomeGreeting(pastConversationCount, { isAdvisor, userFirstName }),
             timestamp: new Date(),
           },
         ]
