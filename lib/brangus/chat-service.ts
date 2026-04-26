@@ -7,7 +7,7 @@ import { calculateHerdValue, categoryFallback, defaultFallbackPrice, type Catego
 import { resolveMLACategory } from "../data/weight-mapping";
 import { cattleBreedPremiums, saleyardToState } from "../data/reference-data";
 import { expandWithNearbySaleyards } from "../data/saleyard-proximity";
-import { toolDefinitions, executeTool, DISPLAY_ONLY_TOOLS, generateAutoCards } from "./tools";
+import { toolDefinitions, executeTool, DISPLAY_ONLY_TOOLS, generateAutoCards, valuationForHerd } from "./tools";
 import { fetchAllPropertyWeather } from "../services/weather-service";
 import { centsToDollars } from "../types/money";
 import type {
@@ -155,6 +155,15 @@ You have a PORTFOLIO INDEX in your system prompt listing every herd with its nam
 CRITICAL - NEVER DO YOUR OWN MATHS:
 You are terrible at arithmetic. NEVER calculate prices, values, totals, differences, or percentages yourself. ALWAYS use a tool to get the numbers. For price scenarios and "what if" questions, ALWAYS use calculate_price_scenario. For herd values, ALWAYS use lookup_portfolio_data. Report the numbers exactly as the tool returns them. Do not recalculate, round differently, or adjust tool results.
 
+VALUATION SOURCE OF TRUTH (BRG-013) - READ CAREFULLY:
+Every herd dollar value, per-head dollar value, and portfolio total in your response MUST come from a Net Realizable Value (or Per head) field returned by lookup_portfolio_data (query types herd_details, all_herds_summary, portfolio_summary). These figures come straight from the AMV engine and match the Dashboard exactly. You quote them verbatim. Specifically:
+- DO NOT multiply $/kg by weight by head count to compute a value. The tool already did it.
+- DO NOT use prices from market_prices, historical_prices, seasonal_pricing, or the portfolio index to derive any dollar figure for a specific herd or the portfolio total. Those query types are for category-level CONTEXT, not per-herd valuation.
+- DO NOT estimate, round into, or "ballpark" a herd value. If the tool result shows $1,311,372 for Sonny, write $1,311,372 (or "about $1.31 million"), not $1,687,114.
+- The tool's per-herd line includes a price decomposition ($/kg, projected weight, breed premium) for transparency. That decomposition is for you to EXPLAIN the number, not re-derive it. The Net Realizable Value line is the answer.
+- If the user disputes a figure, the engine output (Dashboard) is the source of truth, not your re-calculation. Tell them so.
+- If lookup_portfolio_data returns "valuation loading..." or unavailable for a herd, say so and offer to retry. Do NOT substitute your own arithmetic.
+
 TOOL TIPS:
 - market_prices also has national indices (EYCI, WYCI, OTH)
 - historical_prices returns the 12-month EYCI/WYCI trend users see in the Markets tab price detail sheet
@@ -235,12 +244,11 @@ const FALLBACK_RESPONSE_STYLE = `RESPONSE STYLE:
 const FALLBACK_FEW_SHOT = `EXAMPLE CONVERSATIONS (match this tone and format exactly):
 
 User: "What are my yearling steers worth?"
-[You call lookup_portfolio_data to get the data. After receiving tool results, you write a FULL detailed text answer. Optionally call display_summary_cards to highlight key figures, but the text must stand alone.]
-Assistant: Here's the go on your 120 Angus yearling steers at Springfield. They're tracking at $3.42/kg based on MLA saleyard data from 25 Feb 2026.
+[You call lookup_portfolio_data(query_type: "all_herds_summary"). The tool returns each steer herd's Net Realizable Value from the AMV engine. You quote those numbers verbatim, do NOT call market_prices for this and do NOT multiply $/kg by weight to derive a value.]
+[After receiving tool results, you write a FULL detailed text answer. Optionally call display_summary_cards to highlight key figures, but the text must stand alone.]
+Assistant: Here's the go on your 120 Angus yearling steers at Springfield. The AMV engine has them at $1,299 a head, $155,880 for the herd, based on $3.42/kg MLA Toowoomba data from 25 Feb 2026 with the +5% Angus premium baked in.
 
-At 380kg average, that puts them at $1,299 a head, or $155,880 for the whole herd. They've been gaining about 1.5kg/day on your improved pastures, so if you hold another 30 days they'll hit around 425kg and push closer to $1,450 a head.
-
-The Toowoomba market's been steady this month, so those numbers should hold. Want me to check what freight to Roma would cost, or when the best month to sell is?
+They've been gaining about 1.5kg/day on your improved pastures. The Toowoomba market's been steady this month, so those numbers should hold. Want me to check what freight to Roma would cost, or when the best month to sell is?
 
 User: "How's my portfolio looking?"
 [You call lookup_portfolio_data(query_type: "portfolio_summary")]
@@ -521,6 +529,10 @@ export async function sendMessage(
       const finalCards = pendingInsights ?? (autoCards.length > 0 ? autoCards.slice(0, 4) : undefined);
       // Debug: Fallback if Claude returned empty text but has summary cards
       const finalText = text || (finalCards && finalCards.length > 0 ? "Here's what I found." : "");
+      // BRG-013 drift detector: scan the response for dollar figures and compare each
+      // one against the cached AMV engine values. Logs a warning when Brangus quotes a
+      // number that diverges materially from any cached herd total or per-head value.
+      detectValuationDrift(finalText, store);
       return { assistantText: finalText, updatedHistory: currentHistory, quickInsights: finalCards };
     }
 
@@ -561,6 +573,9 @@ export async function sendMessage(
 
         // Haiku's cards take priority, auto-generated cards are fallback
         const finalCards = pendingInsights ?? (autoCards.length > 0 ? autoCards.slice(0, 4) : undefined);
+        // BRG-013 drift detector: same scan as the end_turn path so display-card-only
+        // responses are also instrumented for valuation drift.
+        detectValuationDrift(text, store);
         return { assistantText: text, updatedHistory: currentHistory, quickInsights: finalCards };
       }
 
@@ -1062,4 +1077,76 @@ function buildFallbackSeasonalData(categories: string[]): SeasonalCategoryData[]
   }
 
   return results;
+}
+
+// MARK: - Drift Detector (BRG-013)
+// Debug: Scans an assistant response for $ figures and compares each against the cached
+// AMV engine values for this user's herds. Logs a warning when Brangus quotes a number
+// that diverges materially from any cached herd total / per-head value, so recompute
+// regressions are visible in server logs without re-running every test query.
+// Instrumentation only - never mutates the response.
+
+const DRIFT_TOLERANCE_FRACTION = 0.05;
+const DRIFT_MINIMUM_DOLLARS = 500;
+
+function detectValuationDrift(response: string, store: ChatDataStore): void {
+  if (process.env.NODE_ENV === "production") return;
+  if (!response) return;
+
+  const activeHerds = store.herds.filter((h) => !h.is_sold);
+  if (activeHerds.length === 0) return;
+
+  // Build the set of authoritative engine values: per-herd total, per-herd per-head,
+  // and the portfolio total.
+  const authoritative: Array<{ label: string; value: number }> = [];
+  let portfolioTotal = 0;
+  for (const herd of activeHerds) {
+    const v = valuationForHerd(herd, store, null);
+    authoritative.push({ label: `${herd.name} total`, value: v.netValue });
+    const headCount = herd.head_count ?? 0;
+    if (headCount > 0) {
+      authoritative.push({ label: `${herd.name} per head`, value: v.netValue / headCount });
+    }
+    portfolioTotal += v.netValue;
+  }
+  authoritative.push({ label: "portfolio total", value: portfolioTotal });
+
+  const dollars = extractDollarFigures(response);
+  if (dollars.length === 0) return;
+
+  for (const quoted of dollars) {
+    if (quoted < DRIFT_MINIMUM_DOLLARS) continue;
+    let best: { label: string; value: number; delta: number } | null = null;
+    for (const engine of authoritative) {
+      const delta = Math.abs(quoted - engine.value);
+      if (best === null || delta < best.delta) {
+        best = { label: engine.label, value: engine.value, delta };
+      }
+    }
+    if (!best || best.value <= 0) continue;
+    const drift = best.delta / best.value;
+    if (drift <= DRIFT_TOLERANCE_FRACTION) continue;
+    console.warn(
+      `[Brangus] BRG-013 drift: response quoted $${quoted.toLocaleString("en-AU")}, ` +
+        `closest engine value $${Math.round(best.value).toLocaleString("en-AU")} ` +
+        `(${best.label}), drift ${(drift * 100).toFixed(1)}%`
+    );
+  }
+}
+
+// Debug: Extracts $X[,XXX][.YY] figures from prose. Permits k/m/million suffixes too,
+// converting "$1.31 million" -> 1_310_000. Anything ambiguous is skipped quietly.
+function extractDollarFigures(text: string): number[] {
+  const pattern = /\$\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(million|m|k|thousand)?/gi;
+  const values: number[] = [];
+  for (const match of text.matchAll(pattern)) {
+    const rawNumber = match[1].replace(/,/g, "");
+    let value = Number(rawNumber);
+    if (!Number.isFinite(value)) continue;
+    const suffix = match[2]?.toLowerCase();
+    if (suffix === "million" || suffix === "m") value *= 1_000_000;
+    else if (suffix === "thousand" || suffix === "k") value *= 1_000;
+    values.push(value);
+  }
+  return values;
 }

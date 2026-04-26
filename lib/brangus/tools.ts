@@ -17,7 +17,7 @@ export const toolDefinitions = [
   {
     name: "lookup_portfolio_data",
     description:
-      "Retrieves specific portfolio, market, weather, and operational data from the app. This is your PRIMARY tool - call it for ANY question about herds, properties, prices, market indices, freight, sales, weather, or the yard book. You MUST call this tool before citing any specific numbers (prices, weights, head counts, values, dates, temperatures) in your response. Herd valuations returned by this tool come straight from the AMV (Adjusted Market Value) engine and already include breed premium, projected weight (ADG accrual), pre-birth accrual, calves at foot, and mortality deduction. NEVER recompute these figures yourself - quote them as returned. If the user asks about market indices (EYCI, WYCI, OTH), current prices, today's market, or what categories are worth, use query_type 'market_prices' - this mirrors what the Markets tab shows. If the user asks how the market has MOVED over TIME ('trend', 'last 3 months', 'how has EYCI been tracking', 'price history', 'past six months', 'is the market up or down lately'), use query_type 'historical_prices' - returns the 12-month MLA indicator trend. If the user asks about typical seasonal patterns or the best month to sell, use query_type 'seasonal_pricing'. SALEYARD COMPARISONS: if the user asks 'what would my X be worth at Y instead of Z', 'compare Roma vs Dalby', 'is Gracemere better than Charters Towers for these', or any 'what if I sold at a different yard' question, use query_type 'saleyard_comparison' with herd_name + the list of saleyards. You have LIVE MLA pricing for EVERY saleyard in Australia via the AVAILABLE SALEYARDS list in the portfolio index - the user does NOT need the saleyard 'linked' to their account, it does NOT need to be in their settings, and you should NEVER ask them to add it. Just call the tool. If the user asks about weather, temperature, rain, forecast, or conditions at a property, use query_type 'property_weather'. Always look up data first. Never rely on the portfolio index alone.",
+      "Retrieves specific portfolio, market, weather, and operational data from the app. This is your PRIMARY tool - call it for ANY question about herds, properties, prices, market indices, freight, sales, weather, or the yard book. You MUST call this tool before citing any specific numbers (prices, weights, head counts, values, dates, temperatures) in your response. Herd valuations returned by this tool come straight from the AMV (Adjusted Market Value) engine and already include breed premium, projected weight (ADG accrual), pre-birth accrual, calves at foot, and mortality deduction. NEVER recompute these figures yourself - quote them as returned. BREEDER SUB-TYPES: Breeder-category herds carry a sub-type of either 'Heifer' or 'Cow'. When a user asks about HEIFERS, include Breeder herds with sub-type Heifer in the answer (they are heifers, just flagged for breeding). When a user asks about COWS, include Breeder herds with sub-type Cow plus any Dry Cow herds. Treat the parenthesised sub-type in the per-herd line (e.g. 'Breeder (Heifer)') as authoritative for this grouping. Never silently exclude a Breeder herd from a heifer or cow answer based on its top-level category. If the user asks about market indices (EYCI, WYCI, OTH), current prices, today's market, or what categories are worth, use query_type 'market_prices' - this mirrors what the Markets tab shows. If the user asks how the market has MOVED over TIME ('trend', 'last 3 months', 'how has EYCI been tracking', 'price history', 'past six months', 'is the market up or down lately'), use query_type 'historical_prices' - returns the 12-month MLA indicator trend. If the user asks about typical seasonal patterns or the best month to sell, use query_type 'seasonal_pricing'. SALEYARD COMPARISONS: if the user asks 'what would my X be worth at Y instead of Z', 'compare Roma vs Dalby', 'is Gracemere better than Charters Towers for these', or any 'what if I sold at a different yard' question, use query_type 'saleyard_comparison' with herd_name + the list of saleyards. You have LIVE MLA pricing for EVERY saleyard in Australia via the AVAILABLE SALEYARDS list in the portfolio index - the user does NOT need the saleyard 'linked' to their account, it does NOT need to be in their settings, and you should NEVER ask them to add it. Just call the tool. If the user asks about weather, temperature, rain, forecast, or conditions at a property, use query_type 'property_weather'. Always look up data first. Never rely on the portfolio index alone.",
     input_schema: {
       type: "object",
       properties: {
@@ -62,7 +62,7 @@ export const toolDefinitions = [
         },
         saleyard_override: {
           type: "string",
-          description: "Optional MLA saleyard name (e.g. 'Gracemere', 'Roma', 'Armidale', 'Charters Towers', or a full name like 'Gracemere Central Queensland Livestock Exchange'). Use when the user asks to value a herd at a DIFFERENT saleyard than the one configured on the herd. Applies to query_type 'herd_details', 'all_herds_summary', and 'portfolio_summary'. The engine fetches live MLA pricing for ANY Australian saleyard on demand - the saleyard does NOT need to be linked to the user's account. Recomputes the AMV with that saleyard's price, falling through to nearest yards / state / national average automatically when a direct quote isn't available. Omit for normal valuations. For side-by-side comparisons across multiple yards, prefer query_type 'saleyard_comparison'.",
+          description: "MLA saleyard name (e.g. 'Gracemere', 'Roma', 'Armidale', 'Charters Towers', or a full name like 'Gracemere Central Queensland Livestock Exchange'). REQUIRED whenever the user names a specific saleyard for a valuation question, including phrases like 'use the Roma price', 'value at Dalby', 'priced at Gracemere', 'what would they fetch at X', 'sold at Y instead'. Without this parameter the engine returns the herd's configured-saleyard valuation, NOT the requested yard's. Applies to query_type 'herd_details', 'all_herds_summary', and 'portfolio_summary'. The engine fetches live MLA pricing for ANY Australian saleyard on demand - the saleyard does NOT need to be linked to the user's account. Recomputes the AMV with that saleyard's price, falling through to nearest yards / state / national average automatically when a direct quote isn't available. Omit only when the user has not named a yard. For side-by-side comparisons across multiple yards, use query_type 'saleyard_comparison' instead.",
         },
         saleyards: {
           type: "array",
@@ -462,6 +462,17 @@ async function executeLookup(input: Record<string, unknown>, store: ChatDataStor
       ? saleyardOverrideRaw.trim()
       : null;
 
+  // BRG-001 trace: log whether the model passed saleyard_override so we can tell a
+  // missing-override response apart from a fallback-resolution response when a
+  // Roma/Dalby-style request returns national-average pricing.
+  if (process.env.NODE_ENV !== "production") {
+    console.log(
+      saleyardOverride
+        ? `[Brangus] Lookup tool query_type=${queryType}, saleyard_override='${saleyardOverride}'`
+        : `[Brangus] Lookup tool query_type=${queryType}, saleyard_override=null`
+    );
+  }
+
   switch (queryType) {
     case "portfolio_summary":
       return lookupPortfolioSummary(store, saleyardOverride);
@@ -506,7 +517,7 @@ async function executeLookup(input: Record<string, unknown>, store: ChatDataStor
 // Dashboard. When saleyardOverride is set and differs from the herd's configured
 // saleyard, swaps selected_saleyard on a shallow copy so the engine resolves prices
 // from the override yard. Mirrors iOS valuation(for:saleyardOverride:).
-function valuationForHerd(
+export function valuationForHerd(
   herd: ChatDataStore["herds"][0],
   store: ChatDataStore,
   saleyardOverride: string | null
@@ -567,7 +578,10 @@ function lookupPortfolioSummary(store: ChatDataStore, saleyardOverride: string |
   if (saleyardOverride) {
     lines.push(`Saleyard override applied: ${saleyardOverride} (values recomputed)`);
   }
-  lines.push(`Total portfolio value (Net Realizable, AMV engine): $${fmtDollars(totalNet)}`);
+  // BRG-013: lead with the canonical portfolio total. Decomposition below is for
+  // explanation only and must not be used to re-derive a different total.
+  lines.push(`AMV PORTFOLIO TOTAL (engine output, matches Dashboard, quote verbatim): $${fmtDollars(totalNet)}`);
+  lines.push("DECOMPOSITION (for explanation only - DO NOT sum components into a different total):");
   lines.push(`  Base Market Value (initial weight x price): $${fmtDollars(totalBaseMarket)}`);
   lines.push(`  Weight Gain Accrual (ADG since added): $${fmtDollars(totalWeightGain)}`);
   if (totalPreBirth > 0) lines.push(`  Pre-Birth Accrual (breeders): $${fmtDollars(totalPreBirth)}`);
@@ -603,10 +617,30 @@ function lookupHerdDetails(
   }
 
   const lines = [`HERD DETAILS - ${herd.name}:`];
+
+  // BRG-013: lead with the canonical AMV figure so the LLM sees it FIRST and anchors
+  // on it as the answer. Decomposition (price, projected weight, breed premium,
+  // accruals) is demoted below as "for explanation only".
+  const v = valuationForHerd(herd, store, saleyardOverride);
+  const headCount = herd.head_count ?? 0;
+  const perHead = headCount > 0 ? v.netValue / headCount : 0;
+  const overrideDiffers =
+    !!saleyardOverride &&
+    saleyardOverride.toLowerCase() !== (herd.selected_saleyard ?? "").toLowerCase();
+
+  lines.push("AMV NET REALIZABLE VALUE (engine output, matches Dashboard, quote verbatim):");
+  lines.push(`  Total: $${fmtDollars(v.netValue)}`);
+  lines.push(`  Per head: $${fmtDollars(perHead)} x ${headCount} head`);
+  if (overrideDiffers) {
+    lines.push(`  Saleyard override applied: ${saleyardOverride} (recomputed)`);
+  }
+  lines.push("");
+
   lines.push(`Head count: ${herd.head_count}`);
   lines.push(`Species: ${herd.species}`);
   lines.push(`Breed: ${herd.breed}`);
   lines.push(`Category: ${herd.category}`);
+  if (herd.breeder_sub_type) lines.push(`Breeder sub-type: ${herd.breeder_sub_type}`);
   lines.push(`Sex: ${herd.sex}`);
   lines.push(`Age: ${herd.age_months} months`);
   lines.push(`Initial weight (as entered): ${Math.round(herd.initial_weight ?? herd.current_weight ?? 0)}kg`);
@@ -617,16 +651,8 @@ function lookupHerdDetails(
 
   if (herd.selected_saleyard) lines.push(`Saleyard (configured): ${herd.selected_saleyard}`);
 
-  // Debug: AMV block from the engine - Dashboard-matching numbers.
-  const v = valuationForHerd(herd, store, saleyardOverride);
   lines.push("");
-  lines.push("VALUATION (from AMV engine, matches Dashboard):");
-  const overrideDiffers =
-    !!saleyardOverride &&
-    saleyardOverride.toLowerCase() !== (herd.selected_saleyard ?? "").toLowerCase();
-  if (overrideDiffers) {
-    lines.push(`Saleyard override applied: ${saleyardOverride} (recomputed, not cached)`);
-  }
+  lines.push("VALUATION DECOMPOSITION (for explanation only - DO NOT multiply or re-derive; the AMV total above is authoritative):");
   lines.push(`Projected weight (ADG-adjusted to today): ${Math.round(v.projectedWeight)}kg`);
   lines.push(`Price (breed-adjusted, $/kg liveweight): $${v.pricePerKg.toFixed(3)}`);
   lines.push(`Price source: ${v.priceSource}${v.nearestSaleyardUsed ? ` (nearest: ${v.nearestSaleyardUsed})` : ""}`);
@@ -638,10 +664,6 @@ function lookupHerdDetails(
   if (v.preBirthAccrual > 0) lines.push(`Pre-Birth Accrual: $${fmtDollars(v.preBirthAccrual)}`);
   if (v.calvesAtFootValue > 0) lines.push(`Calves at Foot: $${fmtDollars(v.calvesAtFootValue)}`);
   lines.push(`Mortality Deduction: -$${fmtDollars(v.mortalityDeduction)}`);
-  lines.push(`Net Realizable Value (herd total): $${fmtDollars(v.netValue)}`);
-  if ((herd.head_count ?? 0) > 0) {
-    lines.push(`Per head (Net / Head): $${fmtDollars(v.netValue / (herd.head_count ?? 1))}`);
-  }
   lines.push("");
 
   if (herd.is_breeder) {
@@ -672,31 +694,42 @@ function lookupAllHerdsSummary(store: ChatDataStore, saleyardOverride: string | 
   if (saleyardOverride) {
     lines.push(`Saleyard override applied: ${saleyardOverride} (values recomputed)`);
   }
-  lines.push("Values below come from the AMV engine (include breed premium, projected weight, accruals, mortality). Do not recompute.");
+  // BRG-013: lead with an explicit, unambiguous instruction. The AMV line is the
+  // canonical figure - decomposition is for explanation only, not re-derivation.
+  lines.push("AMV figures below come straight from the engine and match the Dashboard exactly. Quote the AMV total and AMV per-head verbatim. The decomposition (projected weight, $/kg, breed premium) is for explanation only - DO NOT multiply or re-derive.");
 
   let runningTotal = 0;
   for (const herd of activeHerds) {
-    let line = `- ${herd.name}: ${herd.head_count} head`;
-    line += `, ${herd.species} ${herd.breed}, ${herd.category}`;
+    // BRG-012: surface the breeder sub-type alongside category so heifer/cow queries
+    // pick up Breeder herds with the matching sub-type. Without this, "what are my
+    // heifers worth?" misses Breeder-(Heifer) herds because the line shows category="Breeder".
+    const categoryLabel = herd.breeder_sub_type
+      ? `${herd.category} (${herd.breeder_sub_type})`
+      : herd.category;
+
+    const v = valuationForHerd(herd, store, saleyardOverride);
+    const headCount = herd.head_count ?? 0;
+    const perHead = headCount > 0 ? v.netValue / headCount : 0;
+
+    // BRG-013: header carries the canonical AMV total + per-head FIRST.
+    let line = `- ${herd.name} [AMV total $${fmtDollars(v.netValue)} = $${fmtDollars(perHead)}/head x ${headCount} head] (${herd.species} ${herd.breed}, ${categoryLabel}`;
     line += `, ${herd.sex}, ${herd.age_months} months`;
     line += `, initial ${Math.round(herd.initial_weight ?? herd.current_weight ?? 0)}kg`;
     if (herd.daily_weight_gain > 0) line += `, DWG ${herd.daily_weight_gain.toFixed(2)}kg/day`;
     if (herd.selected_saleyard) line += `, saleyard: ${herd.selected_saleyard}`;
     if (herd.is_breeder) line += ", breeder";
 
-    const v = valuationForHerd(herd, store, saleyardOverride);
-    const perHead = (herd.head_count ?? 0) > 0 ? v.netValue / (herd.head_count ?? 1) : 0;
-    line += `, projected ${Math.round(v.projectedWeight)}kg`;
-    line += `, $${v.pricePerKg.toFixed(3)}/kg (breed-adj)`;
+    // BRG-013: decomposition labelled "do not multiply" so the LLM treats it as explanation.
+    let decomposition = `decomposition (do not multiply): projected ${Math.round(v.projectedWeight)}kg, $${v.pricePerKg.toFixed(3)}/kg breed-adj`;
     const premium = fmtPremium(herd, v);
-    if (premium) line += ` [${premium}]`;
-    line += `, $${fmtDollars(perHead)}/head, total $${fmtDollars(v.netValue)}`;
-    if (v.dataDate) line += `, MLA ${v.dataDate}`;
-    runningTotal += v.netValue;
+    if (premium) decomposition += ` [${premium}]`;
+    if (v.dataDate) decomposition += `, MLA ${v.dataDate}`;
+    line += `; ${decomposition})`;
 
+    runningTotal += v.netValue;
     lines.push(line);
   }
-  lines.push(`PORTFOLIO NET REALIZABLE TOTAL: $${fmtDollars(runningTotal)}`);
+  lines.push(`PORTFOLIO NET REALIZABLE TOTAL (AMV engine, quote verbatim): $${fmtDollars(runningTotal)}`);
   return lines.join("\n");
 }
 
@@ -758,6 +791,11 @@ function formatProperty(prop: ChatDataStore["properties"][0], herds: ChatDataSto
 
 function lookupMarketPrices(category: string | undefined, store: ChatDataStore): string {
   const lines: string[] = [];
+  // BRG-013: lead with an explicit reminder that this query type is for category-level
+  // CONTEXT only. The model must not multiply these prices by herd weights to produce
+  // a per-herd or portfolio dollar figure. Per-herd values come from herd_details /
+  // all_herds_summary which carry the AMV engine's Net Realizable Value verbatim.
+  lines.push("USE NOTE: market_prices returns category-level indicator and saleyard pricing for context only. Do NOT use these $/kg figures to derive a value for a specific herd or the portfolio. For any herd dollar value, call herd_details or all_herds_summary and quote the Net Realizable Value (AMV engine) verbatim.");
   lines.push("IMPORTANT: All prices below are in DOLLARS per kg ($/kg). Do NOT convert to cents.");
 
   // Determine which MLA categories to look up
