@@ -762,9 +762,14 @@ function formatProperty(prop: ChatDataStore["properties"][0], herds: ChatDataSto
   lines.push(`State: ${prop.state}`);
   if (prop.suburb) lines.push(`Suburb: ${prop.suburb}`);
   if (prop.region) lines.push(`Region: ${prop.region}`);
+  if (prop.address) lines.push(`Address: ${prop.address}`);
+  if (prop.access_road) lines.push(`Access road: ${prop.access_road}`);
   if (prop.acreage && prop.acreage > 0) lines.push(`Acreage: ${Math.round(prop.acreage)} acres`);
   if (prop.latitude != null && prop.longitude != null) {
     lines.push(`Coordinates: ${prop.latitude.toFixed(4)}, ${prop.longitude.toFixed(4)}`);
+  }
+  if (prop.location_source === "pin_dropped") {
+    lines.push("Location source: pin-dropped on map (no fixed street address)");
   }
   if (prop.default_saleyard) {
     let saleyardLine = `Default saleyard: ${prop.default_saleyard}`;

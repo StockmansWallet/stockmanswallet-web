@@ -18,10 +18,12 @@ export type Database = {
           region: string | null;
           lga: string | null;
           address: string | null;
+          access_road: string | null;
           suburb: string | null;
           postcode: string | null;
           latitude: number | null;
           longitude: number | null;
+          location_source: "geocoded" | "pin_dropped";
           acreage: number | null;
           property_type: string | null;
           notes: string | null;
@@ -47,10 +49,12 @@ export type Database = {
           region?: string | null;
           lga?: string | null;
           address?: string | null;
+          access_road?: string | null;
           suburb?: string | null;
           postcode?: string | null;
           latitude?: number | null;
           longitude?: number | null;
+          location_source?: "geocoded" | "pin_dropped";
           acreage?: number | null;
           property_type?: string | null;
           notes?: string | null;
@@ -76,10 +80,12 @@ export type Database = {
           region?: string | null;
           lga?: string | null;
           address?: string | null;
+          access_road?: string | null;
           suburb?: string | null;
           postcode?: string | null;
           latitude?: number | null;
           longitude?: number | null;
+          location_source?: "geocoded" | "pin_dropped";
           acreage?: number | null;
           property_type?: string | null;
           notes?: string | null;

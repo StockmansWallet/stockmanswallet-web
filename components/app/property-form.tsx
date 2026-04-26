@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AddressAutocomplete, { type AddressResult } from "@/components/app/address-autocomplete";
-import { Home, MapPin, FileText, Star } from "lucide-react";
+import PropertyMapPicker, { type PinResult } from "@/components/app/property-map-picker";
+import { Home, MapPin, FileText, Star, Search, Pin, ChevronRight } from "lucide-react";
 
 import type { Database } from "@/lib/types/database";
 import { lgasForState } from "@/lib/data/lga-data";
@@ -55,8 +56,20 @@ export function PropertyForm({
   const [postcode, setPostcode] = useState(property?.postcode ?? "");
   const [lga, setLga] = useState(property?.lga ?? "");
   const [address, setAddress] = useState(property?.address ?? "");
-  const [latitude, setLatitude] = useState(property?.latitude ?? "");
-  const [longitude, setLongitude] = useState(property?.longitude ?? "");
+  const [accessRoad, setAccessRoad] = useState(property?.access_road ?? "");
+  const [latitude, setLatitude] = useState<number | "">(
+    property?.latitude ?? "",
+  );
+  const [longitude, setLongitude] = useState<number | "">(
+    property?.longitude ?? "",
+  );
+  const [locationSource, setLocationSource] = useState<"geocoded" | "pin_dropped">(
+    property?.location_source ?? "geocoded",
+  );
+  const [locationMode, setLocationMode] = useState<"search" | "pin">(
+    property?.location_source === "pin_dropped" ? "pin" : "search",
+  );
+  const [mapPickerOpen, setMapPickerOpen] = useState(false);
 
   // Sort LGAs by proximity and split into Suggested + All groups
   const { lgaGroups, lgaFlat } = useMemo(() => {
@@ -100,11 +113,27 @@ export function PropertyForm({
 
   function handleAddressSelect(result: AddressResult) {
     setAddress(result.address);
+    setAccessRoad("");
     if (result.suburb) setSuburb(result.suburb);
     if (result.state) setState(result.state);
     if (result.postcode) setPostcode(result.postcode);
     setLatitude(result.latitude);
     setLongitude(result.longitude);
+    setLocationSource("geocoded");
+  }
+
+  function handlePinResult(result: PinResult) {
+    // Pin-drop overrides any prior geocoded street address; coord becomes the
+    // source of truth. Reverse-geocoded admin fields fill blanks but never
+    // overwrite values the user already typed.
+    setAddress("");
+    setLatitude(result.latitude);
+    setLongitude(result.longitude);
+    setLocationSource("pin_dropped");
+    if (result.state) setState(result.state);
+    if (result.suburb && !suburb) setSuburb(result.suburb);
+    if (result.postcode && !postcode) setPostcode(result.postcode);
+    if (result.lga && !lga) setLga(result.lga);
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -209,21 +238,100 @@ export function PropertyForm({
           </div>
         </CardHeader>
         <CardContent className="px-5 pb-5">
+          {/* Mode tabs */}
+          <div className="bg-surface-lowest mb-4 flex items-center gap-1 rounded-xl p-1">
+            <button
+              type="button"
+              onClick={() => setLocationMode("search")}
+              className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-all ${
+                locationMode === "search"
+                  ? "bg-brand text-white"
+                  : "text-text-muted hover:text-text-secondary"
+              }`}
+            >
+              <Search className="h-3.5 w-3.5" />
+              Search Address
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setLocationMode("pin");
+                if (latitude === "" || longitude === "") setMapPickerOpen(true);
+              }}
+              className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-all ${
+                locationMode === "pin"
+                  ? "bg-brand text-white"
+                  : "text-text-muted hover:text-text-secondary"
+              }`}
+            >
+              <Pin className="h-3.5 w-3.5" />
+              Drop a Pin
+            </button>
+          </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <label
-                htmlFor="address"
-                className="text-text-secondary mb-1.5 block text-sm font-medium"
-              >
-                Property Address
-              </label>
-              <AddressAutocomplete
-                defaultValue={property?.address ?? ""}
-                onSelect={handleAddressSelect}
-                placeholder="Start typing a property address..."
-              />
-              <input type="hidden" name="address" value={address} />
-            </div>
+            {locationMode === "search" ? (
+              <div className="sm:col-span-2">
+                <label
+                  htmlFor="address"
+                  className="text-text-secondary mb-1.5 block text-sm font-medium"
+                >
+                  Property Address
+                </label>
+                <AddressAutocomplete
+                  defaultValue={address}
+                  onSelect={handleAddressSelect}
+                  placeholder="Start typing a property address..."
+                />
+                <input type="hidden" name="address" value={address} />
+              </div>
+            ) : (
+              <>
+                <div className="sm:col-span-2">
+                  <label className="text-text-secondary mb-1.5 block text-sm font-medium">
+                    Property Pin
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setMapPickerOpen(true)}
+                    className="hover:bg-surface-raised flex w-full items-center gap-3 rounded-xl bg-white/5 px-4 py-3 text-left transition-colors"
+                  >
+                    <MapPin
+                      className={`h-4 w-4 shrink-0 ${latitude === "" ? "text-text-muted" : "text-success"}`}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-text-primary text-sm font-medium">
+                        {latitude === "" || longitude === ""
+                          ? "Drop a Pin on Your Property"
+                          : "Pin Placed"}
+                      </div>
+                      {latitude !== "" && longitude !== "" && (
+                        <div className="text-text-muted text-xs tabular-nums">
+                          {Number(latitude).toFixed(4)}, {Number(longitude).toFixed(4)}
+                        </div>
+                      )}
+                    </div>
+                    <ChevronRight className="text-text-muted h-4 w-4 shrink-0" />
+                  </button>
+                  {/* Preserve any prior address; handlePinResult clears it when the user actively drops a new pin. */}
+                  <input type="hidden" name="address" value={address} />
+                </div>
+                <div className="sm:col-span-2">
+                  <Input
+                    id="access_road"
+                    name="access_road"
+                    label="Access Road"
+                    labelSuffix="recommended"
+                    value={accessRoad}
+                    onChange={(e) => setAccessRoad(e.target.value)}
+                    placeholder="e.g. Mirambeena Road"
+                  />
+                </div>
+              </>
+            )}
+            {locationMode === "search" && (
+              <input type="hidden" name="access_road" value={accessRoad} />
+            )}
             <Input
               id="suburb"
               name="suburb"
@@ -263,10 +371,11 @@ export function PropertyForm({
               value={lga}
               onChange={(e) => setLga(e.target.value)}
             />
-            {/* Coordinates auto-filled from address selection */}
+            {/* Coordinates: hidden inputs always submitted; visible badge when set */}
             <input type="hidden" name="latitude" value={latitude} />
             <input type="hidden" name="longitude" value={longitude} />
-            {latitude && longitude && (
+            <input type="hidden" name="location_source" value={locationSource} />
+            {latitude !== "" && longitude !== "" && locationMode === "search" && (
               <div>
                 <label className="text-text-secondary mb-1.5 block text-sm font-medium">
                   GPS Coordinates
@@ -282,6 +391,14 @@ export function PropertyForm({
           </div>
         </CardContent>
       </Card>
+
+      <PropertyMapPicker
+        open={mapPickerOpen}
+        onClose={() => setMapPickerOpen(false)}
+        onConfirm={handlePinResult}
+        initialLatitude={typeof latitude === "number" ? latitude : null}
+        initialLongitude={typeof longitude === "number" ? longitude : null}
+      />
 
       {/* Notes */}
       <Card>

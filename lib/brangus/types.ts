@@ -145,11 +145,14 @@ export interface PropertyRow {
   property_name: string;
   property_pic: string | null;
   state: string;
+  address: string | null;
+  access_road: string | null;
   suburb: string | null;
   region: string | null;
   acreage: number | null;
   latitude: number | null;
   longitude: number | null;
+  location_source: "geocoded" | "pin_dropped" | null;
   default_saleyard: string | null;
   default_saleyard_distance: number | null;
   is_default: boolean;
