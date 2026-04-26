@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import type { CategorySummary, HerdExposure } from "../_constants";
+import { MLA_CATEGORY_DESCRIPTIONS, type CategorySummary, type HerdExposure } from "../_constants";
 import { Sparkline } from "./sparkline";
 import { ChangeChip } from "./change-chip";
 
@@ -11,6 +11,7 @@ interface CategoryTileProps {
 
 export function CategoryTile({ summary, exposure }: CategoryTileProps) {
   const positive = (summary.change_4w_pct ?? 0) >= 0;
+  const description = MLA_CATEGORY_DESCRIPTIONS[summary.category];
   return (
     <Link
       href={`/dashboard/market/category/${summary.slug}`}
@@ -19,6 +20,7 @@ export function CategoryTile({ summary, exposure }: CategoryTileProps) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-text-primary truncate text-sm font-semibold">{summary.category}</p>
+          {description && <p className="text-text-muted truncate text-[11px]">{description}</p>}
           <p className="text-text-muted text-[11px]">
             {summary.saleyard_count} saleyards
             {exposure ? ` - ${exposure.head_count} hd in portfolio` : ""}

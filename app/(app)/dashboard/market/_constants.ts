@@ -9,6 +9,22 @@ export const MLA_CATEGORIES = [
   "Cows",
 ] as const;
 
+// Short clarifications for categories whose name is ambiguous on its own. The
+// MLA scraper stores "Heifer" for the lightweight (under-300kg) heifer class
+// but never uses the symmetric "Weaner Heifer" string, so the tile reads as
+// "Heifer" without context. This map surfaces the weight bracket on the tile
+// so producers can place it next to "Weaner Steer" in their head.
+export const MLA_CATEGORY_DESCRIPTIONS: Record<string, string> = {
+  Heifer: "Weaner heifers, under 300kg",
+  "Weaner Steer": "Weaner steers, under 330kg",
+  "Yearling Heifer": "Yearling heifers, 300 to 450kg",
+  "Yearling Steer": "Yearling steers, 330 to 500kg",
+  "Grown Heifer": "Grown heifers, over 450kg",
+  "Grown Steer": "Grown steers, over 500kg",
+  "Grown Bull": "Bulls, all weights",
+  Cows: "Cows, all weights",
+};
+
 export const AU_STATES = ["NSW", "QLD", "VIC", "SA", "WA", "TAS"] as const;
 
 export type PriceRow = {

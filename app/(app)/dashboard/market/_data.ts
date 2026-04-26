@@ -17,13 +17,7 @@ import {
   type CategoryTimelineRow,
 } from "./_constants";
 
-export {
-  MLA_CATEGORIES,
-  AU_STATES,
-  daysAgo,
-  slugify,
-  formatAUDate,
-} from "./_constants";
+export { MLA_CATEGORIES, AU_STATES, daysAgo, slugify, formatAUDate } from "./_constants";
 
 export type {
   PriceRow,
@@ -53,19 +47,38 @@ type PriceFetch = {
 };
 
 async function fetchPriceRows(opts: PriceFetch): Promise<PriceRow[]> {
+  // PostgREST enforces db-max-rows = 1000 per response regardless of any
+  // .limit() value passed by the client, so a flat .limit(20000) silently
+  // returns only the first 1000 rows ordered by data_date ASC. With 4+ years
+  // of weekly data per saleyard or category that meant the page rendered
+  // 2-3 year old data while fresh rows existed in the table. Page through
+  // .range() until either the caller-supplied limit or the dataset is
+  // exhausted.
   const supabase = await createClient();
-  let q = supabase
-    .from("category_prices")
-    .select("category, saleyard, state, final_price_per_kg, weight_range, data_date")
-    .order("data_date", { ascending: true });
-  if (opts.startDate) q = q.gte("data_date", opts.startDate);
-  if (opts.endDate) q = q.lte("data_date", opts.endDate);
-  if (opts.state) q = q.eq("state", opts.state);
-  if (opts.category) q = q.eq("category", opts.category);
-  if (opts.saleyard) q = q.eq("saleyard", opts.saleyard);
-  q = q.limit(opts.limit ?? 20000);
-  const { data } = await q;
-  return (data as PriceRow[]) ?? [];
+  const PAGE = 1000;
+  const cap = opts.limit ?? 20000;
+  const out: PriceRow[] = [];
+
+  for (let from = 0; from < cap; from += PAGE) {
+    const to = Math.min(from + PAGE, cap) - 1;
+    let q = supabase
+      .from("category_prices")
+      .select("category, saleyard, state, final_price_per_kg, weight_range, data_date")
+      .order("data_date", { ascending: true })
+      .order("saleyard", { ascending: true })
+      .range(from, to);
+    if (opts.startDate) q = q.gte("data_date", opts.startDate);
+    if (opts.endDate) q = q.lte("data_date", opts.endDate);
+    if (opts.state) q = q.eq("state", opts.state);
+    if (opts.category) q = q.eq("category", opts.category);
+    if (opts.saleyard) q = q.eq("saleyard", opts.saleyard);
+
+    const { data, error } = await q;
+    if (error || !data || data.length === 0) break;
+    out.push(...(data as PriceRow[]));
+    if (data.length < to - from + 1) break;
+  }
+  return out;
 }
 
 export function aggregateWeekly(rows: PriceRow[]): WeeklyPoint[] {
@@ -143,7 +156,10 @@ export async function getSaleyardSummaries(state?: string): Promise<SaleyardSumm
   const startDate = daysAgo(42);
   const rows = await fetchPriceRows({ startDate, state, limit: 20000 });
 
-  const byYard = new Map<string, { state: string; byDate: Map<string, { total: number; count: number }> }>();
+  const byYard = new Map<
+    string,
+    { state: string; byDate: Map<string, { total: number; count: number }> }
+  >();
   for (const r of rows) {
     const yard = byYard.get(r.saleyard) ?? { state: r.state, byDate: new Map() };
     const d = yard.byDate.get(r.data_date) ?? { total: 0, count: 0 };
@@ -162,8 +178,7 @@ export async function getSaleyardSummaries(state?: string): Promise<SaleyardSumm
     const latestAvg = latest.total / latest.count / 100;
     const weekAgo = dates[dates.length - 2];
     const monthAgo = dates.find((d) => {
-      const diff =
-        (new Date(latestDate).getTime() - new Date(d).getTime()) / 86_400_000;
+      const diff = (new Date(latestDate).getTime() - new Date(d).getTime()) / 86_400_000;
       return diff >= 25 && diff <= 35;
     });
     const pickAvg = (k: string | undefined) => {
@@ -287,12 +302,13 @@ export async function getTopMovers(
       kind: r.kind,
       name: r.name,
       slug,
-      href: r.kind === "category"
-        ? `/dashboard/market/category/${slug}`
-        : `/dashboard/market/saleyard/${slug}`,
+      href:
+        r.kind === "category"
+          ? `/dashboard/market/category/${slug}`
+          : `/dashboard/market/saleyard/${slug}`,
       latest_price: Number(r.latest_price),
       change_pct: Number(r.change_pct),
-      subtitle: r.kind === "category" ? "Category" : r.state ?? undefined,
+      subtitle: r.kind === "category" ? "Category" : (r.state ?? undefined),
     };
   };
   const rows = data as Row[];
@@ -338,7 +354,7 @@ export async function getHerdExposure(userId: string): Promise<HerdExposure[]> {
     const resolution = resolveMLACategory(
       h.category,
       weightForResolve,
-      h.breeder_sub_type ?? undefined,
+      h.breeder_sub_type ?? undefined
     );
     const mlaCat = resolution.primaryMLACategory;
     const g = groups.get(mlaCat) ?? { head: 0, herds: 0, weightSum: 0 };
@@ -361,7 +377,9 @@ export async function getHerdExposure(userId: string): Promise<HerdExposure[]> {
   return out.sort((a, b) => b.head_count - a.head_count);
 }
 
-export async function getSaleyardsForState(state?: string): Promise<Array<{ saleyard: string; state: string }>> {
+export async function getSaleyardsForState(
+  state?: string
+): Promise<Array<{ saleyard: string; state: string }>> {
   // Returns the set of distinct saleyards (with their state) that have
   // price data in the last 60 days. Feeds resolveSlug() on the market
   // detail pages, so missing entries manifest as 404s when the user
