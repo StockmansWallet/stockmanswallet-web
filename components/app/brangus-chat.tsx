@@ -15,12 +15,14 @@ import {
   Download,
   Check,
   FileText,
+  Image as ImageIcon,
   Share2,
   Mail,
   MessageCircle,
   Users,
 } from "lucide-react";
 import { ShareToProducerDialog } from "@/components/app/brangus/share-to-producer-dialog";
+import { BrangusAttachmentRow } from "@/components/app/brangus/brangus-attachment-row";
 import {
   sendMessage,
   buildSystemPrompt,
@@ -204,6 +206,17 @@ export function BrangusChat({
   const [isInitialising, setIsInitialising] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [store, setStore] = useState<ChatDataStore | null>(null);
+  const [attachedFiles, setAttachedFiles] = useState<
+    Array<{
+      id: string;
+      title: string;
+      original_filename: string;
+      mime_type: string;
+      storage_path: string;
+      extracted_text_path: string | null;
+      extraction_status: string;
+    }>
+  >([]);
   const [systemPrompt, setSystemPrompt] = useState("");
   // Accumulated summary cards for the persistent bottom strip - grows across the session
   // Hydrate from saved messages when loading a saved conversation
@@ -375,6 +388,9 @@ export function BrangusChat({
           fetchUserMemories(),
         ]);
         if (cancelled) return;
+        // lookup_file needs user_id at the store level so it can scope its
+        // brangus_files queries without re-fetching auth on every tool call.
+        dataStore.userId = userIdRef.current;
         const prompt = buildSystemPrompt(dataStore, serverConfig, userMemories);
         setStore(dataStore);
         setSystemPrompt(prompt);
@@ -534,12 +550,16 @@ export function BrangusChat({
         }
       }
 
-      // Add user message to UI
+      // Add user message to UI - carry attachment metadata so the bubble
+      // can render chips above the text once the chip strip clears.
       const userMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: "user",
         content: text,
         timestamp: new Date(),
+        attachments: attachedFiles.length > 0
+          ? attachedFiles.map((f) => ({ id: f.id, title: f.title, mime_type: f.mime_type }))
+          : undefined,
       };
       setMessages((prev) => [...prev, userMessage]);
       setIsLoading(true);
@@ -552,12 +572,19 @@ export function BrangusChat({
         );
       }
 
+      // Drain attachments queued via the paperclip for THIS turn so the
+      // multi-modal user message is built once and the chips clear before
+      // the response arrives.
+      const turnAttachments = attachedFiles;
+      setAttachedFiles([]);
+
       try {
         const { assistantText, updatedHistory, quickInsights } = await sendMessage(
           text,
           conversationHistory,
           store,
-          systemPrompt
+          systemPrompt,
+          turnAttachments
         );
 
         // Add assistant message to UI (fade in, not bounce, since it replaces typing indicator)
@@ -623,6 +650,7 @@ export function BrangusChat({
       persistMutations,
       onConversationCreated,
       onConversationUpdated,
+      attachedFiles,
     ]
   );
 
@@ -938,7 +966,30 @@ export function BrangusChat({
                   animate
                   animationType={isPostTyping ? "fade" : "bounce"}
                 >
-                  {isUser ? msg.content : <FormattedResponse text={msg.content} />}
+                  {isUser ? (
+                    <>
+                      {msg.attachments && msg.attachments.length > 0 && (
+                        <div className="mb-1.5 flex flex-wrap gap-1.5">
+                          {msg.attachments.map((att) => (
+                            <span
+                              key={att.id}
+                              className="inline-flex max-w-[200px] items-center gap-1.5 rounded-full bg-white/15 px-2 py-1 text-xs"
+                            >
+                              {att.mime_type.startsWith("image/") ? (
+                                <ImageIcon className="h-3 w-3 shrink-0 opacity-80" />
+                              ) : (
+                                <FileText className="h-3 w-3 shrink-0 opacity-80" />
+                              )}
+                              <span className="truncate">{att.title}</span>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {msg.content}
+                    </>
+                  ) : (
+                    <FormattedResponse text={msg.content} />
+                  )}
                 </ChatBubble>
               );
             })}
@@ -965,6 +1016,13 @@ export function BrangusChat({
 
       {/* Input area */}
       <div data-print-hide className="border-t border-white/10 p-4">
+        <BrangusAttachmentRow
+          userId={userIdRef.current}
+          conversationId={conversationIdRef.current}
+          attachedFiles={attachedFiles}
+          onAdd={(file) => setAttachedFiles((prev) => [...prev, file])}
+          onRemove={(id) => setAttachedFiles((prev) => prev.filter((f) => f.id !== id))}
+        />
         <div>
           <ChatInput
             onSend={handleSend}

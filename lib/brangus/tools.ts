@@ -408,6 +408,39 @@ export const toolDefinitions = [
       required: ["herd_name", "date", "head_count_observed"],
     },
   },
+  {
+    name: "lookup_file",
+    description:
+      "Looks up files the user has uploaded (vet reports, NLIS docs, MLA receipts, lease agreements, soil tests, kill sheets, EU certs, breeding records, photos, anything else). action='list' returns a slim catalogue (id, title, kind, size, page count). action='get_metadata' returns one file's metadata. action='get_content' makes the file readable to you - PDFs and images arrive as native document/image blocks on the next turn, other formats arrive as extracted text in the tool_result. Use list first to discover what the user has, then get_content to actually read the relevant one. When the user attaches a file directly via the paperclip in the chat, you do NOT need to call lookup_file - it is already in the user message.",
+    input_schema: {
+      type: "object",
+      properties: {
+        action: {
+          type: "string",
+          enum: ["list", "get_metadata", "get_content"],
+          description: "list = browse files; get_metadata = inspect one; get_content = read one.",
+        },
+        file_id: {
+          type: "string",
+          description: "UUID of the file. Required for get_metadata and get_content.",
+        },
+        kind: {
+          type: "string",
+          description:
+            "Optional filter for list. One of: vet_report, nlis, mla_receipt, lease, soil_test, kill_sheet, eu_cert, breeding, other.",
+        },
+        free_text: {
+          type: "string",
+          description: "Optional case-insensitive substring filter on title for list.",
+        },
+        max_results: {
+          type: "integer",
+          description: "Optional cap on list results (1-50). Default 25.",
+        },
+      },
+      required: ["action"],
+    },
+  },
 ];
 
 // Display-only tools (no tool_result sent back to API)
@@ -443,8 +476,119 @@ export async function executeTool(
       return executeRecordTreatment(input, store);
     case "record_muster":
       return executeRecordMuster(input, store);
+    case "lookup_file":
+      return executeLookupFile(input, store);
     default:
       return `Error: Unknown tool '${toolName}'`;
+  }
+}
+
+// MARK: - lookup_file Tool
+
+async function executeLookupFile(
+  input: Record<string, unknown>,
+  store: ChatDataStore,
+): Promise<string> {
+  const action = (input.action as string) ?? "";
+  if (!store.userId) return "Error: chat user not authenticated.";
+
+  const supabaseModule = await import("@/lib/supabase/client");
+  const supabase = supabaseModule.createClient();
+
+  switch (action) {
+    case "list": {
+      const kind = typeof input.kind === "string" ? input.kind : null;
+      const freeText = typeof input.free_text === "string" ? input.free_text : "";
+      const maxRaw = typeof input.max_results === "number" ? input.max_results : 25;
+      const max = Math.max(1, Math.min(50, maxRaw));
+
+      let q = supabase
+        .from("brangus_files")
+        .select("id, title, kind, size_bytes, page_count, mime_type, created_at")
+        .eq("user_id", store.userId)
+        .eq("is_deleted", false)
+        .order("updated_at", { ascending: false })
+        .limit(max);
+      if (kind) q = q.eq("kind", kind);
+      if (freeText) q = q.ilike("title", `%${freeText}%`);
+
+      const { data, error } = await q;
+      if (error) return `Error: ${error.message}`;
+      return JSON.stringify(
+        (data ?? []).map((row) => ({
+          id: row.id,
+          title: row.title,
+          kind: row.kind,
+          size_bytes: row.size_bytes,
+          page_count: row.page_count,
+          mime_type: row.mime_type,
+          uploaded_at: row.created_at,
+        })),
+      );
+    }
+    case "get_metadata": {
+      const fileId = typeof input.file_id === "string" ? input.file_id : null;
+      if (!fileId) return "Error: file_id required.";
+      const { data, error } = await supabase
+        .from("brangus_files")
+        .select(
+          "id, title, kind, tags, notes, original_filename, mime_type, size_bytes, page_count, extraction_status, created_at",
+        )
+        .eq("id", fileId)
+        .eq("user_id", store.userId)
+        .eq("is_deleted", false)
+        .maybeSingle();
+      if (error || !data) return "Error: file not found.";
+      return JSON.stringify({
+        id: data.id,
+        title: data.title,
+        kind: data.kind,
+        tags: data.tags ?? [],
+        notes: data.notes,
+        original_filename: data.original_filename,
+        mime_type: data.mime_type,
+        size_bytes: data.size_bytes,
+        page_count: data.page_count,
+        extraction_status: data.extraction_status,
+        uploaded_at: data.created_at,
+      });
+    }
+    case "get_content": {
+      const fileId = typeof input.file_id === "string" ? input.file_id : null;
+      if (!fileId) return "Error: file_id required.";
+      const { data, error } = await supabase
+        .from("brangus_files")
+        .select(
+          "id, title, original_filename, mime_type, storage_path, extracted_text_path, extraction_status",
+        )
+        .eq("id", fileId)
+        .eq("user_id", store.userId)
+        .eq("is_deleted", false)
+        .maybeSingle();
+      if (error || !data) return "Error: file not found.";
+
+      const mime = (data.mime_type ?? "").toLowerCase();
+      const isNative = mime === "application/pdf" || mime.startsWith("image/");
+      if (isNative) {
+        store.pendingFileFollowups.push(data.id);
+        return `Loaded ${data.title}. The file content will arrive as a document/image block on the next turn so you can read it.`;
+      }
+      if (data.extraction_status === "unsupported") {
+        return "Brangus can't read this format directly. Ask the user to convert it to PDF.";
+      }
+      if (data.extracted_text_path) {
+        const { data: blob, error: dlError } = await supabase.storage
+          .from("brangus-files")
+          .download(data.extracted_text_path);
+        if (dlError || !blob) return "(File contents not available.)";
+        const text = await blob.text();
+        const header = `[${data.title} (${data.original_filename})]`;
+        return `${header}\n\n${text}`;
+      }
+      return "(File contents not available yet, extraction still pending.)";
+    }
+    default:
+      return `Error: unknown action '${action}'. Use list, get_metadata, or get_content.`;
   }
 }
 

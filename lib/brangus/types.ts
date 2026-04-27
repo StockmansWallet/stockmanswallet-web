@@ -10,6 +10,15 @@ export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  // Files the user attached to this turn via the paperclip. Drives the chip
+  // strip rendered inside the user bubble. Empty / undefined for plain text.
+  attachments?: ChatMessageAttachment[];
+}
+
+export interface ChatMessageAttachment {
+  id: string;
+  title: string;
+  mime_type: string;
 }
 
 // Navigation actions triggered by tapping a summary card
@@ -39,13 +48,19 @@ export interface AnthropicMessage {
 }
 
 export interface AnthropicContentBlock {
-  type: "text" | "tool_use" | "tool_result";
+  type: "text" | "tool_use" | "tool_result" | "image" | "document";
   text?: string;
   id?: string;
   name?: string;
   input?: Record<string, unknown>;
   tool_use_id?: string;
   content?: string;
+  source?: {
+    type: "base64" | "url";
+    media_type?: string;
+    data?: string;
+    url?: string;
+  };
 }
 
 export interface AnthropicResponse {
@@ -101,6 +116,31 @@ export interface ChatDataStore {
   pendingSaleRecords: PendingSaleRecord[];
   pendingTreatmentRecords: PendingTreatmentRecord[];
   pendingMusterRecords: PendingMusterRecord[];
+
+  // Authenticated user id - needed by tool handlers that talk back to
+  // Supabase (e.g. lookup_file). Populated when the chat starts.
+  userId: string | null;
+
+  // File ids that lookup_file get_content asked Brangus to read on the
+  // NEXT turn (PDFs/images that need to arrive as native document/image
+  // blocks). The chat-service drains this after each tool round and
+  // appends the corresponding content blocks to the next user message.
+  pendingFileFollowups: string[];
+}
+
+// MARK: - Brangus Files (chat-side rows)
+export interface BrangusFileChatRow {
+  id: string;
+  title: string;
+  original_filename: string;
+  mime_type: string;
+  size_bytes: number;
+  kind: string | null;
+  page_count: number | null;
+  extraction_status: string;
+  storage_path: string;
+  extracted_text_path: string | null;
+  created_at: string;
 }
 
 // MARK: - Supabase Row Types (subset of columns needed for chat)

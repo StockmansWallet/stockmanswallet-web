@@ -568,18 +568,113 @@ export function buildSystemPrompt(store: ChatDataStore, serverConfig?: BrangusCo
   return sections.join("\n\n");
 }
 
+// MARK: - File Content Blocks
+
+// Builds the Anthropic content block for an attached file. PDFs and images
+// arrive as native document/image blocks; everything else is sent as a text
+// block built from the extracted.txt artefact written by extract-file-text.
+async function buildFileContentBlock(file: {
+  id: string;
+  title: string;
+  original_filename: string;
+  mime_type: string;
+  storage_path: string;
+  extracted_text_path: string | null;
+  extraction_status: string;
+}): Promise<AnthropicContentBlock | null> {
+  const supabaseModule = await import("@/lib/supabase/client");
+  const supabase = supabaseModule.createClient();
+  const mime = (file.mime_type ?? "").toLowerCase();
+
+  if (mime === "application/pdf") {
+    const { data, error } = await supabase.storage.from("brangus-files").download(file.storage_path);
+    if (error || !data) return null;
+    const base64 = await blobToBase64(data);
+    return {
+      type: "document",
+      source: { type: "base64", media_type: "application/pdf", data: base64 },
+    };
+  }
+  if (mime.startsWith("image/")) {
+    const { data, error } = await supabase.storage.from("brangus-files").download(file.storage_path);
+    if (error || !data) return null;
+    const base64 = await blobToBase64(data);
+    return {
+      type: "image",
+      source: { type: "base64", media_type: file.mime_type, data: base64 },
+    };
+  }
+
+  // Text-extracted format. Pull extracted.txt; if unavailable, surface a
+  // helpful note so Brangus can still respond without crashing.
+  let bodyText = "";
+  if (file.extracted_text_path) {
+    const { data, error } = await supabase.storage
+      .from("brangus-files")
+      .download(file.extracted_text_path);
+    if (!error && data) bodyText = await data.text();
+  }
+  if (!bodyText && file.extraction_status === "unsupported") {
+    bodyText = "(Brangus can't read this format directly. Ask the user to convert to PDF if you need to read the contents.)";
+  } else if (!bodyText) {
+    bodyText = "(File contents not available.)";
+  }
+  return {
+    type: "text",
+    text: `[Attached file: ${file.title} (${file.original_filename})]\n\n${bodyText}`,
+  };
+}
+
+async function blobToBase64(blob: Blob): Promise<string> {
+  const buffer = new Uint8Array(await blob.arrayBuffer());
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let i = 0; i < buffer.length; i += chunkSize) {
+    const chunk = buffer.subarray(i, i + chunkSize);
+    binary += String.fromCharCode.apply(null, Array.from(chunk));
+  }
+  return btoa(binary);
+}
+
 // MARK: - Send Message (full tool loop)
+
+export interface AttachedFile {
+  id: string;
+  title: string;
+  original_filename: string;
+  mime_type: string;
+  storage_path: string;
+  extracted_text_path: string | null;
+  extraction_status: string;
+}
 
 export async function sendMessage(
   userText: string,
   conversationHistory: AnthropicMessage[],
   store: ChatDataStore,
-  systemPrompt: string
+  systemPrompt: string,
+  attachments: AttachedFile[] = []
 ): Promise<{ assistantText: string; updatedHistory: AnthropicMessage[]; quickInsights?: QuickInsight[] }> {
-  // Add user message to history
+  // Build the user message - plain text or a multi-modal content array when
+  // files are attached on this turn.
+  let userContent: AnthropicMessage["content"];
+  if (attachments.length === 0) {
+    userContent = userText;
+  } else {
+    const blocks: AnthropicContentBlock[] = [];
+    for (const file of attachments) {
+      const block = await buildFileContentBlock(file);
+      if (block) blocks.push(block);
+    }
+    if (userText.trim().length > 0) {
+      blocks.push({ type: "text", text: userText });
+    }
+    userContent = blocks;
+  }
+
   const history: AnthropicMessage[] = [
     ...conversationHistory,
-    { role: "user", content: userText },
+    { role: "user", content: userContent },
   ];
 
   let currentHistory = history;
@@ -734,6 +829,26 @@ export async function sendMessage(
           store
         );
         if (generated.length > 0) autoCards.push(...generated);
+      }
+
+      // Drain any pending file follow-ups queued by lookup_file get_content
+      // for native (PDF/image) formats. Append their document/image blocks
+      // alongside tool_results in this same user message - Anthropic accepts
+      // mixed content blocks but rejects two consecutive user messages.
+      if (store.pendingFileFollowups.length > 0) {
+        const queued = store.pendingFileFollowups.splice(0);
+        const supabaseModule = await import("@/lib/supabase/client");
+        const supabase = supabaseModule.createClient();
+        for (const fileId of queued) {
+          const { data: row } = await supabase
+            .from("brangus_files")
+            .select("id, title, original_filename, mime_type, storage_path, extracted_text_path, extraction_status")
+            .eq("id", fileId)
+            .maybeSingle<AttachedFile>();
+          if (!row) continue;
+          const block = await buildFileContentBlock(row);
+          if (block) toolResultBlocks.push(block);
+        }
       }
 
       // Add tool results as user message
@@ -1086,6 +1201,8 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
     pendingSaleRecords: [],
     pendingTreatmentRecords: [],
     pendingMusterRecords: [],
+    userId: null,
+    pendingFileFollowups: [],
   };
 }
 

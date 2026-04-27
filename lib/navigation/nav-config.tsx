@@ -17,6 +17,7 @@ import {
   ClipboardList,
   Search,
   Map as MapIcon,
+  FolderOpen,
 } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
 import { ADVISOR_ENABLED } from "@/lib/feature-flags";
@@ -199,6 +200,12 @@ export const producerToolItems: NavItem[] = [
     href: "/dashboard/tools/grid-iq",
     icon: <Grid3x3 className="h-5 w-5" />,
     ...nav("grid-iq"),
+  },
+  {
+    label: "Files",
+    href: "/dashboard/tools/files",
+    icon: <FolderOpen className="h-5 w-5" />,
+    ...nav("brangus"),
   },
   // Advisory Hub hidden when advisor feature flag is off
   ...(ADVISOR_ENABLED
