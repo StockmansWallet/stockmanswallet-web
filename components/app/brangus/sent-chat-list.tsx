@@ -9,14 +9,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
-  MessageCircleCheck,
-  MessageCircleDashed,
   Trash2,
   Inbox,
   Loader2,
   Check,
   CheckCheck,
 } from "lucide-react";
+import { UserAvatar } from "@/components/app/user-avatar";
+import { fetchSharedChatAvatars } from "@/lib/brangus/shared-chat-avatar-actions";
 import {
   fetchSentSharedChats,
   softDeleteSharedChat,
@@ -51,13 +51,17 @@ function preview(row: SentSharedChatRow): string | null {
 
 export function SentChatList({ onSelect, activeId, refreshSignal }: SentChatListProps) {
   const [rows, setRows] = useState<SentSharedChatRow[] | null>(null);
+  const [avatars, setAvatars] = useState<Record<string, string | null>>({});
   const [deleting, setDeleting] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const next = await fetchSentSharedChats();
-      if (!cancelled) setRows(next);
+      if (cancelled) return;
+      setRows(next);
+      const avatarMap = await fetchSharedChatAvatars(next.map((row) => row.recipient_user_id));
+      if (!cancelled) setAvatars(avatarMap);
     })();
     return () => {
       cancelled = true;
@@ -110,18 +114,12 @@ export function SentChatList({ onSelect, activeId, refreshSignal }: SentChatList
                 active ? "bg-brangus/[0.08]" : ""
               }`}
             >
-              <div
-                className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                  row.is_read ? "bg-brangus/15 text-brangus" : "bg-white/[0.04] text-text-muted"
-                }`}
-                aria-hidden="true"
-              >
-                {row.is_read ? (
-                  <MessageCircleCheck className="h-4 w-4" />
-                ) : (
-                  <MessageCircleDashed className="h-4 w-4" />
-                )}
-              </div>
+              <UserAvatar
+                name={recipient}
+                avatarUrl={avatars[row.recipient_user_id] ?? null}
+                sizeClass="h-10 w-10"
+                tone="brangus"
+              />
 
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
@@ -163,9 +161,7 @@ export function SentChatList({ onSelect, activeId, refreshSignal }: SentChatList
             <button
               onClick={(e) => handleDelete(e, row.id)}
               disabled={deleting === row.id}
-              className={`text-text-muted hover:text-destructive absolute top-3 right-3 shrink-0 rounded-full p-1.5 transition-opacity disabled:cursor-not-allowed ${
-                active ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
-              }`}
+              className="text-text-muted hover:text-destructive absolute top-3 right-3 shrink-0 rounded-full p-1.5 transition-colors disabled:cursor-not-allowed"
               aria-label="Remove from Sent"
             >
               {deleting === row.id ? (

@@ -103,7 +103,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           {/* Desktop sidebar + content */}
           <div className="mx-auto flex w-full max-w-[1960px] flex-1 gap-3 px-3 pt-3 pb-3 lg:gap-4 lg:px-4 lg:pt-3 lg:pb-4">
             <div className="hidden lg:block">
-              <div className="sticky top-[5.25rem] max-h-[calc(100vh-6.25rem)] overflow-y-auto">
+              <div className="sticky top-[5.25rem]">
                 <Sidebar
                   isAdmin={isAdmin}
                   isAdvisor={isAdvisor}

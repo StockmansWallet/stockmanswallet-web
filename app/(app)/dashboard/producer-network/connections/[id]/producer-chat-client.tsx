@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, type ReactNode } from "react";
 import { MessageThread } from "@/components/app/advisory/message-thread";
 import { ChatInput } from "@/components/app/chat/chat-input";
 import { TypingIndicator } from "@/components/app/chat/typing-indicator";
@@ -21,6 +21,7 @@ interface ProducerChatClientProps {
   messages: AdvisoryMessage[];
   participants: Record<string, { name: string; role: string }>;
   avatars?: Record<string, { url?: string | null; initials?: string }>;
+  header?: ReactNode;
 }
 
 export function ProducerChatClient({
@@ -29,6 +30,7 @@ export function ProducerChatClient({
   messages: initialMessages,
   participants,
   avatars,
+  header,
 }: ProducerChatClientProps) {
   const [messages, setMessages] = useState<AdvisoryMessage[]>(initialMessages);
   const [animatedIds, setAnimatedIds] = useState<Set<string>>(new Set());
@@ -116,21 +118,24 @@ export function ProducerChatClient({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-2">
-        <div className="space-y-3">
-          <MessageThread
-            messages={messages}
-            currentUserId={currentUserId}
-            participants={participants}
-            animatedMessageIds={animatedIds}
-            hideSenderName
-            otherBgClass="bg-producer-network-dark"
-            otherTailColor={OTHER_BG}
-            avatars={avatars}
-          />
-          {peerIsTyping && <TypingIndicator bgColor={OTHER_BG} dotClass="bg-white/50" />}
-          <div ref={messagesEndRef} />
+      <div className="relative min-h-0 flex-1">
+        <div className="absolute inset-0 overflow-y-auto pt-[5.25rem] pb-2">
+          <div className="space-y-3 px-4 pt-4">
+            <MessageThread
+              messages={messages}
+              currentUserId={currentUserId}
+              participants={participants}
+              animatedMessageIds={animatedIds}
+              hideSenderName
+              otherBgClass="bg-producer-network-dark"
+              otherTailColor={OTHER_BG}
+              avatars={avatars}
+            />
+            {peerIsTyping && <TypingIndicator bgColor={OTHER_BG} dotClass="bg-white/50" />}
+            <div ref={messagesEndRef} />
+          </div>
         </div>
+        {header && <div className="absolute inset-x-0 top-0 z-20">{header}</div>}
       </div>
 
       <div className="relative z-10 shrink-0 border-t border-white/6 p-4 shadow-[0_-6px_12px_-4px_rgba(0,0,0,0.4)]">

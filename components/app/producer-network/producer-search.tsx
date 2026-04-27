@@ -36,23 +36,34 @@ export function ProducerSearch() {
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
-    if (query.trim().length < 2) {
+    const trimmed = query.trim();
+    if (trimmed.length < 2) return;
+
+    let cancelled = false;
+    debounceRef.current = setTimeout(async () => {
+      const { producers } = await searchProducersForPeer(trimmed);
+      if (!cancelled) {
+        setResults(producers);
+        setSearching(false);
+      }
+    }, 400);
+
+    return () => {
+      cancelled = true;
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [query]);
+
+  const handleQueryChange = (value: string) => {
+    setQuery(value);
+    if (value.trim().length < 2) {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
       setResults([]);
       setSearching(false);
       return;
     }
-
     setSearching(true);
-    debounceRef.current = setTimeout(async () => {
-      const { producers } = await searchProducersForPeer(query);
-      setResults(producers);
-      setSearching(false);
-    }, 400);
-
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [query]);
+  };
 
   const handleConnect = async (userId: string) => {
     setSendingTo(userId);
@@ -67,24 +78,40 @@ export function ProducerSearch() {
   };
 
   return (
-    <div className="mb-6">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" aria-hidden="true" />
-        <input
-          type="text"
-          placeholder="Search for a producer by name or property..."
-          aria-label="Search for a producer"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="w-full rounded-full bg-surface py-2.5 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-white/10"
-        />
-        {searching && (
-          <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-text-muted" aria-hidden="true" />
-        )}
-      </div>
+    <div className="space-y-3">
+      <Card>
+        <CardContent className="space-y-3 p-4">
+          <div className="min-w-0">
+            <p className="text-text-primary text-sm font-semibold">Find producers</p>
+            <p className="text-text-muted mt-0.5 text-xs">
+              Search by producer name or property.
+            </p>
+          </div>
+          <div className="relative w-full">
+            <Search
+              className="text-text-muted absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2"
+              aria-hidden="true"
+            />
+            <input
+              type="text"
+              placeholder="Search producers..."
+              aria-label="Search for a producer"
+              value={query}
+              onChange={(e) => handleQueryChange(e.target.value)}
+              className="bg-surface-lowest text-text-primary placeholder:text-text-muted focus:border-producer-network/30 focus:ring-producer-network/20 h-9 w-full rounded-full border border-white/[0.08] pr-9 pl-9 text-sm focus:ring-1 focus:outline-none"
+            />
+            {searching && (
+              <Loader2
+                className="text-text-muted absolute top-1/2 right-3 h-3.5 w-3.5 -translate-y-1/2 animate-spin"
+                aria-hidden="true"
+              />
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {results.length > 0 && (
-        <div className="mt-3 space-y-2">
+        <div className="space-y-2">
           {results.map((producer) => (
             <Card key={producer.user_id} className="bg-surface">
               <CardContent className="flex items-center justify-between gap-3 p-3">

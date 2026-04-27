@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { notifyProducerConnectionRequest } from "@/lib/advisory/notifications";
 import { sanitiseSearchQuery } from "@/lib/utils/search-sanitise";
+import { fetchUserAvatars } from "@/lib/auth/fetch-user-avatars";
+import { enrichProducers } from "@/lib/data/producer-enrichment";
 
 const targetUserIdSchema = z.object({
   targetUserId: z.string().uuid(),
@@ -62,7 +64,7 @@ export async function searchProducersForPeer(query: string) {
 
   const { data: producers } = await supabase
     .from("user_profiles")
-    .select("user_id, display_name, company_name, state, region, bio")
+    .select("user_id, display_name, company_name, property_name, state, region, bio")
     .eq("role", "producer")
     .not("user_id", "in", `(${excludeIds.join(",")})`)
     .or(
@@ -71,7 +73,26 @@ export async function searchProducersForPeer(query: string) {
     .order("display_name")
     .limit(8);
 
-  return { producers: producers ?? [] };
+  const rows = producers ?? [];
+  const resultIds = rows.map((producer) => producer.user_id);
+  const [avatarMap, enrichmentMap] = await Promise.all([
+    fetchUserAvatars(resultIds),
+    enrichProducers(supabase, resultIds),
+  ]);
+
+  return {
+    producers: rows.map((producer) => {
+      const enrichment = enrichmentMap.get(producer.user_id);
+      return {
+        ...producer,
+        avatar_url: avatarMap.get(producer.user_id) ?? null,
+        primary_species: enrichment?.primary_species ?? null,
+        total_head: enrichment?.total_head ?? 0,
+        herd_size_bucket: enrichment?.herd_size_bucket ?? null,
+        property_count: enrichment?.property_count ?? 0,
+      };
+    }),
+  };
 }
 
 export async function sendProducerConnectionRequest(targetUserId: string) {

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Clock, MessageSquare } from "lucide-react";
+import { ArrowRight, Clock, MessageCircle } from "lucide-react";
 import { UserAvatar } from "@/components/app/user-avatar";
 import { AnimatedUnreadPill } from "@/components/app/animated-unread-pill";
 
@@ -98,7 +98,7 @@ export function ProducerPeerCard({
               </div>
               {status === "approved" && lastMessage && (
                 <p className={`mt-1 flex items-center gap-1 truncate text-[11px] ${hasUnread ? "font-medium text-text-secondary" : "text-text-muted"}`}>
-                  <MessageSquare className="h-3 w-3 shrink-0" aria-hidden="true" />
+                  <MessageCircle className="h-3 w-3 shrink-0" aria-hidden="true" />
                   <span className="truncate">{lastMessage}</span>
                 </p>
               )}

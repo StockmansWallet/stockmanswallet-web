@@ -140,12 +140,6 @@ export const producerNavItems: NavItem[] = [
     icon: <MapPinned className="h-5 w-5" />,
     ...nav(),
   },
-  {
-    label: "Saleyards",
-    href: "/dashboard/saleyards",
-    icon: <MapIcon className="h-5 w-5" />,
-    ...nav(),
-  },
 ];
 
 // Producer mode - intelligence section
@@ -171,6 +165,18 @@ export const producerIntelItems: NavItem[] = [
     icon: <TrendingUp className="h-5 w-5" />,
     ...nav("markets"),
   },
+  {
+    label: "Saleyards",
+    href: "/dashboard/saleyards",
+    icon: <MapIcon className="h-5 w-5" />,
+    ...nav("markets"),
+  },
+  {
+    label: "Reports",
+    href: "/dashboard/tools/reports",
+    icon: <FileText className="h-5 w-5" />,
+    ...nav("reports"),
+  },
 ];
 
 // Producer mode - tools section
@@ -182,12 +188,6 @@ export const producerToolItems: NavItem[] = [
     ...nav("yard-book"),
     notificationTypes: ["yard_book_overdue"],
     badgeSuppressPrefix: "/dashboard/tools/yard-book",
-  },
-  {
-    label: "Reports",
-    href: "/dashboard/tools/reports",
-    icon: <FileText className="h-5 w-5" />,
-    ...nav("reports"),
   },
   {
     label: "Freight IQ",

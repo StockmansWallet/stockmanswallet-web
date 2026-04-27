@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -57,12 +58,14 @@ export function AppHeader({
 }: AppHeaderProps) {
   const pathname = usePathname();
   const [profileOpen, setProfileOpen] = useState(false);
+  const [profileMenuPosition, setProfileMenuPosition] = useState({ top: 0, right: 0 });
   const [pageMeta, setPageMeta] = useState<PageMeta>({
     title: "",
     subtitle: "",
     titleHref: "",
     accent: "brand",
   });
+  const profileTriggerRef = useRef<HTMLDivElement>(null);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const isDashboard = pathname === "/dashboard";
   const initials = displayName
@@ -118,6 +121,7 @@ export function AppHeader({
     if (!profileOpen) return;
 
     function handlePointerDown(event: PointerEvent) {
+      if (profileTriggerRef.current?.contains(event.target as Node)) return;
       if (profileMenuRef.current?.contains(event.target as Node)) return;
       setProfileOpen(false);
     }
@@ -135,8 +139,88 @@ export function AppHeader({
     };
   }, [profileOpen]);
 
+  useEffect(() => {
+    if (!profileOpen) return;
+
+    function updateProfileMenuPosition() {
+      const rect = profileTriggerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      setProfileMenuPosition({
+        top: rect.bottom + 8,
+        right: Math.max(12, window.innerWidth - rect.right),
+      });
+    }
+
+    updateProfileMenuPosition();
+    window.addEventListener("resize", updateProfileMenuPosition);
+    window.addEventListener("scroll", updateProfileMenuPosition, true);
+
+    return () => {
+      window.removeEventListener("resize", updateProfileMenuPosition);
+      window.removeEventListener("scroll", updateProfileMenuPosition, true);
+    };
+  }, [profileOpen]);
+
+  const profileMenu =
+    profileOpen ? (
+      <div
+        ref={profileMenuRef}
+        role="menu"
+        className="fixed z-[100] w-64 overflow-hidden rounded-2xl border border-white/[0.10] bg-white/[0.08] bg-clip-padding p-2 shadow-2xl shadow-black/35 backdrop-blur-xl backdrop-saturate-150"
+        style={{
+          top: profileMenuPosition.top,
+          right: profileMenuPosition.right,
+        }}
+      >
+        <div className="border-b border-white/[0.06] px-3 py-3">
+          <p className="text-text-primary truncate text-sm font-semibold">{displayName}</p>
+          {email && <p className="text-text-muted truncate text-xs">{email}</p>}
+          {roleLabel && (
+            <p className="text-brand mt-1 text-[11px] font-semibold tracking-wide uppercase">
+              {roleLabel}
+            </p>
+          )}
+        </div>
+
+        <div className="py-2">
+          <ProfileMenuLink href="/dashboard/settings/profile" icon={<UserRound className="h-4 w-4" />}>
+            Profile
+          </ProfileMenuLink>
+          <ProfileMenuLink
+            href="/dashboard/settings/account"
+            icon={<WalletCards className="h-4 w-4" />}
+          >
+            Account
+          </ProfileMenuLink>
+          <ProfileMenuLink href="/dashboard/settings" icon={<Settings className="h-4 w-4" />}>
+            Settings
+          </ProfileMenuLink>
+          <ProfileMenuLink href="/dashboard/help" icon={<HelpCircle className="h-4 w-4" />}>
+            Help Center
+          </ProfileMenuLink>
+        </div>
+
+        <form action={signOut} onSubmit={() => clearOverlay()} className="border-t border-white/[0.06] pt-2">
+          <button
+            type="submit"
+            className="text-error hover:bg-error/10 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors"
+          >
+            <LogOut className="h-4 w-4" />
+            Log Out
+          </button>
+        </form>
+      </div>
+    ) : null;
+
   return (
-    <header className="sticky top-0 z-30 hidden border-b border-white/[0.08] bg-[#201B18]/68 px-4 py-2.5 shadow-sm shadow-black/15 backdrop-blur-xl lg:block">
+    <>
+      <header
+      className="sticky top-0 z-30 hidden border-b border-white/[0.08] px-4 py-2.5 shadow-sm shadow-black/15 backdrop-blur-xl lg:block"
+      style={{
+        background:
+          "radial-gradient(ellipse 760px 180px at 0% 0%, color-mix(in srgb, var(--color-brand) 18%, transparent), transparent 72%), rgba(32, 27, 24, 0.68)",
+      }}
+    >
       <div className="mx-auto flex w-full max-w-[1960px] items-center gap-4">
         <Link
           href="/dashboard"
@@ -206,7 +290,7 @@ export function AppHeader({
               <div id="app-header-page-actions" className="flex items-center gap-2" />
             )}
 
-          <div ref={profileMenuRef} className="relative">
+          <div ref={profileTriggerRef} className="relative">
             <button
               type="button"
               aria-haspopup="menu"
@@ -237,68 +321,13 @@ export function AppHeader({
               />
             </button>
 
-            {profileOpen && (
-              <div
-                role="menu"
-                className="absolute top-full right-0 mt-2 w-64 overflow-hidden rounded-2xl border border-white/[0.10] bg-[#201B18]/72 p-2 shadow-2xl shadow-black/35 backdrop-blur-3xl"
-              >
-                <div className="border-b border-white/[0.06] px-3 py-3">
-                  <p className="text-text-primary truncate text-sm font-semibold">{displayName}</p>
-                  {email && <p className="text-text-muted truncate text-xs">{email}</p>}
-                  {roleLabel && (
-                    <p className="text-brand mt-1 text-[11px] font-semibold tracking-wide uppercase">
-                      {roleLabel}
-                    </p>
-                  )}
-                </div>
-
-                <div className="py-2">
-                  <ProfileMenuLink
-                    href="/dashboard/settings/profile"
-                    icon={<UserRound className="h-4 w-4" />}
-                  >
-                    Profile
-                  </ProfileMenuLink>
-                  <ProfileMenuLink
-                    href="/dashboard/settings/account"
-                    icon={<WalletCards className="h-4 w-4" />}
-                  >
-                    Account
-                  </ProfileMenuLink>
-                  <ProfileMenuLink
-                    href="/dashboard/settings"
-                    icon={<Settings className="h-4 w-4" />}
-                  >
-                    Settings
-                  </ProfileMenuLink>
-                  <ProfileMenuLink
-                    href="/dashboard/help"
-                    icon={<HelpCircle className="h-4 w-4" />}
-                  >
-                    Help Center
-                  </ProfileMenuLink>
-                </div>
-
-                <form
-                  action={signOut}
-                  onSubmit={() => clearOverlay()}
-                  className="border-t border-white/[0.06] pt-2"
-                >
-                  <button
-                    type="submit"
-                    className="text-error hover:bg-error/10 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Log Out
-                  </button>
-                </form>
-              </div>
-            )}
           </div>
           </div>
         </div>
       </div>
-    </header>
+      </header>
+      {profileMenu && typeof document !== "undefined" ? createPortal(profileMenu, document.body) : null}
+    </>
   );
 }
 
