@@ -46,7 +46,7 @@ export default async function SaleyardComparisonPage({
   const isEmpty = sc.length === 0;
 
   return (
-    <div className="max-w-5xl">
+    <div className="w-full max-w-[1680px]">
       <PageHeader
         feature="reports"
         title="Saleyard Comparison"

@@ -47,7 +47,7 @@ export default async function DemoGuidePage() {
   if (!isDemoUser) redirect("/dashboard");
 
   return (
-    <div className="max-w-4xl space-y-4 pb-16">
+    <div className="w-full max-w-[1680px] space-y-4 pb-16">
       <PageHeader
         title="Demo Guide"
         titleClassName="text-4xl font-bold text-brand"
@@ -113,7 +113,7 @@ export default async function DemoGuidePage() {
           <CardTitle className="text-base">Things to try</CardTitle>
         </CardHeader>
         <CardContent className="px-5 pb-5">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
             <TryLink
               href="/dashboard/herds/new"
               icon={<IdCard className="h-4 w-4" />}

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { createClient } from "@/lib/supabase/client";
@@ -126,107 +126,108 @@ export function AnalysisList({
         </div>
       )}
 
-      <Card>
-        <CardContent className="divide-y divide-white/[0.06] p-0">
-          {analyses.map((a) => {
-            const advantage = a.grid_iq_advantage ?? 0;
-            const isProcessor = advantage > 0;
-            const saleyardValue = a.net_saleyard_value;
-            const processorValue = a.net_processor_value;
-            const killScore = a.kill_score;
-            const gcr = a.gcr;
-            const checked = selected.has(a.id);
-            const fmt = (v: number | null) =>
-              v === null ? "-" : `$${Math.round(v).toLocaleString()}`;
+      <div
+        className="grid gap-3"
+        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 34rem), 1fr))" }}
+      >
+        {analyses.map((a) => {
+          const advantage = a.grid_iq_advantage ?? 0;
+          const isProcessor = advantage > 0;
+          const saleyardValue = a.net_saleyard_value;
+          const processorValue = a.net_processor_value;
+          const killScore = a.kill_score;
+          const gcr = a.gcr;
+          const checked = selected.has(a.id);
+          const fmt = (v: number | null) =>
+            v === null ? "-" : `$${Math.round(v).toLocaleString()}`;
 
-            const content = (
-              <>
-                {selecting && (
-                  <span
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
-                      checked
-                        ? "border-grid-iq bg-grid-iq text-black"
-                        : "border-white/20 bg-white/[0.04]"
-                    }`}
-                  >
-                    {checked && <Check className="h-3 w-3" strokeWidth={3} />}
-                  </span>
-                )}
-                <div className="bg-grid-iq/15 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
-                  <TrendingUp className="text-grid-iq h-5 w-5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-text-primary text-sm font-medium">
-                    {a.herd_name ?? "Multi-herd"} vs {a.processor_name ?? "Unknown"}
-                  </p>
-                  <div className="text-text-muted mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
-                    {a.analysis_date && (
-                      <span>{new Date(a.analysis_date).toLocaleDateString("en-AU")}</span>
-                    )}
-                    {killScore !== null && (
-                      <span
-                        title="Kill Score: 85+ Excellent, 70-84 Good, 50-69 Fair, <50 Poor"
-                        className={`text-[10px] font-medium ${
-                          killScore >= 85
-                            ? "text-success"
-                            : killScore >= 70
-                              ? "text-grid-iq"
-                              : killScore >= 50
-                                ? "text-warning"
-                                : "text-error"
-                        }`}
-                      >
-                        KS {killScore.toFixed(0)}
-                      </span>
-                    )}
-                    {gcr !== null && <span className="text-[10px]">GCR {gcr.toFixed(0)}%</span>}
-                  </div>
-                </div>
-                <div className="shrink-0 text-right">
-                  <div className="flex items-baseline justify-end gap-2 text-xs">
-                    <span className="text-text-muted">Saleyard</span>
-                    <span className="text-text-secondary tabular-nums">{fmt(saleyardValue)}</span>
-                  </div>
-                  <div className="flex items-baseline justify-end gap-2 text-xs">
-                    <span className="text-text-muted">Grid</span>
-                    <span className="text-text-secondary tabular-nums">{fmt(processorValue)}</span>
-                  </div>
-                  <p
-                    className={`mt-0.5 text-[11px] font-semibold tabular-nums ${isProcessor ? "text-success" : "text-warning"}`}
-                  >
-                    {isProcessor ? "+" : "-"}${Math.abs(Math.round(advantage)).toLocaleString()}
-                  </p>
-                </div>
-                {!selecting && (
-                  <ChevronRight className="text-text-muted group-hover:text-text-secondary h-4 w-4 shrink-0 transition-all group-hover:translate-x-0.5" />
-                )}
-              </>
-            );
-
-            if (selecting) {
-              return (
-                <button
-                  key={a.id}
-                  onClick={() => toggleOne(a.id)}
-                  className="group flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-white/[0.03]"
+          const content = (
+            <>
+              {selecting && (
+                <span
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
+                    checked
+                      ? "border-grid-iq bg-grid-iq text-black"
+                      : "border-white/20 bg-white/[0.04]"
+                  }`}
                 >
-                  {content}
-                </button>
-              );
-            }
+                  {checked && <Check className="h-3 w-3" strokeWidth={3} />}
+                </span>
+              )}
+              <div className="bg-grid-iq/15 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                <TrendingUp className="text-grid-iq h-5 w-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-text-primary text-sm font-medium">
+                  {a.herd_name ?? "Multi-herd"} vs {a.processor_name ?? "Unknown"}
+                </p>
+                <div className="text-text-muted mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
+                  {a.analysis_date && (
+                    <span>{new Date(a.analysis_date).toLocaleDateString("en-AU")}</span>
+                  )}
+                  {killScore !== null && (
+                    <span
+                      title="Kill Score: 85+ Excellent, 70-84 Good, 50-69 Fair, <50 Poor"
+                      className={`text-[10px] font-medium ${
+                        killScore >= 85
+                          ? "text-success"
+                          : killScore >= 70
+                            ? "text-grid-iq"
+                            : killScore >= 50
+                              ? "text-warning"
+                              : "text-error"
+                      }`}
+                    >
+                      KS {killScore.toFixed(0)}
+                    </span>
+                  )}
+                  {gcr !== null && <span className="text-[10px]">GCR {gcr.toFixed(0)}%</span>}
+                </div>
+              </div>
+              <div className="shrink-0 text-right">
+                <div className="flex items-baseline justify-end gap-2 text-xs">
+                  <span className="text-text-muted">Saleyard</span>
+                  <span className="text-text-secondary tabular-nums">{fmt(saleyardValue)}</span>
+                </div>
+                <div className="flex items-baseline justify-end gap-2 text-xs">
+                  <span className="text-text-muted">Grid</span>
+                  <span className="text-text-secondary tabular-nums">{fmt(processorValue)}</span>
+                </div>
+                <p
+                  className={`mt-0.5 text-[11px] font-semibold tabular-nums ${isProcessor ? "text-success" : "text-warning"}`}
+                >
+                  {isProcessor ? "+" : "-"}${Math.abs(Math.round(advantage)).toLocaleString()}
+                </p>
+              </div>
+              {!selecting && (
+                <ChevronRight className="text-text-muted group-hover:text-text-secondary h-4 w-4 shrink-0 transition-all group-hover:translate-x-0.5" />
+              )}
+            </>
+          );
 
+          if (selecting) {
             return (
-              <Link
+              <button
                 key={a.id}
-                href={`/dashboard/tools/grid-iq/analysis/${a.id}`}
-                className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/[0.03]"
+                onClick={() => toggleOne(a.id)}
+                className="group relative flex w-full items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding px-4 py-4 text-left backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)] transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075]"
               >
                 {content}
-              </Link>
+              </button>
             );
-          })}
-        </CardContent>
-      </Card>
+          }
+
+          return (
+            <Link
+              key={a.id}
+              href={`/dashboard/tools/grid-iq/analysis/${a.id}`}
+              className="group relative flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding px-4 py-4 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)] transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075]"
+            >
+              {content}
+            </Link>
+          );
+        })}
+      </div>
 
       {selecting && selected.size > 0 && (
         <div className="mt-4">

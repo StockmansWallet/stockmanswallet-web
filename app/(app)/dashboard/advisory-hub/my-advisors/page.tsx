@@ -43,7 +43,7 @@ export default async function MyAdvisorsPage() {
     c.requester_user_id === user.id ? c.target_user_id : c.requester_user_id
   );
 
-  let profiles: Record<string, {
+  const profiles: Record<string, {
     display_name: string;
     role: string;
     company_name: string;
@@ -101,7 +101,7 @@ export default async function MyAdvisorsPage() {
   const hasAnything = incomingRequests.length > 0 || awaitingResponse.length > 0 || connected.length > 0;
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <ConnectionRealtime userId={user.id} />
       <PageHeader feature="advisor"
         title="My Advisors"
@@ -199,7 +199,7 @@ export default async function MyAdvisorsPage() {
               Connected Advisors ({connected.length})
             </h3>
           )}
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {connected.map((connection) => {
               const profile = profiles[connection._otherPartyId];
               return (

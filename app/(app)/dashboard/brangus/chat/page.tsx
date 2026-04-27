@@ -47,7 +47,7 @@ export default async function BrangusChatPage({ searchParams }: Props) {
     typeof user?.user_metadata?.first_name === "string" ? user.user_metadata.first_name : undefined;
 
   return (
-    <div className="flex max-w-4xl flex-col pb-10" style={{ height: "calc(100vh - 8rem)" }}>
+    <div className="flex w-full max-w-[1680px] flex-col pb-10" style={{ height: "calc(100vh - 8rem)" }}>
       <PageHeader
         feature="brangus"
         title="Brangus"

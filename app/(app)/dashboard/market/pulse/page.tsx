@@ -34,7 +34,7 @@ export default async function MarketPulsePage({ searchParams }: Props) {
   const states = Array.from(byState.keys()).sort();
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <BackLink href="/dashboard/market" />
       <PageHeader feature="markets"
         title="Market Pulse"

@@ -14,7 +14,7 @@ export default function YardBookLoading() {
       </div>
 
       {/* Category toolbar pill */}
-      <div className="bg-surface-lowest mb-4 flex items-center justify-between rounded-full px-2 py-2">
+      <div className="mb-4 flex items-center justify-between rounded-full border border-white/[0.08] bg-white/[0.07] bg-clip-padding px-2 py-2 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)]">
         <div className="flex items-center gap-1.5 overflow-x-auto">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-8 w-20 rounded-full" />

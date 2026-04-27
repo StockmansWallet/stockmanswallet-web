@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { LayoutDashboard, Target, ClipboardList, Library, Factory } from "lucide-react";
+import { PageHeaderActionsPortal } from "@/components/ui/page-header-actions-portal";
 
 const BASE = "/dashboard/tools/grid-iq";
 
@@ -51,6 +52,23 @@ interface GridIQNavProps {
 }
 
 export function GridIQNav({ pendingConsignments = 0 }: GridIQNavProps = {}) {
+  return (
+    <>
+      <PageHeaderActionsPortal>
+        <GridIQNavPills pendingConsignments={pendingConsignments} variant="header" />
+      </PageHeaderActionsPortal>
+      <GridIQNavPills pendingConsignments={pendingConsignments} variant="body" />
+    </>
+  );
+}
+
+function GridIQNavPills({
+  pendingConsignments,
+  variant,
+}: {
+  pendingConsignments: number;
+  variant: "header" | "body";
+}) {
   const pathname = usePathname();
   const containerRef = useRef<HTMLDivElement>(null);
   const linkRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
@@ -74,15 +92,20 @@ export function GridIQNav({ pendingConsignments = 0 }: GridIQNavProps = {}) {
     if (!link) return;
     const containerRect = container.getBoundingClientRect();
     const linkRect = link.getBoundingClientRect();
-    setIndicator({
-      left: linkRect.left - containerRect.left,
-      width: linkRect.width,
+    const next = {
+      left: Math.round(linkRect.left - containerRect.left),
+      width: Math.round(linkRect.width),
+    };
+    setIndicator((current) => {
+      if (current.left === next.left && current.width === next.width) return current;
+      return next;
     });
-    setReady(true);
+    setReady((current) => current || true);
   }, [activeHref]);
 
-  useEffect(() => {
-    measure();
+  useLayoutEffect(() => {
+    const frame = requestAnimationFrame(measure);
+    return () => cancelAnimationFrame(frame);
   }, [measure]);
 
   useEffect(() => {
@@ -91,17 +114,25 @@ export function GridIQNav({ pendingConsignments = 0 }: GridIQNavProps = {}) {
     return () => observer.disconnect();
   }, [measure]);
 
+  const isHeader = variant === "header";
+
   return (
     <nav
       ref={containerRef}
-      className="relative mb-4 flex gap-1 overflow-x-auto rounded-full bg-surface p-1 backdrop-blur-md"
+      aria-label="Grid IQ sections"
+      className={
+        isHeader
+          ? "relative hidden h-9 max-w-[680px] gap-1 overflow-x-auto rounded-full border border-white/[0.08] bg-white/[0.07] bg-clip-padding p-1 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)] lg:flex"
+          : "relative mb-4 flex gap-1 overflow-x-auto rounded-full border border-white/[0.08] bg-white/[0.07] bg-clip-padding p-1 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)] lg:hidden"
+      }
     >
       {activeHref && (
         <div
-          className={`absolute top-1 bottom-1 rounded-full bg-surface-high shadow-sm ${
+          className={`absolute top-1 bottom-1 rounded-full bg-grid-iq/15 ${
             ready ? "transition-all duration-250 ease-out" : ""
           }`}
           style={{ left: indicator.left, width: indicator.width }}
+          aria-hidden="true"
         />
       )}
       {items.map((item) => {
@@ -114,11 +145,11 @@ export function GridIQNav({ pendingConsignments = 0 }: GridIQNavProps = {}) {
             ref={(el) => {
               if (el) linkRefs.current.set(item.href, el);
             }}
-            className={`relative z-10 flex shrink-0 flex-1 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-150 ${
+            className={`focus-visible:ring-grid-iq/40 relative z-10 flex shrink-0 flex-1 items-center justify-center gap-2 rounded-full font-medium whitespace-nowrap transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none ${
               active
-                ? "text-text-primary"
+                ? "text-grid-iq"
                 : "text-text-muted hover:text-text-secondary"
-            }`}
+            } ${isHeader ? "h-7 px-3 text-xs" : "px-4 py-2 text-sm"}`}
           >
             <Icon
               className={`h-4 w-4 ${active ? "text-grid-iq" : "text-text-muted"}`}

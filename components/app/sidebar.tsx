@@ -1,13 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import { ChevronRight, Sparkles } from "lucide-react";
-import tallyAnimData from "@/public/animations/tally.json";
-
-const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
+import { Sparkles } from "lucide-react";
 import { SidebarBadge } from "@/components/app/sidebar-badge";
 import {
   producerNavItems,
@@ -48,11 +43,6 @@ interface SidebarProps {
   isAdmin?: boolean;
   isAdvisor?: boolean;
   isDemoUser?: boolean;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  roleLabel?: string;
-  avatarUrl?: string;
   subscriptionTier?: string;
 }
 
@@ -60,11 +50,6 @@ export function Sidebar({
   isAdmin = false,
   isAdvisor = false,
   isDemoUser = false,
-  firstName = "",
-  lastName = "",
-  email = "",
-  roleLabel = "",
-  avatarUrl = "",
 }: SidebarProps) {
   const pathname = usePathname();
 
@@ -77,26 +62,14 @@ export function Sidebar({
   const mainItems = isAdvisor ? advisorNavItems : producerNavItems;
   const intelItems = isAdvisor ? advisorIntelItems : producerIntelItems;
   const toolItems = isAdvisor ? advisorToolItems : producerToolItems;
-
-  const initials =
-    firstName && lastName ? `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() : "SW";
-  const displayName = firstName && lastName ? `${firstName} ${lastName}` : email || "";
+  const sectionClassName =
+    "rounded-2xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding p-2 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)]";
 
   return (
-    <aside className="flex w-64 flex-col rounded-3xl bg-[#1F1B18]">
-      {/* Logo */}
-      <Link
-        href="/dashboard"
-        aria-label="Stockman's Wallet"
-        className="flex items-center justify-center rounded-t-3xl px-4 pt-4 pb-1 transition-opacity hover:opacity-90"
-      >
-        <Lottie animationData={tallyAnimData} loop={false} className="h-12 w-auto" />
-      </Link>
-
-      {/* Navigation groups */}
-      <nav className="scrollbar-none px-3 pt-3 lg:px-4 lg:pt-4">
+    <aside className="flex w-64 flex-col">
+      <nav className="scrollbar-none">
         <div className="space-y-3 lg:space-y-4">
-          <div className="rounded-2xl bg-white/[0.04] p-2">
+          <div className={sectionClassName}>
             <p className="text-text-muted/60 mb-1 px-3 pt-1 text-[10px] font-semibold tracking-widest uppercase">
               Portfolio
             </p>
@@ -107,7 +80,7 @@ export function Sidebar({
             </div>
           </div>
 
-          <div className="rounded-2xl bg-white/[0.04] p-2">
+          <div className={sectionClassName}>
             <p className="text-text-muted/60 mb-1 px-3 pt-1 text-[10px] font-semibold tracking-widest uppercase">
               Intelligence
             </p>
@@ -119,7 +92,7 @@ export function Sidebar({
           </div>
 
           {toolItems.length > 0 && (
-            <div className="rounded-2xl bg-white/[0.04] p-2">
+            <div className={sectionClassName}>
               <p className="text-text-muted/60 mb-1 px-3 pt-1 text-[10px] font-semibold tracking-widest uppercase">
                 Tools
               </p>
@@ -132,7 +105,7 @@ export function Sidebar({
           )}
 
           {isAdmin && (
-            <div className="rounded-2xl bg-white/[0.04] p-2">
+            <div className={sectionClassName}>
               <p className="text-text-muted/60 mb-1 px-3 pt-1 text-[10px] font-semibold tracking-widest uppercase">
                 Admin
               </p>
@@ -144,7 +117,7 @@ export function Sidebar({
             </div>
           )}
 
-          <div className="rounded-2xl bg-white/[0.04] p-2">
+          <div className={sectionClassName}>
             <div className="space-y-0.5">
               {bottomNavItems.map((item) => (
                 <NavLink key={item.href} item={item} isActive={checkActive(item.href)} />
@@ -163,33 +136,6 @@ export function Sidebar({
           </div>
         </div>
       </nav>
-
-      {/* User card - links to profile */}
-      <div className="p-3 lg:p-4">
-        <Link
-          href="/dashboard/settings/profile"
-          className="flex w-full items-center gap-2.5 rounded-xl bg-white/[0.04] p-2 transition-colors hover:bg-white/[0.06]"
-        >
-          {avatarUrl ? (
-            <Image
-              src={avatarUrl}
-              alt={displayName}
-              width={36}
-              height={36}
-              className="h-9 w-9 shrink-0 rounded-full object-cover"
-            />
-          ) : (
-            <div className="bg-brand/15 text-brand flex h-9 w-9 shrink-0 items-center justify-center rounded-full">
-              <span className="text-sm font-bold">{initials}</span>
-            </div>
-          )}
-          <div className="min-w-0 flex-1 text-left">
-            <p className="text-text-primary truncate text-sm font-semibold">{displayName}</p>
-            {roleLabel && <p className="text-text-muted truncate text-xs">{roleLabel}</p>}
-          </div>
-          <ChevronRight className="text-text-muted h-4 w-4 shrink-0" />
-        </Link>
-      </div>
     </aside>
   );
 }

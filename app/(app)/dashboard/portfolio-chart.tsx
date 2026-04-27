@@ -295,7 +295,7 @@ export function PortfolioChart({ data, range }: PortfolioChartProps & { range?: 
         </div>
       )}
 
-      <ResponsiveContainer key={activeRange} width="100%" height={240}>
+      <ResponsiveContainer key={activeRange} width="100%" height={220}>
         <AreaChart data={chartData} margin={{ top: 8, right: 0, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id="valueGrad" x1="0" y1="0" x2="0" y2="1">

@@ -63,7 +63,7 @@ export default async function ValueVsLandAreaPage({
   const best = analysis[0] ?? null;
 
   return (
-    <div className="max-w-5xl">
+    <div className="w-full max-w-[1680px]">
       <PageHeader
         feature="reports"
         title="Value vs Land Area"

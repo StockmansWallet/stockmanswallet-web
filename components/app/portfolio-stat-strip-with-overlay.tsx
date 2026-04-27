@@ -31,7 +31,7 @@ export function PortfolioStatStripWithOverlay({
   }, [isDemoUser, localHerds, baseTotalHead, baseHerdCount]);
 
   return (
-    <div className="mt-3 grid grid-cols-3 items-stretch gap-3 lg:mt-4 lg:gap-4">
+    <div className="grid grid-cols-3 items-stretch gap-3 lg:gap-4">
       <StatCard
         icon={<Tags className="h-3.5 w-3.5" />}
         label="Head"

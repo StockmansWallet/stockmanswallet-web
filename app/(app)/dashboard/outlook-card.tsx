@@ -17,12 +17,15 @@ export function OutlookCard({ data }: OutlookCardProps) {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-center gap-2">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand/15">
               <Wallet className="h-3.5 w-3.5 text-brand" />
             </div>
-            <CardTitle>Outlook</CardTitle>
+            <div>
+              <CardTitle>Outlook</CardTitle>
+              <p className="mt-1 text-xs text-text-muted">Portfolio value over time</p>
+            </div>
           </div>
           <PortfolioChartRangePicker range={range} onRangeChange={setRange} />
         </div>

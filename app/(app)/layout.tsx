@@ -5,6 +5,7 @@ import { MobileNav } from "@/components/app/mobile-nav";
 import { SidebarNotificationsProvider } from "@/components/app/sidebar-notifications-provider";
 import { DemoModeBanner } from "@/components/app/demo-mode-banner";
 import { DemoModeProvider } from "@/components/app/demo-mode-provider";
+import { AppHeader } from "@/components/app/app-header";
 import { isAdvisorRole, roleDisplayName } from "@/lib/types/advisory";
 import { ADVISOR_ENABLED } from "@/lib/feature-flags";
 import PageBackground from "@/components/marketing/ui/page-background";
@@ -23,9 +24,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   // Fetch user role, subscription tier, onboarding status, admin flag
-  const { data: profile, error: profileError } = await supabase
+  const { data: profile } = await supabase
     .from("user_profiles")
-    .select("role, subscription_tier, onboarding_completed, is_admin")
+    .select("display_name, role, subscription_tier, onboarding_completed, is_admin")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -66,11 +67,17 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   // Demo user check - email comparison is authoritative; RLS enforces read-only server-side.
   const isDemoUser = user.email?.toLowerCase() === process.env.DEMO_EMAIL?.toLowerCase();
+  const authFirstName = user.user_metadata?.first_name || "";
+  const authLastName = user.user_metadata?.last_name || "";
+  const displayName =
+    isDemoUser && authFirstName && authLastName
+      ? `${authFirstName} ${authLastName}`
+      : authFirstName || profile?.display_name?.split(" ")[0] || "Stockman";
 
   return (
     <DemoModeProvider isDemoUser={isDemoUser}>
       <SidebarNotificationsProvider>
-        <PageBackground />
+        <PageBackground variant="app" />
 
         <div className="bg-background/0 flex min-h-screen flex-col">
           {isDemoUser && <DemoModeBanner />}
@@ -84,30 +91,30 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             />
           </div>
 
+          <AppHeader
+            displayName={displayName}
+            email={user.email || ""}
+            roleLabel={roleDisplayName(profile?.role || "producer")}
+            avatarUrl={
+              isDemoUser ? "/images/demo-user-profile.webp" : user.user_metadata?.avatar_url || ""
+            }
+          />
+
           {/* Desktop sidebar + content */}
-          <div className="flex flex-1 gap-3 p-3 lg:gap-4 lg:p-4">
+          <div className="mx-auto flex w-full max-w-[1960px] flex-1 gap-3 px-3 pt-3 pb-3 lg:gap-4 lg:px-4 lg:pt-3 lg:pb-4">
             <div className="hidden lg:block">
-              <div className="sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto">
+              <div className="sticky top-[5.25rem] max-h-[calc(100vh-6.25rem)] overflow-y-auto">
                 <Sidebar
                   isAdmin={isAdmin}
                   isAdvisor={isAdvisor}
                   isDemoUser={isDemoUser}
-                  firstName={user.user_metadata?.first_name || ""}
-                  lastName={user.user_metadata?.last_name || ""}
-                  email={user.email || ""}
-                  roleLabel={roleDisplayName(profile?.role || "producer")}
-                  avatarUrl={
-                    isDemoUser
-                      ? "/images/demo-user-profile.webp"
-                      : user.user_metadata?.avatar_url || ""
-                  }
                   subscriptionTier={profile?.subscription_tier || "stockman"}
                 />
               </div>
             </div>
 
             <main className="min-w-0 flex-1">
-              <div className="max-w-4xl rounded-3xl bg-[#1F1B18] p-3 lg:p-4">{children}</div>
+              {children}
             </main>
           </div>
         </div>

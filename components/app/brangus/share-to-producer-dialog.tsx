@@ -157,7 +157,7 @@ export function ShareToProducerDialog({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-surface/95 relative mx-4 flex w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-white/[0.10] shadow-2xl backdrop-blur-2xl">
+      <div className="bg-surface/95 relative mx-4 flex w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-white/[0.10] shadow-2xl backdrop-blur-xl">
         <header className="flex items-center justify-between border-b border-white/[0.06] px-5 py-4">
           <div>
             <h2 className="text-text-primary text-base font-semibold">Share with a producer</h2>
@@ -176,8 +176,8 @@ export function ShareToProducerDialog({
 
         {sentName !== null ? (
           <div className="flex flex-col items-center gap-3 px-6 py-10 text-center">
-            <div className="bg-producer-network/15 flex h-14 w-14 items-center justify-center rounded-full">
-              <Check className="text-producer-network h-7 w-7" />
+            <div className="bg-brangus/15 flex h-14 w-14 items-center justify-center rounded-full">
+              <Check className="text-brangus h-7 w-7" />
             </div>
             <p className="text-text-primary text-base font-semibold">Shared</p>
             <p className="text-text-muted text-sm">
@@ -244,10 +244,10 @@ export function ShareToProducerDialog({
                         <button
                           onClick={() => setSelectedId(p.user_id)}
                           className={`flex w-full items-center gap-3 px-5 py-3 text-left transition-colors ${
-                            isSelected ? "bg-producer-network/10" : "hover:bg-white/[0.03]"
+                            isSelected ? "bg-brangus/10" : "hover:bg-white/[0.03]"
                           }`}
                         >
-                          <div className="bg-producer-network/20 text-producer-network flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold">
+                          <div className="bg-brangus/20 text-brangus flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold">
                             {p.display_name.charAt(0).toUpperCase()}
                           </div>
                           <div className="min-w-0 flex-1">
@@ -261,7 +261,7 @@ export function ShareToProducerDialog({
                           <div
                             className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
                               isSelected
-                                ? "border-producer-network bg-producer-network text-white"
+                                ? "border-brangus bg-brangus text-white"
                                 : "border-white/20"
                             }`}
                           >

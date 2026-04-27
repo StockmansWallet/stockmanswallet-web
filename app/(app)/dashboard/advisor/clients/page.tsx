@@ -72,7 +72,7 @@ export default async function AdvisorClientsPage() {
   const hasAnything = incomingRequests.length > 0 || outgoingPending.length > 0 || approvedConnections.length > 0;
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <ConnectionRealtime userId={user.id} />
       <PageHeader feature="advisor"
         title="Clients"

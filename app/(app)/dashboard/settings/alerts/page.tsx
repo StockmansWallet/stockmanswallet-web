@@ -57,7 +57,7 @@ export default async function PriceAlertsPage() {
 
   if (!user) {
     return (
-      <div className="max-w-4xl">
+      <div className="w-full max-w-[1680px]">
         <PageHeader
           title="Price alerts"
           subtitle="Get notified when categories or saleyards cross your target price."
@@ -76,7 +76,7 @@ export default async function PriceAlertsPage() {
   ];
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <div className="mb-4 sm:hidden">
         <Link
           href="/dashboard/settings"

@@ -94,7 +94,7 @@ export default async function ProducerProfilePage({
       : null;
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <PageHeader feature="producer-network"
         title="Producer Profile"
         titleClassName="text-4xl font-bold text-producer-network-light"

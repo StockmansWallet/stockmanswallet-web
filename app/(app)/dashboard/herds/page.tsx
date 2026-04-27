@@ -1,10 +1,12 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HerdsListView, type PriceRowFlat } from "./herds-list-view";
 import { YardBookBanner } from "@/components/app/yard-book-banner";
+import { Plus } from "lucide-react";
 import {
   calculateHerdValuation,
   categoryFallback,
@@ -148,7 +150,6 @@ export default async function HerdsPage() {
   const herdProjectedWeightObj: Record<string, number> = {};
   const herdDefaultBreedPremiumObj: Record<string, number> = {};
   const herdCustomBreedPremiumObj: Record<string, number> = {};
-  let totalValue = 0;
   for (const h of herds ?? []) {
     const result = calculateHerdValuation(
       h as Parameters<typeof calculateHerdValuation>[0],
@@ -171,7 +172,6 @@ export default async function HerdsPage() {
     if (h.breed_premium_override != null && h.breed_premium_override !== 0) {
       herdCustomBreedPremiumObj[h.id] = h.breed_premium_override - defaultPremium;
     }
-    totalValue += result.netValue;
   }
 
   // Build property groups: default first, then alphabetical, then "Unassigned"
@@ -183,18 +183,8 @@ export default async function HerdsPage() {
     })
     .map((p) => ({ id: p.id, name: p.property_name, isDefault: p.is_default }));
 
-  const totalHead = herds?.reduce((sum, h) => sum + (h.head_count ?? 0), 0) ?? 0;
-
-  const avgWeight =
-    herds && herds.length > 0
-      ? Math.round(
-          herds.reduce((sum, h) => sum + (h.current_weight ?? 0), 0) /
-            herds.filter((h) => h.current_weight > 0).length || 0
-        )
-      : 0;
-
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <Suspense>
         <YardBookBanner />
       </Suspense>
@@ -202,6 +192,23 @@ export default async function HerdsPage() {
         title="Herds"
         titleClassName="text-4xl font-bold text-brand"
         subtitle="Manage your livestock herds."
+        actions={
+          <>
+            <Link
+              href="/dashboard/herds/sold"
+              className="border border-white/[0.08] bg-white/[0.055] text-text-secondary hover:bg-white/[0.09] hover:text-text-primary inline-flex h-9 items-center rounded-full px-4 text-[13px] font-semibold transition-colors"
+            >
+              Sold Herds
+            </Link>
+            <Link
+              href="/dashboard/herds/new"
+              className="bg-brand hover:bg-brand-dark inline-flex h-9 items-center gap-2 rounded-full px-4 text-[13px] font-semibold text-white transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              Add Herd
+            </Link>
+          </>
+        }
       />
 
       <HerdsListView

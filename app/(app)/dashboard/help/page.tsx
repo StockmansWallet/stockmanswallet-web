@@ -124,16 +124,16 @@ const faqs = [
 
 export default function HelpCenterPage() {
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <PageHeader
         title="Help Center"
         titleClassName="text-4xl font-bold text-brand"
         subtitle="Guides, FAQs, and support for Stockman's Wallet."
       />
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 2xl:grid-cols-4">
         {/* Left Column: Getting Started + Feature Guides + FAQs */}
-        <div className="space-y-4 lg:col-span-2">
+        <div className="space-y-4 lg:col-span-2 2xl:col-span-3">
           {/* Getting Started */}
           <Card>
             <CardHeader>

@@ -92,16 +92,6 @@ function SectionIcon({ icon: Icon }: { icon: React.ComponentType<{ className?: s
   );
 }
 
-function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <div className="rounded-xl bg-white/5 p-4 ring-1 ring-white/[0.06] ring-inset">
-      <p className="text-text-muted text-xs font-medium">{label}</p>
-      <p className="text-text-primary mt-1 text-lg font-bold">{value}</p>
-      {sub && <p className="text-text-muted mt-0.5 text-xs">{sub}</p>}
-    </div>
-  );
-}
-
 function AlertCard({ type, message }: { type: "warning" | "info" | "success"; message: string }) {
   const styles = {
     warning: {
@@ -320,11 +310,11 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
   }
 
   // Live heads-per-deck preview
-  const previewHpd = useMemo(() => {
+  const previewHpd = (() => {
     const w = Number(weight);
     if (!w || w <= 0) return null;
     return categoryAwareHpd(w);
-  }, [weight, selectedHerdId, calvesAtFoot]); // eslint-disable-line react-hooks/exhaustive-deps
+  })();
 
   // Update headPerDeck when weight changes (if no override)
   function handleWeightChange(val: string) {
@@ -463,9 +453,9 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
   }
 
   return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+    <div className="grid grid-cols-1 gap-4 xl:grid-cols-12 xl:items-start">
       {/* Left Column: Setup */}
-      <form onSubmit={handleCalculate} className="min-w-0 flex-1 space-y-4">
+      <form onSubmit={handleCalculate} className="min-w-0 space-y-4 xl:col-span-7">
         {/* Step 1: Origin & Herd */}
         <Card>
           <CardHeader>
@@ -692,7 +682,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
               </div>
               <p className="text-text-muted mt-4 text-xs leading-relaxed">
                 Default rate and head per deck values are based on national averages. Adjust to
-                match your local carrier's requirements.
+                match your local carrier&apos;s requirements.
               </p>
 
               {/* Loading Density Reference */}
@@ -798,7 +788,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
       </form>
 
       {/* Right Column: Results */}
-      <div className="w-full lg:sticky lg:top-6 lg:w-[340px] lg:shrink-0">
+      <div className="w-full xl:sticky xl:top-[5.25rem] xl:col-span-5">
         {result ? (
           <div className="space-y-4">
             {/* Hero Cost */}

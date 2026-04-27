@@ -14,9 +14,13 @@ export function PortfolioValueCard({
   fallbackCount,
 }: PortfolioValueCardProps) {
   const isPositive = changePercent !== undefined && changePercent >= 0;
+  const valuationContext =
+    fallbackCount > 0
+      ? `${fallbackCount} ${fallbackCount === 1 ? "herd" : "herds"} using national averages`
+      : "All active herds priced from saleyard data";
 
   return (
-    <div className="bg-surface-lowest relative overflow-hidden rounded-2xl p-6 sm:p-7">
+    <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding p-6 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)] sm:p-7">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <p className="text-text-muted text-xs font-medium tracking-widest uppercase">
@@ -25,12 +29,6 @@ export function PortfolioValueCard({
           <p className="text-text-primary mt-2 text-4xl leading-none font-bold tabular-nums sm:text-5xl">
             ${Math.round(value).toLocaleString()}
           </p>
-
-          {fallbackCount > 0 && (
-            <span className="bg-error/15 text-error mt-3 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium">
-              {fallbackCount} {fallbackCount === 1 ? "herd" : "herds"} national avg
-            </span>
-          )}
         </div>
 
         {changePercent !== undefined && (
@@ -49,6 +47,11 @@ export function PortfolioValueCard({
             </span>
           </div>
         )}
+      </div>
+
+      <div className="border-border-subtle mt-5 flex flex-col gap-2 border-t pt-4 text-xs text-text-muted sm:flex-row sm:items-center sm:justify-between">
+        <span>Updated today</span>
+        <span>{valuationContext}</span>
       </div>
     </div>
   );

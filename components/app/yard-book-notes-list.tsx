@@ -68,7 +68,7 @@ export function YardBookNotesList({ notes }: YardBookNotesListProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
+      <div className="flex justify-end lg:hidden">
         <Link href="/dashboard/tools/yard-book/notes/new">
           <Button variant="yard-book" size="sm">
             <Plus className="mr-1.5 h-3.5 w-3.5" />

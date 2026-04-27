@@ -278,7 +278,7 @@ export function PreSaleFlow({
           return canAdvanceFromStep1 && canAdvanceFromStep2;
         };
         return (
-          <div>
+          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding p-3 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)]">
             <div className="flex items-center gap-0">
               {([1, 2, 3] as const).map((s, idx) => {
                 const isActive = step === s;
@@ -593,14 +593,17 @@ export function PreSaleFlow({
               );
             }
             return (
-              <div className="flex flex-col gap-2">
+              <div
+                className="grid gap-3"
+                style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 34rem), 1fr))" }}
+              >
                 {visibleGrids.map((grid) => {
                   const expired = isExpired(grid.expiry_date);
                   const selected = selectedGridId === grid.id;
                   return (
                     <Card
                       key={grid.id}
-                      className={`cursor-pointer transition-all ${
+                      className={`relative cursor-pointer transition-colors duration-150 ${
                         selected ? "border-grid-iq/50 bg-grid-iq/10" : "hover:bg-white/[0.04]"
                       }`}
                       onClick={() => handleGridSelect(selected ? null : grid.id)}
@@ -684,13 +687,16 @@ export function PreSaleFlow({
                   )}
                   {killSheetCount > 0 && (
                     <>
-                      <div className="flex flex-col gap-2">
+                      <div
+                        className="grid gap-3"
+                        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 34rem), 1fr))" }}
+                      >
                         {(showAllKillSheets ? killSheets : killSheets.slice(0, 3)).map((ks) => {
                           const isSelected = selectedKillSheetIds.has(ks.id);
                           return (
                             <Card
                               key={ks.id}
-                              className={`cursor-pointer transition-all ${
+                              className={`relative cursor-pointer transition-colors duration-150 ${
                                 isSelected ? "border-grid-iq/50 bg-grid-iq/10" : "hover:bg-white/[0.04]"
                               }`}
                               onClick={() => toggleKillSheet(ks.id)}

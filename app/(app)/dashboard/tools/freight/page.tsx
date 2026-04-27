@@ -31,7 +31,7 @@ export default async function FreightPage() {
   ]);
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <PageHeader
         feature="freight-iq"
         title="Freight IQ"

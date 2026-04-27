@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { isAdvisorRole } from "@/lib/types/advisory";
-import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { HerdComposition } from "./herd-composition";
 import { OutlookCard } from "./outlook-card";
@@ -31,9 +30,8 @@ import { ComingUpCard } from "@/components/app/coming-up-card";
 import { GrowthMortalityCard } from "@/components/app/growth-mortality-card";
 import { ClosestSaleyardsCard } from "@/components/app/closest-saleyards-card";
 import { CalvingAccrualCard } from "@/components/app/calving-accrual-card";
-import { MapPinned, Tags, Layers, ChevronRight } from "lucide-react";
+import { MapPinned, ChevronRight } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
-import { StatCard } from "@/components/ui/stat-card";
 
 function shortSaleyardName(name: string): string {
   return name
@@ -62,10 +60,10 @@ export default async function DashboardPage() {
 
   if (!user) redirect("/sign-in");
 
-  // Fetch display name and role: prefer auth metadata, fall back to user_profiles
+  // Fetch user role so advisor accounts land on their dedicated dashboard.
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select("display_name, role")
+    .select("role")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -74,15 +72,6 @@ export default async function DashboardPage() {
     redirect("/dashboard/advisor");
   }
 
-  const authFirstName = user?.user_metadata?.first_name || "";
-  const authLastName = user?.user_metadata?.last_name || "";
-  const isDemoUser = user?.email?.toLowerCase() === process.env.DEMO_EMAIL?.toLowerCase();
-  // Demo account greets with the full "Demo Stockman" name so the hero doesn't
-  // read as the off-brand "G'day, Demo!".
-  const displayName =
-    isDemoUser && authFirstName && authLastName
-      ? `${authFirstName} ${authLastName}`
-      : authFirstName || profile?.display_name?.split(" ")[0] || "Stockman";
   const todayStr = new Date().toISOString().split("T")[0];
 
   const [
@@ -417,7 +406,7 @@ export default async function DashboardPage() {
 
   return (
     <>
-      <div className="max-w-4xl">
+      <div className="w-full max-w-[1680px]">
         {!hasData ? (
           /* Empty state - matches iOS EmptyDashboardView */
           <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
@@ -437,84 +426,78 @@ export default async function DashboardPage() {
           </div>
         ) : (
           <div>
-            <PageHeader
-              title={`G\u2019day, ${displayName}!`}
-              titleClassName="text-4xl font-bold text-brand"
-              subtitle="Here&#8217;s your herd overview."
-            />
-
-            {/* Hero: Total Portfolio Value (demo user's local additions merged client-side) */}
-            <PortfolioValueCardWithOverlay
-              baseValue={portfolioValue}
-              baseFallbackCount={fallbackCount}
-              changeDollar={changeDollar}
-              changePercent={changePercent}
-              prices={(allPrices ?? []) as PriceRowFlat[]}
-              premiumsByBreed={Object.fromEntries(premiumMap)}
-            />
-
-            {/* Secondary stat strip */}
-            <PortfolioStatStripWithOverlay
-              baseTotalHead={totalHead}
-              baseHerdCount={herdCount}
-              propertyCount={propertyCount}
-            />
-
-            {/* Portfolio Outlook chart - full width */}
-            <div className="mt-3 lg:mt-4">
-              <OutlookCard data={chartData} />
-            </div>
-
-            {/* Two columns */}
-            <div className="mt-3 grid grid-cols-1 gap-3 lg:mt-4 lg:grid-cols-2 lg:gap-4">
-              {/* Left column */}
-              <div className="flex flex-col gap-3 lg:gap-4">
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="bg-brand/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
-                          <IconCattleTags className="text-brand h-3.5 w-3.5" />
-                        </div>
-                        <CardTitle>Herd Composition</CardTitle>
-                      </div>
-                      <Link
-                        href="/dashboard/herds"
-                        className="bg-surface-raised text-text-secondary hover:bg-surface-high hover:text-text-primary inline-flex items-center gap-0.5 rounded-md px-2 py-1 text-xs font-medium transition-colors"
-                      >
-                        View all
-                        <ChevronRight className="h-3 w-3" />
-                      </Link>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <HerdComposition herds={activeHerds} />
-                  </CardContent>
-                </Card>
-
-                <ComingUpCard items={upcomingItems ?? []} />
-
-                <GrowthMortalityCard
-                  avgMortalityRate={avgMortalityRate}
-                  avgDailyWeightGain={avgDailyWeightGain}
-                  totalHead={totalHead}
-                />
-
-                {totalBreedingAccrual > 0 && (
-                  <CalvingAccrualCard
-                    totalAccrual={totalPreBirthAccrual}
-                    calvesAtFootValue={totalCalvesAtFootValue}
-                    calvesAtFootHead={totalCalvesAtFootHead}
-                    breederCount={breederCount}
-                    pregnantCount={pregnantCount}
+            <div className="grid grid-cols-1 gap-3 lg:gap-4 2xl:grid-cols-12">
+              <section className="grid min-w-0 gap-3 lg:gap-4 2xl:col-span-8 2xl:grid-cols-8">
+                <div className="min-w-0 2xl:col-span-8">
+                  <PortfolioValueCardWithOverlay
+                    baseValue={portfolioValue}
+                    baseFallbackCount={fallbackCount}
+                    changeDollar={changeDollar}
+                    changePercent={changePercent}
+                    prices={(allPrices ?? []) as PriceRowFlat[]}
+                    premiumsByBreed={Object.fromEntries(premiumMap)}
                   />
-                )}
-              </div>
+                </div>
 
-              {/* Right column */}
-              <div className="flex min-w-0 flex-col gap-3 lg:gap-4">
+                <div className="min-w-0 2xl:col-span-8">
+                  <PortfolioStatStripWithOverlay
+                    baseTotalHead={totalHead}
+                    baseHerdCount={herdCount}
+                    propertyCount={propertyCount}
+                  />
+                </div>
+
+                <div className="min-w-0 2xl:col-span-8">
+                  <OutlookCard data={chartData} />
+                </div>
+
+                <div className="flex min-w-0 flex-col gap-3 lg:gap-4 2xl:col-span-4">
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="bg-brand/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+                            <IconCattleTags className="text-brand h-3.5 w-3.5" />
+                          </div>
+                          <CardTitle>Herd Composition</CardTitle>
+                        </div>
+                        <Link
+                          href="/dashboard/herds"
+                          className="bg-surface-raised text-text-secondary hover:bg-surface-high hover:text-text-primary inline-flex items-center gap-0.5 rounded-md px-2 py-1 text-xs font-medium transition-colors"
+                        >
+                          View all
+                          <ChevronRight className="h-3 w-3" />
+                        </Link>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <HerdComposition herds={activeHerds} />
+                    </CardContent>
+                  </Card>
+
+                  <GrowthMortalityCard
+                    avgMortalityRate={avgMortalityRate}
+                    avgDailyWeightGain={avgDailyWeightGain}
+                    totalHead={totalHead}
+                  />
+                </div>
+
+                <div className="flex min-w-0 flex-col gap-3 lg:gap-4 2xl:col-span-4">
+                  {totalBreedingAccrual > 0 && (
+                    <CalvingAccrualCard
+                      totalAccrual={totalPreBirthAccrual}
+                      calvesAtFootValue={totalCalvesAtFootValue}
+                      calvesAtFootHead={totalCalvesAtFootHead}
+                      breederCount={breederCount}
+                      pregnantCount={pregnantCount}
+                    />
+                  )}
+                </div>
+              </section>
+
+              <aside className="grid min-w-0 gap-3 lg:grid-cols-2 lg:gap-4 2xl:col-span-4 2xl:grid-cols-1 2xl:self-start">
                 <ClosestSaleyardsCard yards={closestYardValues} hasLocation={hasPrimaryLocation} />
-
+                <ComingUpCard items={upcomingItems ?? []} />
                 <Card>
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -570,7 +553,7 @@ export default async function DashboardPage() {
                     ))}
                   </CardContent>
                 </Card>
-              </div>
+              </aside>
             </div>
           </div>
         )}

@@ -88,7 +88,7 @@ export function AssetRegisterTabs({
       {/* Tab bar */}
       <div
         ref={containerRef}
-        className="bg-surface relative mb-4 flex gap-1 rounded-full p-1 backdrop-blur-md"
+        className="relative mb-4 flex gap-1 rounded-full border border-white/[0.08] bg-white/[0.07] bg-clip-padding p-1 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)]"
         role="tablist"
         aria-label="Asset Register sections"
       >

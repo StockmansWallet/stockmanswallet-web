@@ -30,7 +30,7 @@ export default async function IndicatorsPage({ searchParams }: Props) {
   const latestDate = summaries[0]?.latest_date ?? null;
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <BackLink href="/dashboard/market" />
       <PageHeader feature="markets"
         title="National Categories"

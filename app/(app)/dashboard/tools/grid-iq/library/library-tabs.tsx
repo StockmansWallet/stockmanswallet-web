@@ -1,12 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { createClient } from "@/lib/supabase/client";
 import { bulkDeleteProcessorGrids, bulkDeleteKillSheets } from "./actions";
 import {
   BarChart3,
@@ -107,74 +106,73 @@ export function LibraryTabs({
 }: Props) {
   const resolved = tabAliases[defaultTab] ?? "analyses";
   const [activeTab, setActiveTab] = useState<TabId>(resolved);
+  const [analysisTab, setAnalysisTab] = useState<"pre-sale" | "post-kill">("pre-sale");
   const [uploadType, setUploadType] = useState<"grid" | "killsheet" | null>(initialUpload ?? null);
-
-  const containerRef = useRef<HTMLDivElement>(null);
-  const buttonRefs = useRef<Map<TabId, HTMLButtonElement>>(new Map());
-  const [indicator, setIndicator] = useState({ left: 0, width: 0 });
-  const [indicatorReady, setIndicatorReady] = useState(false);
-
-  const measure = useCallback(() => {
-    const container = containerRef.current;
-    const btn = buttonRefs.current.get(activeTab);
-    if (!container || !btn) return;
-    const cRect = container.getBoundingClientRect();
-    const bRect = btn.getBoundingClientRect();
-    setIndicator({ left: bRect.left - cRect.left, width: bRect.width });
-    setIndicatorReady(true);
-  }, [activeTab]);
-
-  useEffect(() => {
-    measure();
-  }, [measure]);
-
-  useEffect(() => {
-    const observer = new ResizeObserver(measure);
-    if (containerRef.current) observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, [measure]);
+  const preSaleCount = analyses.filter((a) => a.analysis_mode !== "post_sale").length;
+  const postKillCount = analyses.filter((a) => a.analysis_mode === "post_sale").length;
+  const filters: { id: "pre-sale" | "post-kill"; label: string; count: number }[] = [
+    { id: "pre-sale", label: "Pre-Sale", count: preSaleCount },
+    { id: "post-kill", label: "Post-Kill", count: postKillCount },
+  ];
 
   return (
     <div>
-      {/* Heading */}
-      <div className="mb-4">
-        <h2 className="text-text-primary text-xl font-semibold">Library</h2>
-        <p className="text-text-muted mt-0.5 text-sm">
-          Your analyses, grids, kill sheets, and performance history.
-        </p>
-      </div>
-
       {/* Primary tab bar */}
-      <div ref={containerRef} className="bg-surface relative mb-5 flex gap-1 rounded-full p-1">
-        <div
-          className={`bg-surface-high absolute top-1 bottom-1 rounded-full shadow-sm ${
-            indicatorReady ? "transition-all duration-250 ease-out" : ""
-          }`}
-          style={{ left: indicator.left, width: indicator.width }}
-        />
-        {tabs.map((tab) => {
-          const active = activeTab === tab.id;
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.id}
-              ref={(el) => {
-                if (el) buttonRefs.current.set(tab.id, el);
-              }}
-              onClick={() => setActiveTab(tab.id)}
-              className={`relative z-10 flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-150 ${
-                active ? "text-text-primary" : "text-text-muted hover:text-text-secondary"
-              }`}
-            >
-              <Icon className={`h-4 w-4 ${active ? "text-grid-iq" : "text-text-muted"}`} />
-              {tab.label}
-            </button>
-          );
-        })}
+      <div className="mb-4 flex flex-col gap-2 rounded-2xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding p-2 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)] lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-wrap items-center gap-1.5">
+          {tabs.map((tab) => {
+            const active = activeTab === tab.id;
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-150 ${
+                  active
+                    ? "bg-grid-iq/15 text-grid-iq"
+                    : "text-text-muted hover:bg-white/[0.04] hover:text-text-secondary"
+                }`}
+              >
+                <Icon className={`h-3.5 w-3.5 ${active ? "text-grid-iq" : "text-text-muted"}`} />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {activeTab === "analyses" && (
+          <div className="flex flex-wrap items-center gap-1.5 lg:justify-end">
+            {filters.map((filter) => {
+              const active = analysisTab === filter.id;
+              return (
+                <button
+                  key={filter.id}
+                  onClick={() => setAnalysisTab(filter.id)}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                    active
+                      ? "border-grid-iq/40 bg-grid-iq/15 text-grid-iq"
+                      : "border-white/[0.08] bg-white/[0.035] text-text-muted hover:border-white/[0.14] hover:bg-white/[0.055] hover:text-text-secondary"
+                  }`}
+                >
+                  {filter.label}
+                  <span
+                    className={`rounded-full px-1.5 py-[1px] text-[10px] ${
+                      active ? "bg-grid-iq/20 text-grid-iq" : "bg-white/[0.06] text-text-muted"
+                    }`}
+                  >
+                    {filter.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Tab content */}
-      {activeTab === "analyses" && <AnalysesTab analyses={analyses} />}
+      {activeTab === "analyses" && (
+        <AnalysesTab analyses={analyses} subTab={analysisTab} />
+      )}
       {activeTab === "grids" && <GridsTab grids={grids} onUpload={() => setUploadType("grid")} />}
       {activeTab === "kill-sheets" && (
         <KillSheetsTab killSheets={killSheets} onUpload={() => setUploadType("killsheet")} />
@@ -193,8 +191,13 @@ export function LibraryTabs({
 
 // MARK: - Analyses
 
-function AnalysesTab({ analyses }: { analyses: AnalysisRow[] }) {
-  const [subTab, setSubTab] = useState<"pre-sale" | "post-kill">("pre-sale");
+function AnalysesTab({
+  analyses,
+  subTab,
+}: {
+  analyses: AnalysisRow[];
+  subTab: "pre-sale" | "post-kill";
+}) {
   const [selecting, setSelecting] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
@@ -207,47 +210,10 @@ function AnalysesTab({ analyses }: { analyses: AnalysisRow[] }) {
     setSelected(new Set());
   };
 
-  const filters: { id: "pre-sale" | "post-kill"; label: string; count: number }[] = [
-    { id: "pre-sale", label: "Pre-Sale", count: preSale.length },
-    { id: "post-kill", label: "Post-Kill", count: postKill.length },
-  ];
-
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <span className="text-text-muted text-[11px] font-medium tracking-wide uppercase">
-            Filter
-          </span>
-          <div className="flex gap-1.5">
-            {filters.map((f) => {
-              const active = subTab === f.id;
-              return (
-                <button
-                  key={f.id}
-                  onClick={() => setSubTab(f.id)}
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                    active
-                      ? "border-grid-iq/40 bg-grid-iq/15 text-grid-iq"
-                      : "bg-surface-lowest text-text-secondary hover:text-text-primary border-white/[0.08] hover:border-white/[0.14]"
-                  }`}
-                >
-                  {f.label}
-                  {f.count > 0 && (
-                    <span
-                      className={`rounded-full px-1.5 py-[1px] text-[10px] ${
-                        active ? "bg-grid-iq/20 text-grid-iq" : "text-text-muted bg-white/[0.06]"
-                      }`}
-                    >
-                      {f.count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-        {displayed.length > 0 && (
+      {displayed.length > 0 && (
+        <div className="mb-3 flex items-center justify-end gap-3">
           <Button
             variant="ghost"
             size="sm"
@@ -256,8 +222,8 @@ function AnalysesTab({ analyses }: { analyses: AnalysisRow[] }) {
           >
             {selecting ? "Cancel" : "Select"}
           </Button>
-        )}
-      </div>
+        </div>
+      )}
 
       <AnalysisList
         analyses={displayed}
@@ -469,9 +435,11 @@ function GridsTab({ grids, onUpload }: { grids: GridRow[]; onUpload: () => void 
         uploadLabel="Upload Grid"
       />
 
-      <Card>
-        <CardContent className="divide-y divide-white/[0.06] p-0">
-          {grids.map((g) => {
+      <div
+        className="grid gap-3"
+        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 34rem), 1fr))" }}
+      >
+        {grids.map((g) => {
             const expiry = g.expiry_date ? new Date(g.expiry_date) : null;
             const now = new Date();
             const daysUntilExpiry = expiry
@@ -535,7 +503,7 @@ function GridsTab({ grids, onUpload }: { grids: GridRow[]; onUpload: () => void 
                 <button
                   key={g.id}
                   onClick={() => toggleOne(g.id)}
-                  className="group flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-white/[0.03]"
+                  className="group relative flex w-full items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding px-4 py-4 text-left backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)] transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075]"
                 >
                   {content}
                 </button>
@@ -546,14 +514,13 @@ function GridsTab({ grids, onUpload }: { grids: GridRow[]; onUpload: () => void 
               <Link
                 key={g.id}
                 href={`/dashboard/tools/grid-iq/grids/${g.id}`}
-                className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/[0.03]"
+                className="group relative flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding px-4 py-4 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)] transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075]"
               >
                 {content}
               </Link>
             );
           })}
-        </CardContent>
-      </Card>
+      </div>
 
       {selecting && (
         <BulkDeleteBar
@@ -650,9 +617,11 @@ function KillSheetsTab({
         uploadLabel="Upload Kill Sheet"
       />
 
-      <Card>
-        <CardContent className="divide-y divide-white/[0.06] p-0">
-          {killSheets.map((ks) => {
+      <div
+        className="grid gap-3"
+        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 34rem), 1fr))" }}
+      >
+        {killSheets.map((ks) => {
             const rf = ks.realisation_factor;
             const checked = selected.has(ks.id);
 
@@ -712,7 +681,7 @@ function KillSheetsTab({
                 <button
                   key={ks.id}
                   onClick={() => toggleOne(ks.id)}
-                  className="group flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-white/[0.03]"
+                  className="group relative flex w-full items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding px-4 py-4 text-left backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)] transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075]"
                 >
                   {content}
                 </button>
@@ -723,14 +692,13 @@ function KillSheetsTab({
               <Link
                 key={ks.id}
                 href={`/dashboard/tools/grid-iq/kill-sheets/${ks.id}`}
-                className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/[0.03]"
+                className="group relative flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding px-4 py-4 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)] transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075]"
               >
                 {content}
               </Link>
             );
           })}
-        </CardContent>
-      </Card>
+      </div>
 
       {selecting && (
         <BulkDeleteBar

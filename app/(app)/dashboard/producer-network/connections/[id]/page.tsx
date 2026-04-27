@@ -90,7 +90,7 @@ export default async function ProducerConnectionDetailPage({
   };
 
   return (
-    <div className="flex h-[calc(100vh-6rem)] max-w-4xl flex-col">
+    <div className="flex h-[calc(100vh-6rem)] w-full max-w-[1680px] flex-col">
       <MarkConnectionNotificationsRead connectionId={id} />
       {/* Match the Producer Network landing-page header rhythm so the chat
           page starts at the same visual height as the inbox view. */}

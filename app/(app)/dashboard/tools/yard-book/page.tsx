@@ -52,7 +52,7 @@ export default async function YardBookPage({
   const isCompletelyEmpty = allItems.length === 0 && allNotes.length === 0;
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <PageHeader
         feature="yard-book"
         title="Yard Book"

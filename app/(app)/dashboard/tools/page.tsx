@@ -44,14 +44,14 @@ const tools = [
 
 export default function ToolsPage() {
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <PageHeader
         title="Tools"
         titleClassName="text-4xl font-bold text-brand"
         subtitle="Calculators and utilities for your operation."
       />
 
-      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3 2xl:grid-cols-4">
         {tools.map((tool) => (
           <li key={tool.href}>
             <Link href={tool.href}>

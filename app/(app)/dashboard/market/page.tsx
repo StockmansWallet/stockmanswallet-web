@@ -50,7 +50,7 @@ export default async function MarketPage({ searchParams }: Props) {
   const latestDate = summaries[0]?.latest_date ?? null;
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <PageHeader feature="markets"
         title="Market"
         titleClassName="text-4xl font-bold text-markets"
@@ -116,7 +116,7 @@ export default async function MarketPage({ searchParams }: Props) {
                 </Link>
               </div>
             </CardHeader>
-            <CardContent className="grid gap-3 sm:grid-cols-2">
+            <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
               {summaries.map((s) => (
                 <CategoryTile key={s.slug} summary={s} exposure={exposureByCat.get(s.category)} />
               ))}

@@ -8,7 +8,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, MessageSquare, Trash2, Loader2 } from "lucide-react";
+import {
+  ChevronLeft,
+  MessageCircleCheck,
+  MessageCircleDashed,
+  MessageCircleReply,
+  Trash2,
+  Loader2,
+} from "lucide-react";
 import { ChatBubble } from "@/components/app/chat/chat-bubble";
 import { markSharedChatRead, softDeleteSharedChat, type SharedChatRow } from "@/lib/brangus/shared-chats-service";
 
@@ -80,15 +87,20 @@ export function SharedChatPanel({
   const headerLabel = viewerIsRecipient
     ? `Shared by ${senderName}`
     : `You shared this chat with ${recipientName}`;
+  const HeaderIcon = viewerIsRecipient
+    ? MessageCircleReply
+    : chat.is_read
+      ? MessageCircleCheck
+      : MessageCircleDashed;
 
   return (
     <div data-print-chat className="flex flex-1 flex-col overflow-hidden">
       {/* Shared-chat banner - replaces the normal Brangus "welcome" area so the
-          viewer immediately sees context. Uses producer-network accent to match
+          viewer immediately sees context. Uses brangus accent to match
           the Shared tab badge. */}
-      <div className="bg-producer-network/10 border-producer-network/20 flex items-start gap-3 border-b px-4 py-3">
-        <div className="bg-producer-network/20 text-producer-network flex h-9 w-9 shrink-0 items-center justify-center rounded-full">
-          <MessageSquare className="h-4 w-4" />
+      <div className="bg-brangus/10 border-brangus/20 flex items-start gap-3 border-b px-4 py-3">
+        <div className="bg-brangus/20 text-brangus flex h-9 w-9 shrink-0 items-center justify-center rounded-full">
+          <HeaderIcon className="h-4 w-4" />
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-text-primary truncate text-sm font-semibold">{headerLabel}</p>
@@ -97,7 +109,7 @@ export function SharedChatPanel({
             <p className="text-text-primary mt-1 truncate text-xs font-medium">{chat.title}</p>
           )}
           {chat.note && (
-            <div className="border-producer-network/40 bg-producer-network/5 mt-2 rounded-md border-l-2 px-2.5 py-1.5">
+            <div className="border-brangus/40 bg-brangus/5 mt-2 rounded-md border-l-2 px-2.5 py-1.5">
               <p className="text-text-muted text-[10px] font-semibold tracking-wider uppercase">
                 Note from sender
               </p>
@@ -105,7 +117,7 @@ export function SharedChatPanel({
             </div>
           )}
         </div>
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1 lg:hidden">
           <button
             onClick={onBack}
             className="bg-surface-lowest text-text-secondary hover:bg-surface-raised hover:text-text-primary flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors"

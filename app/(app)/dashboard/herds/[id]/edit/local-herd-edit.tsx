@@ -131,7 +131,7 @@ export function LocalHerdEditView({
   }
 
   return (
-    <div className="max-w-4xl pb-24">
+    <div className="w-full max-w-[1680px] pb-24">
       <PageHeader
         title={`Edit: ${herd.name}`}
         subtitle={[herd.species, herd.breed].filter(Boolean).join(" \u00B7 ")}

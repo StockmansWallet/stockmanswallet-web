@@ -124,7 +124,7 @@ export default async function AdvisorDashboardPage() {
   }
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <ConnectionRealtime userId={user.id} />
       <PageHeader feature="advisor"
         title={`Welcome, ${firstName}`}
@@ -188,9 +188,9 @@ export default async function AdvisorDashboardPage() {
       </div>
 
       {/* Two-column: Recent Clients + LGA chart */}
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4 2xl:grid-cols-5">
         {/* Recent Clients */}
-        <Card>
+        <Card className="2xl:col-span-3">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -269,7 +269,7 @@ export default async function AdvisorDashboardPage() {
         </Card>
 
         {/* Right column: LGA chart */}
-        <Card>
+        <Card className="2xl:col-span-2">
           <CardHeader>
             <div className="flex items-center gap-2">
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-advisor/15">

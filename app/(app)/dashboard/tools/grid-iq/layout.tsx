@@ -20,7 +20,7 @@ export default async function GridIQLayout({ children }: { children: React.React
   }
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <PageHeader
         feature="grid-iq"
         title="Grid IQ"

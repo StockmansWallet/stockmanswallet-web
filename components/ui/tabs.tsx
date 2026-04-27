@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
+import { useState, useRef, useEffect, useCallback, useLayoutEffect, type ReactNode } from "react";
 
 type TabAccent =
   | "brangus"
@@ -66,15 +66,20 @@ function Tabs({ tabs, defaultTab, accent }: TabsProps) {
 
     const containerRect = container.getBoundingClientRect();
     const btnRect = btn.getBoundingClientRect();
-    setIndicator({
-      left: btnRect.left - containerRect.left,
-      width: btnRect.width,
+    const next = {
+      left: Math.round(btnRect.left - containerRect.left),
+      width: Math.round(btnRect.width),
+    };
+    setIndicator((current) => {
+      if (current.left === next.left && current.width === next.width) return current;
+      return next;
     });
-    setReady(true);
+    setReady((current) => current || true);
   }, [activeTab]);
 
-  useEffect(() => {
-    measure();
+  useLayoutEffect(() => {
+    const frame = requestAnimationFrame(measure);
+    return () => cancelAnimationFrame(frame);
   }, [measure]);
 
   // Re-measure on resize
@@ -91,7 +96,10 @@ function Tabs({ tabs, defaultTab, accent }: TabsProps) {
   return (
     <div>
       {/* Tab bar */}
-      <div ref={containerRef} className="relative mb-6 flex gap-1 rounded-full bg-surface p-1">
+      <div
+        ref={containerRef}
+        className="relative mb-6 flex gap-1 rounded-full border border-white/[0.08] bg-white/[0.07] bg-clip-padding p-1 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)]"
+      >
         {/* Sliding indicator */}
         <div
           className={`absolute top-1 bottom-1 rounded-full ${indicatorBg} shadow-sm ${ready ? "transition-all duration-250 ease-out" : ""}`}

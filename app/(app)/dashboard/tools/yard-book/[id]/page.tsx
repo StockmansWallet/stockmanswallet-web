@@ -169,7 +169,7 @@ export default async function YardBookItemPage({ params }: { params: Promise<{ i
   const days = daysUntil(item.event_date);
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <PageHeader
         feature="yard-book"
         title={item.title}

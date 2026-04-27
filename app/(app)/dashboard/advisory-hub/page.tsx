@@ -41,7 +41,7 @@ export default async function AdvisoryHubPage() {
   const awaitingCount = connections?.filter((c) => c.status === "pending" && c.target_user_id !== user.id).length ?? 0;
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <ConnectionRealtime userId={user.id} />
       <PageHeader feature="advisor"
         title="Advisory Hub"

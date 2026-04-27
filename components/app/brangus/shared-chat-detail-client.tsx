@@ -7,7 +7,14 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Trash2, MessageSquare, Loader2 } from "lucide-react";
+import {
+  ChevronLeft,
+  Trash2,
+  MessageCircleCheck,
+  MessageCircleDashed,
+  MessageCircleReply,
+  Loader2,
+} from "lucide-react";
 import { ChatBubble } from "@/components/app/chat/chat-bubble";
 import { QuickInsightRow } from "@/components/app/chat/quick-insight-row";
 import { hydrateCardsFromJson } from "@/lib/brangus/cards";
@@ -62,6 +69,11 @@ export function SharedChatDetailClient({ row, viewerIsRecipient }: Props) {
     hour: "numeric",
     minute: "2-digit",
   });
+  const HeaderIcon = viewerIsRecipient
+    ? MessageCircleReply
+    : row.is_read
+      ? MessageCircleCheck
+      : MessageCircleDashed;
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 px-4 py-4">
@@ -91,10 +103,10 @@ export function SharedChatDetailClient({ row, viewerIsRecipient }: Props) {
       </div>
 
       {/* Header card - solid surface so it reads against the Brangus wallpaper. */}
-      <div className="bg-surface border-producer-network/30 rounded-2xl border px-4 py-4 shadow-sm">
+      <div className="bg-surface border-brangus/30 rounded-2xl border px-4 py-4 shadow-sm">
         <div className="flex items-start gap-3">
-          <div className="bg-producer-network/20 text-producer-network flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
-            <MessageSquare className="h-5 w-5" />
+          <div className="bg-brangus/20 text-brangus flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+            <HeaderIcon className="h-5 w-5" />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-text-primary text-sm font-semibold">
@@ -107,7 +119,7 @@ export function SharedChatDetailClient({ row, viewerIsRecipient }: Props) {
               <p className="text-text-primary mt-2 text-sm font-semibold">{row.title}</p>
             )}
             {row.note && (
-              <div className="border-producer-network/40 bg-producer-network/5 mt-3 rounded-lg border-l-2 px-3 py-2">
+              <div className="border-brangus/40 bg-brangus/5 mt-3 rounded-lg border-l-2 px-3 py-2">
                 <p className="text-text-muted text-[10px] font-semibold tracking-wider uppercase">
                   Note from sender
                 </p>

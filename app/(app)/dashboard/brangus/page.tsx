@@ -34,7 +34,7 @@ export default async function BrangusPage() {
     typeof user?.user_metadata?.first_name === "string" ? user.user_metadata.first_name : undefined;
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <PageHeader
         feature="brangus"
         title="Brangus"

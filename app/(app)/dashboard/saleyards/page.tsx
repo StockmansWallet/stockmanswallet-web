@@ -76,7 +76,7 @@ export default async function SaleyardsPage() {
   });
 
   return (
-    <div className="flex max-w-6xl flex-col gap-4 pb-10">
+    <div className="flex w-full max-w-[1680px] flex-col gap-4 pb-10">
       <PageHeader
         title="Saleyards"
         subtitle="Every MLA-tracked saleyard in Australia, mapped. Greyed-out yards haven't reported fresh prices in over a year."

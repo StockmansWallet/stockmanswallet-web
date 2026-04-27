@@ -34,7 +34,7 @@ export default async function PropertyDetailPage({
   const boundUpdate = updateProperty.bind(null, id);
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       {/* Property header */}
       <div className="mb-6 mt-6 flex items-end gap-4">
         <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-brand/15">

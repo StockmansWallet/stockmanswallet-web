@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
@@ -145,86 +145,87 @@ export function ProcessorsList({ processors }: { processors: ProcessorRow[] }) {
         </div>
       )}
 
-      <Card>
-        <CardContent className="divide-y divide-white/[0.06] p-0">
-          {processors.map((p) => {
-            const checked = selected.has(p.id);
-            const hasCoords = p.location_latitude != null && p.location_longitude != null;
+      <div
+        className="grid gap-3"
+        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 34rem), 1fr))" }}
+      >
+        {processors.map((p) => {
+          const checked = selected.has(p.id);
+          const hasCoords = p.location_latitude != null && p.location_longitude != null;
 
-            const content = (
-              <>
-                {selecting && (
-                  <span
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
-                      checked
-                        ? "border-grid-iq bg-grid-iq text-black"
-                        : "border-white/20 bg-white/[0.04]"
-                    }`}
-                  >
-                    {checked && <Check className="h-3 w-3" strokeWidth={3} />}
-                  </span>
-                )}
-                <div className="bg-grid-iq/15 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
-                  <Factory className="text-grid-iq h-5 w-5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="text-text-primary text-sm font-medium">{p.name}</p>
-                    {p.is_primary && (
-                      <span className="bg-grid-iq/15 text-grid-iq rounded-full px-2 py-0.5 text-[10px] font-medium">
-                        Primary
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-text-muted mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
-                    {p.address && <span>{p.address}</span>}
-                    {hasCoords ? (
-                      <span className="text-grid-iq/70 flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        coords set
-                      </span>
-                    ) : (
-                      <span className="text-warning/80">no coords</span>
-                    )}
-                    <span>
-                      {p.grid_count} grid{p.grid_count === 1 ? "" : "s"}
-                    </span>
-                    <span>
-                      {p.kill_sheet_count} kill sheet
-                      {p.kill_sheet_count === 1 ? "" : "s"}
-                    </span>
-                  </div>
-                </div>
-                {!selecting && (
-                  <ChevronRight className="text-text-muted group-hover:text-text-secondary h-4 w-4 shrink-0 transition-all group-hover:translate-x-0.5" />
-                )}
-              </>
-            );
-
-            if (selecting) {
-              return (
-                <button
-                  key={p.id}
-                  onClick={() => toggleOne(p.id)}
-                  className="group flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-white/[0.03]"
+          const content = (
+            <>
+              {selecting && (
+                <span
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
+                    checked
+                      ? "border-grid-iq bg-grid-iq text-black"
+                      : "border-white/20 bg-white/[0.04]"
+                  }`}
                 >
-                  {content}
-                </button>
-              );
-            }
+                  {checked && <Check className="h-3 w-3" strokeWidth={3} />}
+                </span>
+              )}
+              <div className="bg-grid-iq/15 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                <Factory className="text-grid-iq h-5 w-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="text-text-primary text-sm font-medium">{p.name}</p>
+                  {p.is_primary && (
+                    <span className="bg-grid-iq/15 text-grid-iq rounded-full px-2 py-0.5 text-[10px] font-medium">
+                      Primary
+                    </span>
+                  )}
+                </div>
+                <div className="text-text-muted mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
+                  {p.address && <span>{p.address}</span>}
+                  {hasCoords ? (
+                    <span className="text-grid-iq/70 flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      coords set
+                    </span>
+                  ) : (
+                    <span className="text-warning/80">no coords</span>
+                  )}
+                  <span>
+                    {p.grid_count} grid{p.grid_count === 1 ? "" : "s"}
+                  </span>
+                  <span>
+                    {p.kill_sheet_count} kill sheet
+                    {p.kill_sheet_count === 1 ? "" : "s"}
+                  </span>
+                </div>
+              </div>
+              {!selecting && (
+                <ChevronRight className="text-text-muted group-hover:text-text-secondary h-4 w-4 shrink-0 transition-all group-hover:translate-x-0.5" />
+              )}
+            </>
+          );
 
+          if (selecting) {
             return (
-              <Link
+              <button
                 key={p.id}
-                href={`/dashboard/tools/grid-iq/processors/${p.id}`}
-                className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/[0.03]"
+                onClick={() => toggleOne(p.id)}
+                className="group relative flex w-full items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding px-4 py-4 text-left backdrop-blur-xl transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075] [backface-visibility:hidden] [transform:translateZ(0)]"
               >
                 {content}
-              </Link>
+              </button>
             );
-          })}
-        </CardContent>
-      </Card>
+          }
+
+          return (
+            <Link
+              key={p.id}
+              href={`/dashboard/tools/grid-iq/processors/${p.id}`}
+              className="group relative flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding px-4 py-4 backdrop-blur-xl transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075] [backface-visibility:hidden] [transform:translateZ(0)]"
+            >
+              {content}
+            </Link>
+          );
+        })}
+      </div>
 
       {selecting && selected.size > 0 && (
         <div className="mt-4">

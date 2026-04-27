@@ -53,7 +53,7 @@ export default async function FreightHistoryPage() {
   });
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <Link
         href="/dashboard/tools/freight"
         className="bg-surface-lowest text-text-secondary hover:text-text-primary mb-4 inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors"

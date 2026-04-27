@@ -102,7 +102,7 @@ export default async function ProducerDirectoryPage({
   }
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <PageHeader feature="producer-network"
         title="Producer Directory"
         titleClassName="text-4xl font-bold text-producer-network-light"

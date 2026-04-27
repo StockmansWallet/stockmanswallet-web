@@ -46,14 +46,14 @@ const reports = [
 
 export default function ReportsPage() {
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <PageHeader feature="reports"
         title="Reports"
         titleClassName="text-4xl font-bold text-reports"
         subtitle="Generate and export reports"
         subtitleClassName="text-sm font-medium text-text-secondary"
       />
-      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3 2xl:grid-cols-4">
         {reports.map((report) => (
           <li key={report.href}>
           <Link href={report.href}>

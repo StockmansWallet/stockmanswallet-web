@@ -65,7 +65,7 @@ export default async function AccountSettingsPage() {
   const isAdvisor = isAdvisorRole(userRole);
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <div className="mb-4 sm:hidden">
         <Link
           href="/dashboard/settings"
@@ -81,7 +81,7 @@ export default async function AccountSettingsPage() {
         subtitle="Subscription, security, and account management."
       />
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
         {/* Account Type */}
         <Card>
           <CardHeader>

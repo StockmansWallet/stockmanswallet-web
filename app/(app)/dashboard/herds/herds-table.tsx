@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, type ReactNode } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -301,7 +301,6 @@ export function HerdsTable({
   herdDefaultBreedPremium,
   herdCustomBreedPremium,
   propertyGroups,
-  headerActions,
 }: {
   herds: HerdWithProperty[];
   herdValues: Record<string, number>;
@@ -314,7 +313,6 @@ export function HerdsTable({
   herdDefaultBreedPremium?: Record<string, number>;
   herdCustomBreedPremium?: Record<string, number>;
   propertyGroups: PropertyGroup[];
-  headerActions?: ReactNode;
 }) {
   const router = useRouter();
   const navigateToHerd = useCallback(
@@ -534,7 +532,6 @@ export function HerdsTable({
               {isEditing ? "Done" : "Select"}
             </button>
           )}
-          {headerActions}
         </div>
       </div>
 

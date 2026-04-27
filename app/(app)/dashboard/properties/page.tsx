@@ -4,7 +4,8 @@ import { Card } from "@/components/ui/card";
 import { StatCard } from "@/components/ui/stat-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PropertiesTable } from "./properties-table";
-import { MapPinned, LandPlot, Map } from "lucide-react";
+import { MapPinned, LandPlot, Map, Plus } from "lucide-react";
+import Link from "next/link";
 
 export const revalidate = 0;
 
@@ -47,11 +48,20 @@ export default async function PropertiesPage() {
   const uniqueStates = [...new Set((properties ?? []).map((p) => p.state).filter(Boolean))];
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <PageHeader
         title="Properties"
         titleClassName="text-4xl font-bold text-brand"
         subtitle="Manage your properties and locations."
+        actions={
+          <Link
+            href="/dashboard/properties/new"
+            className="bg-brand hover:bg-brand-dark inline-flex h-9 items-center gap-2 rounded-full px-4 text-[13px] font-semibold text-white transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            Add Property
+          </Link>
+        }
       />
 
       {!properties || properties.length === 0 ? (

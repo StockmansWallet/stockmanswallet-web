@@ -123,7 +123,7 @@ export default async function ProducerNetworkPage() {
   const avatarMap = await fetchUserAvatars(avatarIds);
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <ProducerConnectionsRealtime userId={user.id} />
       {/* Connection-request notifications are resolved the moment the
           user lands here, since the Incoming Requests section is right

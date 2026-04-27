@@ -311,7 +311,7 @@ export default async function HerdDetailPage({ params }: { params: Promise<{ id:
   const herdTotal = herdIds.length;
 
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <PageHeader
         title={herd.name}
         titleClassName="text-4xl font-bold text-brand"

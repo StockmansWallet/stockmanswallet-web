@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { computeProducerProfile } from "@/lib/grid-iq/producer-profile";
+import { PageHeader } from "@/components/ui/page-header";
 import { LibraryTabs } from "./library-tabs";
 
 export const metadata = { title: "Library - Grid IQ" };
@@ -59,14 +60,24 @@ export default async function LibraryPage({
     .order("analysis_date", { ascending: true });
 
   return (
-    <LibraryTabs
-      defaultTab={tab ?? (initialUpload === "killsheet" ? "kill-sheets" : "analyses")}
-      initialUpload={initialUpload}
-      analyses={analyses ?? []}
-      grids={grids ?? []}
-      killSheets={killSheets ?? []}
-      profile={profile}
-      postSaleTrend={postSaleTrend ?? []}
-    />
+    <div>
+      <PageHeader
+        feature="grid-iq"
+        title="Library"
+        titleClassName="text-2xl font-semibold text-text-primary"
+        subtitle="Analyses, grids, kill sheets, and performance history"
+        subtitleClassName="text-sm text-text-muted"
+        compact
+      />
+      <LibraryTabs
+        defaultTab={tab ?? (initialUpload === "killsheet" ? "kill-sheets" : "analyses")}
+        initialUpload={initialUpload}
+        analyses={analyses ?? []}
+        grids={grids ?? []}
+        killSheets={killSheets ?? []}
+        profile={profile}
+        postSaleTrend={postSaleTrend ?? []}
+      />
+    </div>
   );
 }

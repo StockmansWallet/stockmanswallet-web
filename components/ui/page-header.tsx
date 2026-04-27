@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
+import { PageHeaderActionsPortal } from "@/components/ui/page-header-actions-portal";
 
 type FeatureHue =
   | "brangus"
@@ -10,6 +12,8 @@ type FeatureHue =
   | "grid-iq"
   | "producer-network"
   | "advisor";
+
+type HeaderAccent = FeatureHue | "brand" | "warning" | "error" | "success" | "info";
 
 interface PageHeaderProps {
   title: string;
@@ -24,30 +28,101 @@ interface PageHeaderProps {
   feature?: FeatureHue;
 }
 
-function PageHeader({ title, actions, compact }: PageHeaderProps) {
-  // Experiment: page titles are hidden since the sidebar indicates location.
-  // Keep <h1> for screen readers and accessibility. Action buttons still render.
-  const srTitle = <h1 className="sr-only">{title}</h1>;
+const featureTitleClasses: Record<FeatureHue, string> = {
+  brangus: "text-brangus",
+  insights: "text-insights",
+  markets: "text-markets",
+  "yard-book": "text-yard-book",
+  reports: "text-reports",
+  "freight-iq": "text-freight-iq",
+  "grid-iq": "text-grid-iq",
+  "producer-network": "text-producer-network",
+  advisor: "text-advisor",
+};
 
-  if (!actions) return srTitle;
+function PageHeader({
+  title,
+  titleHref,
+  subtitle,
+  actions,
+  titleClassName,
+  subtitleClassName,
+  compact,
+  feature,
+}: PageHeaderProps) {
+  const accent = resolveHeaderAccent(feature, titleClassName);
+  const headingClassName =
+    titleClassName ??
+    `text-2xl font-semibold tracking-tight sm:text-3xl ${
+      feature ? featureTitleClasses[feature] : "text-text-primary"
+    }`;
+  const subtitleClass =
+    subtitleClassName ?? "mt-1 text-sm leading-relaxed text-text-secondary sm:text-base";
+  const heading = <h1 className={headingClassName}>{title}</h1>;
+  const marker = (
+    <span
+      hidden
+      data-page-header
+      data-page-title={title}
+      data-page-subtitle={subtitle ?? ""}
+      data-page-title-href={titleHref ?? ""}
+      data-page-accent={accent}
+    />
+  );
 
   if (compact) {
     return (
-      <div className="mb-3 flex items-center justify-end">
-        {srTitle}
-        <div className="flex items-center gap-2">{actions}</div>
-      </div>
+      <>
+        {marker}
+        <div className="mb-3 flex items-center justify-between gap-4 lg:hidden">
+          <div className="min-w-0">
+            {titleHref ? <Link href={titleHref}>{heading}</Link> : heading}
+            {subtitle && <p className={subtitleClass}>{subtitle}</p>}
+          </div>
+          <div className="flex items-center gap-2">{actions}</div>
+        </div>
+        {actions && <PageHeaderActionsPortal>{actions}</PageHeaderActionsPortal>}
+      </>
     );
   }
 
   return (
-    <div className="pt-6 pb-4">
-      {srTitle}
-      <div className="flex flex-1 items-center justify-end">
-        <div className="flex items-center gap-2">{actions}</div>
+    <>
+      {marker}
+      <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-end sm:justify-between lg:hidden">
+        <div className="min-w-0">
+          {titleHref ? <Link href={titleHref}>{heading}</Link> : heading}
+          {subtitle && <p className={subtitleClass}>{subtitle}</p>}
+        </div>
+        {actions && (
+          <div className="flex items-center gap-2">{actions}</div>
+        )}
       </div>
-    </div>
+      {actions && <PageHeaderActionsPortal>{actions}</PageHeaderActionsPortal>}
+    </>
   );
+}
+
+function resolveHeaderAccent(
+  feature: FeatureHue | undefined,
+  titleClassName: string | undefined
+): HeaderAccent {
+  if (feature) return feature;
+  if (!titleClassName) return "brand";
+  if (titleClassName.includes("text-warning")) return "warning";
+  if (titleClassName.includes("text-error")) return "error";
+  if (titleClassName.includes("text-success")) return "success";
+  if (titleClassName.includes("text-info")) return "info";
+  if (titleClassName.includes("text-brangus")) return "brangus";
+  if (titleClassName.includes("text-insights")) return "insights";
+  if (titleClassName.includes("text-markets")) return "markets";
+  if (titleClassName.includes("text-yard-book")) return "yard-book";
+  if (titleClassName.includes("text-reports")) return "reports";
+  if (titleClassName.includes("text-freight-iq")) return "freight-iq";
+  if (titleClassName.includes("text-grid-iq")) return "grid-iq";
+  if (titleClassName.includes("text-producer-network")) return "producer-network";
+  if (titleClassName.includes("text-advisor")) return "advisor";
+  return "brand";
 }
 
 export { PageHeader };

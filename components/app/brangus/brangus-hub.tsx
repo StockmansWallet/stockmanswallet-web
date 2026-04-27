@@ -3,9 +3,10 @@
 // Chat hub layout: tabbed view with live chat + saved conversations
 // Both tabs stay mounted so chat state is preserved when switching
 
-import { useState, useCallback, useRef, useEffect } from "react";
-import { MessageCircle, MessageCirclePlus } from "lucide-react";
+import { useState, useCallback, useRef, useEffect, useLayoutEffect } from "react";
+import { Inbox, MessageCircle, MessageCirclePlus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { PageHeaderActionsPortal } from "@/components/ui/page-header-actions-portal";
 import { BrangusChat } from "@/components/app/brangus-chat";
 import { ConversationList } from "@/components/app/brangus/conversation-list";
 import { SharedChatList } from "@/components/app/brangus/shared-chat-list";
@@ -60,6 +61,7 @@ export function BrangusHub({
 
   // Toolbar portal container (callback ref so it triggers re-render when set)
   const [toolbarEl, setToolbarEl] = useState<HTMLDivElement | null>(null);
+  const [savedActionsEl, setSavedActionsEl] = useState<HTMLDivElement | null>(null);
 
   // Sliding indicator state
   const containerRef = useRef<HTMLDivElement>(null);
@@ -73,14 +75,18 @@ export function BrangusHub({
     if (!container || !btn) return;
     const containerRect = container.getBoundingClientRect();
     const btnRect = btn.getBoundingClientRect();
-    setIndicator({
-      left: btnRect.left - containerRect.left,
-      width: btnRect.width,
+    const next = {
+      left: Math.round(btnRect.left - containerRect.left),
+      width: Math.round(btnRect.width),
+    };
+    setIndicator((current) => {
+      if (current.left === next.left && current.width === next.width) return current;
+      return next;
     });
-    setReady(true);
+    setReady((current) => current || true);
   }, [activeTab]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     measure();
   }, [measure]);
   useEffect(() => {
@@ -270,13 +276,15 @@ export function BrangusHub({
     { id: "saved", label: "Saved Chats" },
     { id: "shared", label: "Shared", badge: sharedUnread },
   ];
+  const desktopTabs = tabs.filter((tab) => tab.id !== "saved");
+  const desktopMainTab = activeTab === "shared" ? "shared" : "chat";
 
   return (
     <div>
-      {/* Tab bar */}
+      {/* Mobile tab bar */}
       <div
         ref={containerRef}
-        className="bg-surface relative mb-4 flex gap-1 rounded-full p-1 backdrop-blur-md"
+        className="relative mb-4 flex gap-1 rounded-full border border-white/[0.08] bg-white/[0.07] bg-clip-padding p-1 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)] lg:hidden"
       >
         <div
           className={`bg-brangus/15 absolute top-1 bottom-1 rounded-full ${ready ? "transition-all duration-250 ease-out" : ""}`}
@@ -295,7 +303,7 @@ export function BrangusHub({
           >
             <span>{tab.label}</span>
             {tab.badge && tab.badge > 0 ? (
-              <span className="bg-producer-network inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white">
+              <span className="bg-brangus inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white">
                 {tab.badge > 9 ? "9+" : tab.badge}
               </span>
             ) : null}
@@ -303,11 +311,44 @@ export function BrangusHub({
         ))}
       </div>
 
-      {/* Action toolbar: Share (portalled from BrangusChat) sits next to New
-          Chat on the right so both live in the same visual cluster. The
-          portal target is empty until the chat has enough messages to share. */}
-      <div className="bg-surface-lowest mb-4 flex items-center justify-end gap-1.5 rounded-full px-2 py-1.5 backdrop-blur-md">
-        <div ref={setToolbarEl} className="flex items-center gap-1.5" />
+      {/* Action toolbar: Share is portalled from BrangusChat once available. */}
+      <PageHeaderActionsPortal>
+        <div className="flex items-center gap-2">
+          <div className="hidden items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.07] bg-clip-padding p-1 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)] lg:flex">
+            {desktopTabs.map((tab) => {
+              const active = desktopMainTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`inline-flex h-7 items-center gap-1.5 rounded-full px-3 text-xs font-semibold transition-colors ${
+                    active
+                      ? "bg-brangus/15 text-brangus"
+                      : "text-text-muted hover:text-text-secondary"
+                  }`}
+                >
+                  <span>{tab.label}</span>
+                  {tab.badge && tab.badge > 0 ? (
+                    <span className="bg-brangus inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white">
+                      {tab.badge > 9 ? "9+" : tab.badge}
+                    </span>
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
+          <div ref={setToolbarEl} className="flex items-center gap-2" />
+          <button
+            onClick={handleNewChat}
+            className="bg-brangus-dark hover:bg-brangus-text inline-flex h-9 shrink-0 items-center gap-2 rounded-full px-4 text-[13px] font-semibold text-white transition-colors"
+          >
+            <MessageCirclePlus className="h-4 w-4" aria-hidden="true" />
+            <span>New Chat</span>
+          </button>
+        </div>
+      </PageHeaderActionsPortal>
+
+      <div className="bg-surface-lowest mb-4 flex items-center justify-end gap-1.5 rounded-full px-2 py-1.5 backdrop-blur-md lg:hidden">
         <button
           onClick={handleNewChat}
           className="bg-brangus-dark hover:bg-brangus-text inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-xs font-semibold text-white transition-colors"
@@ -317,130 +358,251 @@ export function BrangusHub({
         </button>
       </div>
 
-      {/* Chat tab (always mounted, hidden when inactive) */}
-      <div
-        className={
-          activeTab !== "chat"
-            ? "hidden h-[calc(100vh-23.5rem)] sm:h-[calc(100vh-22rem)]"
-            : "h-[calc(100vh-23.5rem)] sm:h-[calc(100vh-22rem)]"
-        }
-      >
-        <Card className="flex h-full flex-col overflow-hidden rounded-3xl">
-          {loadingConv ? (
-            <div className="flex flex-1 items-center justify-center">
-              <div className="border-brangus h-5 w-5 animate-spin rounded-full border-2 border-t-transparent" />
-            </div>
-          ) : (
-            <BrangusChat
-              key={activeConvId ?? `new-${chatResetKey}`}
-              conversationId={activeConvId ?? undefined}
-              initialMessages={activeMessages ?? undefined}
-              pastConversationCount={conversations.length}
-              onConversationCreated={handleConversationCreated}
-              onConversationUpdated={handleConversationUpdated}
-              toolbarContainer={toolbarEl}
-              isAdvisor={isAdvisor}
-              userFirstName={userFirstName}
-            />
-          )}
-        </Card>
-      </div>
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)] lg:gap-4">
+        <div className="min-w-0">
+          {/* Chat tab (always mounted, hidden when inactive) */}
+          <div
+            className={
+              activeTab === "chat"
+                ? "h-[calc(100vh-23.5rem)] sm:h-[calc(100vh-22rem)] lg:h-[calc(100vh-7.5rem)]"
+                : activeTab === "saved"
+                  ? "hidden h-[calc(100vh-23.5rem)] sm:h-[calc(100vh-22rem)] lg:block lg:h-[calc(100vh-7.5rem)]"
+                  : "hidden h-[calc(100vh-23.5rem)] sm:h-[calc(100vh-22rem)] lg:h-[calc(100vh-7.5rem)]"
+            }
+          >
+            <Card className="flex h-full flex-col overflow-hidden rounded-3xl">
+              {loadingConv ? (
+                <div className="flex flex-1 items-center justify-center">
+                  <div className="border-brangus h-5 w-5 animate-spin rounded-full border-2 border-t-transparent" />
+                </div>
+              ) : (
+                <BrangusChat
+                  key={activeConvId ?? `new-${chatResetKey}`}
+                  conversationId={activeConvId ?? undefined}
+                  initialMessages={activeMessages ?? undefined}
+                  pastConversationCount={conversations.length}
+                  onConversationCreated={handleConversationCreated}
+                  onConversationUpdated={handleConversationUpdated}
+                  toolbarContainer={toolbarEl}
+                  isAdvisor={isAdvisor}
+                  userFirstName={userFirstName}
+                />
+              )}
+            </Card>
+          </div>
 
-      {/* Saved Chats tab (always mounted, hidden when inactive) */}
-      <div
-        className={activeTab !== "saved" ? "hidden" : ""}
-        style={{ height: "calc(100vh - 19rem)" }}
-      >
-        {conversations.length > 0 ? (
-          <Card className="h-full overflow-y-auto rounded-2xl">
-            <CardContent className="p-2">
-              <ConversationList
-                conversations={conversations}
-                onSelect={handleSelectConversation}
-                onDeleted={handleConversationDeleted}
-                activeId={activeConvId}
-              />
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="h-full rounded-2xl">
-            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="bg-brangus/10 mb-3 flex h-12 w-12 items-center justify-center rounded-full">
-                <MessageCircle className="text-brangus h-6 w-6" />
+          {/* Saved Chats tab on mobile */}
+          <div
+            className={activeTab !== "saved" ? "hidden" : "lg:hidden"}
+            style={{ height: "calc(100vh - 19rem)" }}
+          >
+            {conversations.length > 0 ? (
+              <Card className="h-full overflow-y-auto rounded-2xl">
+                <CardContent className="p-2">
+                  <ConversationList
+                    conversations={conversations}
+                    onSelect={handleSelectConversation}
+                    onDeleted={handleConversationDeleted}
+                    activeId={activeConvId}
+                  />
+                </CardContent>
+              </Card>
+            ) : (
+              <SavedChatsEmpty />
+            )}
+          </div>
+
+          {/* Shared tab (always mounted, hidden when inactive).
+              Sub-tabs: Inbox (received) and Sent (this user shared). Inbox unread
+              count drives the badge on the parent tab bar.
+              On desktop, the list moves into the right rail so the left pane is
+              reserved for reading the selected shared chat. */}
+          <div
+            className={
+              desktopMainTab !== "shared"
+                ? "hidden h-[calc(100vh-19rem)] lg:h-[calc(100vh-7.5rem)]"
+                : "h-[calc(100vh-19rem)] lg:h-[calc(100vh-7.5rem)]"
+            }
+          >
+            <div className="h-full">
+              {activeSharedChat ? (
+                <Card className="flex h-full flex-col overflow-hidden rounded-3xl">
+                  <SharedChatPanel
+                    chat={activeSharedChat}
+                    viewerIsRecipient={sharedSubTab === "inbox"}
+                    recipientDisplayName={activeSentRecipient}
+                    onBack={handleSharedChatBack}
+                    onRemoved={handleSharedChatRemoved}
+                  />
+                </Card>
+              ) : (
+                <>
+                  <Card className="hidden h-full flex-col overflow-hidden rounded-3xl lg:flex">
+                    <SharedViewerEmpty />
+                  </Card>
+                  <Card className="flex h-full flex-col overflow-hidden rounded-2xl lg:hidden">
+                    <div className="flex shrink-0 items-center justify-between border-b border-white/[0.06] px-4 py-3">
+                      <SharedInboxSentTabs
+                        sharedSubTab={sharedSubTab}
+                        sharedUnread={sharedUnread}
+                        onSwitch={handleSwitchSharedSubTab}
+                      />
+                    </div>
+                    <CardContent className="min-h-0 flex-1 overflow-y-auto p-0">
+                      <div className="h-full">
+                        {sharedSubTab === "inbox" ? (
+                          <SharedChatList
+                            onSelect={handleSelectSharedChat}
+                            activeId={undefined}
+                            refreshSignal={sharedListRefreshKey}
+                          />
+                        ) : (
+                          <SentChatList
+                            onSelect={handleSelectSentChat}
+                            activeId={undefined}
+                            refreshSignal={sharedListRefreshKey}
+                          />
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <aside className="mt-4 hidden min-w-0 lg:mt-0 lg:block">
+          {desktopMainTab === "shared" ? (
+            <Card className="flex h-[calc(100vh-7.5rem)] flex-col overflow-hidden rounded-3xl">
+              <div className="shrink-0 border-b border-white/[0.06] px-4 py-3">
+                <div className="mb-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-text-primary text-sm font-semibold">Shared Chats</p>
+                    <p className="text-text-muted mt-0.5 text-xs">
+                      {sharedSubTab === "inbox" ? "Received chats" : "Chats you sent"}
+                    </p>
+                  </div>
+                </div>
+                <SharedInboxSentTabs
+                  sharedSubTab={sharedSubTab}
+                  sharedUnread={sharedUnread}
+                  onSwitch={handleSwitchSharedSubTab}
+                />
               </div>
-              <p className="text-text-primary text-sm font-medium">No conversations yet</p>
-              <p className="text-text-muted mt-1 max-w-xs text-xs leading-relaxed">
-                Start a chat with Brangus to get AI-powered insights about your herd and the market.
-              </p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Shared tab (always mounted, hidden when inactive).
-          Sub-tabs: Inbox (received) and Sent (this user shared). Inbox unread
-          count drives the badge on the parent tab bar.
-          When activeSharedChat is set, the list is replaced with the panel so
-          the chat renders in-place with the same bubble layout as the live chat. */}
-      <div
-        className={activeTab !== "shared" ? "hidden" : ""}
-        style={{ height: "calc(100vh - 19rem)" }}
-      >
-        {activeSharedChat ? (
-          <Card className="flex h-full flex-col overflow-hidden rounded-3xl">
-            <SharedChatPanel
-              chat={activeSharedChat}
-              viewerIsRecipient={sharedSubTab === "inbox"}
-              recipientDisplayName={activeSentRecipient}
-              onBack={handleSharedChatBack}
-              onRemoved={handleSharedChatRemoved}
-            />
-          </Card>
-        ) : (
-          <div className="flex h-full flex-col gap-2">
-            {/* Inbox / Sent sub-tab toggle. Sits inside the Shared tab so the
-                top-level tab bar stays stable. Matches the segmented-pill
-                pattern used elsewhere in the app for two-state filters. */}
-            <div className="bg-surface-lowest flex shrink-0 items-center gap-1 self-start rounded-full p-1">
-              <button
-                onClick={() => handleSwitchSharedSubTab("inbox")}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                  sharedSubTab === "inbox"
-                    ? "bg-brangus-dark text-white"
-                    : "text-text-muted hover:text-text-secondary"
-                }`}
-              >
-                Inbox{sharedUnread > 0 ? ` (${sharedUnread})` : ""}
-              </button>
-              <button
-                onClick={() => handleSwitchSharedSubTab("sent")}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                  sharedSubTab === "sent"
-                    ? "bg-brangus-dark text-white"
-                    : "text-text-muted hover:text-text-secondary"
-                }`}
-              >
-                Sent
-              </button>
-            </div>
-            <Card className="flex-1 overflow-y-auto rounded-2xl">
-              <CardContent className="p-2">
+              <CardContent className="min-h-0 flex-1 overflow-y-auto p-0">
                 {sharedSubTab === "inbox" ? (
                   <SharedChatList
                     onSelect={handleSelectSharedChat}
+                    activeId={activeSharedChat?.id}
                     refreshSignal={sharedListRefreshKey}
                   />
                 ) : (
                   <SentChatList
                     onSelect={handleSelectSentChat}
+                    activeId={activeSharedChat?.id}
                     refreshSignal={sharedListRefreshKey}
                   />
                 )}
               </CardContent>
             </Card>
-          </div>
-        )}
+          ) : (
+            <Card className="flex h-[calc(100vh-7.5rem)] flex-col overflow-hidden rounded-3xl">
+              <div className="flex shrink-0 items-center justify-between border-b border-white/[0.06] px-4 py-3">
+                <div>
+                  <p className="text-text-primary text-sm font-semibold">Saved Chats</p>
+                  <p className="text-text-muted mt-0.5 text-xs">{conversations.length} saved</p>
+                </div>
+                <div ref={setSavedActionsEl} className="flex items-center justify-end" />
+              </div>
+              <CardContent className="min-h-0 flex-1 overflow-y-auto p-2">
+                {conversations.length > 0 ? (
+                  <ConversationList
+                    conversations={conversations}
+                    onSelect={handleSelectConversation}
+                    onDeleted={handleConversationDeleted}
+                    activeId={activeConvId}
+                    toolbarContainer={savedActionsEl}
+                  />
+                ) : (
+                  <SavedChatsEmpty compact />
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </aside>
       </div>
     </div>
+  );
+}
+
+function SharedInboxSentTabs({
+  sharedSubTab,
+  sharedUnread,
+  onSwitch,
+}: {
+  sharedSubTab: "inbox" | "sent";
+  sharedUnread: number;
+  onSwitch: (next: "inbox" | "sent") => void;
+}) {
+  return (
+    <div className="flex w-full items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.07] bg-clip-padding p-1 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)]">
+      <button
+        onClick={() => onSwitch("inbox")}
+        className={`flex h-8 flex-1 items-center justify-center rounded-full px-3 text-xs font-semibold transition-colors ${
+          sharedSubTab === "inbox"
+            ? "bg-brangus-dark text-white"
+            : "text-text-muted hover:text-text-secondary"
+        }`}
+      >
+        Inbox{sharedUnread > 0 ? ` (${sharedUnread})` : ""}
+      </button>
+      <button
+        onClick={() => onSwitch("sent")}
+        className={`flex h-8 flex-1 items-center justify-center rounded-full px-3 text-xs font-semibold transition-colors ${
+          sharedSubTab === "sent"
+            ? "bg-brangus-dark text-white"
+            : "text-text-muted hover:text-text-secondary"
+        }`}
+      >
+        Sent
+      </button>
+    </div>
+  );
+}
+
+function SharedViewerEmpty() {
+  return (
+    <div className="flex h-full flex-col items-center justify-center px-6 text-center">
+      <div className="bg-brangus/15 mb-4 flex h-14 w-14 items-center justify-center rounded-full">
+        <Inbox className="text-brangus h-7 w-7" />
+      </div>
+      <p className="text-text-primary text-base font-semibold">Select a shared chat</p>
+      <p className="text-text-muted mt-2 max-w-sm text-sm leading-relaxed">
+        Choose something from the shared rail to read it here in full chat format.
+      </p>
+    </div>
+  );
+}
+
+function SavedChatsEmpty({ compact = false }: { compact?: boolean }) {
+  const content = (
+    <div className="flex h-full flex-col items-center justify-center py-12 text-center">
+      <div className="bg-brangus/10 mb-3 flex h-12 w-12 items-center justify-center rounded-full">
+        <MessageCircle className="text-brangus h-6 w-6" />
+      </div>
+      <p className="text-text-primary text-sm font-medium">No conversations yet</p>
+      <p className="text-text-muted mt-1 max-w-xs text-xs leading-relaxed">
+        Start a chat with Brangus to get AI-powered insights about your herd and the market.
+      </p>
+    </div>
+  );
+
+  if (compact) return content;
+
+  return (
+    <Card className="h-full rounded-2xl">
+      <CardContent className="h-full">{content}</CardContent>
+    </Card>
   );
 }

@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Search, MapPinned, ChevronRight } from "lucide-react";
 
@@ -65,12 +64,6 @@ export function PropertiesTable({
               className="bg-surface text-text-primary placeholder:text-text-muted focus:ring-brand/20 h-8 w-full rounded-full pr-4 pl-9 text-xs transition-all outline-none focus:ring-2 sm:w-48"
             />
           </div>
-          <Link
-            href="/dashboard/properties/new"
-            className="bg-brand hover:bg-brand-dark inline-flex h-8 shrink-0 items-center rounded-full px-3.5 text-xs font-medium text-white transition-all"
-          >
-            Add Property
-          </Link>
         </div>
       </div>
 

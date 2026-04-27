@@ -1,6 +1,4 @@
 "use client";
-
-import Link from "next/link";
 import { useMemo } from "react";
 import { StatCard } from "@/components/ui/stat-card";
 import { Tags, Layers, DollarSign, Scale } from "lucide-react";
@@ -234,22 +232,6 @@ export function HerdsListView(props: Props) {
         herdDefaultBreedPremium={merged.herdDefaultBreedPremium}
         herdCustomBreedPremium={merged.herdCustomBreedPremium}
         propertyGroups={props.propertyGroups}
-        headerActions={
-          <div className="flex items-center gap-1.5">
-            <Link
-              href="/dashboard/herds/sold"
-              className="bg-surface text-text-muted hover:bg-surface-raised hover:text-text-secondary inline-flex h-8 shrink-0 items-center rounded-full px-3.5 text-xs font-medium transition-all"
-            >
-              Sold Herds
-            </Link>
-            <Link
-              href="/dashboard/herds/new"
-              className="bg-brand hover:bg-brand-dark inline-flex h-8 shrink-0 items-center rounded-full px-3.5 text-xs font-medium text-white transition-all"
-            >
-              Add Herd
-            </Link>
-          </div>
-        }
       />
     </>
   );

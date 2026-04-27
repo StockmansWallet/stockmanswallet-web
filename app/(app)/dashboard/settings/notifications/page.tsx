@@ -24,7 +24,7 @@ const notificationGroups = [
 
 export default function NotificationsPage() {
   return (
-    <div className="max-w-4xl">
+    <div className="w-full max-w-[1680px]">
       <div className="mb-4 sm:hidden">
         <Link
           href="/dashboard/settings"

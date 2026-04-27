@@ -2,12 +2,12 @@
 
 // List of Brangus conversations shared with the current user by other producers.
 // Lives inside the "Shared" tab on the Brangus hub. Unread rows are emphasised
-// with the producer-network accent so users spot new shares at a glance.
+// with the brangus accent so users spot new shares at a glance.
 // Clicking a row calls onSelect to open the SharedChatPanel in-place rather
 // than navigating away from the hub.
 
 import { useCallback, useEffect, useState } from "react";
-import { Users, Trash2, Inbox, Loader2 } from "lucide-react";
+import { MessageCircleReply, Trash2, Inbox, Loader2 } from "lucide-react";
 import {
   fetchInboxSharedChats,
   softDeleteSharedChat,
@@ -16,6 +16,7 @@ import {
 
 interface SharedChatListProps {
   onSelect: (chat: SharedChatRow) => void;
+  activeId?: string | null;
   // Incremented by BrangusHub when a new shared chat arrives via realtime.
   // The list re-fetches when this changes so it stays live while the tab is open.
   refreshSignal?: number;
@@ -40,7 +41,7 @@ function preview(row: SharedChatRow): string | null {
   return null;
 }
 
-export function SharedChatList({ onSelect, refreshSignal }: SharedChatListProps) {
+export function SharedChatList({ onSelect, activeId, refreshSignal }: SharedChatListProps) {
   const [rows, setRows] = useState<SharedChatRow[] | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
 
@@ -83,8 +84,8 @@ export function SharedChatList({ onSelect, refreshSignal }: SharedChatListProps)
   if (rows.length === 0) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
-        <div className="bg-producer-network/15 flex h-12 w-12 items-center justify-center rounded-full">
-          <Inbox className="text-producer-network h-6 w-6" />
+        <div className="bg-brangus/15 flex h-12 w-12 items-center justify-center rounded-full">
+          <Inbox className="text-brangus h-6 w-6" />
         </div>
         <p className="text-text-primary text-sm font-medium">Nothing shared yet</p>
         <p className="text-text-muted max-w-xs text-xs leading-relaxed">
@@ -98,6 +99,7 @@ export function SharedChatList({ onSelect, refreshSignal }: SharedChatListProps)
     <ul className="divide-y divide-white/[0.04]">
       {rows.map((row) => {
         const p = preview(row);
+        const active = activeId === row.id;
         return (
           <li key={row.id} className="group relative">
             {/* Main row: button opens the panel in-place inside the hub.
@@ -106,27 +108,25 @@ export function SharedChatList({ onSelect, refreshSignal }: SharedChatListProps)
             <button
               onClick={() => onSelect(row)}
               className={`flex w-full items-start gap-3 px-4 py-3 pr-12 text-left transition-colors hover:bg-white/[0.03] ${
-                !row.is_read ? "bg-producer-network/[0.04]" : ""
-              }`}
+                !row.is_read ? "bg-brangus/[0.04]" : ""
+              } ${active ? "bg-brangus/[0.08]" : ""}`}
             >
               <div
                 className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
                   !row.is_read
-                    ? "bg-producer-network/20 text-producer-network"
+                    ? "bg-brangus/20 text-brangus"
                     : "bg-white/[0.04] text-text-muted"
                 }`}
                 aria-hidden="true"
               >
-                <Users className="h-4 w-4" />
+                <MessageCircleReply className="h-4 w-4" />
               </div>
 
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
                   <p
-                    className={`truncate text-sm ${
-                      !row.is_read
-                        ? "text-text-primary font-semibold"
-                        : "text-text-secondary font-medium"
+                    className={`text-text-primary truncate text-sm ${
+                      !row.is_read ? "font-semibold" : "font-medium"
                     }`}
                   >
                     {row.sender_display_name ?? "Another producer"}
@@ -151,7 +151,9 @@ export function SharedChatList({ onSelect, refreshSignal }: SharedChatListProps)
             <button
               onClick={(e) => handleDelete(e, row.id)}
               disabled={deleting === row.id}
-              className="text-text-muted hover:text-destructive absolute top-3 right-3 shrink-0 rounded-full p-1.5 opacity-0 transition-opacity group-hover:opacity-100 disabled:cursor-not-allowed"
+              className={`text-text-muted hover:text-destructive absolute top-3 right-3 shrink-0 rounded-full p-1.5 transition-opacity disabled:cursor-not-allowed ${
+                active ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+              }`}
               aria-label="Remove from Shared"
             >
               {deleting === row.id ? (

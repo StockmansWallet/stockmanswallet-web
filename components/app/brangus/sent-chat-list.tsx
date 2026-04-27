@@ -8,7 +8,15 @@
 // recipient's copy is unaffected.
 
 import { useCallback, useEffect, useState } from "react";
-import { Send, Trash2, Inbox, Loader2, Check, CheckCheck } from "lucide-react";
+import {
+  MessageCircleCheck,
+  MessageCircleDashed,
+  Trash2,
+  Inbox,
+  Loader2,
+  Check,
+  CheckCheck,
+} from "lucide-react";
 import {
   fetchSentSharedChats,
   softDeleteSharedChat,
@@ -17,6 +25,7 @@ import {
 
 interface SentChatListProps {
   onSelect: (chat: SentSharedChatRow) => void;
+  activeId?: string | null;
   // Bumped by the parent when a new send happens, so the list refreshes.
   refreshSignal?: number;
 }
@@ -40,7 +49,7 @@ function preview(row: SentSharedChatRow): string | null {
   return null;
 }
 
-export function SentChatList({ onSelect, refreshSignal }: SentChatListProps) {
+export function SentChatList({ onSelect, activeId, refreshSignal }: SentChatListProps) {
   const [rows, setRows] = useState<SentSharedChatRow[] | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
 
@@ -75,8 +84,8 @@ export function SentChatList({ onSelect, refreshSignal }: SentChatListProps) {
   if (rows.length === 0) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
-        <div className="bg-producer-network/15 flex h-12 w-12 items-center justify-center rounded-full">
-          <Inbox className="text-producer-network h-6 w-6" />
+        <div className="bg-brangus/15 flex h-12 w-12 items-center justify-center rounded-full">
+          <Inbox className="text-brangus h-6 w-6" />
         </div>
         <p className="text-text-primary text-sm font-medium">Nothing sent yet</p>
         <p className="text-text-muted max-w-xs text-xs leading-relaxed">
@@ -92,22 +101,31 @@ export function SentChatList({ onSelect, refreshSignal }: SentChatListProps) {
       {rows.map((row) => {
         const p = preview(row);
         const recipient = row.recipient_display_name ?? "Another producer";
+        const active = activeId === row.id;
         return (
           <li key={row.id} className="group relative">
             <button
               onClick={() => onSelect(row)}
-              className="flex w-full items-start gap-3 px-4 py-3 pr-12 text-left transition-colors hover:bg-white/[0.03]"
+              className={`flex w-full items-start gap-3 px-4 py-3 pr-12 text-left transition-colors hover:bg-white/[0.03] ${
+                active ? "bg-brangus/[0.08]" : ""
+              }`}
             >
               <div
-                className="bg-white/[0.04] text-text-muted mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+                className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                  row.is_read ? "bg-brangus/15 text-brangus" : "bg-white/[0.04] text-text-muted"
+                }`}
                 aria-hidden="true"
               >
-                <Send className="h-4 w-4" />
+                {row.is_read ? (
+                  <MessageCircleCheck className="h-4 w-4" />
+                ) : (
+                  <MessageCircleDashed className="h-4 w-4" />
+                )}
               </div>
 
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-text-secondary truncate text-sm font-medium">
+                  <p className="text-text-primary truncate text-sm font-medium">
                     To {recipient}
                   </p>
                   <span className="text-text-muted shrink-0 text-xs">
@@ -125,8 +143,8 @@ export function SentChatList({ onSelect, refreshSignal }: SentChatListProps) {
                 <div className="mt-1 flex items-center gap-1.5">
                   {row.is_read ? (
                     <>
-                      <CheckCheck className="text-producer-network h-3 w-3" aria-hidden="true" />
-                      <span className="text-producer-network text-[10px] font-medium uppercase tracking-wide">
+                      <CheckCheck className="text-brangus h-3 w-3" aria-hidden="true" />
+                      <span className="text-brangus text-[10px] font-medium uppercase tracking-wide">
                         Read
                       </span>
                     </>
@@ -145,7 +163,9 @@ export function SentChatList({ onSelect, refreshSignal }: SentChatListProps) {
             <button
               onClick={(e) => handleDelete(e, row.id)}
               disabled={deleting === row.id}
-              className="text-text-muted hover:text-destructive absolute top-3 right-3 shrink-0 rounded-full p-1.5 opacity-0 transition-opacity group-hover:opacity-100 disabled:cursor-not-allowed"
+              className={`text-text-muted hover:text-destructive absolute top-3 right-3 shrink-0 rounded-full p-1.5 transition-opacity disabled:cursor-not-allowed ${
+                active ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+              }`}
               aria-label="Remove from Sent"
             >
               {deleting === row.id ? (

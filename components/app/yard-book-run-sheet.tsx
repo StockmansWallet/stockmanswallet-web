@@ -196,7 +196,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
   return (
     <div>
       {/* Toolbar: category pills + add item */}
-      <div className="bg-surface-lowest mb-4 flex flex-col gap-3 rounded-full px-2 py-2 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-4 flex flex-col gap-3 rounded-full border border-white/[0.08] bg-white/[0.07] bg-clip-padding px-2 py-2 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)] sm:flex-row sm:items-center sm:justify-between">
         {/* Left: category filters */}
         <div className="flex items-center gap-1.5 overflow-x-auto">
           <button
@@ -230,30 +230,42 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
           })}
         </div>
 
-        {/* Right: add item */}
+        {/* Right: view controls + mobile add item */}
         <div className="flex items-center gap-1.5">
+          {completedCount > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowCompleted(!showCompleted)}
+              aria-pressed={showCompleted}
+              className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-xs font-medium transition-all ${
+                showCompleted
+                  ? "bg-yard-book/15 text-yard-book"
+                  : "bg-surface text-text-muted hover:bg-surface-raised hover:text-text-secondary"
+              }`}
+            >
+              {showCompleted ? (
+                <EyeOff className="h-3.5 w-3.5" />
+              ) : (
+                <Eye className="h-3.5 w-3.5" />
+              )}
+              <span>{showCompleted ? "Hide" : "Show"} completed</span>
+              <span className="rounded-full bg-white/[0.08] px-1.5 text-[10px] font-semibold tabular-nums">
+                {completedCount}
+              </span>
+            </button>
+          )}
+
           <Link href="/dashboard/tools/yard-book/new">
-            <Button size="sm" variant="yard-book">
+            <Button size="sm" variant="yard-book" className="lg:hidden">
               Add Item
             </Button>
           </Link>
         </div>
       </div>
 
-      {/* Show/hide completed toggle */}
-      {completedCount > 0 && (
-        <button
-          onClick={() => setShowCompleted(!showCompleted)}
-          className="text-text-muted hover:text-text-secondary mb-6 inline-flex items-center gap-1.5 text-xs transition-colors"
-        >
-          {showCompleted ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-          {showCompleted ? "Hide" : "Show"} completed ({completedCount})
-        </button>
-      )}
-
       {/* Horizon sections */}
       {horizonGroups.length === 0 ? (
-        <div className="rounded-2xl bg-white/[0.03] p-12 text-center">
+        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding p-12 text-center backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)]">
           <p className="text-text-muted text-sm">
             {filterCategory
               ? `No ${filterCategory.toLowerCase()} items to show.`
@@ -261,12 +273,16 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
           </p>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="gap-4 space-y-4 xl:columns-2">
           {horizonGroups.map((group) => (
-            <div key={group.key}>
-              {/* Section header */}
-              <div className="mb-2 flex items-center gap-2">
-                <h3 className={`text-xs font-semibold tracking-wider uppercase ${group.textClass}`}>
+            <section
+              key={group.key}
+              className="mb-4 break-inside-avoid rounded-2xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding p-3 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)] sm:p-4"
+            >
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <h3
+                  className={`text-xs font-semibold tracking-wider uppercase ${group.textClass}`}
+                >
                   {group.title}
                 </h3>
                 <span className="bg-yard-book/15 text-yard-book inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-semibold tabular-nums">
@@ -274,8 +290,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
                 </span>
               </div>
 
-              {/* Items */}
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {group.items.map((item) => {
                   const days = daysUntilEvent(item.event_date);
                   const catConfig =
@@ -289,7 +304,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
                   return (
                     <div
                       key={item.id}
-                      className="group relative flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-3 transition-all hover:bg-white/[0.06]"
+                      className="group relative flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding px-3 py-2.5 backdrop-blur-xl transition-colors duration-150 hover:border-yard-book/35 hover:bg-yard-book/[0.075] [backface-visibility:hidden] [transform:translateZ(0)]"
                     >
                       {/* Tap target overlay (entire row navigates to detail) */}
                       <Link
@@ -300,9 +315,9 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
 
                       {/* Category icon */}
                       <div
-                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${catConfig.iconBg}`}
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${catConfig.iconBg}`}
                       >
-                        <CatIcon className={`h-4 w-4 ${catConfig.text}`} />
+                        <CatIcon className={`h-3.5 w-3.5 ${catConfig.text}`} />
                       </div>
 
                       {/* Content */}
@@ -362,7 +377,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
                   );
                 })}
               </div>
-            </div>
+            </section>
           ))}
         </div>
       )}
