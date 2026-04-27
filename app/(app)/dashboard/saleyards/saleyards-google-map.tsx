@@ -15,7 +15,7 @@
 // - User's primary property: distinct home pin
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { APIProvider, Map, AdvancedMarker, InfoWindow, useMap } from "@vis.gl/react-google-maps";
+import { APIProvider, Map, InfoWindow, Marker, useMap } from "@vis.gl/react-google-maps";
 
 import type { SaleyardRow } from "./saleyards-map-view";
 
@@ -46,6 +46,86 @@ const AU_BOUNDS = {
   west: 113, // Perth coast
   east: 154, // East coast
 };
+
+const DARK_PASTEL_MAP_STYLE: google.maps.MapTypeStyle[] = [
+  {
+    featureType: "all",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#b8b0a3" }, { saturation: -45 }, { lightness: 2 }],
+  },
+  {
+    featureType: "all",
+    elementType: "labels.text.stroke",
+    stylers: [{ visibility: "on" }, { color: "#1b1712" }, { lightness: 4 }],
+  },
+  {
+    featureType: "all",
+    elementType: "labels.icon",
+    stylers: [{ visibility: "off" }],
+  },
+  {
+    featureType: "administrative",
+    elementType: "geometry.fill",
+    stylers: [{ color: "#2a241e" }, { saturation: -45 }, { lightness: 6 }],
+  },
+  {
+    featureType: "administrative",
+    elementType: "geometry.stroke",
+    stylers: [{ color: "#7c6b55" }, { saturation: -55 }, { lightness: -5 }, { weight: 1.1 }],
+  },
+  {
+    featureType: "landscape",
+    elementType: "geometry",
+    stylers: [{ color: "#3a3d31" }, { saturation: -38 }, { lightness: -6 }],
+  },
+  {
+    featureType: "landscape.natural",
+    elementType: "geometry",
+    stylers: [{ color: "#47513b" }, { saturation: -50 }, { lightness: -8 }],
+  },
+  {
+    featureType: "poi",
+    elementType: "geometry",
+    stylers: [{ color: "#3f4235" }, { saturation: -55 }, { lightness: -10 }],
+  },
+  {
+    featureType: "road.highway",
+    elementType: "geometry.fill",
+    stylers: [{ color: "#5a4a38" }, { saturation: -45 }, { lightness: -8 }],
+  },
+  {
+    featureType: "road.highway",
+    elementType: "geometry.stroke",
+    stylers: [{ color: "#7a6349" }, { saturation: -50 }, { lightness: -10 }, { weight: 0.2 }],
+  },
+  {
+    featureType: "road.arterial",
+    elementType: "geometry",
+    stylers: [{ color: "#4a4033" }, { saturation: -55 }, { lightness: -4 }],
+  },
+  {
+    featureType: "road.local",
+    elementType: "geometry",
+    stylers: [{ color: "#3d352c" }, { saturation: -55 }, { lightness: -4 }],
+  },
+  {
+    featureType: "transit",
+    elementType: "geometry",
+    stylers: [{ color: "#3a332b" }, { saturation: -60 }, { lightness: -6 }],
+  },
+  {
+    featureType: "water",
+    elementType: "geometry",
+    stylers: [{ color: "#223f45" }, { saturation: -48 }, { lightness: -12 }],
+  },
+  {
+    featureType: "water",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#8fb1b1" }, { saturation: -40 }, { lightness: -4 }],
+  },
+];
+
+const CIRCLE_MARKER_PATH = "M 0,0 m -8,0 a 8,8 0 1,0 16,0 a 8,8 0 1,0 -16,0";
 
 // Programmatic camera control. fitBounds to AU's continental bbox on first
 // render, then panTo when the parent selects a yard externally (e.g. via
@@ -122,10 +202,8 @@ export default function SaleyardsGoogleMap({
         <Map
           defaultCenter={AU_CENTRE}
           defaultZoom={AU_ZOOM}
-          // mapId required for AdvancedMarker. DEMO_MAP_ID renders Google's
-          // default vector style; can be replaced with a custom Cloud-mapped
-          // style id later if we want bespoke colours.
-          mapId="DEMO_MAP_ID"
+          backgroundColor="#223f45"
+          styles={DARK_PASTEL_MAP_STYLE}
           gestureHandling="greedy"
           disableDefaultUI={false}
           mapTypeControl={false}
@@ -137,67 +215,48 @@ export default function SaleyardsGoogleMap({
 
           {yards.map((y) =>
             y.latitude != null && y.longitude != null ? (
-              <AdvancedMarker
+              <Marker
                 key={y.name}
                 position={{ lat: y.latitude, lng: y.longitude }}
+                title={`${y.name}${y.isStale ? " (stale)" : ""}`}
+                icon={{
+                  path: CIRCLE_MARKER_PATH,
+                  fillColor: y.isStale ? "#a1a1aa" : "#22c55e",
+                  fillOpacity: y.isStale ? 0.7 : 1,
+                  strokeColor: y.isStale ? "#71717a" : "#15803d",
+                  strokeOpacity: 1,
+                  strokeWeight: selectedYard === y.name ? 3 : 2,
+                  scale: selectedYard === y.name ? 1.12 : 0.88,
+                }}
                 onClick={() => {
                   onSelectYard(y.name);
                   setInfoOpenFor(y.name);
                 }}
-              >
-                {/* CSS-driven hover label gives instant feedback without
-                    relying on the browser's slow ~500ms title-attribute
-                    delay. Click still opens the full InfoWindow with
-                    distance + last report etc. */}
-                <div
-                  className="saleyard-marker"
-                  data-stale={y.isStale ? "true" : "false"}
-                  data-selected={selectedYard === y.name ? "true" : "false"}
-                  style={{
-                    width: selectedYard === y.name ? 18 : 14,
-                    height: selectedYard === y.name ? 18 : 14,
-                    borderRadius: "50%",
-                    background: y.isStale ? "#a1a1aa" : "#22c55e",
-                    border: `${selectedYard === y.name ? 3 : 2}px solid ${y.isStale ? "#71717a" : "#15803d"}`,
-                    opacity: y.isStale ? 0.7 : 1,
-                    boxShadow: "0 2px 4px rgba(0,0,0,0.25)",
-                    cursor: "pointer",
-                    position: "relative",
-                  }}
-                >
-                  <span className="saleyard-marker-label">
-                    {y.name}
-                    {y.isStale ? " (stale)" : ""}
-                  </span>
-                </div>
-              </AdvancedMarker>
+              />
             ) : null,
           )}
 
           {primaryProperty?.latitude != null && primaryProperty.longitude != null && (
-            <AdvancedMarker
+            <Marker
               position={{ lat: primaryProperty.latitude, lng: primaryProperty.longitude }}
+              title={primaryProperty.name}
+              label={{
+                text: "⌂",
+                color: "#ffffff",
+                fontSize: "16px",
+                fontWeight: "700",
+              }}
+              icon={{
+                path: CIRCLE_MARKER_PATH,
+                fillColor: "#f59e0b",
+                fillOpacity: 1,
+                strokeColor: "#ffffff",
+                strokeOpacity: 1,
+                strokeWeight: 3,
+                scale: 1.55,
+              }}
               onClick={() => setInfoOpenFor("__primary__")}
-            >
-              <div
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: "50%",
-                  background: "#f59e0b",
-                  border: "3px solid white",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.35)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 16,
-                  cursor: "pointer",
-                }}
-                title={primaryProperty.name}
-              >
-                🏠
-              </div>
-            </AdvancedMarker>
+            />
           )}
 
           {/* Yard info window. headerDisabled removes the default 48px

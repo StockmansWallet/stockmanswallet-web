@@ -42,7 +42,7 @@ export function LivestockAssetsSection({ herdData }: { herdData: HerdReportData[
       </div>
 
       {/* Grand total */}
-      <div className="mt-4 flex items-center justify-between rounded-full bg-white/[0.06] px-4 py-3 backdrop-blur-md">
+      <div className="mt-4 flex items-center justify-between rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-4 py-3 backdrop-blur-xl">
         <p className="text-xs font-bold uppercase tracking-wider text-white/60">Total</p>
         <span className="text-sm tabular-nums text-white/60">
           {totalHead.toLocaleString()} head &middot; <span className="text-base font-bold text-reports">{fmt(totalValue)}</span>
@@ -59,7 +59,7 @@ function PropertyGroup({ propertyName, herds }: { propertyName: string; herds: H
   return (
     <div>
       {/* Property header - dark bar */}
-      <div className="mb-2 flex items-center justify-between rounded-full bg-white/[0.06] px-4 py-2.5 backdrop-blur-md">
+      <div className="mb-2 flex items-center justify-between rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-4 py-2.5 backdrop-blur-xl">
         <h4 className="text-sm font-semibold text-white">{propertyName}</h4>
         <span className="text-xs tabular-nums text-white/60">
           {propertyHead.toLocaleString()} head &middot; <span className="font-semibold text-reports">{fmt(propertyValue)}</span>

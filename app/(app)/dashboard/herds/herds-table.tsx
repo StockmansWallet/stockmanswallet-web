@@ -238,7 +238,7 @@ function HerdCard({
             />
           </div>
         )}
-        <span className="text-text-primary flex h-9 w-12 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-sm font-semibold tabular-nums">
+        <span className="text-text-primary flex h-9 w-12 shrink-0 items-center justify-center rounded-lg bg-white/[0.04] text-sm font-semibold tabular-nums">
           {headCount.toLocaleString()}
         </span>
         <div className="min-w-0 flex-1">
@@ -481,7 +481,7 @@ export function HerdsTable({
   return (
     <div>
       {/* Toolbar: species pills + manage + search */}
-      <div className="bg-surface-lowest mb-4 flex flex-col gap-3 rounded-full px-2 py-2 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
+      <div className="bg-surface-lowest mb-4 flex flex-col gap-3 rounded-full border border-white/[0.08] px-2 py-2 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
         {/* Left: species filters */}
         <div className="flex items-center gap-1.5 overflow-x-auto">
           {SPECIES_TABS.map((tab) => {
@@ -544,7 +544,7 @@ export function HerdsTable({
       ) : (
         <>
           {/* Single sort bar above all groups */}
-          <div className="bg-surface-lowest mb-3 rounded-full px-2 py-1.5 backdrop-blur-md">
+          <div className="bg-surface-lowest mb-3 rounded-full border border-white/[0.08] px-2 py-1.5 backdrop-blur-md">
             <div className="flex items-center gap-1 px-2 py-0.5">
               <span className="text-text-muted mr-1.5 text-[10px] font-medium">Sort by</span>
               <div className="flex items-center gap-0.5 rounded-full bg-white/[0.03] p-0.5">
@@ -574,7 +574,7 @@ export function HerdsTable({
                 return (
                   <div key={group.id ?? "_unassigned"}>
                     {/* Property header pill */}
-                    <div className="mb-2 flex items-center justify-between rounded-full bg-white/[0.06] px-4 py-2.5 backdrop-blur-md">
+                    <div className="mb-2 flex items-center justify-between rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-2.5 backdrop-blur-md">
                       <div className="flex items-center gap-2.5">
                         <div className="bg-brand/10 flex h-7 w-7 items-center justify-center rounded-lg">
                           <MapPinned className="text-brand h-3.5 w-3.5" />

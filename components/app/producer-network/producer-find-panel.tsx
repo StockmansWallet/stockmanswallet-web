@@ -155,7 +155,7 @@ export function ProducerFindPanel() {
               return (
                 <div
                   key={producer.user_id}
-                  className="overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.055] backdrop-blur-xl transition-colors hover:border-producer-network/25 hover:bg-producer-network/[0.06]"
+                  className="overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl transition-colors hover:border-producer-network/25 hover:bg-producer-network/[0.06]"
                 >
                   <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-start">
                     <UserAvatar

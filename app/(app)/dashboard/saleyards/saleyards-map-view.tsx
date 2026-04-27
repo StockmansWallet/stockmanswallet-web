@@ -120,8 +120,7 @@ export function SaleyardsMapView({ yards, primaryProperty }: Props) {
   return (
     <div className="flex flex-col gap-4">
       {/* Filter toolbar */}
-      <Card>
-        <CardContent className="flex flex-wrap items-center gap-3 p-3">
+      <div className="flex flex-wrap items-center gap-3 rounded-full border border-white/[0.08] bg-surface-lowest px-3 py-2 backdrop-blur-xl">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="text-text-muted pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
             <input
@@ -156,8 +155,7 @@ export function SaleyardsMapView({ yards, primaryProperty }: Props) {
           <span className="text-text-muted text-xs">
             {activeCount} active{staleCount > 0 ? ` · ${staleCount} stale` : ""}
           </span>
-        </CardContent>
-      </Card>
+      </div>
 
       {/* Map */}
       <Card className="overflow-hidden">

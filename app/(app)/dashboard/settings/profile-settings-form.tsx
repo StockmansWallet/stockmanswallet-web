@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { PageHeaderActionsPortal } from "@/components/ui/page-header-actions-portal";
 import { User, Phone, FileText } from "lucide-react";
 import { updateProfileSettings } from "./actions";
 import { roleDisplayName } from "@/lib/types/advisory";
@@ -72,7 +73,13 @@ export function ProfileSettingsForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form id="profile-settings-form" onSubmit={handleSubmit} className="space-y-4">
+      <PageHeaderActionsPortal>
+        <Button type="submit" form="profile-settings-form" disabled={submitting}>
+          {submitting ? "Saving..." : "Save Profile"}
+        </Button>
+      </PageHeaderActionsPortal>
+
       {message && (
         <div
           role={message.type === "error" ? "alert" : "status"}
@@ -90,11 +97,22 @@ export function ProfileSettingsForm({
         <CardHeader>
           <div className="flex items-center gap-2.5">
             <SectionIcon icon={User} />
-            <CardTitle>Profile</CardTitle>
+            <div>
+              <CardTitle>Profile Details</CardTitle>
+              <p className="mt-1 text-xs text-text-muted">
+                Keep your public producer identity and contact information up to date.
+              </p>
+            </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+        <CardContent className="space-y-6 px-5 pb-5">
+          <section className="space-y-4">
+            <div className="flex items-center gap-2.5">
+              <p className="text-xs font-semibold uppercase tracking-widest text-text-muted">
+                Identity
+              </p>
+              <div className="h-px flex-1 bg-white/[0.06]" />
+            </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Input
                 id="first_name"
@@ -126,23 +144,19 @@ export function ProfileSettingsForm({
               helperText="Role is set during onboarding and cannot be changed"
             />
             <input type="hidden" name="role" value={role || "producer"} />
-          </div>
-        </CardContent>
-      </Card>
+          </section>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2.5">
-            <SectionIcon icon={Phone} />
-            <CardTitle>Contact Details</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <p className="text-text-muted text-xs leading-relaxed">
-              These details are visible when another producer views your profile in the Producer
-              Network.
-            </p>
+          <section className="space-y-4 border-t border-white/[0.06] pt-5">
+            <div className="flex items-center gap-2.5">
+              <SectionIcon icon={Phone} />
+              <div>
+                <p className="text-sm font-semibold text-text-primary">Contact Details</p>
+                <p className="mt-1 text-xs leading-relaxed text-text-muted">
+                  These details are visible when another producer views your profile in the Producer
+                  Network.
+                </p>
+              </div>
+            </div>
             <Input
               id="contact_email"
               name="contact_email"
@@ -175,30 +189,26 @@ export function ProfileSettingsForm({
                 placeholder="Property name"
               />
             )}
-          </div>
+          </section>
+
+          <section className="space-y-4 border-t border-white/[0.06] pt-5">
+            <div className="flex items-center gap-2.5">
+              <SectionIcon icon={FileText} />
+              <p className="text-sm font-semibold text-text-primary">Bio</p>
+            </div>
+            <Textarea
+              id="bio"
+              name="bio"
+              label="About You"
+              defaultValue={bio}
+              placeholder="Tell other producers about your operation..."
+              rows={5}
+            />
+          </section>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2.5">
-            <SectionIcon icon={FileText} />
-            <CardTitle>Bio</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            id="bio"
-            name="bio"
-            label="About You"
-            defaultValue={bio}
-            placeholder="Tell other producers about your operation..."
-            rows={4}
-          />
-        </CardContent>
-      </Card>
-
-      <div className="flex justify-end">
+      <div className="flex justify-end lg:hidden">
         <Button type="submit" disabled={submitting}>
           {submitting ? "Saving..." : "Save Profile"}
         </Button>

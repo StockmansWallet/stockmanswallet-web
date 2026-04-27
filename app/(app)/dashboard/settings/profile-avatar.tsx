@@ -114,9 +114,9 @@ export function ProfileAvatar({ avatarUrl, firstName, lastName, email }: Profile
       </div>
 
       <div className="min-w-0">
-        <p className="text-base font-semibold text-text-primary">{displayName}</p>
+        <p className="truncate text-base font-semibold text-text-primary">{displayName}</p>
         {email && firstName && (
-          <p className="text-sm text-text-muted">{email}</p>
+          <p className="truncate text-sm text-text-muted">{email}</p>
         )}
         <div className="mt-1.5 flex items-center gap-3">
           <button

@@ -247,7 +247,7 @@ export async function ProducerNetworkHub({
         <section
           className={`min-w-0 ${selectedConnection || mode === "find" || selectedPendingConnection ? "order-1" : "order-2 lg:order-1"}`}
         >
-          <div className="relative flex h-[calc(100vh-19rem)] min-h-[34rem] flex-col overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding sm:h-[calc(100vh-17rem)] lg:h-[calc(100vh-7.5rem)]">
+          <div className="relative flex h-[calc(100vh-19rem)] min-h-[34rem] flex-col overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding sm:h-[calc(100vh-17rem)] lg:h-[calc(100vh-7.5rem)]">
             {mode === "find" ? (
               <ProducerFindPanel />
             ) : selectedConnection && selectedOtherId ? (
@@ -259,7 +259,7 @@ export async function ProducerNetworkHub({
                   participants={participants}
                   avatars={chatAvatars}
                   header={
-                    <div className="flex min-h-[5.25rem] items-center justify-between gap-4 border-b border-white/[0.08] bg-white/[0.08] bg-clip-padding px-5 py-4 backdrop-blur-xl backdrop-saturate-150 [backface-visibility:hidden] [transform:translateZ(0)]">
+                    <div className="app-frosted-header flex min-h-[5.25rem] items-center justify-between gap-4 border-b border-white/[0.08] px-5 py-4">
                       <div className="flex min-w-0 items-center gap-3">
                         <Link
                           href={`/dashboard/producer-network/directory/${selectedOtherId}`}
@@ -468,7 +468,7 @@ export async function ProducerNetworkHub({
                           className={`group flex min-h-[4.875rem] items-center gap-3 rounded-2xl border p-3 transition-colors ${
                             active
                               ? "border-producer-network/20 bg-producer-network/12"
-                              : "border-white/[0.06] bg-white/[0.04] hover:bg-white/[0.07]"
+                              : "border-white/[0.06] bg-white/[0.03] hover:bg-white/[0.05]"
                           }`}
                         >
                           <UserAvatar

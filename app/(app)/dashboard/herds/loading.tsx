@@ -14,7 +14,7 @@ export default function HerdsLoading() {
       </div>
 
       {/* Toolbar pill */}
-      <div className="bg-surface-lowest mb-4 flex items-center justify-between rounded-full px-2 py-2">
+      <div className="bg-surface-lowest mb-4 flex items-center justify-between rounded-full border border-white/[0.08] px-2 py-2">
         <div className="flex items-center gap-1.5">
           <Skeleton className="h-8 w-16 rounded-full" />
           <Skeleton className="h-8 w-20 rounded-full" />
@@ -28,7 +28,7 @@ export default function HerdsLoading() {
       </div>
 
       {/* Sort-bar pill */}
-      <div className="bg-surface-lowest mb-3 rounded-full px-4 py-2">
+      <div className="bg-surface-lowest mb-3 rounded-full border border-white/[0.08] px-4 py-2">
         <div className="flex items-center gap-1.5">
           <Skeleton className="h-3 w-10" />
           {Array.from({ length: 5 }).map((_, i) => (
@@ -39,7 +39,7 @@ export default function HerdsLoading() {
 
       {/* Property group */}
       <div>
-        <div className="mb-2 flex items-center justify-between rounded-full bg-white/[0.06] px-4 py-2.5">
+        <div className="mb-2 flex items-center justify-between rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-2.5">
           <div className="flex items-center gap-2.5">
             <Skeleton className="h-7 w-7 rounded-lg" />
             <Skeleton className="h-4 w-36" />

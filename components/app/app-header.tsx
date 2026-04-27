@@ -276,14 +276,14 @@ export function AppHeader({
                 </Link>
                 <Link
                   href="/dashboard/tools/reports"
-                  className="border border-white/[0.08] bg-white/[0.07] text-text-secondary hover:bg-white/[0.09] hover:text-text-primary inline-flex h-9 items-center gap-2 rounded-full px-4 text-[13px] font-semibold transition-colors"
+                  className="border border-white/[0.08] bg-white/[0.03] text-text-secondary hover:bg-white/[0.06] hover:text-text-primary inline-flex h-9 items-center gap-2 rounded-full px-4 text-[13px] font-semibold transition-colors"
                 >
                   <FileText className="h-4 w-4" />
                   Reports
                 </Link>
                 <Link
                   href="/dashboard/tools/yard-book"
-                  className="border border-white/[0.08] bg-white/[0.07] text-text-secondary hover:bg-white/[0.09] hover:text-text-primary inline-flex h-9 items-center gap-2 rounded-full px-4 text-[13px] font-semibold transition-colors"
+                  className="border border-white/[0.08] bg-white/[0.03] text-text-secondary hover:bg-white/[0.06] hover:text-text-primary inline-flex h-9 items-center gap-2 rounded-full px-4 text-[13px] font-semibold transition-colors"
                 >
                   <BookOpen className="h-4 w-4" />
                   Yard Book
@@ -300,7 +300,7 @@ export function AppHeader({
               aria-haspopup="menu"
               aria-expanded={profileOpen}
               onClick={() => setProfileOpen((open) => !open)}
-              className="flex h-9 items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.07] bg-clip-padding p-1 pr-2.5 text-left transition-colors hover:bg-white/[0.09]"
+              className="flex h-9 items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-1 pr-2.5 text-left transition-colors hover:bg-white/[0.06]"
             >
               {avatarUrl ? (
                 <Image

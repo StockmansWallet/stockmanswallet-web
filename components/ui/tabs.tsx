@@ -98,7 +98,7 @@ function Tabs({ tabs, defaultTab, accent }: TabsProps) {
       {/* Tab bar */}
       <div
         ref={containerRef}
-        className="relative mb-6 flex gap-1 rounded-full border border-white/[0.08] bg-white/[0.07] bg-clip-padding p-1 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)]"
+        className="relative mb-6 flex gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-1 backdrop-blur-xl"
       >
         {/* Sliding indicator */}
         <div

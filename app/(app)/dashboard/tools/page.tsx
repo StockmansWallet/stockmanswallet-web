@@ -55,7 +55,7 @@ export default function ToolsPage() {
         {tools.map((tool) => (
           <li key={tool.href}>
             <Link href={tool.href}>
-              <Card className="group h-full transition-all hover:bg-white/[0.07]">
+              <Card className="group h-full transition-all hover:bg-white/[0.05]">
                 <div className="flex items-start gap-4 p-5">
                   <div
                     className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${tool.iconBg} ${tool.iconText}`}

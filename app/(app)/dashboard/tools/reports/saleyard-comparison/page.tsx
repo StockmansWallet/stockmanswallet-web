@@ -8,7 +8,7 @@ import { ReportFilters } from "@/components/app/report-filters";
 import { ReportDownloadMenu } from "@/components/app/report-download-menu";
 import { parseReportConfig } from "@/lib/utils/report-config";
 import { generateSaleyardComparisonData } from "@/lib/services/report-service";
-import { SaleyardComparisonView } from "./saleyard-comparison-view";
+import { SaleyardComparisonView, SaleyardDistanceFilter } from "./saleyard-comparison-view";
 
 export const revalidate = 0;
 export const metadata = { title: "Saleyard Comparison" };
@@ -44,6 +44,7 @@ export default async function SaleyardComparisonPage({
 
   const { saleyardComparison: sc } = reportData;
   const isEmpty = sc.length === 0;
+  const hasDistances = sc.some((s) => s.distanceKm != null);
 
   return (
     <div className="w-full max-w-[1680px]">
@@ -52,21 +53,25 @@ export default async function SaleyardComparisonPage({
         title="Saleyard Comparison"
         titleClassName="text-4xl font-bold text-reports"
         subtitle="Compare how your portfolio values across saleyards."
+        actions={
+          !isEmpty ? (
+            <ReportDownloadMenu
+              label="Download"
+              groups={[{ label: "Saleyard Comparison", reportType: "saleyard-comparison" }]}
+            />
+          ) : undefined
+        }
       />
 
       {/* Toolbar: filters + export in pill row. relative + z-20 lifts
           the toolbar's stacking context above the stat cards below (which
           create their own contexts via backdrop-blur-xl), so the
           ReportFilters property dropdown renders above them. */}
-      <div className="relative z-20 mb-6 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md">
+      <div className="relative z-20 mb-4 flex flex-col gap-2 rounded-[1.75rem] border border-white/[0.08] bg-surface-lowest px-2 py-2 backdrop-blur-md lg:flex-row lg:items-center lg:justify-between lg:rounded-full">
         <Suspense>
           <ReportFilters properties={properties ?? []} />
         </Suspense>
-        {!isEmpty && (
-          <ReportDownloadMenu
-            groups={[{ label: "Saleyard Comparison", reportType: "saleyard-comparison" }]}
-          />
-        )}
+        {!isEmpty && hasDistances && <SaleyardDistanceFilter />}
       </div>
 
       {isEmpty ? (

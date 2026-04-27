@@ -196,7 +196,7 @@ export default async function HerdsPage() {
           <>
             <Link
               href="/dashboard/herds/sold"
-              className="border border-white/[0.08] bg-white/[0.055] text-text-secondary hover:bg-white/[0.09] hover:text-text-primary inline-flex h-9 items-center rounded-full px-4 text-[13px] font-semibold transition-colors"
+              className="border border-white/[0.08] bg-white/[0.03] text-text-secondary hover:bg-white/[0.06] hover:text-text-primary inline-flex h-9 items-center rounded-full px-4 text-[13px] font-semibold transition-colors"
             >
               Sold Herds
             </Link>

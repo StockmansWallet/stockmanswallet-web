@@ -154,12 +154,6 @@ function CustomRangeButton({
   const [draftEnd, setDraftEnd] = useState(end);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Sync drafts when the URL-backed values change (e.g. a preset overrides them)
-  useEffect(() => {
-    setDraftStart(start);
-    setDraftEnd(end);
-  }, [start, end]);
-
   // Click outside / Escape closes
   useEffect(() => {
     if (!open) return;
@@ -196,7 +190,11 @@ function CustomRangeButton({
   return (
     <div ref={containerRef} className="relative">
       <button
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => {
+          setDraftStart(start);
+          setDraftEnd(end);
+          setOpen((o) => !o);
+        }}
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-pressed={active}
@@ -267,14 +265,9 @@ function PropertyDropdown({
   onClear: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const [menuPos, setMenuPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useLayoutEffect(() => {
     if (!open) return;
@@ -319,7 +312,7 @@ function PropertyDropdown({
         : `${selected.length} Properties`;
 
   const menu =
-    open && mounted ? (
+    open && typeof document !== "undefined" ? (
       <div
         ref={menuRef}
         className="fixed z-[60] w-56 overflow-hidden rounded-xl border border-white/[0.08] p-1 shadow-2xl"
@@ -376,14 +369,14 @@ function PropertyDropdown({
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="text-text-secondary flex cursor-pointer items-center gap-1.5 rounded-full bg-white/[0.04] px-4 py-2 text-xs font-medium transition-colors hover:bg-white/[0.07]"
+        className="text-text-secondary flex cursor-pointer items-center gap-1.5 rounded-full bg-white/[0.03] px-4 py-2 text-xs font-medium transition-colors hover:bg-white/[0.06]"
       >
         {label}
         <ChevronDown
           className={`text-text-muted h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
-      {mounted && menu && createPortal(menu, document.body)}
+      {menu && createPortal(menu, document.body)}
     </>
   );
 }

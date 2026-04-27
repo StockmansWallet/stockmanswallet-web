@@ -208,7 +208,7 @@ export function ProcessorsList({ processors }: { processors: ProcessorRow[] }) {
               <button
                 key={p.id}
                 onClick={() => toggleOne(p.id)}
-                className="group relative flex w-full items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding px-4 py-4 text-left backdrop-blur-xl transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075] [backface-visibility:hidden] [transform:translateZ(0)]"
+                className="group relative flex w-full items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-4 py-4 text-left backdrop-blur-xl transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075]"
               >
                 {content}
               </button>
@@ -219,7 +219,7 @@ export function ProcessorsList({ processors }: { processors: ProcessorRow[] }) {
             <Link
               key={p.id}
               href={`/dashboard/tools/grid-iq/processors/${p.id}`}
-              className="group relative flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding px-4 py-4 backdrop-blur-xl transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075] [backface-visibility:hidden] [transform:translateZ(0)]"
+              className="group relative flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-4 py-4 backdrop-blur-xl transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075]"
             >
               {content}
             </Link>

@@ -140,7 +140,7 @@ function YardBookModeTabs({
 }) {
   return (
     <div
-      className="relative flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.07] bg-clip-padding p-1 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)]"
+      className="relative flex items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-1 backdrop-blur-xl"
       role="tablist"
       aria-label="Yard Book sections"
     >

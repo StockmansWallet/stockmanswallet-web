@@ -45,7 +45,7 @@ export function InsightCard({ insight }: { insight: BrangusInsight }) {
   const Icon = iconMap[insight.icon] ?? Wallet;
 
   const content = (
-    <Card className="transition-all hover:bg-white/[0.07]">
+    <Card className="transition-all hover:bg-white/[0.05]">
       <CardContent className="flex flex-col gap-3 p-4">
         {/* Header: icon + title + herd name */}
         <div className="flex items-center gap-3">

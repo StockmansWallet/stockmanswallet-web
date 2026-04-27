@@ -19,7 +19,7 @@ interface NavItemProps {
 function NavItem({ href, icon: Icon, iconBg, iconColor, label, description }: NavItemProps) {
   return (
     <Link href={href} className="group block h-full">
-      <Card className="h-full transition-colors hover:bg-white/[0.07]">
+      <Card className="h-full transition-colors hover:bg-white/[0.05]">
         <CardContent className="flex h-full items-start gap-3.5 p-4">
           <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${iconBg}`}>
             <Icon className={`h-4 w-4 ${iconColor}`} />

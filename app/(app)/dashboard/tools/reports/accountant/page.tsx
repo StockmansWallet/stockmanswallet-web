@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Calculator } from "lucide-react";
 import { fetchAccountantReport } from "./actions";
 import { ReportExportButton } from "@/components/app/report-export-button";
-import type { ReportData, AccountantSnapshot } from "@/lib/types/reports";
+import type { ReportData } from "@/lib/types/reports";
 
 export default function AccountantReportPage() {
   // Financial year options (Australian FY: 1 Jul - 30 Jun)
@@ -62,6 +62,18 @@ export default function AccountantReportPage() {
         title="Accountant Report"
         titleClassName="text-4xl font-bold text-reports"
         subtitle="Financial year reconciliation statement for your accountant."
+        actions={
+          snap ? (
+            <ReportExportButton
+              label="Download"
+              reportType="accountant"
+              extraConfig={{
+                fy: selectedFY.short,
+                openingBook: openingBookValue || "0",
+              }}
+            />
+          ) : undefined
+        }
       />
 
       {/* Configuration */}
@@ -169,18 +181,6 @@ export default function AccountantReportPage() {
             </CardContent>
           </Card>
 
-          {/* Export - matches the other report pages: single pill that
-              server-renders the PDF via Puppeteer and streams it back as
-              a download. extraConfig carries the Accountant-specific
-              inputs (FY + opening book value) that aren't in the URL. */}
-          <ReportExportButton
-            label="Accountant Report"
-            reportType="accountant"
-            extraConfig={{
-              fy: selectedFY.short,
-              openingBook: openingBookValue || "0",
-            }}
-          />
         </>
       )}
 

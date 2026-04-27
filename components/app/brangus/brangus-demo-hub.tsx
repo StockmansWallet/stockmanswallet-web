@@ -237,7 +237,7 @@ export function BrangusDemoHub() {
       {/* Mobile tab bar */}
       <div
         ref={containerRef}
-        className="relative mb-4 flex gap-1 rounded-full border border-white/[0.08] bg-white/[0.07] bg-clip-padding p-1 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)] lg:hidden"
+        className="relative mb-4 flex gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-1 backdrop-blur-xl lg:hidden"
       >
         <div
           className={`bg-brangus/15 absolute top-1 bottom-1 rounded-full ${

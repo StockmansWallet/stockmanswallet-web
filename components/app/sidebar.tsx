@@ -63,7 +63,7 @@ export function Sidebar({
   const intelItems = isAdvisor ? advisorIntelItems : producerIntelItems;
   const toolItems = isAdvisor ? advisorToolItems : producerToolItems;
   const sectionClassName =
-    "rounded-2xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding p-2 backdrop-blur-xl";
+    "rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-2 backdrop-blur-xl";
 
   return (
     <aside className="flex w-64 flex-col">

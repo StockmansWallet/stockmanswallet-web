@@ -106,7 +106,7 @@ export function ConversationList({
       <div className="flex min-w-0 items-center gap-2">
         <button
           onClick={toggleAll}
-          className="flex h-8 items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.07] px-3 text-[11px] font-semibold text-text-secondary transition-colors hover:bg-white/[0.1] hover:text-text-primary"
+          className="flex h-8 items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 text-[11px] font-semibold text-text-secondary transition-colors hover:bg-white/[0.06] hover:text-text-primary"
         >
           {allSelected ? (
             <CheckSquare className="h-3.5 w-3.5 text-brand" />
@@ -134,7 +134,7 @@ export function ConversationList({
         )}
         <button
           onClick={exitSelectMode}
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.07] text-text-muted transition-colors hover:bg-white/[0.1] hover:text-text-primary"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.03] text-text-muted transition-colors hover:bg-white/[0.06] hover:text-text-primary"
           aria-label="Cancel selection"
         >
           <X className="h-4 w-4" />

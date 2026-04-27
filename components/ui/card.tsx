@@ -7,7 +7,7 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 function Card({ children, className = "", ...props }: CardProps) {
   return (
     <div
-      className={`relative rounded-2xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding backdrop-blur-xl ${className}`}
+      className={`relative rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding backdrop-blur-xl ${className}`}
       {...props}
     >
       {children}

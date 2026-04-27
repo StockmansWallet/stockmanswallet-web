@@ -14,7 +14,7 @@ export default function PropertiesLoading() {
       </div>
 
       {/* Toolbar pill */}
-      <div className="bg-surface-lowest mb-4 flex items-center justify-between rounded-full px-2 py-2">
+      <div className="bg-surface-lowest mb-4 flex items-center justify-between rounded-full border border-white/[0.08] px-2 py-2">
         <Skeleton className="h-8 w-16 rounded-full" />
         <div className="flex items-center gap-1.5">
           <Skeleton className="h-8 w-48 rounded-full" />
@@ -23,7 +23,7 @@ export default function PropertiesLoading() {
       </div>
 
       {/* Property list */}
-      <div className="bg-surface-lowest overflow-hidden rounded-2xl">
+      <div className="bg-surface-lowest overflow-hidden rounded-2xl border border-white/[0.08]">
         <div className="divide-y divide-white/[0.06]">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3 px-5 py-3.5">

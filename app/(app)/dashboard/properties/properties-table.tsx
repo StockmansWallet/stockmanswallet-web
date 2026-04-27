@@ -44,7 +44,7 @@ export function PropertiesTable({
   return (
     <div>
       {/* Toolbar */}
-      <div className="bg-surface-lowest mb-4 flex flex-col gap-3 rounded-full px-2 py-2 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
+      <div className="bg-surface-lowest mb-4 flex flex-col gap-3 rounded-full border border-white/[0.08] px-2 py-2 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-1.5 overflow-x-auto">
           <span className="bg-brand/15 text-brand inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-xs font-medium">
             All
@@ -69,13 +69,13 @@ export function PropertiesTable({
 
       {/* List */}
       {filtered.length === 0 ? (
-        <div className="bg-surface-lowest overflow-hidden rounded-2xl">
+        <div className="bg-surface-lowest overflow-hidden rounded-2xl border border-white/[0.08]">
           <p className="text-text-muted px-5 py-16 text-center text-sm">
             {search ? "No properties match your search." : "No properties found."}
           </p>
         </div>
       ) : (
-        <div className="bg-surface-lowest overflow-hidden rounded-2xl">
+        <div className="bg-surface-lowest overflow-hidden rounded-2xl border border-white/[0.08]">
           <div className="divide-y divide-white/[0.06]">
             {filtered.map((property) => {
               const herds = herdCounts[property.id] ?? 0;
@@ -131,13 +131,6 @@ export function PropertiesTable({
                 </div>
               );
             })}
-          </div>
-          <div className="border-border-subtle border-t px-5 py-3">
-            <p className="text-text-muted text-xs">
-              {filtered.length === properties.length
-                ? `${properties.length} ${properties.length === 1 ? "property" : "properties"}`
-                : `${filtered.length} of ${properties.length} properties`}
-            </p>
           </div>
         </div>
       )}

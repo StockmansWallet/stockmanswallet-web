@@ -57,7 +57,7 @@ export default async function MarketPage({ searchParams }: Props) {
         subtitle="Live livestock market intelligence and price indicators."
       />
 
-      <div className="mb-5 flex flex-col gap-3 rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-4 flex flex-col gap-3 rounded-full border border-white/[0.08] bg-surface-lowest px-2 py-2 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-1.5 overflow-x-auto">
           <StateFilter />
         </div>
@@ -76,7 +76,7 @@ export default async function MarketPage({ searchParams }: Props) {
           />
         </Card>
       ) : (
-        <div className="space-y-5">
+        <div className="space-y-4">
           {/* Market overview (seasonal YoY + category timeline toggle) */}
           <MarketOverviewCard
             yoySeries={yoySeries}
@@ -116,7 +116,7 @@ export default async function MarketPage({ searchParams }: Props) {
                 </Link>
               </div>
             </CardHeader>
-            <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            <CardContent className="grid gap-3 px-5 pb-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
               {summaries.map((s) => (
                 <CategoryTile key={s.slug} summary={s} exposure={exposureByCat.get(s.category)} />
               ))}

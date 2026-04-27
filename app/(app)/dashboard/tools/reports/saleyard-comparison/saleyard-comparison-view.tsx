@@ -5,7 +5,8 @@
 // without a server round-trip. The page server component does the heavy
 // lifting (valuation + sort) and hands us a ready ranked list.
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,15 +41,11 @@ export function SaleyardComparisonView({
 }: {
   saleyardComparison: SaleyardComparisonData[];
 }) {
-  const [maxDistanceKm, setMaxDistanceKm] = useState<number | null>(null);
+  const searchParams = useSearchParams();
+  const maxDistanceKm = parseDistanceParam(searchParams.get("distance"));
 
   // Only offer distance filtering when at least some rows carry a distance.
   // Otherwise the filter would silently empty the list and confuse the user.
-  const hasDistances = useMemo(
-    () => saleyardComparison.some((s) => s.distanceKm != null),
-    [saleyardComparison]
-  );
-
   // Apply the distance filter. Rows with a null distance (eg. when the user
   // has no default property with coordinates) are always kept so the report
   // remains usable in that case.
@@ -78,37 +75,6 @@ export function SaleyardComparisonView({
 
   return (
     <div className="flex flex-col gap-4">
-      {hasDistances && (
-        <div className="flex items-center gap-2 text-xs">
-          <span className="text-text-muted">Distance</span>
-          <div className="flex items-center gap-1 rounded-full bg-surface-lowest p-1">
-            {DISTANCE_OPTIONS.map((opt) => {
-              const active = maxDistanceKm === opt.value;
-              return (
-                <button
-                  key={opt.label}
-                  type="button"
-                  onClick={() => setMaxDistanceKm(opt.value)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                    active
-                      ? "bg-reports/15 text-reports"
-                      : "text-text-muted hover:text-text-secondary"
-                  }`}
-                  aria-pressed={active}
-                >
-                  {opt.label}
-                </button>
-              );
-            })}
-          </div>
-          {maxDistanceKm != null && (
-            <span className="text-text-muted">
-              {filtered.length} of {saleyardComparison.length} saleyards
-            </span>
-          )}
-        </div>
-      )}
-
       {isEmpty ? (
         <Card>
           <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
@@ -275,6 +241,56 @@ export function SaleyardComparisonView({
           </Card>
         </>
       )}
+    </div>
+  );
+}
+
+function parseDistanceParam(value: string | null): number | null {
+  if (!value) return null;
+  const parsed = Number(value);
+  return DISTANCE_OPTIONS.some((option) => option.value === parsed) ? parsed : null;
+}
+
+export function SaleyardDistanceFilter() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const maxDistanceKm = parseDistanceParam(searchParams.get("distance"));
+
+  function handleChange(value: number | null) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value == null) {
+      params.delete("distance");
+    } else {
+      params.set("distance", String(value));
+    }
+    const qs = params.toString();
+    router.replace(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });
+  }
+
+  return (
+    <div className="flex shrink-0 items-center gap-2 pl-1 pr-0.5 text-xs lg:ml-auto">
+      <span className="text-text-muted">Distance</span>
+      <div className="flex items-center gap-1 rounded-full bg-white/[0.04] p-0.5">
+        {DISTANCE_OPTIONS.map((opt) => {
+          const active = maxDistanceKm === opt.value;
+          return (
+            <button
+              key={opt.label}
+              type="button"
+              onClick={() => handleChange(opt.value)}
+              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-reports/60 ${
+                active
+                  ? "bg-reports/20 text-reports"
+                  : "text-text-muted hover:text-text-secondary"
+              }`}
+              aria-pressed={active}
+            >
+              {opt.label}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -284,7 +284,7 @@ export function BrangusHub({
       {/* Mobile tab bar */}
       <div
         ref={containerRef}
-        className="relative mb-4 flex gap-1 rounded-full border border-white/[0.08] bg-white/[0.07] bg-clip-padding p-1 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)] lg:hidden"
+        className="relative mb-4 flex gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-1 backdrop-blur-xl lg:hidden"
       >
         <div
           className={`bg-brangus/15 absolute top-1 bottom-1 rounded-full ${ready ? "transition-all duration-250 ease-out" : ""}`}
@@ -314,7 +314,7 @@ export function BrangusHub({
       {/* Action toolbar: Share is portalled from BrangusChat once available. */}
       <PageHeaderActionsPortal>
         <div className="flex items-center gap-2">
-          <div className="hidden items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.07] bg-clip-padding p-1 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)] lg:flex">
+          <div className="hidden items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-1 backdrop-blur-xl lg:flex">
             {desktopTabs.map((tab) => {
               const active = desktopMainTab === tab.id;
               return (
@@ -546,7 +546,7 @@ function SharedInboxSentTabs({
   onSwitch: (next: "inbox" | "sent") => void;
 }) {
   return (
-    <div className="flex w-full items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.07] bg-clip-padding p-1 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)]">
+    <div className="flex w-full items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-1 backdrop-blur-xl">
       <button
         onClick={() => onSwitch("inbox")}
         className={`flex h-8 flex-1 items-center justify-center rounded-full px-3 text-xs font-semibold transition-colors ${

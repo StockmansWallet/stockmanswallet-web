@@ -69,21 +69,24 @@ export default async function SalesSummaryPage({ searchParams }: { searchParams:
         title="Sales Summary"
         titleClassName="text-4xl font-bold text-reports"
         subtitle="Transaction history and performance metrics."
+        actions={
+          !isEmpty ? (
+            <ReportDownloadMenu
+              label="Download"
+              groups={[{ label: "Sales Summary", reportType: "sales-summary" }]}
+            />
+          ) : undefined
+        }
       />
 
       {/* Toolbar. relative + z-20 lifts the toolbar's stacking context
           above the content below (which create their own contexts via
           backdrop-blur-xl), so the ReportFilters property dropdown
           renders above them. */}
-      <div className="relative z-20 mb-6 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md">
+      <div className="relative z-20 mb-4 flex items-center justify-between rounded-full border border-white/[0.08] bg-surface-lowest px-2 py-2 backdrop-blur-md">
         <Suspense>
           <ReportFilters properties={properties ?? []} showPropertyFilter={false} />
         </Suspense>
-        {!isEmpty && (
-          <ReportDownloadMenu
-            groups={[{ label: "Sales Summary", reportType: "sales-summary" }]}
-          />
-        )}
       </div>
 
       {isEmpty ? (

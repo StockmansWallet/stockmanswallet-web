@@ -106,7 +106,7 @@ export function AlertForm({
         <label className="mb-1.5 block text-sm font-medium text-text-secondary">
           Target kind
         </label>
-        <div className="inline-flex rounded-full bg-surface p-1 ring-1 ring-inset ring-white/[0.06]">
+        <div className="inline-flex rounded-full border border-white/[0.08] bg-white/[0.04] p-1">
           {(["category", "saleyard"] as const).map((k) => (
             <button
               key={k}
@@ -114,7 +114,7 @@ export function AlertForm({
               onClick={() => switchKind(k)}
               className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
                 targetKind === k
-                  ? "bg-brand text-white"
+                  ? "bg-markets text-white"
                   : "text-text-secondary hover:text-text-primary"
               }`}
             >
@@ -125,32 +125,34 @@ export function AlertForm({
       </div>
 
       {/* Target picker */}
-      <Select
-        label={targetKind === "category" ? "Category" : "Saleyard"}
-        value={targetName}
-        onChange={(e) => setTargetName(e.target.value)}
-        options={targetKind === "category" ? categoryOptions : saleyardOptions}
-        placeholder={targetKind === "category" ? "Select a category" : "Select a saleyard"}
-        required
-      />
-
-      {/* State filter - only for categories */}
-      {targetKind === "category" && (
+      <div className="grid gap-4 lg:grid-cols-2">
         <Select
-          label="State filter"
-          value={stateFilter}
-          onChange={(e) => setStateFilter(e.target.value)}
-          options={stateOptions}
-          helperText="Restrict the alert to a single state, or leave as All of Australia."
+          label={targetKind === "category" ? "Category" : "Saleyard"}
+          value={targetName}
+          onChange={(e) => setTargetName(e.target.value)}
+          options={targetKind === "category" ? categoryOptions : saleyardOptions}
+          placeholder={targetKind === "category" ? "Select a category" : "Select a saleyard"}
+          required
         />
-      )}
+
+        {/* State filter - only for categories */}
+        {targetKind === "category" && (
+          <Select
+            label="State filter"
+            value={stateFilter}
+            onChange={(e) => setStateFilter(e.target.value)}
+            options={stateOptions}
+            helperText="Restrict the alert to a single state, or leave as All of Australia."
+          />
+        )}
+      </div>
 
       {/* Comparator pill */}
       <div>
         <label className="mb-1.5 block text-sm font-medium text-text-secondary">
           Trigger when price is
         </label>
-        <div className="inline-flex rounded-full bg-surface p-1 ring-1 ring-inset ring-white/[0.06]">
+        <div className="inline-flex rounded-full border border-white/[0.08] bg-white/[0.04] p-1">
           {(["above", "below"] as const).map((c) => (
             <button
               key={c}
@@ -158,7 +160,7 @@ export function AlertForm({
               onClick={() => setComparator(c)}
               className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
                 comparator === c
-                  ? "bg-brand text-white"
+                  ? "bg-markets text-white"
                   : "text-text-secondary hover:text-text-primary"
               }`}
             >
@@ -169,31 +171,33 @@ export function AlertForm({
       </div>
 
       {/* Threshold */}
-      <Input
-        label="Threshold ($/kg)"
-        type="number"
-        step="0.01"
-        min="0"
-        placeholder="e.g. 4.25"
-        value={thresholdDollars}
-        onChange={(e) => setThresholdDollars(e.target.value)}
-        required
-      />
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Input
+          label="Threshold ($/kg)"
+          type="number"
+          step="0.01"
+          min="0"
+          placeholder="e.g. 4.25"
+          value={thresholdDollars}
+          onChange={(e) => setThresholdDollars(e.target.value)}
+          required
+        />
 
-      {/* Note */}
-      <Input
-        label="Note (optional)"
-        type="text"
-        maxLength={500}
-        placeholder="Why are you watching this?"
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-      />
+        {/* Note */}
+        <Input
+          label="Note (optional)"
+          type="text"
+          maxLength={500}
+          placeholder="Why are you watching this?"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+        />
+      </div>
 
       {error && <p className="text-xs text-error">{error}</p>}
 
       <div className="flex items-center gap-2 pt-2">
-        <Button type="submit" disabled={isPending}>
+        <Button type="submit" variant="markets" disabled={isPending}>
           {isPending ? "Saving..." : mode === "create" ? "Create alert" : "Save changes"}
         </Button>
         <Button variant="ghost" type="button" onClick={onDone} disabled={isPending}>

@@ -68,18 +68,21 @@ export default async function PropertyComparisonPage({
         title="Property vs Property"
         titleClassName="text-4xl font-bold text-reports"
         subtitle="Compare portfolio performance across your properties."
+        actions={
+          !isEmpty ? (
+            <ReportDownloadMenu
+              label="Download"
+              groups={[{ label: "Property Comparison", reportType: "property-comparison" }]}
+            />
+          ) : undefined
+        }
       />
 
       {/* Toolbar */}
-      <div className="relative z-20 mb-6 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md">
+      <div className="relative z-20 mb-4 flex items-center justify-between rounded-full border border-white/[0.08] bg-surface-lowest px-2 py-2 backdrop-blur-md">
         <Suspense>
           <ReportFilters properties={properties ?? []} />
         </Suspense>
-        {!isEmpty && (
-          <ReportDownloadMenu
-            groups={[{ label: "Property Comparison", reportType: "property-comparison" }]}
-          />
-        )}
       </div>
 
       {isEmpty ? (

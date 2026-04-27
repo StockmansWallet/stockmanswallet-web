@@ -25,7 +25,7 @@ interface StatCardProps {
 
 function StatCard({ label, value, change, icon, accent = "brand" }: StatCardProps) {
   return (
-    <div className="flex rounded-2xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding p-5 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)]">
+    <div className="flex rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-5 backdrop-blur-xl">
       <div className="flex flex-1 flex-col items-center justify-center text-center">
         {icon && (
           <div className={`mb-2 flex h-7 w-7 items-center justify-center rounded-lg ${accentClasses[accent]}`}>

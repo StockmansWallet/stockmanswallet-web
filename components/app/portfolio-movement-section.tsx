@@ -6,7 +6,6 @@
 import { useState, useEffect, useTransition } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { PortfolioMovementSummary, MovementDriver } from "@/lib/types/portfolio-movement";
-import { formatDateAU } from "@/lib/dates";
 
 // Simple class name joiner (project does not use a cn utility)
 function cn(...classes: (string | false | undefined | null)[]) {
@@ -21,8 +20,6 @@ function fmt(v: number) {
     maximumFractionDigits: 0,
   }).format(v);
 }
-
-const fmtDate = formatDateAU;
 
 function changeColor(value: number) {
   if (value > 0) return "text-success";
@@ -74,20 +71,6 @@ export function PortfolioMovementSection({
 
       {summary && (
         <>
-          {/* Date range label, or inline spinner in the same slot while refetching */}
-          <p className="text-text-muted flex items-center justify-center gap-2 text-center text-xs">
-            {isPending ? (
-              <>
-                <span className="border-brand inline-block h-3 w-3 animate-spin rounded-full border-2 border-t-transparent" />
-                <span>Calculating movement...</span>
-              </>
-            ) : (
-              <>
-                {fmtDate(summary.openingDate)} - {fmtDate(summary.closingDate)}
-              </>
-            )}
-          </p>
-
           <div className={cn("flex flex-col gap-4 transition-opacity", isPending && "opacity-50")}>
             {/* Executive Summary */}
             <Card>

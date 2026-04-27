@@ -56,18 +56,20 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
           above the content below (which create their own contexts via
           backdrop-blur-xl), so the ReportFilters property dropdown
           renders above them. */}
-      <div className="relative z-20 mb-6 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md">
+      <div className="relative z-20 mb-4 flex items-center justify-between rounded-full border border-white/[0.08] bg-surface-lowest px-2 py-2 backdrop-blur-md">
         <Suspense>
           <ReportFilters properties={properties ?? []} />
         </Suspense>
         {!isEmpty && (
-          <ReportDownloadMenu
-            label="Download Reports"
-            groups={[
-              { label: "Asset Report", reportType: "asset-report" },
-              { label: "Lender Report", reportType: "lender-report" },
-            ]}
-          />
+          <div className="lg:hidden">
+            <ReportDownloadMenu
+              label="Download"
+              groups={[
+                { label: "Asset Report", reportType: "asset-report" },
+                { label: "Lender Report", reportType: "lender-report" },
+              ]}
+            />
+          </div>
         )}
       </div>
 
@@ -101,7 +103,17 @@ export default async function AssetRegisterPage({ searchParams }: { searchParams
             startDate={config.startDate}
             endDate={config.endDate}
             selectedPropertyIds={config.selectedPropertyIds}
-          />
+          >
+            <div className="hidden lg:block">
+              <ReportDownloadMenu
+                label="Download"
+                groups={[
+                  { label: "Asset Report", reportType: "asset-report" },
+                  { label: "Lender Report", reportType: "lender-report" },
+                ]}
+              />
+            </div>
+          </AssetRegisterTabs>
         </div>
       )}
     </div>

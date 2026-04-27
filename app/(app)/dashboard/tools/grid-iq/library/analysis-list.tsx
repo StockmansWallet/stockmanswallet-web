@@ -210,7 +210,7 @@ export function AnalysisList({
               <button
                 key={a.id}
                 onClick={() => toggleOne(a.id)}
-                className="group relative flex w-full items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding px-4 py-4 text-left backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)] transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075]"
+                className="group relative flex w-full items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-4 py-4 text-left backdrop-blur-xl transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075]"
               >
                 {content}
               </button>
@@ -221,7 +221,7 @@ export function AnalysisList({
             <Link
               key={a.id}
               href={`/dashboard/tools/grid-iq/analysis/${a.id}`}
-              className="group relative flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.07] bg-clip-padding px-4 py-4 backdrop-blur-xl [backface-visibility:hidden] [transform:translateZ(0)] transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075]"
+              className="group relative flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-4 py-4 backdrop-blur-xl transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075]"
             >
               {content}
             </Link>

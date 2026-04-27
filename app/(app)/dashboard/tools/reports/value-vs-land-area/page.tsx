@@ -69,18 +69,21 @@ export default async function ValueVsLandAreaPage({
         title="Value vs Land Area"
         titleClassName="text-4xl font-bold text-reports"
         subtitle="Livestock value density per acre across your properties."
+        actions={
+          !isEmpty ? (
+            <ReportDownloadMenu
+              label="Download"
+              groups={[{ label: "Value vs Land Area", reportType: "value-vs-land-area" }]}
+            />
+          ) : undefined
+        }
       />
 
       {/* Toolbar */}
-      <div className="relative z-20 mb-6 flex items-center justify-between rounded-full bg-surface-lowest px-2 py-2 backdrop-blur-md">
+      <div className="relative z-20 mb-4 flex items-center justify-between rounded-full border border-white/[0.08] bg-surface-lowest px-2 py-2 backdrop-blur-md">
         <Suspense>
           <ReportFilters properties={properties ?? []} />
         </Suspense>
-        {!isEmpty && (
-          <ReportDownloadMenu
-            groups={[{ label: "Value vs Land Area", reportType: "value-vs-land-area" }]}
-          />
-        )}
       </div>
 
       {isEmpty ? (
