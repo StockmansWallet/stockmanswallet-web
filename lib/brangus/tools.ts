@@ -62,7 +62,7 @@ export const toolDefinitions = [
         },
         saleyard_override: {
           type: "string",
-          description: "MLA saleyard name (e.g. 'Gracemere', 'Roma', 'Armidale', 'Charters Towers', or a full name like 'Gracemere Central Queensland Livestock Exchange'). REQUIRED whenever the user names a specific saleyard for a valuation question, including phrases like 'use the Roma price', 'value at Dalby', 'priced at Gracemere', 'what would they fetch at X', 'sold at Y instead'. Without this parameter the engine returns the herd's configured-saleyard valuation, NOT the requested yard's. Applies to query_type 'herd_details', 'all_herds_summary', and 'portfolio_summary'. The engine fetches live MLA pricing for ANY Australian saleyard on demand - the saleyard does NOT need to be linked to the user's account. Recomputes the AMV with that saleyard's price, falling through to nearest yards / state / national average automatically when a direct quote isn't available. Omit only when the user has not named a yard. For side-by-side comparisons across multiple yards, use query_type 'saleyard_comparison' instead.",
+          description: "MLA saleyard name (e.g. 'Gracemere', 'Roma', 'Armidale', 'Charters Towers', or a full name like 'Gracemere Central Queensland Livestock Exchange'). REQUIRED whenever the user names a specific saleyard, including 'use the Roma price', 'value at Dalby', 'priced at Gracemere', 'what would they fetch at X', 'sold at Y instead', 'general prices from Charters Towers', 'what's selling at Roma right now'. Applies to query_type 'herd_details', 'all_herds_summary', 'portfolio_summary', AND 'market_prices'. For valuation query_types it recomputes the AMV using that yard's price (falling through to nearest yards / state / national average when needed). For 'market_prices' it fetches live category $/kg figures for that specific yard from MLA on demand, even if the yard isn't linked to the user's account. Omit only when the user has not named a yard. For side-by-side comparisons across multiple yards, use query_type 'saleyard_comparison' instead.",
         },
         saleyards: {
           type: "array",
@@ -483,7 +483,7 @@ async function executeLookup(input: Record<string, unknown>, store: ChatDataStor
     case "property_details":
       return lookupPropertyDetails(input.property_name as string, store);
     case "market_prices":
-      return lookupMarketPrices(input.category as string | undefined, store);
+      return await lookupMarketPrices(input.category as string | undefined, store, saleyardOverride);
     case "historical_prices":
       return await lookupHistoricalPrices(
         input.category as string | undefined,
@@ -794,7 +794,11 @@ function formatProperty(prop: ChatDataStore["properties"][0], herds: ChatDataSto
 
 // MARK: - Market Prices
 
-function lookupMarketPrices(category: string | undefined, store: ChatDataStore): string {
+async function lookupMarketPrices(
+  category: string | undefined,
+  store: ChatDataStore,
+  saleyardOverride: string | null
+): Promise<string> {
   const lines: string[] = [];
   // BRG-013: lead with an explicit reminder that this query type is for category-level
   // CONTEXT only. The model must not multiply these prices by herd weights to produce
@@ -813,13 +817,83 @@ function lookupMarketPrices(category: string | undefined, store: ChatDataStore):
     return catl.includes(cl) || cl.includes(catl) || catl.includes(mlal) || mlal.includes(catl);
   };
 
+  // BRG-001 / Charters Towers fix: when the user names a specific yard (saleyard_override),
+  // resolve to its full MLA name and fetch on-demand from category_prices. The preloaded
+  // store only contains yards linked to the user's herds (plus nearest neighbours), so
+  // arbitrary yards like Charters Towers Dalrymple Saleyards were silently returning
+  // empty - the model would then claim "MLA hasn't dropped a fresh report" even though
+  // the data was a day old. This path makes "general prices from <yard>" actually work.
+  const overrideFullName = saleyardOverride ? resolveMLASaleyardName(saleyardOverride) : null;
+
   // 1. Saleyard-specific prices (most relevant to user)
   // BRG-001 (CAT-03 R2): track unique saleyards so we can warn the model when only
   // one yard is loaded, which has caused it to generalise to "the cattle market"
   // without disclosing the limitation. The fix is to surface the constraint and
   // route directional/YoY questions to historical_prices for national context.
   const saleyardsSeen = new Set<string>();
-  if (store.saleyardPriceMap.size > 0) {
+
+  if (overrideFullName) {
+    // Fetch this saleyard's prices directly from Supabase. Filter to base prices
+    // (breed IS NULL) so we surface the same numbers the Markets tab uses.
+    try {
+      const supabase = createClient();
+      let query = supabase
+        .from("category_prices")
+        .select("category, price_per_kg:final_price_per_kg, weight_range, data_date")
+        .eq("saleyard", overrideFullName)
+        .is("breed", null)
+        .order("data_date", { ascending: false })
+        .limit(200);
+
+      if (mlaCat) {
+        query = query.eq("category", mlaCat);
+      }
+
+      const { data: overrideRows, error: overrideErr } = await query;
+      if (overrideErr) throw overrideErr;
+
+      const rows = (overrideRows ?? []) as Array<{
+        category: string;
+        price_per_kg: number;
+        weight_range: string | null;
+        data_date: string;
+      }>;
+
+      // Keep only the most-recent data_date per category|weight_range (latest report).
+      const latestByKey = new Map<string, { category: string; price: number; range: string | null; date: string }>();
+      for (const r of rows) {
+        const key = `${r.category}|${r.weight_range ?? ""}`;
+        const prev = latestByKey.get(key);
+        if (!prev || r.data_date > prev.date) {
+          latestByKey.set(key, {
+            category: r.category,
+            price: centsToDollars(r.price_per_kg),
+            range: r.weight_range,
+            date: r.data_date,
+          });
+        }
+      }
+
+      if (latestByKey.size > 0) {
+        saleyardsSeen.add(overrideFullName);
+        lines.push("");
+        lines.push(`SALEYARD PRICES at ${overrideFullName} (live MLA data, on-demand fetch):`);
+        const sorted = [...latestByKey.values()].sort((a, b) => a.category.localeCompare(b.category));
+        for (const e of sorted) {
+          const rangeLabel = e.range ? ` (${e.range}kg)` : "";
+          lines.push(`- ${e.category}${rangeLabel}: $${e.price.toFixed(2)}/kg [${e.date}]`);
+        }
+      } else {
+        lines.push("");
+        lines.push(`SALEYARD PRICES at ${overrideFullName}: no MLA category_prices rows match${category ? ` for '${category}'` : ""}. Drop the category filter or pick another yard.`);
+      }
+    } catch (err) {
+      console.error("Brangus lookupMarketPrices override fetch error:", err);
+      lines.push("");
+      lines.push(`SALEYARD PRICES at ${overrideFullName}: lookup failed (Supabase error). Try again in a moment.`);
+    }
+  } else if (store.saleyardPriceMap.size > 0) {
+    // No override - fall back to the user's preloaded yard prices.
     const saleyardLines: string[] = [];
     for (const [key, entries] of store.saleyardPriceMap) {
       const [cat, saleyard] = key.split("|");
