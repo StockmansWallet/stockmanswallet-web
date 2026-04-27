@@ -2,6 +2,17 @@
 
 import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
 
+type TabAccent =
+  | "brangus"
+  | "insights"
+  | "markets"
+  | "yard-book"
+  | "reports"
+  | "freight-iq"
+  | "grid-iq"
+  | "producer-network"
+  | "advisor";
+
 interface Tab {
   id: string;
   label: string;
@@ -11,9 +22,37 @@ interface Tab {
 interface TabsProps {
   tabs: Tab[];
   defaultTab?: string;
+  /** Optional feature hue. When set, the active tab text and indicator are tinted to match. */
+  accent?: TabAccent;
 }
 
-function Tabs({ tabs, defaultTab }: TabsProps) {
+// Active text color for each accent. Uses the existing Tailwind feature tokens.
+const activeTextByAccent: Record<TabAccent, string> = {
+  brangus: "text-brangus-light",
+  insights: "text-insights-light",
+  markets: "text-markets-light",
+  "yard-book": "text-yard-book-light",
+  reports: "text-reports-light",
+  "freight-iq": "text-freight-iq-text",
+  "grid-iq": "text-grid-iq-light",
+  "producer-network": "text-producer-network-light",
+  advisor: "text-advisor-light",
+};
+
+// Sliding-pill indicator background, kept subtle so labels remain readable.
+const indicatorByAccent: Record<TabAccent, string> = {
+  brangus: "bg-brangus/20",
+  insights: "bg-insights/20",
+  markets: "bg-markets/20",
+  "yard-book": "bg-yard-book/20",
+  reports: "bg-reports/20",
+  "freight-iq": "bg-freight-iq-dark/30",
+  "grid-iq": "bg-grid-iq/20",
+  "producer-network": "bg-producer-network/20",
+  advisor: "bg-indigo/20",
+};
+
+function Tabs({ tabs, defaultTab, accent }: TabsProps) {
   const [activeTab, setActiveTab] = useState(defaultTab || tabs[0]?.id);
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
@@ -46,6 +85,8 @@ function Tabs({ tabs, defaultTab }: TabsProps) {
   }, [measure]);
 
   const activeContent = tabs.find((t) => t.id === activeTab)?.content;
+  const activeText = accent ? activeTextByAccent[accent] : "text-text-primary";
+  const indicatorBg = accent ? indicatorByAccent[accent] : "bg-surface-high";
 
   return (
     <div>
@@ -53,7 +94,7 @@ function Tabs({ tabs, defaultTab }: TabsProps) {
       <div ref={containerRef} className="relative mb-6 flex gap-1 rounded-full bg-surface p-1">
         {/* Sliding indicator */}
         <div
-          className={`absolute top-1 bottom-1 rounded-full bg-surface-high shadow-sm ${ready ? "transition-all duration-250 ease-out" : ""}`}
+          className={`absolute top-1 bottom-1 rounded-full ${indicatorBg} shadow-sm ${ready ? "transition-all duration-250 ease-out" : ""}`}
           style={{ left: indicator.left, width: indicator.width }}
         />
 
@@ -66,7 +107,7 @@ function Tabs({ tabs, defaultTab }: TabsProps) {
             onClick={() => setActiveTab(tab.id)}
             className={`relative z-10 flex-1 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-150 ${
               activeTab === tab.id
-                ? "text-text-primary"
+                ? activeText
                 : "text-text-muted hover:text-text-secondary"
             }`}
           >
@@ -82,4 +123,4 @@ function Tabs({ tabs, defaultTab }: TabsProps) {
 }
 
 export { Tabs };
-export type { TabsProps, Tab };
+export type { TabsProps, Tab, TabAccent };
