@@ -215,25 +215,29 @@ export function AppHeader({
   return (
     <>
       <header
-      className="sticky top-0 z-30 hidden border-b border-white/[0.08] px-4 py-2.5 shadow-sm shadow-black/15 backdrop-blur-xl lg:block"
-      style={{
-        background:
-          "radial-gradient(ellipse 760px 180px at 0% 0%, color-mix(in srgb, var(--color-brand) 18%, transparent), transparent 72%), rgba(32, 27, 24, 0.68)",
-      }}
-    >
+        className="sticky top-0 z-30 hidden border-b border-white/[0.08] bg-[#201B18]/68 px-4 py-2.5 shadow-sm shadow-black/15 backdrop-blur-xl lg:block"
+      >
       <div className="mx-auto flex w-full max-w-[1960px] items-center gap-4">
         <Link
           href="/dashboard"
           aria-label="Stockman's Wallet"
-          className="flex h-14 w-64 shrink-0 items-center justify-center px-3 transition-opacity hover:opacity-90"
+          className="relative flex h-14 w-64 shrink-0 items-center justify-center overflow-visible px-3 transition-opacity hover:opacity-90"
         >
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-1/2 h-56 w-[34rem] -translate-x-1/2 -translate-y-1/2 rounded-full"
+            style={{
+              background:
+                "radial-gradient(ellipse at center, color-mix(in srgb, var(--color-brand) 16%, transparent), color-mix(in srgb, var(--color-brand) 7%, transparent) 36%, color-mix(in srgb, var(--color-brand) 2%, transparent) 62%, transparent 82%)",
+            }}
+          />
           <Image
             src="/images/sw-logo.svg"
             alt="Stockman's Wallet"
             width={220}
             height={146}
             priority
-            className="h-[3.35rem] w-auto object-contain"
+            className="relative h-[3.35rem] w-auto object-contain"
           />
         </Link>
 
