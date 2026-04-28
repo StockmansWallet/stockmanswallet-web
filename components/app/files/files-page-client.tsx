@@ -30,6 +30,7 @@ import {
   friendlyTitle,
 } from "@/lib/brangus/files";
 import { createClient } from "@/lib/supabase/client";
+import { PageHeaderActionsPortal } from "@/components/ui/page-header-actions-portal";
 
 interface Props {
   userId: string;
@@ -169,6 +170,18 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
     <div className="space-y-4">
       <input ref={fileInputRef} type="file" className="hidden" multiple onChange={handlePicked} />
 
+      <PageHeaderActionsPortal>
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={busy}
+          className="bg-brand hover:bg-brand-dark inline-flex h-9 shrink-0 items-center gap-2 rounded-full px-4 text-[13px] font-semibold text-white transition-colors disabled:opacity-60"
+        >
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+          Add file
+        </button>
+      </PageHeaderActionsPortal>
+
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatTile label="Files" value={stats.total} />
         <StatTile label="Collections" value={stats.collections} />
@@ -199,16 +212,6 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
             <option value="source">Group by source</option>
             <option value="none">No grouping</option>
           </select>
-
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={busy}
-            className="bg-brand/15 text-brand hover:bg-brand/25 inline-flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-medium disabled:opacity-60"
-          >
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            Add file
-          </button>
         </div>
       </div>
 

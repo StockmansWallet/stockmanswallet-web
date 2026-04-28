@@ -26,7 +26,7 @@ export default async function FilesPage() {
     <div className="space-y-6">
       <PageHeader
         title="Files"
-        subtitle="Documents and photos Brangus can read. Vet reports, NLIS docs, lease agreements, kill sheets, soil tests, anything else."
+        subtitle="Documents and photos Brangus can read."
       />
       <FilesPageClient userId={user.id} initialFiles={(files ?? []) as BrangusFileRow[]} />
     </div>
