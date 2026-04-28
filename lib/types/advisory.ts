@@ -236,7 +236,39 @@ export interface PriceAttachment {
   data_date: string;
 }
 
-export type MessageAttachment = HerdAttachment | PriceAttachment;
+/**
+ * Frozen reference to a Brangus AI conversation. Sender's preview/title at
+ * send time; the receiver doesn't get access to the underlying conversation
+ * (Brangus chats are user-private), only the snapshot for context.
+ */
+export interface BrangusChatAttachment {
+  type: "brangus_chat";
+  conversation_id: string;
+  title: string;
+  preview: string | null;
+  updated_at: string | null;
+}
+
+/**
+ * Frozen reference to a File Cabinet (brangus_files) entry. Receiver sees
+ * the filename + metadata; access to the actual file is gated by the file's
+ * existing RLS (per-user). Acts as a "shared pointer" - useful when both
+ * producers have access to the file already.
+ */
+export interface FileAttachment {
+  type: "file";
+  file_id: string;
+  title: string;
+  mime_type: string | null;
+  size_bytes: number | null;
+  kind: string | null;
+}
+
+export type MessageAttachment =
+  | HerdAttachment
+  | PriceAttachment
+  | BrangusChatAttachment
+  | FileAttachment;
 
 export interface AdvisoryMessage {
   id: string;

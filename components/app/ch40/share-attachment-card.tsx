@@ -1,4 +1,4 @@
-import { Beef, TrendingUp, MapPin } from "lucide-react";
+import { Beef, TrendingUp, MapPin, MessageCircle, FileText } from "lucide-react";
 import type { MessageAttachment } from "@/lib/types/advisory";
 
 const SPECIES_EMOJI: Record<string, string> = {
@@ -26,6 +26,12 @@ function formatDate(iso: string): string {
   } catch {
     return iso;
   }
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 export function ShareAttachmentCard({ attachment }: { attachment: MessageAttachment }) {
@@ -67,33 +73,88 @@ export function ShareAttachmentCard({ attachment }: { attachment: MessageAttachm
     );
   }
 
-  // Price attachment
-  return (
-    <div className="mt-2 flex min-w-0 items-start gap-3 rounded-xl border border-info/20 bg-info/[0.04] p-3">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-info/15">
-        <TrendingUp className="h-4 w-4 text-info" aria-hidden="true" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-info">
-          Shared market price
-        </span>
-        <p className="mt-0.5 truncate text-sm font-semibold text-text-primary">
-          {attachment.category}
-          {attachment.breed ? ` (${attachment.breed})` : ""}
-        </p>
-        <p className="mt-1 text-lg font-bold text-info">
-          ${(attachment.price_per_kg / 100).toFixed(2)}
-          <span className="ml-0.5 text-[11px] font-medium text-text-muted">/kg</span>
-        </p>
-        <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-text-muted">
-          <span className="flex items-center gap-1">
-            <MapPin className="h-3 w-3" aria-hidden="true" />
-            {attachment.saleyard}
+  if (attachment.type === "price") {
+    return (
+      <div className="mt-2 flex min-w-0 items-start gap-3 rounded-xl border border-info/20 bg-info/[0.04] p-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-info/15">
+          <TrendingUp className="h-4 w-4 text-info" aria-hidden="true" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-info">
+            Shared market price
           </span>
-          {attachment.weight_range && <span>{attachment.weight_range}</span>}
-          <span>{formatDate(attachment.data_date)}</span>
+          <p className="mt-0.5 truncate text-sm font-semibold text-text-primary">
+            {attachment.category}
+            {attachment.breed ? ` (${attachment.breed})` : ""}
+          </p>
+          <p className="mt-1 text-lg font-bold text-info">
+            ${(attachment.price_per_kg / 100).toFixed(2)}
+            <span className="ml-0.5 text-[11px] font-medium text-text-muted">/kg</span>
+          </p>
+          <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-text-muted">
+            <span className="flex items-center gap-1">
+              <MapPin className="h-3 w-3" aria-hidden="true" />
+              {attachment.saleyard}
+            </span>
+            {attachment.weight_range && <span>{attachment.weight_range}</span>}
+            <span>{formatDate(attachment.data_date)}</span>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  if (attachment.type === "brangus_chat") {
+    return (
+      <div className="mt-2 flex min-w-0 items-start gap-3 rounded-xl border border-brangus/20 bg-brangus/[0.04] p-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brangus/15">
+          <MessageCircle className="h-4 w-4 text-brangus" aria-hidden="true" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-brangus">
+            Shared Brangus chat
+          </span>
+          <p className="mt-0.5 truncate text-sm font-semibold text-text-primary">
+            {attachment.title}
+          </p>
+          {attachment.preview && (
+            <p className="mt-0.5 line-clamp-2 text-xs text-text-secondary">
+              {attachment.preview}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (attachment.type === "file") {
+    return (
+      <div className="mt-2 flex min-w-0 items-start gap-3 rounded-xl border border-ch40/20 bg-ch40/[0.04] p-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-ch40/15">
+          <FileText className="h-4 w-4 text-ch40-light" aria-hidden="true" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-ch40-light">
+            Shared file
+          </span>
+          <p className="mt-0.5 truncate text-sm font-semibold text-text-primary">
+            {attachment.title}
+          </p>
+          <div className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-text-muted">
+            {attachment.kind && <span className="capitalize">{attachment.kind}</span>}
+            {attachment.size_bytes != null && <span>{formatBytes(attachment.size_bytes)}</span>}
+            {attachment.mime_type && <span className="truncate">{attachment.mime_type}</span>}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Debug: TypeScript exhaustiveness guard - if MessageAttachment grows a new
+  // variant, the type system flags this branch instead of silently rendering
+  // the wrong card. Prior version fell through to the price card for any
+  // unknown type which is how iOS-only attachments showed as "$NaN/kg".
+  const _exhaustive: never = attachment;
+  void _exhaustive;
+  return null;
 }
