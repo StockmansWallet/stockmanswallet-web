@@ -1008,11 +1008,9 @@ function CompactFileDragPreview({ preview }: { preview: DragPreview }) {
           8,
           preview.y - 28
         )}px, 0)`,
-        WebkitBackdropFilter: "blur(32px) saturate(1.8)",
-        backdropFilter: "blur(32px) saturate(1.8)",
       }}
     >
-      <div className="file-drag-preview-card flex w-[260px] items-center gap-2.5 rounded-2xl border border-white/[0.10] bg-white/[0.08] bg-clip-padding px-3 py-2.5 shadow-2xl shadow-black/40 backdrop-blur-2xl backdrop-saturate-150 [backface-visibility:hidden]">
+      <div className="file-drag-preview-card flex w-[260px] items-center gap-2.5 rounded-2xl border border-white/[0.10] bg-clip-padding px-3 py-2.5 shadow-2xl shadow-black/40 [backface-visibility:hidden]">
         <div className="bg-brand/15 text-brand flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[10px] text-[10px] font-extrabold tracking-wide">
           {fileTypeShortLabel(preview.type)}
         </div>
