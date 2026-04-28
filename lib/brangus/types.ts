@@ -91,6 +91,14 @@ export interface ChatDataStore {
   // prices resolve ahead of the national-plus-premium fallback. Brangus must
   // pass the same map or its totals diverge from the Dashboard (BRG-013 CAT-06).
   saleyardBreedPriceMap: Map<string, CategoryPriceEntry[]>;
+  // Lowercase resolved-MLA-name set tracking which saleyards already have prices
+  // loaded into the maps above. Initialised with the user's herd yards (loaded
+  // by chat-service at session start). When Brangus asks about an arbitrary yard
+  // (e.g. Charters Towers, Gracemere) that the user does not own, valuationForHerd
+  // calls ensureSaleyardLoaded to live-fetch that yard's prices from Supabase and
+  // merge them into the maps before running the engine. Without this, the engine
+  // silently fell through to the national-average default for any non-owned yard.
+  loadedSaleyards: Set<string>;
   premiumMap: Map<string, number>;
 
   // Grid IQ data (for Brangus tool lookups)

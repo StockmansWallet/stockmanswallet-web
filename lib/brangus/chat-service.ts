@@ -765,7 +765,8 @@ export async function sendMessage(
       // BRG-013 drift detector: scan the response for dollar figures and compare each
       // one against the cached AMV engine values. Logs a warning when Brangus quotes a
       // number that diverges materially from any cached herd total or per-head value.
-      detectValuationDrift(finalText, store);
+      // Fire-and-forget - dev-only logger, latency irrelevant.
+      void detectValuationDrift(finalText, store);
       return { assistantText: finalText, updatedHistory: currentHistory, quickInsights: finalCards };
     }
 
@@ -808,7 +809,7 @@ export async function sendMessage(
         const finalCards = pendingInsights ?? (autoCards.length > 0 ? autoCards.slice(0, 4) : undefined);
         // BRG-013 drift detector: same scan as the end_turn path so display-card-only
         // responses are also instrumented for valuation drift.
-        detectValuationDrift(text, store);
+        void detectValuationDrift(text, store);
         return { assistantText: text, updatedHistory: currentHistory, quickInsights: finalCards };
       }
 
@@ -1242,6 +1243,12 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
     (activeYardRows ?? []).map((r: { name: string }) => r.name),
   );
 
+  // Track which yards already have prices loaded into the maps so the on-demand
+  // ensureSaleyardLoaded helper does not re-query Supabase for them. Seeded with
+  // the herd yards + nearest-3 expansion that we just batch-loaded above. Yards
+  // are stored lowercase to match resolveMLASaleyardName output.
+  const loadedSaleyards = new Set<string>(saleyards.map((y) => y.toLowerCase()));
+
   return {
     herds: herds ?? [],
     properties: properties ?? [],
@@ -1254,6 +1261,7 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
     nationalPriceMap,
     saleyardPriceMap,
     saleyardBreedPriceMap,
+    loadedSaleyards,
     premiumMap,
     seasonalData,
     gridIQAnalyses: gridIQAnalyses ?? [],
@@ -1435,7 +1443,7 @@ function buildFallbackSeasonalData(categories: string[]): SeasonalCategoryData[]
 const DRIFT_TOLERANCE_FRACTION = 0.05;
 const DRIFT_MINIMUM_DOLLARS = 500;
 
-function detectValuationDrift(response: string, store: ChatDataStore): void {
+async function detectValuationDrift(response: string, store: ChatDataStore): Promise<void> {
   if (process.env.NODE_ENV === "production") return;
   if (!response) return;
 
@@ -1443,11 +1451,14 @@ function detectValuationDrift(response: string, store: ChatDataStore): void {
   if (activeHerds.length === 0) return;
 
   // Build the set of authoritative engine values: per-herd total, per-herd per-head,
-  // and the portfolio total.
+  // and the portfolio total. valuationForHerd is async because it may live-fetch a
+  // saleyard's prices when the requested yard is not in the preloaded map - here
+  // we always pass null (herd's own yard) so it's a synchronous engine call in
+  // practice, but still needs to be awaited.
   const authoritative: Array<{ label: string; value: number }> = [];
   let portfolioTotal = 0;
   for (const herd of activeHerds) {
-    const v = valuationForHerd(herd, store, null);
+    const v = await valuationForHerd(herd, store, null);
     authoritative.push({ label: `${herd.name} total`, value: v.netValue });
     const headCount = herd.head_count ?? 0;
     if (headCount > 0) {

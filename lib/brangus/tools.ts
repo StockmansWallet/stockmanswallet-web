@@ -664,11 +664,11 @@ async function executeLookup(input: Record<string, unknown>, store: ChatDataStor
 
   switch (queryType) {
     case "portfolio_summary":
-      return lookupPortfolioSummary(store, saleyardOverride);
+      return await lookupPortfolioSummary(store, saleyardOverride);
     case "herd_details":
-      return lookupHerdDetails(input.herd_name as string, store, saleyardOverride);
+      return await lookupHerdDetails(input.herd_name as string, store, saleyardOverride);
     case "all_herds_summary":
-      return lookupAllHerdsSummary(store, saleyardOverride);
+      return await lookupAllHerdsSummary(store, saleyardOverride);
     case "property_details":
       return lookupPropertyDetails(input.property_name as string, store);
     case "market_prices":
@@ -701,19 +701,127 @@ async function executeLookup(input: Record<string, unknown>, store: ChatDataStor
   }
 }
 
+// MARK: - On-demand Saleyard Price Loading
+// Debug: chat-service preloads saleyardPriceMap for the user's herd yards plus
+// the nearest 3 in the same state. When Brangus is asked about an arbitrary
+// yard (e.g. "compare Charters Towers vs Gracemere" for a user who owns
+// neither), the map has nothing for those yards and the AMV engine falls
+// through to nearest-saleyard / state / national-average / default ($4.473/kg
+// breed-adj). Result: identical "fallback" values for both yards even when
+// MLA has fresh data sitting in Supabase. ensureSaleyardLoaded does the
+// same one-yard fetch lookupMarketPrices already does for saleyard_override
+// queries, but merges the rows back into saleyardPriceMap and
+// saleyardBreedPriceMap so any subsequent valuationForHerd / calculate_freight
+// call against that yard hits live MLA data instead of the fallback.
+//
+// Memoised via store.loadedSaleyards so repeat calls within the same chat
+// session are a no-op. In-flight Promise dedup prevents two parallel tool
+// calls from issuing duplicate fetches.
+const inflightSaleyardLoads = new Map<string, Promise<void>>();
+
+async function ensureSaleyardLoaded(yard: string, store: ChatDataStore): Promise<void> {
+  if (!yard) return;
+  const resolved = resolveMLASaleyardName(yard);
+  const key = resolved.toLowerCase();
+  if (store.loadedSaleyards.has(key)) return;
+
+  const inflight = inflightSaleyardLoads.get(key);
+  if (inflight) return inflight;
+
+  const promise = (async () => {
+    const supabase = createClient();
+    // Pull the last 90 days of base + breed-specific prices for this yard. 90
+    // days is comfortably wider than the engine's STALE_DATA_THRESHOLD (56)
+    // so the fresh-window picker still has room. Single-yard scope keeps us
+    // well under the PostgREST 1000-row default - typical yards report ~16
+    // categories x 1-2 weight ranges per data_date, so ~30 entries/date.
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - 90);
+    const cutoffIso = cutoffDate.toISOString().slice(0, 10);
+
+    const { data, error } = await supabase
+      .from("category_prices")
+      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
+      .eq("saleyard", resolved)
+      .gte("data_date", cutoffIso)
+      .order("data_date", { ascending: false })
+      .limit(1000);
+
+    if (error) {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn(`[Brangus] ensureSaleyardLoaded('${resolved}') failed:`, error.message);
+      }
+      // Mark as attempted so we don't retry within the session, but the maps
+      // stay empty for this yard - engine will then legitimately fall back.
+      store.loadedSaleyards.add(key);
+      return;
+    }
+
+    const rows = (data ?? []) as Array<{
+      category: string;
+      price_per_kg: number;
+      weight_range: string | null;
+      saleyard: string;
+      breed: string | null;
+      data_date: string;
+    }>;
+
+    for (const p of rows) {
+      const entry = {
+        price_per_kg: centsToDollars(p.price_per_kg),
+        weight_range: p.weight_range,
+        data_date: p.data_date,
+      };
+      if (p.breed === null) {
+        const k = `${p.category}|${p.saleyard}`;
+        const entries = store.saleyardPriceMap.get(k) ?? [];
+        entries.push(entry);
+        store.saleyardPriceMap.set(k, entries);
+      } else {
+        const k = `${p.category}|${p.breed}|${p.saleyard}`;
+        const entries = store.saleyardBreedPriceMap.get(k) ?? [];
+        entries.push(entry);
+        store.saleyardBreedPriceMap.set(k, entries);
+      }
+    }
+
+    store.loadedSaleyards.add(key);
+
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`[Brangus] ensureSaleyardLoaded('${resolved}'): merged ${rows.length} price rows into the engine maps`);
+    }
+  })();
+
+  inflightSaleyardLoads.set(key, promise);
+  try {
+    await promise;
+  } finally {
+    inflightSaleyardLoads.delete(key);
+  }
+}
+
 // MARK: - Valuation Helper
 // Debug: Runs the AMV engine for a herd so the chat reports the same numbers as the
 // Dashboard. When saleyardOverride is set and differs from the herd's configured
 // saleyard, swaps selected_saleyard on a shallow copy so the engine resolves prices
 // from the override yard. Mirrors iOS valuation(for:saleyardOverride:).
-export function valuationForHerd(
+//
+// async because an arbitrary override yard may not be in the preloaded
+// saleyardPriceMap. ensureSaleyardLoaded live-fetches that yard's prices and
+// merges them into the maps before the engine runs, so the engine never has
+// to fall back to national average for a yard that has fresh MLA data.
+export async function valuationForHerd(
   herd: ChatDataStore["herds"][0],
   store: ChatDataStore,
   saleyardOverride: string | null
-): HerdValuationResult {
+): Promise<HerdValuationResult> {
   const overrideDiffers =
     !!saleyardOverride &&
     saleyardOverride.toLowerCase() !== (herd.selected_saleyard ?? "").toLowerCase();
+
+  if (overrideDiffers && saleyardOverride) {
+    await ensureSaleyardLoaded(saleyardOverride, store);
+  }
 
   const input = overrideDiffers
     ? { ...herd, selected_saleyard: saleyardOverride }
@@ -742,7 +850,7 @@ function fmtPremium(herd: ChatDataStore["herds"][0], v: HerdValuationResult): st
 // MARK: - Portfolio Summary
 // Debug: Values come straight from the AMV engine (matches Dashboard). Never sum
 // $/kg x weight in the chat layer - that was the root cause of BRG-010.
-function lookupPortfolioSummary(store: ChatDataStore, saleyardOverride: string | null): string {
+async function lookupPortfolioSummary(store: ChatDataStore, saleyardOverride: string | null): Promise<string> {
   const activeHerds = store.herds.filter((h) => !h.is_sold);
   const totalHead = activeHerds.reduce((sum, h) => sum + (h.head_count ?? 0), 0);
 
@@ -754,7 +862,7 @@ function lookupPortfolioSummary(store: ChatDataStore, saleyardOverride: string |
   let totalMortality = 0;
 
   for (const herd of activeHerds) {
-    const v = valuationForHerd(herd, store, saleyardOverride);
+    const v = await valuationForHerd(herd, store, saleyardOverride);
     totalNet += v.netValue;
     totalBaseMarket += v.baseMarketValue;
     totalWeightGain += v.weightGainAccrual;
@@ -792,11 +900,11 @@ function lookupPortfolioSummary(store: ChatDataStore, saleyardOverride: string |
 
 // Debug: Emits the engine's HerdValuationResult directly - Brangus must not recompute
 // it. When saleyardOverride differs from the herd's saleyard, engine is re-run.
-function lookupHerdDetails(
+async function lookupHerdDetails(
   name: string | undefined,
   store: ChatDataStore,
   saleyardOverride: string | null
-): string {
+): Promise<string> {
   if (!name) return "Error: Missing herd_name. Provide the herd name from the portfolio index.";
 
   const herd = findHerd(name, store.herds);
@@ -810,7 +918,7 @@ function lookupHerdDetails(
   // BRG-013: lead with the canonical AMV figure so the LLM sees it FIRST and anchors
   // on it as the answer. Decomposition (price, projected weight, breed premium,
   // accruals) is demoted below as "for explanation only".
-  const v = valuationForHerd(herd, store, saleyardOverride);
+  const v = await valuationForHerd(herd, store, saleyardOverride);
   const headCount = herd.head_count ?? 0;
   const perHead = headCount > 0 ? v.netValue / headCount : 0;
   const overrideDiffers =
@@ -875,7 +983,7 @@ function lookupHerdDetails(
 
 // MARK: - All Herds Summary
 // Debug: Per-herd line now carries engine-sourced valuation (matches Dashboard).
-function lookupAllHerdsSummary(store: ChatDataStore, saleyardOverride: string | null): string {
+async function lookupAllHerdsSummary(store: ChatDataStore, saleyardOverride: string | null): Promise<string> {
   const activeHerds = store.herds.filter((h) => !h.is_sold);
   if (activeHerds.length === 0) return "No active herds in portfolio.";
 
@@ -896,7 +1004,7 @@ function lookupAllHerdsSummary(store: ChatDataStore, saleyardOverride: string | 
       ? `${herd.category} (${herd.breeder_sub_type})`
       : herd.category;
 
-    const v = valuationForHerd(herd, store, saleyardOverride);
+    const v = await valuationForHerd(herd, store, saleyardOverride);
     const headCount = herd.head_count ?? 0;
     const perHead = headCount > 0 ? v.netValue / headCount : 0;
 
@@ -1294,7 +1402,7 @@ async function lookupSaleyardComparison(
   const rows: Row[] = [];
   for (const yard of ordered) {
     const isBaseline = baseline ? yard.toLowerCase() === baseline.toLowerCase() : false;
-    const v = valuationForHerd(herd, store, isBaseline ? null : yard);
+    const v = await valuationForHerd(herd, store, isBaseline ? null : yard);
     rows.push({ yard, v });
   }
 
@@ -1898,7 +2006,7 @@ async function executeSingleFreight(input: Record<string, unknown>, store: ChatD
     const destSaleyard = input.destination_saleyard as string | undefined;
     if (herd && destSaleyard) {
       const resolvedYard = resolveMLASaleyardName(destSaleyard);
-      const v = valuationForHerd(herd, store, resolvedYard);
+      const v = await valuationForHerd(herd, store, resolvedYard);
       if (v && v.netValue > 0) {
         const gross = v.netValue;
         const netOfFreight = gross - (estimate.totalCost + gst);
