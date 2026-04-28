@@ -29,7 +29,7 @@ import {
   loadChatDataStore,
   fetchServerConfig,
 } from "@/lib/brangus/chat-service";
-import { fetchUserMemories } from "@/lib/brangus/tools";
+import { fetchRecentChats, fetchUserMemories } from "@/lib/brangus/tools";
 import {
   createConversation,
   saveMessage,
@@ -381,17 +381,20 @@ export function BrangusChat({
         } = await supabase.auth.getUser();
         if (user) userIdRef.current = user.id;
 
-        // Debug: Fetch all config from server (mirrors iOS ServerConfig pattern)
-        const [dataStore, serverConfig, userMemories] = await Promise.all([
+        // Debug: Fetch all config from server (mirrors iOS ServerConfig pattern).
+        // recentChats excludes the active conversation so a resumed chat doesn't
+        // appear in its own "recent chats" list.
+        const [dataStore, serverConfig, userMemories, recentChats] = await Promise.all([
           loadChatDataStore(),
           fetchServerConfig(),
           fetchUserMemories(),
+          fetchRecentChats(existingConvId ?? null),
         ]);
         if (cancelled) return;
         // lookup_file needs user_id at the store level so it can scope its
         // brangus_files queries without re-fetching auth on every tool call.
         dataStore.userId = userIdRef.current;
-        const prompt = buildSystemPrompt(dataStore, serverConfig, userMemories);
+        const prompt = buildSystemPrompt(dataStore, serverConfig, userMemories, recentChats);
         setStore(dataStore);
         setSystemPrompt(prompt);
       } catch (err) {

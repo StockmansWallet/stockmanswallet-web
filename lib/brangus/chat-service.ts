@@ -398,7 +398,12 @@ function sanitisePromptField(value: string | null | undefined, max = 120): strin
     .slice(0, max);
 }
 
-export function buildSystemPrompt(store: ChatDataStore, serverConfig?: BrangusConfigMap, userMemories?: string | null): string {
+export function buildSystemPrompt(
+  store: ChatDataStore,
+  serverConfig?: BrangusConfigMap,
+  userMemories?: string | null,
+  recentChats?: string | null,
+): string {
   const config = serverConfig ?? {};
   const activeHerdsList = store.herds.filter((h) => !h.is_sold);
   const totalHead = activeHerdsList.reduce((sum, h) => sum + (h.head_count ?? 0), 0);
@@ -554,6 +559,13 @@ export function buildSystemPrompt(store: ChatDataStore, serverConfig?: BrangusCo
   // 4.5. User memories (from previous conversations)
   if (userMemories) {
     sections.push(userMemories);
+  }
+
+  // 4.6. Recent chat history (last 5 conversations) so Brangus has proactive
+  // awareness of past chats and can recognise vague references without forcing
+  // a search_past_chats tool round-trip on common cases.
+  if (recentChats) {
+    sections.push(recentChats);
   }
 
   // 5. App guidance for web (server or fallback)
