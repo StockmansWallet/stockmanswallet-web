@@ -70,7 +70,10 @@ const USER_BG = "var(--color-chat-user)";
 // Profile images
 const BRANGUS_AVATAR = "/images/brangus-chat-profile.webp";
 
-// Brangus welcome greetings - first-time users get an intro, returning users get casual greetings
+// Brangus welcome greetings - first-time users get an intro, returning users get casual greetings.
+// Used as the static fallback when the proactive Haiku-generated opener isn't available
+// (no recent_chats yet, Haiku failure, or rate-limited). Pool leans heavily on the user's
+// first name when we have it to keep greetings feeling personal even on the fallback path.
 function buildWelcomeGreeting(
   pastConversations: number,
   options: { isAdvisor?: boolean; userFirstName?: string } = {}
@@ -78,14 +81,14 @@ function buildWelcomeGreeting(
   const hour = new Date().getHours();
   const tod = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
 
+  const trimmedName = options.userFirstName?.trim();
+  const hasName = !!(trimmedName && trimmedName.length > 0);
+  const name = hasName ? trimmedName! : "mate";
+
   // Advisor users get the same intro every chat - the example questions are the most useful
   // part of the greeting and reset the advisor's framing for each client session. Skips the
   // returning-user pool because advisor flow values consistency over novelty.
   if (options.isAdvisor) {
-    const name =
-      options.userFirstName && options.userFirstName.trim().length > 0
-        ? options.userFirstName.trim()
-        : "mate";
     return `G'day ${name}, I'm Brangus, your Stockman's Wallet portfolio advisor. I'm here to help analyse client portfolios and shape the numbers for review, reporting, and decision-making.
 
 Try asking me:
@@ -96,39 +99,54 @@ Try asking me:
 
   // First-time user - introduce Brangus
   if (pastConversations === 0) {
-    switch (tod) {
-      case "morning":
-        return "Good morning. I'm Brangus, your stock advisor. I've got your whole portfolio at my fingertips, so fire away. Ask me about your herds, freight, sale timing, or anything else and I'll do the heavy lifting.";
-      case "afternoon":
-        return "Good arvo. I'm Brangus, your stock advisor. I've got your whole portfolio at my fingertips, so fire away. Ask me about your herds, freight, sale timing, or anything else and I'll do the heavy lifting.";
-      case "evening":
-        return "G'evening. I'm Brangus, your stock advisor. I've got your whole portfolio at my fingertips, so fire away. Ask me about your herds, freight, sale timing, or anything else and I'll do the heavy lifting.";
-    }
+    const opener = tod === "morning" ? "Good morning" : tod === "afternoon" ? "Good arvo" : "G'evening";
+    return `${opener}, ${name}. I'm Brangus, your stock advisor. I've got your whole portfolio at my fingertips, so fire away. Ask me about your herds, freight, sale timing, or anything else and I'll do the heavy lifting.`;
   }
 
-  // Returning user - casual, varied greetings
+  // Returning user - casual, varied greetings. Build a deeper pool than before so consecutive
+  // chat opens don't keep landing on the same line. Most entries use the first name; a small
+  // number stay name-free so the pattern doesn't feel forced.
   const pool: string[] = [];
 
   switch (tod) {
     case "morning":
-      pool.push("Morning! Early start? What are we looking at today?");
-      pool.push("G'day mate. Coffee in hand? Let's get into it.");
+      pool.push(`Morning, ${name}. Early start? What are we looking at today?`);
+      pool.push(`G'day ${name}. Coffee in hand? Let's get into it.`);
+      pool.push(`Morning ${name}, what's first up today?`);
+      pool.push(`Up early, ${name}? Where do you want to start?`);
+      pool.push(`G'day ${name}, anything in particular on the radar this morning?`);
       break;
     case "afternoon":
-      pool.push("Good arvo. How's the day shaping up? What can I help with?");
-      pool.push("G'day. What are we working on this arvo?");
+      pool.push(`Arvo, ${name}. How's the day shaping up? What can I help with?`);
+      pool.push(`G'day ${name}. What are we working on this arvo?`);
+      pool.push(`Afternoon ${name}, what's the go?`);
+      pool.push(`Arvo ${name}, anything I can give a hand with?`);
+      pool.push(`G'day ${name}, what's on the cards this arvo?`);
       break;
     case "evening":
-      pool.push("Evening. Burning the midnight oil? What's on your mind?");
-      pool.push("G'day. Quiet time to do some thinking? I'm all ears.");
+      pool.push(`Evening, ${name}. Burning the midnight oil? What's on your mind?`);
+      pool.push(`G'day ${name}. Quiet time to do some thinking? I'm all ears.`);
+      pool.push(`Evening ${name}, knocking off or just getting started?`);
+      pool.push(`G'day ${name}, what's playing on your mind tonight?`);
       break;
   }
 
-  pool.push("Oi oi. Ready when you are.");
-  pool.push("Pull up a chair. What do you need a hand with?");
-  pool.push("Back for another yarn? Let's get into it.");
-  pool.push("G'day! How ya going? What can I do for ya today?");
-  pool.push("What are we digging into today?");
+  // Always-available greetings (name-led)
+  pool.push(`Oi oi, ${name}. Ready when you are.`);
+  pool.push(`Pull up a chair, ${name}. What do you need a hand with?`);
+  pool.push(`Back for another yarn, ${name}? Let's get into it.`);
+  pool.push(`G'day ${name}, what are we digging into today?`);
+  pool.push(`How ya going, ${name}? What can I do for ya?`);
+  pool.push(`Good to see ya, ${name}. What are we tackling?`);
+  pool.push(`Right then, ${name}, where do you want to start?`);
+
+  // A handful of name-free entries so the pattern doesn't feel formulaic. Keeps the
+  // ratio firmly in favour of the first name without making every line use it.
+  pool.push("Right then. Where do you want to dig in?");
+  if (!hasName) {
+    pool.push("What's on the cards, mate?");
+    pool.push("Fire away, mate. I'm all yours.");
+  }
 
   return pool[Math.floor(Math.random() * pool.length)];
 }
@@ -424,13 +442,14 @@ export function BrangusChat({
         setSystemPrompt(prompt);
         setIsInitialising(false);
 
-        // Generate a relevance-aware opener via Haiku based on recent chats so
-        // Brangus picks up the thread when there's a hook (planned action,
-        // pending decision, injury, follow-up he said he'd check on). Only
-        // fires for new conversations with recent chat history. This runs after
-        // the portfolio store is ready so the chat shell is usable as soon as
-        // the required data has loaded.
-        if (!existingConvId && recentChats) {
+        // Generate a dynamic Haiku-driven opener for every returning user so each
+        // chat opens with a fresh greeting that uses their first name and time of
+        // day, not the same static template. When recent chats include a hook,
+        // Brangus picks up the thread; otherwise he produces a clean greeting.
+        // Skipped for first-time users (the static intro that explains who he is
+        // matters more on chat #1). Runs after the portfolio store is ready so
+        // the chat shell is usable as soon as the required data has loaded.
+        if (!existingConvId && pastConversationCount > 0) {
           generateProactiveWelcome({
             userName: userFirstName,
             timeOfDay: timeOfDayForNow(),

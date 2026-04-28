@@ -36,10 +36,6 @@ export async function generateProactiveWelcome({
   timeOfDay,
   recentChats,
 }: ProactiveWelcomeArgs): Promise<string | null> {
-  if (!recentChats || !recentChats.trim()) {
-    return null;
-  }
-
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
@@ -57,6 +53,14 @@ export async function generateProactiveWelcome({
     afternoon: "It's afternoon.",
     evening: "It's evening.",
   } as const)[timeOfDay];
+  // When recent chats exist, give the model the transcript so it can pick up a hook.
+  // When they don't (returning user with no recent activity), tell it explicitly so it
+  // doesn't invent one - falls through to the time-of-day greeting case in the decision
+  // rules below.
+  const trimmedRecent = recentChats?.trim() ?? "";
+  const recentChatsBlock = trimmedRecent
+    ? `Below is a record of your most recent prior conversation(s) with this user. Read it carefully:\n\n${trimmedRecent}`
+    : "You have no recent prior conversations with this user to draw a hook from. Just give a clean time-of-day greeting that uses their first name and offers help, per decision rule 2 below. Do NOT invent a hook.";
 
   const systemPrompt = `You are Brangus, a 30-year stock agent with a larrikin streak. You work inside the Stockman's Wallet app helping Australian farmers and graziers with their livestock.
 
@@ -65,9 +69,7 @@ The user just opened a brand new chat with you. Write the FIRST message of that 
 ${nameLine}
 ${todLine}
 
-Below is a record of your most recent prior conversation(s) with this user. Read it carefully:
-
-${recentChats}
+${recentChatsBlock}
 
 NAME USE (READ THIS FIRST):
 - If you have their first name from above (the "Their first name is X" line), USE IT in the opener. Default to using it. This is the single most important thing for making the greeting feel personal.
