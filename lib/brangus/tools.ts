@@ -1,10 +1,11 @@
 // Brangus tool definitions and execution for web
 // Mirrors iOS BrangusChatService+ToolUse.swift and +DataLookup.swift
 
-import { calculateHerdValuation, parseCalvesAtFoot, type HerdValuationResult } from "../engines/valuation-engine";
+import { calculateHerdValuation, categoryFallback, parseCalvesAtFoot, type HerdValuationResult } from "../engines/valuation-engine";
 import { calculateFreightEstimate } from "../engines/freight-engine";
 import { saleyardCoordinates, resolveMLASaleyardName } from "../data/reference-data";
 import { resolveMLACategory } from "../data/weight-mapping";
+import { fetchLatestSaleyardPrices } from "../data/saleyard-prices";
 import { fetchWeatherForLocation } from "../services/weather-service";
 import { getRoadDistanceKm } from "../services/distance-service";
 import { createClient } from "../supabase/client";
@@ -729,66 +730,79 @@ async function ensureSaleyardLoaded(yard: string, store: ChatDataStore): Promise
   if (inflight) return inflight;
 
   const promise = (async () => {
-    const supabase = createClient();
-    // Pull the last 90 days of base + breed-specific prices for this yard. 90
-    // days is comfortably wider than the engine's STALE_DATA_THRESHOLD (56)
-    // so the fresh-window picker still has room. Single-yard scope keeps us
-    // well under the PostgREST 1000-row default - typical yards report ~16
-    // categories x 1-2 weight ranges per data_date, so ~30 entries/date.
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - 90);
-    const cutoffIso = cutoffDate.toISOString().slice(0, 10);
+    // Use the same latest_saleyard_prices RPC as chat-service's session
+    // preload and every other valuation surface. The RPC server-side
+    // aggregates to the latest data_date per (saleyard, category, weight_range)
+    // so we get exactly what the engine consumes (~30-60 rows for one yard)
+    // without bumping the PostgREST 1000-row cap. Categories are derived from
+    // the user's active herds + their fallbacks so the override yard's data
+    // matches whatever the engine is going to ask for.
+    const activeHerds = store.herds.filter((h) => !h.is_sold);
+    const primaryCategories = [
+      ...new Set(
+        activeHerds.map(
+          (h) =>
+            resolveMLACategory(
+              h.category,
+              h.initial_weight ?? 0,
+              h.breeder_sub_type ?? undefined,
+            ).primaryMLACategory,
+        ),
+      ),
+    ];
+    const mlaCategories = [
+      ...new Set([
+        ...primaryCategories,
+        ...primaryCategories
+          .map((c) => categoryFallback(c))
+          .filter((c): c is string => c !== null),
+      ]),
+    ];
 
-    const { data, error } = await supabase
-      .from("category_prices")
-      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
-      .eq("saleyard", resolved)
-      .gte("data_date", cutoffIso)
-      .order("data_date", { ascending: false })
-      .limit(1000);
-
-    if (error) {
-      if (process.env.NODE_ENV !== "production") {
-        console.warn(`[Brangus] ensureSaleyardLoaded('${resolved}') failed:`, error.message);
-      }
-      // Mark as attempted so we don't retry within the session, but the maps
-      // stay empty for this yard - engine will then legitimately fall back.
+    if (mlaCategories.length === 0) {
       store.loadedSaleyards.add(key);
       return;
     }
 
-    const rows = (data ?? []) as Array<{
-      category: string;
-      price_per_kg: number;
-      weight_range: string | null;
-      saleyard: string;
-      breed: string | null;
-      data_date: string;
-    }>;
-
-    for (const p of rows) {
-      const entry = {
-        price_per_kg: centsToDollars(p.price_per_kg),
-        weight_range: p.weight_range,
-        data_date: p.data_date,
-      };
-      if (p.breed === null) {
-        const k = `${p.category}|${p.saleyard}`;
-        const entries = store.saleyardPriceMap.get(k) ?? [];
-        entries.push(entry);
-        store.saleyardPriceMap.set(k, entries);
-      } else {
-        const k = `${p.category}|${p.breed}|${p.saleyard}`;
-        const entries = store.saleyardBreedPriceMap.get(k) ?? [];
-        entries.push(entry);
-        store.saleyardBreedPriceMap.set(k, entries);
+    try {
+      const supabase = createClient();
+      const rows = await fetchLatestSaleyardPrices(supabase, [resolved], mlaCategories);
+      for (const p of rows) {
+        // Skip National rows - the engine reads National prices from
+        // nationalPriceMap, which the chat-service preload populated separately.
+        if (p.saleyard === "National") continue;
+        const entry = {
+          price_per_kg: centsToDollars(p.price_per_kg),
+          weight_range: p.weight_range,
+          data_date: p.data_date,
+        };
+        if (p.breed === null) {
+          const k = `${p.category}|${p.saleyard}`;
+          const entries = store.saleyardPriceMap.get(k) ?? [];
+          entries.push(entry);
+          store.saleyardPriceMap.set(k, entries);
+        } else {
+          const k = `${p.category}|${p.breed}|${p.saleyard}`;
+          const entries = store.saleyardBreedPriceMap.get(k) ?? [];
+          entries.push(entry);
+          store.saleyardBreedPriceMap.set(k, entries);
+        }
       }
-    }
 
-    store.loadedSaleyards.add(key);
+      store.loadedSaleyards.add(key);
 
-    if (process.env.NODE_ENV !== "production") {
-      console.log(`[Brangus] ensureSaleyardLoaded('${resolved}'): merged ${rows.length} price rows into the engine maps`);
+      if (process.env.NODE_ENV !== "production") {
+        console.log(
+          `[Brangus] ensureSaleyardLoaded('${resolved}'): merged ${rows.length} latest-price rows into the engine maps`,
+        );
+      }
+    } catch (e) {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn(`[Brangus] ensureSaleyardLoaded('${resolved}') failed:`, e);
+      }
+      // Mark as attempted so we don't retry within the session - engine will
+      // then legitimately fall back through nearest / state / national.
+      store.loadedSaleyards.add(key);
     }
   })();
 

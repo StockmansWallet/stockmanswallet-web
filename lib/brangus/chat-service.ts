@@ -6,6 +6,7 @@ import { createClient } from "../supabase/client";
 import { calculateHerdValue, categoryFallback, defaultFallbackPrice, type CategoryPriceEntry } from "../engines/valuation-engine";
 import { resolveMLACategory } from "../data/weight-mapping";
 import { cattleBreedPremiums, saleyardToState, resolveMLASaleyardName } from "../data/reference-data";
+import { fetchLatestSaleyardPrices } from "../data/saleyard-prices";
 import { expandWithNearbySaleyards } from "../data/saleyard-proximity";
 import { toolDefinitions, executeTool, DISPLAY_ONLY_TOOLS, generateAutoCards, valuationForHerd } from "./tools";
 import { fetchAllPropertyWeather } from "../services/weather-service";
@@ -1196,13 +1197,24 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
   const saleyards = expandWithNearbySaleyards(herdSaleyards, 3);
   const primaryCategories = [...new Set(activeHerdsList.map((h: { category: string; initial_weight?: number; breeder_sub_type?: string }) => resolveMLACategory(h.category, h.initial_weight ?? 0, h.breeder_sub_type ?? undefined).primaryMLACategory))];
   const mlaCategories = [...new Set([...primaryCategories, ...primaryCategories.map(c => categoryFallback(c)).filter((c): c is string => c !== null)])];
+  // Use the latest_saleyard_prices RPC instead of the raw .in(...) query. The
+  // raw query was silently truncating at PostgREST's 1000-row default - Luke's
+  // Charters Towers + Dalby slice alone returns 8,271 rows of historical
+  // category_prices, far above the cap, so the engine's runtime lookup found
+  // no entry for `Weaner Steer | Charters Towers Dalrymple Saleyards` and
+  // fell through to the national-average fallback ($4.473/kg breed-adj). The
+  // RPC server-side aggregates to the latest data_date per (saleyard, category,
+  // weight_range), returning ~60 rows for the same input - what the engine
+  // actually consumes - and matches every other surface in the app
+  // (dashboard, advisor pages, herds page, reports) which already use it.
   if (saleyards.length > 0 && mlaCategories.length > 0) {
-    const { data: saleyardPricesData } = await supabase
-      .from("category_prices")
-      .select("category, price_per_kg:final_price_per_kg, weight_range, saleyard, breed, data_date")
-      .in("saleyard", saleyards)
-      .in("category", mlaCategories);
-    for (const p of (saleyardPricesData ?? []) as { category: string; price_per_kg: number; weight_range: string | null; saleyard: string; breed: string | null; data_date: string }[]) {
+    const saleyardPricesData = await fetchLatestSaleyardPrices(supabase, saleyards, mlaCategories);
+    for (const p of saleyardPricesData) {
+      // The RPC also returns "National" rows (helper of last resort for the
+      // engine). Skip those here - the parallel National fetch above already
+      // populates nationalPriceMap, and the engine reads National lookups
+      // from that map, not from saleyardPriceMap.
+      if (p.saleyard === "National") continue;
       if (p.breed === null) {
         const key = `${p.category}|${p.saleyard}`;
         const entries = saleyardPriceMap.get(key) ?? [];
