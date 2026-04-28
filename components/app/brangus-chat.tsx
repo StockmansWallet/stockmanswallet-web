@@ -204,9 +204,20 @@ export function BrangusChat({
     content: m.content,
   }));
 
-  // Add welcome message for new conversations (not resumed)
-  const welcomeMessage: ChatMessage[] =
-    !existingConvId && hydratedMessages.length === 0
+  // Whether we'll fire the Haiku-driven dynamic opener for this chat session.
+  // Mirrors the trigger condition in the data-load effect below. When true, we
+  // intentionally skip rendering the static greeting up front and show a typing
+  // indicator instead, so the user never sees the static-then-swap flash. When
+  // false (first-time user, advisor, demo, or resumed chat), the static
+  // greeting is rendered immediately as before.
+  const willFireDynamicOpener =
+    !existingConvId && hydratedMessages.length === 0 && pastConversationCount > 0 && !isAdvisor;
+
+  // Static greeting only goes into initial messages when the dynamic opener
+  // isn't going to run. For new chats that WILL run Haiku, messages starts
+  // empty and the typing indicator covers the gap until Haiku resolves.
+  const initialStaticWelcome: ChatMessage[] =
+    !existingConvId && hydratedMessages.length === 0 && !willFireDynamicOpener
       ? [
           {
             id: "welcome",
@@ -217,11 +228,14 @@ export function BrangusChat({
         ]
       : [];
 
-  const [messages, setMessages] = useState<ChatMessage[]>([...welcomeMessage, ...hydratedMessages]);
+  const [messages, setMessages] = useState<ChatMessage[]>([...initialStaticWelcome, ...hydratedMessages]);
+  // Drives the typing-indicator-in-place-of-welcome render path. True only while
+  // we're waiting for Haiku's dynamic opener to come back (or fail).
+  const [isWelcomeLoading, setIsWelcomeLoading] = useState<boolean>(willFireDynamicOpener);
   // Tracks the welcome bubble's current content so handleSend can persist it
   // when the conversation is lazy-created on first send. Updated by the
-  // proactive welcome callback when Haiku swaps the static greeting.
-  const welcomeContentRef = useRef<string | null>(welcomeMessage[0]?.content ?? null);
+  // proactive welcome callback when Haiku resolves.
+  const welcomeContentRef = useRef<string | null>(initialStaticWelcome[0]?.content ?? null);
   const [conversationHistory, setConversationHistory] =
     useState<AnthropicMessage[]>(hydratedHistory);
   const [isLoading, setIsLoading] = useState(false);
@@ -449,26 +463,50 @@ export function BrangusChat({
         // Skipped for first-time users (the static intro that explains who he is
         // matters more on chat #1). Runs after the portfolio store is ready so
         // the chat shell is usable as soon as the required data has loaded.
-        if (!existingConvId && pastConversationCount > 0) {
+        //
+        // While Haiku is in flight, the chat shows a typing indicator (driven by
+        // isWelcomeLoading); the welcome bubble is inserted only once we have
+        // the final content. Avoids the static-then-swap flash users used to see.
+        if (!existingConvId && pastConversationCount > 0 && !isAdvisor) {
+          // Resolve the welcome bubble to whatever Haiku returns, falling back to
+          // a static greeting on failure / null. Either way we land on a single
+          // render with the final content - no subsequent swap.
+          const finaliseWelcome = (content: string) => {
+            if (cancelled) return;
+            welcomeContentRef.current = content;
+            setMessages((prev) => {
+              // If the user typed before Haiku resolved, drop the welcome - they're
+              // already engaged and inserting a stale opener at the top would feel weird.
+              if (prev.length > 0) return prev;
+              return [
+                {
+                  id: "welcome",
+                  role: "assistant" as const,
+                  content,
+                  timestamp: new Date(),
+                },
+              ];
+            });
+            setIsWelcomeLoading(false);
+          };
+
           generateProactiveWelcome({
             userName: userFirstName,
             timeOfDay: timeOfDayForNow(),
             recentChats,
           })
             .then((opener) => {
-              if (cancelled || !opener) return;
-              // Only swap the welcome bubble if it's still the only message and
-              // the user hasn't typed anything in the meantime.
-              setMessages((prev) => {
-                if (prev.length !== 1 || prev[0].id !== "welcome") return prev;
-                welcomeContentRef.current = opener;
-                const updated = [...prev];
-                updated[0] = { ...updated[0], content: opener };
-                return updated;
-              });
+              if (cancelled) return;
+              const content =
+                opener ??
+                buildWelcomeGreeting(pastConversationCount, { isAdvisor, userFirstName });
+              finaliseWelcome(content);
             })
             .catch((err) => {
               console.warn("Failed to generate proactive Brangus welcome:", err);
+              finaliseWelcome(
+                buildWelcomeGreeting(pastConversationCount, { isAdvisor, userFirstName })
+              );
             });
         }
       } catch (err) {
@@ -1030,10 +1068,17 @@ export function BrangusChat({
 
       {/* Messages area */}
       <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-4 pt-4 pb-2">
-        {messages.length === 0 && !isLoading ? (
+        {messages.length === 0 && !isLoading && !isWelcomeLoading ? (
           <EmptyState onPromptClick={(prompt) => handleSend(prompt)} />
         ) : (
           <div className="space-y-3">
+            {/* Welcome typing indicator: shown while Haiku is generating the
+                dynamic opener for returning users. Replaced atomically with the
+                welcome bubble once Haiku resolves, so there's no static-then-swap
+                flash at the top of the chat. */}
+            {isWelcomeLoading && messages.length === 0 && (
+              <TypingIndicator bgColor={BRANGUS_BG} dotClass="bg-brangus/60" />
+            )}
             {messages.map((msg) => {
               const isUser = msg.role === "user";
               const isPostTyping = msg.id === postTypingIdRef.current;
