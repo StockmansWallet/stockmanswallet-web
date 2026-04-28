@@ -1,14 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import {
-  FileText,
-  ImageIcon,
-  Loader2,
-  Plus,
-  Trash2,
-  X,
-} from "lucide-react";
+import { FileText, ImageIcon, Loader2, Plus, Trash2, X } from "lucide-react";
 import {
   type BrangusFileKind,
   type BrangusFileRow,
@@ -74,7 +67,7 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
         setBusy(false);
       }
     },
-    [userId],
+    [userId]
   );
 
   const handleDelete = useCallback(async (file: BrangusFileRow) => {
@@ -96,20 +89,14 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
 
   return (
     <div className="space-y-4">
-      <input
-        ref={fileInputRef}
-        type="file"
-        className="hidden"
-        multiple
-        onChange={handlePicked}
-      />
+      <input ref={fileInputRef} type="file" className="hidden" multiple onChange={handlePicked} />
 
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={busy}
-          className="inline-flex items-center gap-2 rounded-lg bg-amber-500/15 px-3 py-2 text-sm font-medium text-amber-300 hover:bg-amber-500/25 disabled:opacity-60"
+          className="bg-brand/15 text-brand hover:bg-brand/25 inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium disabled:opacity-60"
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
           Add file
@@ -137,15 +124,15 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
 
       {filtered.length === 0 ? (
         <div className="rounded-xl border border-white/10 bg-white/[0.02] p-8 text-center text-sm text-white/60">
-          No files yet. Upload vet reports, NLIS docs, lease agreements, kill sheets, soil tests,
-          or any photo. Brangus can read them.
+          No files yet. Upload vet reports, NLIS docs, lease agreements, kill sheets, soil tests, or
+          any photo. Brangus can read them.
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-white/10 bg-white/[0.02]">
           <ul className="divide-y divide-white/[0.06]">
             {filtered.map((file) => (
               <li key={file.id} className="flex items-center gap-3 px-4 py-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/15 text-amber-300">
+                <div className="bg-brand/15 text-brand flex h-9 w-9 items-center justify-center rounded-lg">
                   {file.mime_type.startsWith("image/") ? (
                     <ImageIcon className="h-4 w-4" />
                   ) : (
@@ -252,7 +239,7 @@ function FileDetailDrawer({
         </div>
 
         <label className="space-y-1">
-          <span className="text-xs uppercase tracking-wide text-white/50">Title</span>
+          <span className="text-xs tracking-wide text-white/50 uppercase">Title</span>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -262,7 +249,7 @@ function FileDetailDrawer({
         </label>
 
         <label className="space-y-1">
-          <span className="text-xs uppercase tracking-wide text-white/50">Kind</span>
+          <span className="text-xs tracking-wide text-white/50 uppercase">Kind</span>
           <select
             value={kind}
             onChange={(e) => {

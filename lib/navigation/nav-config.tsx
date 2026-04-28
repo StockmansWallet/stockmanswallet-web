@@ -205,7 +205,7 @@ export const producerToolItems: NavItem[] = [
     label: "Files",
     href: "/dashboard/tools/files",
     icon: <FolderOpen className="h-5 w-5" />,
-    ...nav("brangus"),
+    ...nav(),
   },
   // Advisory Hub hidden when advisor feature flag is off
   ...(ADVISOR_ENABLED
