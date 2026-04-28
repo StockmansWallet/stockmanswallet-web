@@ -74,7 +74,7 @@ const BRANGUS_AVATAR = "/images/brangus-chat-profile.webp";
 // Brangus welcome greetings - first-time users get an intro, returning users get casual greetings
 function buildWelcomeGreeting(
   pastConversations: number,
-  options: { isAdvisor?: boolean; userFirstName?: string } = {},
+  options: { isAdvisor?: boolean; userFirstName?: string } = {}
 ): string {
   const hour = new Date().getHours();
   const tod = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
@@ -273,6 +273,7 @@ export function BrangusChat({
   }, []);
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [userInitials, setUserInitials] = useState("SW");
   const [userAvatarUrl, setUserAvatarUrl] = useState<string | undefined>(undefined);
   const postTypingIdRef = useRef<string | null>(null);
@@ -341,9 +342,21 @@ export function BrangusChat({
     });
   }, []);
 
-  // Auto-scroll to bottom on new messages
+  // Auto-scroll the messages list to the bottom on new messages.
+  // Scrolls the container directly (not scrollIntoView) so the page itself
+  // doesn't scroll on small screens where the welcome bubble would otherwise
+  // be pushed above the viewport on first paint.
+  const isFirstScrollRef = useRef(true);
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    const target = container.scrollHeight - container.clientHeight;
+    if (target <= 0) return;
+    container.scrollTo({
+      top: target,
+      behavior: isFirstScrollRef.current ? "auto" : "smooth",
+    });
+    isFirstScrollRef.current = false;
   }, [messages]);
 
   // Card action handler - navigates to the relevant section of the app
@@ -588,9 +601,10 @@ export function BrangusChat({
         role: "user",
         content: text,
         timestamp: new Date(),
-        attachments: attachedFiles.length > 0
-          ? attachedFiles.map((f) => ({ id: f.id, title: f.title, mime_type: f.mime_type }))
-          : undefined,
+        attachments:
+          attachedFiles.length > 0
+            ? attachedFiles.map((f) => ({ id: f.id, title: f.title, mime_type: f.mime_type }))
+            : undefined,
       };
       setMessages((prev) => [...prev, userMessage]);
       setIsLoading(true);
@@ -977,7 +991,7 @@ export function BrangusChat({
       />
 
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-2">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-4 pt-4 pb-2">
         {messages.length === 0 && !isLoading ? (
           <EmptyState onPromptClick={(prompt) => handleSend(prompt)} />
         ) : (
