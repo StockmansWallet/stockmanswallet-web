@@ -36,6 +36,7 @@ export interface BrangusFileRow {
   size_bytes: number;
   kind: BrangusFileKind | null;
   category?: string | null;
+  tags?: string[] | null;
   page_count: number | null;
   extraction_status: BrangusFileExtractionStatus;
   source: BrangusFileSource;
@@ -70,6 +71,8 @@ export const DEFAULT_FILE_CATEGORY_OPTIONS = [
   "General",
 ];
 
+export const FILE_COLLECTION_TAG_PREFIX = "collection:";
+
 export type BrangusDetectedFileType =
   | "pdf"
   | "image"
@@ -96,8 +99,30 @@ export function kindLabel(kind: BrangusFileKind | null | undefined): string | nu
   return FILE_KIND_OPTIONS.find((option) => option.value === kind)?.label ?? null;
 }
 
-export function fileCategoryLabel(file: Pick<BrangusFileRow, "category" | "kind">): string {
-  return file.category?.trim() || "Uncategorised";
+export function fileCollectionFromTags(tags: string[] | null | undefined): string | null {
+  const collectionTag = tags?.find((tag) => tag.startsWith(FILE_COLLECTION_TAG_PREFIX));
+  const collection = collectionTag?.slice(FILE_COLLECTION_TAG_PREFIX.length).trim();
+  return collection || null;
+}
+
+export function fileTagsWithoutCollection(tags: string[] | null | undefined): string[] {
+  return (tags ?? []).filter((tag) => !tag.startsWith(FILE_COLLECTION_TAG_PREFIX));
+}
+
+export function tagsWithFileCollection(
+  tags: string[] | null | undefined,
+  category: string | null | undefined
+): string[] {
+  const nextTags = fileTagsWithoutCollection(tags);
+  const cleanCategory = category?.trim();
+  if (cleanCategory) nextTags.push(`${FILE_COLLECTION_TAG_PREFIX}${cleanCategory}`);
+  return nextTags;
+}
+
+export function fileCategoryLabel(
+  file: Pick<BrangusFileRow, "category" | "kind" | "tags">
+): string {
+  return fileCollectionFromTags(file.tags) || file.category?.trim() || "Uncategorised";
 }
 
 export function detectFileType(
@@ -185,12 +210,11 @@ export async function uploadBrangusFile(opts: {
     size_bytes: opts.file.size,
     title: opts.title?.trim() || friendlyTitle(opts.file.name),
     kind: opts.kind ?? null,
+    tags: tagsWithFileCollection([], opts.category),
     source: opts.source ?? "files",
     conversation_id: opts.conversationId ?? null,
     extraction_status: "pending",
   };
-  const category = opts.category?.trim();
-  if (category) insertPayload.category = category;
 
   const { error: insertError } = await supabase.from("brangus_files").insert(insertPayload);
   if (insertError) {

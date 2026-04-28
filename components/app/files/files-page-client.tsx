@@ -27,6 +27,7 @@ import {
   fileCategoryLabel,
   FILE_TYPE_LABELS,
   formatFileSize,
+  tagsWithFileCollection,
   uploadBrangusFile,
   deleteBrangusFile,
   signedUrlFor,
@@ -150,6 +151,7 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
             size_bytes: file.size,
             kind: null,
             category: null,
+            tags: [],
             page_count: null,
             extraction_status: "pending",
             source: "files",
@@ -186,34 +188,41 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
       const file = files.find((candidate) => candidate.id === fileId);
       if (!file) return;
 
-      const previousCategory = file.category ?? null;
+      const currentCategory = fileCategoryLabel(file);
+      const previousCategory = currentCategory === UNCATEGORISED ? null : currentCategory;
+      const previousTags = file.tags ?? [];
       const cleanNext = nextCollection?.trim() || null;
       if ((previousCategory ?? null) === cleanNext) return;
+      const nextTags = tagsWithFileCollection(previousTags, cleanNext);
 
       setError(null);
       setFiles((prev) =>
         prev.map((candidate) =>
-          candidate.id === fileId ? { ...candidate, category: cleanNext } : candidate
+          candidate.id === fileId ? { ...candidate, category: cleanNext, tags: nextTags } : candidate
         )
       );
       setActiveFile((current) =>
-        current?.id === fileId ? { ...current, category: cleanNext } : current
+        current?.id === fileId ? { ...current, category: cleanNext, tags: nextTags } : current
       );
 
       const supabase = createClient();
       const { error: updateError } = await supabase
         .from("brangus_files")
-        .update({ category: cleanNext })
+        .update({ tags: nextTags })
         .eq("id", fileId);
 
       if (updateError) {
         setFiles((prev) =>
           prev.map((candidate) =>
-            candidate.id === fileId ? { ...candidate, category: previousCategory } : candidate
+            candidate.id === fileId
+              ? { ...candidate, category: previousCategory, tags: previousTags }
+              : candidate
           )
         );
         setActiveFile((current) =>
-          current?.id === fileId ? { ...current, category: previousCategory } : current
+          current?.id === fileId
+            ? { ...current, category: previousCategory, tags: previousTags }
+            : current
         );
         setError(updateError.message);
       }
@@ -267,25 +276,31 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
       }
 
       setError(null);
-      const matchingFileIds = files
-        .filter((file) => fileCategoryLabel(file) === currentCollection)
-        .map((file) => file.id);
+      const matchingFiles = files.filter((file) => fileCategoryLabel(file) === currentCollection);
 
-      if (matchingFileIds.length > 0) {
+      if (matchingFiles.length > 0) {
         const supabase = createClient();
-        const { error: updateError } = await supabase
-          .from("brangus_files")
-          .update({ category: nextCollection })
-          .in("id", matchingFileIds);
-        if (updateError) {
-          setError(updateError.message);
-          return;
+        for (const file of matchingFiles) {
+          const { error: updateError } = await supabase
+            .from("brangus_files")
+            .update({ tags: tagsWithFileCollection(file.tags, nextCollection) })
+            .eq("id", file.id);
+          if (updateError) {
+            setError(updateError.message);
+            return;
+          }
         }
       }
 
       setFiles((prev) =>
         prev.map((file) =>
-          fileCategoryLabel(file) === currentCollection ? { ...file, category: nextCollection } : file
+          fileCategoryLabel(file) === currentCollection
+            ? {
+                ...file,
+                category: nextCollection,
+                tags: tagsWithFileCollection(file.tags, nextCollection),
+              }
+            : file
         )
       );
       setCustomCollections((prev) => {
@@ -331,22 +346,23 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
       setError(null);
       if (filesInCollection.length > 0) {
         const supabase = createClient();
-        const { error: updateError } = await supabase
-          .from("brangus_files")
-          .update({ category: null })
-          .in(
-            "id",
-            filesInCollection.map((file) => file.id)
-          );
-        if (updateError) {
-          setError(updateError.message);
-          return;
+        for (const file of filesInCollection) {
+          const { error: updateError } = await supabase
+            .from("brangus_files")
+            .update({ tags: tagsWithFileCollection(file.tags, null) })
+            .eq("id", file.id);
+          if (updateError) {
+            setError(updateError.message);
+            return;
+          }
         }
       }
 
       setFiles((prev) =>
         prev.map((file) =>
-          fileCategoryLabel(file) === collectionToDelete ? { ...file, category: null } : file
+          fileCategoryLabel(file) === collectionToDelete
+            ? { ...file, category: null, tags: tagsWithFileCollection(file.tags, null) }
+            : file
         )
       );
       setCustomCollections((prev) =>
@@ -930,7 +946,8 @@ function FileDetailDrawer({
   onChange: (file: Partial<BrangusFileRow> & { id: string }) => void;
 }) {
   const [title, setTitle] = useState(file.title);
-  const [category, setCategory] = useState(file.category?.trim() || "");
+  const initialCategory = fileCategoryLabel(file);
+  const [category, setCategory] = useState(initialCategory === UNCATEGORISED ? "" : initialCategory);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const type = detectFileType(file);
 
@@ -938,21 +955,23 @@ function FileDetailDrawer({
     async (nextTitle: string, nextCategory: string) => {
       const cleanTitle = nextTitle.trim() || file.original_filename;
       const cleanCategory = nextCategory.trim() || null;
+      const nextTags = tagsWithFileCollection(file.tags, cleanCategory);
       const supabase = createClient();
       await supabase
         .from("brangus_files")
         .update({
           title: cleanTitle,
-          category: cleanCategory,
+          tags: nextTags,
         })
         .eq("id", file.id);
       onChange({
         id: file.id,
         title: cleanTitle,
         category: cleanCategory,
+        tags: nextTags,
       });
     },
-    [file.id, file.original_filename, onChange]
+    [file.id, file.original_filename, file.tags, onChange]
   );
 
   const save = useCallback(() => {
