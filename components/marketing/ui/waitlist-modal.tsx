@@ -74,7 +74,7 @@ const FEATURE_OPTIONS: Record<Role, { value: string; label: string }[]> = {
     { value: 'freight_iq', label: 'Freight IQ' },
     { value: 'grid_iq', label: 'Grid IQ' },
     { value: 'insights', label: 'Insights' },
-    { value: 'producer_network', label: 'Ch 40' },
+    { value: 'ch40', label: 'Ch 40' },
     // Advisory Hub hidden when advisor feature flag is off
     ...(ADVISOR_ENABLED ? [{ value: 'advisory_hub', label: 'Advisory Hub' }] : []),
     { value: 'markets', label: 'Markets' },
