@@ -75,7 +75,7 @@ export default function PropertyDetailLoading() {
         </div>
 
         {/* Action bar */}
-        <div className="bg-surface-lowest flex items-center justify-between rounded-full px-2 py-2 backdrop-blur-md">
+        <div className="bg-surface-lowest flex items-center justify-between rounded-full px-2 py-2">
           <Skeleton className="h-8 w-16 rounded-full" />
           <div className="flex items-center gap-1.5">
             <Skeleton className="h-8 w-16 rounded-full" />

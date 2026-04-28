@@ -237,7 +237,7 @@ export function BrangusDemoHub() {
       {/* Mobile tab bar */}
       <div
         ref={containerRef}
-        className="relative mb-4 flex gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-1 backdrop-blur-xl lg:hidden"
+        className="relative mb-4 flex gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-1 lg:hidden"
       >
         <div
           className={`bg-brangus/15 absolute top-1 bottom-1 rounded-full ${
@@ -264,7 +264,7 @@ export function BrangusDemoHub() {
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)] lg:gap-4">
         <div className="min-w-0">
           {/* Demo notice strip (replaces the action toolbar from the live hub) */}
-          <div className="bg-brangus/5 border-brangus/20 mb-4 flex items-center gap-2.5 rounded-full border px-4 py-2 text-xs backdrop-blur-xl lg:hidden">
+          <div className="bg-brangus/5 border-brangus/20 mb-4 flex items-center gap-2.5 rounded-full border px-4 py-2 text-xs lg:hidden">
             <Sparkles className="text-brangus h-3.5 w-3.5 shrink-0" />
             <p className="text-text-secondary leading-snug">
               You&apos;re exploring Brangus with sample conversations. Sign up to ask your own

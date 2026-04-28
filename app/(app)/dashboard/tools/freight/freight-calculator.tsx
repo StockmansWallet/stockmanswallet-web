@@ -107,7 +107,7 @@ function AlertCard({ type, message }: { type: "warning" | "info" | "success"; me
   const s = styles[type];
   return (
     <div
-      className={`flex items-start gap-3 rounded-xl p-4 ring-1 backdrop-blur-md ring-inset ${s.bg}`}
+      className={`flex items-start gap-3 rounded-xl p-4 ring-1 ring-inset ${s.bg}`}
     >
       <div className="mt-0.5 shrink-0">{s.icon}</div>
       <p className="text-text-secondary text-sm leading-relaxed">{message}</p>
@@ -897,7 +897,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 <Button
                   type="button"
                   variant="ghost"
-                  className="bg-freight-iq/15 text-freight-iq hover:bg-freight-iq/25 ring-freight-iq/20 ring-1 backdrop-blur-md ring-inset"
+                  className="bg-freight-iq/15 text-freight-iq hover:bg-freight-iq/25 ring-freight-iq/20 ring-1 ring-inset"
                   onClick={handleShare}
                   aria-live="polite"
                 >
@@ -919,7 +919,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
               )}
               <Link
                 href="/dashboard/tools/freight/history"
-                className="text-freight-iq mt-3 inline-flex h-9 items-center gap-1.5 self-center rounded-full bg-white/[0.03] px-4 text-[13px] font-semibold ring-1 ring-white/[0.06] backdrop-blur-md transition-colors ring-inset hover:bg-white/[0.06]"
+                className="text-freight-iq mt-3 inline-flex h-9 items-center gap-1.5 self-center rounded-full bg-white/[0.03] px-4 text-[13px] font-semibold ring-1 ring-white/[0.06] transition-colors ring-inset hover:bg-white/[0.06]"
               >
                 <History className="h-3.5 w-3.5" /> View saved estimates
               </Link>

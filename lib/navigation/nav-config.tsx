@@ -64,59 +64,59 @@ type NavFeature =
 
 const FEATURE_NAV: Record<NavFeature, { activeClass: string; hoverClass: string }> = {
   brand: {
-    activeClass: "bg-brand/15 text-brand backdrop-blur-sm",
+    activeClass: "bg-brand/15 text-brand",
     hoverClass: "hover:bg-brand-dark hover:text-white",
   },
   brangus: {
-    activeClass: "bg-brangus/15 text-brangus backdrop-blur-sm",
+    activeClass: "bg-brangus/15 text-brangus",
     hoverClass: "hover:bg-brangus-dark hover:text-white",
   },
   insights: {
-    activeClass: "bg-insights/15 text-insights backdrop-blur-sm",
+    activeClass: "bg-insights/15 text-insights",
     hoverClass: "hover:bg-insights-dark hover:text-white",
   },
   markets: {
-    activeClass: "bg-markets/15 text-markets backdrop-blur-sm",
+    activeClass: "bg-markets/15 text-markets",
     hoverClass: "hover:bg-markets-dark hover:text-white",
   },
   "yard-book": {
-    activeClass: "bg-yard-book/15 text-yard-book backdrop-blur-sm",
+    activeClass: "bg-yard-book/15 text-yard-book",
     hoverClass: "hover:bg-yard-book-dark hover:text-white",
   },
   reports: {
-    activeClass: "bg-reports/15 text-reports backdrop-blur-sm",
+    activeClass: "bg-reports/15 text-reports",
     hoverClass: "hover:bg-reports-dark hover:text-white",
   },
   "freight-iq": {
-    activeClass: "bg-freight-iq/15 text-freight-iq backdrop-blur-sm",
+    activeClass: "bg-freight-iq/15 text-freight-iq",
     hoverClass: "hover:bg-freight-iq-dark hover:text-white",
   },
   "grid-iq": {
-    activeClass: "bg-grid-iq/15 text-grid-iq backdrop-blur-sm",
+    activeClass: "bg-grid-iq/15 text-grid-iq",
     hoverClass: "hover:bg-grid-iq-dark hover:text-white",
   },
   advisor: {
-    activeClass: "bg-advisor/15 text-advisor backdrop-blur-sm",
+    activeClass: "bg-advisor/15 text-advisor",
     hoverClass: "hover:bg-advisor-dark hover:text-white",
   },
   "producer-network": {
-    activeClass: "bg-producer-network/15 text-producer-network backdrop-blur-sm",
+    activeClass: "bg-producer-network/15 text-producer-network",
     hoverClass: "hover:bg-producer-network-dark hover:text-white",
   },
   red: {
-    activeClass: "bg-red/15 text-red backdrop-blur-sm",
+    activeClass: "bg-red/15 text-red",
     hoverClass: "hover:bg-red-dark hover:text-white",
   },
   teal: {
-    activeClass: "bg-teal/15 text-teal backdrop-blur-sm",
+    activeClass: "bg-teal/15 text-teal",
     hoverClass: "hover:bg-teal-dark hover:text-white",
   },
   violet: {
-    activeClass: "bg-violet/15 text-violet backdrop-blur-sm",
+    activeClass: "bg-violet/15 text-violet",
     hoverClass: "hover:bg-violet-dark hover:text-white",
   },
   success: {
-    activeClass: "bg-success/15 text-success backdrop-blur-sm",
+    activeClass: "bg-success/15 text-success",
     hoverClass: "hover:bg-success-dark hover:text-white",
   },
 };

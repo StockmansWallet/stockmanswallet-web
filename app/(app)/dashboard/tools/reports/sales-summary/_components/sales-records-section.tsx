@@ -51,7 +51,7 @@ export function SalesRecordsSection({ salesData }: { salesData: SaleReportData[]
         ))}
       </div>
 
-      <div className="mt-4 flex items-center justify-between rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-4 py-3 backdrop-blur-xl">
+      <div className="mt-4 flex items-center justify-between rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-4 py-3">
         <p className="text-xs font-bold uppercase tracking-wider text-white/60">Total</p>
         <span className="text-sm tabular-nums text-white/60">
           {totalHead.toLocaleString()} head &middot;{" "}
@@ -68,7 +68,7 @@ function MonthGroup({ label, sales }: { label: string; sales: SaleReportData[] }
 
   return (
     <div>
-      <div className="mb-2 flex items-center justify-between rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-4 py-2.5 backdrop-blur-xl">
+      <div className="mb-2 flex items-center justify-between rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-4 py-2.5">
         <h4 className="text-sm font-semibold text-white">{label}</h4>
         <span className="text-xs tabular-nums text-white/60">
           {groupHead.toLocaleString()} head &middot;{" "}

@@ -80,7 +80,7 @@ export default async function ValueVsLandAreaPage({
       />
 
       {/* Toolbar */}
-      <div className="relative z-20 mb-4 flex items-center justify-between rounded-full border border-white/[0.08] bg-surface-lowest px-2 py-2 backdrop-blur-md">
+      <div className="relative z-20 mb-4 flex items-center justify-between rounded-full border border-white/[0.08] bg-surface-lowest px-2 py-2">
         <Suspense>
           <ReportFilters properties={properties ?? []} />
         </Suspense>

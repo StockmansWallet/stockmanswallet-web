@@ -122,8 +122,8 @@ function GridIQNavPills({
       aria-label="Grid IQ sections"
       className={
         isHeader
-          ? "relative hidden h-9 max-w-[680px] gap-1 overflow-x-auto rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-1 backdrop-blur-xl lg:flex"
-          : "relative mb-4 flex gap-1 overflow-x-auto rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-1 backdrop-blur-xl lg:hidden"
+          ? "relative hidden h-9 max-w-[680px] gap-1 overflow-x-auto rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-1 lg:flex"
+          : "relative mb-4 flex gap-1 overflow-x-auto rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-1 lg:hidden"
       }
     >
       {activeHref && (

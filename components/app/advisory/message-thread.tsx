@@ -136,7 +136,7 @@ export function MessageThread({
           <div key={msg.id}>
             {showTime && (
               <div className="flex justify-center py-2">
-                <span className="bg-surface-lowest text-text-muted rounded-full px-3 py-1 text-[11px] font-medium backdrop-blur-xl">
+                <span className="bg-surface-lowest text-text-muted rounded-full px-3 py-1 text-[11px] font-medium">
                   {formatTimeSeparator(new Date(msg.created_at))}
                 </span>
               </div>

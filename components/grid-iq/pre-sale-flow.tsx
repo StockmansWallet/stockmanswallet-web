@@ -278,7 +278,7 @@ export function PreSaleFlow({
           return canAdvanceFromStep1 && canAdvanceFromStep2;
         };
         return (
-          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-3 backdrop-blur-xl">
+          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-3">
             <div className="flex items-center gap-0">
               {([1, 2, 3] as const).map((s, idx) => {
                 const isActive = step === s;

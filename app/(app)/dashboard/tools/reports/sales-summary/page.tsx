@@ -81,9 +81,9 @@ export default async function SalesSummaryPage({ searchParams }: { searchParams:
 
       {/* Toolbar. relative + z-20 lifts the toolbar's stacking context
           above the content below (which create their own contexts via
-          backdrop-blur-xl), so the ReportFilters property dropdown
+         ), so the ReportFilters property dropdown
           renders above them. */}
-      <div className="relative z-20 mb-4 flex items-center justify-between rounded-full border border-white/[0.08] bg-surface-lowest px-2 py-2 backdrop-blur-md">
+      <div className="relative z-20 mb-4 flex items-center justify-between rounded-full border border-white/[0.08] bg-surface-lowest px-2 py-2">
         <Suspense>
           <ReportFilters properties={properties ?? []} showPropertyFilter={false} />
         </Suspense>

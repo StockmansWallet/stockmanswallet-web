@@ -196,7 +196,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
   return (
     <div>
       {/* Toolbar: category pills + add item */}
-      <div className="mb-4 flex flex-col gap-3 rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-2 py-2 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-4 flex flex-col gap-3 rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-2 py-2 sm:flex-row sm:items-center sm:justify-between">
         {/* Left: category filters */}
         <div className="flex items-center gap-1.5 overflow-x-auto">
           <button
@@ -265,7 +265,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
 
       {/* Horizon sections */}
       {horizonGroups.length === 0 ? (
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-12 text-center backdrop-blur-xl">
+        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-12 text-center">
           <p className="text-text-muted text-sm">
             {filterCategory
               ? `No ${filterCategory.toLowerCase()} items to show.`
@@ -277,7 +277,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
           {horizonGroups.map((group) => (
             <section
               key={group.key}
-              className="mb-4 break-inside-avoid rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-3 backdrop-blur-xl sm:p-4"
+              className="mb-4 break-inside-avoid rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-3 sm:p-4"
             >
               <div className="mb-3 flex items-center justify-between gap-3">
                 <h3
@@ -304,7 +304,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
                   return (
                     <div
                       key={item.id}
-                      className="group relative flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-3 py-2.5 backdrop-blur-xl transition-colors duration-150 hover:border-yard-book/35 hover:bg-yard-book/[0.075]"
+                      className="group relative flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-3 py-2.5 transition-colors duration-150 hover:border-yard-book/35 hover:bg-yard-book/[0.075]"
                     >
                       {/* Tap target overlay (entire row navigates to detail) */}
                       <Link

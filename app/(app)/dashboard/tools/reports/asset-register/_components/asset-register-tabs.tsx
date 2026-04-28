@@ -154,7 +154,7 @@ function AssetRegisterTabPills({
   return (
     <div
       ref={containerRef}
-      className={`relative flex gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-1 backdrop-blur-xl ${
+      className={`relative flex gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-1 ${
         isHeader ? "h-9" : ""
       }`}
       role="tablist"

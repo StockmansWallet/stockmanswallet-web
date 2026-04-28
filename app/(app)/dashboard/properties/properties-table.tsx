@@ -44,7 +44,7 @@ export function PropertiesTable({
   return (
     <div>
       {/* Toolbar */}
-      <div className="bg-surface-lowest mb-4 flex flex-col gap-3 rounded-full border border-white/[0.08] px-2 py-2 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
+      <div className="bg-surface-lowest mb-4 flex flex-col gap-3 rounded-full border border-white/[0.08] px-2 py-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-1.5 overflow-x-auto">
           <span className="bg-brand/15 text-brand inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-xs font-medium">
             All

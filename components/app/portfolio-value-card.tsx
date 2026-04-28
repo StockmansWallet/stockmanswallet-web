@@ -20,7 +20,7 @@ export function PortfolioValueCard({
       : "All active herds priced from saleyard data";
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-6 backdrop-blur-xl sm:p-7">
+    <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-6 sm:p-7">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <p className="text-text-muted text-xs font-medium tracking-widest uppercase">

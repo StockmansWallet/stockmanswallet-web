@@ -118,7 +118,7 @@ export function LibraryTabs({
   return (
     <div>
       {/* Primary tab bar */}
-      <div className="mb-4 flex flex-col gap-2 rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-2 backdrop-blur-xl lg:flex-row lg:items-center lg:justify-between">
+      <div className="mb-4 flex flex-col gap-2 rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-2 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap items-center gap-1.5">
           {tabs.map((tab) => {
             const active = activeTab === tab.id;
@@ -503,7 +503,7 @@ function GridsTab({ grids, onUpload }: { grids: GridRow[]; onUpload: () => void 
                 <button
                   key={g.id}
                   onClick={() => toggleOne(g.id)}
-                  className="group relative flex w-full items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-4 py-4 text-left backdrop-blur-xl transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075]"
+                  className="group relative flex w-full items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-4 py-4 text-left transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075]"
                 >
                   {content}
                 </button>
@@ -514,7 +514,7 @@ function GridsTab({ grids, onUpload }: { grids: GridRow[]; onUpload: () => void 
               <Link
                 key={g.id}
                 href={`/dashboard/tools/grid-iq/grids/${g.id}`}
-                className="group relative flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-4 py-4 backdrop-blur-xl transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075]"
+                className="group relative flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-4 py-4 transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075]"
               >
                 {content}
               </Link>
@@ -681,7 +681,7 @@ function KillSheetsTab({
                 <button
                   key={ks.id}
                   onClick={() => toggleOne(ks.id)}
-                  className="group relative flex w-full items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-4 py-4 text-left backdrop-blur-xl transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075]"
+                  className="group relative flex w-full items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-4 py-4 text-left transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075]"
                 >
                   {content}
                 </button>
@@ -692,7 +692,7 @@ function KillSheetsTab({
               <Link
                 key={ks.id}
                 href={`/dashboard/tools/grid-iq/kill-sheets/${ks.id}`}
-                className="group relative flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-4 py-4 backdrop-blur-xl transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075]"
+                className="group relative flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-4 py-4 transition-colors duration-150 hover:border-grid-iq/35 hover:bg-grid-iq/[0.075]"
               >
                 {content}
               </Link>

@@ -137,7 +137,7 @@ export function ModerationMenu({
           onClick={() => setPanel(panel === "root" ? "closed" : "root")}
           aria-label="Profile actions"
           aria-expanded={panel === "root"}
-          className="bg-surface-lowest text-text-secondary hover:bg-surface-raised hover:text-text-primary flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-xl transition-colors"
+          className="bg-surface-lowest text-text-secondary hover:bg-surface-raised hover:text-text-primary flex h-9 w-9 items-center justify-center rounded-full transition-colors"
         >
           <Settings className="h-4 w-4" aria-hidden="true" />
         </button>

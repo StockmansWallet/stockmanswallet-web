@@ -393,7 +393,7 @@ function Th({ children, sticky, right }: { children?: ReactNode; sticky?: boolea
     <th
       className={`whitespace-nowrap px-2 py-2 text-[10px] font-medium text-text-muted ${
         right ? "text-right" : "text-left"
-      } ${sticky ? "sticky left-0 z-10 bg-surface-secondary/90 backdrop-blur-sm" : ""}`}
+      } ${sticky ? "sticky left-0 z-10 bg-surface-secondary/90" : ""}`}
     >
       {children}
     </th>
@@ -433,7 +433,7 @@ function Td({ children, sticky, right, className = "" }: { children?: ReactNode;
     <td
       className={`whitespace-nowrap px-2 py-2 text-text-secondary ${
         right ? "text-right tabular-nums" : "text-left"
-      } ${sticky ? "sticky left-0 z-10 bg-inherit backdrop-blur-sm" : ""} ${className}`}
+      } ${sticky ? "sticky left-0 z-10 bg-inherit" : ""} ${className}`}
     >
       {children}
     </td>

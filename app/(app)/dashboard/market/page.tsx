@@ -57,7 +57,7 @@ export default async function MarketPage({ searchParams }: Props) {
         subtitle="Live livestock market intelligence and price indicators."
       />
 
-      <div className="mb-4 flex flex-col gap-3 rounded-full border border-white/[0.08] bg-surface-lowest px-2 py-2 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-4 flex flex-col gap-3 rounded-full border border-white/[0.08] bg-surface-lowest px-2 py-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-1.5 overflow-x-auto">
           <StateFilter />
         </div>
