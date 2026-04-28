@@ -361,10 +361,10 @@ export function BrangusHub({
           <div
             className={
               activeTab === "chat"
-                ? "h-[calc(100vh-23.5rem)] sm:h-[calc(100vh-22rem)] lg:h-[calc(100vh-7.5rem)]"
+                ? "h-[calc(100vh-23.5rem)] sm:h-[calc(100vh-22rem)] lg:h-[calc(100vh-109px)]"
                 : activeTab === "saved"
-                  ? "hidden h-[calc(100vh-23.5rem)] sm:h-[calc(100vh-22rem)] lg:block lg:h-[calc(100vh-7.5rem)]"
-                  : "hidden h-[calc(100vh-23.5rem)] sm:h-[calc(100vh-22rem)] lg:h-[calc(100vh-7.5rem)]"
+                  ? "hidden h-[calc(100vh-23.5rem)] sm:h-[calc(100vh-22rem)] lg:block lg:h-[calc(100vh-109px)]"
+                  : "hidden h-[calc(100vh-23.5rem)] sm:h-[calc(100vh-22rem)] lg:h-[calc(100vh-109px)]"
             }
           >
             <Card className="flex h-full flex-col overflow-hidden rounded-3xl">
@@ -417,8 +417,8 @@ export function BrangusHub({
           <div
             className={
               desktopMainTab !== "shared"
-                ? "hidden h-[calc(100vh-19rem)] lg:h-[calc(100vh-7.5rem)]"
-                : "h-[calc(100vh-19rem)] lg:h-[calc(100vh-7.5rem)]"
+                ? "hidden h-[calc(100vh-19rem)] lg:h-[calc(100vh-109px)]"
+                : "h-[calc(100vh-19rem)] lg:h-[calc(100vh-109px)]"
             }
           >
             <div className="h-full">
@@ -471,7 +471,7 @@ export function BrangusHub({
 
         <aside className="mt-4 hidden min-w-0 lg:mt-0 lg:block">
           {desktopMainTab === "shared" ? (
-            <Card className="flex h-[calc(100vh-7.5rem)] flex-col overflow-hidden rounded-3xl">
+            <Card className="flex h-[calc(100vh-109px)] flex-col overflow-hidden rounded-3xl">
               <div className="relative min-h-0 flex-1">
                 <CardContent className="absolute inset-0 overflow-y-auto p-0 pt-[7.5rem]">
                   {sharedSubTab === "inbox" ? (
@@ -506,7 +506,7 @@ export function BrangusHub({
               </div>
             </Card>
           ) : (
-            <Card className="flex h-[calc(100vh-7.5rem)] flex-col overflow-hidden rounded-3xl">
+            <Card className="flex h-[calc(100vh-109px)] flex-col overflow-hidden rounded-3xl">
               <div className="relative min-h-0 flex-1">
                 <CardContent className="absolute inset-0 overflow-y-auto p-2 pt-[4.5rem]">
                   {conversations.length > 0 ? (

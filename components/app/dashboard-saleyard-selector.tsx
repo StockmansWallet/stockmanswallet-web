@@ -193,7 +193,7 @@ export function DashboardSaleyardSelector({
 
       {/* Dropdown */}
       {open && (
-        <div className="bg-popover-cool absolute right-0 left-0 z-50 mt-1 max-h-80 overflow-hidden rounded-xl border border-white/10 shadow-xl">
+        <div className="absolute right-0 left-0 z-50 mt-1 max-h-80 overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding shadow-2xl shadow-black/35 backdrop-blur-xl backdrop-saturate-150">
           {/* Search */}
           <div className="flex items-center gap-2 border-b border-white/5 px-3 py-2">
             <Search className="text-text-muted h-3.5 w-3.5" />

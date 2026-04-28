@@ -182,7 +182,6 @@ function GroupedSelect({
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-required={required}
         disabled={disabled}
         onClick={() => !disabled && setOpen(!open)}
         className={`relative flex w-full items-center justify-between rounded-lg bg-surface py-3 pl-4 pr-10 text-left text-sm outline-none transition-all ${
@@ -220,7 +219,7 @@ function GroupedSelect({
             role="listbox"
             aria-label={label ?? "Select"}
             style={{ top: popoverPos.top, left: popoverPos.left, width: popoverPos.width }}
-            className="fixed z-50 animate-fade-in rounded-2xl bg-bg-alt py-2 shadow-2xl ring-1 ring-inset ring-ring-subtle"
+            className="fixed z-50 animate-fade-in rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding py-2 shadow-2xl shadow-black/35 backdrop-blur-xl backdrop-saturate-150"
           >
             <div className="max-h-[320px] overflow-y-auto overscroll-contain">
               {groups
@@ -251,6 +250,9 @@ function GroupedSelect({
 
 const NativeSelect = forwardRef<HTMLSelectElement, SelectProps>(
   ({ label, error, helperText, id, options, placeholder, className = "", groups: _groups, custom: _custom, hint, required, ...props }, ref) => {
+    void _groups;
+    void _custom;
+
     return (
       <div data-field-error={error ? "true" : undefined}>
         {label && (

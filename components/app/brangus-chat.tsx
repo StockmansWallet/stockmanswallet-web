@@ -887,13 +887,10 @@ export function BrangusChat({
               ref={shareMenuRef}
               role="menu"
               aria-label="Share conversation"
-              className="fixed z-[60] w-52 overflow-hidden rounded-xl border border-white/[0.08] py-1 shadow-2xl"
+              className="fixed z-[60] w-52 overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding py-1 shadow-2xl shadow-black/35 backdrop-blur-xl backdrop-saturate-150"
               style={{
                 top: shareMenuPos.top,
                 right: shareMenuPos.right,
-                backgroundColor: "rgba(26, 26, 26, 0.55)",
-                backdropFilter: "blur(28px) saturate(1.6)",
-                WebkitBackdropFilter: "blur(28px) saturate(1.6)",
               }}
             >
               <button

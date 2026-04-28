@@ -166,7 +166,7 @@ export function AppHeader({
       <div
         ref={profileMenuRef}
         role="menu"
-        className="fixed z-[100] w-64 overflow-hidden rounded-2xl border border-white/[0.10] bg-white/[0.08] bg-clip-padding p-2 shadow-2xl shadow-black/35 backdrop-blur-xl backdrop-saturate-150"
+        className="fixed z-[100] w-64 overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-2 shadow-2xl shadow-black/35 backdrop-blur-xl backdrop-saturate-150"
         style={{
           top: profileMenuPosition.top,
           right: profileMenuPosition.right,
@@ -215,9 +215,9 @@ export function AppHeader({
   return (
     <>
       <header
-        className="sticky top-0 z-30 hidden border-b border-white/[0.08] bg-[#201B18]/68 px-4 py-2.5 shadow-sm shadow-black/15 backdrop-blur-xl lg:block"
+        className="sticky top-0 z-30 hidden border-b border-white/[0.08] bg-[#201B18]/68 py-2.5 shadow-sm shadow-black/15 backdrop-blur-xl lg:block"
       >
-      <div className="mx-auto flex w-full max-w-[1960px] items-center gap-4">
+      <div className="mx-auto flex w-full max-w-[1960px] items-center gap-4 px-4">
         <Link
           href="/dashboard"
           aria-label="Stockman's Wallet"
@@ -300,18 +300,18 @@ export function AppHeader({
               aria-haspopup="menu"
               aria-expanded={profileOpen}
               onClick={() => setProfileOpen((open) => !open)}
-              className="flex h-9 items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-1 pr-2.5 text-left transition-colors hover:bg-white/[0.06]"
+              className="flex h-11 items-center gap-2.5 rounded-full border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-1.5 pr-3 text-left transition-colors hover:bg-white/[0.06]"
             >
               {avatarUrl ? (
                 <Image
                   src={avatarUrl}
                   alt={displayName}
-                  width={28}
-                  height={28}
-                  className="h-7 w-7 rounded-full object-cover"
+                  width={32}
+                  height={32}
+                  className="h-8 w-8 rounded-full object-cover"
                 />
               ) : (
-                <span className="bg-brand/15 text-brand flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold">
+                <span className="bg-brand/15 text-brand flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-bold">
                   {initials || "SW"}
                 </span>
               )}
@@ -319,7 +319,7 @@ export function AppHeader({
                 {displayName}
               </span>
               <ChevronDown
-                className={`text-text-muted h-3.5 w-3.5 transition-transform ${
+                className={`text-text-muted h-4 w-4 transition-transform ${
                   profileOpen ? "rotate-180" : ""
                 }`}
               />

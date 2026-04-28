@@ -144,12 +144,7 @@ export function ModerationMenu({
 
         {panel === "root" && (
           <div
-            className="absolute top-full right-0 z-20 mt-1 w-56 overflow-hidden rounded-xl border border-white/[0.08] shadow-2xl"
-            style={{
-              background: "rgba(26, 26, 26, 0.55)",
-              backdropFilter: "blur(28px) saturate(1.6)",
-              WebkitBackdropFilter: "blur(28px) saturate(1.6)",
-            }}
+            className="absolute top-full right-0 z-20 mt-1 w-56 overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding shadow-2xl shadow-black/35 backdrop-blur-xl backdrop-saturate-150"
           >
             {connectionIdForDisconnect && (
               <button

@@ -130,13 +130,10 @@ export function ReportDownloadMenu({ groups, label = "Download" }: ReportDownloa
         ref={menuRef}
         role="menu"
         aria-label="Download reports"
-        className="fixed z-[60] w-72 overflow-hidden rounded-xl border border-white/[0.08] p-3 shadow-2xl"
+        className="fixed z-[60] w-72 overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-3 shadow-2xl shadow-black/35 backdrop-blur-xl backdrop-saturate-150"
         style={{
           top: menuPos.top,
           right: menuPos.right,
-          backgroundColor: "rgba(26, 26, 26, 0.55)",
-          backdropFilter: "blur(28px) saturate(1.6)",
-          WebkitBackdropFilter: "blur(28px) saturate(1.6)",
         }}
       >
         <div className="flex flex-col gap-3">

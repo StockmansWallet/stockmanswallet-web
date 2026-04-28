@@ -213,7 +213,7 @@ function CustomRangeButton({
         <div
           role="dialog"
           aria-label="Custom date range"
-          className="bg-bg-alt ring-ring-subtle absolute top-full left-0 z-40 mt-2 w-72 rounded-2xl p-4 shadow-2xl ring-1 ring-inset"
+          className="absolute top-full left-0 z-40 mt-2 w-72 rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-4 shadow-2xl shadow-black/35 backdrop-blur-xl backdrop-saturate-150"
         >
           <div className="flex flex-col gap-3">
             <DatePicker
@@ -315,13 +315,10 @@ function PropertyDropdown({
     open && typeof document !== "undefined" ? (
       <div
         ref={menuRef}
-        className="fixed z-[60] w-56 overflow-hidden rounded-xl border border-white/[0.08] p-1 shadow-2xl"
+        className="fixed z-[60] w-56 overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-1 shadow-2xl shadow-black/35 backdrop-blur-xl backdrop-saturate-150"
         style={{
           top: menuPos.top,
           left: menuPos.left,
-          backgroundColor: "rgba(26, 26, 26, 0.55)",
-          backdropFilter: "blur(28px) saturate(1.6)",
-          WebkitBackdropFilter: "blur(28px) saturate(1.6)",
         }}
       >
         {selected.length > 0 && (

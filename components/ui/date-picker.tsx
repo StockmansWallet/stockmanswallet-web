@@ -106,12 +106,6 @@ function DatePicker({
   const minDate = parseDate(min ?? "");
   const maxDate = parseDate(max ?? "");
 
-  // Sync view to selected date when value changes externally
-  useEffect(() => {
-    const d = parseDate(value);
-    if (d) setView([d.getFullYear(), d.getMonth()]);
-  }, [value]);
-
   // Position the popover below the trigger (re-measures after render)
   useEffect(() => {
     if (!open || !triggerRef.current) return;
@@ -203,6 +197,14 @@ function DatePicker({
     setOpen(false);
   }
 
+  function handleToggleOpen() {
+    if (!open) {
+      const target = selected ?? today;
+      setView([target.getFullYear(), target.getMonth()]);
+    }
+    setOpen((current) => !current);
+  }
+
   function isDisabled(date: Date): boolean {
     if (minDate && date < minDate) return true;
     if (maxDate && date > maxDate) return true;
@@ -229,7 +231,7 @@ function DatePicker({
         type="button"
         aria-haspopup="dialog"
         aria-expanded={open}
-        onClick={() => setOpen(!open)}
+        onClick={handleToggleOpen}
         className={`flex w-full items-center justify-between rounded-lg bg-surface px-4 py-3 text-left text-sm outline-none transition-all ${
           value ? "text-text-primary" : "text-text-muted"
         } ${
@@ -256,7 +258,7 @@ function DatePicker({
             role="dialog"
             aria-label="Calendar"
             style={{ top: popoverPos.top, left: popoverPos.left }}
-            className="fixed z-50 w-[280px] animate-fade-in rounded-2xl bg-bg-alt p-4 shadow-2xl ring-1 ring-inset ring-ring-subtle"
+            className="fixed z-50 w-[280px] animate-fade-in rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-4 shadow-2xl shadow-black/35 backdrop-blur-xl backdrop-saturate-150"
           >
             {/* Month navigation */}
             <div className="mb-3 flex items-center justify-between">
