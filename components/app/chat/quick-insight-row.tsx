@@ -9,9 +9,7 @@ import { useRef, useState, useCallback, useEffect, useLayoutEffect } from "react
 import { ChevronRight } from "lucide-react";
 import type { QuickInsight, CardAction } from "@/lib/brangus/types";
 
-// Total height reserved for the row even when no cards are present. Keeps the
-// strip visible as a target area so the first card has a frame to slide into,
-// and stops the chat layout from jumping when cards arrive.
+// Total card-row height used once the summary strip is visible.
 const ROW_MIN_HEIGHT_PX = 68;
 
 // Width over which the edge fade runs out. Keep this in sync with the
@@ -60,7 +58,7 @@ function QuickInsightCard({
   return (
     <div
       data-insight-id={insight.id}
-      className={`flex min-w-[100px] max-w-[180px] shrink-0 flex-col gap-1 rounded-xl bg-white/5 px-3 py-2.5 ${
+      className={`flex min-w-[100px] max-w-[180px] shrink-0 flex-col gap-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 shadow-[0_4px_14px_rgba(0,0,0,0.16)] ${
         hasTap ? "cursor-pointer transition-opacity hover:opacity-80" : ""
       }`}
       onClick={hasTap ? () => onCardAction(insight.action!) : undefined}
@@ -105,9 +103,13 @@ const TAIL_THRESHOLD_PX = 80;
 export function QuickInsightRow({
   insights,
   onCardAction,
+  animateInitialCards = false,
+  initialCardAnimationDelayMs = 0,
 }: {
   insights: QuickInsight[];
   onCardAction?: (action: CardAction) => void;
+  animateInitialCards?: boolean;
+  initialCardAnimationDelayMs?: number;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -132,13 +134,12 @@ export function QuickInsightRow({
   }>({ scrollLeft: 0, scrollWidth: 0, clientWidth: 0 });
   const prevCountRef = useRef<number>(insights.length);
 
-  // Ids of cards we've already animated in. Initialised lazily with the ids
-  // of whatever cards were present on first render, so a conversation that
-  // hydrates with existing cards doesn't cascade-animate them all at once -
-  // only cards that arrive during this session slide in.
+  // Ids of cards we've already animated in. Hydrated cards are marked as seen
+  // by default, while the first live batch can opt into the same right-to-left
+  // entrance animation as later cards.
   const animatedIdsRef = useRef<Set<string> | null>(null);
   if (animatedIdsRef.current === null) {
-    animatedIdsRef.current = new Set(insights.map((i) => i.id));
+    animatedIdsRef.current = animateInitialCards ? new Set() : new Set(insights.map((i) => i.id));
   }
 
   // Drive the edge-fade mask off the scroll position. Treat a 1px threshold as
@@ -210,7 +211,9 @@ export function QuickInsightRow({
 
     const containerRect = container.getBoundingClientRect();
 
-    for (const insight of insights) {
+    const newInsights = insights.filter((insight) => !seen.has(insight.id));
+
+    for (const [index, insight] of newInsights.entries()) {
       if (seen.has(insight.id)) continue;
       seen.add(insight.id);
 
@@ -235,12 +238,13 @@ export function QuickInsightRow({
         ],
         {
           duration: 460,
+          delay: initialCardAnimationDelayMs + index * 120,
           easing: "cubic-bezier(0.22, 0.9, 0.3, 1)",
           fill: "backwards",
         }
       );
     }
-  }, [insights]);
+  }, [insights, initialCardAnimationDelayMs]);
 
   // Click-and-drag horizontal scrolling for mouse users
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -293,9 +297,6 @@ export function QuickInsightRow({
       } as React.CSSProperties)
     : undefined;
 
-  // The row is always mounted even when empty, so the first card has a visible
-  // frame to slide into. Reserve a card-height worth of space so layout stays
-  // stable when cards first arrive or the last one is cleared.
   return (
     <div
       ref={containerRef}

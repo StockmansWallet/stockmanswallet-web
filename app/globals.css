@@ -586,6 +586,21 @@ body {
   animation: fade-in 0.3s ease-out both;
 }
 
+@keyframes brangus-summary-strip-in {
+  from {
+    opacity: 0;
+    transform: translateY(115%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-brangus-summary-strip-in {
+  animation: brangus-summary-strip-in 0.58s cubic-bezier(0.22, 0.9, 0.3, 1) both;
+}
+
 /* Native select/input dark styling */
 select option {
   background: #1a1a1a;

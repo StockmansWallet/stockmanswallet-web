@@ -224,6 +224,8 @@ export function BrangusChat({
   const [sessionCards, setSessionCards] = useState<QuickInsight[]>(() =>
     hydrateCardsFromMessages(initialMessages ?? [])
   );
+  const hadHydratedSessionCardsRef = useRef(sessionCards.length > 0);
+  const summaryStripHasAppearedRef = useRef(sessionCards.length > 0);
   const [copied, setCopied] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const shareTriggerRef = useRef<HTMLButtonElement>(null);
@@ -236,6 +238,12 @@ export function BrangusChat({
   useEffect(() => {
     setShareMenuMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (sessionCards.length > 0) {
+      summaryStripHasAppearedRef.current = true;
+    }
+  }, [sessionCards.length]);
 
   // "Share with a producer" dialog state. Opens from the share menu and posts
   // a frozen snapshot of the current conversation into brangus_shared_chats.
@@ -840,6 +848,11 @@ export function BrangusChat({
     );
   }
 
+  const isFirstLiveSummaryReveal =
+    sessionCards.length > 0 &&
+    !hadHydratedSessionCardsRef.current &&
+    !summaryStripHasAppearedRef.current;
+
   return (
     <div data-print-chat className="flex flex-1 flex-col overflow-hidden">
       <BrangusChatPrintView
@@ -1049,12 +1062,23 @@ export function BrangusChat({
         </div>
       )}
 
-      {/* Summary card strip - persistent bottom strip, full width for edge-to-edge scrolling.
-          The strip is always rendered (even when empty) so that the first card has a visible
-          target area to slide into and layout doesn't jump when cards first appear. */}
-      <div data-print-cards className="border-t border-white/10 py-2">
-        <QuickInsightRow insights={sessionCards} onCardAction={handleCardAction} />
-      </div>
+      {/* Summary card strip - appears only once Brangus has cards to show. */}
+      {sessionCards.length > 0 && (
+        <div data-print-cards className="overflow-hidden">
+          <div
+            className={`border-t border-white/[0.08] bg-linear-to-b from-black/10 via-black/[0.035] to-transparent py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.035),inset_0_10px_18px_rgba(0,0,0,0.08)] ${
+              isFirstLiveSummaryReveal ? "animate-brangus-summary-strip-in" : ""
+            }`}
+          >
+            <QuickInsightRow
+              insights={sessionCards}
+              onCardAction={handleCardAction}
+              animateInitialCards={isFirstLiveSummaryReveal}
+              initialCardAnimationDelayMs={isFirstLiveSummaryReveal ? 720 : 0}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Input area */}
       <div data-print-hide className="border-t border-white/10 p-4">
