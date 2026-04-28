@@ -96,7 +96,7 @@ export function kindLabel(kind: BrangusFileKind | null | undefined): string | nu
 }
 
 export function fileCategoryLabel(file: Pick<BrangusFileRow, "category" | "kind">): string {
-  return file.category?.trim() || kindLabel(file.kind) || "Uncategorised";
+  return file.category?.trim() || "Uncategorised";
 }
 
 export function detectFileType(

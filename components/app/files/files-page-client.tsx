@@ -8,9 +8,12 @@ import {
   FileText,
   Folder,
   FolderOpen,
+  Check,
   ImageIcon,
   Layers3,
   Loader2,
+  MoreHorizontal,
+  Pencil,
   Plus,
   Search,
   Trash2,
@@ -53,26 +56,40 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
   const [customCollections, setCustomCollections] = useState<string[]>(() =>
     loadCustomCollections(userId)
   );
+  const [hiddenCollections, setHiddenCollections] = useState<string[]>(() =>
+    loadHiddenCollections(userId)
+  );
   const [isCreatingCollection, setIsCreatingCollection] = useState(false);
   const [collectionDraft, setCollectionDraft] = useState("");
+  const [editingCollection, setEditingCollection] = useState<string | null>(null);
+  const [editingDraft, setEditingDraft] = useState("");
+  const [openCollectionMenu, setOpenCollectionMenu] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     saveCustomCollections(userId, customCollections);
   }, [customCollections, userId]);
 
+  useEffect(() => {
+    saveHiddenCollections(userId, hiddenCollections);
+  }, [hiddenCollections, userId]);
+
   const categoryOptions = useMemo(() => {
+    const hidden = new Set(hiddenCollections.map((collection) => collection.toLowerCase()));
     const values = new Set(DEFAULT_FILE_CATEGORY_OPTIONS);
+    for (const collection of hiddenCollections) {
+      values.delete(collection);
+    }
     for (const collection of customCollections) {
       const label = collection.trim();
-      if (label) values.add(label);
+      if (label && !hidden.has(label.toLowerCase())) values.add(label);
     }
     for (const file of files) {
       const label = fileCategoryLabel(file);
       if (label !== UNCATEGORISED) values.add(label);
     }
     return Array.from(values).sort((a, b) => a.localeCompare(b));
-  }, [customCollections, files]);
+  }, [customCollections, files, hiddenCollections]);
 
   const collectionCounts = useMemo(() => {
     const counts = new Map<string, number>();
@@ -187,10 +204,134 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
         ? prev
         : [...prev, nextCollection]
     );
+    setHiddenCollections((prev) =>
+      prev.filter((collection) => collection.toLowerCase() !== nextCollection.toLowerCase())
+    );
     setActiveCollection(nextCollection);
     setCollectionDraft("");
     setIsCreatingCollection(false);
   }, [collectionDraft]);
+
+  const renameCollection = useCallback(
+    async (currentCollection: string, nextCollectionRaw: string) => {
+      const nextCollection = nextCollectionRaw.trim();
+      if (!nextCollection || nextCollection.toLowerCase() === currentCollection.toLowerCase()) {
+        setEditingCollection(null);
+        setEditingDraft("");
+        return;
+      }
+      if (
+        categoryOptions.some(
+          (category) =>
+            category.toLowerCase() === nextCollection.toLowerCase() &&
+            category.toLowerCase() !== currentCollection.toLowerCase()
+        )
+      ) {
+        setError("A collection with that name already exists.");
+        return;
+      }
+
+      setError(null);
+      const matchingFileIds = files
+        .filter((file) => fileCategoryLabel(file) === currentCollection)
+        .map((file) => file.id);
+
+      if (matchingFileIds.length > 0) {
+        const supabase = createClient();
+        const { error: updateError } = await supabase
+          .from("brangus_files")
+          .update({ category: nextCollection })
+          .in("id", matchingFileIds);
+        if (updateError) {
+          setError(updateError.message);
+          return;
+        }
+      }
+
+      setFiles((prev) =>
+        prev.map((file) =>
+          fileCategoryLabel(file) === currentCollection ? { ...file, category: nextCollection } : file
+        )
+      );
+      setCustomCollections((prev) => {
+        const withoutCurrent = prev.filter(
+          (collection) => collection.toLowerCase() !== currentCollection.toLowerCase()
+        );
+        return withoutCurrent.some(
+          (collection) => collection.toLowerCase() === nextCollection.toLowerCase()
+        )
+          ? withoutCurrent
+          : [...withoutCurrent, nextCollection];
+      });
+      setHiddenCollections((prev) => {
+        const next = prev.filter(
+          (collection) => collection.toLowerCase() !== nextCollection.toLowerCase()
+        );
+        return next.some((collection) => collection.toLowerCase() === currentCollection.toLowerCase())
+          ? next
+          : [...next, currentCollection];
+      });
+      setActiveCollection((current) => (current === currentCollection ? nextCollection : current));
+      setEditingCollection(null);
+      setEditingDraft("");
+    },
+    [categoryOptions, files]
+  );
+
+  const deleteCollection = useCallback(
+    async (collectionToDelete: string) => {
+      const filesInCollection = files.filter(
+        (file) => fileCategoryLabel(file) === collectionToDelete
+      );
+      if (
+        !confirm(
+          filesInCollection.length > 0
+            ? `Delete ${collectionToDelete}? Files in it will move to Uncategorised.`
+            : `Delete ${collectionToDelete}?`
+        )
+      ) {
+        return;
+      }
+
+      setError(null);
+      if (filesInCollection.length > 0) {
+        const supabase = createClient();
+        const { error: updateError } = await supabase
+          .from("brangus_files")
+          .update({ category: null })
+          .in(
+            "id",
+            filesInCollection.map((file) => file.id)
+          );
+        if (updateError) {
+          setError(updateError.message);
+          return;
+        }
+      }
+
+      setFiles((prev) =>
+        prev.map((file) =>
+          fileCategoryLabel(file) === collectionToDelete ? { ...file, category: null } : file
+        )
+      );
+      setCustomCollections((prev) =>
+        prev.filter((collection) => collection.toLowerCase() !== collectionToDelete.toLowerCase())
+      );
+      setHiddenCollections((prev) =>
+        prev.some((collection) => collection.toLowerCase() === collectionToDelete.toLowerCase())
+          ? prev
+          : [...prev, collectionToDelete]
+      );
+      setActiveCollection((current) =>
+        current === collectionToDelete ? ALL_COLLECTIONS : current
+      );
+      if (editingCollection === collectionToDelete) {
+        setEditingCollection(null);
+        setEditingDraft("");
+      }
+    },
+    [editingCollection, files]
+  );
 
   return (
     <div className="space-y-4">
@@ -306,13 +447,42 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
           <div className="my-2 h-px bg-white/[0.06]" />
 
           {categoryOptions.map((category) => (
-            <CollectionButton
-              key={category}
-              label={category}
-              count={collectionCounts.get(category) ?? 0}
-              active={activeCollection === category}
-              onClick={() => setActiveCollection(category)}
-            />
+            <div key={category}>
+              {editingCollection === category ? (
+                <CollectionEditRow
+                  value={editingDraft}
+                  onChange={setEditingDraft}
+                  onSave={() => void renameCollection(category, editingDraft)}
+                  onCancel={() => {
+                    setEditingCollection(null);
+                    setEditingDraft("");
+                  }}
+                />
+              ) : (
+                <CollectionButton
+                  label={category}
+                  count={collectionCounts.get(category) ?? 0}
+                  active={activeCollection === category}
+                  menuOpen={openCollectionMenu === category}
+                  onClick={() => {
+                    setActiveCollection(category);
+                    setOpenCollectionMenu(null);
+                  }}
+                  onToggleMenu={() =>
+                    setOpenCollectionMenu((current) => (current === category ? null : category))
+                  }
+                  onRename={() => {
+                    setEditingCollection(category);
+                    setEditingDraft(category);
+                    setOpenCollectionMenu(null);
+                  }}
+                  onDelete={() => {
+                    setOpenCollectionMenu(null);
+                    void deleteCollection(category);
+                  }}
+                />
+              )}
+            </div>
           ))}
         </aside>
 
@@ -376,10 +546,22 @@ function customCollectionsStorageKey(userId: string): string {
   return `stockmanswallet:file-collections:${userId}`;
 }
 
+function hiddenCollectionsStorageKey(userId: string): string {
+  return `stockmanswallet:hidden-file-collections:${userId}`;
+}
+
 function loadCustomCollections(userId: string): string[] {
+  return loadCollectionList(customCollectionsStorageKey(userId));
+}
+
+function loadHiddenCollections(userId: string): string[] {
+  return loadCollectionList(hiddenCollectionsStorageKey(userId));
+}
+
+function loadCollectionList(key: string): string[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = window.localStorage.getItem(customCollectionsStorageKey(userId));
+    const raw = window.localStorage.getItem(key);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
@@ -393,8 +575,16 @@ function loadCustomCollections(userId: string): string[] {
 }
 
 function saveCustomCollections(userId: string, collections: string[]): void {
+  saveCollectionList(customCollectionsStorageKey(userId), collections);
+}
+
+function saveHiddenCollections(userId: string, collections: string[]): void {
+  saveCollectionList(hiddenCollectionsStorageKey(userId), collections);
+}
+
+function saveCollectionList(key: string, collections: string[]): void {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(customCollectionsStorageKey(userId), JSON.stringify(collections));
+  window.localStorage.setItem(key, JSON.stringify(collections));
 }
 
 function StatTile({ label, value }: { label: string; value: number }) {
@@ -410,29 +600,127 @@ function CollectionButton({
   label,
   count,
   active,
+  menuOpen,
   onClick,
+  onToggleMenu,
+  onRename,
+  onDelete,
 }: {
   label: string;
   count: number;
   active: boolean;
+  menuOpen?: boolean;
   onClick: () => void;
+  onToggleMenu?: () => void;
+  onRename?: () => void;
+  onDelete?: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm transition ${
+    <div
+      className={`group relative flex w-full items-center rounded-lg px-2 py-2 pr-9 text-left text-sm transition ${
         active ? "bg-brand/15 text-brand" : "text-white/70 hover:bg-white/[0.05] hover:text-white"
       }`}
     >
-      {active ? (
-        <FolderOpen className="h-4 w-4 shrink-0" />
-      ) : (
-        <Folder className="h-4 w-4 shrink-0" />
+      <button type="button" onClick={onClick} className="flex min-w-0 flex-1 items-center gap-2">
+        {active ? (
+          <FolderOpen className="h-4 w-4 shrink-0" />
+        ) : (
+          <Folder className="h-4 w-4 shrink-0" />
+        )}
+        <span className="min-w-0 flex-1 truncate text-left">{label}</span>
+      </button>
+      <span
+        className={`absolute right-4 text-xs tabular-nums opacity-55 transition ${
+          onToggleMenu && (menuOpen ? "opacity-0" : "group-hover:opacity-0 group-focus-within:opacity-0")
+        }`}
+      >
+        {count}
+      </span>
+      {onToggleMenu && (
+        <>
+          <button
+            type="button"
+            onClick={onToggleMenu}
+            className={`absolute right-2 rounded-md p-1 text-white/35 transition hover:bg-white/[0.08] hover:text-white focus:bg-white/[0.08] focus:text-white ${
+              menuOpen
+                ? "opacity-100"
+                : "pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100"
+            }`}
+            aria-label={`Manage ${label}`}
+            aria-expanded={menuOpen}
+          >
+            <MoreHorizontal className="h-3.5 w-3.5" />
+          </button>
+          {menuOpen && (
+            <div className="absolute top-8 right-2 z-20 w-32 overflow-hidden rounded-lg border border-white/10 bg-neutral-950 py-1 shadow-xl">
+              {onRename && (
+                <button
+                  type="button"
+                  onClick={onRename}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-white/75 hover:bg-white/[0.06] hover:text-white"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                  Rename
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  type="button"
+                  onClick={onDelete}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-red-200 hover:bg-red-500/10 hover:text-red-100"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Delete
+                </button>
+              )}
+            </div>
+          )}
+        </>
       )}
-      <span className="min-w-0 flex-1 truncate">{label}</span>
-      <span className="shrink-0 text-xs opacity-55">{count}</span>
-    </button>
+    </div>
+  );
+}
+
+function CollectionEditRow({
+  value,
+  onChange,
+  onSave,
+  onCancel,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  onSave: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <div className="flex items-center gap-1 rounded-lg bg-white/[0.04] px-2 py-2">
+      <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") onSave();
+          if (event.key === "Escape") onCancel();
+        }}
+        className="h-7 min-w-0 flex-1 rounded-md border border-white/10 bg-black/20 px-2 text-xs text-white outline-none focus:border-brand/50"
+        autoFocus
+      />
+      <button
+        type="button"
+        onClick={onSave}
+        className="rounded-md p-1.5 text-emerald-300 hover:bg-emerald-400/10"
+        aria-label="Save collection name"
+      >
+        <Check className="h-3.5 w-3.5" />
+      </button>
+      <button
+        type="button"
+        onClick={onCancel}
+        className="rounded-md p-1.5 text-white/45 hover:bg-white/[0.08] hover:text-white"
+        aria-label="Cancel rename"
+      >
+        <X className="h-3.5 w-3.5" />
+      </button>
+    </div>
   );
 }
 
@@ -491,20 +779,15 @@ function FileRow({
 }
 
 function StatusPill({ status }: { status: BrangusFileRow["extraction_status"] }) {
-  const label =
-    status === "pending"
-      ? "Reading"
-      : status === "failed"
-        ? "Failed"
-        : status === "unsupported"
-          ? "Stored"
-          : "Ready";
+  const label = fileStatusLabel(status);
   const className =
     status === "pending"
       ? "border-amber-400/25 bg-amber-400/10 text-amber-200"
       : status === "failed"
         ? "border-red-400/25 bg-red-400/10 text-red-200"
-        : "border-emerald-400/20 bg-emerald-400/10 text-emerald-200";
+        : status === "unsupported"
+          ? "border-white/10 bg-white/[0.04] text-white/60"
+          : "border-emerald-400/20 bg-emerald-400/10 text-emerald-200";
 
   return (
     <span
@@ -513,6 +796,13 @@ function StatusPill({ status }: { status: BrangusFileRow["extraction_status"] })
       {label}
     </span>
   );
+}
+
+function fileStatusLabel(status: BrangusFileRow["extraction_status"]): string {
+  if (status === "pending") return "Processing";
+  if (status === "failed") return "Failed";
+  if (status === "unsupported") return "Stored";
+  return "Ready";
 }
 
 function FileTypeIcon({ type }: { type: BrangusDetectedFileType }) {
@@ -672,7 +962,7 @@ function FileDetailDrawer({
           <dt className="text-white/40">Source</dt>
           <dd>{file.source === "chat" ? "Brangus chat" : "Files"}</dd>
           <dt className="text-white/40">Status</dt>
-          <dd>{file.extraction_status === "pending" ? "Reading..." : "Ready"}</dd>
+          <dd>{fileStatusLabel(file.extraction_status)}</dd>
         </dl>
 
         <button
