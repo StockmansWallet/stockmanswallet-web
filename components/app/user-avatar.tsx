@@ -11,13 +11,13 @@ interface UserAvatarProps {
   // escape hatch for callers that want a rounded-xl square instead.
   shape?: "tile" | "circle";
   // Colour tone applied to the initials tile when no image is present.
-  tone?: "producer-network" | "brangus" | "success" | "advisor" | "neutral";
+  tone?: "ch40" | "brangus" | "success" | "advisor" | "neutral";
   // Text size for the initial. Matches the tile scale.
   initialClass?: string;
 }
 
 const toneBg: Record<NonNullable<UserAvatarProps["tone"]>, string> = {
-  "producer-network": "bg-producer-network/15",
+  "ch40": "bg-ch40/15",
   brangus: "bg-brangus/15",
   success: "bg-success/15",
   advisor: "bg-advisor/15",
@@ -25,7 +25,7 @@ const toneBg: Record<NonNullable<UserAvatarProps["tone"]>, string> = {
 };
 
 const toneText: Record<NonNullable<UserAvatarProps["tone"]>, string> = {
-  "producer-network": "text-producer-network-light",
+  "ch40": "text-ch40-light",
   brangus: "text-brangus",
   success: "text-success",
   advisor: "text-advisor",
@@ -37,7 +37,7 @@ export function UserAvatar({
   avatarUrl,
   sizeClass = "h-10 w-10",
   shape = "circle",
-  tone = "producer-network",
+  tone = "ch40",
   initialClass = "text-sm font-bold",
 }: UserAvatarProps) {
   const initial = (name?.trim().charAt(0) || "?").toUpperCase();

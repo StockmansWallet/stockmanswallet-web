@@ -7,7 +7,7 @@ import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/app/advisory/confirm-modal";
 import { blockUser, unblockUser, reportUser } from "./moderation-actions";
-import { disconnectProducer } from "@/app/(app)/dashboard/producer-network/connections/[id]/actions";
+import { disconnectProducer } from "@/app/(app)/dashboard/ch40/connections/[id]/actions";
 
 interface ModerationMenuProps {
   targetUserId: string;
@@ -77,7 +77,7 @@ export function ModerationMenu({
       return;
     }
     setPanel("closed");
-    router.push("/dashboard/producer-network");
+    router.push("/dashboard/ch40");
     router.refresh();
   };
 
@@ -105,7 +105,7 @@ export function ModerationMenu({
       return;
     }
     setPanel("closed");
-    router.push("/dashboard/producer-network/connections");
+    router.push("/dashboard/ch40/connections");
     router.refresh();
   };
 
@@ -269,7 +269,7 @@ export function ModerationMenu({
                 rows={3}
                 maxLength={1000}
                 placeholder="Describe what happened..."
-                className="bg-surface-lowest text-text-primary placeholder:text-text-muted focus:border-producer-network/40 focus:ring-producer-network/20 w-full resize-none rounded-xl border border-white/10 p-3 text-sm focus:ring-1 focus:outline-none"
+                className="bg-surface-lowest text-text-primary placeholder:text-text-muted focus:border-ch40/40 focus:ring-ch40/20 w-full resize-none rounded-xl border border-white/10 p-3 text-sm focus:ring-1 focus:outline-none"
               />
             </div>
             {error && (

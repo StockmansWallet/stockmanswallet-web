@@ -33,7 +33,7 @@ export function ProducerDirectorySearch({
           params.delete(key);
         }
       }
-      router.push(`/dashboard/producer-network/directory?${params.toString()}`);
+      router.push(`/dashboard/ch40/directory?${params.toString()}`);
     },
     [router, searchParams],
   );
@@ -55,7 +55,7 @@ export function ProducerDirectorySearch({
         aria-pressed={active}
         className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
           active
-            ? "border-producer-network/40 bg-producer-network/15 text-producer-network-light"
+            ? "border-ch40/40 bg-ch40/15 text-ch40-light"
             : "border-white/[0.08] bg-surface text-text-muted hover:border-white/20 hover:text-text-secondary"
         }`}
       >
@@ -74,7 +74,7 @@ export function ProducerDirectorySearch({
         aria-pressed={active}
         className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
           active
-            ? "border-producer-network/40 bg-producer-network/15 text-producer-network-light"
+            ? "border-ch40/40 bg-ch40/15 text-ch40-light"
             : "border-white/[0.08] bg-surface text-text-muted hover:border-white/20 hover:text-text-secondary"
         }`}
       >
@@ -94,7 +94,7 @@ export function ProducerDirectorySearch({
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
           onBlur={() => pushParams({ q: searchValue })}
-          className="w-full rounded-full border border-white/5 bg-surface py-2 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus:border-producer-network/30 focus:outline-none focus:ring-1 focus:ring-producer-network/20"
+          className="w-full rounded-full border border-white/5 bg-surface py-2 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus:border-ch40/30 focus:outline-none focus:ring-1 focus:ring-ch40/20"
         />
       </form>
 

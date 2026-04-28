@@ -56,7 +56,7 @@ type NavFeature =
   | "freight-iq"
   | "grid-iq"
   | "advisor"
-  | "producer-network"
+  | "ch40"
   | "red"
   | "teal"
   | "violet"
@@ -99,9 +99,9 @@ const FEATURE_NAV: Record<NavFeature, { activeClass: string; hoverClass: string 
     activeClass: "bg-advisor/15 text-advisor",
     hoverClass: "hover:bg-advisor-dark hover:text-white",
   },
-  "producer-network": {
-    activeClass: "bg-producer-network/15 text-producer-network",
-    hoverClass: "hover:bg-producer-network-dark hover:text-white",
+  "ch40": {
+    activeClass: "bg-ch40/15 text-ch40",
+    hoverClass: "hover:bg-ch40-dark hover:text-white",
   },
   red: {
     activeClass: "bg-red/15 text-red",
@@ -220,11 +220,11 @@ export const producerToolItems: NavItem[] = [
     : []),
   {
     label: "Ch 40",
-    href: "/dashboard/producer-network",
+    href: "/dashboard/ch40",
     icon: <Radio className="h-5 w-5" />,
-    ...nav("producer-network"),
+    ...nav("ch40"),
     notificationTypes: ["new_message", "new_connection_request"],
-    badgeSuppressPrefix: "/dashboard/producer-network/connections/",
+    badgeSuppressPrefix: "/dashboard/ch40/connections/",
   },
 ];
 

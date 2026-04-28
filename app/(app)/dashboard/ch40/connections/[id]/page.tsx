@@ -1,4 +1,4 @@
-import { ProducerNetworkHub } from "../../producer-network-hub";
+import { ProducerNetworkHub } from "../../ch40-hub";
 
 export const metadata = {
   title: "Producer Chat",

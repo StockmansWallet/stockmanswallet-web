@@ -158,9 +158,9 @@ const FEATURE_TABS: FeatureTab[] = [
     tagline: "The Producer Channel",
     description:
       "Tune in to other producers in your region. Build a trusted peer network to share operational insights, compare notes on markets and conditions, and collaborate on the challenges only another farmer understands.",
-    color: "var(--feature-network)",
-    colorLight: "var(--feature-network-light)",
-    colorDark: "var(--feature-network-dark)",
+    color: "var(--feature-ch40)",
+    colorLight: "var(--feature-ch40-light)",
+    colorDark: "var(--feature-ch40-dark)",
     bullets: [
       "Browse a directory of producers and send connection requests",
       "Build a permanent network of trusted peers across your region",

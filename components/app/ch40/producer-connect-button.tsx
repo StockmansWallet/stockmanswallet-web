@@ -8,7 +8,7 @@ import { Handshake, X } from "lucide-react";
 import {
   sendProducerConnectionRequest,
   cancelProducerConnectionRequest,
-} from "@/app/(app)/dashboard/producer-network/directory/actions";
+} from "@/app/(app)/dashboard/ch40/directory/actions";
 
 interface ProducerConnectButtonProps {
   targetUserId: string;

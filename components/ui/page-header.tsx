@@ -10,7 +10,7 @@ type FeatureHue =
   | "reports"
   | "freight-iq"
   | "grid-iq"
-  | "producer-network"
+  | "ch40"
   | "advisor";
 
 type HeaderAccent = FeatureHue | "brand" | "warning" | "error" | "success" | "info";
@@ -36,7 +36,7 @@ const featureTitleClasses: Record<FeatureHue, string> = {
   reports: "text-reports",
   "freight-iq": "text-freight-iq",
   "grid-iq": "text-grid-iq",
-  "producer-network": "text-producer-network",
+  "ch40": "text-ch40",
   advisor: "text-advisor",
 };
 
@@ -120,7 +120,7 @@ function resolveHeaderAccent(
   if (titleClassName.includes("text-reports")) return "reports";
   if (titleClassName.includes("text-freight-iq")) return "freight-iq";
   if (titleClassName.includes("text-grid-iq")) return "grid-iq";
-  if (titleClassName.includes("text-producer-network")) return "producer-network";
+  if (titleClassName.includes("text-ch40")) return "ch40";
   if (titleClassName.includes("text-advisor")) return "advisor";
   return "brand";
 }

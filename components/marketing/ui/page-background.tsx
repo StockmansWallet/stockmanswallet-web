@@ -16,7 +16,7 @@ export default function PageBackground({ variant = "photo" }: { variant?: PageBa
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse 2050px 1320px at -14% -20%, color-mix(in srgb, var(--color-brand) 32%, transparent), color-mix(in srgb, var(--color-brand) 13%, transparent) 38%, color-mix(in srgb, var(--color-brand) 3.5%, transparent) 64%, transparent 84%), radial-gradient(ellipse 1700px 980px at 58% 46%, color-mix(in srgb, var(--color-producer-network) 7%, transparent), color-mix(in srgb, var(--color-producer-network) 2.6%, transparent) 48%, transparent 78%)",
+              "radial-gradient(ellipse 2050px 1320px at -14% -20%, color-mix(in srgb, var(--color-brand) 32%, transparent), color-mix(in srgb, var(--color-brand) 13%, transparent) 38%, color-mix(in srgb, var(--color-brand) 3.5%, transparent) 64%, transparent 84%), radial-gradient(ellipse 1700px 980px at 58% 46%, color-mix(in srgb, var(--color-ch40) 7%, transparent), color-mix(in srgb, var(--color-ch40) 2.6%, transparent) 48%, transparent 78%)",
           }}
         />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_55%,rgba(73,49,32,0.18)_80%,rgba(35,24,18,0.38)_100%)]" />

@@ -19,7 +19,7 @@ type EmptyStateVariant =
   | "reports"
   | "freight-iq"
   | "grid-iq"
-  | "producer-network";
+  | "ch40";
 
 interface EmptyStateProps {
   icon?: ReactNode;
@@ -47,7 +47,7 @@ const variantStyles: Record<EmptyStateVariant, { iconBg: string; iconText: strin
   reports: { iconBg: "bg-reports/10", iconText: "text-reports" },
   "freight-iq": { iconBg: "bg-freight-iq/10", iconText: "text-freight-iq" },
   "grid-iq": { iconBg: "bg-grid-iq/10", iconText: "text-grid-iq" },
-  "producer-network": { iconBg: "bg-producer-network/10", iconText: "text-producer-network" },
+  "ch40": { iconBg: "bg-ch40/10", iconText: "text-ch40" },
 };
 
 const variantToButton: Record<EmptyStateVariant, ButtonVariant> = {
@@ -66,7 +66,7 @@ const variantToButton: Record<EmptyStateVariant, ButtonVariant> = {
   reports: "reports",
   "freight-iq": "freight-iq",
   "grid-iq": "grid-iq",
-  "producer-network": "producer-network",
+  "ch40": "ch40",
 };
 
 function EmptyState({

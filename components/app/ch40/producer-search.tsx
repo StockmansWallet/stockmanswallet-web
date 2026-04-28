@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   searchProducersForPeer,
   sendProducerConnectionRequest,
-} from "@/app/(app)/dashboard/producer-network/directory/actions";
+} from "@/app/(app)/dashboard/ch40/directory/actions";
 
 interface SearchResult {
   user_id: string;
@@ -98,7 +98,7 @@ export function ProducerSearch() {
               aria-label="Search for a producer"
               value={query}
               onChange={(e) => handleQueryChange(e.target.value)}
-              className="bg-surface-lowest text-text-primary placeholder:text-text-muted focus:border-producer-network/30 focus:ring-producer-network/20 h-9 w-full rounded-full border border-white/[0.08] pr-9 pl-9 text-sm focus:ring-1 focus:outline-none"
+              className="bg-surface-lowest text-text-primary placeholder:text-text-muted focus:border-ch40/30 focus:ring-ch40/20 h-9 w-full rounded-full border border-white/[0.08] pr-9 pl-9 text-sm focus:ring-1 focus:outline-none"
             />
             {searching && (
               <Loader2

@@ -199,7 +199,7 @@ export function SaleyardsMapView({ yards, primaryProperty }: Props) {
                     {y.isStale ? (
                       <span className="text-text-muted">Stale</span>
                     ) : (
-                      <span className="text-producer-network">Active</span>
+                      <span className="text-ch40">Active</span>
                     )}
                   </span>
                 </button>

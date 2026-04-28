@@ -17,7 +17,7 @@ import { UserAvatar } from "@/components/app/user-avatar";
 import {
   searchProducersForPeer,
   sendProducerConnectionRequest,
-} from "@/app/(app)/dashboard/producer-network/directory/actions";
+} from "@/app/(app)/dashboard/ch40/directory/actions";
 
 interface SearchResult {
   user_id: string;
@@ -121,7 +121,7 @@ export function ProducerFindPanel() {
               aria-label="Search for a producer"
               value={query}
               onChange={(event) => handleQueryChange(event.target.value)}
-              className="h-10 w-full rounded-full border border-white/[0.08] bg-surface-lowest pr-10 pl-10 text-sm text-text-primary placeholder:text-text-muted focus:border-producer-network/30 focus:ring-1 focus:ring-producer-network/20 focus:outline-none"
+              className="h-10 w-full rounded-full border border-white/[0.08] bg-surface-lowest pr-10 pl-10 text-sm text-text-primary placeholder:text-text-muted focus:border-ch40/30 focus:ring-1 focus:ring-ch40/20 focus:outline-none"
             />
             {searching && (
               <Loader2
@@ -137,8 +137,8 @@ export function ProducerFindPanel() {
         {query.trim().length < 2 ? (
           <div className="pointer-events-none absolute inset-x-0 top-1/2 flex -translate-y-1/2 justify-center px-6 text-center">
             <div>
-              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-producer-network/10">
-                <Search className="h-6 w-6 text-producer-network" aria-hidden="true" />
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-ch40/10">
+                <Search className="h-6 w-6 text-ch40" aria-hidden="true" />
               </div>
               <p className="text-sm font-semibold text-text-primary">Search your producer network</p>
               <p className="mt-1 max-w-sm text-xs leading-relaxed text-text-muted">
@@ -155,7 +155,7 @@ export function ProducerFindPanel() {
               return (
                 <div
                   key={producer.user_id}
-                  className="overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] transition-colors hover:border-producer-network/25 hover:bg-producer-network/[0.06]"
+                  className="overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] transition-colors hover:border-ch40/25 hover:bg-ch40/[0.06]"
                 >
                   <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-start">
                     <UserAvatar
@@ -199,7 +199,7 @@ export function ProducerFindPanel() {
                             </span>
                           ) : (
                             <Button
-                              variant="producer-network"
+                              variant="ch40"
                               size="sm"
                               onClick={() => handleConnect(producer.user_id)}
                               disabled={sendingTo === producer.user_id}
@@ -225,7 +225,7 @@ export function ProducerFindPanel() {
 
                       <div className="mt-4 flex flex-wrap gap-2">
                         {producer.primary_species && (
-                          <span className="inline-flex items-center rounded-full border border-producer-network/12 bg-producer-network/[0.08] px-3 py-1 text-xs font-medium text-producer-network-light">
+                          <span className="inline-flex items-center rounded-full border border-ch40/12 bg-ch40/[0.08] px-3 py-1 text-xs font-medium text-ch40-light">
                             {producer.primary_species}
                           </span>
                         )}

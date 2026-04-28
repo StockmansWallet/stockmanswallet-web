@@ -19,7 +19,7 @@ const SPECIES_EMOJI: Record<string, string> = {
 export function ProducerCard({ producer, avatarUrl }: { producer: DirectoryProducer; avatarUrl?: string | null }) {
   return (
     <Link
-      href={`/dashboard/producer-network/directory/${producer.user_id}`}
+      href={`/dashboard/ch40/directory/${producer.user_id}`}
       className="group flex items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-white/[0.03]"
     >
       <UserAvatar

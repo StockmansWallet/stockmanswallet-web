@@ -148,7 +148,7 @@ export async function sendProducerConnectionRequest(targetUserId: string) {
 
   await notifyProducerConnectionRequest(supabase, targetUserId, requesterName, conn.id);
 
-  revalidatePath("/dashboard/producer-network");
+  revalidatePath("/dashboard/ch40");
   return { success: true };
 }
 
@@ -189,7 +189,7 @@ export async function cancelProducerConnectionRequest(connectionId: string) {
 
   if (error) return { error: error.message };
 
-  revalidatePath("/dashboard/producer-network");
-  revalidatePath(`/dashboard/producer-network/directory/${connection.requester_user_id}`);
+  revalidatePath("/dashboard/ch40");
+  revalidatePath(`/dashboard/ch40/directory/${connection.requester_user_id}`);
   return { success: true };
 }

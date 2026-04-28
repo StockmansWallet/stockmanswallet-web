@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Search, Users2 } from "lucide-react";
-import { ProducerCard } from "@/components/app/producer-network/producer-card";
+import { ProducerCard } from "@/components/app/ch40/producer-card";
 import { ProducerDirectorySearch } from "./producer-directory-search";
 import { sanitiseSearchQuery } from "@/lib/utils/search-sanitise";
 import { enrichProducers, type PrimarySpecies } from "@/lib/data/producer-enrichment";
@@ -103,10 +103,10 @@ export default async function ProducerDirectoryPage({
 
   return (
     <div className="w-full max-w-[1680px]">
-      <PageHeader feature="producer-network"
+      <PageHeader feature="ch40"
         title="Producer Directory"
-        titleClassName="text-4xl font-bold text-producer-network-light"
-        titleHref="/dashboard/producer-network"
+        titleClassName="text-4xl font-bold text-ch40-light"
+        titleHref="/dashboard/ch40"
         subtitle="Back to Ch 40"
         subtitleClassName="text-sm font-medium text-text-secondary"
       />
@@ -120,7 +120,7 @@ export default async function ProducerDirectoryPage({
       {!hasFilter ? (
         <Card>
           <EmptyState
-            icon={<Search className="h-6 w-6 text-producer-network-light" />}
+            icon={<Search className="h-6 w-6 text-ch40-light" />}
             title="Search to find producers"
             description="Type a name, property, or use the filters above to find producers to connect with."
             variant="amber"
@@ -129,7 +129,7 @@ export default async function ProducerDirectoryPage({
       ) : filteredProducers.length === 0 ? (
         <Card>
           <EmptyState
-            icon={<Users2 className="h-6 w-6 text-producer-network-light" />}
+            icon={<Users2 className="h-6 w-6 text-ch40-light" />}
             title="No producers found"
             description="No producers match your search. Try a different name or clear a filter."
             variant="amber"

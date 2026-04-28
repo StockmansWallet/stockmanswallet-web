@@ -2,7 +2,7 @@
 
 import { ChatBubble } from "@/components/app/chat/chat-bubble";
 import { Badge } from "@/components/ui/badge";
-import { ShareAttachmentCard } from "@/components/app/producer-network/share-attachment-card";
+import { ShareAttachmentCard } from "@/components/app/ch40/share-attachment-card";
 import type { AdvisoryMessage, MessageType } from "@/lib/types/advisory";
 
 interface Participant {

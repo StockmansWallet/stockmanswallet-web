@@ -5,19 +5,19 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
-import { ProducerRequestCard } from "@/components/app/producer-network/producer-request-card";
-import { ProducerConversationRemoveButton } from "@/components/app/producer-network/producer-conversation-remove-button";
-import { ProducerFindPanel } from "@/components/app/producer-network/producer-find-panel";
-import { ProducerConnectButton } from "@/components/app/producer-network/producer-connect-button";
-import { ProducerConnectionsRealtime } from "@/components/app/producer-network/producer-connections-realtime";
+import { ProducerRequestCard } from "@/components/app/ch40/producer-request-card";
+import { ProducerConversationRemoveButton } from "@/components/app/ch40/producer-conversation-remove-button";
+import { ProducerFindPanel } from "@/components/app/ch40/producer-find-panel";
+import { ProducerConnectButton } from "@/components/app/ch40/producer-connect-button";
+import { ProducerConnectionsRealtime } from "@/components/app/ch40/producer-connections-realtime";
 import { MarkNotificationsRead } from "@/components/app/mark-notifications-read";
 import { MarkConnectionNotificationsRead } from "@/components/app/mark-connection-notifications-read";
 import { AnimatedUnreadPill } from "@/components/app/animated-unread-pill";
 import { UserAvatar } from "@/components/app/user-avatar";
 import { createClient } from "@/lib/supabase/server";
 import { fetchUserAvatars } from "@/lib/auth/fetch-user-avatars";
-import { ModerationMenu } from "@/app/(app)/dashboard/producer-network/directory/[id]/moderation-menu";
-import { ProducerChatClient } from "@/app/(app)/dashboard/producer-network/connections/[id]/producer-chat-client";
+import { ModerationMenu } from "@/app/(app)/dashboard/ch40/directory/[id]/moderation-menu";
+import { ProducerChatClient } from "@/app/(app)/dashboard/ch40/connections/[id]/producer-chat-client";
 import type { AdvisoryMessage, ConnectionRequest } from "@/lib/types/advisory";
 
 interface ProducerNetworkHubProps {
@@ -223,17 +223,17 @@ export async function ProducerNetworkHub({
         <MarkConnectionNotificationsRead connectionId={selectedConnectionId} />
       )}
       <PageHeader
-        feature="producer-network"
+        feature="ch40"
         title="Ch 40"
         subtitle="The Producer Channel - tune in and chat with other producers"
-        titleClassName="text-4xl font-bold text-producer-network-light"
+        titleClassName="text-4xl font-bold text-ch40-light"
         subtitleClassName="text-sm font-medium text-text-secondary"
         actions={
           <Link
-            href="/dashboard/producer-network?panel=find"
+            href="/dashboard/ch40?panel=find"
             className={`inline-flex h-8 items-center justify-center rounded-full px-4 text-[13px] font-semibold transition-colors ${
               mode === "find"
-                ? "bg-producer-network text-white"
+                ? "bg-ch40 text-white"
                 : "bg-surface-high text-text-secondary hover:bg-surface-raised"
             }`}
           >
@@ -262,7 +262,7 @@ export async function ProducerNetworkHub({
                     <div className="flex min-h-[5.25rem] [transform:translateZ(0)] items-center justify-between gap-4 border-b border-white/[0.08] bg-white/[0.06] bg-clip-padding px-5 py-4 backdrop-blur-2xl backdrop-saturate-150 [backface-visibility:hidden]">
                       <div className="flex min-w-0 items-center gap-3">
                         <Link
-                          href={`/dashboard/producer-network/directory/${selectedOtherId}`}
+                          href={`/dashboard/ch40/directory/${selectedOtherId}`}
                           aria-label={`View ${selectedOtherName}'s profile`}
                           className="shrink-0"
                         >
@@ -303,12 +303,12 @@ export async function ProducerNetworkHub({
             ) : (
               <div className="flex min-h-0 flex-1 items-center justify-center px-6">
                 <EmptyState
-                  icon={<MessageCircle className="text-producer-network h-6 w-6" />}
+                  icon={<MessageCircle className="text-ch40 h-6 w-6" />}
                   title="Select a conversation"
                   description="Choose a producer from the conversations rail to open the chat here."
                   actionLabel="Find Producers"
-                  actionHref="/dashboard/producer-network?panel=find"
-                  variant="producer-network"
+                  actionHref="/dashboard/ch40?panel=find"
+                  variant="ch40"
                 />
               </div>
             )}
@@ -360,12 +360,12 @@ export async function ProducerNetworkHub({
                           key={c.id}
                           className={`group relative flex min-h-[4.875rem] items-center gap-3 rounded-xl p-3 transition-colors ${
                             active
-                              ? "bg-producer-network/15"
+                              ? "bg-ch40/15"
                               : "bg-white/[0.03] hover:bg-white/[0.05]"
                           }`}
                         >
                           <Link
-                            href={`/dashboard/producer-network/connections/${c.id}`}
+                            href={`/dashboard/ch40/connections/${c.id}`}
                             aria-current={active ? "page" : undefined}
                             aria-label={`Open chat with ${name}`}
                             className="absolute inset-0 z-0"
@@ -418,12 +418,12 @@ export async function ProducerNetworkHub({
                   </div>
                 ) : (
                   <EmptyState
-                    icon={<Users2 className="text-producer-network-light h-6 w-6" />}
+                    icon={<Users2 className="text-ch40-light h-6 w-6" />}
                     title="No conversations yet"
                     description="Find producers to start building your network."
                     actionLabel="Find Producers"
-                    actionHref="/dashboard/producer-network?panel=find"
-                    variant="producer-network"
+                    actionHref="/dashboard/ch40?panel=find"
+                    variant="ch40"
                   />
                 )}
 
@@ -446,11 +446,11 @@ export async function ProducerNetworkHub({
                         return (
                           <Link
                             key={c.id}
-                            href={`/dashboard/producer-network?pending=${c.id}`}
+                            href={`/dashboard/ch40?pending=${c.id}`}
                             aria-current={active ? "page" : undefined}
                             className={`group flex min-h-[4.875rem] items-center gap-3 rounded-2xl border p-3 transition-colors ${
                               active
-                                ? "border-producer-network/20 bg-producer-network/12"
+                                ? "border-ch40/20 bg-ch40/12"
                                 : "border-white/[0.06] bg-white/[0.03] hover:bg-white/[0.05]"
                             }`}
                           >
@@ -500,9 +500,9 @@ export async function ProducerNetworkHub({
             </div>
 
             <div className="shrink-0 border-t border-white/[0.06] p-3">
-              <div className="border-producer-network/10 bg-producer-network/[0.04] flex items-start gap-2 rounded-2xl border p-3">
+              <div className="border-ch40/10 bg-ch40/[0.04] flex items-start gap-2 rounded-2xl border p-3">
                 <Handshake
-                  className="text-producer-network-light mt-0.5 h-4 w-4 shrink-0"
+                  className="text-ch40-light mt-0.5 h-4 w-4 shrink-0"
                   aria-hidden="true"
                 />
                 <p className="text-text-muted text-[11px] leading-relaxed">
@@ -569,8 +569,8 @@ function PendingProducerPanel({
           </p>
           {location && <p className="text-text-secondary mt-4 text-xs font-medium">{location}</p>}
           <Link
-            href="/dashboard/producer-network?panel=find"
-            className="border-producer-network/20 bg-producer-network/10 text-producer-network hover:bg-producer-network/15 mt-5 inline-flex h-9 items-center justify-center rounded-full border px-4 text-[13px] font-semibold transition-colors"
+            href="/dashboard/ch40?panel=find"
+            className="border-ch40/20 bg-ch40/10 text-ch40 hover:bg-ch40/15 mt-5 inline-flex h-9 items-center justify-center rounded-full border px-4 text-[13px] font-semibold transition-colors"
           >
             <Search className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
             Find more producers

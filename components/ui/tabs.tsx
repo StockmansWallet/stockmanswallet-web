@@ -10,7 +10,7 @@ type TabAccent =
   | "reports"
   | "freight-iq"
   | "grid-iq"
-  | "producer-network"
+  | "ch40"
   | "advisor";
 
 interface Tab {
@@ -35,7 +35,7 @@ const activeTextByAccent: Record<TabAccent, string> = {
   reports: "text-reports-light",
   "freight-iq": "text-freight-iq-text",
   "grid-iq": "text-grid-iq-light",
-  "producer-network": "text-producer-network-light",
+  "ch40": "text-ch40-light",
   advisor: "text-advisor-light",
 };
 
@@ -48,7 +48,7 @@ const indicatorByAccent: Record<TabAccent, string> = {
   reports: "bg-reports/20",
   "freight-iq": "bg-freight-iq-dark/30",
   "grid-iq": "bg-grid-iq/20",
-  "producer-network": "bg-producer-network/20",
+  "ch40": "bg-ch40/20",
   advisor: "bg-indigo/20",
 };
 

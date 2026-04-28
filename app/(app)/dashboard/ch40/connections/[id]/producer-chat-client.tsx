@@ -4,8 +4,8 @@ import { useState, useEffect, useRef, useCallback, type ReactNode } from "react"
 import { MessageThread } from "@/components/app/advisory/message-thread";
 import { ChatInput } from "@/components/app/chat/chat-input";
 import { TypingIndicator } from "@/components/app/chat/typing-indicator";
-import { ShareMenu } from "@/components/app/producer-network/share-menu";
-import { ShareAttachmentCard } from "@/components/app/producer-network/share-attachment-card";
+import { ShareMenu } from "@/components/app/ch40/share-menu";
+import { ShareAttachmentCard } from "@/components/app/ch40/share-attachment-card";
 import { useTypingIndicator } from "@/hooks/use-typing-indicator";
 import { sendProducerMessage, fetchProducerMessages } from "./actions";
 import type { AdvisoryMessage, MessageAttachment } from "@/lib/types/advisory";
@@ -13,7 +13,7 @@ import type { AdvisoryMessage, MessageAttachment } from "@/lib/types/advisory";
 const POLL_INTERVAL = 5000;
 // Peer bubble uses the Producer Network accent (sage, -dark variant for
 // filled-area legibility, matching the Brangus chat pattern).
-const OTHER_BG = "var(--color-producer-network-dark)";
+const OTHER_BG = "var(--color-ch40-dark)";
 
 interface ProducerChatClientProps {
   connectionId: string;
@@ -127,7 +127,7 @@ export function ProducerChatClient({
               participants={participants}
               animatedMessageIds={animatedIds}
               hideSenderName
-              otherBgClass="bg-producer-network-dark"
+              otherBgClass="bg-ch40-dark"
               otherTailColor={OTHER_BG}
               avatars={avatars}
             />
@@ -166,7 +166,7 @@ export function ProducerChatClient({
               placeholder={
                 pendingAttachment ? "Add a note (optional), then send..." : "Write a message..."
               }
-              accentClass="bg-producer-network hover:bg-producer-network"
+              accentClass="bg-ch40 hover:bg-ch40"
               allowEmpty={pendingAttachment != null}
             />
           </div>

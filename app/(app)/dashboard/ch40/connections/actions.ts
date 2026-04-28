@@ -42,7 +42,7 @@ export async function approveProducerRequest(requestId: string) {
 
   await notifyProducerRequestApproved(supabase, conn.requester_user_id, name, conn.id);
 
-  revalidatePath("/dashboard/producer-network");
+  revalidatePath("/dashboard/ch40");
   return { success: true };
 }
 
@@ -76,6 +76,6 @@ export async function denyProducerRequest(requestId: string) {
 
   await notifyProducerRequestDenied(supabase, conn.requester_user_id, name, conn.id, "denied");
 
-  revalidatePath("/dashboard/producer-network");
+  revalidatePath("/dashboard/ch40");
   return { success: true };
 }

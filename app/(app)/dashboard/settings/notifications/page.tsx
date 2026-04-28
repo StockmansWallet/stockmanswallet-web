@@ -60,7 +60,7 @@ const notificationGroups = [
     title: "Ch 40",
     description: "Connection requests, chat messages, and shared activity.",
     icon: MessageCircle,
-    tone: "producer-network",
+    tone: "ch40",
     items: [
       {
         label: "Connection requests",
@@ -69,7 +69,7 @@ const notificationGroups = [
       },
       {
         label: "Messages",
-        description: "Unread producer-network conversations show in the sidebar.",
+        description: "Unread ch40 conversations show in the sidebar.",
         status: "In app",
       },
     ],
@@ -297,8 +297,8 @@ function getToneClasses(tone: string) {
       return { bg: "bg-yard-book/15", text: "text-yard-book" };
     case "markets":
       return { bg: "bg-markets/15", text: "text-markets" };
-    case "producer-network":
-      return { bg: "bg-producer-network/15", text: "text-producer-network" };
+    case "ch40":
+      return { bg: "bg-ch40/15", text: "text-ch40" };
     default:
       return { bg: "bg-violet/15", text: "text-violet" };
   }

@@ -105,7 +105,7 @@ export const FEATURES: Feature[] = [
     icon: "truck",
   },
   {
-    id: "producer-network",
+    id: "ch40",
     name: "Ch 40",
     description:
       "Tune in to other producers in your region. Build a trusted peer network to share operational insights, compare notes on markets and conditions, and collaborate on the challenges only another farmer understands.",

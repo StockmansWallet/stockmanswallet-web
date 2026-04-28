@@ -175,7 +175,7 @@ export async function notifyProducerConnectionRequest(
     type: "producer_connection_request",
     title: `${fromName} wants to connect`,
     body: "Review and accept or decline this connection request.",
-    link: "/dashboard/producer-network",
+    link: "/dashboard/ch40",
     connectionId,
   });
 }
@@ -191,7 +191,7 @@ export async function notifyProducerRequestApproved(
     type: "producer_request_approved",
     title: `${fromName} accepted your connection`,
     body: "You can now chat with each other.",
-    link: `/dashboard/producer-network/connections/${connectionId}`,
+    link: `/dashboard/ch40/connections/${connectionId}`,
     connectionId,
   });
 }
@@ -220,7 +220,7 @@ export async function notifyProducerRequestDenied(
       reason === "disconnected"
         ? "Your producer connection has ended. You can send a new request later."
         : undefined,
-    link: "/dashboard/producer-network",
+    link: "/dashboard/ch40",
     connectionId,
   });
 }

@@ -33,7 +33,7 @@ type HeaderAccent =
   | "reports"
   | "freight-iq"
   | "grid-iq"
-  | "producer-network"
+  | "ch40"
   | "advisor";
 
 interface PageMeta {
@@ -348,7 +348,7 @@ const accentTitleClass: Record<HeaderAccent, string> = {
   reports: "text-reports",
   "freight-iq": "text-freight-iq",
   "grid-iq": "text-grid-iq",
-  "producer-network": "text-producer-network-light",
+  "ch40": "text-ch40-light",
   advisor: "text-advisor",
 };
 

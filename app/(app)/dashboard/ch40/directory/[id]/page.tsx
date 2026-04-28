@@ -5,8 +5,8 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Building2, Handshake, Home, Ban } from "lucide-react";
-import { ProducerConnectButton } from "@/components/app/producer-network/producer-connect-button";
-import { ProducerConnectionStatusBadge } from "@/components/app/producer-network/producer-connection-status-badge";
+import { ProducerConnectButton } from "@/components/app/ch40/producer-connect-button";
+import { ProducerConnectionStatusBadge } from "@/components/app/ch40/producer-connection-status-badge";
 import { ModerationMenu } from "./moderation-menu";
 import { enrichProducers } from "@/lib/data/producer-enrichment";
 import { isBlockedBy } from "@/lib/data/user-blocks";
@@ -95,19 +95,19 @@ export default async function ProducerProfilePage({
 
   return (
     <div className="w-full max-w-[1680px]">
-      <PageHeader feature="producer-network"
+      <PageHeader feature="ch40"
         title="Producer Profile"
-        titleClassName="text-4xl font-bold text-producer-network-light"
-        titleHref="/dashboard/producer-network/directory"
+        titleClassName="text-4xl font-bold text-ch40-light"
+        titleHref="/dashboard/ch40/directory"
         subtitle="Back to directory"
         subtitleClassName="text-sm font-medium text-text-secondary"
       />
 
       <Card className="mb-6 overflow-hidden">
-        <div className="bg-gradient-to-br from-producer-network/10 via-transparent to-transparent p-6">
+        <div className="bg-gradient-to-br from-ch40/10 via-transparent to-transparent p-6">
           <div className="flex items-start gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-producer-network/15">
-              <Handshake className="h-7 w-7 text-producer-network-light" aria-hidden="true" />
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-ch40/15">
+              <Handshake className="h-7 w-7 text-ch40-light" aria-hidden="true" />
             </div>
             <div className="min-w-0 flex-1">
               <h2 className="text-xl font-bold text-text-primary">

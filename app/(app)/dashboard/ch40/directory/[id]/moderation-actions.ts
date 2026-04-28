@@ -54,8 +54,8 @@ export async function blockUser(userId: string, reason?: string) {
       `and(requester_user_id.eq.${user.id},target_user_id.eq.${userId}),and(requester_user_id.eq.${userId},target_user_id.eq.${user.id})`,
     );
 
-  revalidatePath("/dashboard/producer-network");
-  revalidatePath(`/dashboard/producer-network/directory/${userId}`);
+  revalidatePath("/dashboard/ch40");
+  revalidatePath(`/dashboard/ch40/directory/${userId}`);
   return { success: true };
 }
 
@@ -75,8 +75,8 @@ export async function unblockUser(userId: string) {
 
   if (error) return { error: error.message };
 
-  revalidatePath("/dashboard/producer-network");
-  revalidatePath(`/dashboard/producer-network/directory/${userId}`);
+  revalidatePath("/dashboard/ch40");
+  revalidatePath(`/dashboard/ch40/directory/${userId}`);
   return { success: true };
 }
 

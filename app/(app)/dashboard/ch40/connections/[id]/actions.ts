@@ -170,11 +170,11 @@ export async function sendProducerMessage(
     userId: recipientId,
     type: "new_message",
     title: `New message from ${senderName}`,
-    link: `/dashboard/producer-network/connections/${connectionId}`,
+    link: `/dashboard/ch40/connections/${connectionId}`,
     connectionId,
   });
 
-  revalidatePath(`/dashboard/producer-network/connections/${connectionId}`);
+  revalidatePath(`/dashboard/ch40/connections/${connectionId}`);
   return { success: true };
 }
 
@@ -278,6 +278,6 @@ export async function disconnectProducer(connectionId: string) {
 
   await notifyProducerRequestDenied(supabase, recipientId, name, connectionId, "disconnected");
 
-  revalidatePath("/dashboard/producer-network");
+  revalidatePath("/dashboard/ch40");
   return { success: true };
 }

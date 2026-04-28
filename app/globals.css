@@ -150,9 +150,9 @@
   --feature-freight: var(--color-freight-iq);
   --feature-freight-light: var(--color-freight-iq-light);
   --feature-freight-dark: var(--color-freight-iq-dark);
-  --feature-network: var(--color-producer-network);
-  --feature-network-light: var(--color-producer-network-light);
-  --feature-network-dark: var(--color-producer-network-dark);
+  --feature-ch40: var(--color-ch40);
+  --feature-ch40-light: var(--color-ch40-light);
+  --feature-ch40-dark: var(--color-ch40-dark);
   --feature-gridiq: var(--color-grid-iq);
   --feature-gridiq-light: var(--color-grid-iq-light);
   --feature-gridiq-dark: var(--color-grid-iq-dark);
@@ -341,11 +341,11 @@
   --color-grid-iq-dark: var(--color-teal-dark);
   --color-grid-iq-text: var(--color-teal-text);
 
-  /* Producer Network - Paddock Sage */
-  --color-producer-network: var(--color-sage);
-  --color-producer-network-light: var(--color-sage-light);
-  --color-producer-network-dark: var(--color-sage-dark);
-  --color-producer-network-text: var(--color-sage-text);
+  /* Ch 40 - Paddock Sage */
+  --color-ch40: var(--color-sage);
+  --color-ch40-light: var(--color-sage-light);
+  --color-ch40-dark: var(--color-sage-dark);
+  --color-ch40-text: var(--color-sage-text);
 
   /* Help Centre - neutral info blue, distinct from Brangus sky. */
   --color-help-centre: var(--color-neutral);
@@ -353,7 +353,7 @@
   --color-help-centre-dark: var(--color-neutral-dark);
   --color-help-centre-text: var(--color-neutral-text);
 
-  /* Community - alias of Producer Network. */
+  /* Community - alias of Ch 40. */
   --color-community: var(--color-sage);
   --color-community-light: var(--color-sage-light);
   --color-community-dark: var(--color-sage-dark);
@@ -370,7 +370,7 @@
      - chat-other: peer bubble default for chats that don't override
      - chat-advisor-accent: send-button accent in advisor chat (rose)
      Brangus (assistant) bubble uses --color-brangus-dark; producer peer uses
-     --color-producer-network-dark. Override per chat via the MessageThread
+     --color-ch40-dark. Override per chat via the MessageThread
      otherBgClass / otherTailColor props, not by adding new tokens.
      ================================================================ */
   --color-chat-user: #3d4550;

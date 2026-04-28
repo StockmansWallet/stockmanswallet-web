@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { ConfirmModal } from "@/components/app/advisory/confirm-modal";
-import { disconnectProducer } from "@/app/(app)/dashboard/producer-network/connections/[id]/actions";
+import { disconnectProducer } from "@/app/(app)/dashboard/ch40/connections/[id]/actions";
 
 interface ProducerConversationRemoveButtonProps {
   connectionId: string;
@@ -30,7 +30,7 @@ export function ProducerConversationRemoveButton({
       return;
     }
     setOpen(false);
-    router.push("/dashboard/producer-network");
+    router.push("/dashboard/ch40");
     router.refresh();
   };
 

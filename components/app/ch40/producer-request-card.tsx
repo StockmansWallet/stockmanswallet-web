@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/app/advisory/confirm-modal";
 import { UserAvatar } from "@/components/app/user-avatar";
-import { approveProducerRequest, denyProducerRequest } from "@/app/(app)/dashboard/producer-network/connections/actions";
+import { approveProducerRequest, denyProducerRequest } from "@/app/(app)/dashboard/ch40/connections/actions";
 
 interface ProducerRequestCardProps {
   request: {

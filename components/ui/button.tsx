@@ -20,7 +20,7 @@ type ButtonVariant =
   | "reports"
   | "freight-iq"
   | "grid-iq"
-  | "producer-network";
+  | "ch40";
 type ButtonSize = "sm" | "md" | "lg";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -62,8 +62,8 @@ const variantClasses: Record<ButtonVariant, string> = {
     "bg-freight-iq-dark text-white hover:bg-freight-iq-text active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   "grid-iq":
     "bg-grid-iq text-white hover:bg-grid-iq-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
-  "producer-network":
-    "bg-producer-network text-white hover:bg-producer-network-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
+  "ch40":
+    "bg-ch40 text-white hover:bg-ch40-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
