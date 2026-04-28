@@ -946,10 +946,57 @@ async function callBrangusAPI(
   if (!res.ok) {
     const errorText = await res.text();
     console.error("Brangus API error:", res.status, errorText);
-    throw new Error(`Brangus returned an error (${res.status}). Please try again.`);
+    throw new Error(friendlyErrorMessage(res.status, errorText));
   }
 
   return res.json();
+}
+
+// MARK: - Friendly Error Messages
+// Maps an HTTP status from the brangus-chat edge function to a user-facing
+// message. Prefers the body's `error` field when present (the edge function
+// already crafts good messages there) and falls back to a status-specific
+// line. Stays in Brangus's relaxed voice; never surfaces the raw status code.
+function friendlyErrorMessage(status: number, bodyText: string): string {
+  const bodyError = parseErrorField(bodyText);
+
+  switch (status) {
+    case 401:
+      return "Your session's expired. Sign out and back in to keep chatting with Brangus.";
+    case 403:
+      return (
+        bodyError ??
+        "Brangus can't access your account right now. Sign out and back in, or get in touch if it keeps happening."
+      );
+    case 429:
+      return (
+        bodyError ??
+        "You've reached today's chat limit with Brangus. It resets at midnight Sydney time, give it another go then."
+      );
+    case 400:
+      return bodyError ?? "Something about that message tripped Brangus up. Try shortening it or rewording.";
+    case 502:
+    case 503:
+    case 504:
+      return "Brangus is having a moment. Give it a few seconds and try again.";
+    case 500:
+      return "Brangus hit a snag on his end. Try once more, or let us know if it keeps happening.";
+    default:
+      return bodyError ?? "Couldn't reach Brangus just now. Check your connection and try again.";
+  }
+}
+
+function parseErrorField(bodyText: string): string | null {
+  if (!bodyText) return null;
+  try {
+    const parsed = JSON.parse(bodyText);
+    if (parsed && typeof parsed.error === "string" && parsed.error.length > 0) {
+      return parsed.error;
+    }
+  } catch {
+    // Body wasn't JSON; ignore and fall through to status-based default.
+  }
+  return null;
 }
 
 // MARK: - Freight Guardrail Helpers
