@@ -64,6 +64,7 @@ export const DEFAULT_FILE_CATEGORY_OPTIONS = [
   "Soil & pasture",
   "Kill sheets",
   "Breeding records",
+  "Reports",
   "Photos",
   "Finance & admin",
   "General",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type DragEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Database,
   File,
@@ -64,6 +64,8 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
   const [editingCollection, setEditingCollection] = useState<string | null>(null);
   const [editingDraft, setEditingDraft] = useState("");
   const [openCollectionMenu, setOpenCollectionMenu] = useState<string | null>(null);
+  const [draggingFileId, setDraggingFileId] = useState<string | null>(null);
+  const [dropCollection, setDropCollection] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -128,23 +130,6 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
     return Array.from(groups.entries());
   }, [groupMode, visibleFiles]);
 
-  const stats = useMemo(() => {
-    const typeCounts = files.reduce(
-      (acc, file) => {
-        const type = detectFileType(file);
-        acc[type] = (acc[type] ?? 0) + 1;
-        return acc;
-      },
-      {} as Partial<Record<BrangusDetectedFileType, number>>
-    );
-    return {
-      total: files.length,
-      collections: collectionCounts.size,
-      pdfs: typeCounts.pdf ?? 0,
-      images: typeCounts.image ?? 0,
-    };
-  }, [collectionCounts.size, files]);
-
   const handlePicked = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const picked = Array.from(e.target.files ?? []);
@@ -195,6 +180,56 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
     setFiles((prev) => prev.map((f) => (f.id === updated.id ? { ...f, ...updated } : f)));
     setActiveFile((current) => (current?.id === updated.id ? { ...current, ...updated } : current));
   }, []);
+
+  const moveFileToCollection = useCallback(
+    async (fileId: string, nextCollection: string | null) => {
+      const file = files.find((candidate) => candidate.id === fileId);
+      if (!file) return;
+
+      const previousCategory = file.category ?? null;
+      const cleanNext = nextCollection?.trim() || null;
+      if ((previousCategory ?? null) === cleanNext) return;
+
+      setError(null);
+      setFiles((prev) =>
+        prev.map((candidate) =>
+          candidate.id === fileId ? { ...candidate, category: cleanNext } : candidate
+        )
+      );
+      setActiveFile((current) =>
+        current?.id === fileId ? { ...current, category: cleanNext } : current
+      );
+
+      const supabase = createClient();
+      const { error: updateError } = await supabase
+        .from("brangus_files")
+        .update({ category: cleanNext })
+        .eq("id", fileId);
+
+      if (updateError) {
+        setFiles((prev) =>
+          prev.map((candidate) =>
+            candidate.id === fileId ? { ...candidate, category: previousCategory } : candidate
+          )
+        );
+        setActiveFile((current) =>
+          current?.id === fileId ? { ...current, category: previousCategory } : current
+        );
+        setError(updateError.message);
+      }
+    },
+    [files]
+  );
+
+  const handleDropOnCollection = useCallback(
+    (collection: string | null) => {
+      if (!draggingFileId) return;
+      void moveFileToCollection(draggingFileId, collection);
+      setDraggingFileId(null);
+      setDropCollection(null);
+    },
+    [draggingFileId, moveFileToCollection]
+  );
 
   const handleCreateCollection = useCallback(() => {
     const nextCollection = collectionDraft.trim();
@@ -333,6 +368,9 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
     [editingCollection, files]
   );
 
+  const activeCollectionLabel =
+    activeCollection === ALL_COLLECTIONS ? "All files" : activeCollection;
+
   return (
     <div className="space-y-4">
       <input ref={fileInputRef} type="file" className="hidden" multiple onChange={handlePicked} />
@@ -348,39 +386,6 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
           Add file
         </button>
       </PageHeaderActionsPortal>
-
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatTile label="Files" value={stats.total} />
-        <StatTile label="Collections" value={stats.collections} />
-        <StatTile label="PDFs" value={stats.pdfs} />
-        <StatTile label="Images" value={stats.images} />
-      </div>
-
-      <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-white/[0.02] p-3 md:flex-row md:items-center md:justify-between">
-        <div className="relative min-w-0 flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-white/35" />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search files, categories, or types"
-            className="focus:border-brand/50 h-10 w-full rounded-lg border border-white/10 bg-black/20 pr-3 pl-9 text-sm text-white outline-none placeholder:text-white/35"
-          />
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <select
-            value={groupMode}
-            onChange={(e) => setGroupMode(e.target.value as GroupMode)}
-            className="h-10 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-sm text-white"
-            aria-label="Group files"
-          >
-            <option value="category">Group by collection</option>
-            <option value="type">Group by file type</option>
-            <option value="source">Group by source</option>
-            <option value="none">No grouping</option>
-          </select>
-        </div>
-      </div>
 
       {error && (
         <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
@@ -442,6 +447,14 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
             count={collectionCounts.get(UNCATEGORISED) ?? 0}
             active={activeCollection === UNCATEGORISED}
             onClick={() => setActiveCollection(UNCATEGORISED)}
+            dropActive={dropCollection === UNCATEGORISED}
+            onDragOver={(event) => {
+              if (!draggingFileId) return;
+              event.preventDefault();
+              setDropCollection(UNCATEGORISED);
+            }}
+            onDragLeave={() => setDropCollection(null)}
+            onDrop={() => handleDropOnCollection(null)}
           />
 
           <div className="my-2 h-px bg-white/[0.06]" />
@@ -468,6 +481,14 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
                     setActiveCollection(category);
                     setOpenCollectionMenu(null);
                   }}
+                  dropActive={dropCollection === category}
+                  onDragOver={(event) => {
+                    if (!draggingFileId) return;
+                    event.preventDefault();
+                    setDropCollection(category);
+                  }}
+                  onDragLeave={() => setDropCollection(null)}
+                  onDrop={() => handleDropOnCollection(category)}
                   onToggleMenu={() =>
                     setOpenCollectionMenu((current) => (current === category ? null : category))
                   }
@@ -487,46 +508,94 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
         </aside>
 
         <main className="min-w-0 rounded-xl border border-white/10 bg-white/[0.02]">
-          {visibleFiles.length === 0 ? (
-            <div className="p-8 text-center text-sm text-white/60">
-              {files.length === 0
-                ? "No files yet. Upload documents or photos and they will appear here."
-                : "No files match this view."}
-            </div>
-          ) : (
-            <div className="divide-y divide-white/[0.06]">
-              {groupedFiles.map(([group, groupFiles]) => (
-                <section key={group} className="min-w-0">
-                  {groupMode !== "none" && (
-                    <div className="flex items-center justify-between bg-white/[0.025] px-4 py-2">
-                      <div className="flex min-w-0 items-center gap-2 text-xs font-semibold tracking-wide text-white/55 uppercase">
-                        {groupMode === "type" ? (
-                          <FileTypeIcon type={detectFileType(groupFiles[0])} />
-                        ) : groupMode === "source" ? (
-                          <Layers3 className="h-4 w-4" />
-                        ) : (
-                          <FolderOpen className="h-4 w-4" />
-                        )}
-                        <span className="truncate">{group}</span>
-                      </div>
-                      <span className="text-xs text-white/35">{groupFiles.length}</span>
-                    </div>
-                  )}
+          <div className="border-b border-white/[0.06] p-3">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 text-xs font-semibold tracking-wide text-white/45 uppercase">
+                  <FolderOpen className="h-4 w-4" />
+                  <span className="truncate">{activeCollectionLabel}</span>
+                  <span className="text-white/30">{visibleFiles.length}</span>
+                </div>
+              </div>
 
-                  <ul className="divide-y divide-white/[0.05]">
-                    {groupFiles.map((file) => (
-                      <FileRow
-                        key={file.id}
-                        file={file}
-                        onOpen={() => setActiveFile(file)}
-                        onDelete={() => handleDelete(file)}
-                      />
-                    ))}
-                  </ul>
-                </section>
-              ))}
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center lg:justify-end">
+                <div className="relative min-w-0 sm:w-48 lg:w-56">
+                  <Search className="text-text-muted pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search files"
+                    aria-label="Search files"
+                    className="bg-surface text-text-primary placeholder:text-text-muted focus:ring-brand/20 h-8 w-full rounded-full pr-4 pl-9 text-xs transition-all outline-none focus:ring-2"
+                  />
+                </div>
+
+                <select
+                  value={groupMode}
+                  onChange={(e) => setGroupMode(e.target.value as GroupMode)}
+                  className="h-9 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-sm text-white"
+                  aria-label="Group files"
+                >
+                  <option value="category">Group by collection</option>
+                  <option value="type">Group by file type</option>
+                  <option value="source">Group by source</option>
+                  <option value="none">No grouping</option>
+                </select>
+              </div>
             </div>
-          )}
+          </div>
+
+          <div className="p-3">
+            {visibleFiles.length === 0 ? (
+              <div className="p-8 text-center text-sm text-white/60">
+                {files.length === 0
+                  ? "No files yet. Upload documents or photos and they will appear here."
+                  : "No files match this view."}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {groupedFiles.map(([group, groupFiles]) => (
+                  <section key={group} className="min-w-0">
+                    {groupMode !== "none" && (
+                      <div className="mb-2 flex items-center justify-between px-1">
+                        <div className="flex min-w-0 items-center gap-2 text-xs font-semibold tracking-wide text-white/55 uppercase">
+                          {groupMode === "type" ? (
+                            <FileTypeIcon type={detectFileType(groupFiles[0])} />
+                          ) : groupMode === "source" ? (
+                            <Layers3 className="h-4 w-4" />
+                          ) : (
+                            <FolderOpen className="h-4 w-4" />
+                          )}
+                          <span className="truncate">{group}</span>
+                        </div>
+                        <span className="text-xs text-white/35">{groupFiles.length}</span>
+                      </div>
+                    )}
+
+                    <ul className="space-y-2">
+                      {groupFiles.map((file) => (
+                        <FileRow
+                          key={file.id}
+                          file={file}
+                          onOpen={() => setActiveFile(file)}
+                          onDelete={() => handleDelete(file)}
+                          onDragStart={() => {
+                            setDraggingFileId(file.id);
+                            setOpenCollectionMenu(null);
+                          }}
+                          onDragEnd={() => {
+                            setDraggingFileId(null);
+                            setDropCollection(null);
+                          }}
+                        />
+                      ))}
+                    </ul>
+                  </section>
+                ))}
+              </div>
+            )}
+          </div>
         </main>
       </div>
 
@@ -587,21 +656,16 @@ function saveCollectionList(key: string, collections: string[]): void {
   window.localStorage.setItem(key, JSON.stringify(collections));
 }
 
-function StatTile({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3">
-      <div className="text-xs font-medium text-white/45">{label}</div>
-      <div className="mt-1 text-2xl font-semibold text-white">{value}</div>
-    </div>
-  );
-}
-
 function CollectionButton({
   label,
   count,
   active,
   menuOpen,
+  dropActive,
   onClick,
+  onDragOver,
+  onDragLeave,
+  onDrop,
   onToggleMenu,
   onRename,
   onDelete,
@@ -610,15 +674,26 @@ function CollectionButton({
   count: number;
   active: boolean;
   menuOpen?: boolean;
+  dropActive?: boolean;
   onClick: () => void;
+  onDragOver?: (event: DragEvent<HTMLDivElement>) => void;
+  onDragLeave?: () => void;
+  onDrop?: () => void;
   onToggleMenu?: () => void;
   onRename?: () => void;
   onDelete?: () => void;
 }) {
   return (
     <div
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
       className={`group relative flex w-full items-center rounded-lg px-2 py-2 pr-9 text-left text-sm transition ${
-        active ? "bg-brand/15 text-brand" : "text-white/70 hover:bg-white/[0.05] hover:text-white"
+        dropActive
+          ? "bg-brand/25 text-brand ring-1 ring-brand/35"
+          : active
+            ? "bg-brand/15 text-brand"
+            : "text-white/70 hover:bg-white/[0.05] hover:text-white"
       }`}
     >
       <button type="button" onClick={onClick} className="flex min-w-0 flex-1 items-center gap-2">
@@ -728,16 +803,29 @@ function FileRow({
   file,
   onOpen,
   onDelete,
+  onDragStart,
+  onDragEnd,
 }: {
   file: BrangusFileRow;
   onOpen: () => void;
   onDelete: () => void;
+  onDragStart: () => void;
+  onDragEnd: () => void;
 }) {
   const type = detectFileType(file);
   const category = fileCategoryLabel(file);
 
   return (
-    <li className="flex min-w-0 items-center gap-3 px-4 py-3">
+    <li
+      draggable
+      onDragStart={(event) => {
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", file.id);
+        onDragStart();
+      }}
+      onDragEnd={onDragEnd}
+      className="flex min-w-0 cursor-grab items-center gap-3 rounded-lg border border-white/10 bg-white/[0.025] px-4 py-3 transition hover:border-white/15 hover:bg-white/[0.04] active:cursor-grabbing"
+    >
       <div className="bg-brand/15 text-brand flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
         <FileTypeIcon type={type} />
       </div>
