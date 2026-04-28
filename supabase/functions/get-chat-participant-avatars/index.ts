@@ -70,22 +70,42 @@ serve(async (req) => {
 
     // Debug: Derive the set of user IDs the caller is allowed to ask about.
     // Allowed = anyone the caller has shared with, or anyone who has shared
-    // with the caller, via brangus_shared_chats. Same posture as the web action.
-    const { data: chatRows, error: chatError } = await userClient
-      .from("brangus_shared_chats")
-      .select("sender_user_id, recipient_user_id")
-      .or(`sender_user_id.eq.${callerId},recipient_user_id.eq.${callerId}`);
-    if (chatError) {
+    // with the caller, via brangus_shared_chats; plus anyone the caller has an
+    // approved producer_peer connection_requests row with (Ch 40 peer chat).
+    const [sharedChats, peerConnections] = await Promise.all([
+      userClient
+        .from("brangus_shared_chats")
+        .select("sender_user_id, recipient_user_id")
+        .or(`sender_user_id.eq.${callerId},recipient_user_id.eq.${callerId}`),
+      userClient
+        .from("connection_requests")
+        .select("requester_user_id, target_user_id")
+        .eq("connection_type", "producer_peer")
+        .eq("status", "approved")
+        .or(`requester_user_id.eq.${callerId},target_user_id.eq.${callerId}`),
+    ]);
+    if (sharedChats.error) {
       return json({ error: "Could not load shared chat scope" }, 500);
+    }
+    if (peerConnections.error) {
+      return json({ error: "Could not load Ch 40 connection scope" }, 500);
     }
 
     const allowed = new Set<string>();
-    for (const row of chatRows ?? []) {
+    for (const row of sharedChats.data ?? []) {
       if (row.sender_user_id === callerId && row.recipient_user_id) {
         allowed.add(row.recipient_user_id);
       }
       if (row.recipient_user_id === callerId && row.sender_user_id) {
         allowed.add(row.sender_user_id);
+      }
+    }
+    for (const row of peerConnections.data ?? []) {
+      if (row.requester_user_id === callerId && row.target_user_id) {
+        allowed.add(row.target_user_id);
+      }
+      if (row.target_user_id === callerId && row.requester_user_id) {
+        allowed.add(row.requester_user_id);
       }
     }
     const safeIds = unique.filter((id) => allowed.has(id));
