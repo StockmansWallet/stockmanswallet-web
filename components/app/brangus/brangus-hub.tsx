@@ -269,7 +269,7 @@ export function BrangusHub({
   }, []); // intentionally empty: runs once on mount
 
   const tabs: { id: TabId; label: string; badge?: number }[] = [
-    { id: "chat", label: "Chat" },
+    { id: "chat", label: "Brangus Chat" },
     { id: "saved", label: "Saved Chats" },
     { id: "shared", label: "Shared", badge: sharedUnread },
   ];
@@ -508,7 +508,7 @@ export function BrangusHub({
           ) : (
             <Card className="flex h-[calc(100vh-7.5rem)] flex-col overflow-hidden rounded-3xl">
               <div className="relative min-h-0 flex-1">
-                <CardContent className="absolute inset-0 overflow-y-auto p-2 pt-[4rem]">
+                <CardContent className="absolute inset-0 overflow-y-auto p-2 pt-[4.5rem]">
                   {conversations.length > 0 ? (
                     <ConversationList
                       conversations={conversations}

@@ -102,7 +102,7 @@ export function SharedChatList({ onSelect, activeId, refreshSignal }: SharedChat
   }
 
   return (
-    <ul className="divide-y divide-white/[0.04]">
+    <ul className="space-y-2 p-2">
       {rows.map((row) => {
         const p = preview(row);
         const active = activeId === row.id;
@@ -113,9 +113,9 @@ export function SharedChatList({ onSelect, activeId, refreshSignal }: SharedChat
                 on hover without the two overlapping. */}
             <button
               onClick={() => onSelect(row)}
-              className={`flex w-full items-start gap-3 px-4 py-3 pr-12 text-left transition-colors hover:bg-white/[0.03] ${
-                !row.is_read ? "bg-brangus/[0.04]" : ""
-              } ${active ? "bg-brangus/[0.08]" : ""}`}
+              className={`flex w-full items-start gap-3 rounded-xl p-3 pr-12 text-left transition-colors hover:bg-white/[0.05] ${
+                !row.is_read ? "bg-brangus/[0.06]" : "bg-white/[0.03]"
+              } ${active ? "bg-brangus/10" : ""}`}
             >
               <UserAvatar
                 name={row.sender_display_name ?? "Another producer"}

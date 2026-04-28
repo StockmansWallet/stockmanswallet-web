@@ -101,7 +101,7 @@ export function SentChatList({ onSelect, activeId, refreshSignal }: SentChatList
   }
 
   return (
-    <ul className="divide-y divide-white/[0.04]">
+    <ul className="space-y-2 p-2">
       {rows.map((row) => {
         const p = preview(row);
         const recipient = row.recipient_display_name ?? "Another producer";
@@ -110,8 +110,8 @@ export function SentChatList({ onSelect, activeId, refreshSignal }: SentChatList
           <li key={row.id} className="group relative">
             <button
               onClick={() => onSelect(row)}
-              className={`flex w-full items-start gap-3 px-4 py-3 pr-12 text-left transition-colors hover:bg-white/[0.03] ${
-                active ? "bg-brangus/[0.08]" : ""
+              className={`flex w-full items-start gap-3 rounded-xl p-3 pr-12 text-left transition-colors hover:bg-white/[0.05] ${
+                active ? "bg-brangus/10" : "bg-white/[0.03]"
               }`}
             >
               <UserAvatar

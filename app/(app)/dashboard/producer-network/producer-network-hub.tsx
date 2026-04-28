@@ -342,7 +342,7 @@ export async function ProducerNetworkHub({
                 )}
 
                 {sortedApproved.length > 0 ? (
-                  <div className="divide-y divide-white/[0.06]">
+                  <div className="space-y-2 p-3">
                     {sortedApproved.map((c) => {
                       const otherId = otherIdFor(c);
                       const profile = profileMap.get(otherId);
@@ -358,8 +358,10 @@ export async function ProducerNetworkHub({
                       return (
                         <div
                           key={c.id}
-                          className={`group relative flex min-h-[4.875rem] items-center gap-3 px-4 py-3.5 transition-colors ${
-                            active ? "bg-producer-network/15" : "hover:bg-producer-network/[0.08]"
+                          className={`group relative flex min-h-[4.875rem] items-center gap-3 rounded-xl p-3 transition-colors ${
+                            active
+                              ? "bg-producer-network/15"
+                              : "bg-white/[0.03] hover:bg-white/[0.05]"
                           }`}
                         >
                           <Link

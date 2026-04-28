@@ -209,7 +209,7 @@ export function BrangusDemoHub() {
   }, [measure]);
 
   const tabs: { id: TabId; label: string }[] = [
-    { id: "chat", label: "Chat" },
+    { id: "chat", label: "Brangus Chat" },
     { id: "saved", label: "Saved Chats" },
   ];
 
