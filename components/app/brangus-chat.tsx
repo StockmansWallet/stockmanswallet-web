@@ -30,6 +30,7 @@ import {
   fetchServerConfig,
 } from "@/lib/brangus/chat-service";
 import { fetchRecentChats, fetchUserMemories } from "@/lib/brangus/tools";
+import { generateProactiveWelcome, timeOfDayForNow } from "@/lib/brangus/proactive-welcome";
 import {
   createConversation,
   saveMessage,
@@ -397,6 +398,33 @@ export function BrangusChat({
         const prompt = buildSystemPrompt(dataStore, serverConfig, userMemories, recentChats);
         setStore(dataStore);
         setSystemPrompt(prompt);
+
+        // Generate a relevance-aware opener via Haiku based on recent chats so
+        // Brangus picks up the thread when there's a hook (planned action,
+        // pending decision, injury, follow-up he said he'd check on). Only
+        // fires for new conversations with recent chat history. Falls through
+        // silently when there's no hook material, leaving the static greeting.
+        if (!existingConvId && recentChats) {
+          const opener = await generateProactiveWelcome({
+            userName: userFirstName,
+            timeOfDay: timeOfDayForNow(),
+            recentChats,
+          });
+          if (cancelled || !opener) {
+            // Either the request raced with unmount, or there was no hook to
+            // pick up. Either way, keep the static welcome already on screen.
+          } else {
+            // Only swap the welcome bubble if it's still the only message and
+            // the user hasn't typed anything in the meantime (which would have
+            // pushed a user message into prev[1]).
+            setMessages((prev) => {
+              if (prev.length !== 1 || prev[0].id !== "welcome") return prev;
+              const updated = [...prev];
+              updated[0] = { ...updated[0], content: opener };
+              return updated;
+            });
+          }
+        }
       } catch (err) {
         if (cancelled) return;
         console.error("Failed to load chat data:", err);
