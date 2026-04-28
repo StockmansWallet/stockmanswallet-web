@@ -200,6 +200,10 @@ export function BrangusChat({
       : [];
 
   const [messages, setMessages] = useState<ChatMessage[]>([...welcomeMessage, ...hydratedMessages]);
+  // Tracks the welcome bubble's current content so handleSend can persist it
+  // when the conversation is lazy-created on first send. Updated by the
+  // proactive welcome callback when Haiku swaps the static greeting.
+  const welcomeContentRef = useRef<string | null>(welcomeMessage[0]?.content ?? null);
   const [conversationHistory, setConversationHistory] =
     useState<AnthropicMessage[]>(hydratedHistory);
   const [isLoading, setIsLoading] = useState(false);
@@ -438,6 +442,7 @@ export function BrangusChat({
               // the user hasn't typed anything in the meantime.
               setMessages((prev) => {
                 if (prev.length !== 1 || prev[0].id !== "welcome") return prev;
+                welcomeContentRef.current = opener;
                 const updated = [...prev];
                 updated[0] = { ...updated[0], content: opener };
                 return updated;
@@ -598,6 +603,19 @@ export function BrangusChat({
           const conv = await createConversation(userId);
           conversationIdRef.current = conv.id;
           onConversationCreated?.(conv);
+
+          // Persist the welcome bubble (rendered in memory before first send)
+          // so resumed conversations show the original opener at the top
+          // instead of jumping straight to the user's first question. Whatever
+          // is in welcomeContentRef right now is what the user actually saw -
+          // the static greeting or the Haiku-generated opener if it had time
+          // to swap in.
+          const welcomeToSave = welcomeContentRef.current;
+          if (welcomeToSave) {
+            saveMessage(conv.id, userId, "assistant", welcomeToSave).catch((err) =>
+              console.error("Failed to persist welcome message:", err)
+            );
+          }
         } catch (err) {
           console.error("Failed to create conversation:", err);
         }
