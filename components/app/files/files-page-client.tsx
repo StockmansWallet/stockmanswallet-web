@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Database,
   File,
@@ -50,16 +50,29 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
   const [activeCollection, setActiveCollection] = useState(ALL_COLLECTIONS);
   const [groupMode, setGroupMode] = useState<GroupMode>("category");
   const [query, setQuery] = useState("");
+  const [customCollections, setCustomCollections] = useState<string[]>(() =>
+    loadCustomCollections(userId)
+  );
+  const [isCreatingCollection, setIsCreatingCollection] = useState(false);
+  const [collectionDraft, setCollectionDraft] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    saveCustomCollections(userId, customCollections);
+  }, [customCollections, userId]);
 
   const categoryOptions = useMemo(() => {
     const values = new Set(DEFAULT_FILE_CATEGORY_OPTIONS);
+    for (const collection of customCollections) {
+      const label = collection.trim();
+      if (label) values.add(label);
+    }
     for (const file of files) {
       const label = fileCategoryLabel(file);
       if (label !== UNCATEGORISED) values.add(label);
     }
     return Array.from(values).sort((a, b) => a.localeCompare(b));
-  }, [files]);
+  }, [customCollections, files]);
 
   const collectionCounts = useMemo(() => {
     const counts = new Map<string, number>();
@@ -166,6 +179,19 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
     setActiveFile((current) => (current?.id === updated.id ? { ...current, ...updated } : current));
   }, []);
 
+  const handleCreateCollection = useCallback(() => {
+    const nextCollection = collectionDraft.trim();
+    if (!nextCollection) return;
+    setCustomCollections((prev) =>
+      prev.some((collection) => collection.toLowerCase() === nextCollection.toLowerCase())
+        ? prev
+        : [...prev, nextCollection]
+    );
+    setActiveCollection(nextCollection);
+    setCollectionDraft("");
+    setIsCreatingCollection(false);
+  }, [collectionDraft]);
+
   return (
     <div className="space-y-4">
       <input ref={fileInputRef} type="file" className="hidden" multiple onChange={handlePicked} />
@@ -223,10 +249,46 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
 
       <div className="grid gap-4 lg:grid-cols-[250px_minmax(0,1fr)]">
         <aside className="rounded-xl border border-white/10 bg-white/[0.02] p-2 lg:sticky lg:top-4 lg:self-start">
-          <div className="flex items-center gap-2 px-2 py-2 text-xs font-semibold tracking-wide text-white/45 uppercase">
-            <Folder className="h-4 w-4" />
-            Collections
+          <div className="flex items-center justify-between gap-2 px-2 py-2">
+            <div className="flex items-center gap-2 text-xs font-semibold tracking-wide text-white/45 uppercase">
+              <Folder className="h-4 w-4" />
+              Collections
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsCreatingCollection((open) => !open)}
+              className="rounded-lg p-1.5 text-white/45 hover:bg-white/[0.05] hover:text-white"
+              aria-label="New collection"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
           </div>
+
+          {isCreatingCollection && (
+            <div className="mb-2 flex gap-1 px-2">
+              <input
+                value={collectionDraft}
+                onChange={(e) => setCollectionDraft(e.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") handleCreateCollection();
+                  if (event.key === "Escape") {
+                    setCollectionDraft("");
+                    setIsCreatingCollection(false);
+                  }
+                }}
+                placeholder="Collection name"
+                className="h-8 min-w-0 flex-1 rounded-lg border border-white/10 bg-black/20 px-2 text-xs text-white outline-none placeholder:text-white/35 focus:border-brand/50"
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={handleCreateCollection}
+                className="bg-brand/15 text-brand hover:bg-brand/25 rounded-lg px-2 text-xs font-semibold"
+              >
+                Add
+              </button>
+            </div>
+          )}
 
           <CollectionButton
             label="All files"
@@ -308,6 +370,31 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
       )}
     </div>
   );
+}
+
+function customCollectionsStorageKey(userId: string): string {
+  return `stockmanswallet:file-collections:${userId}`;
+}
+
+function loadCustomCollections(userId: string): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(customCollectionsStorageKey(userId));
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((value): value is string => typeof value === "string")
+      .map((value) => value.trim())
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+function saveCustomCollections(userId: string, collections: string[]): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(customCollectionsStorageKey(userId), JSON.stringify(collections));
 }
 
 function StatTile({ label, value }: { label: string; value: number }) {

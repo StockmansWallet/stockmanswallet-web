@@ -175,7 +175,7 @@ export async function uploadBrangusFile(opts: {
     });
   if (uploadError) throw uploadError;
 
-  const { error: insertError } = await supabase.from("brangus_files").insert({
+  const insertPayload: Record<string, unknown> = {
     id: fileId,
     user_id: opts.userId,
     storage_path: storagePath,
@@ -184,11 +184,14 @@ export async function uploadBrangusFile(opts: {
     size_bytes: opts.file.size,
     title: opts.title?.trim() || friendlyTitle(opts.file.name),
     kind: opts.kind ?? null,
-    category: opts.category?.trim() || null,
     source: opts.source ?? "files",
     conversation_id: opts.conversationId ?? null,
     extraction_status: "pending",
-  });
+  };
+  const category = opts.category?.trim();
+  if (category) insertPayload.category = category;
+
+  const { error: insertError } = await supabase.from("brangus_files").insert(insertPayload);
   if (insertError) {
     // Best-effort cleanup of the orphaned object so retries don't pile up.
     await supabase.storage.from(BRANGUS_FILES_BUCKET).remove([storagePath]);

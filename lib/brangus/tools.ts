@@ -519,7 +519,31 @@ async function executeLookupFile(
       if (freeText) q = q.ilike("title", `%${freeText}%`);
 
       const { data, error } = await q;
-      if (error) return `Error: ${error.message}`;
+      if (error) {
+        let fallbackQ = supabase
+          .from("brangus_files")
+          .select("id, title, kind, size_bytes, page_count, mime_type, created_at")
+          .eq("user_id", store.userId)
+          .eq("is_deleted", false)
+          .order("updated_at", { ascending: false })
+          .limit(max);
+        if (kind) fallbackQ = fallbackQ.eq("kind", kind);
+        if (freeText) fallbackQ = fallbackQ.ilike("title", `%${freeText}%`);
+        const { data: fallbackData, error: fallbackError } = await fallbackQ;
+        if (fallbackError) return `Error: ${error.message}`;
+        return JSON.stringify(
+          (fallbackData ?? []).map((row) => ({
+            id: row.id,
+            title: row.title,
+            category: null,
+            kind: row.kind,
+            size_bytes: row.size_bytes,
+            page_count: row.page_count,
+            mime_type: row.mime_type,
+            uploaded_at: row.created_at,
+          })),
+        );
+      }
       return JSON.stringify(
         (data ?? []).map((row) => ({
           id: row.id,
@@ -536,7 +560,7 @@ async function executeLookupFile(
     case "get_metadata": {
       const fileId = typeof input.file_id === "string" ? input.file_id : null;
       if (!fileId) return "Error: file_id required.";
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from("brangus_files")
         .select(
           "id, title, category, kind, tags, notes, original_filename, mime_type, size_bytes, page_count, extraction_status, created_at",
@@ -545,6 +569,19 @@ async function executeLookupFile(
         .eq("user_id", store.userId)
         .eq("is_deleted", false)
         .maybeSingle();
+      if (error || !data) {
+        const fallback = await supabase
+          .from("brangus_files")
+          .select(
+            "id, title, kind, tags, notes, original_filename, mime_type, size_bytes, page_count, extraction_status, created_at",
+          )
+          .eq("id", fileId)
+          .eq("user_id", store.userId)
+          .eq("is_deleted", false)
+          .maybeSingle();
+        data = fallback.data ? { ...fallback.data, category: null } : null;
+        error = fallback.error;
+      }
       if (error || !data) return "Error: file not found.";
       return JSON.stringify({
         id: data.id,

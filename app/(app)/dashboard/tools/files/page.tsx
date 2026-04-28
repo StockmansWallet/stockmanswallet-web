@@ -13,7 +13,7 @@ export default async function FilesPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: files } = await supabase
+  const { data: filesWithCategory, error: filesError } = await supabase
     .from("brangus_files")
     .select(
       "id, storage_path, title, original_filename, mime_type, size_bytes, kind, category, page_count, extraction_status, source, conversation_id, created_at, updated_at"
@@ -21,6 +21,21 @@ export default async function FilesPage() {
     .eq("user_id", user.id)
     .eq("is_deleted", false)
     .order("updated_at", { ascending: false });
+
+  let files = filesWithCategory;
+
+  if (filesError) {
+    const fallback = await supabase
+      .from("brangus_files")
+      .select(
+        "id, storage_path, title, original_filename, mime_type, size_bytes, kind, page_count, extraction_status, source, conversation_id, created_at, updated_at"
+      )
+      .eq("user_id", user.id)
+      .eq("is_deleted", false)
+      .order("updated_at", { ascending: false });
+
+    files = fallback.data?.map((file) => ({ ...file, category: null })) ?? null;
+  }
 
   return (
     <div className="space-y-6">
