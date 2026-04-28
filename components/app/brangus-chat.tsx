@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation";
 import {
   Brain,
   ChevronDown,
-  Loader2,
   AlertCircle,
   ClipboardCopy,
   Download,
@@ -419,32 +418,34 @@ export function BrangusChat({
         const prompt = buildSystemPrompt(dataStore, serverConfig, userMemories, recentChats);
         setStore(dataStore);
         setSystemPrompt(prompt);
+        setIsInitialising(false);
 
         // Generate a relevance-aware opener via Haiku based on recent chats so
         // Brangus picks up the thread when there's a hook (planned action,
         // pending decision, injury, follow-up he said he'd check on). Only
-        // fires for new conversations with recent chat history. Falls through
-        // silently when there's no hook material, leaving the static greeting.
+        // fires for new conversations with recent chat history. This runs after
+        // the portfolio store is ready so the chat shell is usable as soon as
+        // the required data has loaded.
         if (!existingConvId && recentChats) {
-          const opener = await generateProactiveWelcome({
+          generateProactiveWelcome({
             userName: userFirstName,
             timeOfDay: timeOfDayForNow(),
             recentChats,
-          });
-          if (cancelled || !opener) {
-            // Either the request raced with unmount, or there was no hook to
-            // pick up. Either way, keep the static welcome already on screen.
-          } else {
-            // Only swap the welcome bubble if it's still the only message and
-            // the user hasn't typed anything in the meantime (which would have
-            // pushed a user message into prev[1]).
-            setMessages((prev) => {
-              if (prev.length !== 1 || prev[0].id !== "welcome") return prev;
-              const updated = [...prev];
-              updated[0] = { ...updated[0], content: opener };
-              return updated;
+          })
+            .then((opener) => {
+              if (cancelled || !opener) return;
+              // Only swap the welcome bubble if it's still the only message and
+              // the user hasn't typed anything in the meantime.
+              setMessages((prev) => {
+                if (prev.length !== 1 || prev[0].id !== "welcome") return prev;
+                const updated = [...prev];
+                updated[0] = { ...updated[0], content: opener };
+                return updated;
+              });
+            })
+            .catch((err) => {
+              console.warn("Failed to generate proactive Brangus welcome:", err);
             });
-          }
         }
       } catch (err) {
         if (cancelled) return;
@@ -838,16 +839,6 @@ export function BrangusChat({
     setShowShareMenu(false);
   }, [getShareText]);
 
-  // Loading state
-  if (isInitialising) {
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8">
-        <Loader2 className="text-brangus h-8 w-8 animate-spin" />
-        <p className="text-text-muted text-sm">Loading your portfolio data...</p>
-      </div>
-    );
-  }
-
   const isFirstLiveSummaryReveal =
     sessionCards.length > 0 &&
     !hadHydratedSessionCardsRef.current &&
@@ -1081,18 +1072,22 @@ export function BrangusChat({
       )}
 
       {/* Input area */}
-      <div data-print-hide className="border-t border-white/10 p-4">
+      <div
+        data-print-hide
+        className={`border-t border-white/10 p-4 transition-opacity ${
+          isInitialising ? "opacity-60" : "opacity-100"
+        }`}
+      >
         <BrangusAttachmentRow
           userId={userIdRef.current}
           conversationId={conversationIdRef.current}
           attachedFiles={attachedFiles}
           onAdd={(file) => setAttachedFiles((prev) => [...prev, file])}
           onRemove={(id) => setAttachedFiles((prev) => prev.filter((f) => f.id !== id))}
-        />
-        <div>
+        >
           <ChatInput
             onSend={handleSend}
-            placeholder="Ask Brangus anything..."
+            placeholder={isInitialising ? "Loading portfolio data..." : "Ask Brangus anything..."}
             disabled={!store}
             loading={isLoading}
             accentClass="bg-brangus-dark hover:bg-brangus-text"
@@ -1101,7 +1096,7 @@ export function BrangusChat({
             micSupported={micSupported}
             liveTranscript={transcript}
           />
-        </div>
+        </BrangusAttachmentRow>
       </div>
     </div>
   );
