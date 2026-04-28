@@ -13,11 +13,11 @@ import {
   MapPinned,
   FlaskConical,
   Upload,
-  Handshake,
   ClipboardList,
   Search,
   Map as MapIcon,
   FolderOpen,
+  Radio,
 } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
 import { ADVISOR_ENABLED } from "@/lib/feature-flags";
@@ -219,9 +219,9 @@ export const producerToolItems: NavItem[] = [
       ]
     : []),
   {
-    label: "Producer Network",
+    label: "Ch 40",
     href: "/dashboard/producer-network",
-    icon: <Handshake className="h-5 w-5" />,
+    icon: <Radio className="h-5 w-5" />,
     ...nav("producer-network"),
     notificationTypes: ["new_message", "new_connection_request"],
     badgeSuppressPrefix: "/dashboard/producer-network/connections/",

@@ -3,7 +3,7 @@ import { ProducerNetworkHub } from "./producer-network-hub";
 export const revalidate = 0;
 
 export const metadata = {
-  title: "Producer Network",
+  title: "Ch 40",
 };
 
 export default async function ProducerNetworkPage({

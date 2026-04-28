@@ -11,7 +11,7 @@ import {
   Truck,
   Grid3x3,
   Users,
-  Handshake,
+  Radio,
   Lightbulb,
 } from "lucide-react";
 import { ADVISOR_ENABLED } from "@/lib/feature-flags";
@@ -154,10 +154,10 @@ const FEATURE_TABS: FeatureTab[] = [
   },
   {
     id: "network",
-    name: "Producer Network",
-    tagline: "Connect with your region",
+    name: "Ch 40",
+    tagline: "The Producer Channel",
     description:
-      "Connect with other producers in your region. Build a trusted peer network to share operational insights, compare notes on markets and conditions, and collaborate on the challenges only another farmer understands.",
+      "Tune in to other producers in your region. Build a trusted peer network to share operational insights, compare notes on markets and conditions, and collaborate on the challenges only another farmer understands.",
     color: "var(--feature-network)",
     colorLight: "var(--feature-network-light)",
     colorDark: "var(--feature-network-dark)",
@@ -169,7 +169,7 @@ const FEATURE_TABS: FeatureTab[] = [
       "Control your visibility and opt in or out of the producer directory",
     ],
     mockup: "/images/iphone-screen-producernetwork.webp",
-    icon: <Handshake className="h-5 w-5" />,
+    icon: <Radio className="h-5 w-5" />,
   },
   {
     id: "gridiq",

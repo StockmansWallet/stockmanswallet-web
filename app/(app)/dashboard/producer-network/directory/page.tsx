@@ -107,7 +107,7 @@ export default async function ProducerDirectoryPage({
         title="Producer Directory"
         titleClassName="text-4xl font-bold text-producer-network-light"
         titleHref="/dashboard/producer-network"
-        subtitle="Back to Producer Network"
+        subtitle="Back to Ch 40"
         subtitleClassName="text-sm font-medium text-text-secondary"
       />
 

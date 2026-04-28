@@ -57,7 +57,7 @@ const notificationGroups = [
     ],
   },
   {
-    title: "Producer Network",
+    title: "Ch 40",
     description: "Connection requests, chat messages, and shared activity.",
     icon: MessageCircle,
     tone: "producer-network",

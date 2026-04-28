@@ -26,14 +26,14 @@ const CAN_DO = [
   "Explore herd detail, breeding accrual, calves at foot",
   "Chat with Brangus, the livestock AI co-pilot",
   "View Markets, Insights, Reports, Freight IQ, Grid IQ",
-  "Try the Yard Book and Producer Network layouts",
+  "Try the Yard Book and Ch 40 layouts",
 ] as const;
 
 const READ_ONLY = [
   "Seeded herds and properties can\u2019t be edited or deleted",
   "Sales, muster and health records stay on their originals",
   "Settings and profile changes aren\u2019t saved",
-  "Producer Network connections and chats aren\u2019t sent",
+  "Ch 40 connections and chats aren\u2019t sent",
   "Grid IQ analyses and report PDFs can be generated but not stored",
 ] as const;
 

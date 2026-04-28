@@ -208,7 +208,7 @@ export function StepPreferences({
         />
         <ToggleRow
           icon={<Users className="h-5 w-5" />}
-          label="Visible on Producer Network"
+          label="Visible on Ch 40"
           subtitle="Other producers can discover and connect with you"
           checked={isVisibleOnProducerNetwork}
           onChange={onVisibleOnProducerNetworkChange}

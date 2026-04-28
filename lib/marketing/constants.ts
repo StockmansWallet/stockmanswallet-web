@@ -106,9 +106,9 @@ export const FEATURES: Feature[] = [
   },
   {
     id: "producer-network",
-    name: "Producer Network",
+    name: "Ch 40",
     description:
-      "Connect with other producers in your region. Build a trusted peer network to share operational insights, compare notes on markets and conditions, and collaborate on the challenges only another farmer understands.",
+      "Tune in to other producers in your region. Build a trusted peer network to share operational insights, compare notes on markets and conditions, and collaborate on the challenges only another farmer understands.",
     accentColor: "#7C6DD8",
     accentColorLight: "#A094E8",
     bullets: [
@@ -211,7 +211,7 @@ export const PRICING_TIERS: PricingTier[] = [
       { name: "Insights", included: true },
       { name: "Brangus Intelligence", included: true },
       { name: "Freight IQ (15 calculations/month)", included: true },
-      { name: "Producer Network", included: true },
+      { name: "Ch 40 (Producer Network)", included: true },
     ],
   },
   {
@@ -232,7 +232,7 @@ export const PRICING_TIERS: PricingTier[] = [
       { name: "Insights", included: true },
       { name: "Brangus Intelligence", included: true },
       { name: "Freight IQ (30 calculations/month)", included: true },
-      { name: "Producer Network", included: true },
+      { name: "Ch 40 (Producer Network)", included: true },
     ],
   },
   // Advisor Plans

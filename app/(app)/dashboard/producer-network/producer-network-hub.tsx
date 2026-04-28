@@ -224,8 +224,8 @@ export async function ProducerNetworkHub({
       )}
       <PageHeader
         feature="producer-network"
-        title="Producer Network"
-        subtitle="Connect and chat with other producers"
+        title="Ch 40"
+        subtitle="The Producer Channel - tune in and chat with other producers"
         titleClassName="text-4xl font-bold text-producer-network-light"
         subtitleClassName="text-sm font-medium text-text-secondary"
         actions={
