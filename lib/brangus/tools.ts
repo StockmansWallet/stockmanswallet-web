@@ -965,7 +965,15 @@ async function lookupHerdDetails(
   lines.push("");
   lines.push("VALUATION DECOMPOSITION (for explanation only - DO NOT multiply or re-derive; the AMV total above is authoritative):");
   lines.push(`Projected weight (ADG-adjusted to today): ${Math.round(v.projectedWeight)}kg`);
-  lines.push(`Price (breed-adjusted, $/kg liveweight): $${v.pricePerKg.toFixed(3)}`);
+  // Debug: BRG-019 - surface both base MLA rate and breed-adjusted rate when a premium
+  // is applied, so Brangus can quote both to the user. Users hear the base rate from
+  // their agent at the yards and need to reconcile it with the adjusted figure.
+  if (v.breedPremiumApplied !== 0 && v.basePrice > 0 && Math.abs(v.basePrice - v.pricePerKg) > 0.0005) {
+    lines.push(`Base price (MLA $/kg liveweight, no breed premium): $${v.basePrice.toFixed(3)}`);
+    lines.push(`Breed-adjusted price ($/kg liveweight, premium applied): $${v.pricePerKg.toFixed(3)}`);
+  } else {
+    lines.push(`Price ($/kg liveweight): $${v.pricePerKg.toFixed(3)}`);
+  }
   lines.push(`Price source: ${v.priceSource}${v.nearestSaleyardUsed ? ` (nearest: ${v.nearestSaleyardUsed})` : ""}`);
   if (v.dataDate) lines.push(`MLA data date: ${v.dataDate}`);
   const premium = fmtPremium(herd, v);
@@ -1031,9 +1039,15 @@ async function lookupAllHerdsSummary(store: ChatDataStore, saleyardOverride: str
     if (herd.is_breeder) line += ", breeder";
 
     // BRG-013: decomposition labelled "do not multiply" so the LLM treats it as explanation.
-    let decomposition = `decomposition (do not multiply): projected ${Math.round(v.projectedWeight)}kg, $${v.pricePerKg.toFixed(3)}/kg breed-adj`;
+    // BRG-019: when a breed premium is applied, expose BOTH base and adjusted $/kg so
+    // Brangus quotes both to the user (e.g. "$3.70/kg base, $4.255/kg with premium").
+    let decomposition = `decomposition (do not multiply): projected ${Math.round(v.projectedWeight)}kg`;
     const premium = fmtPremium(herd, v);
-    if (premium) decomposition += ` [${premium}]`;
+    if (premium && v.basePrice > 0 && Math.abs(v.basePrice - v.pricePerKg) > 0.0005) {
+      decomposition += `, $${v.basePrice.toFixed(3)}/kg base, $${v.pricePerKg.toFixed(3)}/kg with premium [${premium}]`;
+    } else {
+      decomposition += `, $${v.pricePerKg.toFixed(3)}/kg`;
+    }
     if (v.dataDate) decomposition += `, MLA ${v.dataDate}`;
     line += `; ${decomposition})`;
 
@@ -1426,7 +1440,12 @@ async function lookupSaleyardComparison(
     let line = `- ${row.yard} [${label}]:`;
     if (row.v) {
       const perHead = herd.head_count > 0 ? row.v.netValue / herd.head_count : 0;
-      line += ` $${row.v.pricePerKg.toFixed(3)}/kg breed-adj`;
+      // BRG-019: when a breed premium is applied, surface BOTH base and adjusted $/kg.
+      if (row.v.breedPremiumApplied !== 0 && row.v.basePrice > 0 && Math.abs(row.v.basePrice - row.v.pricePerKg) > 0.0005) {
+        line += ` $${row.v.basePrice.toFixed(3)}/kg base, $${row.v.pricePerKg.toFixed(3)}/kg with premium`;
+      } else {
+        line += ` $${row.v.pricePerKg.toFixed(3)}/kg`;
+      }
       line += `, projected ${Math.round(row.v.projectedWeight)}kg`;
       line += `, $${fmtDollars(perHead)}/head`;
       line += `, total $${fmtDollars(row.v.netValue)}`;
@@ -2028,7 +2047,15 @@ async function executeSingleFreight(input: Record<string, unknown>, store: ChatD
         const perHeadNet = herd.head_count > 0 ? netOfFreight / herd.head_count : 0;
         lines.push("");
         lines.push(`LIVE PRICING AT ${resolvedYard} (engine-computed - quote these figures, not the herd's dashboard total):`);
-        lines.push(`- Price: $${v.pricePerKg.toFixed(3)}/kg breed-adjusted`);
+        // BRG-019: dual-display base + adjusted when a breed premium is applied so Brangus
+        // can quote both. Gross / net stay as adjusted only - the response footnote covers them.
+        if (v.breedPremiumApplied !== 0 && v.basePrice > 0 && Math.abs(v.basePrice - v.pricePerKg) > 0.0005) {
+          const sign = v.breedPremiumApplied >= 0 ? "+" : "";
+          lines.push(`- Base price: $${v.basePrice.toFixed(3)}/kg (MLA, no breed premium)`);
+          lines.push(`- Breed-adjusted price: $${v.pricePerKg.toFixed(3)}/kg (${sign}${v.breedPremiumApplied.toFixed(1)}% ${herd.breed} premium applied)`);
+        } else {
+          lines.push(`- Price: $${v.pricePerKg.toFixed(3)}/kg`);
+        }
         let sourceLine = `- Source: ${v.priceSource}`;
         if (v.dataDate) sourceLine += ` (MLA ${v.dataDate})`;
         lines.push(sourceLine);
