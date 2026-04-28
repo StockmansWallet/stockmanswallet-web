@@ -33,6 +33,11 @@ interface MessageThreadProps {
    * initials fallback) beside each bubble, matching the Brangus chat style.
    */
   avatars?: Record<string, { url?: string | null; initials?: string }>;
+  /**
+   * Producer-peer connection id. When present, file attachment cards can ask
+   * the server for a verified download link.
+   */
+  connectionId?: string;
 }
 
 const messageTypeLabels: Record<
@@ -105,6 +110,7 @@ export function MessageThread({
   otherBgClass = "bg-chat-other",
   otherTailColor = DEFAULT_OTHER_BG,
   avatars,
+  connectionId,
 }: MessageThreadProps) {
   if (messages.length === 0) {
     return (
@@ -157,7 +163,9 @@ export function MessageThread({
                 </Badge>
               )}
               {msg.content && <div>{msg.content}</div>}
-              {msg.attachment && <ShareAttachmentCard attachment={msg.attachment} />}
+              {msg.attachment && (
+                <ShareAttachmentCard attachment={msg.attachment} connectionId={connectionId} />
+              )}
             </ChatBubble>
           </div>
         );

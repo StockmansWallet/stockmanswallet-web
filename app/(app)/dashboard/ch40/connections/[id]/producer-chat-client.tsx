@@ -7,10 +7,11 @@ import { TypingIndicator } from "@/components/app/chat/typing-indicator";
 import { ShareMenu } from "@/components/app/ch40/share-menu";
 import { ShareAttachmentCard } from "@/components/app/ch40/share-attachment-card";
 import { useTypingIndicator } from "@/hooks/use-typing-indicator";
+import { createClient } from "@/lib/supabase/client";
 import { sendProducerMessage, fetchProducerMessages } from "./actions";
 import type { AdvisoryMessage, MessageAttachment } from "@/lib/types/advisory";
 
-const POLL_INTERVAL = 5000;
+const POLL_INTERVAL = 15000;
 // Peer bubble uses the Producer Network accent (sage, -dark variant for
 // filled-area legibility, matching the Brangus chat pattern).
 const OTHER_BG = "var(--color-ch40-dark)";
@@ -46,30 +47,60 @@ export function ProducerChatClient({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, peerIsTyping]);
 
-  // Poll for new messages
+  // Live message subscription with a polling fallback for missed websocket events.
   useEffect(() => {
-    const interval = setInterval(async () => {
-      const result = await fetchProducerMessages(connectionId);
-      if (result.messages && result.messages.length > 0) {
-        setMessages((prev) => {
-          const prevIds = new Set(prev.map((m) => m.id));
-          const incoming = result.messages;
-          const brandNew = incoming.filter((m) => !prevIds.has(m.id));
+    let cancelled = false;
+    const supabase = createClient();
 
-          if (brandNew.length > 0) {
-            setAnimatedIds((ids) => {
-              const next = new Set(ids);
-              brandNew.forEach((m) => next.add(m.id));
-              return next;
-            });
-            return incoming;
-          }
-          return prev;
-        });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!cancelled && session?.access_token) {
+        supabase.realtime.setAuth(session.access_token);
       }
+    });
+
+    async function refreshMessages() {
+      const result = await fetchProducerMessages(connectionId);
+      if (!result.messages || cancelled) return;
+
+      setMessages((prev) => {
+        const prevIds = new Set(prev.map((m) => m.id));
+        const brandNew = result.messages.filter((m) => !prevIds.has(m.id));
+
+        if (brandNew.length > 0) {
+          setAnimatedIds((ids) => {
+            const next = new Set(ids);
+            brandNew.forEach((m) => next.add(m.id));
+            return next;
+          });
+          return result.messages;
+        }
+        return prev;
+      });
+    }
+
+    const channel = supabase
+      .channel(`producer-chat-${connectionId.slice(0, 8)}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "advisory_messages",
+          filter: `connection_id=eq.${connectionId}`,
+        },
+        () => { void refreshMessages(); },
+      )
+      .subscribe();
+
+    const interval = setInterval(async () => {
+      await refreshMessages();
     }, POLL_INTERVAL);
 
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+      void supabase.removeChannel(channel);
+    };
   }, [connectionId]);
 
   const handleSend = useCallback(
@@ -125,6 +156,7 @@ export function ProducerChatClient({
               messages={messages}
               currentUserId={currentUserId}
               participants={participants}
+              connectionId={connectionId}
               animatedMessageIds={animatedIds}
               hideSenderName
               otherBgClass="bg-ch40-dark"

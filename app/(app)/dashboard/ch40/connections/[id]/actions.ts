@@ -33,9 +33,28 @@ const priceAttachmentSchema = z.object({
   data_date: z.string(),
 });
 
+const brangusChatAttachmentSchema = z.object({
+  type: z.literal("brangus_chat"),
+  conversation_id: z.string().uuid(),
+  title: z.string().max(200),
+  preview: z.string().max(1000).nullable(),
+  updated_at: z.string().nullable(),
+});
+
+const fileAttachmentSchema = z.object({
+  type: z.literal("file"),
+  file_id: z.string().uuid(),
+  title: z.string().max(200),
+  mime_type: z.string().max(120).nullable(),
+  size_bytes: z.number().int().nonnegative().nullable(),
+  kind: z.string().max(80).nullable(),
+});
+
 const attachmentSchema = z.discriminatedUnion("type", [
   herdAttachmentSchema,
   priceAttachmentSchema,
+  brangusChatAttachmentSchema,
+  fileAttachmentSchema,
 ]);
 
 const sendMessageSchema = z.object({
@@ -89,6 +108,7 @@ export async function sendProducerMessage(
   _messageType: MessageType = "general_note",
   attachment: MessageAttachment | null = null,
 ) {
+  void _messageType;
   const parsed = sendMessageSchema.safeParse({ connectionId, content, attachment });
   if (!parsed.success) return { error: "Invalid input" };
   const supabase = await createClient();
@@ -142,6 +162,39 @@ export async function sendProducerMessage(
   } else if (attachment && attachment.type === "price") {
     // Prices are public reference data; no ownership check needed.
     verifiedAttachment = attachment;
+  } else if (attachment && attachment.type === "brangus_chat") {
+    const { data: conversation } = await supabase
+      .from("brangus_conversations")
+      .select("id, title, preview_text, updated_at")
+      .eq("id", attachment.conversation_id)
+      .eq("user_id", user.id)
+      .eq("is_deleted", false)
+      .maybeSingle();
+    if (!conversation) return { error: "Brangus chat not found or not yours to share" };
+    verifiedAttachment = {
+      type: "brangus_chat",
+      conversation_id: conversation.id as string,
+      title: (conversation.title as string | null) ?? attachment.title,
+      preview: (conversation.preview_text as string | null) ?? attachment.preview,
+      updated_at: (conversation.updated_at as string | null) ?? attachment.updated_at,
+    };
+  } else if (attachment && attachment.type === "file") {
+    const { data: file } = await supabase
+      .from("brangus_files")
+      .select("id, title, original_filename, mime_type, size_bytes, kind")
+      .eq("id", attachment.file_id)
+      .eq("user_id", user.id)
+      .eq("is_deleted", false)
+      .maybeSingle();
+    if (!file) return { error: "File not found or not yours to share" };
+    verifiedAttachment = {
+      type: "file",
+      file_id: file.id as string,
+      title: (file.title as string | null) ?? (file.original_filename as string) ?? attachment.title,
+      mime_type: (file.mime_type as string | null) ?? attachment.mime_type,
+      size_bytes: (file.size_bytes as number | null) ?? attachment.size_bytes,
+      kind: (file.kind as string | null) ?? attachment.kind,
+    };
   }
 
   const { error } = await supabase.from("advisory_messages").insert({
@@ -176,6 +229,67 @@ export async function sendProducerMessage(
 
   revalidatePath(`/dashboard/ch40/connections/${connectionId}`);
   return { success: true };
+}
+
+export async function getCh40SharedFileDownloadUrl(connectionId: string, fileId: string) {
+  const parsed = z.object({
+    connectionId: z.string().uuid(),
+    fileId: z.string().uuid(),
+  }).safeParse({ connectionId, fileId });
+  if (!parsed.success) return { error: "Invalid input" };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Not authenticated" };
+
+  const { data: connection } = await supabase
+    .from("connection_requests")
+    .select("id, requester_user_id, target_user_id")
+    .eq("id", connectionId)
+    .eq("connection_type", "producer_peer")
+    .eq("status", "approved")
+    .single();
+
+  if (!connection) return { error: "Connection not found" };
+
+  const isParty =
+    connection.requester_user_id === user.id ||
+    connection.target_user_id === user.id;
+  if (!isParty) return { error: "Connection not found" };
+
+  const { data: messages } = await supabase
+    .from("advisory_messages")
+    .select("id, attachment")
+    .eq("connection_id", connectionId);
+
+  const hasAttachedFile = (messages ?? []).some((message) => {
+    const attachment = message.attachment as MessageAttachment | null;
+    return attachment?.type === "file" && attachment.file_id === fileId;
+  });
+  if (!hasAttachedFile) return { error: "File is not attached to this conversation" };
+
+  const { data: file } = await supabase
+    .from("brangus_files")
+    .select("storage_path, original_filename, title")
+    .eq("id", fileId)
+    .eq("is_deleted", false)
+    .maybeSingle();
+
+  if (!file?.storage_path) return { error: "File is no longer available" };
+
+  const filename =
+    (file.original_filename as string | null) ||
+    (file.title as string | null) ||
+    "shared-file";
+  const { data: signed, error } = await supabase.storage
+    .from("brangus-files")
+    .createSignedUrl(file.storage_path as string, 60 * 15, { download: filename });
+
+  if (error || !signed?.signedUrl) return { error: "Could not create download link" };
+  return { signedUrl: signed.signedUrl, filename };
 }
 
 /**

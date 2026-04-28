@@ -1,4 +1,8 @@
-import { Beef, TrendingUp, MapPin, MessageCircle, FileText } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { Beef, TrendingUp, MapPin, MessageCircle, FileText, Download, Loader2 } from "lucide-react";
+import { getCh40SharedFileDownloadUrl } from "@/app/(app)/dashboard/ch40/connections/[id]/actions";
 import type { MessageAttachment } from "@/lib/types/advisory";
 
 const SPECIES_EMOJI: Record<string, string> = {
@@ -34,7 +38,37 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function ShareAttachmentCard({ attachment }: { attachment: MessageAttachment }) {
+export function ShareAttachmentCard({
+  attachment,
+  connectionId,
+}: {
+  attachment: MessageAttachment;
+  connectionId?: string;
+}) {
+  const [downloading, setDownloading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function openSharedFile() {
+    if (attachment.type !== "file" || !connectionId || downloading) return;
+    setDownloading(true);
+    setError(null);
+    const result = await getCh40SharedFileDownloadUrl(connectionId, attachment.file_id);
+    setDownloading(false);
+
+    if ("error" in result) {
+      setError(result.error ?? "Could not open file");
+      return;
+    }
+
+    const anchor = document.createElement("a");
+    anchor.href = result.signedUrl;
+    anchor.download = result.filename;
+    anchor.rel = "noopener";
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+  }
+
   if (attachment.type === "herd") {
     return (
       <div className="mt-2 flex min-w-0 items-start gap-3 rounded-xl border border-ch40/20 bg-ch40/[0.04] p-3">
@@ -145,6 +179,22 @@ export function ShareAttachmentCard({ attachment }: { attachment: MessageAttachm
             {attachment.size_bytes != null && <span>{formatBytes(attachment.size_bytes)}</span>}
             {attachment.mime_type && <span className="truncate">{attachment.mime_type}</span>}
           </div>
+          {connectionId && (
+            <button
+              type="button"
+              onClick={openSharedFile}
+              disabled={downloading}
+              className="mt-2 inline-flex h-7 items-center gap-1.5 rounded-full border border-ch40/20 bg-ch40/12 px-3 text-[11px] font-semibold text-ch40-light transition-colors hover:bg-ch40/18 disabled:opacity-60"
+            >
+              {downloading ? (
+                <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+              ) : (
+                <Download className="h-3 w-3" aria-hidden="true" />
+              )}
+              {downloading ? "Opening" : "Open file"}
+            </button>
+          )}
+          {error && <p className="mt-1 text-[11px] text-warning">{error}</p>}
         </div>
       </div>
     );
