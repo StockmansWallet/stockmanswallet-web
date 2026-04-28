@@ -3,6 +3,7 @@
 import { type DragEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Database,
+  Download,
   File,
   FileSpreadsheet,
   FileText,
@@ -30,6 +31,7 @@ import {
   tagsWithFileCollection,
   uploadBrangusFile,
   deleteBrangusFile,
+  signedDownloadUrlFor,
   signedUrlFor,
   friendlyTitle,
 } from "@/lib/brangus/files";
@@ -76,6 +78,28 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
   useEffect(() => {
     saveHiddenCollections(userId, hiddenCollections);
   }, [hiddenCollections, userId]);
+
+  useEffect(() => {
+    if (!openCollectionMenu) return;
+
+    function handlePointerDown(event: PointerEvent) {
+      const target = event.target;
+      if (target instanceof Element && target.closest("[data-files-collection-menu-root]")) return;
+      setOpenCollectionMenu(null);
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpenCollectionMenu(null);
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [openCollectionMenu]);
 
   const categoryOptions = useMemo(() => {
     const hidden = new Set(hiddenCollections.map((collection) => collection.toLowerCase()));
@@ -176,6 +200,30 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
     await deleteBrangusFile(file);
     setFiles((prev) => prev.filter((f) => f.id !== file.id));
     setActiveFile((current) => (current?.id === file.id ? null : current));
+  }, []);
+
+  const handleDownload = useCallback(async (file: BrangusFileRow) => {
+    setError(null);
+    try {
+      let storagePath = file.storage_path;
+      if (!storagePath) {
+        const supabase = createClient();
+        const { data: row, error: lookupError } = await supabase
+          .from("brangus_files")
+          .select("storage_path")
+          .eq("id", file.id)
+          .maybeSingle<{ storage_path: string }>();
+        if (lookupError) throw lookupError;
+        storagePath = row?.storage_path;
+      }
+      if (!storagePath) throw new Error("Could not find the original file.");
+
+      const url = await signedDownloadUrlFor(storagePath, file.original_filename);
+      if (!url) throw new Error("Could not create a download link.");
+      triggerAnchorDownload(url, file.original_filename);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Download failed.");
+    }
   }, []);
 
   const handleFileChange = useCallback((updated: Partial<BrangusFileRow> & { id: string }) => {
@@ -595,6 +643,7 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
                           key={file.id}
                           file={file}
                           onOpen={() => setActiveFile(file)}
+                          onDownload={() => void handleDownload(file)}
                           onDelete={() => handleDelete(file)}
                           onDragStart={() => {
                             setDraggingFileId(file.id);
@@ -620,6 +669,7 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
           file={activeFile}
           categoryOptions={categoryOptions}
           onClose={() => setActiveFile(null)}
+          onDownload={() => void handleDownload(activeFile)}
           onChange={handleFileChange}
         />
       )}
@@ -704,6 +754,7 @@ function CollectionButton({
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
+      data-files-collection-menu-root={onToggleMenu ? "" : undefined}
       className={`group relative flex w-full items-center rounded-lg px-2 py-2 pr-9 text-left text-sm transition ${
         dropActive
           ? "bg-brand/25 text-brand ring-1 ring-brand/35"
@@ -743,14 +794,18 @@ function CollectionButton({
             <MoreHorizontal className="h-3.5 w-3.5" />
           </button>
           {menuOpen && (
-            <div className="absolute top-8 right-2 z-20 w-32 overflow-hidden rounded-lg border border-white/10 bg-neutral-950 py-1 shadow-xl">
+            <div
+              role="menu"
+              className="absolute top-9 right-1 z-50 w-40 overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-1.5 shadow-2xl shadow-black/35 backdrop-blur-xl backdrop-saturate-150"
+            >
               {onRename && (
                 <button
                   type="button"
                   onClick={onRename}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-white/75 hover:bg-white/[0.06] hover:text-white"
+                  role="menuitem"
+                  className="text-text-muted hover:text-text-primary flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors hover:bg-white/[0.06]"
                 >
-                  <Pencil className="h-3.5 w-3.5" />
+                  <Pencil className="h-4 w-4" />
                   Rename
                 </button>
               )}
@@ -758,9 +813,10 @@ function CollectionButton({
                 <button
                   type="button"
                   onClick={onDelete}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-red-200 hover:bg-red-500/10 hover:text-red-100"
+                  role="menuitem"
+                  className="text-error hover:bg-error/10 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition-colors"
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Trash2 className="h-4 w-4" />
                   Delete
                 </button>
               )}
@@ -818,12 +874,14 @@ function CollectionEditRow({
 function FileRow({
   file,
   onOpen,
+  onDownload,
   onDelete,
   onDragStart,
   onDragEnd,
 }: {
   file: BrangusFileRow;
   onOpen: () => void;
+  onDownload: () => void;
   onDelete: () => void;
   onDragStart: () => void;
   onDragEnd: () => void;
@@ -869,6 +927,16 @@ function FileRow({
       </button>
 
       <StatusPill status={file.extraction_status} />
+
+      <button
+        type="button"
+        onClick={onDownload}
+        className="rounded-lg p-2 text-white/40 hover:bg-white/[0.08] hover:text-white"
+        aria-label={`Download ${file.title}`}
+        title="Download original"
+      >
+        <Download className="h-4 w-4" />
+      </button>
 
       <button
         type="button"
@@ -934,15 +1002,27 @@ function groupLabel(file: BrangusFileRow, groupMode: GroupMode): string {
   return fileCategoryLabel(file);
 }
 
+function triggerAnchorDownload(href: string, filename: string): void {
+  const a = document.createElement("a");
+  a.href = href;
+  a.download = filename;
+  a.rel = "noopener";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
 function FileDetailDrawer({
   file,
   categoryOptions,
   onClose,
+  onDownload,
   onChange,
 }: {
   file: BrangusFileRow;
   categoryOptions: string[];
   onClose: () => void;
+  onDownload: () => void;
   onChange: (file: Partial<BrangusFileRow> & { id: string }) => void;
 }) {
   const [title, setTitle] = useState(file.title);
@@ -1072,13 +1152,23 @@ function FileDetailDrawer({
           <dd>{fileStatusLabel(file.extraction_status)}</dd>
         </dl>
 
-        <button
-          type="button"
-          onClick={openPreview}
-          className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white hover:bg-white/[0.08]"
-        >
-          Preview
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={openPreview}
+            className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white hover:bg-white/[0.08]"
+          >
+            Preview
+          </button>
+          <button
+            type="button"
+            onClick={onDownload}
+            className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white hover:bg-white/[0.08]"
+          >
+            <Download className="h-4 w-4" />
+            Download original
+          </button>
+        </div>
 
         {previewUrl && (
           <div className="aspect-[3/4] overflow-hidden rounded-lg border border-white/10">

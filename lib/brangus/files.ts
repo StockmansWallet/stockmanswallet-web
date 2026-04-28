@@ -61,11 +61,13 @@ export const DEFAULT_FILE_CATEGORY_OPTIONS = [
   "Health & vet",
   "NLIS & compliance",
   "Sales & receipts",
+  "Sale Reports",
   "Leases & property",
   "Soil & pasture",
   "Kill sheets",
   "Breeding records",
-  "Reports",
+  "General Reports",
+  "Processor Grids",
   "Photos",
   "Finance & admin",
   "General",
@@ -247,6 +249,18 @@ export async function signedUrlFor(storagePath: string): Promise<string | null> 
   const { data, error } = await supabase.storage
     .from(BRANGUS_FILES_BUCKET)
     .createSignedUrl(storagePath, SIGNED_URL_TTL_SECONDS);
+  if (error || !data) return null;
+  return data.signedUrl;
+}
+
+export async function signedDownloadUrlFor(
+  storagePath: string,
+  filename: string
+): Promise<string | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase.storage
+    .from(BRANGUS_FILES_BUCKET)
+    .createSignedUrl(storagePath, SIGNED_URL_TTL_SECONDS, { download: filename });
   if (error || !data) return null;
   return data.signedUrl;
 }

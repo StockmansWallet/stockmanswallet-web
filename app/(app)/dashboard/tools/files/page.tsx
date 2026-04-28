@@ -39,10 +39,7 @@ export default async function FilesPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Files"
-        subtitle="Documents and photos Brangus can read."
-      />
+      <PageHeader title="Files" subtitle="Property and livestock documents." />
       <FilesPageClient userId={user.id} initialFiles={(files ?? []) as BrangusFileRow[]} />
     </div>
   );
