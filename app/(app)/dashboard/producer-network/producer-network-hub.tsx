@@ -259,7 +259,7 @@ export async function ProducerNetworkHub({
                   participants={participants}
                   avatars={chatAvatars}
                   header={
-                    <div className="app-frosted-header flex min-h-[5.25rem] items-center justify-between gap-4 border-b border-white/[0.08] px-5 py-4">
+                    <div className="flex min-h-[5.25rem] [transform:translateZ(0)] items-center justify-between gap-4 border-b border-white/[0.08] bg-white/[0.06] bg-clip-padding px-5 py-4 backdrop-blur-2xl backdrop-saturate-150 [backface-visibility:hidden]">
                       <div className="flex min-w-0 items-center gap-3">
                         <Link
                           href={`/dashboard/producer-network/directory/${selectedOtherId}`}
@@ -319,179 +319,183 @@ export async function ProducerNetworkHub({
           className={`min-w-0 ${selectedConnection || mode === "find" || selectedPendingConnection ? "order-2" : "order-1 lg:order-2"}`}
         >
           <Card className="flex h-auto flex-col overflow-hidden rounded-3xl lg:h-[calc(100vh-7.5rem)]">
-            <div className="app-frosted-header relative flex min-h-[5.25rem] shrink-0 items-center border-b border-white/[0.06] px-4 py-4">
-              <div className="flex w-full items-start justify-between gap-3">
-                <div>
-                  <p className="text-text-primary text-base font-semibold">Conversations</p>
-                  <p className="text-text-muted mt-0.5 text-sm">
-                    {approved.length} connected producers
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="border-success/15 bg-success/10 text-success inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold">
-                    <UserCheck className="h-3 w-3" aria-hidden="true" />
-                    {approved.length}
-                  </span>
-                  {pendingCount > 0 && (
-                    <span className="border-warning/15 bg-warning/10 text-warning inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold">
-                      <Clock className="h-3 w-3" aria-hidden="true" />
-                      {pendingCount}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <CardContent className="min-h-0 flex-1 overflow-y-auto p-0">
-              {incomingRequests.length > 0 && (
-                <div className="border-b border-white/[0.06] p-3">
-                  <div className="mb-2 flex items-center justify-between">
-                    <p className="text-warning text-xs font-semibold">Incoming Requests</p>
-                    <span className="bg-warning/10 text-warning rounded-full px-2 py-0.5 text-[10px] font-semibold">
-                      {incomingRequests.length}
-                    </span>
-                  </div>
-                  <div className="space-y-2">
-                    {incomingRequests.map((req) => (
-                      <ProducerRequestCard
-                        key={req.id}
-                        request={req}
-                        avatarUrl={avatarMap.get(req.requester_user_id) ?? null}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {sortedApproved.length > 0 ? (
-                <div className="divide-y divide-white/[0.06]">
-                  {sortedApproved.map((c) => {
-                    const otherId = otherIdFor(c);
-                    const profile = profileMap.get(otherId);
-                    const name = profile?.display_name ?? c.requester_name;
-                    const company = profile?.property_name ?? profile?.company_name;
-                    const lastMessage = lastMessages.get(c.id);
-                    const unreadCount = unreadByConnection.get(c.id) ?? 0;
-                    const hasUnread = unreadCount > 0;
-                    const active = c.id === selectedConnectionId;
-                    const lastActivity =
-                      lastMessage?.createdAt ?? c.permission_granted_at ?? c.created_at;
-
-                    return (
-                      <div
-                        key={c.id}
-                        className={`group relative flex min-h-[4.875rem] items-center gap-3 px-4 py-3.5 transition-colors ${
-                          active ? "bg-producer-network/15" : "hover:bg-producer-network/[0.08]"
-                        }`}
-                      >
-                        <Link
-                          href={`/dashboard/producer-network/connections/${c.id}`}
-                          aria-current={active ? "page" : undefined}
-                          aria-label={`Open chat with ${name}`}
-                          className="absolute inset-0 z-0"
+            <div className="relative min-h-0 flex-1">
+              <CardContent className="absolute inset-0 overflow-y-auto p-0 pt-[5.25rem]">
+                {incomingRequests.length > 0 && (
+                  <div className="border-b border-white/[0.06] p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                      <p className="text-warning text-xs font-semibold">Incoming Requests</p>
+                      <span className="bg-warning/10 text-warning rounded-full px-2 py-0.5 text-[10px] font-semibold">
+                        {incomingRequests.length}
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {incomingRequests.map((req) => (
+                        <ProducerRequestCard
+                          key={req.id}
+                          request={req}
+                          avatarUrl={avatarMap.get(req.requester_user_id) ?? null}
                         />
-                        <div className="relative shrink-0">
-                          <UserAvatar
-                            name={name}
-                            avatarUrl={avatarMap.get(otherId) ?? null}
-                            sizeClass="h-10 w-10"
-                          />
-                          <AnimatedUnreadPill
-                            count={active ? 0 : unreadCount}
-                            className="-top-1 -right-1 h-4 min-w-4 px-1 text-[10px]"
-                          />
-                        </div>
-                        <div className="pointer-events-none relative z-10 min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                            <p
-                              className={`truncate text-sm ${hasUnread && !active ? "text-text-primary font-bold" : "text-text-primary font-semibold"}`}
-                            >
-                              {name}
-                            </p>
-                            {company && (
-                              <span className="text-text-secondary truncate text-xs">
-                                {company}
-                              </span>
-                            )}
-                          </div>
-                          {lastMessage ? (
-                            <p
-                              className={`mt-1 flex items-center gap-1 truncate text-xs ${hasUnread && !active ? "text-text-secondary font-medium" : "text-text-muted"}`}
-                            >
-                              <MessageCircle className="h-3 w-3 shrink-0" aria-hidden="true" />
-                              <span className="truncate">{lastMessage.content}</span>
-                            </p>
-                          ) : (
-                            <p className="text-text-muted mt-1 text-xs">No messages yet</p>
-                          )}
-                        </div>
-                        <div className="relative z-10 flex shrink-0 items-center gap-2">
-                          <span className="text-text-muted text-xs">{timeAgo(lastActivity)}</span>
-                          <ProducerConversationRemoveButton connectionId={c.id} targetName={name} />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <EmptyState
-                  icon={<Users2 className="text-producer-network-light h-6 w-6" />}
-                  title="No conversations yet"
-                  description="Find producers to start building your network."
-                  actionLabel="Find Producers"
-                  actionHref="/dashboard/producer-network?panel=find"
-                  variant="producer-network"
-                />
-              )}
-
-              {outgoingPending.length > 0 && (
-                <div className="border-t border-white/[0.06] p-3">
-                  <div className="mb-2 flex items-center justify-between">
-                    <p className="text-text-secondary text-xs font-semibold">Awaiting Response</p>
-                    <span className="text-text-secondary rounded-full border border-white/[0.08] bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold">
-                      {outgoingPending.length}
-                    </span>
+                      ))}
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    {outgoingPending.map((c) => {
+                )}
+
+                {sortedApproved.length > 0 ? (
+                  <div className="divide-y divide-white/[0.06]">
+                    {sortedApproved.map((c) => {
                       const otherId = otherIdFor(c);
                       const profile = profileMap.get(otherId);
                       const name = profile?.display_name ?? c.requester_name;
                       const company = profile?.property_name ?? profile?.company_name;
-                      const active = selectedPendingConnectionId === c.id;
+                      const lastMessage = lastMessages.get(c.id);
+                      const unreadCount = unreadByConnection.get(c.id) ?? 0;
+                      const hasUnread = unreadCount > 0;
+                      const active = c.id === selectedConnectionId;
+                      const lastActivity =
+                        lastMessage?.createdAt ?? c.permission_granted_at ?? c.created_at;
 
                       return (
-                        <Link
+                        <div
                           key={c.id}
-                          href={`/dashboard/producer-network?pending=${c.id}`}
-                          aria-current={active ? "page" : undefined}
-                          className={`group flex min-h-[4.875rem] items-center gap-3 rounded-2xl border p-3 transition-colors ${
-                            active
-                              ? "border-producer-network/20 bg-producer-network/12"
-                              : "border-white/[0.06] bg-white/[0.03] hover:bg-white/[0.05]"
+                          className={`group relative flex min-h-[4.875rem] items-center gap-3 px-4 py-3.5 transition-colors ${
+                            active ? "bg-producer-network/15" : "hover:bg-producer-network/[0.08]"
                           }`}
                         >
-                          <UserAvatar
-                            name={name}
-                            avatarUrl={avatarMap.get(otherId) ?? null}
-                            sizeClass="h-10 w-10"
+                          <Link
+                            href={`/dashboard/producer-network/connections/${c.id}`}
+                            aria-current={active ? "page" : undefined}
+                            aria-label={`Open chat with ${name}`}
+                            className="absolute inset-0 z-0"
                           />
-                          <div className="min-w-0 flex-1">
-                            <p className="text-text-primary truncate text-sm font-semibold">
-                              {name}
-                            </p>
-                            {company && (
-                              <p className="text-text-muted truncate text-xs">{company}</p>
+                          <div className="relative shrink-0">
+                            <UserAvatar
+                              name={name}
+                              avatarUrl={avatarMap.get(otherId) ?? null}
+                              sizeClass="h-10 w-10"
+                            />
+                            <AnimatedUnreadPill
+                              count={active ? 0 : unreadCount}
+                              className="-top-1 -right-1 h-4 min-w-4 px-1 text-[10px]"
+                            />
+                          </div>
+                          <div className="pointer-events-none relative z-10 min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                              <p
+                                className={`truncate text-sm ${hasUnread && !active ? "text-text-primary font-bold" : "text-text-primary font-semibold"}`}
+                              >
+                                {name}
+                              </p>
+                              {company && (
+                                <span className="text-text-secondary truncate text-xs">
+                                  {company}
+                                </span>
+                              )}
+                            </div>
+                            {lastMessage ? (
+                              <p
+                                className={`mt-1 flex items-center gap-1 truncate text-xs ${hasUnread && !active ? "text-text-secondary font-medium" : "text-text-muted"}`}
+                              >
+                                <MessageCircle className="h-3 w-3 shrink-0" aria-hidden="true" />
+                                <span className="truncate">{lastMessage.content}</span>
+                              </p>
+                            ) : (
+                              <p className="text-text-muted mt-1 text-xs">No messages yet</p>
                             )}
                           </div>
-                          <Clock className="text-warning h-4 w-4" aria-hidden="true" />
-                        </Link>
+                          <div className="relative z-10 flex shrink-0 items-center gap-2">
+                            <span className="text-text-muted text-xs">{timeAgo(lastActivity)}</span>
+                            <ProducerConversationRemoveButton
+                              connectionId={c.id}
+                              targetName={name}
+                            />
+                          </div>
+                        </div>
                       );
                     })}
                   </div>
+                ) : (
+                  <EmptyState
+                    icon={<Users2 className="text-producer-network-light h-6 w-6" />}
+                    title="No conversations yet"
+                    description="Find producers to start building your network."
+                    actionLabel="Find Producers"
+                    actionHref="/dashboard/producer-network?panel=find"
+                    variant="producer-network"
+                  />
+                )}
+
+                {outgoingPending.length > 0 && (
+                  <div className="border-t border-white/[0.06] p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                      <p className="text-text-secondary text-xs font-semibold">Awaiting Response</p>
+                      <span className="text-text-secondary rounded-full border border-white/[0.08] bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold">
+                        {outgoingPending.length}
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {outgoingPending.map((c) => {
+                        const otherId = otherIdFor(c);
+                        const profile = profileMap.get(otherId);
+                        const name = profile?.display_name ?? c.requester_name;
+                        const company = profile?.property_name ?? profile?.company_name;
+                        const active = selectedPendingConnectionId === c.id;
+
+                        return (
+                          <Link
+                            key={c.id}
+                            href={`/dashboard/producer-network?pending=${c.id}`}
+                            aria-current={active ? "page" : undefined}
+                            className={`group flex min-h-[4.875rem] items-center gap-3 rounded-2xl border p-3 transition-colors ${
+                              active
+                                ? "border-producer-network/20 bg-producer-network/12"
+                                : "border-white/[0.06] bg-white/[0.03] hover:bg-white/[0.05]"
+                            }`}
+                          >
+                            <UserAvatar
+                              name={name}
+                              avatarUrl={avatarMap.get(otherId) ?? null}
+                              sizeClass="h-10 w-10"
+                            />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-text-primary truncate text-sm font-semibold">
+                                {name}
+                              </p>
+                              {company && (
+                                <p className="text-text-muted truncate text-xs">{company}</p>
+                              )}
+                            </div>
+                            <Clock className="text-warning h-4 w-4" aria-hidden="true" />
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+              <div className="absolute inset-x-0 top-0 z-20 flex min-h-[5.25rem] [transform:translateZ(0)] items-center border-b border-white/[0.08] bg-white/[0.06] bg-clip-padding px-4 py-4 backdrop-blur-2xl backdrop-saturate-150 [backface-visibility:hidden]">
+                <div className="flex w-full items-start justify-between gap-3">
+                  <div>
+                    <p className="text-text-primary text-base font-semibold">Conversations</p>
+                    <p className="text-text-muted mt-0.5 text-sm">
+                      {approved.length} connected producers
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="border-success/15 bg-success/10 text-success inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold">
+                      <UserCheck className="h-3 w-3" aria-hidden="true" />
+                      {approved.length}
+                    </span>
+                    {pendingCount > 0 && (
+                      <span className="border-warning/15 bg-warning/10 text-warning inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold">
+                        <Clock className="h-3 w-3" aria-hidden="true" />
+                        {pendingCount}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              )}
-            </CardContent>
+              </div>
+            </div>
 
             <div className="shrink-0 border-t border-white/[0.06] p-3">
               <div className="border-producer-network/10 bg-producer-network/[0.04] flex items-start gap-2 rounded-2xl border p-3">

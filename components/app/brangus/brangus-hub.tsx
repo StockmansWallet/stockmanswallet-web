@@ -16,10 +16,7 @@ import { createClient } from "@/lib/supabase/client";
 import { fetchMessages } from "@/lib/brangus/conversation-service";
 import { fetchInboxSharedChats } from "@/lib/brangus/shared-chats-service";
 import type { BrangusConversationRow, BrangusMessageRow } from "@/lib/brangus/conversation-service";
-import type {
-  SharedChatRow,
-  SentSharedChatRow,
-} from "@/lib/brangus/shared-chats-service";
+import type { SharedChatRow, SentSharedChatRow } from "@/lib/brangus/shared-chats-service";
 
 type TabId = "chat" | "saved" | "shared";
 
@@ -475,59 +472,63 @@ export function BrangusHub({
         <aside className="mt-4 hidden min-w-0 lg:mt-0 lg:block">
           {desktopMainTab === "shared" ? (
             <Card className="flex h-[calc(100vh-7.5rem)] flex-col overflow-hidden rounded-3xl">
-              <div className="shrink-0 border-b border-white/[0.06] px-4 py-3">
-                <div className="mb-3 flex items-center justify-between">
-                  <div>
-                    <p className="text-text-primary text-sm font-semibold">Shared Chats</p>
-                    <p className="text-text-muted mt-0.5 text-xs">
-                      {sharedSubTab === "inbox" ? "Received chats" : "Chats you sent"}
-                    </p>
+              <div className="relative min-h-0 flex-1">
+                <CardContent className="absolute inset-0 overflow-y-auto p-0 pt-[7.5rem]">
+                  {sharedSubTab === "inbox" ? (
+                    <SharedChatList
+                      onSelect={handleSelectSharedChat}
+                      activeId={activeSharedChat?.id}
+                      refreshSignal={sharedListRefreshKey}
+                    />
+                  ) : (
+                    <SentChatList
+                      onSelect={handleSelectSentChat}
+                      activeId={activeSharedChat?.id}
+                      refreshSignal={sharedListRefreshKey}
+                    />
+                  )}
+                </CardContent>
+                <div className="absolute inset-x-0 top-0 z-20 [transform:translateZ(0)] border-b border-white/[0.08] bg-white/[0.06] bg-clip-padding px-4 py-3 backdrop-blur-2xl backdrop-saturate-150 [backface-visibility:hidden]">
+                  <div className="mb-3 flex items-center justify-between">
+                    <div>
+                      <p className="text-text-primary text-sm font-semibold">Shared Chats</p>
+                      <p className="text-text-muted mt-0.5 text-xs">
+                        {sharedSubTab === "inbox" ? "Received chats" : "Chats you sent"}
+                      </p>
+                    </div>
                   </div>
+                  <SharedInboxSentTabs
+                    sharedSubTab={sharedSubTab}
+                    sharedUnread={sharedUnread}
+                    onSwitch={handleSwitchSharedSubTab}
+                  />
                 </div>
-                <SharedInboxSentTabs
-                  sharedSubTab={sharedSubTab}
-                  sharedUnread={sharedUnread}
-                  onSwitch={handleSwitchSharedSubTab}
-                />
               </div>
-              <CardContent className="min-h-0 flex-1 overflow-y-auto p-0">
-                {sharedSubTab === "inbox" ? (
-                  <SharedChatList
-                    onSelect={handleSelectSharedChat}
-                    activeId={activeSharedChat?.id}
-                    refreshSignal={sharedListRefreshKey}
-                  />
-                ) : (
-                  <SentChatList
-                    onSelect={handleSelectSentChat}
-                    activeId={activeSharedChat?.id}
-                    refreshSignal={sharedListRefreshKey}
-                  />
-                )}
-              </CardContent>
             </Card>
           ) : (
             <Card className="flex h-[calc(100vh-7.5rem)] flex-col overflow-hidden rounded-3xl">
-              <div className="flex shrink-0 items-center justify-between border-b border-white/[0.06] px-4 py-3">
-                <div>
-                  <p className="text-text-primary text-sm font-semibold">Saved Chats</p>
-                  <p className="text-text-muted mt-0.5 text-xs">{conversations.length} saved</p>
+              <div className="relative min-h-0 flex-1">
+                <CardContent className="absolute inset-0 overflow-y-auto p-2 pt-[4rem]">
+                  {conversations.length > 0 ? (
+                    <ConversationList
+                      conversations={conversations}
+                      onSelect={handleSelectConversation}
+                      onDeleted={handleConversationDeleted}
+                      activeId={activeConvId}
+                      toolbarContainer={savedActionsEl}
+                    />
+                  ) : (
+                    <SavedChatsEmpty compact />
+                  )}
+                </CardContent>
+                <div className="absolute inset-x-0 top-0 z-20 flex [transform:translateZ(0)] items-center justify-between border-b border-white/[0.08] bg-white/[0.06] bg-clip-padding px-4 py-3 backdrop-blur-2xl backdrop-saturate-150 [backface-visibility:hidden]">
+                  <div>
+                    <p className="text-text-primary text-sm font-semibold">Saved Chats</p>
+                    <p className="text-text-muted mt-0.5 text-xs">{conversations.length} saved</p>
+                  </div>
+                  <div ref={setSavedActionsEl} className="flex items-center justify-end" />
                 </div>
-                <div ref={setSavedActionsEl} className="flex items-center justify-end" />
               </div>
-              <CardContent className="min-h-0 flex-1 overflow-y-auto p-2">
-                {conversations.length > 0 ? (
-                  <ConversationList
-                    conversations={conversations}
-                    onSelect={handleSelectConversation}
-                    onDeleted={handleConversationDeleted}
-                    activeId={activeConvId}
-                    toolbarContainer={savedActionsEl}
-                  />
-                ) : (
-                  <SavedChatsEmpty compact />
-                )}
-              </CardContent>
             </Card>
           )}
         </aside>
