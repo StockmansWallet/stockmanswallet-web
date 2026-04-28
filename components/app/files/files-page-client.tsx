@@ -771,13 +771,16 @@ function CollectionButton({
         )}
         <span className="min-w-0 flex-1 truncate text-left">{label}</span>
       </button>
-      <span
-        className={`absolute right-4 text-xs tabular-nums opacity-55 transition ${
-          onToggleMenu && (menuOpen ? "opacity-0" : "group-hover:opacity-0 group-focus-within:opacity-0")
-        }`}
-      >
-        {count}
-      </span>
+      {count > 0 && (
+        <span
+          className={`text-brand border-brand/20 absolute right-3 flex h-5 min-w-5 items-center justify-center rounded-full border bg-brand/15 px-1.5 text-[10px] font-bold tabular-nums transition ${
+            onToggleMenu &&
+            (menuOpen ? "opacity-0" : "group-hover:opacity-0 group-focus-within:opacity-0")
+          }`}
+        >
+          {count > 99 ? "99+" : count}
+        </span>
+      )}
       {onToggleMenu && (
         <>
           <button
