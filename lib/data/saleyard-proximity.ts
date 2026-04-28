@@ -1,4 +1,4 @@
-import { saleyardCoordinates, saleyardToState, saleyards } from "./reference-data";
+import { saleyardCoordinates, saleyardToState, saleyards, resolveMLASaleyardName } from "./reference-data";
 
 /**
  * Haversine formula for distance between two coordinates in kilometers.
@@ -91,13 +91,25 @@ export function closestSaleyardsToProperty(
  * Expands a list of saleyard names to include their nearest neighbours.
  * Used to prefetch fallback prices so the valuation engine can resolve
  * nearby saleyards without additional Supabase calls.
+ *
+ * Inputs are normalised to canonical MLA full names so callers can pass
+ * either short aliases ("Charters Towers") or full names ("Charters Towers
+ * Dalrymple Saleyards") interchangeably. saleyardToState and nearestSaleyards
+ * are keyed on full names only - without normalisation a short-alias input
+ * silently expanded to nothing, and any downstream .in("saleyard", ...)
+ * query missed every row in category_prices because Supabase stores the
+ * full names. This produced "$4.473/kg breed-adj" national-fallback values
+ * for users whose herds were stored with short-alias saleyards.
  */
 export function expandWithNearbySaleyards(
   saleyards: string[],
   limit: number = 3
 ): string[] {
-  const expanded = new Set(saleyards);
-  for (const sy of saleyards) {
+  const normalised = saleyards
+    .map((s) => resolveMLASaleyardName(s))
+    .filter((s) => s.length > 0);
+  const expanded = new Set(normalised);
+  for (const sy of normalised) {
     const state = saleyardToState[sy];
     if (!state) continue;
     for (const nearby of nearestSaleyards(sy, state, limit)) {

@@ -5,7 +5,7 @@
 import { createClient } from "../supabase/client";
 import { calculateHerdValue, categoryFallback, defaultFallbackPrice, type CategoryPriceEntry } from "../engines/valuation-engine";
 import { resolveMLACategory } from "../data/weight-mapping";
-import { cattleBreedPremiums, saleyardToState } from "../data/reference-data";
+import { cattleBreedPremiums, saleyardToState, resolveMLASaleyardName } from "../data/reference-data";
 import { expandWithNearbySaleyards } from "../data/saleyard-proximity";
 import { toolDefinitions, executeTool, DISPLAY_ONLY_TOOLS, generateAutoCards, valuationForHerd } from "./tools";
 import { fetchAllPropertyWeather } from "../services/weather-service";
@@ -1177,8 +1177,18 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
 
   // Fetch saleyard-specific prices now that herds are loaded
   // Filter by user's saleyards + MLA categories to stay under PostgREST 1000-row limit
+  // Saleyard names are normalised to canonical MLA full names so a herd stored
+  // as "Charters Towers" matches Supabase rows under "Charters Towers Dalrymple
+  // Saleyards". Without this normalisation the .in("saleyard", ...) filter
+  // returns zero rows for short-alias herds and the engine silently falls
+  // through to the national-average fallback ($4.473/kg breed-adj).
   const activeHerdsList = (herds ?? []).filter((h: { is_sold: boolean }) => !h.is_sold);
-  const herdSaleyards = [...new Set(activeHerdsList.map((h: { selected_saleyard: string | null }) => h.selected_saleyard).filter(Boolean))] as string[];
+  const herdSaleyards = [...new Set(
+    activeHerdsList
+      .map((h: { selected_saleyard: string | null }) => h.selected_saleyard)
+      .filter((s: string | null): s is string => Boolean(s) && s!.length > 0)
+      .map((s: string) => resolveMLASaleyardName(s))
+  )] as string[];
   // BRG-001: include nearest saleyards in the same fetch so the engine's nearest-saleyard
   // fallback (and saleyard override requests against a non-herd yard) hit the map instead
   // of falling through to the national average. Mirrors the iOS prefetch behaviour.
