@@ -997,8 +997,8 @@ function FileTypeIcon({ type }: { type: BrangusDetectedFileType }) {
 function groupLabel(file: BrangusFileRow, groupMode: GroupMode): string {
   if (groupMode === "type") return FILE_TYPE_LABELS[detectFileType(file)];
   if (groupMode === "source")
-    return file.source === "chat" ? "From Brangus chat" : "Uploaded in Files";
-  if (groupMode === "none") return "Files";
+    return file.source === "chat" ? "From Brangus chat" : "Uploaded in File Cabinet";
+  if (groupMode === "none") return "File Cabinet";
   return fileCategoryLabel(file);
 }
 
@@ -1147,7 +1147,7 @@ function FileDetailDrawer({
             </>
           )}
           <dt className="text-white/40">Source</dt>
-          <dd>{file.source === "chat" ? "Brangus chat" : "Files"}</dd>
+          <dd>{file.source === "chat" ? "Brangus chat" : "File Cabinet"}</dd>
           <dt className="text-white/40">Status</dt>
           <dd>{fileStatusLabel(file.extraction_status)}</dd>
         </dl>

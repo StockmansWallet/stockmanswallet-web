@@ -212,7 +212,7 @@ export function BrangusAttachmentRow({
                 className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-white/80 transition hover:bg-white/[0.06] hover:text-white disabled:opacity-50"
               >
                 <FolderOpen className="h-3.5 w-3.5" />
-                <span>From my Files</span>
+                <span>From my File Cabinet</span>
               </button>
             </div>
           )}

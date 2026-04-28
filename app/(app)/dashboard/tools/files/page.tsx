@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { FilesPageClient } from "@/components/app/files/files-page-client";
 import type { BrangusFileRow } from "@/lib/brangus/files";
 
-export const metadata = { title: "Files" };
+export const metadata = { title: "File Cabinet" };
 
 export default async function FilesPage() {
   const supabase = await createClient();
@@ -39,7 +39,7 @@ export default async function FilesPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Files" subtitle="Property and livestock documents." />
+      <PageHeader title="File Cabinet" subtitle="Property and livestock documents." />
       <FilesPageClient userId={user.id} initialFiles={(files ?? []) as BrangusFileRow[]} />
     </div>
   );
