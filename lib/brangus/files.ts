@@ -29,11 +29,13 @@ export type BrangusFileExtractionStatus =
 
 export interface BrangusFileRow {
   id: string;
+  storage_path?: string;
   title: string;
   original_filename: string;
   mime_type: string;
   size_bytes: number;
   kind: BrangusFileKind | null;
+  category?: string | null;
   page_count: number | null;
   extraction_status: BrangusFileExtractionStatus;
   source: BrangusFileSource;
@@ -53,6 +55,72 @@ export const FILE_KIND_OPTIONS: { value: BrangusFileKind; label: string }[] = [
   { value: "breeding", label: "Breeding Record" },
   { value: "other", label: "Other" },
 ];
+
+export const DEFAULT_FILE_CATEGORY_OPTIONS = [
+  "Health & vet",
+  "NLIS & compliance",
+  "Sales & receipts",
+  "Leases & property",
+  "Soil & pasture",
+  "Kill sheets",
+  "Breeding records",
+  "Photos",
+  "Finance & admin",
+  "General",
+];
+
+export type BrangusDetectedFileType =
+  | "pdf"
+  | "image"
+  | "spreadsheet"
+  | "document"
+  | "data"
+  | "other";
+
+export const FILE_TYPE_LABELS: Record<BrangusDetectedFileType, string> = {
+  pdf: "PDFs",
+  image: "Images",
+  spreadsheet: "Spreadsheets",
+  document: "Documents",
+  data: "Data & text",
+  other: "Other files",
+};
+
+const SPREADSHEET_EXTENSIONS = new Set(["csv", "xls", "xlsx", "xlsm", "ods", "tsv"]);
+const DOCUMENT_EXTENSIONS = new Set(["doc", "docx", "pages", "rtf"]);
+const DATA_EXTENSIONS = new Set(["txt", "json", "xml"]);
+
+export function kindLabel(kind: BrangusFileKind | null | undefined): string | null {
+  if (!kind) return null;
+  return FILE_KIND_OPTIONS.find((option) => option.value === kind)?.label ?? null;
+}
+
+export function fileCategoryLabel(file: Pick<BrangusFileRow, "category" | "kind">): string {
+  return file.category?.trim() || kindLabel(file.kind) || "Uncategorised";
+}
+
+export function detectFileType(
+  file: Pick<BrangusFileRow, "mime_type" | "original_filename">
+): BrangusDetectedFileType {
+  const mime = file.mime_type.toLowerCase();
+  const ext = file.original_filename.split(".").pop()?.toLowerCase() ?? "";
+
+  if (mime === "application/pdf" || ext === "pdf") return "pdf";
+  if (mime.startsWith("image/")) return "image";
+  if (
+    mime.includes("spreadsheet") ||
+    mime.includes("excel") ||
+    mime.includes("csv") ||
+    SPREADSHEET_EXTENSIONS.has(ext)
+  ) {
+    return "spreadsheet";
+  }
+  if (mime.includes("word") || mime.includes("opendocument.text") || DOCUMENT_EXTENSIONS.has(ext)) {
+    return "document";
+  }
+  if (mime.startsWith("text/") || DATA_EXTENSIONS.has(ext)) return "data";
+  return "other";
+}
 
 export function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -85,6 +153,7 @@ export async function uploadBrangusFile(opts: {
   file: File;
   title?: string;
   kind?: BrangusFileKind | null;
+  category?: string | null;
   source?: BrangusFileSource;
   conversationId?: string | null;
 }): Promise<UploadResult> {
@@ -115,6 +184,7 @@ export async function uploadBrangusFile(opts: {
     size_bytes: opts.file.size,
     title: opts.title?.trim() || friendlyTitle(opts.file.name),
     kind: opts.kind ?? null,
+    category: opts.category?.trim() || null,
     source: opts.source ?? "files",
     conversation_id: opts.conversationId ?? null,
     extraction_status: "pending",
@@ -138,9 +208,10 @@ export async function deleteBrangusFile(file: BrangusFileRow): Promise<void> {
     .from("brangus_files")
     .update({ is_deleted: true, deleted_at: new Date().toISOString() })
     .eq("id", file.id);
-  // Best-effort remote object cleanup.
-  const folder = file.id; // signed paths share the {userId}/{fileId}/ prefix; we delete by path lookup via list
-  void folder;
+
+  if (file.storage_path) {
+    await supabase.storage.from(BRANGUS_FILES_BUCKET).remove([file.storage_path]);
+  }
 }
 
 export async function signedUrlFor(storagePath: string): Promise<string | null> {
@@ -152,7 +223,9 @@ export async function signedUrlFor(storagePath: string): Promise<string | null> 
   return data.signedUrl;
 }
 
-export async function downloadOriginalAsBase64(storagePath: string): Promise<{ base64: string; mime: string } | null> {
+export async function downloadOriginalAsBase64(
+  storagePath: string
+): Promise<{ base64: string; mime: string } | null> {
   const supabase = createClient();
   const { data, error } = await supabase.storage.from(BRANGUS_FILES_BUCKET).download(storagePath);
   if (error || !data) return null;
@@ -167,7 +240,10 @@ export async function downloadOriginalAsBase64(storagePath: string): Promise<{ b
   return { base64: btoa(binary), mime: data.type || "application/octet-stream" };
 }
 
-export async function downloadExtractedText(fileId: string, userId: string): Promise<string | null> {
+export async function downloadExtractedText(
+  fileId: string,
+  userId: string
+): Promise<string | null> {
   const supabase = createClient();
   // Naming convention is fixed - extracted.txt always lives next to original.
   const candidate = `${userId}/${fileId}/extracted.txt`;

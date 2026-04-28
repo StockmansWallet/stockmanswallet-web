@@ -411,7 +411,7 @@ export const toolDefinitions = [
   {
     name: "lookup_file",
     description:
-      "Looks up files the user has uploaded (vet reports, NLIS docs, MLA receipts, lease agreements, soil tests, kill sheets, EU certs, breeding records, photos, anything else). action='list' returns a slim catalogue (id, title, kind, size, page count). action='get_metadata' returns one file's metadata. action='get_content' makes the file readable to you - PDFs and images arrive as native document/image blocks on the next turn, other formats arrive as extracted text in the tool_result. Use list first to discover what the user has, then get_content to actually read the relevant one. When the user attaches a file directly via the paperclip in the chat, you do NOT need to call lookup_file - it is already in the user message.",
+      "Looks up files the user has uploaded (vet reports, NLIS docs, MLA receipts, lease agreements, soil tests, kill sheets, EU certs, breeding records, photos, anything else). action='list' returns a slim catalogue (id, title, category, kind, size, page count). action='get_metadata' returns one file's metadata. action='get_content' makes the file readable to you - PDFs and images arrive as native document/image blocks on the next turn, other formats arrive as extracted text in the tool_result. Use list first to discover what the user has, then get_content to actually read the relevant one. When the user attaches a file directly via the paperclip in the chat, you do NOT need to call lookup_file - it is already in the user message.",
     input_schema: {
       type: "object",
       properties: {
@@ -427,7 +427,11 @@ export const toolDefinitions = [
         kind: {
           type: "string",
           description:
-            "Optional filter for list. One of: vet_report, nlis, mla_receipt, lease, soil_test, kill_sheet, eu_cert, breeding, other.",
+            "Optional legacy kind filter for list. One of: vet_report, nlis, mla_receipt, lease, soil_test, kill_sheet, eu_cert, breeding, other.",
+        },
+        category: {
+          type: "string",
+          description: "Optional user-created collection/category filter for list, e.g. Health & vet.",
         },
         free_text: {
           type: "string",
@@ -498,18 +502,20 @@ async function executeLookupFile(
   switch (action) {
     case "list": {
       const kind = typeof input.kind === "string" ? input.kind : null;
+      const category = typeof input.category === "string" ? input.category : null;
       const freeText = typeof input.free_text === "string" ? input.free_text : "";
       const maxRaw = typeof input.max_results === "number" ? input.max_results : 25;
       const max = Math.max(1, Math.min(50, maxRaw));
 
       let q = supabase
         .from("brangus_files")
-        .select("id, title, kind, size_bytes, page_count, mime_type, created_at")
+        .select("id, title, category, kind, size_bytes, page_count, mime_type, created_at")
         .eq("user_id", store.userId)
         .eq("is_deleted", false)
         .order("updated_at", { ascending: false })
         .limit(max);
       if (kind) q = q.eq("kind", kind);
+      if (category) q = q.eq("category", category);
       if (freeText) q = q.ilike("title", `%${freeText}%`);
 
       const { data, error } = await q;
@@ -518,6 +524,7 @@ async function executeLookupFile(
         (data ?? []).map((row) => ({
           id: row.id,
           title: row.title,
+          category: row.category,
           kind: row.kind,
           size_bytes: row.size_bytes,
           page_count: row.page_count,
@@ -532,7 +539,7 @@ async function executeLookupFile(
       const { data, error } = await supabase
         .from("brangus_files")
         .select(
-          "id, title, kind, tags, notes, original_filename, mime_type, size_bytes, page_count, extraction_status, created_at",
+          "id, title, category, kind, tags, notes, original_filename, mime_type, size_bytes, page_count, extraction_status, created_at",
         )
         .eq("id", fileId)
         .eq("user_id", store.userId)
@@ -542,6 +549,7 @@ async function executeLookupFile(
       return JSON.stringify({
         id: data.id,
         title: data.title,
+        category: data.category,
         kind: data.kind,
         tags: data.tags ?? [],
         notes: data.notes,

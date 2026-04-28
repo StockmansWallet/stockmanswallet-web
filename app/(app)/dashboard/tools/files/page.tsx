@@ -16,7 +16,7 @@ export default async function FilesPage() {
   const { data: files } = await supabase
     .from("brangus_files")
     .select(
-      "id, title, original_filename, mime_type, size_bytes, kind, page_count, extraction_status, source, conversation_id, created_at, updated_at",
+      "id, storage_path, title, original_filename, mime_type, size_bytes, kind, category, page_count, extraction_status, source, conversation_id, created_at, updated_at"
     )
     .eq("user_id", user.id)
     .eq("is_deleted", false)
