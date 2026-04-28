@@ -76,7 +76,7 @@ export const toolDefinitions = [
   {
     name: "calculate_freight",
     description:
-      "Calculates exact freight costs using the app's Freight IQ engine. You MUST call this tool every time the user asks about freight, transport, or trucking costs - FOR EVERY DESTINATION, EVERY TIME. No exceptions. The fact that you calculated freight to one yard does NOT let you guess the cost to another yard - different distances, different categories, different loading densities. NEVER calculate freight yourself, NEVER estimate distances in your head, NEVER apply your own rate, NEVER re-use a prior tool result and rescale it. If the user asks about multiple saleyards (e.g. 'compare freight to Roma, Dalby, Gracemere' or 'what would it cost to send these to Bendigo, Wagga, Yass, Scone?'), pass ALL of them in one call via the 'destinations' array - the tool returns one result per yard in a single response. The engine handles deck loading density, cow-and-calf pair detection, distance routing via OSRM, and GST. Prefer destination_saleyard (single) or destinations (batch) over distance_km so the engine routes real road distance from the property. Only pass distance_km when the user gives you an explicit number and there is no matching saleyard. If the user specifies a rate different from the default, pass it via rate_per_deck_per_km. For breeder herds where the user says calves are at foot, set calves_at_foot=true so the engine uses the fixed 18 head/deck cow-calf density.",
+      "Calculates exact freight costs using the app's Freight IQ engine, AND returns the live MLA-priced gross sale value at each destination saleyard when a herd_name is supplied. You MUST call this tool every time the user asks about freight, transport, or trucking costs - FOR EVERY DESTINATION, EVERY TIME. No exceptions. The fact that you calculated freight to one yard does NOT let you guess the cost to another yard - different distances, different categories, different loading densities. NEVER calculate freight yourself, NEVER estimate distances in your head, NEVER apply your own rate, NEVER re-use a prior tool result and rescale it. If the user asks about multiple saleyards (e.g. 'compare freight to Roma, Dalby, Gracemere' or 'what would it cost to send these to Bendigo, Wagga, Yass, Scone?'), pass ALL of them in one call via the 'destinations' array - the tool returns one result per yard in a single response. The engine handles deck loading density, cow-and-calf pair detection, distance routing via OSRM, and GST. Prefer destination_saleyard (single) or destinations (batch) over distance_km so the engine routes real road distance from the property. Only pass distance_km when the user gives you an explicit number and there is no matching saleyard. If the user specifies a rate different from the default, pass it via rate_per_deck_per_km. For breeder herds where the user says calves are at foot, set calves_at_foot=true so the engine uses the fixed 18 head/deck cow-calf density. PER-YARD PRICING: when herd_name + destination_saleyard (or destinations) are both supplied, every destination block also includes a 'LIVE PRICING AT [yard]' section with the engine-computed price/kg, gross sale value, and net-of-freight for that specific yard. Quote those figures directly for any comparison - gross value differs by yard, so NEVER carry one yard's gross across to another and NEVER use the herd's stored portfolio value as the gross at a non-baseline yard.",
     input_schema: {
       type: "object",
       properties: {
@@ -1887,6 +1887,40 @@ async function executeSingleFreight(input: Record<string, unknown>, store: ChatD
   if (estimate.efficiencyPrompt) lines.push(`Freight Efficiency: ${estimate.efficiencyPrompt}`);
   if (estimate.categoryWarning) lines.push(`Category Escalation: ${estimate.categoryWarning}`);
   if (estimate.breederAutoDetectNotice) lines.push(`Breeder Loading: ${estimate.breederAutoDetectNotice}`);
+
+  // BRG-018 - When the freight tool runs against a known herd at a named saleyard,
+  // also surface the live MLA price + projected gross at that yard so Brangus does
+  // not fall back to the herd's stored portfolio price (which is keyed to the herd's
+  // configured saleyard, not the destination). Mirrors the iOS executeSingleFreight
+  // change so both platforms produce the same per-yard pricing block.
+  if (herdName) {
+    const herd = findHerd(herdName, store.herds);
+    const destSaleyard = input.destination_saleyard as string | undefined;
+    if (herd && destSaleyard) {
+      const resolvedYard = resolveMLASaleyardName(destSaleyard);
+      const v = valuationForHerd(herd, store, resolvedYard);
+      if (v && v.netValue > 0) {
+        const gross = v.netValue;
+        const netOfFreight = gross - (estimate.totalCost + gst);
+        const perHeadGross = herd.head_count > 0 ? gross / herd.head_count : 0;
+        const perHeadNet = herd.head_count > 0 ? netOfFreight / herd.head_count : 0;
+        lines.push("");
+        lines.push(`LIVE PRICING AT ${resolvedYard} (engine-computed - quote these figures, not the herd's dashboard total):`);
+        lines.push(`- Price: $${v.pricePerKg.toFixed(3)}/kg breed-adjusted`);
+        let sourceLine = `- Source: ${v.priceSource}`;
+        if (v.dataDate) sourceLine += ` (MLA ${v.dataDate})`;
+        lines.push(sourceLine);
+        lines.push(`- Projected weight: ${Math.round(v.projectedWeight)}kg/head`);
+        lines.push(`- Gross sale value at ${resolvedYard}: $${fmtDollars(gross)} ($${fmtDollars(perHeadGross)}/head)`);
+        lines.push(`- Net of freight: $${fmtDollars(netOfFreight)} ($${fmtDollars(perHeadNet)}/head)`);
+        lines.push(`- IMPORTANT: gross value differs by saleyard. Do NOT reuse a gross figure from another yard or from the herd's stored portfolio total.`);
+      } else {
+        lines.push("");
+        lines.push(`LIVE PRICING AT ${resolvedYard}: valuation engine returned no result. Call lookup_portfolio_data with query_type 'saleyard_comparison' before quoting any gross or net sale value at this yard.`);
+      }
+    }
+  }
+
   return lines.join("\n");
 }
 
