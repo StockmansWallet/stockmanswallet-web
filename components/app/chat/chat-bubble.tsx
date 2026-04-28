@@ -82,9 +82,11 @@ export function ChatBubble({
     <div className="h-12 w-12 shrink-0 self-end" aria-hidden="true" />
   ) : null;
 
+  const hasHangingAvatar = Boolean(avatarUrl || avatarInitials);
+
   return (
     <div
-      className={`flex items-end gap-2 ${isRight ? "justify-end pl-14" : "justify-start pr-14"} ${animClass}`}
+      className={`flex items-end gap-2 px-1 ${hasHangingAvatar ? "pb-8" : ""} ${isRight ? "justify-end pl-14" : "justify-start pr-14"} ${animClass}`}
       style={
         animate && animationType === "bounce"
           ? { transformOrigin: isRight ? "bottom right" : "bottom left" }
@@ -92,7 +94,7 @@ export function ChatBubble({
       }
     >
       {!isRight && avatar}
-      <div className="relative max-w-[80%] overflow-visible">
+      <div className="relative max-w-[min(80%,42rem)] overflow-visible">
         <div className={`rounded-3xl px-4 py-2.5 text-sm leading-relaxed ${bgClass} ${textClass}`}>
           {(senderName || timestamp) && (
             <div className="mb-0.5 flex items-center gap-2">

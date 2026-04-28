@@ -5,6 +5,9 @@ interface TypingIndicatorProps {
   bgColor: string;
   /** Color for the bouncing dots */
   dotClass?: string;
+  /** Reserve the sender avatar lane so the bubble lines up with chat rows */
+  reserveAvatarSpace?: boolean;
+  className?: string;
 }
 
 /**
@@ -14,12 +17,18 @@ interface TypingIndicatorProps {
 export function TypingIndicator({
   bgColor,
   dotClass = "bg-white/50",
+  reserveAvatarSpace = false,
+  className = "",
 }: TypingIndicatorProps) {
   return (
-    <div className="flex justify-start animate-bubble-in" style={{ transformOrigin: "bottom left" }}>
+    <div
+      className={`flex items-end justify-start gap-2 px-1 pr-14 animate-bubble-in ${className}`}
+      style={{ transformOrigin: "bottom left" }}
+    >
+      {reserveAvatarSpace && <div className="h-12 w-12 shrink-0 self-end" aria-hidden="true" />}
       <div className="relative">
         <div
-          className="flex items-center gap-1.5 rounded-3xl px-4 py-3"
+          className="flex min-h-10 min-w-14 items-center justify-center gap-1.5 rounded-3xl px-4 py-3"
           style={{ backgroundColor: bgColor }}
         >
           <span className={`h-2 w-2 rounded-full ${dotClass} animate-bounce [animation-delay:0ms]`} />

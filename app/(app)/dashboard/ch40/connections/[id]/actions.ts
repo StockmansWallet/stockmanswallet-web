@@ -197,13 +197,17 @@ export async function sendProducerMessage(
     };
   }
 
-  const { error } = await supabase.from("advisory_messages").insert({
-    connection_id: connectionId,
-    sender_user_id: user.id,
-    message_type: "general_note",
-    content: content.trim(),
-    attachment: verifiedAttachment,
-  });
+  const { data: message, error } = await supabase
+    .from("advisory_messages")
+    .insert({
+      connection_id: connectionId,
+      sender_user_id: user.id,
+      message_type: "general_note",
+      content: content.trim(),
+      attachment: verifiedAttachment,
+    })
+    .select("*")
+    .single();
 
   if (error) return { error: error.message };
 
@@ -228,7 +232,7 @@ export async function sendProducerMessage(
   });
 
   revalidatePath(`/dashboard/ch40/connections/${connectionId}`);
-  return { success: true };
+  return { success: true, message: message as AdvisoryMessage };
 }
 
 export async function getCh40SharedFileDownloadUrl(connectionId: string, fileId: string) {

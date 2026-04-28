@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, type ReactNode } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, useCallback, type ReactNode } from "react";
 import { MessageThread } from "@/components/app/advisory/message-thread";
 import { ChatInput } from "@/components/app/chat/chat-input";
 import { TypingIndicator } from "@/components/app/chat/typing-indicator";
@@ -11,7 +11,7 @@ import { createClient } from "@/lib/supabase/client";
 import { sendProducerMessage, fetchProducerMessages } from "./actions";
 import type { AdvisoryMessage, MessageAttachment } from "@/lib/types/advisory";
 
-const POLL_INTERVAL = 15000;
+const POLL_INTERVAL = 5000;
 // Peer bubble uses the Producer Network accent (sage, -dark variant for
 // filled-area legibility, matching the Brangus chat pattern).
 const OTHER_BG = "var(--color-ch40-dark)";
@@ -40,23 +40,59 @@ export function ProducerChatClient({
 
   const { peerIsTyping, notifyTyping } = useTypingIndicator(`chat:${connectionId}`, currentUserId);
 
-  // Auto-scroll to bottom on new messages. block: "end" aligns the end-ref
-  // to the viewport bottom; the default ("start") would scroll the ref to
-  // the top and clip the first bubble off the top of the card.
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages, peerIsTyping]);
+  const mergeMessage = useCallback((incoming: AdvisoryMessage) => {
+    setMessages((prev) => {
+      const withoutDuplicate = prev.filter((m) => m.id !== incoming.id);
+      return [...withoutDuplicate, incoming].sort(
+        (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+      );
+    });
+    setAnimatedIds((ids) => new Set(ids).add(incoming.id));
+  }, []);
+
+  // Auto-scroll to bottom on load and incoming messages. Layout timing matters
+  // here because the composer is outside the scroll viewport and the spacer
+  // must be measured before the browser restores any previous scroll offset.
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
+    requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
+    });
+  }, []);
+
+  useLayoutEffect(() => {
+    scrollToBottom();
+  }, [messages.length, peerIsTyping, pendingAttachment, scrollToBottom]);
 
   // Live message subscription with a polling fallback for missed websocket events.
   useEffect(() => {
     let cancelled = false;
+    let channel: ReturnType<ReturnType<typeof createClient>["channel"]> | null = null;
     const supabase = createClient();
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    async function startRealtime() {
+      const { data: { session } } = await supabase.auth.getSession();
       if (!cancelled && session?.access_token) {
         supabase.realtime.setAuth(session.access_token);
       }
-    });
+      if (cancelled) return;
+
+      channel = supabase
+        .channel(`producer-chat-${connectionId.slice(0, 8)}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "advisory_messages",
+            filter: `connection_id=eq.${connectionId}`,
+          },
+          (payload) => {
+            mergeMessage(payload.new as AdvisoryMessage);
+          },
+        )
+        .subscribe();
+    }
 
     async function refreshMessages() {
       const result = await fetchProducerMessages(connectionId);
@@ -78,19 +114,7 @@ export function ProducerChatClient({
       });
     }
 
-    const channel = supabase
-      .channel(`producer-chat-${connectionId.slice(0, 8)}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "advisory_messages",
-          filter: `connection_id=eq.${connectionId}`,
-        },
-        () => { void refreshMessages(); },
-      )
-      .subscribe();
+    void startRealtime();
 
     const interval = setInterval(async () => {
       await refreshMessages();
@@ -99,9 +123,9 @@ export function ProducerChatClient({
     return () => {
       cancelled = true;
       clearInterval(interval);
-      void supabase.removeChannel(channel);
+      if (channel) void supabase.removeChannel(channel);
     };
-  }, [connectionId]);
+  }, [connectionId, mergeMessage]);
 
   const handleSend = useCallback(
     async (text: string) => {
@@ -139,9 +163,15 @@ export function ProducerChatClient({
         return;
       }
 
-      const refreshed = await fetchProducerMessages(connectionId);
-      if (refreshed.messages) {
-        setMessages(refreshed.messages);
+      if (result?.message) {
+        setMessages((prev) => {
+          const withoutOptimisticOrDuplicate = prev.filter(
+            (m) => m.id !== optimisticMsg.id && m.id !== result.message.id,
+          );
+          return [...withoutOptimisticOrDuplicate, result.message].sort(
+            (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+          );
+        });
       }
     },
     [connectionId, currentUserId, pendingAttachment]
@@ -150,8 +180,8 @@ export function ProducerChatClient({
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <div className="relative min-h-0 flex-1">
-        <div className="absolute inset-0 overflow-y-auto pt-[5.25rem] pb-2">
-          <div className="space-y-3 px-4 pt-4">
+        <div className="absolute inset-0 overflow-y-auto pt-[5.25rem] pb-4">
+          <div className="space-y-3 px-5 pt-4">
             <MessageThread
               messages={messages}
               currentUserId={currentUserId}
@@ -163,7 +193,15 @@ export function ProducerChatClient({
               otherTailColor={OTHER_BG}
               avatars={avatars}
             />
-            {peerIsTyping && <TypingIndicator bgColor={OTHER_BG} dotClass="bg-white/50" />}
+            {peerIsTyping && (
+              <TypingIndicator
+                bgColor={OTHER_BG}
+                dotClass="bg-white/50"
+                reserveAvatarSpace={!!avatars}
+                className="mt-2"
+              />
+            )}
+            <div aria-hidden className={pendingAttachment ? "h-44" : "h-28"} />
             <div ref={messagesEndRef} />
           </div>
         </div>
