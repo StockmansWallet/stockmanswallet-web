@@ -1,6 +1,13 @@
 "use client";
 
-import { type DragEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type PointerEvent as ReactPointerEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Database,
   Download,
@@ -44,9 +51,20 @@ interface Props {
 }
 
 type GroupMode = "category" | "type" | "source" | "none";
+type DragPreview = {
+  file: BrangusFileRow;
+  type: BrangusDetectedFileType;
+  startX: number;
+  startY: number;
+  x: number;
+  y: number;
+  active: boolean;
+};
 
 const ALL_COLLECTIONS = "__all__";
 const UNCATEGORISED = "Uncategorised";
+const DROP_UNCATEGORISED = "__uncategorised__";
+const DRAG_ACTIVATION_DISTANCE = 6;
 
 export function FilesPageClient({ userId, initialFiles }: Props) {
   const [files, setFiles] = useState<BrangusFileRow[]>(initialFiles);
@@ -67,9 +85,13 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
   const [editingCollection, setEditingCollection] = useState<string | null>(null);
   const [editingDraft, setEditingDraft] = useState("");
   const [openCollectionMenu, setOpenCollectionMenu] = useState<string | null>(null);
-  const [draggingFileId, setDraggingFileId] = useState<string | null>(null);
   const [dropCollection, setDropCollection] = useState<string | null>(null);
+  const [dragPreview, setDragPreview] = useState<DragPreview | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dragPreviewRef = useRef<DragPreview | null>(null);
+  const suppressNextFileOpenRef = useRef(false);
+  const activeDragPreview = dragPreview?.active ? dragPreview : null;
+  const draggingFileId = activeDragPreview?.file.id ?? null;
 
   useEffect(() => {
     saveCustomCollections(userId, customCollections);
@@ -100,6 +122,12 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [openCollectionMenu]);
+
+  useEffect(() => {
+    dragPreviewRef.current = dragPreview;
+  }, [dragPreview]);
+
+  const isPointerDragStarted = dragPreview !== null;
 
   const categoryOptions = useMemo(() => {
     const hidden = new Set(hiddenCollections.map((collection) => collection.toLowerCase()));
@@ -278,15 +306,89 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
     [files]
   );
 
-  const handleDropOnCollection = useCallback(
-    (collection: string | null) => {
-      if (!draggingFileId) return;
-      void moveFileToCollection(draggingFileId, collection);
-      setDraggingFileId(null);
+  useEffect(() => {
+    if (!isPointerDragStarted) return;
+
+    const previousUserSelect = document.body.style.userSelect;
+    document.body.style.userSelect = "none";
+
+    function finishDrag(event?: globalThis.PointerEvent, shouldDrop = false) {
+      const current = dragPreviewRef.current;
+      if (!current) return;
+
+      const active =
+        current.active ||
+        (event
+          ? Math.hypot(event.clientX - current.startX, event.clientY - current.startY) >=
+            DRAG_ACTIVATION_DISTANCE
+          : false);
+      const dropTarget =
+        shouldDrop && active && event
+          ? collectionDropTargetFromPoint(event.clientX, event.clientY)
+          : undefined;
+
+      if (dropTarget !== undefined) {
+        void moveFileToCollection(current.file.id, dropTarget);
+      }
+
+      if (active) {
+        suppressNextFileOpenRef.current = true;
+        window.setTimeout(() => {
+          suppressNextFileOpenRef.current = false;
+        }, 0);
+      }
+
+      dragPreviewRef.current = null;
+      setDragPreview(null);
       setDropCollection(null);
-    },
-    [draggingFileId, moveFileToCollection]
-  );
+    }
+
+    function handlePointerMove(event: globalThis.PointerEvent) {
+      const current = dragPreviewRef.current;
+      if (!current) return;
+
+      const active =
+        current.active ||
+        Math.hypot(event.clientX - current.startX, event.clientY - current.startY) >=
+          DRAG_ACTIVATION_DISTANCE;
+      const next = {
+        ...current,
+        x: event.clientX,
+        y: event.clientY,
+        active,
+      };
+
+      event.preventDefault();
+      dragPreviewRef.current = next;
+      setDragPreview(next);
+
+      if (active) {
+        const dropTarget = collectionDropTargetFromPoint(event.clientX, event.clientY);
+        setDropCollection(
+          dropTarget === undefined ? null : dropTarget === null ? UNCATEGORISED : dropTarget
+        );
+      }
+    }
+
+    function handlePointerUp(event: globalThis.PointerEvent) {
+      finishDrag(event, true);
+    }
+
+    function handlePointerCancel() {
+      finishDrag();
+    }
+
+    document.addEventListener("pointermove", handlePointerMove, { passive: false });
+    document.addEventListener("pointerup", handlePointerUp);
+    document.addEventListener("pointercancel", handlePointerCancel);
+
+    return () => {
+      document.removeEventListener("pointermove", handlePointerMove);
+      document.removeEventListener("pointerup", handlePointerUp);
+      document.removeEventListener("pointercancel", handlePointerCancel);
+      document.body.style.userSelect = previousUserSelect;
+    };
+  }, [isPointerDragStarted, moveFileToCollection]);
 
   const handleCreateCollection = useCallback(() => {
     const nextCollection = collectionDraft.trim();
@@ -511,14 +613,8 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
             count={collectionCounts.get(UNCATEGORISED) ?? 0}
             active={activeCollection === UNCATEGORISED}
             onClick={() => setActiveCollection(UNCATEGORISED)}
+            dropTarget={null}
             dropActive={dropCollection === UNCATEGORISED}
-            onDragOver={(event) => {
-              if (!draggingFileId) return;
-              event.preventDefault();
-              setDropCollection(UNCATEGORISED);
-            }}
-            onDragLeave={() => setDropCollection(null)}
-            onDrop={() => handleDropOnCollection(null)}
           />
 
           <div className="my-2 h-px bg-white/[0.06]" />
@@ -545,14 +641,8 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
                     setActiveCollection(category);
                     setOpenCollectionMenu(null);
                   }}
+                  dropTarget={category}
                   dropActive={dropCollection === category}
-                  onDragOver={(event) => {
-                    if (!draggingFileId) return;
-                    event.preventDefault();
-                    setDropCollection(category);
-                  }}
-                  onDragLeave={() => setDropCollection(null)}
-                  onDrop={() => handleDropOnCollection(category)}
                   onToggleMenu={() =>
                     setOpenCollectionMenu((current) => (current === category ? null : category))
                   }
@@ -642,16 +732,25 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
                         <FileRow
                           key={file.id}
                           file={file}
-                          onOpen={() => setActiveFile(file)}
+                          isDragging={draggingFileId === file.id}
+                          onOpen={() => {
+                            if (suppressNextFileOpenRef.current) return;
+                            setActiveFile(file);
+                          }}
                           onDownload={() => void handleDownload(file)}
                           onDelete={() => handleDelete(file)}
-                          onDragStart={() => {
-                            setDraggingFileId(file.id);
+                          onPointerDragStart={(event) => {
+                            event.currentTarget.setPointerCapture(event.pointerId);
+                            setDragPreview({
+                              file,
+                              type: detectFileType(file),
+                              startX: event.clientX,
+                              startY: event.clientY,
+                              x: event.clientX,
+                              y: event.clientY,
+                              active: false,
+                            });
                             setOpenCollectionMenu(null);
-                          }}
-                          onDragEnd={() => {
-                            setDraggingFileId(null);
-                            setDropCollection(null);
                           }}
                         />
                       ))}
@@ -673,6 +772,8 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
           onChange={handleFileChange}
         />
       )}
+
+      {activeDragPreview && <CompactFileDragPreview preview={activeDragPreview} />}
     </div>
   );
 }
@@ -727,11 +828,9 @@ function CollectionButton({
   count,
   active,
   menuOpen,
+  dropTarget,
   dropActive,
   onClick,
-  onDragOver,
-  onDragLeave,
-  onDrop,
   onToggleMenu,
   onRename,
   onDelete,
@@ -740,20 +839,22 @@ function CollectionButton({
   count: number;
   active: boolean;
   menuOpen?: boolean;
+  dropTarget?: string | null;
   dropActive?: boolean;
   onClick: () => void;
-  onDragOver?: (event: DragEvent<HTMLDivElement>) => void;
-  onDragLeave?: () => void;
-  onDrop?: () => void;
   onToggleMenu?: () => void;
   onRename?: () => void;
   onDelete?: () => void;
 }) {
   return (
     <div
-      onDragOver={onDragOver}
-      onDragLeave={onDragLeave}
-      onDrop={onDrop}
+      data-files-collection-drop-target={
+        dropTarget === undefined
+          ? undefined
+          : dropTarget === null
+            ? DROP_UNCATEGORISED
+            : dropTarget
+      }
       data-files-collection-menu-root={onToggleMenu ? "" : undefined}
       className={`group relative flex w-full items-center rounded-lg px-2 py-2 pr-9 text-left text-sm transition ${
         dropActive
@@ -874,34 +975,91 @@ function CollectionEditRow({
   );
 }
 
+function collectionDropTargetFromPoint(x: number, y: number): string | null | undefined {
+  const target = document.elementFromPoint(x, y);
+  const collectionTarget =
+    target instanceof Element
+      ? target.closest<HTMLElement>("[data-files-collection-drop-target]")
+      : null;
+  const value = collectionTarget?.dataset.filesCollectionDropTarget;
+
+  if (!value) return undefined;
+  return value === DROP_UNCATEGORISED ? null : value;
+}
+
+function fileTypeShortLabel(type: BrangusDetectedFileType): string {
+  if (type === "pdf") return "PDF";
+  if (type === "image") return "IMG";
+  if (type === "spreadsheet") return "XLS";
+  if (type === "document") return "DOC";
+  if (type === "data") return "TXT";
+  return "FILE";
+}
+
+function CompactFileDragPreview({ preview }: { preview: DragPreview }) {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none fixed z-[1000]"
+      style={{
+        left: 0,
+        top: 0,
+        transform: `translate3d(${Math.max(8, preview.x - 42)}px, ${Math.max(
+          8,
+          preview.y - 28
+        )}px, 0)`,
+        WebkitBackdropFilter: "blur(32px) saturate(1.8)",
+        backdropFilter: "blur(32px) saturate(1.8)",
+      }}
+    >
+      <div className="file-drag-preview-card flex w-[260px] items-center gap-2.5 rounded-2xl border border-white/[0.10] bg-white/[0.08] bg-clip-padding px-3 py-2.5 shadow-2xl shadow-black/40 backdrop-blur-2xl backdrop-saturate-150 [backface-visibility:hidden]">
+        <div className="bg-brand/15 text-brand flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[10px] text-[10px] font-extrabold tracking-wide">
+          {fileTypeShortLabel(preview.type)}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-xs leading-tight font-bold text-white">
+            {preview.file.title}
+          </div>
+          <div className="mt-1 truncate text-[11px] leading-tight text-white/55">
+            {FILE_TYPE_LABELS[preview.type]} / {formatFileSize(preview.file.size_bytes)}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function FileRow({
   file,
+  isDragging,
   onOpen,
   onDownload,
   onDelete,
-  onDragStart,
-  onDragEnd,
+  onPointerDragStart,
 }: {
   file: BrangusFileRow;
+  isDragging: boolean;
   onOpen: () => void;
   onDownload: () => void;
   onDelete: () => void;
-  onDragStart: () => void;
-  onDragEnd: () => void;
+  onPointerDragStart: (event: ReactPointerEvent<HTMLLIElement>) => void;
 }) {
   const type = detectFileType(file);
   const category = fileCategoryLabel(file);
 
   return (
     <li
-      draggable
-      onDragStart={(event) => {
-        event.dataTransfer.effectAllowed = "move";
-        event.dataTransfer.setData("text/plain", file.id);
-        onDragStart();
+      onPointerDown={(event) => {
+        if (event.button !== 0) return;
+        const target = event.target;
+        if (target instanceof Element && target.closest("[data-file-row-action]")) return;
+        onPointerDragStart(event);
       }}
-      onDragEnd={onDragEnd}
-      className="flex min-w-0 cursor-grab items-center gap-3 rounded-lg border border-white/10 bg-white/[0.025] px-4 py-3 transition hover:border-white/15 hover:bg-white/[0.04] active:cursor-grabbing"
+      className={`flex min-w-0 touch-pan-y cursor-grab select-none items-center gap-3 rounded-lg border px-4 py-3 transition-[transform,opacity,background-color,border-color,box-shadow] duration-200 ease-out active:cursor-grabbing ${
+        isDragging
+          ? "-translate-y-0.5 scale-[0.92] border-brand/20 bg-brand/[0.05] opacity-0 shadow-none"
+          : "border-white/10 bg-white/[0.025] hover:border-white/15 hover:bg-white/[0.04]"
+      }`}
     >
       <div className="bg-brand/15 text-brand flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
         <FileTypeIcon type={type} />
@@ -933,6 +1091,7 @@ function FileRow({
 
       <button
         type="button"
+        data-file-row-action
         onClick={onDownload}
         className="rounded-lg p-2 text-white/40 hover:bg-white/[0.08] hover:text-white"
         aria-label={`Download ${file.title}`}
@@ -943,6 +1102,7 @@ function FileRow({
 
       <button
         type="button"
+        data-file-row-action
         onClick={onDelete}
         className="rounded-lg p-2 text-white/40 hover:bg-red-500/10 hover:text-red-300"
         aria-label="Delete file"
