@@ -178,7 +178,7 @@ export async function ProducerNetworkHub({
       .from("notifications")
       .select("related_connection_id")
       .eq("user_id", user.id)
-      .eq("type", "new_message")
+      .in("type", ["new_message", "producer_request_approved"])
       .eq("is_read", false)
       .in(
         "related_connection_id",

@@ -190,7 +190,7 @@ export async function notifyProducerRequestApproved(
     userId: toUserId,
     type: "producer_request_approved",
     title: `${fromName} accepted your connection`,
-    body: "You can now chat with each other.",
+    body: "Tap to open the chat and say g'day.",
     link: `/dashboard/ch40/connections/${connectionId}`,
     connectionId,
   });

@@ -223,7 +223,11 @@ export const producerToolItems: NavItem[] = [
     href: "/dashboard/ch40",
     icon: <Radio className="h-5 w-5" />,
     ...nav("ch40"),
-    notificationTypes: ["new_message", "new_connection_request"],
+    notificationTypes: [
+      "new_message",
+      "new_connection_request",
+      "producer_request_approved",
+    ],
     badgeSuppressPrefix: "/dashboard/ch40/connections/",
   },
 ];
