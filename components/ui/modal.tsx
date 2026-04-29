@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 
@@ -37,7 +38,7 @@ function Modal({ open, onClose, title, children, size = "md" }: ModalProps) {
     };
   }, [open, onClose]);
 
-  return (
+  const content = (
     <AnimatePresence>
       {open && (
         <div
@@ -84,6 +85,12 @@ function Modal({ open, onClose, title, children, size = "md" }: ModalProps) {
       )}
     </AnimatePresence>
   );
+
+  // Portal to body so the fixed-position overlay isn't clipped by an
+  // ancestor with overflow:hidden, transform, or backdrop-filter (which
+  // promote the ancestor to a containing block for fixed children).
+  if (typeof document === "undefined") return null;
+  return createPortal(content, document.body);
 }
 
 export { Modal };
