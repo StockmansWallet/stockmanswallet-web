@@ -69,8 +69,8 @@ export default function Pricing() {
           </h2>
           <p className="text-text-secondary mx-auto mt-4 max-w-xl text-base">
             {ADVISOR_ENABLED
-              ? "Plans for producers and advisors. All plans include a 21-day free trial."
-              : "All plans include a 21-day free trial."}
+              ? "Plans for producers and advisors. All plans include a 7-day free trial."
+              : "All plans include a 7-day free trial."}
           </p>
         </motion.div>
 
@@ -132,14 +132,14 @@ export default function Pricing() {
             transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
             className={`mt-12 grid gap-4 sm:gap-6 ${
               activeTab === "producer"
-                ? "mx-auto max-w-3xl sm:grid-cols-2"
+                ? "mx-auto max-w-5xl sm:grid-cols-2 lg:grid-cols-3"
                 : "mx-auto max-w-3xl sm:grid-cols-2"
             }`}
           >
             {tiers.map((tier) => (
               <div
                 key={tier.id}
-                className={`group relative flex flex-col rounded-2xl p-4 backdrop-blur-md transition-colors duration-300 sm:p-6 ${
+                className={`group relative flex flex-col rounded-2xl p-4 backdrop-blur-xl transition-colors duration-300 sm:p-6 ${
                   tier.highlighted
                     ? `border ${accent.border} ${accent.cardBg} ${accent.glow}`
                     : "border border-white/[0.06] bg-white/[0.04] hover:bg-white/[0.06]"
@@ -218,14 +218,14 @@ export default function Pricing() {
 
         {/* Notes */}
         <div className="mx-auto mt-12 max-w-2xl space-y-4">
-          <div className="rounded-2xl bg-white/[0.03] p-5 backdrop-blur-sm">
-            <h4 className="text-sm font-semibold text-white">21-Day Free Trial</h4>
+          <div className="rounded-2xl bg-white/[0.03] p-5 backdrop-blur-lg">
+            <h4 className="text-sm font-semibold text-white">7-Day Free Trial</h4>
             <p className="text-text-muted mt-1 text-xs leading-relaxed">
-              21-day free trial included. Paid subscription begins automatically at the end of the
+              7-day free trial included. Paid subscription begins automatically at the end of the
               trial unless cancelled beforehand.
             </p>
           </div>
-          <div className="rounded-2xl bg-white/[0.03] p-5 backdrop-blur-sm">
+          <div className="rounded-2xl bg-white/[0.03] p-5 backdrop-blur-lg">
             <h4 className="text-brand text-sm font-semibold">Usage Limits</h4>
             <p className="text-text-muted mt-1 text-xs leading-relaxed">
               Plan-based usage limits apply to Brangus and Freight IQ. Additional usage can be

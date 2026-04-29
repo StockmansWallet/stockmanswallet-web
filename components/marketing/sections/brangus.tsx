@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 
@@ -85,7 +85,7 @@ function ContextCard({ card, index }: { card: ChatExample["contextCards"][0]; in
         delay: index * 0.1,
         opacity: { duration: 0.25, delay: index * 0.1 },
       }}
-      className="flex h-[66px] min-w-[100px] flex-col justify-center gap-0.5 rounded-xl bg-white/[0.06] px-3 backdrop-blur-sm sm:min-w-[120px] sm:px-3.5"
+      className="flex h-[66px] min-w-[100px] flex-col justify-center gap-0.5 rounded-xl bg-white/[0.06] px-3 backdrop-blur-lg sm:min-w-[120px] sm:px-3.5"
     >
       <div className="flex items-center gap-0.5">
         <span className="text-text-muted flex-1 truncate text-[10px] font-semibold tracking-wide uppercase">
@@ -153,13 +153,14 @@ export default function Brangus() {
 
     if (phase === "fading") {
       // Reverse pop: cards first, then AI bubble, then user bubble, then swap
-      setShowCards(false);
+      const t0 = setTimeout(() => setShowCards(false), 0);
       const t1 = setTimeout(() => setShowResponse(false), 300);
       const t2 = setTimeout(() => {
         setCurrentIndex((prev) => (prev + 1) % CHAT_EXAMPLES.length);
         setPhase("user");
       }, 700);
       return () => {
+        clearTimeout(t0);
         clearTimeout(t1);
         clearTimeout(t2);
       };
@@ -209,10 +210,9 @@ export default function Brangus() {
               </span>
             </h2>
             <p className="text-text-secondary mt-6 max-w-md text-base leading-relaxed">
-              Brangus is the engine room of Stockman's Wallet. He is always on, with direct access
+              Brangus is the engine room of Stockman&apos;s Wallet. He is always on, with direct access
               to your data, herds, portfolio, tools, and workflows. He analyses the numbers,
-              connects the moving parts, and helps drive better decisions across your operation. He
-              is your portfolio manager and new best mate.
+              connects the moving parts, and helps drive better decisions across your operation.
             </p>
             <ul className="mt-8 space-y-4">
               {[

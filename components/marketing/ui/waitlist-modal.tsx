@@ -10,7 +10,7 @@ type Role = 'producer' | 'advisor'
 type HerdSize = 'under_50' | '50_500' | '500_2000' | '2000_plus'
 type PropertyCount = '1' | '2_plus'
 type ClientCount = 'under_15' | '15_100' | '100_plus'
-type SubscriptionTier = 'jackaroo' | 'stockman' | 'head_stockman' | 'advisor' | 'head_advisor'
+type SubscriptionTier = 'ringer' | 'stockman' | 'head_stockman' | 'advisor' | 'head_advisor'
 
 interface WaitlistFormData {
   name: string
@@ -55,9 +55,9 @@ const CLIENT_COUNT_OPTIONS: { value: ClientCount; label: string }[] = [
 
 const TIER_OPTIONS: Record<Role, { value: SubscriptionTier; label: string; subtitle: string }[]> = {
   producer: [
-    { value: 'jackaroo', label: 'Jackaroo', subtitle: 'Entry Level' },
-    { value: 'stockman', label: 'Stockman', subtitle: 'Single Property' },
-    { value: 'head_stockman', label: 'Head Stockman', subtitle: 'Multi Property' },
+    { value: 'ringer', label: 'Ringer', subtitle: '1 Property' },
+    { value: 'stockman', label: 'Stockman', subtitle: 'Up to 3 Properties' },
+    { value: 'head_stockman', label: 'Head Stockman', subtitle: '4+ Properties' },
   ],
   advisor: [
     { value: 'advisor', label: 'Advisor', subtitle: 'Professional' },

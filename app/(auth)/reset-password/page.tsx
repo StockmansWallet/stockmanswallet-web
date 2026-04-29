@@ -32,8 +32,8 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    if (password.length < 12) {
-      setError("Password must be at least 12 characters.");
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
       return;
     }
 
@@ -91,7 +91,7 @@ export default function ResetPasswordPage() {
               Set a new password.
             </h1>
             <p className="mt-3 text-[clamp(1rem,3.2vw,1.28rem)] leading-relaxed text-white/72">
-              Pick something at least 12 characters long.
+              Pick something at least 8 characters long.
             </p>
           </div>
 
@@ -127,7 +127,7 @@ export default function ResetPasswordPage() {
                     name="password"
                     type={showPassword ? "text" : "password"}
                     autoComplete="new-password"
-                    placeholder="At least 12 characters"
+                    placeholder="At least 8 characters"
                     className="focus:border-brand/70 focus:ring-brand/20 w-full rounded-2xl border border-white/10 bg-white/12 px-4 py-3.5 pr-12 text-base text-white transition-colors outline-none placeholder:text-white/40 focus:bg-white/15 focus:ring-2"
                   />
                   <button

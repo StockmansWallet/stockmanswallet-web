@@ -26,7 +26,7 @@ export default function ContactSignup() {
           </h2>
           <p className="text-text-secondary mx-auto mt-6 max-w-lg text-base">
             Join the waitlist for Australia&apos;s first livestock portfolio management platform.
-            Launching May 2026 on the App Store, with companion web access.
+            Launching June 2026 on the App Store, with companion web access.
           </p>
         </motion.div>
 

@@ -24,7 +24,7 @@ export default function AboutCTA() {
           </h2>
           <p className="text-text-secondary mx-auto mt-6 max-w-lg text-base">
             Join the waitlist for early access. Founding members receive exclusive pricing and
-            priority onboarding when we launch in May 2026.
+            priority onboarding when we launch in June 2026.
           </p>
         </motion.div>
 

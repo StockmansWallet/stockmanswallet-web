@@ -10,10 +10,10 @@ const signInSchema = z.object({
   password: z.string().min(1),
 });
 
-// Password policy: 12 chars minimum, 128 max. Existing users with
+// Password policy: 8 chars minimum, 128 max. Existing users with
 // shorter passwords still sign in (signInSchema stays permissive at min(1));
 // this only applies when a password is being created or changed.
-const PASSWORD_MIN = 12;
+const PASSWORD_MIN = 8;
 const PASSWORD_MAX = 128;
 
 const signUpSchema = z.object({

@@ -5,7 +5,7 @@ const VALID_ROLES = ['producer', 'advisor'] as const
 const VALID_HERD_SIZES = ['under_50', '50_500', '500_2000', '2000_plus'] as const
 const VALID_PROPERTY_COUNTS = ['1', '2_plus'] as const
 const VALID_CLIENT_COUNTS = ['under_15', '15_30', '30_50', '50_plus'] as const
-const VALID_TIERS = ['jackaroo', 'stockman', 'head_stockman', 'advisor', 'head_advisor'] as const
+const VALID_TIERS = ['ringer', 'stockman', 'head_stockman', 'advisor', 'head_advisor'] as const
 const VALID_FEATURES = [
   'brangus', 'freight_iq', 'herd_valuation', 'reports', 'advisory_hub',
   'yard_book', 'grid_iq', 'ch40', 'insights', 'markets',

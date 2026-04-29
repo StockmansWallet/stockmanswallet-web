@@ -100,7 +100,7 @@ export default function Hero() {
                 height={40}
                 className="h-10 w-auto opacity-75 transition-opacity hover:opacity-100"
               />
-              <span className="text-text-muted text-sm">Coming May 2026</span>
+              <span className="text-text-muted text-sm">Coming June 2026</span>
             </motion.div>
           </motion.div>
 
@@ -131,8 +131,8 @@ export default function Hero() {
               className="absolute top-[25%] left-4 z-20 hidden w-72 rounded-2xl p-5 shadow-2xl lg:block xl:-left-8"
               style={{
                 backgroundColor: "rgba(124, 167, 73, 0.08)",
-                backdropFilter: "blur(12px)",
-                WebkitBackdropFilter: "blur(12px)",
+                backdropFilter: "blur(28px)",
+                WebkitBackdropFilter: "blur(28px)",
                 border: "1px solid rgba(124, 167, 73, 0.15)",
               }}
             >
@@ -174,8 +174,8 @@ export default function Hero() {
               className="absolute top-[45%] right-4 z-20 hidden w-72 rounded-2xl p-5 shadow-2xl lg:block xl:-right-8"
               style={{
                 backgroundColor: "rgba(19, 153, 236, 0.08)",
-                backdropFilter: "blur(12px)",
-                WebkitBackdropFilter: "blur(12px)",
+                backdropFilter: "blur(28px)",
+                WebkitBackdropFilter: "blur(28px)",
                 border: "1px solid rgba(19, 153, 236, 0.15)",
               }}
             >

@@ -9,16 +9,7 @@ import { useWaitlist } from "@/components/marketing/ui/waitlist-provider";
 
 export function Header() {
   const { openWaitlist } = useWaitlist();
-  const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => {
-    function onScroll() {
-      setScrolled(window.scrollY > 20);
-    }
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     if (mobileOpen) {
@@ -34,15 +25,11 @@ export function Header() {
   return (
     <header
       className="fixed top-0 z-50 w-full transition-all duration-700 ease-in-out"
-      style={
-        scrolled
-          ? {
-              backgroundColor: "rgba(15, 12, 8, 0.35)",
-              backdropFilter: "blur(24px) saturate(1.2)",
-              WebkitBackdropFilter: "blur(24px) saturate(1.2)",
-            }
-          : undefined
-      }
+      style={{
+        backgroundColor: "rgba(15, 12, 8, 0.35)",
+        backdropFilter: "blur(24px) saturate(1.2)",
+        WebkitBackdropFilter: "blur(24px) saturate(1.2)",
+      }}
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}

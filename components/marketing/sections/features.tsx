@@ -30,6 +30,7 @@ interface FeatureTab {
   video?: string;
   icon: React.ReactNode;
   comingSoon?: boolean;
+  badge?: string;
 }
 
 const FEATURE_TABS: FeatureTab[] = [
@@ -172,26 +173,6 @@ const FEATURE_TABS: FeatureTab[] = [
     icon: <Radio className="h-5 w-5" />,
   },
   {
-    id: "gridiq",
-    name: "Grid IQ",
-    tagline: "Market vs processor",
-    description:
-      "Compare the saleyard against the processor before you sell. Upload grids via photo or PDF, let AI extract the data, build a test consignment from your portfolio, and see which channel nets the best return. Then track kill sheets to sharpen future decisions.",
-    color: "var(--feature-gridiq)",
-    colorLight: "var(--feature-gridiq-light)",
-    colorDark: "var(--feature-gridiq-dark)",
-    bullets: [
-      "AI-powered grid extraction from photos, PDFs, and spreadsheets",
-      "Net market vs net processor comparison including freight",
-      "Processor fit scoring and sell window indicator per category",
-      "Post-kill analysis with Grid Capture Ratio, Realisation Factor, and Kill Score",
-      "Build a kill sheet library that improves your predictions over time",
-    ],
-    mockup: "/images/iphone-screen-gridiq.webp",
-    icon: <Grid3x3 className="h-5 w-5" />,
-    comingSoon: true,
-  },
-  {
     id: "markets",
     name: "Markets",
     tagline: "Live market intelligence",
@@ -228,6 +209,26 @@ const FEATURE_TABS: FeatureTab[] = [
     ],
     mockup: "/images/iphone-screen-insights.webp",
     icon: <Lightbulb className="h-5 w-5" />,
+  },
+  {
+    id: "gridiq",
+    name: "Grid IQ",
+    tagline: "Optional processor analysis add-on",
+    description:
+      "Compare the saleyard against the processor before you sell. Grid IQ will be available as an optional add-on to subscription plans, so producers can add processor grid analysis when they need it without it being bundled into the base plans.",
+    color: "var(--feature-gridiq)",
+    colorLight: "var(--feature-gridiq-light)",
+    colorDark: "var(--feature-gridiq-dark)",
+    bullets: [
+      "AI-powered grid extraction from photos, PDFs, and spreadsheets",
+      "Net market vs net processor comparison including freight",
+      "Processor fit scoring and sell window indicator per category",
+      "Post-kill analysis with Grid Capture Ratio, Realisation Factor, and Kill Score",
+      "Build a kill sheet library that improves your predictions over time",
+    ],
+    mockup: "/images/iphone-screen-gridiq.webp",
+    icon: <Grid3x3 className="h-5 w-5" />,
+    badge: "Optional Add-on",
   },
 ];
 
@@ -374,7 +375,7 @@ export default function Features() {
                   style={{ color: feature.color }}
                 >
                   {feature.name}
-                  {feature.comingSoon && (
+                  {(feature.badge || feature.comingSoon) && (
                     <span
                       className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
                       style={{
@@ -383,7 +384,7 @@ export default function Features() {
                         border: `1px solid ${feature.color}40`,
                       }}
                     >
-                      Coming Soon
+                      {feature.badge ?? "Coming Soon"}
                     </span>
                   )}
                 </h3>

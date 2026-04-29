@@ -48,8 +48,8 @@ function SignUpScreen() {
       return;
     }
 
-    if (password.length < 12) {
-      setError("Password must be at least 12 characters.");
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
       return;
     }
 
@@ -279,7 +279,7 @@ function SignUpScreen() {
                                 name="password"
                                 type={showPassword ? "text" : "password"}
                                 autoComplete="new-password"
-                                placeholder="At least 12 characters"
+                                placeholder="At least 8 characters"
                                 className="focus:border-brand/70 focus:ring-brand/20 w-full rounded-2xl border border-white/10 bg-white/12 px-4 py-3.5 pr-12 text-base text-white transition-colors outline-none placeholder:text-white/40 focus:bg-white/15 focus:ring-2"
                               />
                               <button
@@ -378,7 +378,7 @@ function SignUpScreen() {
                             Back
                           </button>
 
-                          <span className="text-white/50">At least 12 characters</span>
+                          <span className="text-white/50">At least 8 characters</span>
                         </div>
                       </motion.div>
                     )}
