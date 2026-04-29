@@ -265,7 +265,7 @@ export async function ProducerNetworkHub({
   return (
     <div className="w-full max-w-[1680px]">
       <ProducerConnectionsRealtime userId={user.id} />
-      <MarkNotificationsRead types={["new_connection_request"]} />
+      <MarkNotificationsRead types={["new_connection_request", "producer_request_denied"]} />
       {selectedConnectionId && (
         <MarkConnectionNotificationsRead connectionId={selectedConnectionId} />
       )}

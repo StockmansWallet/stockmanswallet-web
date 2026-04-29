@@ -209,9 +209,12 @@ export async function notifyProducerRequestDenied(
   connectionId: string,
   reason: "denied" | "disconnected"
 ) {
+  // Use a producer-specific type (mirrors producer_request_approved) so
+  // the Ch 40 sidebar badge listens for it without picking up advisor-
+  // flow denials, which share the generic request_denied type.
   await createNotification(supabase, {
     userId: toUserId,
-    type: "request_denied",
+    type: "producer_request_denied",
     title:
       reason === "disconnected"
         ? `${fromName} disconnected`

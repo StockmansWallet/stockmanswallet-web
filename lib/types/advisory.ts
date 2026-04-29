@@ -291,6 +291,7 @@ export type NotificationType =
   | "new_message"
   | "renewal_requested"
   | "producer_request_approved"
+  | "producer_request_denied"
   | "yard_book_reminder"
   | "yard_book_overdue"
   | "price_alert";

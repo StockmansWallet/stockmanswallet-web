@@ -227,6 +227,7 @@ export const producerToolItems: NavItem[] = [
       "new_message",
       "new_connection_request",
       "producer_request_approved",
+      "producer_request_denied",
     ],
     badgeSuppressPrefix: "/dashboard/ch40/connections/",
   },
