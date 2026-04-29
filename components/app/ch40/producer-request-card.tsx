@@ -70,7 +70,7 @@ export function ProducerRequestCard({ request, avatarUrl }: ProducerRequestCardP
                 onClick={handleApprove}
                 disabled={loading !== null}
               >
-                {loading === "approve" ? "..." : "Accept"}
+                {loading === "approve" ? "Accepting..." : "Accept"}
               </Button>
             </div>
           </div>

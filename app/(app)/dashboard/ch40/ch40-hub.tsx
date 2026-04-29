@@ -10,6 +10,7 @@ import { ProducerConversationRemoveButton } from "@/components/app/ch40/producer
 import { ProducerFindPanel } from "@/components/app/ch40/producer-find-panel";
 import { ProducerConnectButton } from "@/components/app/ch40/producer-connect-button";
 import { ProducerConnectionsRealtime } from "@/components/app/ch40/producer-connections-realtime";
+import { ConversationEndedPanel } from "@/components/app/ch40/conversation-ended-panel";
 import { MarkNotificationsRead } from "@/components/app/mark-notifications-read";
 import { MarkConnectionNotificationsRead } from "@/components/app/mark-connection-notifications-read";
 import { AnimatedUnreadPill } from "@/components/app/animated-unread-pill";
@@ -77,13 +78,34 @@ export async function ProducerNetworkHub({
   const selectedConnection = selectedConnectionId
     ? approved.find((c) => c.id === selectedConnectionId)
     : null;
-  if (selectedConnectionId && !selectedConnection) notFound();
+
+  // If the chat URL points at a connection that's no longer approved, see
+  // whether the caller is still a party on a now-ended row (removed,
+  // expired, denied). If so, show a closure panel in place of the chat
+  // instead of 404'ing the user mid-view, e.g. when the other party
+  // disconnects while they're sitting on the page.
+  const ENDED_STATUSES = ["removed", "expired", "denied"] as const;
+  type EndedStatus = (typeof ENDED_STATUSES)[number];
+  const selectedEndedConnection =
+    !selectedConnection && selectedConnectionId
+      ? allConns.find(
+          (c) =>
+            c.id === selectedConnectionId &&
+            (ENDED_STATUSES as readonly string[]).includes(c.status),
+        )
+      : null;
+
+  if (selectedConnectionId && !selectedConnection && !selectedEndedConnection) {
+    notFound();
+  }
   const selectedPendingConnection = selectedPendingConnectionId
     ? outgoingPending.find((c) => c.id === selectedPendingConnectionId)
     : null;
 
   const otherIdFor = (c: ConnectionRequest) =>
     c.requester_user_id === user.id ? c.target_user_id : c.requester_user_id;
+
+  const endedOtherId = selectedEndedConnection ? otherIdFor(selectedEndedConnection) : null;
 
   const connectedAndPendingIds = Array.from(
     new Set([...approved.map(otherIdFor), ...outgoingPending.map(otherIdFor)])
@@ -93,11 +115,16 @@ export async function ProducerNetworkHub({
       user.id,
       ...connectedAndPendingIds,
       ...incomingRequests.map((r) => r.requester_user_id),
+      ...(endedOtherId ? [endedOtherId] : []),
     ])
   );
 
   const profileIds = Array.from(
-    new Set([...connectedAndPendingIds, ...incomingRequests.map((r) => r.requester_user_id)])
+    new Set([
+      ...connectedAndPendingIds,
+      ...incomingRequests.map((r) => r.requester_user_id),
+      ...(endedOtherId ? [endedOtherId] : []),
+    ])
   );
   const profileMap = new Map<string, ProducerProfileSummary>();
   if (profileIds.length > 0) {
@@ -265,7 +292,7 @@ export async function ProducerNetworkHub({
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)]">
         <section
-          className={`min-w-0 ${selectedConnection || mode === "find" || selectedPendingConnection ? "order-1" : "order-2 lg:order-1"}`}
+          className={`min-w-0 ${selectedConnection || selectedEndedConnection || mode === "find" || selectedPendingConnection ? "order-1" : "order-2 lg:order-1"}`}
         >
           <div className="relative flex h-[calc(100vh-19rem)] min-h-[34rem] flex-col overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding sm:h-[calc(100vh-17rem)] lg:h-[calc(100vh-7.5rem)]">
             {mode === "find" ? (
@@ -313,6 +340,22 @@ export async function ProducerNetworkHub({
                   }
                 />
               </div>
+            ) : selectedEndedConnection && endedOtherId ? (
+              <ConversationEndedPanel
+                otherUserId={endedOtherId}
+                otherName={
+                  profileMap.get(endedOtherId)?.display_name ??
+                  selectedEndedConnection.requester_name ??
+                  "Producer"
+                }
+                otherCompany={
+                  profileMap.get(endedOtherId)?.property_name ??
+                  profileMap.get(endedOtherId)?.company_name ??
+                  null
+                }
+                avatarUrl={avatarMap.get(endedOtherId) ?? null}
+                endedStatus={selectedEndedConnection.status as EndedStatus}
+              />
             ) : selectedPendingConnection ? (
               <PendingProducerPanel
                 connection={selectedPendingConnection}

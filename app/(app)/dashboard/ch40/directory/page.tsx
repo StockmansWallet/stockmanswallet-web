@@ -123,7 +123,7 @@ export default async function ProducerDirectoryPage({
             icon={<Search className="h-6 w-6 text-ch40-light" />}
             title="Search to find producers"
             description="Type a name, property, or use the filters above to find producers to connect with."
-            variant="amber"
+            variant="ch40"
           />
         </Card>
       ) : filteredProducers.length === 0 ? (
@@ -132,7 +132,7 @@ export default async function ProducerDirectoryPage({
             icon={<Users2 className="h-6 w-6 text-ch40-light" />}
             title="No producers found"
             description="No producers match your search. Try a different name or clear a filter."
-            variant="amber"
+            variant="ch40"
           />
         </Card>
       ) : (

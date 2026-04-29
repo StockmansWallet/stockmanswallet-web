@@ -172,7 +172,7 @@ export async function notifyProducerConnectionRequest(
 ) {
   await createNotification(supabase, {
     userId: toUserId,
-    type: "producer_connection_request",
+    type: "new_connection_request",
     title: `${fromName} wants to connect`,
     body: "Review and accept or decline this connection request.",
     link: "/dashboard/ch40",

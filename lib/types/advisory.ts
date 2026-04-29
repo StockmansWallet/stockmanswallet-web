@@ -290,7 +290,6 @@ export type NotificationType =
   | "access_expired"
   | "new_message"
   | "renewal_requested"
-  | "producer_connection_request"
   | "producer_request_approved"
   | "yard_book_reminder"
   | "yard_book_overdue"

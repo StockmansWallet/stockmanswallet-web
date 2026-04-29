@@ -419,7 +419,7 @@ export async function disconnectProducer(connectionId: string) {
 
   const { error } = await supabase
     .from("connection_requests")
-    .update({ status: "expired" })
+    .update({ status: "removed", updated_at: new Date().toISOString() })
     .eq("id", connectionId);
 
   if (error) return { error: error.message };
