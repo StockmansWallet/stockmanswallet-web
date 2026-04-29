@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import LandingButton from "@/components/marketing/ui/landing-button";
 import { useWaitlist } from "@/components/marketing/ui/waitlist-provider";
 import tallyAnimData from "@/public/animations/tally.json";
@@ -13,13 +13,16 @@ const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 export default function Hero() {
   const { openWaitlist } = useWaitlist();
   const sectionRef = useRef<HTMLElement>(null);
+  const prefersReducedMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
   });
 
-  const phoneY = useTransform(scrollYProgress, [0, 1], [0, 80]);
-  const textY = useTransform(scrollYProgress, [0, 1], [0, -40]);
+  const phoneYRaw = useTransform(scrollYProgress, [0, 1], [0, 80]);
+  const textYRaw = useTransform(scrollYProgress, [0, 1], [0, -40]);
+  const phoneY = prefersReducedMotion ? 0 : phoneYRaw;
+  const textY = prefersReducedMotion ? 0 : textYRaw;
 
   return (
     <section
@@ -79,11 +82,12 @@ export default function Hero() {
               transition={{ duration: 0.6, delay: 0.5 }}
               className="mt-10"
             >
-              <LandingButton size="sm" onClick={openWaitlist}>
+              <LandingButton size="md" onClick={openWaitlist}>
                 Join Waitlist
               </LandingButton>
               <p className="text-text-muted mt-3 text-xs">
-                Join the waitlist. We&apos;ll email you before launch with early access details.
+                Join the waitlist. We&apos;ll email you before the app launches with early access
+                details.
               </p>
             </motion.div>
 
@@ -91,16 +95,18 @@ export default function Hero() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.7 }}
-              className="mt-8 flex items-center gap-4"
+              className="mt-8 flex cursor-default items-center gap-4"
+              aria-label="App launching June 2026 on the App Store"
             >
               <Image
                 src="/images/download-on-app-store.svg"
-                alt="Download on the App Store"
+                alt=""
+                aria-hidden="true"
                 width={120}
                 height={40}
-                className="h-10 w-auto opacity-75 transition-opacity hover:opacity-100"
+                className="h-10 w-auto opacity-60"
               />
-              <span className="text-text-muted text-sm">Coming June 2026</span>
+              <span className="text-text-muted text-sm">App launching June 2026</span>
             </motion.div>
           </motion.div>
 
@@ -120,6 +126,8 @@ export default function Hero() {
                 height={844}
                 className="w-full"
                 priority
+                loading="eager"
+                sizes="(min-width: 1024px) 300px, (min-width: 640px) 280px, 260px"
               />
             </motion.div>
 

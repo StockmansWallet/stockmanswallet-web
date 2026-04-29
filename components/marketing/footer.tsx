@@ -64,10 +64,10 @@ export function Footer() {
             </nav>
             <div className="mt-6">
               <a
-                href="mailto:support@stockmanswallet.com.au"
+                href="mailto:hello@stockmanswallet.com.au"
                 className="text-text-secondary hover:text-brand text-sm transition-colors"
               >
-                support@stockmanswallet.com.au
+                hello@stockmanswallet.com.au
               </a>
             </div>
           </div>

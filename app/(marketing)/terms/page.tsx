@@ -12,7 +12,7 @@ export default function TermsOfService() {
 
         <div className="space-y-6 text-sm leading-relaxed text-text-secondary">
           <p>
-            <strong className="text-white">Last updated:</strong> 2 March 2026
+            <strong className="text-white">Last updated:</strong> 30 April 2026
           </p>
 
           <section>
@@ -50,8 +50,8 @@ export default function TermsOfService() {
             <h2 className="mb-3 text-xl font-semibold text-white">Contact</h2>
             <p>
               For questions about these terms, contact us at{' '}
-              <a href="mailto:support@stockmanswallet.com.au" className="text-brand hover:text-brand-light">
-                support@stockmanswallet.com.au
+              <a href="mailto:hello@stockmanswallet.com.au" className="text-brand hover:text-brand-light">
+                hello@stockmanswallet.com.au
               </a>
             </p>
           </section>

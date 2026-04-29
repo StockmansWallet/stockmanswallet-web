@@ -67,12 +67,19 @@ const nextConfig: NextConfig = {
             value: [
               "default-src 'self'",
               "media-src 'self' blob:",
-              "script-src 'self' 'unsafe-inline' https://maps.googleapis.com",
+              // Note: 'unsafe-inline' on scripts is required by Next.js
+              // hydration. Migrate to a nonce-based policy via middleware
+              // post-launch.
+              "script-src 'self' 'unsafe-inline' https://maps.googleapis.com https://va.vercel-scripts.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: blob: https://*.supabase.co https://maps.googleapis.com https://maps.gstatic.com https://lh3.googleusercontent.com https://*.googleusercontent.com",
               "font-src 'self' data: https://fonts.gstatic.com",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.supabase.com https://maps.googleapis.com https://api.open-meteo.com",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.supabase.com https://maps.googleapis.com https://api.open-meteo.com https://va.vercel-scripts.com https://vitals.vercel-insights.com",
               "frame-ancestors 'none'",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+              "upgrade-insecure-requests",
             ].join("; "),
           },
         ],

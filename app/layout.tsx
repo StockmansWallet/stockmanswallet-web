@@ -1,6 +1,13 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Caveat, Geist_Mono, Nunito } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { StructuredData } from "@/components/marketing/structured-data";
 import "./globals.css";
+
+const SITE_URL = "https://stockmanswallet.com.au";
+const SITE_NAME = "Stockman's Wallet";
+const SITE_DESCRIPTION =
+  "Track your cattle, sheep and pig herds as financial assets with real-time MLA market valuations. Built for Australian producers.";
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -20,12 +27,12 @@ const caveat = Caveat({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Stockman's Wallet - Intelligent Livestock Valuation",
-    template: "Stockman's Wallet | %s",
+    default: `${SITE_NAME} - Intelligent Livestock Valuation`,
+    template: `${SITE_NAME} | %s`,
   },
-  description:
-    "Track your cattle, sheep and pig herds as financial assets with real-time MLA market valuations. Built for Australian producers.",
+  description: SITE_DESCRIPTION,
   keywords: [
     "livestock",
     "cattle",
@@ -38,15 +45,46 @@ export const metadata: Metadata = {
     "grazier",
     "herd management",
   ],
-  authors: [{ name: "Stockman's Wallet" }],
+  authors: [{ name: SITE_NAME }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: "Stockman's Wallet - Intelligent Livestock Valuation",
-    description: "Track your livestock herds as financial assets with real-time market valuations.",
-    url: "https://stockmanswallet.com.au",
-    siteName: "Stockman's Wallet",
+    title: `${SITE_NAME} - Intelligent Livestock Valuation`,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    siteName: SITE_NAME,
     locale: "en_AU",
     type: "website",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} - Intelligent Livestock Valuation`,
+    description: SITE_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#14110f",
+  colorScheme: "dark",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -60,6 +98,8 @@ export default function RootLayout({
         className={`${geistMono.variable} ${nunito.variable} ${caveat.variable} font-sans antialiased`}
       >
         {children}
+        <Analytics />
+        <StructuredData />
       </body>
     </html>
   );

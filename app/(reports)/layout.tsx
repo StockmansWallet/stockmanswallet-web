@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import { ForceLightTheme } from "./_force-light-theme";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function ReportsLayout({
   children,

@@ -34,6 +34,7 @@ export default function PageBackground({ variant = "photo" }: { variant?: PageBa
         alt=""
         fill
         priority
+        sizes="100vw"
         className={`object-cover ${isApp ? "scale-[1.035] opacity-70 blur-sm saturate-[0.78]" : ""}`}
       />
       <div
@@ -41,7 +42,7 @@ export default function PageBackground({ variant = "photo" }: { variant?: PageBa
         style={{
           background: isApp
             ? "linear-gradient(to bottom, rgba(17,15,13,0.68) 0%, rgba(17,15,13,0.76) 34%, rgba(17,15,13,0.86) 68%, rgba(17,15,13,0.94) 100%)"
-            : "linear-gradient(to bottom, rgba(15,15,15,0.32) 0%, rgba(15,15,15,0.46) 24%, rgba(15,15,15,0.60) 52%, rgba(15,15,15,0.80) 80%, rgba(15,15,15,0.94) 100%)",
+            : "linear-gradient(to bottom, rgba(15,15,15,0.42) 0%, rgba(15,15,15,0.56) 24%, rgba(15,15,15,0.70) 52%, rgba(15,15,15,0.86) 80%, rgba(15,15,15,0.96) 100%)",
         }}
       />
       {isApp && (

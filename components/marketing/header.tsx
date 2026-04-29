@@ -10,6 +10,7 @@ import { useWaitlist } from "@/components/marketing/ui/waitlist-provider";
 export function Header() {
   const { openWaitlist } = useWaitlist();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     if (mobileOpen) {
@@ -22,13 +23,28 @@ export function Header() {
     };
   }, [mobileOpen]);
 
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 64);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <header
-      className="fixed top-0 z-50 w-full transition-all duration-700 ease-in-out"
+      className={`fixed top-0 z-50 w-full transition-all duration-500 ease-in-out ${
+        scrolled ? "border-b border-white/[0.06]" : "border-b border-transparent"
+      }`}
       style={{
-        backgroundColor: "rgba(15, 12, 8, 0.35)",
-        backdropFilter: "blur(24px) saturate(1.2)",
-        WebkitBackdropFilter: "blur(24px) saturate(1.2)",
+        backgroundColor: scrolled ? "rgba(15, 12, 8, 0.78)" : "rgba(15, 12, 8, 0.35)",
+        backdropFilter: scrolled
+          ? "blur(28px) saturate(1.4)"
+          : "blur(24px) saturate(1.2)",
+        WebkitBackdropFilter: scrolled
+          ? "blur(28px) saturate(1.4)"
+          : "blur(24px) saturate(1.2)",
       }}
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -59,7 +75,7 @@ export function Header() {
 
         {/* Desktop CTA */}
         <div className="hidden items-center gap-3 lg:flex">
-          <LandingButton size="sm" onClick={openWaitlist}>
+          <LandingButton size="md" onClick={openWaitlist}>
             Join Waitlist
           </LandingButton>
         </div>
@@ -68,7 +84,9 @@ export function Header() {
         <button
           className="text-text-secondary focus-visible:ring-brand flex h-11 w-11 items-center justify-center rounded-[10px] hover:bg-white/5 focus-visible:ring-2 focus-visible:outline-none lg:hidden"
           onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle menu"
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          aria-controls="marketing-mobile-menu"
+          aria-expanded={mobileOpen}
         >
           {mobileOpen ? (
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -94,7 +112,10 @@ export function Header() {
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="glass-strong absolute inset-x-0 top-16 border-t border-white/5 lg:hidden">
+        <div
+          id="marketing-mobile-menu"
+          className="glass-strong absolute inset-x-0 top-16 border-t border-white/5 lg:hidden"
+        >
           <nav className="flex flex-col gap-1 px-4 py-4">
             {NAV_LINKS.map((link) => (
               <Link
@@ -109,7 +130,7 @@ export function Header() {
 
             <div className="mt-2 border-t border-white/5 pt-4">
               <LandingButton
-                size="sm"
+                size="md"
                 className="w-full"
                 onClick={() => {
                   setMobileOpen(false);

@@ -97,7 +97,7 @@ export const FEATURES: Feature[] = [
     accentColorLight: "#64BBF5",
     bullets: [
       "11 transport categories with weight-based escalation pricing",
-      "Real driving distances calculated via Apple Maps",
+      "Real road-distance routing for freight estimates",
       "Per-head, per-deck, and total cost breakdown including GST",
       "Save estimates for future reference and side-by-side comparison",
       "Feed results into Grid IQ for net-of-freight market vs processor analysis",

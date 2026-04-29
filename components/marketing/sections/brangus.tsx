@@ -177,6 +177,7 @@ export default function Brangus() {
               src="/images/brangus-post-dirt2.webp"
               alt="Brangus leaning on a post beside the chat panel"
               fill
+              sizes="420px"
               className="object-contain object-right-bottom"
             />
           </div>

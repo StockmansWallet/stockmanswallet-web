@@ -24,7 +24,7 @@ export default function AboutCTA() {
           </h2>
           <p className="text-text-secondary mx-auto mt-6 max-w-lg text-base">
             Join the waitlist for early access. Founding members receive exclusive pricing and
-            priority onboarding when we launch in June 2026.
+            priority onboarding when the app launches in June 2026.
           </p>
         </motion.div>
 
@@ -35,7 +35,7 @@ export default function AboutCTA() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mx-auto mt-10 flex justify-center"
         >
-          <LandingButton size="sm" onClick={openWaitlist}>
+          <LandingButton size="md" onClick={openWaitlist}>
             Join Waitlist
           </LandingButton>
         </motion.div>

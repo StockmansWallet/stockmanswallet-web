@@ -26,7 +26,7 @@ export default function ContactSignup() {
           </h2>
           <p className="text-text-secondary mx-auto mt-6 max-w-lg text-base">
             Join the waitlist for Australia&apos;s first livestock portfolio management platform.
-            Launching June 2026 on the App Store, with companion web access.
+            The app launches June 2026 on the App Store, with companion web access.
           </p>
         </motion.div>
 
@@ -37,7 +37,7 @@ export default function ContactSignup() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mx-auto mt-10 flex justify-center"
         >
-          <LandingButton size="sm" onClick={openWaitlist}>
+          <LandingButton size="md" onClick={openWaitlist}>
             Join Waitlist
           </LandingButton>
         </motion.div>
@@ -50,8 +50,8 @@ export default function ContactSignup() {
           className="mt-6 flex flex-col items-center gap-2"
         >
           <p className="text-text-muted max-w-sm text-xs leading-relaxed">
-            We&apos;ll send you an email before launch with early access instructions. Founding
-            members get exclusive pricing and priority onboarding.
+            We&apos;ll send you an email before the app launches with early access instructions.
+            Founding members get exclusive pricing and priority onboarding.
           </p>
           <a
             href="mailto:hello@stockmanswallet.com.au"

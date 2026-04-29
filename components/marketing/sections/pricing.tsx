@@ -69,8 +69,8 @@ export default function Pricing() {
           </h2>
           <p className="text-text-secondary mx-auto mt-4 max-w-xl text-base">
             {ADVISOR_ENABLED
-              ? "Plans for producers and advisors. All plans include a 7-day free trial."
-              : "All plans include a 7-day free trial."}
+              ? "Plans for producers and advisors. Every plan starts with a 7-day free trial when the app launches."
+              : "Every plan starts with a 7-day free trial when the app launches."}
           </p>
         </motion.div>
 
@@ -155,7 +155,7 @@ export default function Pricing() {
 
                 <div className="mb-6">
                   <h3 className={`text-lg font-semibold ${accent.text}`}>{tier.name}</h3>
-                  <p className="text-text-muted text-xs">{tier.subtitle}</p>
+                  <p className="mt-1 text-sm font-semibold text-white">{tier.subtitle}</p>
                   <div className="mt-4">
                     {tier.price !== null ? (
                       <div className="flex items-baseline gap-1">
@@ -221,8 +221,8 @@ export default function Pricing() {
           <div className="rounded-2xl bg-white/[0.03] p-5 backdrop-blur-lg">
             <h4 className="text-sm font-semibold text-white">7-Day Free Trial</h4>
             <p className="text-text-muted mt-1 text-xs leading-relaxed">
-              7-day free trial included. Paid subscription begins automatically at the end of the
-              trial unless cancelled beforehand.
+              Every paid plan starts with a 7-day free trial when the app launches. Your subscription
+              begins automatically at the end of the trial unless cancelled beforehand.
             </p>
           </div>
           <div className="rounded-2xl bg-white/[0.03] p-5 backdrop-blur-lg">

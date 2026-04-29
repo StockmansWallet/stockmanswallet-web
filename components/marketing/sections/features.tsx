@@ -145,7 +145,7 @@ const FEATURE_TABS: FeatureTab[] = [
     colorDark: "var(--feature-freight-dark)",
     bullets: [
       "11 transport categories with weight-based escalation pricing",
-      "Real driving distances calculated via Apple Maps",
+      "Real road-distance routing for freight estimates",
       "Per-head, per-deck, and total cost breakdown including GST",
       "Save estimates for future reference and side-by-side comparison",
       "Feed results into Grid IQ for net-of-freight market vs processor analysis",
@@ -292,6 +292,7 @@ export default function Features() {
               <button
                 key={tab.id}
                 onClick={() => setActive(i)}
+                aria-pressed={active === i}
                 className={`focus-visible:ring-brand relative flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition-colors duration-300 focus-visible:ring-2 focus-visible:outline-none ${
                   active === i ? "" : "text-white/50 hover:text-white/75"
                 }`}
@@ -498,6 +499,7 @@ export default function Features() {
                         alt={`${feature.name} screenshot`}
                         width={390}
                         height={844}
+                        sizes="(min-width: 1024px) 280px, (min-width: 640px) 260px, 240px"
                         className="w-full"
                       />
                     )}

@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { motion } from "framer-motion";
 import { TEAM_MEMBERS } from "@/lib/marketing/constants";
 import LandingButton from "@/components/marketing/ui/landing-button";
@@ -67,7 +66,7 @@ export default function About() {
           transition={{ duration: 0.4, delay: 0.5 }}
           className="mt-10 flex justify-center"
         >
-          <LandingButton variant="secondary" size="sm" href="/about" className="backdrop-blur-sm">
+          <LandingButton variant="secondary" size="md" href="/about" className="backdrop-blur-sm">
             Learn more about us
           </LandingButton>
         </motion.div>

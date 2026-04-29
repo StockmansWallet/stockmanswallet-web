@@ -4,13 +4,21 @@ import { createServerClient } from "@supabase/ssr";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
+  const requestedNext = searchParams.get("next");
+  const safeNext =
+    requestedNext?.startsWith("/") && !requestedNext.startsWith("//")
+      ? requestedNext
+      : null;
 
   if (!code) {
     return NextResponse.redirect(`${origin}/sign-in`);
   }
 
-  // Detect recovery flow via cookie set by forgotPassword action
+  // Detect recovery flow via explicit callback params, with the cookie kept as
+  // a fallback for older links/providers that do not preserve query params.
   const isRecovery =
+    searchParams.get("type") === "recovery" ||
+    safeNext === "/reset-password" ||
     request.cookies.get("sw-password-recovery")?.value === "true";
   // Detect iOS email verification (custom URL schemes don't work in email clients)
   const isIOS = searchParams.get("source") === "ios";
@@ -18,7 +26,7 @@ export async function GET(request: NextRequest) {
     ? "/reset-password"
     : isIOS
       ? "/auth/verified"
-      : "/dashboard";
+      : safeNext ?? "/dashboard";
   const response = NextResponse.redirect(`${origin}${redirectTo}`);
 
   // Create Supabase client that writes cookies directly onto the redirect response

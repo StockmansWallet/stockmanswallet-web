@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
@@ -9,6 +9,7 @@ interface ModalProps {
   open: boolean;
   onClose: () => void;
   title?: string;
+  ariaLabel?: string;
   children: ReactNode;
   size?: "sm" | "md" | "lg";
 }
@@ -19,22 +20,70 @@ const sizeClasses = {
   lg: "max-w-2xl",
 };
 
-function Modal({ open, onClose, title, children, size = "md" }: ModalProps) {
+const focusableSelector = [
+  "a[href]",
+  "button:not([disabled])",
+  "textarea:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "[tabindex]:not([tabindex='-1'])",
+].join(",");
+
+function Modal({ open, onClose, title, ariaLabel, children, size = "md" }: ModalProps) {
+  const titleId = useId();
   const overlayRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!open) return;
 
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+
+      if (e.key !== "Tab") return;
+
+      const panel = panelRef.current;
+      if (!panel) return;
+
+      const focusable = Array.from(
+        panel.querySelectorAll<HTMLElement>(focusableSelector),
+      ).filter((el) => !el.hasAttribute("disabled") && el.getAttribute("aria-hidden") !== "true");
+
+      if (focusable.length === 0) {
+        e.preventDefault();
+        panel.focus();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
 
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
     document.addEventListener("keydown", handleKeyDown);
     document.body.style.overflow = "hidden";
+
+    window.requestAnimationFrame(() => {
+      const firstFocusable = panelRef.current?.querySelector<HTMLElement>(focusableSelector);
+      (firstFocusable ?? panelRef.current)?.focus();
+    });
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
+      previousFocusRef.current?.focus?.();
     };
   }, [open, onClose]);
 
@@ -59,6 +108,12 @@ function Modal({ open, onClose, title, children, size = "md" }: ModalProps) {
 
           {/* Panel */}
           <motion.div
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={title ? titleId : undefined}
+            aria-label={!title ? (ariaLabel ?? "Dialog") : undefined}
+            tabIndex={-1}
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -68,7 +123,9 @@ function Modal({ open, onClose, title, children, size = "md" }: ModalProps) {
             {/* Header */}
             {title && (
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-text-primary">{title}</h2>
+                <h2 id={titleId} className="text-lg font-semibold text-text-primary">
+                  {title}
+                </h2>
                 <button
                   onClick={onClose}
                   aria-label="Close"

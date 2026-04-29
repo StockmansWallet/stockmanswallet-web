@@ -8,9 +8,8 @@ import { ADVISOR_ENABLED } from '@/lib/feature-flags'
 
 type Role = 'producer' | 'advisor'
 type HerdSize = 'under_50' | '50_500' | '500_2000' | '2000_plus'
-type PropertyCount = '1' | '2_plus'
+type PropertyCount = '1' | '2_3' | '4_plus'
 type ClientCount = 'under_15' | '15_100' | '100_plus'
-type SubscriptionTier = 'ringer' | 'stockman' | 'head_stockman' | 'advisor' | 'head_advisor'
 
 interface WaitlistFormData {
   name: string
@@ -20,7 +19,6 @@ interface WaitlistFormData {
   herd_size: HerdSize | ''
   property_count: PropertyCount | ''
   client_count: ClientCount | ''
-  preferred_tier: SubscriptionTier | ''
   interested_features: string[]
   contact_opt_in: boolean
 }
@@ -44,7 +42,8 @@ const HERD_SIZE_OPTIONS: { value: HerdSize; label: string }[] = [
 
 const PROPERTY_OPTIONS: { value: PropertyCount; label: string }[] = [
   { value: '1', label: '1' },
-  { value: '2_plus', label: '2+' },
+  { value: '2_3', label: '2\u20133' },
+  { value: '4_plus', label: '4+' },
 ]
 
 const CLIENT_COUNT_OPTIONS: { value: ClientCount; label: string }[] = [
@@ -52,18 +51,6 @@ const CLIENT_COUNT_OPTIONS: { value: ClientCount; label: string }[] = [
   { value: '15_100', label: '15\u2013100' },
   { value: '100_plus', label: '100+' },
 ]
-
-const TIER_OPTIONS: Record<Role, { value: SubscriptionTier; label: string; subtitle: string }[]> = {
-  producer: [
-    { value: 'ringer', label: 'Ringer', subtitle: '1 Property' },
-    { value: 'stockman', label: 'Stockman', subtitle: 'Up to 3 Properties' },
-    { value: 'head_stockman', label: 'Head Stockman', subtitle: '4+ Properties' },
-  ],
-  advisor: [
-    { value: 'advisor', label: 'Advisor', subtitle: 'Professional' },
-    { value: 'head_advisor', label: 'Head Advisor', subtitle: 'Enterprise' },
-  ],
-}
 
 const FEATURE_OPTIONS: Record<Role, { value: string; label: string }[]> = {
   producer: [
@@ -99,7 +86,6 @@ const INITIAL_FORM: WaitlistFormData = {
   herd_size: '',
   property_count: '',
   client_count: '',
-  preferred_tier: '',
   interested_features: [],
   contact_opt_in: false,
 }
@@ -129,7 +115,6 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
         next.herd_size = ''
         next.property_count = ''
         next.client_count = ''
-        next.preferred_tier = ''
         next.interested_features = []
       }
       return next
@@ -172,16 +157,13 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)
   const showEmailHint = emailBlurred && form.email.length > 0 && !emailValid
 
-  const hasTier = form.preferred_tier !== ''
-
   const isValid =
     form.name.trim() !== '' &&
     emailValid &&
     form.role !== '' &&
     form.postcode.trim() !== '' &&
     hasDetails &&
-    hasFeatures &&
-    hasTier
+    hasFeatures
 
   const missingHint = (() => {
     if (!form.name.trim()) return 'Enter your name'
@@ -194,7 +176,6 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
         : 'Select client count above'
     }
     if (!hasFeatures) return 'Select at least one feature'
-    if (!hasTier) return 'Choose a preferred plan'
     return null
   })()
 
@@ -219,9 +200,6 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
         payload.property_count = form.property_count
       } else {
         payload.client_count = form.client_count
-      }
-      if (form.preferred_tier) {
-        payload.preferred_tier = form.preferred_tier
       }
 
       const res = await fetch('/api/signup', {
@@ -276,7 +254,7 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
   // -- Success state --
   if (status === 'success') {
     return (
-      <Modal open={open} onClose={handleClose} size="sm">
+      <Modal open={open} onClose={handleClose} size="sm" ariaLabel="Waitlist signup confirmed">
         <div className="flex flex-col items-center py-8 text-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-success/15">
             <svg className="h-7 w-7 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -285,7 +263,8 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
           </div>
           <h3 className="mt-5 text-lg font-semibold text-white">You&apos;re on the list!</h3>
           <p className="mt-2 max-w-xs text-sm leading-relaxed text-text-secondary">
-            We&apos;ll be in touch before launch with early access details and exclusive founding member pricing.
+            We&apos;ll be in touch before the app launches with early access details and exclusive
+            founding member pricing.
           </p>
           <button
             onClick={handleClose}
@@ -300,7 +279,7 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
 
   // -- Form --
   return (
-    <Modal open={open} onClose={handleClose} size="lg">
+    <Modal open={open} onClose={handleClose} size="lg" ariaLabel="Join the waitlist">
       <button
         onClick={handleClose}
         aria-label="Close"
@@ -316,7 +295,8 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
             Join the <span className="text-brand">Waitlist</span>
           </h2>
           <p className="mx-auto mt-2.5 max-w-sm text-[15px] leading-relaxed text-text-secondary">
-            Be the first to know when we launch, and help us build something great for your operation.
+            Be the first to know when the app launches, and help us build something great for your
+            operation.
           </p>
         </div>
 
@@ -517,52 +497,6 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
                         >
                           {selected && <Check className="h-3 w-3" />}
                           {opt.label}
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* ── Subscription tier ── */}
-          <AnimatePresence>
-            {hasRole && hasDetails && hasFeatures && (
-              <motion.div {...reveal} className="overflow-hidden">
-                <div className="border-t border-white/[0.06] pt-5">
-                  <p className="mb-3.5 text-xs font-medium uppercase tracking-wider text-text-muted">
-                    Preferred plan
-                  </p>
-                  <div className={`grid gap-2 ${form.role === 'producer' ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
-                    {TIER_OPTIONS[form.role as Role].map((opt) => {
-                      const selected = form.preferred_tier === opt.value
-                      return (
-                        <button
-                          key={opt.value}
-                          type="button"
-                          onClick={() => updateField('preferred_tier', opt.value)}
-                          className={`flex items-center gap-3 rounded-xl border p-3.5 text-left transition-all duration-150 cursor-pointer ${
-                            selected
-                              ? 'border-brand/40 bg-brand/[0.08]'
-                              : 'border-white/[0.08] hover:border-white/15 hover:bg-white/[0.03]'
-                          }`}
-                        >
-                          <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-all ${
-                            selected
-                              ? 'border-brand bg-brand'
-                              : 'border-white/20'
-                          }`}>
-                            {selected && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
-                          </div>
-                          <div>
-                            <span className={`text-sm font-medium ${selected ? 'text-white' : 'text-text-secondary'}`}>
-                              {opt.label}
-                            </span>
-                            <span className={`block text-[11px] ${selected ? 'text-text-secondary' : 'text-text-muted'}`}>
-                              {opt.subtitle}
-                            </span>
-                          </div>
                         </button>
                       )
                     })}

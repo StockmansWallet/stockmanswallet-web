@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 
 const signInSchema = z.object({
-  email: z.string().email(),
+  email: z.string().trim().toLowerCase().email().max(254),
   password: z.string().min(1),
 });
 
@@ -17,12 +17,12 @@ const PASSWORD_MIN = 8;
 const PASSWORD_MAX = 128;
 
 const signUpSchema = z.object({
-  email: z.string().email().max(254),
+  email: z.string().trim().toLowerCase().email().max(254),
   password: z.string().min(PASSWORD_MIN).max(PASSWORD_MAX),
 });
 
 const forgotPasswordSchema = z.object({
-  email: z.string().email().max(254),
+  email: z.string().trim().toLowerCase().email().max(254),
 });
 
 const updatePasswordSchema = z.object({
@@ -116,19 +116,16 @@ export async function forgotPassword(formData: FormData) {
 
   // Always return success to avoid revealing whether the email exists
   await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${origin}/auth/callback`,
+    redirectTo: `${origin}/auth/callback?next=/reset-password&type=recovery`,
   });
 
-  // Set a cookie so the callback route knows this is a recovery flow
-  // Supabase PKCE doesn't reliably forward query params or expose AMR after code exchange
+  // Fallback marker for providers/email clients that strip callback params.
+  // Lax is required because reset links arrive via a top-level cross-site GET.
   const cookieStore = await cookies();
   cookieStore.set("sw-password-recovery", "true", {
     httpOnly: true,
-    secure: true,
-    // Strict: only sent on same-site top-level navigation. Recovery
-    // callback is always entered via our own link, not cross-site
-    // redirects, so Strict is correct.
-    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
     maxAge: 3600, // 1 hour - matches Supabase OTP expiry
     path: "/",
   });

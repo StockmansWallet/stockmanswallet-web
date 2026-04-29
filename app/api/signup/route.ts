@@ -3,9 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 
 const VALID_ROLES = ['producer', 'advisor'] as const
 const VALID_HERD_SIZES = ['under_50', '50_500', '500_2000', '2000_plus'] as const
-const VALID_PROPERTY_COUNTS = ['1', '2_plus'] as const
-const VALID_CLIENT_COUNTS = ['under_15', '15_30', '30_50', '50_plus'] as const
-const VALID_TIERS = ['ringer', 'stockman', 'head_stockman', 'advisor', 'head_advisor'] as const
+const VALID_PROPERTY_COUNTS = ['1', '2_3', '4_plus'] as const
+const VALID_CLIENT_COUNTS = ['under_15', '15_100', '100_plus'] as const
 const VALID_FEATURES = [
   'brangus', 'freight_iq', 'herd_valuation', 'reports', 'advisory_hub',
   'yard_book', 'grid_iq', 'ch40', 'insights', 'markets',
@@ -20,7 +19,7 @@ export async function POST(request: Request) {
     )
 
     const body = await request.json()
-    const { name, email, role, postcode, herd_size, property_count, client_count, preferred_tier, interested_features, contact_opt_in } = body
+    const { name, email, role, postcode, herd_size, property_count, client_count, interested_features, contact_opt_in } = body
 
     // Email is always required
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -50,9 +49,6 @@ export async function POST(request: Request) {
     if (client_count && VALID_CLIENT_COUNTS.includes(client_count)) {
       record.client_count = client_count
     }
-    if (preferred_tier && VALID_TIERS.includes(preferred_tier)) {
-      record.preferred_tier = preferred_tier
-    }
     if (Array.isArray(interested_features) && interested_features.length > 0) {
       const validFeatures = interested_features.filter((f: string) =>
         VALID_FEATURES.includes(f as typeof VALID_FEATURES[number])
@@ -74,7 +70,6 @@ export async function POST(request: Request) {
       if (error.code === '23505') {
         return NextResponse.json({ success: true, message: 'Already on waitlist' })
       }
-      console.error('Waitlist insert error:', error.message)
       return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
     }
 

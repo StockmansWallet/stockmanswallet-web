@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 const STATS = [
   { label: 'Market Categories', value: '50+' },
   { label: 'Headquarters', value: 'Queensland' },
-  { label: 'Launching', value: 'June 2026' },
+  { label: 'App Launch', value: 'June 2026' },
 ]
 
 export default function AboutAustralia() {

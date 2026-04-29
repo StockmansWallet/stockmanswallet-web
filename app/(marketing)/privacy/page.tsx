@@ -12,13 +12,13 @@ export default function PrivacyPolicy() {
 
         <div className="space-y-6 text-sm leading-relaxed text-text-secondary">
           <p>
-            <strong className="text-white">Last updated:</strong> 6 March 2026
+            <strong className="text-white">Last updated:</strong> 30 April 2026
           </p>
 
           <section>
             <h2 className="mb-3 text-xl font-semibold text-white">Overview</h2>
             <p>
-              Stockman&apos;s Wallet (&quot;we&quot;, &quot;our&quot;, &quot;us&quot;) is operated by Stockman&apos;s Wallet Pty Ltd (ABN pending), based in Queensland, Australia. We are committed to protecting your privacy in accordance with the Australian Privacy Act 1988 (Cth) and the Australian Privacy Principles (APPs). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our iOS application and website.
+              Stockman&apos;s Wallet (&quot;we&quot;, &quot;our&quot;, &quot;us&quot;) is operated by Stockman&apos;s Wallet Pty Ltd, based in Queensland, Australia. We are committed to protecting your privacy in accordance with the Australian Privacy Act 1988 (Cth) and the Australian Privacy Principles (APPs). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our iOS application and website.
             </p>
           </section>
 
@@ -61,14 +61,15 @@ export default function PrivacyPolicy() {
 
           <section>
             <h2 className="mb-3 text-xl font-semibold text-white">Third-Party Services</h2>
-            <p>We use the following third-party services to operate the app. Each processes only the minimum data required for its function:</p>
+            <p>We use the following third-party services to operate the app and website. Each processes only the minimum data required for its function:</p>
             <ul className="ml-4 mt-2 list-disc space-y-1">
               <li><strong className="text-white">Supabase</strong> (backend infrastructure, authentication, database) - stores your account and livestock data</li>
               <li><strong className="text-white">Anthropic / Claude</strong> (AI processing) - processes your Brangus chat messages. Messages are not retained by Anthropic after processing.</li>
               <li><strong className="text-white">Apple WeatherKit</strong> (weather data) - retrieves weather information for your property locations</li>
               <li><strong className="text-white">MLA (Meat &amp; Livestock Australia)</strong> (market data) - provides livestock market prices. No personal data is sent.</li>
+              <li><strong className="text-white">Vercel Web Analytics</strong> (website analytics) - records privacy-preserving, aggregate website traffic information so we can understand page performance and visitor interest. It is not used for advertising or cross-site tracking.</li>
             </ul>
-            <p className="mt-3">We do not use any analytics, advertising, or tracking SDKs.</p>
+            <p className="mt-3">We do not sell your data, use advertising trackers, or use analytics for profiling. Website analytics are used only in aggregate to improve the public website and launch communications.</p>
           </section>
 
           <section>
@@ -108,8 +109,8 @@ export default function PrivacyPolicy() {
             <h2 className="mb-3 text-xl font-semibold text-white">Contact</h2>
             <p>
               For privacy-related enquiries or to exercise your rights, contact us at{' '}
-              <a href="mailto:support@stockmanswallet.com.au" className="text-brand hover:text-brand-light">
-                support@stockmanswallet.com.au
+              <a href="mailto:hello@stockmanswallet.com.au" className="text-brand hover:text-brand-light">
+                hello@stockmanswallet.com.au
               </a>
             </p>
             <p className="mt-2">
