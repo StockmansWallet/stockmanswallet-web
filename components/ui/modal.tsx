@@ -11,13 +11,14 @@ interface ModalProps {
   title?: string;
   ariaLabel?: string;
   children: ReactNode;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
 const sizeClasses = {
   sm: "max-w-md",
   md: "max-w-xl",
   lg: "max-w-2xl",
+  xl: "max-w-4xl",
 };
 
 const focusableSelector = [
@@ -34,13 +35,18 @@ function Modal({ open, onClose, title, ariaLabel, children, size = "md" }: Modal
   const overlayRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!open) return;
 
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {
-        onClose();
+        onCloseRef.current();
         return;
       }
 
@@ -85,7 +91,7 @@ function Modal({ open, onClose, title, ariaLabel, children, size = "md" }: Modal
       document.body.style.overflow = "";
       previousFocusRef.current?.focus?.();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   const content = (
     <AnimatePresence>
