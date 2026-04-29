@@ -67,6 +67,8 @@ export interface ConnectionRequest {
   connection_type: ConnectionType;
   sharing_permissions: SharingPermissions;
   created_at: string;
+  requester_cleared_at?: string | null;
+  target_cleared_at?: string | null;
 }
 
 // Producer profile (for producer network directory)

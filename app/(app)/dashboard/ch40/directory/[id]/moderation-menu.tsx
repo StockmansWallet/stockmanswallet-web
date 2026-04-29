@@ -1,13 +1,17 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import { Settings, Ban, Flag, ShieldOff, UserMinus } from "lucide-react";
+import { Settings, Ban, Flag, ShieldOff, UserMinus, Eraser } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/app/advisory/confirm-modal";
 import { blockUser, unblockUser, reportUser } from "./moderation-actions";
-import { disconnectProducer } from "@/app/(app)/dashboard/ch40/connections/[id]/actions";
+import {
+  disconnectProducer,
+  clearProducerMessages,
+} from "@/app/(app)/dashboard/ch40/connections/[id]/actions";
 
 interface ModerationMenuProps {
   targetUserId: string;
@@ -28,7 +32,8 @@ type Panel =
   | "block-confirm"
   | "report"
   | "unblock-confirm"
-  | "disconnect-confirm";
+  | "disconnect-confirm"
+  | "clear-confirm";
 
 const REPORT_REASONS: Array<{
   value: "spam" | "abusive" | "impersonation" | "other";
@@ -54,17 +59,47 @@ export function ModerationMenu({
     useState<(typeof REPORT_REASONS)[number]["value"]>("spam");
   const [reportDescription, setReportDescription] = useState("");
   const [reportSent, setReportSent] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
 
   useEffect(() => {
     if (panel !== "root") return;
-    function onClick(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setPanel("closed");
-      }
+    function onPointerDown(e: PointerEvent) {
+      if (triggerRef.current?.contains(e.target as Node)) return;
+      if (menuRef.current?.contains(e.target as Node)) return;
+      setPanel("closed");
     }
-    document.addEventListener("mousedown", onClick);
-    return () => document.removeEventListener("mousedown", onClick);
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setPanel("closed");
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [panel]);
+
+  useEffect(() => {
+    if (panel !== "root") return;
+
+    function updatePosition() {
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      setMenuPosition({
+        top: rect.bottom + 8,
+        right: Math.max(12, window.innerWidth - rect.right),
+      });
+    }
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
   }, [panel]);
 
   const handleBlock = async () => {
@@ -109,6 +144,20 @@ export function ModerationMenu({
     router.refresh();
   };
 
+  const handleClearMessages = async () => {
+    if (!connectionIdForDisconnect) return;
+    setLoading(true);
+    setError(null);
+    const result = await clearProducerMessages(connectionIdForDisconnect);
+    setLoading(false);
+    if ("error" in result && result.error) {
+      setError(result.error);
+      return;
+    }
+    setPanel("closed");
+    router.refresh();
+  };
+
   const handleReport = async () => {
     setLoading(true);
     setError(null);
@@ -129,63 +178,94 @@ export function ModerationMenu({
     setError(null);
   };
 
-  return (
-    <>
-      <div className="relative" ref={menuRef}>
+  const menu =
+    panel === "root" ? (
+      <div
+        ref={menuRef}
+        role="menu"
+        className="fixed z-[100] w-56 overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-2 shadow-2xl shadow-black/35 backdrop-blur-xl backdrop-saturate-150"
+        style={{ top: menuPosition.top, right: menuPosition.right }}
+      >
+        {connectionIdForDisconnect && (
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => setPanel("clear-confirm")}
+            className="text-text-secondary hover:bg-white/[0.06] hover:text-text-primary flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors"
+          >
+            <Eraser className="h-4 w-4" aria-hidden="true" />
+            Clear messages
+          </button>
+        )}
+        {connectionIdForDisconnect && (
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => setPanel("disconnect-confirm")}
+            className="text-text-secondary hover:bg-white/[0.06] hover:text-text-primary flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors"
+          >
+            <UserMinus className="h-4 w-4" aria-hidden="true" />
+            Disconnect
+          </button>
+        )}
+        {alreadyBlocked ? (
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => setPanel("unblock-confirm")}
+            className="text-text-secondary hover:bg-white/[0.06] hover:text-text-primary flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors"
+          >
+            <ShieldOff className="h-4 w-4" aria-hidden="true" />
+            Unblock
+          </button>
+        ) : (
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => setPanel("block-confirm")}
+            className="text-error hover:bg-error/10 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors"
+          >
+            <Ban className="h-4 w-4" aria-hidden="true" />
+            Block producer
+          </button>
+        )}
         <button
           type="button"
-          onClick={() => setPanel(panel === "root" ? "closed" : "root")}
-          aria-label="Profile actions"
-          aria-expanded={panel === "root"}
-          className="bg-surface-lowest text-text-secondary hover:bg-surface-raised hover:text-text-primary flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+          role="menuitem"
+          onClick={() => setPanel("report")}
+          className="text-text-secondary hover:bg-white/[0.06] hover:text-text-primary flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors"
         >
-          <Settings className="h-4 w-4" aria-hidden="true" />
+          <Flag className="h-4 w-4" aria-hidden="true" />
+          Report producer
         </button>
-
-        {panel === "root" && (
-          <div
-            className="absolute top-full right-0 z-20 mt-1 w-56 overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding shadow-2xl shadow-black/35 backdrop-blur-xl backdrop-saturate-150"
-          >
-            {connectionIdForDisconnect && (
-              <button
-                type="button"
-                onClick={() => setPanel("disconnect-confirm")}
-                className="text-text-primary flex w-full items-center gap-2 border-b border-white/[0.06] px-3 py-2.5 text-left text-sm transition-colors hover:bg-white/[0.04]"
-              >
-                <UserMinus className="text-text-muted h-4 w-4" aria-hidden="true" />
-                Disconnect
-              </button>
-            )}
-            {alreadyBlocked ? (
-              <button
-                type="button"
-                onClick={() => setPanel("unblock-confirm")}
-                className="text-text-primary flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm transition-colors hover:bg-white/[0.04]"
-              >
-                <ShieldOff className="text-text-muted h-4 w-4" aria-hidden="true" />
-                Unblock
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setPanel("block-confirm")}
-                className="text-error hover:bg-error/[0.06] flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm transition-colors"
-              >
-                <Ban className="h-4 w-4" aria-hidden="true" />
-                Block producer
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => setPanel("report")}
-              className="text-text-primary flex w-full items-center gap-2 border-t border-white/[0.06] px-3 py-2.5 text-left text-sm transition-colors hover:bg-white/[0.04]"
-            >
-              <Flag className="text-text-muted h-4 w-4" aria-hidden="true" />
-              Report producer
-            </button>
-          </div>
-        )}
       </div>
+    ) : null;
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={() => setPanel(panel === "root" ? "closed" : "root")}
+        aria-label="Profile actions"
+        aria-expanded={panel === "root"}
+        aria-haspopup="menu"
+        className="bg-surface-lowest text-text-secondary hover:bg-surface-raised hover:text-text-primary flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+      >
+        <Settings className="h-4 w-4" aria-hidden="true" />
+      </button>
+      {menu && typeof document !== "undefined" ? createPortal(menu, document.body) : null}
+
+      <ConfirmModal
+        open={panel === "clear-confirm"}
+        onClose={() => setPanel("closed")}
+        onConfirm={handleClearMessages}
+        title="Clear messages"
+        description={`Clear your view of this chat with ${targetName}? This only affects your side. ${targetName} will still see the full conversation, and any new messages from now on will appear normally.`}
+        confirmLabel="Clear"
+        confirmVariant="primary"
+        loading={loading}
+      />
 
       <ConfirmModal
         open={panel === "disconnect-confirm"}

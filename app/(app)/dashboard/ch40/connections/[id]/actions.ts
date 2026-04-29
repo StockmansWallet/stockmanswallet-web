@@ -80,7 +80,7 @@ export async function fetchProducerMessages(connectionId: string) {
 
   const { data: connection } = await supabase
     .from("connection_requests")
-    .select("id, requester_user_id, target_user_id")
+    .select("id, requester_user_id, target_user_id, requester_cleared_at, target_cleared_at")
     .eq("id", connectionId)
     .eq("connection_type", "producer_peer")
     .eq("status", "approved")
@@ -88,18 +88,60 @@ export async function fetchProducerMessages(connectionId: string) {
 
   if (!connection) return { error: "Connection not found", messages: [] };
 
-  const isParty =
-    connection.requester_user_id === user.id ||
-    connection.target_user_id === user.id;
-  if (!isParty) return { error: "Connection not found", messages: [] };
+  const isRequester = connection.requester_user_id === user.id;
+  const isTarget = connection.target_user_id === user.id;
+  if (!isRequester && !isTarget) return { error: "Connection not found", messages: [] };
 
-  const { data: messages } = await supabase
+  const callerClearedAt = isRequester
+    ? (connection.requester_cleared_at as string | null)
+    : (connection.target_cleared_at as string | null);
+
+  let query = supabase
     .from("advisory_messages")
     .select("*")
     .eq("connection_id", connectionId)
     .order("created_at", { ascending: true });
+  if (callerClearedAt) query = query.gt("created_at", callerClearedAt);
+
+  const { data: messages } = await query;
 
   return { messages: (messages ?? []) as AdvisoryMessage[] };
+}
+
+export async function clearProducerMessages(connectionId: string) {
+  const parsed = connectionIdSchema.safeParse({ connectionId });
+  if (!parsed.success) return { error: "Invalid input" };
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Not authenticated" };
+
+  const { data: connection } = await supabase
+    .from("connection_requests")
+    .select("id, requester_user_id, target_user_id")
+    .eq("id", connectionId)
+    .eq("connection_type", "producer_peer")
+    .single();
+
+  if (!connection) return { error: "Connection not found" };
+
+  const isRequester = connection.requester_user_id === user.id;
+  const isTarget = connection.target_user_id === user.id;
+  if (!isRequester && !isTarget) return { error: "Connection not found" };
+
+  const column = isRequester ? "requester_cleared_at" : "target_cleared_at";
+  const { error } = await supabase
+    .from("connection_requests")
+    .update({ [column]: new Date().toISOString() })
+    .eq("id", connectionId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath(`/dashboard/ch40/connections/${connectionId}`);
+  revalidatePath("/dashboard/ch40");
+  return { success: true };
 }
 
 export async function sendProducerMessage(

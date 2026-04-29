@@ -118,6 +118,14 @@ export async function ProducerNetworkHub({
 
   const lastMessages = new Map<string, { content: string; createdAt: string }>();
   if (approved.length > 0) {
+    const clearedAtByConnection = new Map<string, string | null>();
+    for (const c of approved) {
+      const clearedAt =
+        c.requester_user_id === user.id
+          ? (c.requester_cleared_at ?? null)
+          : (c.target_cleared_at ?? null);
+      clearedAtByConnection.set(c.id, clearedAt);
+    }
     const { data: messages } = await supabase
       .from("advisory_messages")
       .select("connection_id, content, created_at")
@@ -127,6 +135,10 @@ export async function ProducerNetworkHub({
       )
       .order("created_at", { ascending: false });
     for (const m of messages ?? []) {
+      const clearedAt = clearedAtByConnection.get(m.connection_id);
+      if (clearedAt && new Date(m.created_at).getTime() <= new Date(clearedAt).getTime()) {
+        continue;
+      }
       if (!lastMessages.has(m.connection_id)) {
         lastMessages.set(m.connection_id, { content: m.content, createdAt: m.created_at });
       }
@@ -178,11 +190,19 @@ export async function ProducerNetworkHub({
     selectedOtherProfile?.property_name ?? selectedOtherProfile?.company_name ?? null;
 
   if (selectedConnection && selectedOtherId) {
-    const { data: messages } = await supabase
+    const callerClearedAt =
+      selectedConnection.requester_user_id === user.id
+        ? (selectedConnection.requester_cleared_at ?? null)
+        : (selectedConnection.target_cleared_at ?? null);
+
+    let messagesQuery = supabase
       .from("advisory_messages")
       .select("*")
       .eq("connection_id", selectedConnection.id)
       .order("created_at", { ascending: true });
+    if (callerClearedAt) messagesQuery = messagesQuery.gt("created_at", callerClearedAt);
+
+    const { data: messages } = await messagesQuery;
     selectedMessages = (messages ?? []) as AdvisoryMessage[];
 
     const { data: blockRows } = await supabase
