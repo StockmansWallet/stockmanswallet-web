@@ -11,7 +11,12 @@ import { createClient } from "@/lib/supabase/client";
 import { sendProducerMessage, fetchProducerMessages } from "./actions";
 import type { AdvisoryMessage, MessageAttachment } from "@/lib/types/advisory";
 
-const POLL_INTERVAL = 5000;
+// Polling is a safety net only - the realtime subscription handles
+// live delivery. Stretched from 5s to 60s so we aren't double-fetching
+// every 5 seconds on top of postgres_changes events. When the
+// websocket is healthy, polling falls through with no work; when it
+// drops, this is the catch-up.
+const POLL_INTERVAL = 60_000;
 // Peer bubble uses the Producer Network accent (sage, -dark variant for
 // filled-area legibility, matching the Brangus chat pattern).
 const OTHER_BG = "var(--color-ch40-dark)";
@@ -77,8 +82,12 @@ export function ProducerChatClient({
       }
       if (cancelled) return;
 
+      // Use the full connection id in the channel name. Truncating to 8
+      // chars created a non-zero collision risk between conversations
+      // sharing a UUID prefix; a collision would silently merge realtime
+      // streams across threads.
       channel = supabase
-        .channel(`producer-chat-${connectionId.slice(0, 8)}`)
+        .channel(`producer-chat-${connectionId}`)
         .on(
           "postgres_changes",
           {
