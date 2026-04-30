@@ -91,7 +91,7 @@ export async function ProducerNetworkHub({
       ? allConns.find(
           (c) =>
             c.id === selectedConnectionId &&
-            (ENDED_STATUSES as readonly string[]).includes(c.status),
+            (ENDED_STATUSES as readonly string[]).includes(c.status)
         )
       : null;
 
@@ -294,7 +294,7 @@ export async function ProducerNetworkHub({
         <section
           className={`min-w-0 ${selectedConnection || selectedEndedConnection || mode === "find" || selectedPendingConnection ? "order-1" : "order-2 lg:order-1"}`}
         >
-          <div className="relative flex h-[calc(100vh-19rem)] min-h-[34rem] flex-col overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding sm:h-[calc(100vh-17rem)] lg:h-[calc(100vh-7.5rem)]">
+          <div className="relative flex h-[calc(100vh-19rem)] min-h-[34rem] flex-col overflow-hidden rounded-3xl border border-white/[0.08] bg-black/15 bg-clip-padding sm:h-[calc(100vh-17rem)] lg:h-[calc(100vh-7.5rem)]">
             {mode === "find" ? (
               <ProducerFindPanel />
             ) : selectedConnection && selectedOtherId ? (
@@ -422,9 +422,7 @@ export async function ProducerNetworkHub({
                         <div
                           key={c.id}
                           className={`group relative flex min-h-[4.875rem] items-center gap-3 rounded-xl p-3 transition-colors ${
-                            active
-                              ? "bg-ch40/15"
-                              : "bg-white/[0.03] hover:bg-white/[0.05]"
+                            active ? "bg-ch40/15" : "bg-white/[0.03] hover:bg-white/[0.05]"
                           }`}
                         >
                           <Link
@@ -564,10 +562,7 @@ export async function ProducerNetworkHub({
 
             <div className="shrink-0 border-t border-white/[0.06] p-3">
               <div className="border-ch40/10 bg-ch40/[0.04] flex items-start gap-2 rounded-2xl border p-3">
-                <Handshake
-                  className="text-ch40-light mt-0.5 h-4 w-4 shrink-0"
-                  aria-hidden="true"
-                />
+                <Handshake className="text-ch40-light mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                 <p className="text-text-muted text-[11px] leading-relaxed">
                   No portfolio data is shared unless you choose to attach it to a message.
                 </p>

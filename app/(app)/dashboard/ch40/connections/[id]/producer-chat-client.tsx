@@ -233,7 +233,7 @@ export function ProducerChatClient({
         {header && <div className="absolute inset-x-0 top-0 z-20">{header}</div>}
       </div>
 
-      <div className="relative z-10 shrink-0 border-t border-white/6 p-4 shadow-[0_-6px_12px_-4px_rgba(0,0,0,0.4)]">
+      <div className="relative z-10 shrink-0 border-t border-white/[0.08] bg-white/[0.06] bg-clip-padding p-4 backdrop-blur-2xl backdrop-saturate-150">
         {/* Pending-attachment preview sits above the input so the sender
             can see what's queued and remove it before hitting send. */}
         {pendingAttachment && (
