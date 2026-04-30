@@ -169,20 +169,6 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
   const isValid = contactValid && hasDetails && hasFeatures;
   const canGoNext = step === 0 ? contactValid : step === 1 ? hasDetails : isValid;
 
-  const missingHint = (() => {
-    if (step === 0) {
-      if (!form.name.trim()) return "Enter your name";
-      if (!emailValid) return "Enter a valid email address";
-      if (!form.role) return "Choose your role";
-      if (!form.postcode.trim()) return "Enter your postcode";
-    }
-    if (step === 1 && !hasDetails) {
-      return form.role === "producer" ? "Select herd size and properties" : "Select client count";
-    }
-    if (step === 2 && !hasFeatures) return "Select at least one feature";
-    return null;
-  })();
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!isValid || step !== STEPS.length - 1) return;
@@ -631,30 +617,6 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
                 Back
               </button>
 
-              <AnimatePresence mode="wait">
-                {missingHint ? (
-                  <motion.p
-                    key={missingHint}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="text-text-muted hidden text-center text-xs sm:block"
-                  >
-                    {missingHint}
-                  </motion.p>
-                ) : (
-                  <motion.p
-                    key="ready"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="text-success hidden text-center text-xs sm:block"
-                  >
-                    Looks good
-                  </motion.p>
-                )}
-              </AnimatePresence>
-
               {step < STEPS.length - 1 ? (
                 <button
                   type="button"
@@ -694,9 +656,6 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
                 </button>
               )}
             </div>
-            {missingHint && (
-              <p className="text-text-muted mt-2 text-center text-xs sm:hidden">{missingHint}</p>
-            )}
           </div>
         </form>
       </div>

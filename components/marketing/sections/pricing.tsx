@@ -67,7 +67,7 @@ export default function Pricing() {
               className="text-center"
             >
               <span className="text-brand text-sm font-medium tracking-wider uppercase">
-                Pricing
+                Introductory Pricing
               </span>
               <h2 className="mt-3 text-3xl font-semibold text-balance text-white sm:text-4xl lg:text-5xl">
                 Simple, transparent pricing
