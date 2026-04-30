@@ -87,7 +87,7 @@ function QuickInsightCard({
         {compact(insight.value)}
       </span>
       <span
-        className={`text-[10px] truncate ${insight.subtitle ? "text-text-secondary" : "text-transparent"}`}
+        className={`text-[9px] truncate ${insight.subtitle ? "text-text-secondary" : "text-transparent"}`}
       >
         {insight.subtitle ? compact(insight.subtitle) : "\u00A0"}
       </span>

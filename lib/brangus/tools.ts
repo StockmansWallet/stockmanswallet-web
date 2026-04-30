@@ -216,7 +216,7 @@ export const toolDefinitions = [
             properties: {
               label: { type: "string", description: "Short label, max 20 chars (e.g. 'Portfolio Value', 'Price/kg', 'Freight Cost')" },
               value: { type: "string", description: "The key figure (e.g. '$187,128', '$3.42/kg', '120 head')" },
-              subtitle: { type: "string", description: "Brief context, max 30 chars (e.g. 'MLA saleyard data', '+ $234 GST')" },
+              subtitle: { type: "string", description: "Brief context, max 30 chars (e.g. 'MLA saleyard data', '+ $234 GST'). When mentioning GST, ALWAYS use '+ GST' form (e.g. '$X + GST' or '+ $234 GST'), NEVER 'Incl GST', 'Inc GST', or 'including GST'." },
               sentiment: { type: "string", enum: ["positive", "negative", "neutral"], description: "positive for gains/good news, negative for losses/warnings, neutral for facts" },
             },
             required: ["label", "value", "sentiment"],

@@ -896,6 +896,22 @@ export async function sendMessage(
   throw new Error("Brangus ran out of tool rounds. Please try a simpler question.");
 }
 
+// Normalises GST phrasing in card text so all summary cards read "$X + GST".
+// Claude sometimes emits "Incl GST" / "including GST", rewrite to canonical form.
+function normaliseGSTPhrasing(text: string): string {
+  let result = text;
+  const patterns: Array<[RegExp, string]> = [
+    [/\bincl(?:\.|uding)?\s+gst\b/gi, "+ GST"],
+    [/\binc\.?\s+gst\b/gi, "+ GST"],
+    [/\bgst\s+inclusive\b/gi, "+ GST"],
+    [/\binclusive\s+of\s+gst\b/gi, "+ GST"],
+  ];
+  for (const [pattern, replacement] of patterns) {
+    result = result.replace(pattern, replacement);
+  }
+  return result;
+}
+
 // Extract QuickInsight cards from display_summary_cards tool input
 function extractQuickInsights(input: Record<string, unknown>): QuickInsight[] {
   const cards = input.cards as Array<Record<string, unknown>> | undefined;
@@ -903,13 +919,16 @@ function extractQuickInsights(input: Record<string, unknown>): QuickInsight[] {
 
   return cards
     .filter((c) => c.label && c.value && c.sentiment)
-    .map((c) => ({
-      id: crypto.randomUUID(),
-      label: c.label as string,
-      value: c.value as string,
-      subtitle: (c.subtitle as string) || undefined,
-      sentiment: c.sentiment as "positive" | "negative" | "neutral",
-    }));
+    .map((c) => {
+      const rawSubtitle = c.subtitle as string | undefined;
+      return {
+        id: crypto.randomUUID(),
+        label: c.label as string,
+        value: normaliseGSTPhrasing(c.value as string),
+        subtitle: rawSubtitle ? normaliseGSTPhrasing(rawSubtitle) : undefined,
+        sentiment: c.sentiment as "positive" | "negative" | "neutral",
+      };
+    });
 }
 
 // MARK: - API Call
