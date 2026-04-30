@@ -66,13 +66,20 @@ export function ProducerChatClient({
         }
         return true;
       });
-      return [...withoutOptimisticDup, incoming].sort(
+      const next = [...withoutOptimisticDup, incoming].sort(
         (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
       );
-    });
-    setAnimatedIds((ids) => {
-      const next = new Set(ids);
-      next.add(incoming.id);
+      // Prune animatedIds to ids that still exist after the merge so the
+      // set doesn't grow unbounded for the lifetime of the chat session.
+      setAnimatedIds((ids) => {
+        const liveIds = new Set(next.map((m) => m.id));
+        const pruned = new Set<string>();
+        for (const id of ids) {
+          if (liveIds.has(id)) pruned.add(id);
+        }
+        pruned.add(incoming.id);
+        return pruned;
+      });
       return next;
     });
     // No need to manually clear the typing indicator - the peer's send
@@ -140,16 +147,32 @@ export function ProducerChatClient({
 
     async function refreshMessages() {
       const result = await fetchProducerMessages(connectionId);
-      if (!result.messages || cancelled) return;
+      if (cancelled) return;
+      if (result.error) {
+        // Polling is the safety net; if it errors we want it visible in
+        // logs rather than silently leaving the chat stuck for up to 60s.
+        // Realtime's still attached so most users won't notice, but the
+        // log gives us something to grep for if a regression slips in.
+        console.warn("[ch40] polling fetch failed:", result.error);
+        return;
+      }
+      if (!result.messages) return;
 
       setMessages((prev) => {
         const prevIds = new Set(prev.map((m) => m.id));
         const brandNew = result.messages.filter((m) => !prevIds.has(m.id));
 
         if (brandNew.length > 0) {
+          // Prune animatedIds to ids that still exist in the new message
+          // list so the set doesn't grow unbounded across long sessions
+          // (clearProducerMessages or future moderation can drop ids).
           setAnimatedIds((ids) => {
-            const next = new Set(ids);
-            brandNew.forEach((m) => next.add(m.id));
+            const liveIds = new Set(result.messages.map((m) => m.id));
+            const next = new Set<string>();
+            for (const id of ids) {
+              if (liveIds.has(id)) next.add(id);
+            }
+            for (const m of brandNew) next.add(m.id);
             return next;
           });
           return result.messages;

@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { ChatBubble } from "@/components/app/chat/chat-bubble";
 import { Badge } from "@/components/ui/badge";
 import { ShareAttachmentCard } from "@/components/app/ch40/share-attachment-card";
@@ -101,6 +102,75 @@ function shouldShowTimestamp(
   return currentTime - previousTime > FIVE_MINUTES;
 }
 
+interface MessageRowProps {
+  msg: AdvisoryMessage;
+  isOwn: boolean;
+  showTime: boolean;
+  showAvatar: boolean;
+  shouldAnimate: boolean;
+  senderName: string | undefined;
+  avatarUrl: string | undefined;
+  avatarInitials: string | undefined;
+  reserveAvatarSpace: boolean;
+  bgClass: string;
+  tailColor: string;
+  connectionId?: string;
+}
+
+// Memoised so a fresh `messages` array reference (every realtime tick)
+// only re-renders rows whose own props actually change. With long threads
+// this drops re-render cost from O(n) per tick to O(1).
+const MessageRow = memo(
+  ({
+    msg,
+    isOwn,
+    showTime,
+    showAvatar,
+    shouldAnimate,
+    senderName,
+    avatarUrl,
+    avatarInitials,
+    reserveAvatarSpace,
+    bgClass,
+    tailColor,
+    connectionId,
+  }: MessageRowProps) => {
+    const typeConfig = messageTypeLabels[msg.message_type];
+    return (
+      <div>
+        {showTime && (
+          <div className="flex justify-center py-2">
+            <span className="bg-surface-lowest text-text-muted rounded-full px-3 py-1 text-[11px] font-medium">
+              {formatTimeSeparator(new Date(msg.created_at))}
+            </span>
+          </div>
+        )}
+        <ChatBubble
+          side={isOwn ? "right" : "left"}
+          bgClass={bgClass}
+          tailColor={tailColor}
+          animate={shouldAnimate}
+          senderName={senderName}
+          avatarUrl={showAvatar ? avatarUrl : undefined}
+          avatarInitials={showAvatar ? avatarInitials : undefined}
+          reserveAvatarSpace={reserveAvatarSpace}
+        >
+          {msg.message_type !== "general_note" && (
+            <Badge variant={typeConfig.variant} className="mb-1">
+              {typeConfig.label}
+            </Badge>
+          )}
+          {msg.content && <div>{msg.content}</div>}
+          {msg.attachment && (
+            <ShareAttachmentCard attachment={msg.attachment} connectionId={connectionId} />
+          )}
+        </ChatBubble>
+      </div>
+    );
+  }
+);
+MessageRow.displayName = "MessageRow";
+
 export function MessageThread({
   messages,
   currentUserId,
@@ -124,8 +194,7 @@ export function MessageThread({
     <div className="space-y-3">
       {messages.map((msg, i) => {
         const isOwn = msg.sender_user_id === currentUserId;
-        const typeConfig = messageTypeLabels[msg.message_type];
-        const shouldAnimate = animatedMessageIds?.has(msg.id);
+        const shouldAnimate = animatedMessageIds?.has(msg.id) ?? false;
         const sender = participants[msg.sender_user_id];
         const prev = i > 0 ? messages[i - 1] : undefined;
         const next = i < messages.length - 1 ? messages[i + 1] : undefined;
@@ -139,35 +208,21 @@ export function MessageThread({
         const showAvatar = nextBreaksGroup;
 
         return (
-          <div key={msg.id}>
-            {showTime && (
-              <div className="flex justify-center py-2">
-                <span className="bg-surface-lowest text-text-muted rounded-full px-3 py-1 text-[11px] font-medium">
-                  {formatTimeSeparator(new Date(msg.created_at))}
-                </span>
-              </div>
-            )}
-            <ChatBubble
-              side={isOwn ? "right" : "left"}
-              bgClass={isOwn ? "bg-chat-user" : otherBgClass}
-              tailColor={isOwn ? OWN_BG : otherTailColor}
-              animate={!!shouldAnimate}
-              senderName={!isOwn && !hideSenderName ? sender?.name : undefined}
-              avatarUrl={showAvatar ? (avatars?.[msg.sender_user_id]?.url ?? undefined) : undefined}
-              avatarInitials={showAvatar ? avatars?.[msg.sender_user_id]?.initials : undefined}
-              reserveAvatarSpace={!!avatars && !showAvatar}
-            >
-              {msg.message_type !== "general_note" && (
-                <Badge variant={typeConfig.variant} className="mb-1">
-                  {typeConfig.label}
-                </Badge>
-              )}
-              {msg.content && <div>{msg.content}</div>}
-              {msg.attachment && (
-                <ShareAttachmentCard attachment={msg.attachment} connectionId={connectionId} />
-              )}
-            </ChatBubble>
-          </div>
+          <MessageRow
+            key={msg.id}
+            msg={msg}
+            isOwn={isOwn}
+            showTime={showTime}
+            showAvatar={showAvatar}
+            shouldAnimate={shouldAnimate}
+            senderName={!isOwn && !hideSenderName ? sender?.name : undefined}
+            avatarUrl={avatars?.[msg.sender_user_id]?.url ?? undefined}
+            avatarInitials={avatars?.[msg.sender_user_id]?.initials}
+            reserveAvatarSpace={!!avatars && !showAvatar}
+            bgClass={isOwn ? "bg-chat-user" : otherBgClass}
+            tailColor={isOwn ? OWN_BG : otherTailColor}
+            connectionId={connectionId}
+          />
         );
       })}
     </div>

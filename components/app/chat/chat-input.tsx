@@ -54,6 +54,14 @@ export function ChatInput({
   // composer unmounts, so we only fire one typing-stop per session of
   // typing - no spam.
   const isTypingRef = useRef(false);
+  // Mirror onTypingStop into a ref so the unmount + visibilitychange
+  // effects can keep [] dep arrays. If a parent ever passes an inline
+  // arrow callback the cleanup would otherwise re-bind on every parent
+  // render and fire spuriously.
+  const onTypingStopRef = useRef(onTypingStop);
+  useEffect(() => {
+    onTypingStopRef.current = onTypingStop;
+  }, [onTypingStop]);
 
   const hasText = value.trim().length > 0;
   const canSend = hasText || allowEmpty;
@@ -67,8 +75,8 @@ export function ChatInput({
   const stopTyping = useCallback(() => {
     if (!isTypingRef.current) return;
     isTypingRef.current = false;
-    onTypingStop?.();
-  }, [onTypingStop]);
+    onTypingStopRef.current?.();
+  }, []);
 
   const handleSubmit = useCallback(async () => {
     const trimmed = value.trim();
@@ -89,10 +97,10 @@ export function ChatInput({
     return () => {
       if (isTypingRef.current) {
         isTypingRef.current = false;
-        onTypingStop?.();
+        onTypingStopRef.current?.();
       }
     };
-  }, [onTypingStop]);
+  }, []);
 
   // Fire typing-stop when the tab becomes hidden (user switched tabs,
   // minimised the window, or backgrounded the browser). Without this the
@@ -101,14 +109,14 @@ export function ChatInput({
     const handleVisibility = () => {
       if (document.hidden && isTypingRef.current) {
         isTypingRef.current = false;
-        onTypingStop?.();
+        onTypingStopRef.current?.();
       }
     };
     document.addEventListener("visibilitychange", handleVisibility);
     return () => {
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [onTypingStop]);
+  }, []);
 
   // Display live transcript in the textarea while listening
   const displayValue = isListening && liveTranscript ? liveTranscript : value;
