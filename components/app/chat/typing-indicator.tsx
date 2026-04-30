@@ -46,13 +46,15 @@ export function TypingIndicator({
   avatarInitials,
   className = "",
 }: TypingIndicatorProps) {
+  const hasHangingAvatar = Boolean(avatarUrl || avatarInitials);
+
   return (
     <motion.div
       layout="position"
       role="status"
       aria-live="polite"
       aria-label="Other participant is typing"
-      className={`flex items-end justify-start gap-2 px-1 pr-14 ${className}`}
+      className={`flex items-end justify-start gap-2 px-1 pr-14 ${hasHangingAvatar ? "pb-8" : ""} ${className}`}
       style={{ transformOrigin: "bottom left" }}
       initial={typingMotion.initial}
       animate={typingMotion.animate}
@@ -63,7 +65,7 @@ export function TypingIndicator({
         avatarUrl={avatarUrl}
         initials={avatarInitials}
         reserveSpace={reserveAvatarSpace}
-        className="self-end"
+        className={`${hasHangingAvatar ? "-mb-8" : ""} self-end`}
       />
       <div className="relative">
         <div
