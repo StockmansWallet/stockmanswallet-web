@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 const TYPING_EVENT = "typing";
 const TYPING_REFRESH_MS = 2_000;
 const TYPING_STALE_MS = 3_500;
+const TYPING_STOP_GRACE_MS = 900;
 
 interface TypingBroadcastPayload {
   senderUserId: string;
@@ -36,7 +37,9 @@ function isTypingPayload(value: unknown): value is TypingBroadcastPayload {
  * Ephemeral cross-client typing indicator backed by Supabase Realtime
  * broadcasts. Typing is not durable presence state: the sender emits
  * active/idle events plus periodic refreshes, and receivers clear the UI
- * after a short timeout if refreshes stop.
+ * after a short timeout if refreshes stop. Idle events clear after a short
+ * grace period so a send handoff can replace the typing row with the real
+ * message without a down-then-up layout jump.
  */
 export function useTypingIndicator(channelName: string, userId: string) {
   const [peerIsTyping, setPeerIsTyping] = useState(false);
@@ -125,7 +128,13 @@ export function useTypingIndicator(channelName: string, userId: string) {
 
         if (!payload.active) {
           peerLastSentAtRef.current = payload.sentAt;
-          clearPeerTyping();
+          clearPeerTimer();
+          const sessionId = payload.sessionId;
+          peerClearTimerRef.current = setTimeout(() => {
+            if (peerSessionIdRef.current === sessionId) {
+              clearPeerTyping();
+            }
+          }, TYPING_STOP_GRACE_MS);
           return;
         }
 
