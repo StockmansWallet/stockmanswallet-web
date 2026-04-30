@@ -1,4 +1,5 @@
 import Image from "next/image";
+import landingBg from "@/public/images/landing-bg.webp";
 
 type PageBackgroundVariant = "photo" | "app";
 
@@ -31,12 +32,13 @@ export default function PageBackground({ variant = "photo" }: { variant?: PageBa
 
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
-      <div className="absolute inset-0 bg-[#1C1B1B]" />
+      <div className="absolute inset-0 bg-[#17130f]" />
       <Image
-        src="/images/landing-bg.webp"
+        src={landingBg}
         alt=""
         fill
         priority
+        placeholder="blur"
         sizes="100vw"
         className={`object-cover ${isApp ? "scale-[1.035] opacity-70 blur-sm saturate-[0.78]" : ""}`}
       />
