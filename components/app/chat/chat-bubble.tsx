@@ -1,6 +1,18 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { motion } from "framer-motion";
+
+// Shared spring config used by every animated bubble in the app so a
+// new message bubble and the typing indicator that just preceded it
+// move with the same physics. Tuned to match iOS Messages: quick,
+// slight overshoot past 1.0, settles fast.
+const bubbleSpring = {
+  type: "spring" as const,
+  stiffness: 520,
+  damping: 30,
+  mass: 0.7,
+};
 
 interface ChatBubbleProps {
   side: "left" | "right";
@@ -62,11 +74,6 @@ export function ChatBubble({
   children,
 }: ChatBubbleProps) {
   const isRight = side === "right";
-  const animClass = animate
-    ? animationType === "fade"
-      ? "animate-fade-in"
-      : "animate-bubble-in"
-    : "";
 
   const avatar = avatarUrl ? (
     <img
@@ -83,16 +90,10 @@ export function ChatBubble({
   ) : null;
 
   const hasHangingAvatar = Boolean(avatarUrl || avatarInitials);
+  const wrapperClass = `flex items-end gap-2 px-1 ${hasHangingAvatar ? "pb-8" : ""} ${isRight ? "justify-end pl-14" : "justify-start pr-14"}`;
 
-  return (
-    <div
-      className={`flex items-end gap-2 px-1 ${hasHangingAvatar ? "pb-8" : ""} ${isRight ? "justify-end pl-14" : "justify-start pr-14"} ${animClass}`}
-      style={
-        animate && animationType === "bounce"
-          ? { transformOrigin: isRight ? "bottom right" : "bottom left" }
-          : undefined
-      }
-    >
+  const content = (
+    <>
       {!isRight && avatar}
       <div className="relative max-w-[min(80%,42rem)] overflow-visible">
         <div className={`rounded-3xl px-4 py-2.5 text-sm leading-relaxed ${bgClass} ${textClass}`}>
@@ -107,6 +108,38 @@ export function ChatBubble({
         <BubbleTail side={side} color={tailColor} />
       </div>
       {isRight && avatar}
-    </div>
+    </>
+  );
+
+  if (!animate) {
+    return <div className={wrapperClass}>{content}</div>;
+  }
+
+  if (animationType === "fade") {
+    return (
+      <motion.div
+        className={wrapperClass}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.18 }}
+      >
+        {content}
+      </motion.div>
+    );
+  }
+
+  // Spring scale-pop matching the typing indicator's physics. Origin is
+  // pinned to the bubble's tail side so the bubble grows out of where its
+  // tail will sit, like iOS Messages.
+  return (
+    <motion.div
+      className={wrapperClass}
+      style={{ transformOrigin: isRight ? "bottom right" : "bottom left" }}
+      initial={{ opacity: 0, scale: 0.6, y: 4 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={bubbleSpring}
+    >
+      {content}
+    </motion.div>
   );
 }
