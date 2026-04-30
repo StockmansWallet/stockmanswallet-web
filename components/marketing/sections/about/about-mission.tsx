@@ -19,7 +19,7 @@ const AFTER_ITEMS = [
 export default function AboutMission() {
   return (
     <section className="relative py-24 lg:py-32">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
         {/* Centred Intro */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}

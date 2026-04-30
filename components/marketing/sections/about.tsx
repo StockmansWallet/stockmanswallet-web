@@ -9,7 +9,7 @@ import SectionCard from "@/components/marketing/ui/section-card";
 export default function About() {
   return (
     <section id="about" className="relative scroll-mt-28">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
         <SectionCard
           className="px-6 py-12 text-center sm:px-10 sm:py-14 lg:px-12 lg:py-16"
           glowPosition="50% 18%"

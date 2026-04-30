@@ -9,7 +9,7 @@ const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 export default function AboutTally() {
   return (
     <section className="relative border-y border-white/[0.04] py-24 lg:py-32">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
           {/* Lottie Animation Column */}
           <motion.div

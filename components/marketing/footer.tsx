@@ -5,7 +5,7 @@ import { NAV_LINKS } from "@/lib/marketing/constants";
 export function Footer() {
   return (
     <footer className="relative">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
         <div className="relative overflow-hidden rounded-t-[32px] border border-b-0 border-white/[0.10] bg-[#17130f] px-4 py-12 shadow-[0_-12px_40px_rgba(0,0,0,0.35)] sm:px-8 lg:px-10 xl:px-12">
           <div className="grid gap-8 md:grid-cols-3">
             {/* Brand */}

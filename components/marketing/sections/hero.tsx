@@ -28,7 +28,7 @@ export default function Hero() {
   return (
     <section ref={sectionRef} id="hero" className="relative overflow-x-clip pt-28">
       {/* Content */}
-      <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="relative mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8">
         <SectionCard
           className="px-6 py-12 sm:px-8 sm:py-14 lg:px-12 lg:py-16"
           glowPosition="60% 20%"

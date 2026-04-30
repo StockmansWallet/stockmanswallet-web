@@ -257,7 +257,7 @@ export default function Features() {
 
   return (
     <section id="features" className="relative scroll-mt-28 overflow-x-clip">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
         <SectionCard glowPosition="58% 18%" glowSize="1200px 720px">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
