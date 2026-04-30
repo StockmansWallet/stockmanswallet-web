@@ -17,7 +17,7 @@ export default function SectionCard({
   return (
     <div
       className={clsx(
-        "relative overflow-hidden rounded-[32px] border border-white/[0.10] bg-[#17130f] px-4 py-10 shadow-[0_32px_120px_rgba(0,0,0,0.52)] sm:px-8 sm:py-12 lg:px-10 xl:px-12",
+        "relative overflow-hidden rounded-[32px] bg-[#17130f] px-4 py-10 shadow-[0_18px_48px_rgba(0,0,0,0.32)] sm:px-8 sm:py-12 lg:px-10 xl:px-12",
         className
       )}
     >
@@ -33,6 +33,10 @@ export default function SectionCard({
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(ellipse_960px_640px_at_50%_42%,transparent_0%,rgba(8,7,6,0.08)_58%,rgba(8,7,6,0.32)_100%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-[1] rounded-[32px] ring-1 ring-white/[0.12] ring-inset"
       />
       {children}
     </div>

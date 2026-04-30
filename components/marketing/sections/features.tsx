@@ -214,9 +214,9 @@ const FEATURE_TABS: FeatureTab[] = [
   {
     id: "gridiq",
     name: "Grid IQ",
-    tagline: "Optional processor analysis add-on",
+    tagline: "Market vs processor",
     description:
-      "Compare the saleyard against the processor before you sell. Grid IQ will be available as an optional add-on to subscription plans, so producers can add processor grid analysis when they need it without it being bundled into the base plans.",
+      "Compare the saleyard against the processor before you sell. Upload grids via photo or PDF, let AI extract the data, build a test consignment from your portfolio, and see which channel nets the best return. Then track kill sheets to sharpen future decisions.",
     color: "var(--feature-gridiq)",
     colorLight: "var(--feature-gridiq-light)",
     colorDark: "var(--feature-gridiq-dark)",
@@ -229,7 +229,7 @@ const FEATURE_TABS: FeatureTab[] = [
     ],
     mockup: "/images/iphone-screen-gridiq.webp",
     icon: <Grid3x3 className="h-5 w-5" />,
-    badge: "Optional Add-on",
+    comingSoon: true,
   },
 ];
 
@@ -315,21 +315,40 @@ export default function Features() {
                       key={tab.id}
                       onClick={() => setActive(i)}
                       aria-pressed={selected}
-                      className={`group relative flex w-full cursor-pointer items-center gap-3 rounded-[14px] px-3 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none ${
+                      className={`group relative flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-[14px] px-3 py-3 text-left ring-1 transition-colors ring-inset focus-visible:outline-none ${
                         selected
-                          ? "bg-white/[0.09] text-white"
-                          : "text-white/58 hover:bg-white/[0.045] hover:text-white/80"
+                          ? "bg-white/[0.09] text-white ring-transparent"
+                          : "text-white/58 ring-white/[0.08] hover:bg-white/[0.045] hover:text-white/80"
                       }`}
                     >
-                      <span
-                        className="absolute inset-y-2 left-0 w-0.5 rounded-full opacity-0 transition-opacity group-hover:opacity-60"
-                        style={{ backgroundColor: tab.color }}
-                      />
+                      {selected && (
+                        <span
+                          aria-hidden="true"
+                          className="pointer-events-none absolute inset-0"
+                          style={{
+                            background: `linear-gradient(to right, color-mix(in srgb, ${tab.color} 22%, transparent), transparent 65%)`,
+                          }}
+                        />
+                      )}
+                      {selected && (
+                        <span
+                          aria-hidden="true"
+                          className="pointer-events-none absolute inset-0 rounded-[14px]"
+                          style={{
+                            padding: "1px",
+                            background: `linear-gradient(to right, ${tab.color}, color-mix(in srgb, ${tab.color} 0%, transparent) 45%)`,
+                            WebkitMask:
+                              "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+                            WebkitMaskComposite: "xor",
+                            maskComposite: "exclude",
+                          }}
+                        />
+                      )}
                       {selected && (
                         <motion.span
                           layoutId="featureRailIndicator"
-                          className="absolute inset-y-2 left-0 w-0.5 rounded-full"
-                          style={{ backgroundColor: tab.color }}
+                          aria-hidden="true"
+                          className="pointer-events-none absolute inset-0"
                           transition={{ type: "spring", duration: 0.45, bounce: 0.12 }}
                         />
                       )}
@@ -344,8 +363,28 @@ export default function Features() {
                       >
                         {tab.icon}
                       </span>
-                      <span className="min-w-0">
-                        <span className="block truncate text-sm font-semibold">{tab.name}</span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-center gap-2">
+                          <span className="truncate text-sm font-semibold">{tab.name}</span>
+                          {tab.comingSoon && (
+                            <span
+                              className={`inline-flex shrink-0 items-center rounded-full border px-1.5 py-px text-[10px] font-semibold tracking-wide uppercase ${
+                                selected ? "" : "border-white/[0.10] bg-white/[0.04] text-white/55"
+                              }`}
+                              style={
+                                selected
+                                  ? {
+                                      backgroundColor: `color-mix(in srgb, ${tab.color} 14%, transparent)`,
+                                      color: tab.colorLight,
+                                      borderColor: `color-mix(in srgb, ${tab.color} 35%, transparent)`,
+                                    }
+                                  : undefined
+                              }
+                            >
+                              Coming Soon
+                            </span>
+                          )}
+                        </span>
                         <span className="mt-0.5 block truncate text-xs text-white/48">
                           {tab.tagline}
                         </span>
