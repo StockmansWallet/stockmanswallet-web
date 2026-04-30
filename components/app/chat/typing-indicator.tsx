@@ -1,5 +1,7 @@
 "use client";
 
+import { motion } from "framer-motion";
+
 interface TypingIndicatorProps {
   /** Solid opaque background color for the bubble */
   bgColor: string;
@@ -9,6 +11,23 @@ interface TypingIndicatorProps {
   reserveAvatarSpace?: boolean;
   className?: string;
 }
+
+// iMessage-style spring: quick, slight overshoot on entry, smooth fade
+// on exit. The transformOrigin pin to bottom-left makes the bubble grow
+// out of its tail so the entrance reads as "coming from the peer", not
+// dropping in from above. Callers wrap this in <AnimatePresence> so the
+// exit animation actually plays before unmount.
+const typingMotion = {
+  initial: { opacity: 0, scale: 0.7, y: 8 },
+  animate: { opacity: 1, scale: 1, y: 0 },
+  exit: { opacity: 0, scale: 0.7, y: 4 },
+  transition: {
+    type: "spring" as const,
+    stiffness: 520,
+    damping: 30,
+    mass: 0.7,
+  },
+};
 
 /**
  * Shared typing indicator bubble with three bouncing dots.
@@ -21,12 +40,16 @@ export function TypingIndicator({
   className = "",
 }: TypingIndicatorProps) {
   return (
-    <div
+    <motion.div
       role="status"
       aria-live="polite"
       aria-label="Other participant is typing"
-      className={`animate-bubble-in flex items-end justify-start gap-2 px-1 pr-14 ${className}`}
+      className={`flex items-end justify-start gap-2 px-1 pr-14 ${className}`}
       style={{ transformOrigin: "bottom left" }}
+      initial={typingMotion.initial}
+      animate={typingMotion.animate}
+      exit={typingMotion.exit}
+      transition={typingMotion.transition}
     >
       {reserveAvatarSpace && <div className="h-12 w-12 shrink-0 self-end" aria-hidden="true" />}
       <div className="relative">
@@ -58,6 +81,6 @@ export function TypingIndicator({
           />
         </svg>
       </div>
-    </div>
+    </motion.div>
   );
 }

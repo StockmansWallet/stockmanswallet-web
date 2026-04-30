@@ -554,14 +554,19 @@ body {
   animation: orb-drift-reverse 25s ease-in-out infinite;
 }
 
-/* Brangus chat bubble entrance - matches iOS spring(duration: 0.35, bounce: 0.2) */
+/* Chat bubble entrance - iMessage-style scale-and-pop. Origin is set by
+   the caller (bottom-left for peer, bottom-right for self) so the bubble
+   reads as growing out of its tail rather than dropping in. The spring
+   overshoot is tuned to match iOS Messages: enter quick, slight bounce
+   past 1.0, settle. */
 @keyframes bubble-in {
   0% {
     opacity: 0;
-    transform: translateY(16px) scale(0.95);
+    transform: translateY(4px) scale(0.6);
   }
-  70% {
-    transform: translateY(-2px) scale(1.01);
+  55% {
+    opacity: 1;
+    transform: translateY(0) scale(1.04);
   }
   100% {
     opacity: 1;
@@ -570,7 +575,7 @@ body {
 }
 
 @utility animate-bubble-in {
-  animation: bubble-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation: bubble-in 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 @keyframes fade-in {

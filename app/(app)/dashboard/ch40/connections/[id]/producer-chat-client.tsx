@@ -4,6 +4,7 @@ import { useState, useEffect, useLayoutEffect, useRef, useCallback, type ReactNo
 import { MessageThread } from "@/components/app/advisory/message-thread";
 import { ChatInput } from "@/components/app/chat/chat-input";
 import { TypingIndicator } from "@/components/app/chat/typing-indicator";
+import { AnimatePresence } from "framer-motion";
 import { ShareMenu } from "@/components/app/ch40/share-menu";
 import { ShareAttachmentCard } from "@/components/app/ch40/share-attachment-card";
 import { useTypingIndicator } from "@/hooks/use-typing-indicator";
@@ -274,14 +275,17 @@ export function ProducerChatClient({
               otherTailColor={OTHER_BG}
               avatars={avatars}
             />
-            {peerIsTyping && (
-              <TypingIndicator
-                bgColor={OTHER_BG}
-                dotClass="bg-white/50"
-                reserveAvatarSpace={!!avatars}
-                className="mt-2"
-              />
-            )}
+            <AnimatePresence initial={false}>
+              {peerIsTyping && (
+                <TypingIndicator
+                  key="typing"
+                  bgColor={OTHER_BG}
+                  dotClass="bg-white/50"
+                  reserveAvatarSpace={!!avatars}
+                  className="mt-2"
+                />
+              )}
+            </AnimatePresence>
             <div aria-hidden className={pendingAttachment ? "h-44" : "h-28"} />
             <div ref={messagesEndRef} />
           </div>
