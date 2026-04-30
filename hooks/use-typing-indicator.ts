@@ -50,9 +50,6 @@ export function useTypingIndicator(channelName: string, userId: string) {
           break;
         }
       }
-      if (true) {
-        console.log("[typing] recompute", { state, someoneTyping });
-      }
       setPeerIsTyping(someoneTyping);
     };
 
@@ -61,9 +58,6 @@ export function useTypingIndicator(channelName: string, userId: string) {
       .on("presence", { event: "join" }, recompute)
       .on("presence", { event: "leave" }, recompute)
       .subscribe(async (status) => {
-        if (true) {
-          console.log(`[typing] subscribe status=${status} channel=${channelName}`);
-        }
         if (status !== "SUBSCRIBED") return;
         // Seed presence with our CURRENT local state, not always false.
         // Race: if the user starts typing during the ~200ms between mount
@@ -72,12 +66,7 @@ export function useTypingIndicator(channelName: string, userId: string) {
         // would stay true so subsequent notifyTyping calls return early,
         // and the peer never sees us typing for that whole session.
         // Tracking the current ref value here recovers from that race.
-        const result = await channel.track({ typing: localTypingRef.current });
-        if (true) {
-          console.log(`[typing] subscribe seed track result=${result}`, {
-            seed: localTypingRef.current,
-          });
-        }
+        await channel.track({ typing: localTypingRef.current });
       });
 
     channelRef.current = channel;
@@ -95,16 +84,7 @@ export function useTypingIndicator(channelName: string, userId: string) {
   const notifyTyping = useCallback(() => {
     if (localTypingRef.current) return;
     localTypingRef.current = true;
-    if (true) {
-      console.log("[typing] notifyTyping fired -> track({typing:true})", {
-        hasChannel: !!channelRef.current,
-      });
-    }
-    channelRef.current?.track({ typing: true }).then((result) => {
-      if (true) {
-        console.log("[typing] track(true) result=", result);
-      }
-    });
+    void channelRef.current?.track({ typing: true });
   }, []);
 
   /**
@@ -114,14 +94,7 @@ export function useTypingIndicator(channelName: string, userId: string) {
   const notifyTypingStop = useCallback(() => {
     if (!localTypingRef.current) return;
     localTypingRef.current = false;
-    if (true) {
-      console.log("[typing] notifyTypingStop fired -> track({typing:false})");
-    }
-    channelRef.current?.track({ typing: false }).then((result) => {
-      if (true) {
-        console.log("[typing] track(false) result=", result);
-      }
-    });
+    void channelRef.current?.track({ typing: false });
   }, []);
 
   return { peerIsTyping, notifyTyping, notifyTypingStop };
