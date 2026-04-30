@@ -64,7 +64,7 @@ export function Header() {
 
   return (
     <>
-      <header className="fixed top-0 z-50 w-full border-b border-white/[0.08] bg-[#17130f]/75 py-2.5 shadow-sm shadow-black/15 backdrop-blur-xl">
+      <header className="fixed top-0 z-50 w-full border-b border-white/[0.08] bg-[#17130f] py-2.5 shadow-sm shadow-black/15">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           {/* Logo */}
           <Link
@@ -74,7 +74,7 @@ export function Header() {
           >
             <span
               aria-hidden
-              className="pointer-events-none absolute inset-1/2 h-56 w-[34rem] -translate-x-1/2 -translate-y-1/2 rounded-full"
+              className="pointer-events-none absolute inset-1/2 h-[27rem] w-[66rem] -translate-x-1/2 -translate-y-1/2 rounded-full"
               style={{
                 background:
                   "radial-gradient(ellipse at center, color-mix(in srgb, var(--color-brand) 16%, transparent), color-mix(in srgb, var(--color-brand) 7%, transparent) 36%, color-mix(in srgb, var(--color-brand) 2%, transparent) 62%, transparent 82%)",
