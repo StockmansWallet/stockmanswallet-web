@@ -104,10 +104,9 @@ export function ProducerChatClient({
         });
         return next;
       });
-      // The peer's typing-stop presence update can land after the INSERT,
-      // so clear the indicator locally the moment we know they sent. The
-      // AnimatePresence exit on the typing bubble runs concurrently with
-      // the new bubble's entrance.
+      // Clear the indicator locally the moment we know the peer sent. The
+      // broadcast stop event can land after the INSERT, and the message is
+      // the stronger signal that typing has ended.
       if (incoming.sender_user_id !== currentUserId) {
         clearPeerTyping();
       }
@@ -121,14 +120,21 @@ export function ProducerChatClient({
   // moved, so the distance check would always read "scrolled up". A
   // scroll listener tracks the pinned state continuously instead.
   // First call uses "auto" so the chat opens at the bottom without a
-  // visible scroll animation; subsequent calls use "smooth" so a new
-  // message gently slides existing bubbles up like iOS Messages.
+  // visible scroll animation. Later calls choose the behaviour based on
+  // what changed: typing can glide in, but message insertion and typing
+  // removal lock to the bottom immediately so the thread does not chase a
+  // moving scrollHeight while exit animations are running.
   const hasScrolledOnceRef = useRef(false);
-  const scrollToBottom = useCallback(() => {
+  const previousLayoutStateRef = useRef({
+    messageCount: messages.length,
+    peerIsTyping,
+    hasPendingAttachment: Boolean(pendingAttachment),
+  });
+
+  const scrollToBottom = useCallback((behavior: ScrollBehavior) => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    const behavior: ScrollBehavior = hasScrolledOnceRef.current ? "smooth" : "auto";
     hasScrolledOnceRef.current = true;
 
     if (scrollFrameRef.current != null) {
@@ -166,7 +172,28 @@ export function ProducerChatClient({
   }, []);
 
   useLayoutEffect(() => {
-    if (userPinnedToBottomRef.current) scrollToBottom();
+    const previous = previousLayoutStateRef.current;
+    const current = {
+      messageCount: messages.length,
+      peerIsTyping,
+      hasPendingAttachment: Boolean(pendingAttachment),
+    };
+    previousLayoutStateRef.current = current;
+
+    if (!userPinnedToBottomRef.current) return;
+
+    const messageCountChanged = previous.messageCount !== current.messageCount;
+    const pendingAttachmentChanged =
+      previous.hasPendingAttachment !== current.hasPendingAttachment;
+    const typingAppeared =
+      !previous.peerIsTyping &&
+      current.peerIsTyping &&
+      !messageCountChanged &&
+      !pendingAttachmentChanged;
+    const behavior: ScrollBehavior =
+      !hasScrolledOnceRef.current || !typingAppeared ? "auto" : "smooth";
+
+    scrollToBottom(behavior);
   }, [messages.length, peerIsTyping, pendingAttachment, scrollToBottom]);
 
   // Live message subscription with a polling fallback for missed websocket events.
@@ -323,7 +350,7 @@ export function ProducerChatClient({
               otherTailColor={OTHER_BG}
               avatars={avatars}
             />
-            <AnimatePresence initial={false}>
+            <AnimatePresence initial={false} mode="popLayout" presenceAffectsLayout={false}>
               {peerIsTyping && (
                 <TypingIndicator
                   key="typing"
