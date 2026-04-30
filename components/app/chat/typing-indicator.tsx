@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { ChatAvatar } from "@/components/app/chat/chat-avatar";
 
 interface TypingIndicatorProps {
   /** Solid opaque background color for the bubble */
@@ -9,6 +10,10 @@ interface TypingIndicatorProps {
   dotClass?: string;
   /** Reserve the sender avatar lane so the bubble lines up with chat rows */
   reserveAvatarSpace?: boolean;
+  /** Peer's avatar URL to render alongside the bubble (matches message rows) */
+  avatarUrl?: string | null;
+  /** Initials fallback when no avatar URL is available */
+  avatarInitials?: string;
   className?: string;
 }
 
@@ -37,10 +42,13 @@ export function TypingIndicator({
   bgColor,
   dotClass = "bg-white/50",
   reserveAvatarSpace = false,
+  avatarUrl,
+  avatarInitials,
   className = "",
 }: TypingIndicatorProps) {
   return (
     <motion.div
+      layout="position"
       role="status"
       aria-live="polite"
       aria-label="Other participant is typing"
@@ -51,7 +59,12 @@ export function TypingIndicator({
       exit={typingMotion.exit}
       transition={typingMotion.transition}
     >
-      {reserveAvatarSpace && <div className="h-12 w-12 shrink-0 self-end" aria-hidden="true" />}
+      <ChatAvatar
+        avatarUrl={avatarUrl}
+        initials={avatarInitials}
+        reserveSpace={reserveAvatarSpace}
+        className="self-end"
+      />
       <div className="relative">
         <div
           className="flex min-h-10 min-w-14 items-center justify-center gap-1.5 rounded-3xl px-4 py-3"

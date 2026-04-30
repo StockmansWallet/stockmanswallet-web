@@ -44,6 +44,7 @@ export function ProducerChatClient({
   const [pendingAttachment, setPendingAttachment] = useState<MessageAttachment | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollFrameRef = useRef<number | null>(null);
   // Tracks whether the user is pinned to the bottom of the thread so a
   // new message or typing-indicator pulse only auto-scrolls when they
   // were already at the bottom. Defaults to true so the very first
@@ -55,6 +56,19 @@ export function ProducerChatClient({
     `chat:${connectionId}`,
     currentUserId
   );
+
+  // Pull the peer's avatar so the typing indicator sits on the same row
+  // identity as the message bubbles below it. Peer = whichever party in
+  // the avatars map is not the local user.
+  const { url: peerAvatarUrl, initials: peerAvatarInitials } = (() => {
+    if (!avatars) return { url: undefined, initials: undefined };
+    for (const [uid, meta] of Object.entries(avatars)) {
+      if (uid !== currentUserId) {
+        return { url: meta.url ?? undefined, initials: meta.initials };
+      }
+    }
+    return { url: undefined, initials: undefined };
+  })();
 
   const mergeMessage = useCallback(
     (incoming: AdvisoryMessage) => {
@@ -106,11 +120,38 @@ export function ProducerChatClient({
   // bubble has already grown the scroll height by then - scrollTop hasn't
   // moved, so the distance check would always read "scrolled up". A
   // scroll listener tracks the pinned state continuously instead.
+  // First call uses "auto" so the chat opens at the bottom without a
+  // visible scroll animation; subsequent calls use "smooth" so a new
+  // message gently slides existing bubbles up like iOS Messages.
+  const hasScrolledOnceRef = useRef(false);
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
-    requestAnimationFrame(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const behavior: ScrollBehavior = hasScrolledOnceRef.current ? "smooth" : "auto";
+    hasScrolledOnceRef.current = true;
+
+    if (scrollFrameRef.current != null) {
+      cancelAnimationFrame(scrollFrameRef.current);
+    }
+
+    scrollFrameRef.current = requestAnimationFrame(() => {
+      const latestContainer = scrollContainerRef.current;
+      if (!latestContainer) return;
+      latestContainer.scrollTo({
+        top: latestContainer.scrollHeight - latestContainer.clientHeight,
+        behavior,
+      });
+      scrollFrameRef.current = null;
     });
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (scrollFrameRef.current != null) {
+        cancelAnimationFrame(scrollFrameRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -289,6 +330,8 @@ export function ProducerChatClient({
                   bgColor={OTHER_BG}
                   dotClass="bg-white/50"
                   reserveAvatarSpace={!!avatars}
+                  avatarUrl={peerAvatarUrl}
+                  avatarInitials={peerAvatarInitials}
                   className="mt-2"
                 />
               )}

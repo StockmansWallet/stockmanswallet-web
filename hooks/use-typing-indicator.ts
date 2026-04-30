@@ -21,6 +21,7 @@ import { createClient } from "@/lib/supabase/client";
 export function useTypingIndicator(channelName: string, userId: string) {
   const [peerIsTyping, setPeerIsTyping] = useState(false);
   const channelRef = useRef<ReturnType<ReturnType<typeof createClient>["channel"]> | null>(null);
+  const channelSubscribedRef = useRef(false);
   // Tracks the last typing state we sent so notifyTyping/notifyTypingStop
   // can no-op when called redundantly (e.g. fired on every keystroke).
   const localTypingRef = useRef(false);
@@ -60,12 +61,21 @@ export function useTypingIndicator(channelName: string, userId: string) {
       setPeerIsTyping(someoneTyping);
     };
 
+    const trackCurrentState = () => {
+      if (!channelSubscribedRef.current) return;
+      void channel.track({ typing: localTypingRef.current });
+    };
+
     channel
       .on("presence", { event: "sync" }, recompute)
       .on("presence", { event: "join" }, recompute)
       .on("presence", { event: "leave" }, recompute)
       .subscribe(async (status) => {
-        if (status !== "SUBSCRIBED") return;
+        if (status !== "SUBSCRIBED") {
+          channelSubscribedRef.current = false;
+          return;
+        }
+        channelSubscribedRef.current = true;
         // Seed presence with our CURRENT local state, not always false.
         // Race: if the user starts typing during the ~200ms between mount
         // and SUBSCRIBED, notifyTyping fires against an unsubscribed
@@ -73,14 +83,16 @@ export function useTypingIndicator(channelName: string, userId: string) {
         // would stay true so subsequent notifyTyping calls return early,
         // and the peer never sees us typing for that whole session.
         // Tracking the current ref value here recovers from that race.
-        await channel.track({ typing: localTypingRef.current });
+        trackCurrentState();
       });
 
     channelRef.current = channel;
 
     return () => {
-      // untrack is best-effort - channel removal will clean up regardless.
-      void channel.untrack();
+      if (channelSubscribedRef.current) {
+        void channel.untrack();
+      }
+      channelSubscribedRef.current = false;
       supabase.removeChannel(channel);
       channelRef.current = null;
       localTypingRef.current = false;
@@ -91,7 +103,9 @@ export function useTypingIndicator(channelName: string, userId: string) {
   const notifyTyping = useCallback(() => {
     if (localTypingRef.current) return;
     localTypingRef.current = true;
-    void channelRef.current?.track({ typing: true });
+    if (channelSubscribedRef.current) {
+      void channelRef.current?.track({ typing: true });
+    }
   }, []);
 
   /**
@@ -101,7 +115,9 @@ export function useTypingIndicator(channelName: string, userId: string) {
   const notifyTypingStop = useCallback(() => {
     if (!localTypingRef.current) return;
     localTypingRef.current = false;
-    void channelRef.current?.track({ typing: false });
+    if (channelSubscribedRef.current) {
+      void channelRef.current?.track({ typing: false });
+    }
   }, []);
 
   /**

@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { ChatAvatar } from "@/components/app/chat/chat-avatar";
 
 interface ChatBubbleProps {
   side: "left" | "right";
@@ -67,22 +68,16 @@ export function ChatBubble({
       ? "animate-fade-in"
       : "animate-bubble-in"
     : "";
-
-  const avatar = avatarUrl ? (
-    <img
-      src={avatarUrl}
-      alt=""
-      className="-mb-8 h-12 w-12 shrink-0 self-end rounded-full object-cover"
-    />
-  ) : avatarInitials ? (
-    <div className="-mb-8 flex h-12 w-12 shrink-0 items-center justify-center self-end rounded-full bg-white/10">
-      <span className="text-text-primary text-sm font-bold">{avatarInitials}</span>
-    </div>
-  ) : reserveAvatarSpace ? (
-    <div className="h-12 w-12 shrink-0 self-end" aria-hidden="true" />
-  ) : null;
-
   const hasHangingAvatar = Boolean(avatarUrl || avatarInitials);
+
+  const avatar = (
+    <ChatAvatar
+      avatarUrl={avatarUrl}
+      initials={avatarInitials}
+      reserveSpace={reserveAvatarSpace}
+      className={`${hasHangingAvatar ? "-mb-8" : ""} self-end`}
+    />
+  );
 
   return (
     <div

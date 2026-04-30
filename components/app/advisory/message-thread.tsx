@@ -1,6 +1,7 @@
 "use client";
 
 import { memo } from "react";
+import { motion } from "framer-motion";
 import { ChatBubble } from "@/components/app/chat/chat-bubble";
 import { Badge } from "@/components/ui/badge";
 import { ShareAttachmentCard } from "@/components/app/ch40/share-attachment-card";
@@ -137,7 +138,10 @@ const MessageRow = memo(
   }: MessageRowProps) => {
     const typeConfig = messageTypeLabels[msg.message_type];
     return (
-      <div>
+      <motion.div
+        layout="position"
+        transition={{ type: "spring", stiffness: 500, damping: 42, mass: 0.8 }}
+      >
         {showTime && (
           <div className="flex justify-center py-2">
             <span className="bg-surface-lowest text-text-muted rounded-full px-3 py-1 text-[11px] font-medium">
@@ -165,7 +169,7 @@ const MessageRow = memo(
             <ShareAttachmentCard attachment={msg.attachment} connectionId={connectionId} />
           )}
         </ChatBubble>
-      </div>
+      </motion.div>
     );
   }
 );
