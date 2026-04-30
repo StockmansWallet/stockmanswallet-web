@@ -76,14 +76,12 @@ export function ChatInput({
 
     setValue("");
     resetHeight();
-    // Don't broadcast typing-stop on send: the INSERT is itself a stronger
-    // stop signal, and a separate typing-stop event would race with the
-    // INSERT - if it lands first the peer's indicator blinks off before
-    // the bubble morph can play. Just reset our local ref so the next
-    // session of typing fires a fresh broadcast.
-    isTypingRef.current = false;
+    // Tell peers we've stopped typing. Presence's track() is idempotent
+    // and last-write-wins, so this won't bounce or race the message
+    // INSERT - either ordering produces a clean transition.
+    stopTyping();
     await onSend(trimmed);
-  }, [value, canSend, disabled, loading, onSend, resetHeight]);
+  }, [value, canSend, disabled, loading, onSend, resetHeight, stopTyping]);
 
   // Fire typing-stop on unmount so the peer's indicator clears even if the
   // user navigates away mid-compose.

@@ -28,7 +28,7 @@ export function ConnectionChatClient({
   const [animatedIds, setAnimatedIds] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { peerIsTyping, notifyTyping } = useTypingIndicator(
+  const { peerIsTyping, notifyTyping, notifyTypingStop } = useTypingIndicator(
     `advisory:${connectionId}`,
     currentUserId
   );
@@ -116,6 +116,7 @@ export function ConnectionChatClient({
         <ChatInput
           onSend={handleSend}
           onTyping={notifyTyping}
+          onTypingStop={notifyTypingStop}
           placeholder="Write a message..."
           accentClass="bg-chat-advisor-accent hover:bg-chat-advisor-accent-hover"
         />

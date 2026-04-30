@@ -43,31 +43,23 @@ export function ProducerChatClient({
   const [pendingAttachment, setPendingAttachment] = useState<MessageAttachment | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { peerIsTyping, notifyTyping, notifyTypingStop, clearPeerTyping } = useTypingIndicator(
+  const { peerIsTyping, notifyTyping, notifyTypingStop } = useTypingIndicator(
     `chat:${connectionId}`,
     currentUserId
   );
 
-  const mergeMessage = useCallback(
-    (incoming: AdvisoryMessage) => {
-      setMessages((prev) => {
-        const withoutDuplicate = prev.filter((m) => m.id !== incoming.id);
-        return [...withoutDuplicate, incoming].sort(
-          (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-        );
-      });
-      setAnimatedIds((ids) => new Set(ids).add(incoming.id));
-      // Peer's message landed, so they're definitionally not typing.
-      // clearPeerTyping unmounts the indicator AND opens a short
-      // suppression window in the hook so a stale typing broadcast
-      // (the peer's last throttled keystroke can race in just after the
-      // INSERT) can't pop the indicator back behind the new bubble.
-      if (incoming.sender_user_id !== currentUserId) {
-        clearPeerTyping();
-      }
-    },
-    [clearPeerTyping, currentUserId]
-  );
+  const mergeMessage = useCallback((incoming: AdvisoryMessage) => {
+    setMessages((prev) => {
+      const withoutDuplicate = prev.filter((m) => m.id !== incoming.id);
+      return [...withoutDuplicate, incoming].sort(
+        (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      );
+    });
+    setAnimatedIds((ids) => new Set(ids).add(incoming.id));
+    // No need to manually clear the typing indicator - the peer's send
+    // path fires notifyTypingStop, which broadcasts a presence update
+    // that flips peerIsTyping false here automatically.
+  }, []);
 
   // Auto-scroll to bottom on load and incoming messages. Layout timing matters
   // here because the composer is outside the scroll viewport and the spacer
