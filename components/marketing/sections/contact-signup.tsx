@@ -9,7 +9,7 @@ export default function ContactSignup() {
   const { openWaitlist } = useWaitlist();
 
   return (
-    <section id="signup" className="relative overflow-hidden py-16 sm:py-24 lg:py-32">
+    <section id="signup" className="relative scroll-mt-24 overflow-hidden">
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionCard
           className="px-6 py-12 text-center sm:px-10 sm:py-14 lg:px-12 lg:py-16"

@@ -8,7 +8,7 @@ import SectionCard from "@/components/marketing/ui/section-card";
 
 export default function About() {
   return (
-    <section id="about" className="relative py-16 sm:py-24 lg:py-32">
+    <section id="about" className="relative scroll-mt-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionCard
           className="px-6 py-12 text-center sm:px-10 sm:py-14 lg:px-12 lg:py-16"

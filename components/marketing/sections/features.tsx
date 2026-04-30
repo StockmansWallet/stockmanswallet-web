@@ -256,10 +256,7 @@ export default function Features() {
   const proofPoints = feature.bullets.slice(0, 3);
 
   return (
-    <section
-      id="features"
-      className="relative min-h-[calc(100svh-4rem)] overflow-x-clip py-16 sm:py-24 lg:py-32"
-    >
+    <section id="features" className="relative scroll-mt-24 overflow-x-clip">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionCard glowPosition="58% 18%" glowSize="1200px 720px">
           <motion.div

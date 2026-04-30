@@ -29,10 +29,10 @@ export default function Hero() {
     <section
       ref={sectionRef}
       id="hero"
-      className="relative overflow-x-clip pt-24 pb-16 sm:pt-28 sm:pb-20 lg:pt-32 lg:pb-24"
+      className="relative overflow-x-clip pt-24 sm:pt-28 lg:pt-32"
     >
       {/* Content */}
-      <div className="relative mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
+      <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionCard
           className="px-6 py-12 sm:px-8 sm:py-14 lg:px-12 lg:py-16"
           glowPosition="60% 20%"
