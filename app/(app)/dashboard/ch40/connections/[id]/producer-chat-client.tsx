@@ -51,48 +51,55 @@ export function ProducerChatClient({
   // user at the top of a long history.
   const userPinnedToBottomRef = useRef(true);
 
-  const { peerIsTyping, notifyTyping, notifyTypingStop } = useTypingIndicator(
+  const { peerIsTyping, notifyTyping, notifyTypingStop, clearPeerTyping } = useTypingIndicator(
     `chat:${connectionId}`,
     currentUserId
   );
 
-  const mergeMessage = useCallback((incoming: AdvisoryMessage) => {
-    setMessages((prev) => {
-      // Strip any optimistic temp row that matches the incoming message
-      // (same sender, same content) so the user doesn't briefly see
-      // their bubble twice when the realtime INSERT outraces our own
-      // server action's response.
-      const withoutOptimisticDup = prev.filter((m) => {
-        if (m.id === incoming.id) return false;
-        if (
-          m.id.startsWith("optimistic-") &&
-          m.sender_user_id === incoming.sender_user_id &&
-          m.content === incoming.content
-        ) {
-          return false;
-        }
-        return true;
+  const mergeMessage = useCallback(
+    (incoming: AdvisoryMessage) => {
+      setMessages((prev) => {
+        // Strip any optimistic temp row that matches the incoming message
+        // (same sender, same content) so the user doesn't briefly see
+        // their bubble twice when the realtime INSERT outraces our own
+        // server action's response.
+        const withoutOptimisticDup = prev.filter((m) => {
+          if (m.id === incoming.id) return false;
+          if (
+            m.id.startsWith("optimistic-") &&
+            m.sender_user_id === incoming.sender_user_id &&
+            m.content === incoming.content
+          ) {
+            return false;
+          }
+          return true;
+        });
+        const next = [...withoutOptimisticDup, incoming].sort(
+          (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+        // Prune animatedIds to ids that still exist after the merge so the
+        // set doesn't grow unbounded for the lifetime of the chat session.
+        setAnimatedIds((ids) => {
+          const liveIds = new Set(next.map((m) => m.id));
+          const pruned = new Set<string>();
+          for (const id of ids) {
+            if (liveIds.has(id)) pruned.add(id);
+          }
+          pruned.add(incoming.id);
+          return pruned;
+        });
+        return next;
       });
-      const next = [...withoutOptimisticDup, incoming].sort(
-        (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-      );
-      // Prune animatedIds to ids that still exist after the merge so the
-      // set doesn't grow unbounded for the lifetime of the chat session.
-      setAnimatedIds((ids) => {
-        const liveIds = new Set(next.map((m) => m.id));
-        const pruned = new Set<string>();
-        for (const id of ids) {
-          if (liveIds.has(id)) pruned.add(id);
-        }
-        pruned.add(incoming.id);
-        return pruned;
-      });
-      return next;
-    });
-    // No need to manually clear the typing indicator - the peer's send
-    // path fires notifyTypingStop, which broadcasts a presence update
-    // that flips peerIsTyping false here automatically.
-  }, []);
+      // The peer's typing-stop presence update can land after the INSERT,
+      // so clear the indicator locally the moment we know they sent. The
+      // AnimatePresence exit on the typing bubble runs concurrently with
+      // the new bubble's entrance.
+      if (incoming.sender_user_id !== currentUserId) {
+        clearPeerTyping();
+      }
+    },
+    [clearPeerTyping, currentUserId]
+  );
 
   // Auto-scroll to bottom only when the user is already pinned there. We
   // can't compute "at bottom" inside the layout effect because the new

@@ -554,6 +554,29 @@ body {
   animation: orb-drift-reverse 25s ease-in-out infinite;
 }
 
+/* Chat bubble entrance - iMessage-style scale pop. Caller pins the
+   transform-origin to the bubble's tail side (bottom-left for peer,
+   bottom-right for self) so each bubble grows out of where its tail
+   will sit. cubic-bezier matches an underdamped spring. */
+@keyframes bubble-in {
+  0% {
+    opacity: 0;
+    transform: translateY(4px) scale(0.6);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(0) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@utility animate-bubble-in {
+  animation: bubble-in 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;

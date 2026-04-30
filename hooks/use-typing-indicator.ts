@@ -104,5 +104,15 @@ export function useTypingIndicator(channelName: string, userId: string) {
     void channelRef.current?.track({ typing: false });
   }, []);
 
-  return { peerIsTyping, notifyTyping, notifyTypingStop };
+  /**
+   * Force-clear the local peer-typing flag. Call when a peer message
+   * arrives so the indicator unmounts immediately rather than waiting
+   * on the peer's typing-stop presence update, which can race the
+   * INSERT and arrive a few hundred ms later.
+   */
+  const clearPeerTyping = useCallback(() => {
+    setPeerIsTyping(false);
+  }, []);
+
+  return { peerIsTyping, notifyTyping, notifyTypingStop, clearPeerTyping };
 }
