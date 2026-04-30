@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { ArrowUp, Loader2, Mic } from "lucide-react";
 
 interface ChatInputProps {
@@ -11,6 +11,12 @@ interface ChatInputProps {
   accentClass?: string;
   /** Called on each keystroke - use for typing indicator broadcast */
   onTyping?: () => void;
+  /**
+   * Called when the local user has explicitly stopped typing - input
+   * cleared, message sent, or composer unmounted. Use to broadcast a
+   * typing-stop event so the peer's indicator drops immediately.
+   */
+  onTypingStop?: () => void;
   /** Whether voice input is currently active */
   isListening?: boolean;
   /** Called when mic button is tapped */
@@ -34,6 +40,7 @@ export function ChatInput({
   loading = false,
   accentClass = "bg-violet hover:bg-violet",
   onTyping,
+  onTypingStop,
   isListening = false,
   onMicTap,
   micSupported = false,
@@ -42,6 +49,11 @@ export function ChatInput({
 }: ChatInputProps) {
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  // Tracks whether the peer believes we're typing right now. Flips to true
+  // on the first keystroke and back to false when the input clears or the
+  // composer unmounts, so we only fire one typing-stop per session of
+  // typing - no spam.
+  const isTypingRef = useRef(false);
 
   const hasText = value.trim().length > 0;
   const canSend = hasText || allowEmpty;
@@ -52,14 +64,37 @@ export function ChatInput({
     }
   }, []);
 
+  const stopTyping = useCallback(() => {
+    if (!isTypingRef.current) return;
+    isTypingRef.current = false;
+    onTypingStop?.();
+  }, [onTypingStop]);
+
   const handleSubmit = useCallback(async () => {
     const trimmed = value.trim();
     if (!canSend || disabled || loading) return;
 
     setValue("");
     resetHeight();
+    // Don't broadcast typing-stop on send: the INSERT is itself a stronger
+    // stop signal, and a separate typing-stop event would race with the
+    // INSERT - if it lands first the peer's indicator blinks off before
+    // the bubble morph can play. Just reset our local ref so the next
+    // session of typing fires a fresh broadcast.
+    isTypingRef.current = false;
     await onSend(trimmed);
   }, [value, canSend, disabled, loading, onSend, resetHeight]);
+
+  // Fire typing-stop on unmount so the peer's indicator clears even if the
+  // user navigates away mid-compose.
+  useEffect(() => {
+    return () => {
+      if (isTypingRef.current) {
+        isTypingRef.current = false;
+        onTypingStop?.();
+      }
+    };
+  }, [onTypingStop]);
 
   // Display live transcript in the textarea while listening
   const displayValue = isListening && liveTranscript ? liveTranscript : value;
@@ -67,13 +102,23 @@ export function ChatInput({
   return (
     <div className="flex items-center gap-2">
       {/* Input field with send button inside */}
-      <div className="flex min-h-[44px] flex-1 items-center rounded-[22px] border border-white/10 bg-white/5 pl-4 pr-1.5 transition-colors focus-within:border-white/20 focus-within:bg-white/[0.08]">
+      <div className="flex min-h-[44px] flex-1 items-center rounded-[22px] border border-white/10 bg-white/5 pr-1.5 pl-4 transition-colors focus-within:border-white/20 focus-within:bg-white/[0.08]">
         <textarea
           ref={textareaRef}
           value={displayValue}
           onChange={(e) => {
-            setValue(e.target.value);
-            onTyping?.();
+            const next = e.target.value;
+            setValue(next);
+            const nextHasText = next.trim().length > 0;
+            if (nextHasText) {
+              if (!isTypingRef.current) isTypingRef.current = true;
+              onTyping?.();
+            } else if (isTypingRef.current) {
+              // User cleared the input without sending - tell the peer to
+              // drop the indicator immediately rather than waiting on the
+              // auto-hide timer.
+              stopTyping();
+            }
             const el = e.target;
             el.style.height = "auto";
             el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
@@ -87,7 +132,7 @@ export function ChatInput({
           placeholder={isListening ? "Listening..." : placeholder}
           disabled={disabled || loading || isListening}
           rows={1}
-          className="max-h-[120px] flex-1 resize-none bg-transparent py-2.5 text-sm leading-5 text-text-primary placeholder:text-text-muted outline-none disabled:opacity-50"
+          className="text-text-primary placeholder:text-text-muted max-h-[120px] flex-1 resize-none bg-transparent py-2.5 text-sm leading-5 outline-none disabled:opacity-50"
         />
 
         {/* Send button - visible when there is text or an attachment is queued */}
@@ -96,7 +141,7 @@ export function ChatInput({
           onClick={handleSubmit}
           disabled={disabled || loading || !canSend}
           className={`ml-2 flex h-8 shrink-0 items-center justify-center rounded-full px-4 text-white transition-all ${accentClass} ${
-            canSend ? "opacity-100 scale-100" : "opacity-0 scale-75 pointer-events-none"
+            canSend ? "scale-100 opacity-100" : "pointer-events-none scale-75 opacity-0"
           }`}
           aria-label="Send message"
         >
@@ -116,8 +161,8 @@ export function ChatInput({
           disabled={disabled || loading}
           className={`flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-full transition-all ${
             isListening
-              ? `${accentClass} text-white animate-pulse`
-              : "bg-white/5 text-text-muted hover:bg-white/10 hover:text-text-secondary border border-white/10"
+              ? `${accentClass} animate-pulse text-white`
+              : "text-text-muted hover:text-text-secondary border border-white/10 bg-white/5 hover:bg-white/10"
           }`}
           aria-label={isListening ? "Stop listening" : "Voice input"}
         >
