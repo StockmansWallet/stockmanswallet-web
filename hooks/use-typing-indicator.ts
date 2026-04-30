@@ -22,12 +22,21 @@ export function useTypingIndicator(channelName: string, userId: string) {
 
   useEffect(() => {
     const supabase = createClient();
-    const channel = supabase.channel(channelName);
+    // self: false so our own broadcasts don't echo back and trigger the
+    // "peer is typing" indicator on the device that sent the event.
+    const channel = supabase.channel(channelName, {
+      config: { broadcast: { self: false } },
+    });
+
+    // iOS sends UUIDs uppercase, web auth.uid() is lowercase, so a strict
+    // string compare would treat the same user as a peer when both
+    // platforms are signed into one account. Compare case-insensitively.
+    const normalisedSelf = userId.toLowerCase();
 
     channel
       .on("broadcast", { event: "typing" }, (payload) => {
         const senderId = payload.payload?.userId;
-        if (senderId && senderId !== userId) {
+        if (senderId && senderId.toLowerCase() !== normalisedSelf) {
           setPeerIsTyping(true);
 
           // Clear previous timeout
@@ -63,5 +72,19 @@ export function useTypingIndicator(channelName: string, userId: string) {
     });
   }, [userId]);
 
-  return { peerIsTyping, notifyTyping };
+  /**
+   * Force-clear the peer-typing state. Call when a peer message arrives so
+   * the indicator doesn't linger past the message under the 3s auto-hide
+   * timer (which makes the indicator look like it flashes back in after
+   * the new bubble pushes it down).
+   */
+  const clearPeerTyping = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    setPeerIsTyping(false);
+  }, []);
+
+  return { peerIsTyping, notifyTyping, clearPeerTyping };
 }

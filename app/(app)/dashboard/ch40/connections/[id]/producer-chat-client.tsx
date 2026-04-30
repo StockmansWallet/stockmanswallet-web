@@ -43,17 +43,30 @@ export function ProducerChatClient({
   const [pendingAttachment, setPendingAttachment] = useState<MessageAttachment | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { peerIsTyping, notifyTyping } = useTypingIndicator(`chat:${connectionId}`, currentUserId);
+  const { peerIsTyping, notifyTyping, clearPeerTyping } = useTypingIndicator(
+    `chat:${connectionId}`,
+    currentUserId
+  );
 
-  const mergeMessage = useCallback((incoming: AdvisoryMessage) => {
-    setMessages((prev) => {
-      const withoutDuplicate = prev.filter((m) => m.id !== incoming.id);
-      return [...withoutDuplicate, incoming].sort(
-        (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
-      );
-    });
-    setAnimatedIds((ids) => new Set(ids).add(incoming.id));
-  }, []);
+  const mergeMessage = useCallback(
+    (incoming: AdvisoryMessage) => {
+      setMessages((prev) => {
+        const withoutDuplicate = prev.filter((m) => m.id !== incoming.id);
+        return [...withoutDuplicate, incoming].sort(
+          (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+      });
+      setAnimatedIds((ids) => new Set(ids).add(incoming.id));
+      // Peer just sent something, so they're definitionally not typing
+      // anymore. Clear the indicator now rather than waiting for the 3s
+      // auto-hide; otherwise the bubble pushes the indicator down and it
+      // looks like a second indicator flashes in.
+      if (incoming.sender_user_id !== currentUserId) {
+        clearPeerTyping();
+      }
+    },
+    [clearPeerTyping, currentUserId]
+  );
 
   // Auto-scroll to bottom on load and incoming messages. Layout timing matters
   // here because the composer is outside the scroll viewport and the spacer
@@ -76,7 +89,9 @@ export function ProducerChatClient({
     const supabase = createClient();
 
     async function startRealtime() {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!cancelled && session?.access_token) {
         supabase.realtime.setAuth(session.access_token);
       }
@@ -98,7 +113,7 @@ export function ProducerChatClient({
           },
           (payload) => {
             mergeMessage(payload.new as AdvisoryMessage);
-          },
+          }
         )
         .subscribe();
     }
@@ -175,10 +190,10 @@ export function ProducerChatClient({
       if (result?.message) {
         setMessages((prev) => {
           const withoutOptimisticOrDuplicate = prev.filter(
-            (m) => m.id !== optimisticMsg.id && m.id !== result.message.id,
+            (m) => m.id !== optimisticMsg.id && m.id !== result.message.id
           );
           return [...withoutOptimisticOrDuplicate, result.message].sort(
-            (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+            (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
           );
         });
       }
