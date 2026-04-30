@@ -94,6 +94,22 @@ export function ChatInput({
     };
   }, [onTypingStop]);
 
+  // Fire typing-stop when the tab becomes hidden (user switched tabs,
+  // minimised the window, or backgrounded the browser). Without this the
+  // peer continues to see the typing dots until presence times out.
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.hidden && isTypingRef.current) {
+        isTypingRef.current = false;
+        onTypingStop?.();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [onTypingStop]);
+
   // Display live transcript in the textarea while listening
   const displayValue = isListening && liveTranscript ? liveTranscript : value;
 

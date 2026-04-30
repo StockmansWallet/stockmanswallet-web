@@ -57,16 +57,17 @@ const attachmentSchema = z.discriminatedUnion("type", [
   fileAttachmentSchema,
 ]);
 
-const sendMessageSchema = z.object({
-  connectionId: z.string().uuid(),
-  // Content is optional when an attachment is present so 'sharing a herd'
-  // with no extra note still goes through.
-  content: z.string().max(5000),
-  attachment: attachmentSchema.nullable().optional(),
-}).refine(
-  (v) => v.content.trim().length > 0 || v.attachment != null,
-  { message: "Message must have content or an attachment" },
-);
+const sendMessageSchema = z
+  .object({
+    connectionId: z.string().uuid(),
+    // Content is optional when an attachment is present so 'sharing a herd'
+    // with no extra note still goes through.
+    content: z.string().max(5000),
+    attachment: attachmentSchema.nullable().optional(),
+  })
+  .refine((v) => v.content.trim().length > 0 || v.attachment != null, {
+    message: "Message must have content or an attachment",
+  });
 
 export async function fetchProducerMessages(connectionId: string) {
   const parsed = connectionIdSchema.safeParse({ connectionId });
@@ -123,6 +124,7 @@ export async function clearProducerMessages(connectionId: string) {
     .select("id, requester_user_id, target_user_id")
     .eq("id", connectionId)
     .eq("connection_type", "producer_peer")
+    .eq("status", "approved")
     .single();
 
   if (!connection) return { error: "Connection not found" };
@@ -148,7 +150,7 @@ export async function sendProducerMessage(
   connectionId: string,
   content: string,
   _messageType: MessageType = "general_note",
-  attachment: MessageAttachment | null = null,
+  attachment: MessageAttachment | null = null
 ) {
   void _messageType;
   const parsed = sendMessageSchema.safeParse({ connectionId, content, attachment });
@@ -232,7 +234,8 @@ export async function sendProducerMessage(
     verifiedAttachment = {
       type: "file",
       file_id: file.id as string,
-      title: (file.title as string | null) ?? (file.original_filename as string) ?? attachment.title,
+      title:
+        (file.title as string | null) ?? (file.original_filename as string) ?? attachment.title,
       mime_type: (file.mime_type as string | null) ?? attachment.mime_type,
       size_bytes: (file.size_bytes as number | null) ?? attachment.size_bytes,
       kind: (file.kind as string | null) ?? attachment.kind,
@@ -254,9 +257,7 @@ export async function sendProducerMessage(
   if (error) return { error: error.message };
 
   // Notify the other party
-  const recipientId = isRequester
-    ? connection.target_user_id
-    : connection.requester_user_id;
+  const recipientId = isRequester ? connection.target_user_id : connection.requester_user_id;
 
   const { data: profile } = await supabase
     .from("user_profiles")
@@ -278,10 +279,12 @@ export async function sendProducerMessage(
 }
 
 export async function getCh40SharedFileDownloadUrl(connectionId: string, fileId: string) {
-  const parsed = z.object({
-    connectionId: z.string().uuid(),
-    fileId: z.string().uuid(),
-  }).safeParse({ connectionId, fileId });
+  const parsed = z
+    .object({
+      connectionId: z.string().uuid(),
+      fileId: z.string().uuid(),
+    })
+    .safeParse({ connectionId, fileId });
   if (!parsed.success) return { error: "Invalid input" };
 
   const supabase = await createClient();
@@ -301,9 +304,7 @@ export async function getCh40SharedFileDownloadUrl(connectionId: string, fileId:
 
   if (!connection) return { error: "Connection not found" };
 
-  const isParty =
-    connection.requester_user_id === user.id ||
-    connection.target_user_id === user.id;
+  const isParty = connection.requester_user_id === user.id || connection.target_user_id === user.id;
   if (!isParty) return { error: "Connection not found" };
 
   const { data: messages } = await supabase
@@ -319,17 +320,23 @@ export async function getCh40SharedFileDownloadUrl(connectionId: string, fileId:
 
   const { data: file } = await supabase
     .from("brangus_files")
-    .select("storage_path, original_filename, title")
+    .select("storage_path, original_filename, title, user_id")
     .eq("id", fileId)
     .eq("is_deleted", false)
     .maybeSingle();
 
   if (!file?.storage_path) return { error: "File is no longer available" };
 
+  // Defence in depth: only mint a signed URL if the file's owner is one
+  // of the two parties on this connection. Without this, a future bug
+  // that lets an unrelated file id slip into the messages table would
+  // become an exfiltration path.
+  const ownerIsParty =
+    file.user_id === connection.requester_user_id || file.user_id === connection.target_user_id;
+  if (!ownerIsParty) return { error: "File is not attached to this conversation" };
+
   const filename =
-    (file.original_filename as string | null) ||
-    (file.title as string | null) ||
-    "shared-file";
+    (file.original_filename as string | null) || (file.title as string | null) || "shared-file";
   const { data: signed, error } = await supabase.storage
     .from("brangus-files")
     .createSignedUrl(file.storage_path as string, 60 * 15, { download: filename });
@@ -345,7 +352,9 @@ export async function getCh40SharedFileDownloadUrl(connectionId: string, fileId:
  */
 export async function listMyHerdsForShare() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { herds: [] as Array<Record<string, unknown>> };
 
   const { data } = await supabase
@@ -368,7 +377,9 @@ export async function listMyHerdsForShare() {
  */
 export async function listMarketPricesForShare() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { prices: [] as Array<Record<string, unknown>> };
 
   // Producer's default saleyard (if any) comes from their default property.
@@ -384,10 +395,19 @@ export async function listMarketPricesForShare() {
     ? [prop.default_saleyard as string, "National"]
     : ["National"];
 
-  const { data: rows } = await supabase.rpc("latest_saleyard_prices", {
+  const { data: rows } = (await supabase.rpc("latest_saleyard_prices", {
     p_saleyards: saleyards,
     p_categories: [] as string[],
-  }) as unknown as { data: Array<{ category: string; saleyard: string; price_per_kg: number; weight_range: string | null; breed: string | null; data_date: string }> | null };
+  })) as unknown as {
+    data: Array<{
+      category: string;
+      saleyard: string;
+      price_per_kg: number;
+      weight_range: string | null;
+      breed: string | null;
+      data_date: string;
+    }> | null;
+  };
 
   // price_per_kg from this RPC is in cents - divide at render time to
   // match the rest of the app. Send up to 12 most relevant rows.
@@ -425,9 +445,7 @@ export async function disconnectProducer(connectionId: string) {
   if (error) return { error: error.message };
 
   // Notify the other party
-  const recipientId = isRequester
-    ? connection.target_user_id
-    : connection.requester_user_id;
+  const recipientId = isRequester ? connection.target_user_id : connection.requester_user_id;
 
   const { data: profile } = await supabase
     .from("user_profiles")

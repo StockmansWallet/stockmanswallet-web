@@ -22,6 +22,9 @@ export function TypingIndicator({
 }: TypingIndicatorProps) {
   return (
     <div
+      role="status"
+      aria-live="polite"
+      aria-label="Other participant is typing"
       className={`animate-bubble-in flex items-end justify-start gap-2 px-1 pr-14 ${className}`}
       style={{ transformOrigin: "bottom left" }}
     >

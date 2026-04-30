@@ -42,6 +42,7 @@ export function ProducerChatClient({
   const [animatedIds, setAnimatedIds] = useState<Set<string>>(new Set());
   const [pendingAttachment, setPendingAttachment] = useState<MessageAttachment | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { peerIsTyping, notifyTyping, notifyTypingStop } = useTypingIndicator(
     `chat:${connectionId}`,
@@ -50,20 +51,39 @@ export function ProducerChatClient({
 
   const mergeMessage = useCallback((incoming: AdvisoryMessage) => {
     setMessages((prev) => {
-      const withoutDuplicate = prev.filter((m) => m.id !== incoming.id);
-      return [...withoutDuplicate, incoming].sort(
+      // Strip any optimistic temp row that matches the incoming message
+      // (same sender, same content) so the user doesn't briefly see
+      // their bubble twice when the realtime INSERT outraces our own
+      // server action's response.
+      const withoutOptimisticDup = prev.filter((m) => {
+        if (m.id === incoming.id) return false;
+        if (
+          m.id.startsWith("optimistic-") &&
+          m.sender_user_id === incoming.sender_user_id &&
+          m.content === incoming.content
+        ) {
+          return false;
+        }
+        return true;
+      });
+      return [...withoutOptimisticDup, incoming].sort(
         (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
       );
     });
-    setAnimatedIds((ids) => new Set(ids).add(incoming.id));
+    setAnimatedIds((ids) => {
+      const next = new Set(ids);
+      next.add(incoming.id);
+      return next;
+    });
     // No need to manually clear the typing indicator - the peer's send
     // path fires notifyTypingStop, which broadcasts a presence update
     // that flips peerIsTyping false here automatically.
   }, []);
 
-  // Auto-scroll to bottom on load and incoming messages. Layout timing matters
-  // here because the composer is outside the scroll viewport and the spacer
-  // must be measured before the browser restores any previous scroll offset.
+  // Auto-scroll to bottom only when the user is already pinned to the bottom
+  // (within a small threshold). If they've scrolled up to read history, leave
+  // them there - typing-indicator pulses or new messages shouldn't yank the
+  // viewport away from what they're reading.
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
     requestAnimationFrame(() => {
@@ -71,9 +91,16 @@ export function ProducerChatClient({
     });
   }, []);
 
+  const isAtBottom = useCallback(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return true;
+    const distanceFromBottom = el.scrollHeight - (el.scrollTop + el.clientHeight);
+    return distanceFromBottom < 80;
+  }, []);
+
   useLayoutEffect(() => {
-    scrollToBottom();
-  }, [messages.length, peerIsTyping, pendingAttachment, scrollToBottom]);
+    if (isAtBottom()) scrollToBottom();
+  }, [messages.length, peerIsTyping, pendingAttachment, scrollToBottom, isAtBottom]);
 
   // Live message subscription with a polling fallback for missed websocket events.
   useEffect(() => {
@@ -197,7 +224,10 @@ export function ProducerChatClient({
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <div className="relative min-h-0 flex-1">
-        <div className="absolute inset-0 overflow-y-auto pt-[5.25rem] pb-4">
+        <div
+          ref={scrollContainerRef}
+          className="absolute inset-0 overflow-y-auto pt-[5.25rem] pb-4"
+        >
           <div className="space-y-3 px-5 pt-4">
             <MessageThread
               messages={messages}
