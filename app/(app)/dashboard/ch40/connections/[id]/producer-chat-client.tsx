@@ -60,14 +60,14 @@ export function ProducerChatClient({
   // Pull the peer's avatar so the typing indicator sits on the same row
   // identity as the message bubbles below it. Peer = whichever party in
   // the avatars map is not the local user.
-  const { url: peerAvatarUrl, initials: peerAvatarInitials } = (() => {
-    if (!avatars) return { url: undefined, initials: undefined };
+  const { id: peerUserId, url: peerAvatarUrl, initials: peerAvatarInitials } = (() => {
+    if (!avatars) return { id: undefined, url: undefined, initials: undefined };
     for (const [uid, meta] of Object.entries(avatars)) {
       if (uid !== currentUserId) {
-        return { url: meta.url ?? undefined, initials: meta.initials };
+        return { id: uid, url: meta.url ?? undefined, initials: meta.initials };
       }
     }
-    return { url: undefined, initials: undefined };
+    return { id: undefined, url: undefined, initials: undefined };
   })();
 
   const mergeMessage = useCallback(
@@ -349,6 +349,7 @@ export function ProducerChatClient({
               otherBgClass="bg-ch40-dark"
               otherTailColor={OTHER_BG}
               avatars={avatars}
+              continuationSenderId={peerIsTyping ? peerUserId : undefined}
             />
             <AnimatePresence initial={false} mode="popLayout" presenceAffectsLayout={false}>
               {peerIsTyping && (
