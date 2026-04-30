@@ -13,6 +13,7 @@ interface ModalProps {
   children: ReactNode;
   size?: "sm" | "md" | "lg" | "xl";
   backdropClassName?: string;
+  panelClassName?: string;
 }
 
 const sizeClasses = {
@@ -39,6 +40,7 @@ function Modal({
   children,
   size = "md",
   backdropClassName = "bg-black/50 backdrop-blur-[2px]",
+  panelClassName = "rounded-3xl bg-white/5 p-6 shadow-2xl backdrop-blur-3xl",
 }: ModalProps) {
   const titleId = useId();
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -133,7 +135,7 @@ function Modal({
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: "spring", duration: 0.35, bounce: 0.15 }}
             onClick={(e) => e.stopPropagation()}
-            className={`relative z-10 w-full ${sizeClasses[size]} rounded-3xl bg-white/5 p-6 shadow-2xl backdrop-blur-3xl`}
+            className={`relative z-10 w-full ${sizeClasses[size]} ${panelClassName}`}
           >
             {/* Header */}
             {title && (

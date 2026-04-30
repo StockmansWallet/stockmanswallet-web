@@ -260,7 +260,7 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
         onClose={handleClose}
         size="sm"
         ariaLabel="Waitlist signup confirmed"
-        backdropClassName="bg-black/25 backdrop-blur-xl"
+        backdropClassName="bg-black/40 backdrop-blur-md"
       >
         <div className="flex flex-col items-center py-8 text-center">
           <div className="bg-success/15 flex h-14 w-14 items-center justify-center rounded-full">
@@ -290,7 +290,8 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
       onClose={handleClose}
       size="xl"
       ariaLabel="Join the waitlist"
-      backdropClassName="bg-black/25 backdrop-blur-xl"
+      backdropClassName="bg-black/40 backdrop-blur-md"
+      panelClassName="rounded-3xl shadow-2xl shadow-black/40"
     >
       <button
         onClick={handleClose}
@@ -301,7 +302,7 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
       </button>
 
       <div
-        className="-mx-6 -my-6 grid max-h-[84vh] overflow-hidden rounded-3xl border border-white/[0.10] bg-[#17130f] md:grid-cols-[0.84fr_1.16fr]"
+        className="grid max-h-[84vh] overflow-hidden rounded-3xl bg-[#17130f] ring-1 ring-white/[0.12] ring-inset md:grid-cols-[0.84fr_1.16fr]"
         style={{
           background:
             "radial-gradient(ellipse 920px 620px at 28% 16%, color-mix(in srgb, var(--color-brand) 22%, transparent), color-mix(in srgb, var(--color-brand) 8%, transparent) 42%, transparent 74%), linear-gradient(180deg, #17130f 0%, #1b1812 40%, #18130f 72%, #120f0d 100%)",
@@ -611,7 +612,7 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
                 type="button"
                 onClick={goBack}
                 disabled={step === 0 || status === "submitting"}
-                className="text-text-secondary inline-flex h-11 cursor-pointer items-center gap-2 rounded-full border border-white/[0.08] px-4 text-sm font-semibold transition-colors hover:bg-white/[0.05] hover:text-white disabled:pointer-events-none disabled:opacity-30"
+                className="text-text-secondary inline-flex h-11 cursor-pointer items-center gap-2 rounded-full border border-white/[0.08] pr-5 pl-3 text-sm font-semibold transition-colors hover:bg-white/[0.05] hover:text-white disabled:pointer-events-none disabled:opacity-30"
               >
                 <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                 Back
@@ -622,7 +623,7 @@ export function WaitlistModal({ open, onClose }: WaitlistModalProps) {
                   type="button"
                   onClick={goNext}
                   disabled={!canGoNext || status === "submitting"}
-                  className="bg-brand hover:bg-brand-light inline-flex h-11 cursor-pointer items-center gap-2 rounded-full px-5 text-sm font-semibold text-white transition-colors disabled:pointer-events-none disabled:opacity-40"
+                  className="bg-brand hover:bg-brand-light inline-flex h-11 cursor-pointer items-center gap-2 rounded-full pr-3 pl-5 text-sm font-semibold text-white transition-colors disabled:pointer-events-none disabled:opacity-40"
                 >
                   Next
                   <ChevronRight className="h-4 w-4" aria-hidden="true" />
