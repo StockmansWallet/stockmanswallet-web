@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PRICING_TIERS } from "@/lib/marketing/constants";
 import { ADVISOR_ENABLED } from "@/lib/feature-flags";
+import SectionCard from "@/components/marketing/ui/section-card";
 
 const ALL_TABS = [
   {
@@ -56,183 +57,197 @@ export default function Pricing() {
   return (
     <section id="pricing" className="relative py-16 sm:py-24 lg:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center"
-        >
-          <span className="text-brand text-sm font-medium tracking-wider uppercase">Pricing</span>
-          <h2 className="mt-3 text-3xl font-semibold text-balance text-white sm:text-4xl lg:text-5xl">
-            Simple, transparent pricing
-          </h2>
-          <p className="text-text-secondary mx-auto mt-4 max-w-xl text-base">
-            {ADVISOR_ENABLED
-              ? "Plans for producers and advisors. Every plan starts with a 7-day free trial when the app launches."
-              : "Every plan starts with a 7-day free trial when the app launches."}
-          </p>
-        </motion.div>
+        <SectionCard glowPosition="50% 16%" glowSize="1120px 700px">
+          <div className="relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center"
+            >
+              <span className="text-brand text-sm font-medium tracking-wider uppercase">
+                Pricing
+              </span>
+              <h2 className="mt-3 text-3xl font-semibold text-balance text-white sm:text-4xl lg:text-5xl">
+                Simple, transparent pricing
+              </h2>
+              <p className="text-text-secondary mx-auto mt-4 max-w-xl text-base">
+                {ADVISOR_ENABLED
+                  ? "Plans for producers and advisors. Every plan starts with a 7-day free trial when the app launches."
+                  : "Every plan starts with a 7-day free trial when the app launches."}
+              </p>
+            </motion.div>
 
-        {/* Tab Toggle - hidden when only one tab */}
-        {TABS.length > 1 && (
-          <div className="mt-10 flex justify-center">
-            <div className="inline-flex gap-2 rounded-full border border-white/[0.06] bg-white/[0.02] p-2 backdrop-blur-sm">
-              {TABS.map((tab) => {
-                const isActive = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className="focus-visible:ring-brand relative cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold transition-colors duration-300 focus-visible:ring-2 focus-visible:outline-none"
-                    style={{
-                      color: isActive ? "#fff" : tab.colour,
-                    }}
-                  >
-                    {isActive && (
-                      <motion.div
-                        layoutId="pricingTab"
-                        className="absolute inset-0 rounded-full"
-                        style={{ backgroundColor: tab.colour, border: `1px solid ${tab.colour}` }}
-                        transition={{ type: "spring", duration: 0.5, bounce: 0.15 }}
-                      />
-                    )}
-                    {!isActive && (
-                      <div
-                        className="absolute inset-0 rounded-full"
-                        style={{ border: `1px solid ${tab.colour}40` }}
-                      />
-                    )}
-                    <span className="relative z-10 flex items-center gap-2">
-                      <svg
-                        className="h-4 w-4"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={2}
+            {/* Tab Toggle - hidden when only one tab */}
+            {TABS.length > 1 && (
+              <div className="mt-10 flex justify-center">
+                <div className="inline-flex gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] p-2 backdrop-blur-sm">
+                  {TABS.map((tab) => {
+                    const isActive = activeTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className="focus-visible:ring-brand relative cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold transition-colors duration-300 focus-visible:ring-2 focus-visible:outline-none"
+                        style={{
+                          color: isActive ? "#fff" : tab.colour,
+                        }}
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" d={tab.icon} />
-                      </svg>
-                      {tab.label}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
+                        {isActive && (
+                          <motion.div
+                            layoutId="pricingTab"
+                            className="absolute inset-0 rounded-full"
+                            style={{
+                              backgroundColor: tab.colour,
+                              border: `1px solid ${tab.colour}`,
+                            }}
+                            transition={{ type: "spring", duration: 0.5, bounce: 0.15 }}
+                          />
+                        )}
+                        {!isActive && (
+                          <div
+                            className="absolute inset-0 rounded-full"
+                            style={{ border: `1px solid ${tab.colour}40` }}
+                          />
+                        )}
+                        <span className="relative z-10 flex items-center gap-2">
+                          <svg
+                            className="h-4 w-4"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d={tab.icon} />
+                          </svg>
+                          {tab.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
-        {/* Pricing Cards */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
-            className={`mt-12 grid gap-4 sm:gap-6 ${
-              activeTab === "producer"
-                ? "mx-auto max-w-5xl sm:grid-cols-2 lg:grid-cols-3"
-                : "mx-auto max-w-3xl sm:grid-cols-2"
-            }`}
-          >
-            {tiers.map((tier) => (
-              <div
-                key={tier.id}
-                className={`group relative flex flex-col rounded-2xl p-4 backdrop-blur-xl transition-colors duration-300 sm:p-6 ${
-                  tier.highlighted
-                    ? `border ${accent.border} ${accent.cardBg} ${accent.glow}`
-                    : "border border-white/[0.06] bg-white/[0.04] hover:bg-white/[0.06]"
+            {/* Pricing Cards */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+                className={`mt-12 grid gap-4 sm:gap-6 ${
+                  activeTab === "producer"
+                    ? "mx-auto max-w-5xl sm:grid-cols-2 lg:grid-cols-3"
+                    : "mx-auto max-w-3xl sm:grid-cols-2"
                 }`}
               >
-                {tier.badge && (
+                {tiers.map((tier) => (
                   <div
-                    className={`absolute -top-3 left-1/2 -translate-x-1/2 rounded-full ${accent.bg} px-3 py-1 text-xs font-semibold text-white`}
+                    key={tier.id}
+                    className={`group relative flex flex-col rounded-2xl p-4 transition-colors duration-300 sm:p-6 ${
+                      tier.highlighted
+                        ? `border ${accent.border} ${accent.cardBg} ${accent.glow}`
+                        : "border border-white/[0.08] bg-white/[0.05] hover:bg-white/[0.07]"
+                    }`}
                   >
-                    {tier.badge}
-                  </div>
-                )}
-
-                <div className="mb-6">
-                  <h3 className={`text-lg font-semibold ${accent.text}`}>{tier.name}</h3>
-                  <p className="mt-1 text-sm font-semibold text-white">{tier.subtitle}</p>
-                  <div className="mt-4">
-                    {tier.price !== null ? (
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-2xl font-bold text-white sm:text-3xl">
-                          A${tier.price}
-                        </span>
-                        <span className="text-text-muted text-sm">/month + GST</span>
-                      </div>
-                    ) : tier.priceLabel ? (
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-2xl font-bold text-white sm:text-3xl">
-                          {tier.priceLabel}
-                        </span>
-                      </div>
-                    ) : (
-                      <p className="text-brand-light text-lg font-semibold">Coming Soon</p>
-                    )}
-                  </div>
-                  <p className="text-text-muted mt-2 text-xs">{tier.description}</p>
-                </div>
-
-                <ul className="flex-1 space-y-2.5">
-                  {tier.features.map((f) => (
-                    <li key={f.name} className="flex items-start gap-2.5">
-                      {f.included ? (
-                        <svg
-                          aria-hidden="true"
-                          className={`mt-0.5 h-4 w-4 shrink-0 ${accent.check}`}
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth={2.5}
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                      ) : (
-                        <svg
-                          aria-hidden="true"
-                          className="text-text-quaternary mt-0.5 h-4 w-4 shrink-0"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M18 12H6" />
-                        </svg>
-                      )}
-                      <span
-                        className={`text-xs ${f.included ? "text-text-secondary" : "text-text-muted"}`}
+                    {tier.badge && (
+                      <div
+                        className={`absolute -top-3 left-1/2 -translate-x-1/2 rounded-full ${accent.bg} px-3 py-1 text-xs font-semibold text-white`}
                       >
-                        {f.name}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </motion.div>
-        </AnimatePresence>
+                        {tier.badge}
+                      </div>
+                    )}
 
-        {/* Notes */}
-        <div className="mx-auto mt-12 max-w-2xl space-y-4">
-          <div className="rounded-2xl bg-white/[0.03] p-5 backdrop-blur-lg">
-            <h4 className="text-sm font-semibold text-white">7-Day Free Trial</h4>
-            <p className="text-text-muted mt-1 text-xs leading-relaxed">
-              Every paid plan starts with a 7-day free trial when the app launches. Your subscription
-              begins automatically at the end of the trial unless cancelled beforehand.
-            </p>
+                    <div className="mb-6">
+                      <h3 className={`text-lg font-semibold ${accent.text}`}>{tier.name}</h3>
+                      <p className="mt-1 text-sm font-semibold text-white">{tier.subtitle}</p>
+                      <div className="mt-4">
+                        {tier.price !== null ? (
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-2xl font-bold text-white sm:text-3xl">
+                              ${tier.price}
+                            </span>
+                            <span className="text-text-muted text-sm">/month + GST</span>
+                          </div>
+                        ) : tier.priceLabel ? (
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-2xl font-bold text-white sm:text-3xl">
+                              {tier.priceLabel}
+                            </span>
+                          </div>
+                        ) : (
+                          <p className="text-brand-light text-lg font-semibold">Coming Soon</p>
+                        )}
+                      </div>
+                      <p className="text-text-muted mt-2 text-xs">{tier.description}</p>
+                    </div>
+
+                    <ul className="flex-1 space-y-2.5">
+                      {tier.features.map((f) => (
+                        <li key={f.name} className="flex items-start gap-2.5">
+                          {f.included ? (
+                            <svg
+                              aria-hidden="true"
+                              className={`mt-0.5 h-4 w-4 shrink-0 ${accent.check}`}
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth={2.5}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                          ) : (
+                            <svg
+                              aria-hidden="true"
+                              className="text-text-quaternary mt-0.5 h-4 w-4 shrink-0"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M18 12H6" />
+                            </svg>
+                          )}
+                          <span
+                            className={`text-xs ${f.included ? "text-text-secondary" : "text-text-muted"}`}
+                          >
+                            {f.name}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Notes */}
+            <div className="mx-auto mt-12 grid max-w-4xl gap-4 sm:grid-cols-2">
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.04] p-5">
+                <h4 className="text-sm font-semibold text-white">7-Day Free Trial</h4>
+                <p className="text-text-muted mt-1 text-xs leading-relaxed">
+                  Every paid plan starts with a 7-day free trial when the app launches. Your
+                  subscription begins automatically at the end of the trial unless cancelled
+                  beforehand.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.04] p-5">
+                <h4 className="text-brand text-sm font-semibold">Usage Limits</h4>
+                <p className="text-text-muted mt-1 text-xs leading-relaxed">
+                  Plan-based usage limits apply to Brangus and Freight IQ. Additional usage can be
+                  purchased if needed.
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="rounded-2xl bg-white/[0.03] p-5 backdrop-blur-lg">
-            <h4 className="text-brand text-sm font-semibold">Usage Limits</h4>
-            <p className="text-text-muted mt-1 text-xs leading-relaxed">
-              Plan-based usage limits apply to Brangus and Freight IQ. Additional usage can be
-              purchased if needed.
-            </p>
-          </div>
-        </div>
+        </SectionCard>
       </div>
     </section>
   );

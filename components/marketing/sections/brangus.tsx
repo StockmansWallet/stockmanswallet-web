@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion, useInView, AnimatePresence } from "framer-motion";
+import SectionCard from "@/components/marketing/ui/section-card";
 
 interface ChatExample {
   userMessage: string;
@@ -85,31 +86,24 @@ function ContextCard({ card, index }: { card: ChatExample["contextCards"][0]; in
         delay: index * 0.1,
         opacity: { duration: 0.25, delay: index * 0.1 },
       }}
-      className="flex h-[66px] min-w-[100px] flex-col justify-center gap-0.5 rounded-xl bg-white/[0.06] px-3 backdrop-blur-lg sm:min-w-[120px] sm:px-3.5"
+      className="grid h-[78px] w-[148px] grid-rows-[18px_24px_16px] content-center gap-0.5 rounded-xl bg-white/[0.06] px-3 py-2 backdrop-blur-lg sm:w-[162px] sm:px-3.5"
     >
       <div className="flex items-center gap-0.5">
-        <span className="text-text-muted flex-1 truncate text-[10px] font-semibold tracking-wide uppercase">
+        <span className="text-text-muted flex-1 truncate text-[9px] leading-[18px] font-semibold tracking-wide uppercase sm:text-[10px]">
           {card.label}
         </span>
-        <svg
-          className="text-text-muted h-2.5 w-2.5 shrink-0"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
       </div>
-      <span className={`text-[17px] leading-tight font-bold ${card.color ?? "text-white"}`}>
+      <span
+        className={`truncate text-[17px] leading-6 font-bold tabular-nums ${card.color ?? "text-white"}`}
+      >
         {card.value}
       </span>
-      <span className="text-text-secondary text-[10px]">{card.detail}</span>
+      <span className="text-text-secondary truncate text-[10px] leading-4">{card.detail}</span>
     </motion.div>
   );
 }
 
-const HOLD_DURATION = 18000;
+const HOLD_DURATION = 26000;
 
 export default function Brangus() {
   const ref = useRef<HTMLDivElement>(null);
@@ -170,176 +164,188 @@ export default function Brangus() {
   return (
     <section id="brangus" className="relative overflow-x-clip py-16 sm:py-24 lg:py-32">
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="relative grid items-center gap-10 sm:gap-16 lg:grid-cols-[1.2fr_2fr] lg:gap-12">
-          {/* Brangus - anchored to grid, bottom-aligned with left column */}
-          <div className="pointer-events-none absolute right-[-180px] bottom-[-50px] z-10 hidden h-[820px] w-[420px] lg:block">
-            <Image
-              src="/images/brangus-post-dirt2.webp"
-              alt="Brangus leaning on a post beside the chat panel"
-              fill
-              sizes="420px"
-              className="object-contain object-right-bottom"
-            />
-          </div>
-
-          {/* Text */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <span className="text-sm font-medium tracking-wider text-[#4c7fff] uppercase">
-              Portfolio Intelligence
-            </span>
-            <h2 className="mt-3 text-3xl font-semibold text-balance sm:text-4xl lg:text-5xl">
-              <span className="text-[#4c7fff]">Meet Brangus.</span>
-              <br />
-              <span className="text-white">Your intelligent livestock advisor.</span>
-              <br />
-              <span
-                className="text-brand inline-block whitespace-nowrap"
-                style={{
-                  fontFamily: "var(--font-caveat), Caveat, cursive",
-                  transform: "rotate(-3.5deg) translateX(4.5em)",
-                  fontSize: "0.85em",
-                  marginTop: "0.15em",
-                  fontWeight: 700,
-                }}
-              >
-                and new best mate!
-              </span>
-            </h2>
-            <p className="text-text-secondary mt-6 max-w-md text-base leading-relaxed">
-              Brangus is the engine room of Stockman&apos;s Wallet. He is always on, with direct access
-              to your data, herds, portfolio, tools, and workflows. He analyses the numbers,
-              connects the moving parts, and helps drive better decisions across your operation.
-            </p>
-            <ul className="mt-8 space-y-4">
-              {[
-                "Live herd and portfolio data",
-                "Years of historical market data",
-                "Always on across your operation",
-                "Connected to every tool and workflow",
-                "Manages your Yard Book via conversation",
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#4c7fff]/15 backdrop-blur-sm">
-                    <svg
-                      aria-hidden="true"
-                      className="h-3 w-3 text-[#4c7fff]"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={3}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <span className="text-text-secondary text-sm">{item}</span>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-
-          {/* Chat Demo */}
-          <motion.div
-            ref={ref}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="relative pt-16"
-          >
-            <div className="mr-0 lg:mr-[220px]">
-              <motion.div
-                animate={{ opacity: phase === "fading" ? 0 : 1 }}
-                transition={{ duration: 0.4 }}
-              >
-                {/* User row */}
-                <div className="flex items-end justify-end gap-2 pb-6 sm:pb-4">
-                  <motion.div
-                    key={`user-${currentIndex}`}
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: [0, 1.05, 1] }}
-                    transition={{ duration: 0.45, delay: 0.15, ease: "easeOut" }}
-                    style={{ transformOrigin: "bottom right" }}
-                    className="relative max-w-[85%] rounded-2xl bg-[#3d4550] px-4 py-2.5 sm:max-w-[75%]"
-                  >
-                    <p className="text-xs leading-relaxed text-white/90 sm:text-sm">
-                      {current.userMessage}
-                    </p>
-                    <BubbleTail side="right" color="#3d4550" />
-                  </motion.div>
-                  <motion.div
-                    key={`user-av-${currentIndex}`}
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.2 }}
-                    className="mb-[-20px] shrink-0 sm:mb-[-28px]"
-                  >
-                    <Image
-                      src="/images/demo-user-profile.webp"
-                      alt="User"
-                      width={40}
-                      height={40}
-                      className="h-8 w-8 rounded-full object-cover sm:h-10 sm:w-10"
-                    />
-                  </motion.div>
-                </div>
-
-                {/* Brangus row */}
-                <div
-                  className="flex items-end gap-2 pb-6"
-                  style={{ visibility: showResponse ? "visible" : "hidden" }}
-                >
-                  <motion.div
-                    animate={{ opacity: showResponse ? 1 : 0, scale: showResponse ? 1 : 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="mb-[-20px] shrink-0 sm:mb-[-28px]"
-                  >
-                    <Image
-                      src="/images/brangus-chat-profile.webp"
-                      alt="Brangus"
-                      width={40}
-                      height={40}
-                      className="h-8 w-8 rounded-full object-cover sm:h-10 sm:w-10"
-                    />
-                  </motion.div>
-                  <motion.div
-                    key={`ai-${currentIndex}`}
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={
-                      showResponse ? { opacity: 1, scale: [0, 1.05, 1] } : { opacity: 0, scale: 0 }
-                    }
-                    transition={{ duration: 0.45, delay: 0.1, ease: "easeOut" }}
-                    style={{ transformOrigin: "bottom left" }}
-                    className="relative max-w-[85%] rounded-2xl bg-[#2b4fa8] px-4 py-2.5 sm:max-w-[75%]"
-                  >
-                    <p className="text-xs leading-relaxed whitespace-pre-line text-white sm:text-sm">
-                      {current.assistantMessage}
-                    </p>
-                    <BubbleTail side="left" color="#2b4fa8" />
-                  </motion.div>
-                </div>
-
-                {/* Context cards */}
-                <div className="mt-8 flex min-h-[76px] flex-wrap items-center gap-2 sm:flex-nowrap sm:gap-2.5">
-                  <AnimatePresence>
-                    {showCards &&
-                      current.contextCards.length > 0 &&
-                      current.contextCards.map((card, i) => (
-                        <ContextCard key={`${currentIndex}-${card.label}`} card={card} index={i} />
-                      ))}
-                  </AnimatePresence>
-                </div>
-              </motion.div>
+        <SectionCard glowPosition="18% 16%" glowSize="1120px 700px">
+          <div className="relative z-10 grid items-center gap-10 sm:gap-16 lg:grid-cols-[minmax(400px,0.82fr)_minmax(0,1.78fr)] lg:gap-8 xl:grid-cols-[minmax(430px,0.9fr)_minmax(0,1.85fr)] xl:gap-10">
+            {/* Brangus - anchored to grid, bottom-aligned with left column */}
+            <div className="pointer-events-none absolute right-[-95px] bottom-[-58px] z-0 hidden h-[800px] w-[430px] lg:block">
+              <Image
+                src="/images/brangus-post-dirt2.webp"
+                alt="Brangus leaning on a post beside the chat panel"
+                fill
+                sizes="430px"
+                className="object-contain object-right-bottom"
+              />
             </div>
 
-            {/* Glow */}
-            <div className="absolute -inset-6 -z-10 rounded-3xl bg-[#4c7fff]/[0.04] blur-3xl" />
-          </motion.div>
-        </div>
+            {/* Text */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="relative z-10"
+            >
+              <span className="text-sm font-medium tracking-wider text-[#4c7fff] uppercase">
+                Portfolio Intelligence
+              </span>
+              <h2 className="mt-3 max-w-[460px] text-3xl leading-[1.08] font-semibold sm:text-4xl lg:text-[44px] xl:text-5xl">
+                <span className="text-[#4c7fff]">Meet Brangus.</span>
+                <br />
+                <span className="text-white">Your intelligent</span>
+                <br />
+                <span className="inline-block whitespace-nowrap text-white">livestock advisor.</span>
+                <br />
+                <span
+                  className="text-brand inline-block whitespace-nowrap"
+                  style={{
+                    fontFamily: "var(--font-caveat), Caveat, cursive",
+                    transform: "rotate(-3.5deg) translateX(3.2em)",
+                    fontSize: "0.85em",
+                    marginTop: "0.15em",
+                    fontWeight: 700,
+                  }}
+                >
+                  and new best mate!
+                </span>
+              </h2>
+              <p className="text-text-secondary mt-6 max-w-[360px] text-base leading-relaxed sm:max-w-[380px]">
+                Brangus is the engine room of Stockman&apos;s Wallet. He is always on, with direct
+                access to your data, herds, portfolio, tools, and workflows. He analyses the
+                numbers, connects the moving parts, and helps drive better decisions across your
+                operation.
+              </p>
+              <ul className="mt-8 space-y-4">
+                {[
+                  "Live herd and portfolio data",
+                  "Years of historical market data",
+                  "Always on across your operation",
+                  "Connected to every tool and workflow",
+                  "Manages your Yard Book via conversation",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#4c7fff]/15 backdrop-blur-sm">
+                      <svg
+                        aria-hidden="true"
+                        className="h-3 w-3 text-[#4c7fff]"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={3}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="text-text-secondary text-sm">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            {/* Chat Demo */}
+            <motion.div
+              ref={ref}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="relative z-20 min-w-0 pt-16"
+            >
+              <div className="mr-0 lg:mr-[220px] lg:-translate-x-10 xl:-translate-x-14">
+                <motion.div
+                  animate={{ opacity: phase === "fading" ? 0 : 1 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  {/* User row */}
+                  <div className="flex items-end justify-end gap-2 pb-6 sm:pb-4">
+                    <motion.div
+                      key={`user-${currentIndex}`}
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: [0, 1.05, 1] }}
+                      transition={{ duration: 0.45, delay: 0.15, ease: "easeOut" }}
+                      style={{ transformOrigin: "bottom right" }}
+                      className="relative max-w-[85%] rounded-2xl bg-[#3d4550] px-4 py-2.5 sm:max-w-[75%]"
+                    >
+                      <p className="text-xs leading-relaxed text-white/90 sm:text-sm">
+                        {current.userMessage}
+                      </p>
+                      <BubbleTail side="right" color="#3d4550" />
+                    </motion.div>
+                    <motion.div
+                      key={`user-av-${currentIndex}`}
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.2 }}
+                      className="mb-[-20px] shrink-0 sm:mb-[-28px]"
+                    >
+                      <Image
+                        src="/images/demo-user-profile.webp"
+                        alt="User"
+                        width={40}
+                        height={40}
+                        className="h-8 w-8 rounded-full object-cover sm:h-10 sm:w-10"
+                      />
+                    </motion.div>
+                  </div>
+
+                  {/* Brangus row */}
+                  <div
+                    className="flex items-end gap-2 pb-6"
+                    style={{ visibility: showResponse ? "visible" : "hidden" }}
+                  >
+                    <motion.div
+                      animate={{ opacity: showResponse ? 1 : 0, scale: showResponse ? 1 : 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="mb-[-20px] shrink-0 sm:mb-[-28px]"
+                    >
+                      <Image
+                        src="/images/brangus-chat-profile.webp"
+                        alt="Brangus"
+                        width={40}
+                        height={40}
+                        className="h-8 w-8 rounded-full object-cover sm:h-10 sm:w-10"
+                      />
+                    </motion.div>
+                    <motion.div
+                      key={`ai-${currentIndex}`}
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={
+                        showResponse
+                          ? { opacity: 1, scale: [0, 1.05, 1] }
+                          : { opacity: 0, scale: 0 }
+                      }
+                      transition={{ duration: 0.45, delay: 0.1, ease: "easeOut" }}
+                      style={{ transformOrigin: "bottom left" }}
+                      className="relative max-w-[85%] rounded-2xl bg-[#2b4fa8] px-4 py-2.5 sm:max-w-[75%]"
+                    >
+                      <p className="text-xs leading-relaxed whitespace-pre-line text-white sm:text-sm">
+                        {current.assistantMessage}
+                      </p>
+                      <BubbleTail side="left" color="#2b4fa8" />
+                    </motion.div>
+                  </div>
+
+                  {/* Context cards */}
+                  <div className="mt-8 flex min-h-[76px] flex-wrap items-center gap-2 sm:flex-nowrap sm:gap-2.5">
+                    <AnimatePresence>
+                      {showCards &&
+                        current.contextCards.length > 0 &&
+                        current.contextCards.map((card, i) => (
+                          <ContextCard
+                            key={`${currentIndex}-${card.label}`}
+                            card={card}
+                            index={i}
+                          />
+                        ))}
+                    </AnimatePresence>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Glow */}
+              <div className="absolute -inset-6 -z-10 rounded-3xl bg-[#4c7fff]/[0.04] blur-3xl" />
+            </motion.div>
+          </div>
+        </SectionCard>
       </div>
     </section>
   );
