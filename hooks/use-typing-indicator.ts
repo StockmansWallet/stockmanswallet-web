@@ -22,9 +22,58 @@ export function useTypingIndicator(channelName: string, userId: string) {
   const [peerIsTyping, setPeerIsTyping] = useState(false);
   const channelRef = useRef<ReturnType<ReturnType<typeof createClient>["channel"]> | null>(null);
   const channelSubscribedRef = useRef(false);
-  // Tracks the last typing state we sent so notifyTyping/notifyTypingStop
-  // can no-op when called redundantly (e.g. fired on every keystroke).
+  const presenceWriteInFlightRef = useRef(false);
+  const desiredPresenceVersionRef = useRef(0);
+  const flushedPresenceVersionRef = useRef(0);
+  const typingSessionRef = useRef(0);
+  const lastTypingRefreshAtRef = useRef(0);
+  const desiredPresenceRef = useRef({ typing: false, typingSessionId: 0, updatedAt: 0 });
+  // Tracks the local composer state. The presence payload also carries a
+  // monotonically increasing typingSessionId so a new typing run is still
+  // visible to peers even if a previous typing=false write was dropped by
+  // the socket during a send/navigation race.
   const localTypingRef = useRef(false);
+
+  const flushPresence = useCallback(async () => {
+    if (presenceWriteInFlightRef.current) return;
+    const channel = channelRef.current;
+    if (!channelSubscribedRef.current || !channel) return;
+
+    presenceWriteInFlightRef.current = true;
+    try {
+      while (
+        channelSubscribedRef.current &&
+        channelRef.current === channel &&
+        flushedPresenceVersionRef.current < desiredPresenceVersionRef.current
+      ) {
+        const version = desiredPresenceVersionRef.current;
+        const payload = desiredPresenceRef.current;
+        await channel.track(payload).catch(() => "error" as const);
+        flushedPresenceVersionRef.current = version;
+      }
+    } finally {
+      presenceWriteInFlightRef.current = false;
+    }
+  }, []);
+
+  const queuePresence = useCallback(
+    (typing: boolean, refreshExistingSession = false) => {
+      const now = Date.now();
+      if (typing && (!localTypingRef.current || refreshExistingSession)) {
+        if (!localTypingRef.current) typingSessionRef.current += 1;
+        lastTypingRefreshAtRef.current = now;
+      }
+
+      desiredPresenceRef.current = {
+        typing,
+        typingSessionId: typingSessionRef.current,
+        updatedAt: now,
+      };
+      desiredPresenceVersionRef.current += 1;
+      void flushPresence();
+    },
+    [flushPresence]
+  );
 
   useEffect(() => {
     const supabase = createClient();
@@ -61,11 +110,6 @@ export function useTypingIndicator(channelName: string, userId: string) {
       setPeerIsTyping(someoneTyping);
     };
 
-    const trackCurrentState = () => {
-      if (!channelSubscribedRef.current) return;
-      void channel.track({ typing: localTypingRef.current });
-    };
-
     channel
       .on("presence", { event: "sync" }, recompute)
       .on("presence", { event: "join" }, recompute)
@@ -83,7 +127,7 @@ export function useTypingIndicator(channelName: string, userId: string) {
         // would stay true so subsequent notifyTyping calls return early,
         // and the peer never sees us typing for that whole session.
         // Tracking the current ref value here recovers from that race.
-        trackCurrentState();
+        queuePresence(localTypingRef.current, localTypingRef.current);
       });
 
     channelRef.current = channel;
@@ -96,17 +140,22 @@ export function useTypingIndicator(channelName: string, userId: string) {
       supabase.removeChannel(channel);
       channelRef.current = null;
       localTypingRef.current = false;
+      presenceWriteInFlightRef.current = false;
     };
-  }, [channelName, userId]);
+  }, [channelName, queuePresence, userId]);
 
   /** Tell peers we're typing. Idempotent - safe to call on every keystroke. */
   const notifyTyping = useCallback(() => {
-    if (localTypingRef.current) return;
-    localTypingRef.current = true;
-    if (channelSubscribedRef.current) {
-      void channelRef.current?.track({ typing: true });
+    if (localTypingRef.current) {
+      const now = Date.now();
+      if (now - lastTypingRefreshAtRef.current >= 2_000) {
+        queuePresence(true, true);
+      }
+      return;
     }
-  }, []);
+    localTypingRef.current = true;
+    queuePresence(true);
+  }, [queuePresence]);
 
   /**
    * Tell peers we're no longer typing. Call when the input clears, when
@@ -115,10 +164,8 @@ export function useTypingIndicator(channelName: string, userId: string) {
   const notifyTypingStop = useCallback(() => {
     if (!localTypingRef.current) return;
     localTypingRef.current = false;
-    if (channelSubscribedRef.current) {
-      void channelRef.current?.track({ typing: false });
-    }
-  }, []);
+    queuePresence(false);
+  }, [queuePresence]);
 
   /**
    * Force-clear the local peer-typing flag. Call when a peer message
