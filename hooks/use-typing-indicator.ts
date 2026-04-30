@@ -50,7 +50,7 @@ export function useTypingIndicator(channelName: string, userId: string) {
           break;
         }
       }
-      if (process.env.NODE_ENV !== "production") {
+      if (true) {
         console.log("[typing] recompute", { state, someoneTyping });
       }
       setPeerIsTyping(someoneTyping);
@@ -61,7 +61,7 @@ export function useTypingIndicator(channelName: string, userId: string) {
       .on("presence", { event: "join" }, recompute)
       .on("presence", { event: "leave" }, recompute)
       .subscribe(async (status) => {
-        if (process.env.NODE_ENV !== "production") {
+        if (true) {
           console.log(`[typing] subscribe status=${status} channel=${channelName}`);
         }
         if (status !== "SUBSCRIBED") return;
@@ -73,7 +73,7 @@ export function useTypingIndicator(channelName: string, userId: string) {
         // and the peer never sees us typing for that whole session.
         // Tracking the current ref value here recovers from that race.
         const result = await channel.track({ typing: localTypingRef.current });
-        if (process.env.NODE_ENV !== "production") {
+        if (true) {
           console.log(`[typing] subscribe seed track result=${result}`, {
             seed: localTypingRef.current,
           });
@@ -95,13 +95,13 @@ export function useTypingIndicator(channelName: string, userId: string) {
   const notifyTyping = useCallback(() => {
     if (localTypingRef.current) return;
     localTypingRef.current = true;
-    if (process.env.NODE_ENV !== "production") {
+    if (true) {
       console.log("[typing] notifyTyping fired -> track({typing:true})", {
         hasChannel: !!channelRef.current,
       });
     }
     channelRef.current?.track({ typing: true }).then((result) => {
-      if (process.env.NODE_ENV !== "production") {
+      if (true) {
         console.log("[typing] track(true) result=", result);
       }
     });
@@ -114,11 +114,11 @@ export function useTypingIndicator(channelName: string, userId: string) {
   const notifyTypingStop = useCallback(() => {
     if (!localTypingRef.current) return;
     localTypingRef.current = false;
-    if (process.env.NODE_ENV !== "production") {
+    if (true) {
       console.log("[typing] notifyTypingStop fired -> track({typing:false})");
     }
     channelRef.current?.track({ typing: false }).then((result) => {
-      if (process.env.NODE_ENV !== "production") {
+      if (true) {
         console.log("[typing] track(false) result=", result);
       }
     });
