@@ -20,9 +20,21 @@ export function MarkConnectionNotificationsRead({ connectionId }: MarkConnection
     let cancelled = false;
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
-    async function init() {
-      // Clear whatever was unread when the user arrived on the page.
+    const canMarkRead = () => document.visibilityState === "visible" && document.hasFocus();
+
+    const markReadIfVisible = async () => {
+      if (cancelled || !canMarkRead()) return;
       await markConnectionNotificationsAsRead(connectionId);
+    };
+
+    const handleVisibilityOrFocus = () => {
+      void markReadIfVisible();
+    };
+
+    async function init() {
+      // Clear unread notifications only when this chat is genuinely in front
+      // of the user. A background browser tab must not consume iOS badges.
+      await markReadIfVisible();
       if (cancelled) return;
 
       const { data: { user } } = await supabase.auth.getUser();
@@ -49,17 +61,21 @@ export function MarkConnectionNotificationsRead({ connectionId }: MarkConnection
           (payload) => {
             const row = payload.new as { related_connection_id: string | null };
             if (row.related_connection_id === connectionId) {
-              void markConnectionNotificationsAsRead(connectionId);
+              void markReadIfVisible();
             }
           },
         )
         .subscribe();
     }
 
+    document.addEventListener("visibilitychange", handleVisibilityOrFocus);
+    window.addEventListener("focus", handleVisibilityOrFocus);
     void init();
 
     return () => {
       cancelled = true;
+      document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
+      window.removeEventListener("focus", handleVisibilityOrFocus);
       if (channel) supabase.removeChannel(channel);
     };
   }, [connectionId]);
