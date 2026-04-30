@@ -10,7 +10,10 @@ export default function PageBackground({ variant = "photo" }: { variant?: PageBa
 
   if (isApp) {
     return (
-      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-[#17130f]">
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-[#17130f]"
+      >
         <div className="absolute inset-0 bg-[linear-gradient(180deg,#17130f_0%,#1b1812_40%,#18130f_72%,#120f0d_100%)]" />
         <div
           className="absolute inset-0"
@@ -42,7 +45,7 @@ export default function PageBackground({ variant = "photo" }: { variant?: PageBa
         style={{
           background: isApp
             ? "linear-gradient(to bottom, rgba(17,15,13,0.68) 0%, rgba(17,15,13,0.76) 34%, rgba(17,15,13,0.86) 68%, rgba(17,15,13,0.94) 100%)"
-            : "linear-gradient(to bottom, rgba(15,15,15,0.42) 0%, rgba(15,15,15,0.56) 24%, rgba(15,15,15,0.70) 52%, rgba(15,15,15,0.86) 80%, rgba(15,15,15,0.96) 100%)",
+            : "linear-gradient(to bottom, rgba(15,15,15,0.18) 0%, rgba(15,15,15,0.28) 28%, rgba(15,15,15,0.50) 58%, rgba(15,15,15,0.68) 82%, rgba(15,15,15,0.78) 100%)",
         }}
       />
       {isApp && (

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { ADVISOR_ENABLED } from "@/lib/feature-flags";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
+import SectionCard from "@/components/marketing/ui/section-card";
 
 interface FeatureTab {
   id: string;
@@ -252,240 +253,208 @@ function FeatureVideo({ src, isActive }: { src: string; isActive: boolean }) {
 export default function Features() {
   const [active, setActive] = useState(0);
   const feature = FEATURE_TABS[active];
-
-  function goPrev() {
-    setActive((prev) => (prev - 1 + FEATURE_TABS.length) % FEATURE_TABS.length);
-  }
-
-  function goNext() {
-    setActive((prev) => (prev + 1) % FEATURE_TABS.length);
-  }
+  const proofPoints = feature.bullets.slice(0, 3);
 
   return (
-    <section id="features" className="relative py-16 sm:py-24 lg:py-32">
+    <section
+      id="features"
+      className="relative min-h-[calc(100svh-4rem)] overflow-x-clip py-16 sm:py-24 lg:py-32"
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center"
-        >
-          <span className="text-brand text-sm font-medium tracking-wider uppercase">Features</span>
-          <h2 className="mt-3 text-3xl font-semibold text-balance text-white sm:text-4xl lg:text-5xl">
-            Everything you need to manage <br className="hidden sm:block" />
-            <span className="text-brand">livestock as financial assets</span>
-          </h2>
-        </motion.div>
+        <SectionCard glowPosition="58% 18%" glowSize="1200px 720px">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="relative z-10 mx-auto max-w-4xl text-center"
+          >
+            <span className="text-brand text-sm font-medium tracking-wider uppercase">
+              Features
+            </span>
+            <h2 className="mt-3 text-3xl leading-tight font-semibold text-balance text-white sm:text-4xl lg:text-5xl">
+              Everything you need to manage
+              <br className="hidden sm:block" />
+              <span className="text-brand">livestock as financial assets</span>
+            </h2>
+          </motion.div>
 
-        {/* Tab Navigation */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="mt-12 flex justify-center"
-        >
-          <div className="scrollbar-none inline-flex max-w-full flex-nowrap justify-start gap-1 overflow-x-auto rounded-full border border-white/[0.08] bg-white/[0.03] p-1.5 backdrop-blur-sm sm:max-w-3xl sm:flex-wrap sm:justify-center sm:overflow-visible">
+          <div className="scrollbar-none relative z-10 mt-10 flex gap-2 overflow-x-auto pb-1 lg:hidden">
             {FEATURE_TABS.map((tab, i) => (
               <button
                 key={tab.id}
                 onClick={() => setActive(i)}
                 aria-pressed={active === i}
-                className={`focus-visible:ring-brand relative flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition-colors duration-300 focus-visible:ring-2 focus-visible:outline-none ${
-                  active === i ? "" : "text-white/50 hover:text-white/75"
+                className={`flex shrink-0 cursor-pointer items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none ${
+                  active === i
+                    ? "border-white/15 bg-white/10 text-white"
+                    : "border-white/[0.08] bg-white/[0.04] text-white/60"
                 }`}
-                style={active === i ? { color: tab.color } : undefined}
+                style={active === i ? { color: tab.colorLight } : undefined}
               >
-                {active === i && (
-                  <motion.div
-                    layoutId="featureTab"
-                    className="absolute inset-0 rounded-full"
-                    style={{ background: `${tab.color}15`, border: `1px solid ${tab.color}30` }}
-                    transition={{ type: "spring", duration: 0.5, bounce: 0.15 }}
-                  />
-                )}
-                <span className="relative z-10">{tab.icon}</span>
-                <span className="relative z-10 hidden sm:inline">{tab.name}</span>
+                {tab.icon}
+                <span>{tab.name}</span>
               </button>
             ))}
           </div>
-        </motion.div>
 
-        {/* Feature Content */}
-        <div className="relative mt-16">
-          {/* Prev / Next Arrows */}
-          <button
-            onClick={goPrev}
-            aria-label="Previous feature"
-            className="absolute top-1/2 -left-2 z-20 hidden -translate-y-1/2 cursor-pointer items-center justify-center rounded-full p-4 backdrop-blur-sm transition-colors focus-visible:ring-2 focus-visible:outline-none lg:-left-24 lg:flex"
-            style={{
-              color: feature.colorLight,
-              backgroundColor: `color-mix(in srgb, ${feature.color} 15%, transparent)`,
-            }}
-          >
-            <svg
-              className="h-6 w-6"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2.5}
+          <div className="relative z-10 mt-14 grid items-start gap-10 lg:grid-cols-[240px_minmax(0,1fr)_340px] lg:gap-12 xl:grid-cols-[260px_minmax(0,1fr)_380px]">
+            <motion.nav
+              initial={{ opacity: 0, x: -18 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              aria-label="Feature selector"
+              className="hidden lg:block"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-            </svg>
-          </button>
-          <button
-            onClick={goNext}
-            aria-label="Next feature"
-            className="absolute top-1/2 -right-2 z-20 hidden -translate-y-1/2 cursor-pointer items-center justify-center rounded-full p-4 backdrop-blur-sm transition-colors focus-visible:ring-2 focus-visible:outline-none lg:-right-24 lg:flex"
-            style={{
-              color: feature.colorLight,
-              backgroundColor: `color-mix(in srgb, ${feature.color} 15%, transparent)`,
-            }}
-          >
-            <svg
-              className="h-6 w-6"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2.5}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-            </svg>
-          </button>
-
-          <div className="grid items-center gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-20">
-            {/* Text */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={feature.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                transition={{ duration: 0.4 }}
-              >
-                <span
-                  className="text-sm font-medium tracking-wider uppercase"
-                  style={{ color: feature.colorDark }}
-                >
-                  {feature.tagline}
-                </span>
-                <h3
-                  className="mt-3 flex items-center gap-3 text-2xl font-semibold sm:text-3xl"
-                  style={{ color: feature.color }}
-                >
-                  {feature.name}
-                  {(feature.badge || feature.comingSoon) && (
-                    <span
-                      className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
-                      style={{
-                        backgroundColor: `${feature.color}20`,
-                        color: feature.colorLight,
-                        border: `1px solid ${feature.color}40`,
-                      }}
-                    >
-                      {feature.badge ?? "Coming Soon"}
-                    </span>
-                  )}
-                </h3>
-                <p className="text-text-secondary mt-4 text-base leading-relaxed">
-                  {feature.description}
+              <div className="space-y-1.5">
+                <p className="mb-4 text-xs font-semibold tracking-wider text-white/45 uppercase">
+                  Product areas
                 </p>
-                <ul className="mt-6 space-y-3">
-                  {feature.bullets.map((bullet) => (
-                    <li key={bullet} className="flex items-start gap-3">
-                      <div
-                        className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full backdrop-blur-sm"
+                {FEATURE_TABS.map((tab, i) => {
+                  const selected = active === i;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActive(i)}
+                      aria-pressed={selected}
+                      className={`group relative flex w-full cursor-pointer items-center gap-3 rounded-[14px] px-3 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none ${
+                        selected
+                          ? "bg-white/[0.09] text-white"
+                          : "text-white/58 hover:bg-white/[0.045] hover:text-white/80"
+                      }`}
+                    >
+                      <span
+                        className="absolute inset-y-2 left-0 w-0.5 rounded-full opacity-0 transition-opacity group-hover:opacity-60"
+                        style={{ backgroundColor: tab.color }}
+                      />
+                      {selected && (
+                        <motion.span
+                          layoutId="featureRailIndicator"
+                          className="absolute inset-y-2 left-0 w-0.5 rounded-full"
+                          style={{ backgroundColor: tab.color }}
+                          transition={{ type: "spring", duration: 0.45, bounce: 0.12 }}
+                        />
+                      )}
+                      <span
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]"
                         style={{
-                          backgroundColor: `color-mix(in srgb, ${feature.color} 15%, transparent)`,
+                          color: selected ? tab.colorLight : undefined,
+                          backgroundColor: selected
+                            ? `color-mix(in srgb, ${tab.color} 13%, transparent)`
+                            : "rgba(255,255,255,0.035)",
                         }}
                       >
-                        <svg
-                          aria-hidden="true"
-                          className="h-3 w-3"
-                          style={{ color: feature.colorLight }}
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth={3}
+                        {tab.icon}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-semibold">{tab.name}</span>
+                        <span className="mt-0.5 block truncate text-xs text-white/48">
+                          {tab.tagline}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.nav>
+
+            <div className="min-w-0">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={feature.id}
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }}
+                  transition={{ duration: 0.32, ease: "easeOut" }}
+                  className="max-w-xl"
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="text-xs font-semibold tracking-wider uppercase"
+                      style={{ color: feature.colorLight }}
+                    >
+                      {feature.tagline}
+                    </span>
+                    {(feature.badge || feature.comingSoon) && (
+                      <span
+                        className="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold"
+                        style={{
+                          backgroundColor: `${feature.color}18`,
+                          color: feature.colorLight,
+                          borderColor: `${feature.color}35`,
+                        }}
+                      >
+                        {feature.badge ?? "Coming Soon"}
+                      </span>
+                    )}
+                  </div>
+
+                  <h3
+                    className="mt-4 text-4xl font-semibold tracking-tight text-balance sm:text-5xl"
+                    style={{ color: feature.color }}
+                  >
+                    {feature.name}
+                  </h3>
+
+                  <p className="mt-5 text-base leading-relaxed text-white/78 sm:text-lg">
+                    {feature.description}
+                  </p>
+
+                  <div className="mt-8 grid gap-3">
+                    {proofPoints.map((bullet) => (
+                      <div key={bullet} className="flex items-start gap-3">
+                        <span
+                          className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
+                          style={{
+                            color: feature.colorLight,
+                            backgroundColor: `color-mix(in srgb, ${feature.color} 16%, transparent)`,
+                          }}
                         >
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
+                          <svg
+                            aria-hidden="true"
+                            className="h-3.5 w-3.5"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={3}
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </span>
+                        <span className="text-sm leading-relaxed text-white/74">{bullet}</span>
                       </div>
-                      <span className="text-text-secondary text-sm">{bullet}</span>
-                    </li>
-                  ))}
-                </ul>
+                    ))}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
 
-                {/* Mobile prev/next */}
-                <div className="mt-8 flex items-center gap-4 lg:hidden">
-                  <button
-                    onClick={goPrev}
-                    aria-label="Previous feature"
-                    className="flex cursor-pointer items-center justify-center rounded-full p-3 backdrop-blur-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                    style={{
-                      color: feature.colorLight,
-                      backgroundColor: `color-mix(in srgb, ${feature.color} 15%, transparent)`,
-                    }}
-                  >
-                    <svg
-                      className="h-5 w-5"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2.5}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M15.75 19.5L8.25 12l7.5-7.5"
-                      />
-                    </svg>
-                  </button>
-                  <span className="text-sm font-medium text-white/50 tabular-nums">
-                    {active + 1} / {FEATURE_TABS.length}
-                  </span>
-                  <button
-                    onClick={goNext}
-                    aria-label="Next feature"
-                    className="flex cursor-pointer items-center justify-center rounded-full p-3 backdrop-blur-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                    style={{
-                      color: feature.colorLight,
-                      backgroundColor: `color-mix(in srgb, ${feature.color} 15%, transparent)`,
-                    }}
-                  >
-                    <svg
-                      className="h-5 w-5"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2.5}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M8.25 4.5l7.5 7.5-7.5 7.5"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-
-            {/* Mockup – frame stays fixed, only screen content crossfades */}
-            <div className="relative flex justify-center">
+            <motion.div
+              initial={{ opacity: 0, x: 24 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.55, delay: 0.15 }}
+              className="relative flex justify-center lg:justify-end"
+            >
               <div
-                className="relative z-10 w-[240px] sm:w-[260px] lg:w-[280px]"
+                aria-hidden="true"
+                className="absolute top-1/2 left-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-25 blur-3xl"
+                style={{
+                  background: `radial-gradient(circle, ${feature.color} 0%, transparent 62%)`,
+                }}
+              />
+              <div
+                className="relative z-10 w-[230px] sm:w-[250px] lg:w-[280px] xl:w-[300px]"
                 style={{ aspectRatio: "390 / 844" }}
               >
                 <AnimatePresence initial={false}>
                   <motion.div
                     key={feature.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.35, ease: "easeInOut" }}
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.28, ease: "easeOut" }}
                     className="absolute inset-0"
                   >
                     {feature.video ? (
@@ -499,16 +468,16 @@ export default function Features() {
                         alt={`${feature.name} screenshot`}
                         width={390}
                         height={844}
-                        sizes="(min-width: 1024px) 280px, (min-width: 640px) 260px, 240px"
-                        className="w-full"
+                        sizes="(min-width: 1280px) 300px, (min-width: 1024px) 280px, (min-width: 640px) 250px, 230px"
+                        className="w-full drop-shadow-[0_28px_80px_rgba(0,0,0,0.45)]"
                       />
                     )}
                   </motion.div>
                 </AnimatePresence>
               </div>
-            </div>
+            </motion.div>
           </div>
-        </div>
+        </SectionCard>
       </div>
     </section>
   );

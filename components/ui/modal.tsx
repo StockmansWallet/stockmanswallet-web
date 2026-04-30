@@ -12,6 +12,7 @@ interface ModalProps {
   ariaLabel?: string;
   children: ReactNode;
   size?: "sm" | "md" | "lg" | "xl";
+  backdropClassName?: string;
 }
 
 const sizeClasses = {
@@ -30,7 +31,15 @@ const focusableSelector = [
   "[tabindex]:not([tabindex='-1'])",
 ].join(",");
 
-function Modal({ open, onClose, title, ariaLabel, children, size = "md" }: ModalProps) {
+function Modal({
+  open,
+  onClose,
+  title,
+  ariaLabel,
+  children,
+  size = "md",
+  backdropClassName = "bg-black/50 backdrop-blur-[2px]",
+}: ModalProps) {
   const titleId = useId();
   const overlayRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -55,9 +64,9 @@ function Modal({ open, onClose, title, ariaLabel, children, size = "md" }: Modal
       const panel = panelRef.current;
       if (!panel) return;
 
-      const focusable = Array.from(
-        panel.querySelectorAll<HTMLElement>(focusableSelector),
-      ).filter((el) => !el.hasAttribute("disabled") && el.getAttribute("aria-hidden") !== "true");
+      const focusable = Array.from(panel.querySelectorAll<HTMLElement>(focusableSelector)).filter(
+        (el) => !el.hasAttribute("disabled") && el.getAttribute("aria-hidden") !== "true"
+      );
 
       if (focusable.length === 0) {
         e.preventDefault();
@@ -99,9 +108,7 @@ function Modal({ open, onClose, title, ariaLabel, children, size = "md" }: Modal
         <div
           ref={overlayRef}
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          onClick={(e) => {
-            if (e.target === overlayRef.current) onClose();
-          }}
+          onClick={onClose}
         >
           {/* Backdrop */}
           <motion.div
@@ -109,7 +116,8 @@ function Modal({ open, onClose, title, ariaLabel, children, size = "md" }: Modal
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-[2px]"
+            onClick={onClose}
+            className={`fixed inset-0 ${backdropClassName}`}
           />
 
           {/* Panel */}
@@ -124,18 +132,19 @@ function Modal({ open, onClose, title, ariaLabel, children, size = "md" }: Modal
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: "spring", duration: 0.35, bounce: 0.15 }}
-            className={`relative w-full ${sizeClasses[size]} rounded-3xl bg-white/5 backdrop-blur-3xl p-6 shadow-2xl`}
+            onClick={(e) => e.stopPropagation()}
+            className={`relative z-10 w-full ${sizeClasses[size]} rounded-3xl bg-white/5 p-6 shadow-2xl backdrop-blur-3xl`}
           >
             {/* Header */}
             {title && (
               <div className="mb-4 flex items-center justify-between">
-                <h2 id={titleId} className="text-lg font-semibold text-text-primary">
+                <h2 id={titleId} className="text-text-primary text-lg font-semibold">
                   {title}
                 </h2>
                 <button
                   onClick={onClose}
                   aria-label="Close"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-raised hover:text-text-primary"
+                  className="text-text-muted hover:bg-surface-raised hover:text-text-primary flex h-8 w-8 items-center justify-center rounded-lg transition-colors"
                 >
                   <X className="h-5 w-5" aria-hidden="true" />
                 </button>
