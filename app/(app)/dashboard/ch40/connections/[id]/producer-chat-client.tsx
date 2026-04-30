@@ -43,6 +43,12 @@ export function ProducerChatClient({
   const [pendingAttachment, setPendingAttachment] = useState<MessageAttachment | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  // Tracks whether the user is pinned to the bottom of the thread so a
+  // new message or typing-indicator pulse only auto-scrolls when they
+  // were already at the bottom. Defaults to true so the very first
+  // render scrolls into the latest messages instead of stranding the
+  // user at the top of a long history.
+  const userPinnedToBottomRef = useRef(true);
 
   const { peerIsTyping, notifyTyping, notifyTypingStop } = useTypingIndicator(
     `chat:${connectionId}`,
@@ -87,10 +93,11 @@ export function ProducerChatClient({
     // that flips peerIsTyping false here automatically.
   }, []);
 
-  // Auto-scroll to bottom only when the user is already pinned to the bottom
-  // (within a small threshold). If they've scrolled up to read history, leave
-  // them there - typing-indicator pulses or new messages shouldn't yank the
-  // viewport away from what they're reading.
+  // Auto-scroll to bottom only when the user is already pinned there. We
+  // can't compute "at bottom" inside the layout effect because the new
+  // bubble has already grown the scroll height by then - scrollTop hasn't
+  // moved, so the distance check would always read "scrolled up". A
+  // scroll listener tracks the pinned state continuously instead.
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
     requestAnimationFrame(() => {
@@ -98,16 +105,20 @@ export function ProducerChatClient({
     });
   }, []);
 
-  const isAtBottom = useCallback(() => {
+  useEffect(() => {
     const el = scrollContainerRef.current;
-    if (!el) return true;
-    const distanceFromBottom = el.scrollHeight - (el.scrollTop + el.clientHeight);
-    return distanceFromBottom < 80;
+    if (!el) return;
+    const handleScroll = () => {
+      const distanceFromBottom = el.scrollHeight - (el.scrollTop + el.clientHeight);
+      userPinnedToBottomRef.current = distanceFromBottom < 80;
+    };
+    el.addEventListener("scroll", handleScroll, { passive: true });
+    return () => el.removeEventListener("scroll", handleScroll);
   }, []);
 
   useLayoutEffect(() => {
-    if (isAtBottom()) scrollToBottom();
-  }, [messages.length, peerIsTyping, pendingAttachment, scrollToBottom, isAtBottom]);
+    if (userPinnedToBottomRef.current) scrollToBottom();
+  }, [messages.length, peerIsTyping, pendingAttachment, scrollToBottom]);
 
   // Live message subscription with a polling fallback for missed websocket events.
   useEffect(() => {

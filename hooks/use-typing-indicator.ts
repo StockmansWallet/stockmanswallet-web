@@ -34,19 +34,11 @@ export function useTypingIndicator(channelName: string, userId: string) {
     // user. iOS sends UUIDs uppercase, web is lowercase, so normalise.
     const normalisedSelf = userId.toLowerCase();
 
-    let cancelled = false;
-
-    // Forward the current access token to the realtime client before
-    // subscribing. Cookie-auth (@supabase/ssr) clients don't auto-push
-    // the JWT to realtime - without setAuth, presence on RLS-aware
-    // channels can subscribe unauthenticated and silently drop events.
-    // Other consumers of this realtime client (the messages channel in
-    // producer-chat-client) also call setAuth, but they may mount after
-    // this hook so we set it here too.
-    void supabase.auth.getSession().then(({ data: { session } }) => {
-      if (cancelled || !session?.access_token) return;
-      supabase.realtime.setAuth(session.access_token);
-    });
+    // setAuth is intentionally NOT called here. The Supabase JS client is
+    // a singleton and the messages effect in the chat client mounts in
+    // the same render, also calling setAuth on the same shared realtime
+    // client. Adding a second async setAuth from this hook can race the
+    // subscribe and disturb already-joined channels.
 
     const channel = supabase.channel(channelName, {
       config: {
@@ -87,7 +79,6 @@ export function useTypingIndicator(channelName: string, userId: string) {
     channelRef.current = channel;
 
     return () => {
-      cancelled = true;
       // untrack is best-effort - channel removal will clean up regardless.
       void channel.untrack();
       supabase.removeChannel(channel);
