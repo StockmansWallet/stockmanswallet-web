@@ -8,6 +8,12 @@ interface TypingIndicatorProps {
   /** Reserve the sender avatar lane so the bubble lines up with chat rows */
   reserveAvatarSpace?: boolean;
   className?: string;
+  /**
+   * When true, plays the bubble-out exit animation so the indicator
+   * appears to morph into the incoming message bubble. Caller is
+   * responsible for unmounting after the animation completes.
+   */
+  isExiting?: boolean;
 }
 
 /**
@@ -19,10 +25,11 @@ export function TypingIndicator({
   dotClass = "bg-white/50",
   reserveAvatarSpace = false,
   className = "",
+  isExiting = false,
 }: TypingIndicatorProps) {
   return (
     <div
-      className={`flex items-end justify-start gap-2 px-1 pr-14 animate-bubble-in ${className}`}
+      className={`flex items-end justify-start gap-2 px-1 pr-14 ${isExiting ? "animate-bubble-out" : "animate-bubble-in"} ${className}`}
       style={{ transformOrigin: "bottom left" }}
     >
       {reserveAvatarSpace && <div className="h-12 w-12 shrink-0 self-end" aria-hidden="true" />}
@@ -31,9 +38,15 @@ export function TypingIndicator({
           className="flex min-h-10 min-w-14 items-center justify-center gap-1.5 rounded-3xl px-4 py-3"
           style={{ backgroundColor: bgColor }}
         >
-          <span className={`h-2 w-2 rounded-full ${dotClass} animate-bounce [animation-delay:0ms]`} />
-          <span className={`h-2 w-2 rounded-full ${dotClass} animate-bounce [animation-delay:150ms]`} />
-          <span className={`h-2 w-2 rounded-full ${dotClass} animate-bounce [animation-delay:300ms]`} />
+          <span
+            className={`h-2 w-2 rounded-full ${dotClass} animate-bounce [animation-delay:0ms]`}
+          />
+          <span
+            className={`h-2 w-2 rounded-full ${dotClass} animate-bounce [animation-delay:150ms]`}
+          />
+          <span
+            className={`h-2 w-2 rounded-full ${dotClass} animate-bounce [animation-delay:300ms]`}
+          />
         </div>
         <svg
           width="22"

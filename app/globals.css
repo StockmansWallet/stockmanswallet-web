@@ -573,6 +573,24 @@ body {
   animation: bubble-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
+/* Counterpart to bubble-in: used when a typing indicator is morphing into
+   the message bubble that just arrived. The exit overlaps the new bubble's
+   entrance so the eye reads it as a single continuous shape change. */
+@keyframes bubble-out {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.92);
+  }
+}
+
+@utility animate-bubble-out {
+  animation: bubble-out 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;

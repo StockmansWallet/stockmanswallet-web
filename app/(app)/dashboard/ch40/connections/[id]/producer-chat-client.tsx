@@ -41,7 +41,11 @@ export function ProducerChatClient({
   const [messages, setMessages] = useState<AdvisoryMessage[]>(initialMessages);
   const [animatedIds, setAnimatedIds] = useState<Set<string>>(new Set());
   const [pendingAttachment, setPendingAttachment] = useState<MessageAttachment | null>(null);
+  const [indicatorExiting, setIndicatorExiting] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  // Holds the in-flight exit-animation timer so we can cancel it on unmount
+  // or when a fresh peer typing event arrives mid-fade.
+  const exitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { peerIsTyping, notifyTyping, clearPeerTyping } = useTypingIndicator(
     `chat:${connectionId}`,
@@ -57,16 +61,42 @@ export function ProducerChatClient({
         );
       });
       setAnimatedIds((ids) => new Set(ids).add(incoming.id));
-      // Peer just sent something, so they're definitionally not typing
-      // anymore. Clear the indicator now rather than waiting for the 3s
-      // auto-hide; otherwise the bubble pushes the indicator down and it
-      // looks like a second indicator flashes in.
+      // When the peer's message arrives, fade the indicator out over the
+      // same window in which the new bubble's entrance animation plays so
+      // the dots visually morph into the message rather than blinking off.
+      // Keep the indicator mounted for the duration of the exit animation
+      // (matches BUBBLE_EXIT_MS in the bubble-out keyframe).
       if (incoming.sender_user_id !== currentUserId) {
-        clearPeerTyping();
+        if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
+        setIndicatorExiting(true);
+        exitTimerRef.current = setTimeout(() => {
+          clearPeerTyping();
+          setIndicatorExiting(false);
+          exitTimerRef.current = null;
+        }, 250);
       }
     },
     [clearPeerTyping, currentUserId]
   );
+
+  // Clear any pending exit timer if the component unmounts mid-fade.
+  useEffect(() => {
+    return () => {
+      if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
+    };
+  }, []);
+
+  // If a fresh typing event arrives while the indicator is mid-exit, cancel
+  // the fade and let it snap back to its full state.
+  useEffect(() => {
+    if (peerIsTyping && indicatorExiting) {
+      if (exitTimerRef.current) {
+        clearTimeout(exitTimerRef.current);
+        exitTimerRef.current = null;
+      }
+      setIndicatorExiting(false);
+    }
+  }, [peerIsTyping, indicatorExiting]);
 
   // Auto-scroll to bottom on load and incoming messages. Layout timing matters
   // here because the composer is outside the scroll viewport and the spacer
@@ -217,12 +247,13 @@ export function ProducerChatClient({
               otherTailColor={OTHER_BG}
               avatars={avatars}
             />
-            {peerIsTyping && (
+            {(peerIsTyping || indicatorExiting) && (
               <TypingIndicator
                 bgColor={OTHER_BG}
                 dotClass="bg-white/50"
                 reserveAvatarSpace={!!avatars}
                 className="mt-2"
+                isExiting={indicatorExiting}
               />
             )}
             <div aria-hidden className={pendingAttachment ? "h-44" : "h-28"} />
