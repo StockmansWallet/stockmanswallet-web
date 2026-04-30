@@ -4,7 +4,6 @@ import { useState, useEffect, useLayoutEffect, useRef, useCallback, type ReactNo
 import { MessageThread } from "@/components/app/advisory/message-thread";
 import { ChatInput } from "@/components/app/chat/chat-input";
 import { TypingIndicator } from "@/components/app/chat/typing-indicator";
-import { AnimatePresence } from "framer-motion";
 import { ShareMenu } from "@/components/app/ch40/share-menu";
 import { ShareAttachmentCard } from "@/components/app/ch40/share-attachment-card";
 import { useTypingIndicator } from "@/hooks/use-typing-indicator";
@@ -60,14 +59,14 @@ export function ProducerChatClient({
   // Pull the peer's avatar so the typing indicator sits on the same row
   // identity as the message bubbles below it. Peer = whichever party in
   // the avatars map is not the local user.
-  const { id: peerUserId, url: peerAvatarUrl, initials: peerAvatarInitials } = (() => {
-    if (!avatars) return { id: undefined, url: undefined, initials: undefined };
+  const { url: peerAvatarUrl, initials: peerAvatarInitials } = (() => {
+    if (!avatars) return { url: undefined, initials: undefined };
     for (const [uid, meta] of Object.entries(avatars)) {
       if (uid !== currentUserId) {
-        return { id: uid, url: meta.url ?? undefined, initials: meta.initials };
+        return { url: meta.url ?? undefined, initials: meta.initials };
       }
     }
-    return { id: undefined, url: undefined, initials: undefined };
+    return { url: undefined, initials: undefined };
   })();
 
   const mergeMessage = useCallback(
@@ -349,21 +348,19 @@ export function ProducerChatClient({
               otherBgClass="bg-ch40-dark"
               otherTailColor={OTHER_BG}
               avatars={avatars}
-              continuationSenderId={peerIsTyping ? peerUserId : undefined}
             />
-            <AnimatePresence initial={false} mode="popLayout" presenceAffectsLayout={false}>
-              {peerIsTyping && (
-                <TypingIndicator
-                  key="typing"
-                  bgColor={OTHER_BG}
-                  dotClass="bg-white/50"
-                  reserveAvatarSpace={!!avatars}
-                  avatarUrl={peerAvatarUrl}
-                  avatarInitials={peerAvatarInitials}
-                  className="mt-2"
-                />
-              )}
-            </AnimatePresence>
+            {peerIsTyping && (
+              <TypingIndicator
+                key="typing"
+                bgColor={OTHER_BG}
+                dotClass="bg-white/50"
+                reserveAvatarSpace={!!avatars}
+                avatarUrl={peerAvatarUrl}
+                avatarInitials={peerAvatarInitials}
+                enableLayoutAnimation={false}
+                className="mt-2"
+              />
+            )}
             <div aria-hidden className={pendingAttachment ? "h-44" : "h-28"} />
             <div ref={messagesEndRef} />
           </div>

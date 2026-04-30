@@ -36,12 +36,6 @@ interface MessageThreadProps {
    */
   avatars?: Record<string, { url?: string | null; initials?: string }>;
   /**
-   * Sender id for an ephemeral row rendered after the thread, such as a
-   * typing indicator. When it matches the final message sender, the final
-   * bubble is grouped as a continuation instead of ending with an avatar.
-   */
-  continuationSenderId?: string;
-  /**
    * Producer-peer connection id. When present, file attachment cards can ask
    * the server for a verified download link.
    */
@@ -190,7 +184,6 @@ export function MessageThread({
   otherBgClass = "bg-chat-other",
   otherTailColor = DEFAULT_OTHER_BG,
   avatars,
-  continuationSenderId,
   connectionId,
 }: MessageThreadProps) {
   if (messages.length === 0) {
@@ -214,11 +207,8 @@ export function MessageThread({
         // a consecutive same-sender run. A run ends when the next message is
         // from a different sender or when a timestamp separator will appear
         // before it. Avoids the -mb-8 hanging avatars stacking on each other.
-        const nextContinuesGroup =
-          next?.sender_user_id === msg.sender_user_id ||
-          (!next && continuationSenderId === msg.sender_user_id);
         const nextBreaksGroup =
-          !nextContinuesGroup || (next ? shouldShowTimestamp(next, msg) : false);
+          !next || next.sender_user_id !== msg.sender_user_id || shouldShowTimestamp(next, msg);
         const showAvatar = nextBreaksGroup;
 
         return (

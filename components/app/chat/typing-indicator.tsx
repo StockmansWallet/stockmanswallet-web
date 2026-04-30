@@ -14,14 +14,16 @@ interface TypingIndicatorProps {
   avatarUrl?: string | null;
   /** Initials fallback when no avatar URL is available */
   avatarInitials?: string;
+  /** Opt into Framer layout repositioning when a parent animates layout changes */
+  enableLayoutAnimation?: boolean;
   className?: string;
 }
 
 // iMessage-style spring: quick, slight overshoot on entry, smooth fade
 // on exit. The transformOrigin pin to bottom-left makes the bubble grow
 // out of its tail so the entrance reads as "coming from the peer", not
-// dropping in from above. Callers wrap this in <AnimatePresence> so the
-// exit animation actually plays before unmount.
+// dropping in from above. Exit animation only runs when a caller wraps
+// this component in an AnimatePresence boundary.
 const typingMotion = {
   initial: { opacity: 0, scale: 0.7, y: 8 },
   animate: { opacity: 1, scale: 1, y: 0 },
@@ -44,13 +46,14 @@ export function TypingIndicator({
   reserveAvatarSpace = false,
   avatarUrl,
   avatarInitials,
+  enableLayoutAnimation = true,
   className = "",
 }: TypingIndicatorProps) {
   const hasHangingAvatar = Boolean(avatarUrl || avatarInitials);
 
   return (
     <motion.div
-      layout="position"
+      layout={enableLayoutAnimation ? "position" : false}
       role="status"
       aria-live="polite"
       aria-label="Other participant is typing"
