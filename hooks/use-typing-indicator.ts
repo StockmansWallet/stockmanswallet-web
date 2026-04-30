@@ -59,11 +59,14 @@ export function useTypingIndicator(channelName: string, userId: string) {
       .on("presence", { event: "leave" }, recompute)
       .subscribe(async (status) => {
         if (status !== "SUBSCRIBED") return;
-        // Seed presence with typing:false so we appear in the state
-        // immediately. Without an initial track() the local client
-        // wouldn't be visible to peers until they start typing.
-        localTypingRef.current = false;
-        await channel.track({ typing: false });
+        // Seed presence with our CURRENT local state, not always false.
+        // Race: if the user starts typing during the ~200ms between mount
+        // and SUBSCRIBED, notifyTyping fires against an unsubscribed
+        // channel and the track() call silently no-ops. localTypingRef
+        // would stay true so subsequent notifyTyping calls return early,
+        // and the peer never sees us typing for that whole session.
+        // Tracking the current ref value here recovers from that race.
+        await channel.track({ typing: localTypingRef.current });
       });
 
     channelRef.current = channel;
