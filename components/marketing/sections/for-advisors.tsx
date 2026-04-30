@@ -672,7 +672,7 @@ export default function ForAdvisors() {
   const [active, setActive] = useState(0);
 
   return (
-    <section id="advisors" className="relative scroll-mt-28">
+    <section id="advisors" className="relative scroll-mt-[6.75rem]">
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div

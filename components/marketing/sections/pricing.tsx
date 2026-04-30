@@ -55,7 +55,7 @@ export default function Pricing() {
   const accent = ACCENT[activeTab];
 
   return (
-    <section id="pricing" className="relative scroll-mt-28">
+    <section id="pricing" className="relative scroll-mt-[6.75rem]">
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
         <SectionCard glowPosition="50% 16%" glowSize="1120px 700px">
           <div className="relative z-10">
