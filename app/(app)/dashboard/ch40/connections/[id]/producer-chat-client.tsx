@@ -361,7 +361,7 @@ export function ProducerChatClient({
                 className="mt-2"
               />
             )}
-            <div aria-hidden className={pendingAttachment ? "h-44" : "h-28"} />
+            <div aria-hidden className="h-3" />
             <div ref={messagesEndRef} />
           </div>
         </div>
