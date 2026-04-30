@@ -186,6 +186,9 @@ export function BrangusHub({
   //      tab was in the background.
   //   3. 15s polling as a safety net for flaky websocket connections.
   //
+  // Same channel also subscribes to brangus_conversations so a chat created or
+  // soft-deleted on iOS / another device flows in here without a hard refresh.
+  //
   // Runs once on mount; does not depend on activeTab so the badge stays live
   // even while the user is on the Chat or Saved tabs.
   useEffect(() => {
@@ -246,6 +249,54 @@ export function BrangusHub({
           },
           () => {
             refreshUnread();
+          }
+        )
+        // New conversation created on another device: prepend to the saved list.
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "brangus_conversations",
+            filter: `user_id=eq.${user.id}`,
+          },
+          (payload) => {
+            const row = payload.new as BrangusConversationRow;
+            if (row.is_deleted) return;
+            setConversations((prev) =>
+              prev.some((c) => c.id === row.id) ? prev : [row, ...prev]
+            );
+          }
+        )
+        // Title change, preview update, soft-delete, restore: reflect in place.
+        // Soft-delete sets is_deleted=true so we drop the row from the list and
+        // close the active chat if the deleted conversation was open.
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "brangus_conversations",
+            filter: `user_id=eq.${user.id}`,
+          },
+          (payload) => {
+            const row = payload.new as BrangusConversationRow;
+            if (row.is_deleted) {
+              setConversations((prev) => prev.filter((c) => c.id !== row.id));
+              setActiveConvId((current) => {
+                if (current === row.id) {
+                  setActiveMessages(null);
+                  setChatResetKey((k) => k + 1);
+                  return null;
+                }
+                return current;
+              });
+              return;
+            }
+            setConversations((prev) => {
+              if (!prev.some((c) => c.id === row.id)) return [row, ...prev];
+              return prev.map((c) => (c.id === row.id ? { ...c, ...row } : c));
+            });
           }
         )
         .subscribe();

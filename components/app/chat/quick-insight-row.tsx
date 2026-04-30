@@ -40,6 +40,14 @@ function compact(text: string): string {
     .replace(/\bactive herds\b/gi, "herds");
 }
 
+// Splits a trailing "+ GST" off the value so the dollar amount can render
+// big and the GST tag can render smaller and muted alongside it.
+function splitGSTSuffix(value: string): { main: string; gstSuffix: string | null } {
+  const match = value.match(/^(.*?)\s*\+\s*GST\s*$/i);
+  if (match) return { main: match[1], gstSuffix: "+ GST" };
+  return { main: value, gstSuffix: null };
+}
+
 const sentimentColor: Record<QuickInsight["sentiment"], string> = {
   positive: "text-success",
   negative: "text-error",
@@ -81,11 +89,21 @@ function QuickInsightCard({
           <ChevronRight className="h-2.5 w-2.5 shrink-0 text-text-muted" />
         )}
       </div>
-      <span
-        className={`text-[17px] font-bold leading-tight ${sentimentColor[insight.sentiment]} truncate`}
-      >
-        {compact(insight.value)}
-      </span>
+      {(() => {
+        const parts = splitGSTSuffix(insight.value);
+        return (
+          <span
+            className={`text-[17px] font-bold leading-tight ${sentimentColor[insight.sentiment]} truncate`}
+          >
+            {compact(parts.main)}
+            {parts.gstSuffix && (
+              <span className="ml-1 text-[10px] font-semibold text-text-secondary">
+                {parts.gstSuffix}
+              </span>
+            )}
+          </span>
+        );
+      })()}
       <span
         className={`text-[9px] truncate ${insight.subtitle ? "text-text-secondary" : "text-transparent"}`}
       >
