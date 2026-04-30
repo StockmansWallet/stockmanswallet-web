@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, type MouseEvent } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { NAV_LINKS } from "@/lib/marketing/constants";
@@ -10,7 +10,6 @@ import { useWaitlist } from "@/components/marketing/ui/waitlist-provider";
 export function Header() {
   const { openWaitlist } = useWaitlist();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     if (mobileOpen) {
@@ -22,15 +21,6 @@ export function Header() {
       document.body.style.overflow = "";
     };
   }, [mobileOpen]);
-
-  useEffect(() => {
-    const onScroll = () => {
-      setScrolled(window.scrollY > 64);
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   function handleNavClick(event: MouseEvent<HTMLAnchorElement>, href: string) {
     if (!href.startsWith("/#") || window.location.pathname !== "/") return;
@@ -46,27 +36,30 @@ export function Header() {
   }
 
   return (
-    <header
-      className={`fixed top-0 z-50 w-full transition-all duration-500 ease-in-out ${
-        scrolled ? "border-b border-white/[0.06]" : "border-b border-transparent"
-      }`}
-      style={{
-        backgroundColor: scrolled ? "rgba(15, 12, 8, 0.78)" : "rgba(15, 12, 8, 0.35)",
-        backdropFilter: scrolled ? "blur(28px) saturate(1.4)" : "blur(24px) saturate(1.2)",
-        WebkitBackdropFilter: scrolled ? "blur(28px) saturate(1.4)" : "blur(24px) saturate(1.2)",
-      }}
-    >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+    <header className="fixed top-0 z-50 w-full border-b border-white/[0.08] bg-[#17130f]/75 py-2.5 shadow-sm shadow-black/15 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <Image
-            src="/images/sw-logo-tally.svg"
-            alt="Stockman's Wallet"
-            width={44}
-            height={44}
-            className="h-11 w-11"
+        <Link
+          href="/"
+          aria-label="Stockman's Wallet"
+          className="relative flex h-14 w-64 shrink-0 items-center justify-center overflow-visible px-3 transition-opacity hover:opacity-90"
+        >
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-1/2 h-56 w-[34rem] -translate-x-1/2 -translate-y-1/2 rounded-full"
+            style={{
+              background:
+                "radial-gradient(ellipse at center, color-mix(in srgb, var(--color-brand) 16%, transparent), color-mix(in srgb, var(--color-brand) 7%, transparent) 36%, color-mix(in srgb, var(--color-brand) 2%, transparent) 62%, transparent 82%)",
+            }}
           />
-          <span className="text-lg font-bold text-white sm:text-xl">Stockman&apos;s Wallet</span>
+          <Image
+            src="/images/sw-logo.svg"
+            alt="Stockman's Wallet"
+            width={220}
+            height={146}
+            priority
+            className="relative h-[3.35rem] w-auto object-contain"
+          />
         </Link>
 
         {/* Desktop Nav */}
@@ -76,7 +69,7 @@ export function Header() {
               key={link.href}
               href={link.href}
               onClick={(event) => handleNavClick(event, link.href)}
-              className="text-text-secondary focus-visible:ring-brand rounded-[10px] px-3 py-2 text-sm font-medium transition-colors hover:bg-white/5 hover:text-white focus-visible:ring-2 focus-visible:outline-none"
+              className="text-text-secondary focus-visible:ring-brand rounded-[10px] px-3 py-2 text-base font-medium transition-colors hover:bg-white/5 hover:text-white focus-visible:ring-2 focus-visible:outline-none"
             >
               {link.label}
             </Link>
@@ -124,7 +117,7 @@ export function Header() {
       {mobileOpen && (
         <div
           id="marketing-mobile-menu"
-          className="glass-strong absolute inset-x-0 top-16 border-t border-white/5 lg:hidden"
+          className="glass-strong absolute inset-x-0 top-full border-t border-white/5 lg:hidden"
         >
           <nav className="flex flex-col gap-1 px-4 py-4">
             {NAV_LINKS.map((link) => (

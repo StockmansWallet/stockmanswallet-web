@@ -162,7 +162,7 @@ export default function Brangus() {
   }, [phase, inView]);
 
   return (
-    <section id="brangus" className="relative scroll-mt-24 overflow-x-clip">
+    <section id="brangus" className="relative scroll-mt-28 overflow-x-clip">
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionCard glowPosition="18% 16%" glowSize="1120px 700px">
           <div className="relative z-10 grid items-center gap-10 sm:gap-16 lg:grid-cols-[minmax(400px,0.82fr)_minmax(0,1.78fr)] lg:gap-8 xl:grid-cols-[minmax(430px,0.9fr)_minmax(0,1.85fr)] xl:gap-10">

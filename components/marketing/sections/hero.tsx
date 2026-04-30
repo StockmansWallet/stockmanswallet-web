@@ -26,7 +26,7 @@ export default function Hero() {
   const textY = prefersReducedMotion ? 0 : textYRaw;
 
   return (
-    <section ref={sectionRef} id="hero" className="relative overflow-x-clip pt-24">
+    <section ref={sectionRef} id="hero" className="relative overflow-x-clip pt-28">
       {/* Content */}
       <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionCard
