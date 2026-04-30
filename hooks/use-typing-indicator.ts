@@ -50,6 +50,9 @@ export function useTypingIndicator(channelName: string, userId: string) {
           break;
         }
       }
+      if (process.env.NODE_ENV !== "production") {
+        console.log("[typing] recompute", { state, someoneTyping });
+      }
       setPeerIsTyping(someoneTyping);
     };
 
@@ -58,6 +61,9 @@ export function useTypingIndicator(channelName: string, userId: string) {
       .on("presence", { event: "join" }, recompute)
       .on("presence", { event: "leave" }, recompute)
       .subscribe(async (status) => {
+        if (process.env.NODE_ENV !== "production") {
+          console.log(`[typing] subscribe status=${status} channel=${channelName}`);
+        }
         if (status !== "SUBSCRIBED") return;
         // Seed presence with our CURRENT local state, not always false.
         // Race: if the user starts typing during the ~200ms between mount
@@ -66,7 +72,12 @@ export function useTypingIndicator(channelName: string, userId: string) {
         // would stay true so subsequent notifyTyping calls return early,
         // and the peer never sees us typing for that whole session.
         // Tracking the current ref value here recovers from that race.
-        await channel.track({ typing: localTypingRef.current });
+        const result = await channel.track({ typing: localTypingRef.current });
+        if (process.env.NODE_ENV !== "production") {
+          console.log(`[typing] subscribe seed track result=${result}`, {
+            seed: localTypingRef.current,
+          });
+        }
       });
 
     channelRef.current = channel;
@@ -84,7 +95,16 @@ export function useTypingIndicator(channelName: string, userId: string) {
   const notifyTyping = useCallback(() => {
     if (localTypingRef.current) return;
     localTypingRef.current = true;
-    void channelRef.current?.track({ typing: true });
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[typing] notifyTyping fired -> track({typing:true})", {
+        hasChannel: !!channelRef.current,
+      });
+    }
+    channelRef.current?.track({ typing: true }).then((result) => {
+      if (process.env.NODE_ENV !== "production") {
+        console.log("[typing] track(true) result=", result);
+      }
+    });
   }, []);
 
   /**
@@ -94,7 +114,14 @@ export function useTypingIndicator(channelName: string, userId: string) {
   const notifyTypingStop = useCallback(() => {
     if (!localTypingRef.current) return;
     localTypingRef.current = false;
-    void channelRef.current?.track({ typing: false });
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[typing] notifyTypingStop fired -> track({typing:false})");
+    }
+    channelRef.current?.track({ typing: false }).then((result) => {
+      if (process.env.NODE_ENV !== "production") {
+        console.log("[typing] track(false) result=", result);
+      }
+    });
   }, []);
 
   return { peerIsTyping, notifyTyping, notifyTypingStop };
