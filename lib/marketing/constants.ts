@@ -195,14 +195,14 @@ export const PRICING_TIERS: PricingTier[] = [
   // Producer Plans
   {
     id: "ringer",
-    name: "The Scotch",
+    name: "The Sirloin",
     subtitle: "1 Property",
     price: 89,
     priceAnnual: null,
     description: "Lean, honest, and ready to work.",
     highlighted: false,
     category: "producer",
-    image: "/images/cuts/cut-scotch.webp",
+    image: "/images/cuts/cut-sirloin-v3.webp",
     features: [
       { name: "1 property", included: true },
       { name: "Unlimited herds", included: true },
@@ -224,7 +224,7 @@ export const PRICING_TIERS: PricingTier[] = [
     description: "More marbling. More room to grow.",
     highlighted: false,
     category: "producer",
-    image: "/images/cuts/cut-ribeye.webp",
+    image: "/images/cuts/cut-ribeye-v3.webp",
     features: [
       { name: "Up to 3 properties", included: true },
       { name: "Unlimited herds", included: true },
@@ -246,7 +246,7 @@ export const PRICING_TIERS: PricingTier[] = [
     description: "The showpiece, built for the big yards.",
     highlighted: false,
     category: "producer",
-    image: "/images/cuts/cut-tomahawk.webp",
+    image: "/images/cuts/cut-tomahawk-v3.webp",
     features: [
       { name: "4+ properties", included: true },
       { name: "Unlimited herds", included: true },

@@ -163,7 +163,7 @@ export default function Pricing() {
                     )}
 
                     {tier.image && (
-                      <div className="relative mb-2 flex h-32 items-center justify-center sm:h-40">
+                      <div className="pointer-events-none relative -mt-16 mb-2 flex h-36 items-end justify-center sm:-mt-20 sm:h-44">
                         <div
                           aria-hidden="true"
                           className="absolute inset-0 mx-auto h-full w-3/4 rounded-full opacity-40 blur-2xl"
@@ -178,7 +178,7 @@ export default function Pricing() {
                           aria-hidden
                           width={512}
                           height={512}
-                          quality={92}
+                          quality={95}
                           sizes="(min-width: 1024px) 280px, (min-width: 640px) 240px, 200px"
                           className="relative h-full w-auto object-contain drop-shadow-[0_18px_24px_rgba(0,0,0,0.45)]"
                         />

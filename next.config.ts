@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
     "/api/reports/generate": ["./node_modules/@sparticuz/chromium/bin/**"],
   },
   images: {
+    // Allow high-quality optimisations on marketing imagery. Next.js 16
+    // restricts quality values to those listed here; without it, requests
+    // for q=90/95 return HTTP 400 and the browser falls back to its cache.
+    qualities: [75, 90, 95],
     // Pin to the exact Supabase project subdomain. The previous wildcard
     // (*.supabase.co) would let next/image optimise and proxy images from
     // any Supabase project - an attacker controlling any public Supabase
