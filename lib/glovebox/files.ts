@@ -1,57 +1,66 @@
-// Shared helpers and types for the Brangus file uploads feature.
-// Mirrors the iOS BrangusFile model and feeds both the Files tool page and
+// Shared helpers and types for the Glovebox file store.
+// Mirrors the iOS GloveboxFile model and feeds both the Glovebox tool and
 // the Brangus chat paperclip path on the web.
 
 import { createClient } from "@/lib/supabase/client";
 
-export const BRANGUS_FILES_BUCKET = "brangus-files";
+export const GLOVEBOX_FILES_BUCKET = "glovebox-files";
 export const SIGNED_URL_TTL_SECONDS = 60 * 15;
 
-export type BrangusFileKind =
+export type GloveboxFileKind =
   | "vet_report"
   | "nlis"
   | "mla_receipt"
   | "lease"
   | "soil_test"
   | "kill_sheet"
+  | "processor_grid"
   | "eu_cert"
   | "breeding"
   | "other";
 
-export type BrangusFileSource = "files" | "chat";
+export type GloveboxFileSource =
+  | "glovebox"
+  | "chat"
+  | "ch40"
+  | "grid_iq"
+  | "reports"
+  | "yard_book"
+  | "freight_iq";
 
-export type BrangusFileExtractionStatus =
+export type GloveboxFileExtractionStatus =
   | "pending"
   | "complete"
   | "unsupported"
   | "failed"
   | "not_required";
 
-export interface BrangusFileRow {
+export interface GloveboxFileRow {
   id: string;
   storage_path?: string;
   title: string;
   original_filename: string;
   mime_type: string;
   size_bytes: number;
-  kind: BrangusFileKind | null;
+  kind: GloveboxFileKind | null;
   category?: string | null;
   tags?: string[] | null;
   page_count: number | null;
-  extraction_status: BrangusFileExtractionStatus;
-  source: BrangusFileSource;
+  extraction_status: GloveboxFileExtractionStatus;
+  source: GloveboxFileSource;
   conversation_id: string | null;
   created_at: string;
   updated_at: string;
 }
 
-export const FILE_KIND_OPTIONS: { value: BrangusFileKind; label: string }[] = [
+export const FILE_KIND_OPTIONS: { value: GloveboxFileKind; label: string }[] = [
   { value: "vet_report", label: "Vet Report" },
   { value: "nlis", label: "NLIS" },
   { value: "mla_receipt", label: "MLA Receipt" },
   { value: "lease", label: "Lease" },
   { value: "soil_test", label: "Soil Test" },
   { value: "kill_sheet", label: "Kill Sheet" },
+  { value: "processor_grid", label: "Processor Grid" },
   { value: "eu_cert", label: "EU Certificate" },
   { value: "breeding", label: "Breeding Record" },
   { value: "other", label: "Other" },
@@ -75,7 +84,7 @@ export const DEFAULT_FILE_CATEGORY_OPTIONS = [
 
 export const FILE_COLLECTION_TAG_PREFIX = "collection:";
 
-export type BrangusDetectedFileType =
+export type GloveboxDetectedFileType =
   | "pdf"
   | "image"
   | "spreadsheet"
@@ -83,7 +92,7 @@ export type BrangusDetectedFileType =
   | "data"
   | "other";
 
-export const FILE_TYPE_LABELS: Record<BrangusDetectedFileType, string> = {
+export const FILE_TYPE_LABELS: Record<GloveboxDetectedFileType, string> = {
   pdf: "PDFs",
   image: "Images",
   spreadsheet: "Spreadsheets",
@@ -96,7 +105,7 @@ const SPREADSHEET_EXTENSIONS = new Set(["csv", "xls", "xlsx", "xlsm", "ods", "ts
 const DOCUMENT_EXTENSIONS = new Set(["doc", "docx", "pages", "rtf"]);
 const DATA_EXTENSIONS = new Set(["txt", "json", "xml"]);
 
-export function kindLabel(kind: BrangusFileKind | null | undefined): string | null {
+export function kindLabel(kind: GloveboxFileKind | null | undefined): string | null {
   if (!kind) return null;
   return FILE_KIND_OPTIONS.find((option) => option.value === kind)?.label ?? null;
 }
@@ -122,14 +131,14 @@ export function tagsWithFileCollection(
 }
 
 export function fileCategoryLabel(
-  file: Pick<BrangusFileRow, "category" | "kind" | "tags">
+  file: Pick<GloveboxFileRow, "category" | "kind" | "tags">
 ): string {
   return fileCollectionFromTags(file.tags) || file.category?.trim() || "Uncategorised";
 }
 
 export function detectFileType(
-  file: Pick<BrangusFileRow, "mime_type" | "original_filename">
-): BrangusDetectedFileType {
+  file: Pick<GloveboxFileRow, "mime_type" | "original_filename">
+): GloveboxDetectedFileType {
   const mime = file.mime_type.toLowerCase();
   const ext = file.original_filename.split(".").pop()?.toLowerCase() ?? "";
 
@@ -176,13 +185,13 @@ export interface UploadResult {
   storagePath: string;
 }
 
-export async function uploadBrangusFile(opts: {
+export async function uploadGloveboxFile(opts: {
   userId: string;
   file: File;
   title?: string;
-  kind?: BrangusFileKind | null;
+  kind?: GloveboxFileKind | null;
   category?: string | null;
-  source?: BrangusFileSource;
+  source?: GloveboxFileSource;
   conversationId?: string | null;
 }): Promise<UploadResult> {
   const supabase = createClient();
@@ -195,7 +204,7 @@ export async function uploadBrangusFile(opts: {
   const mime = opts.file.type || "application/octet-stream";
 
   const { error: uploadError } = await supabase.storage
-    .from(BRANGUS_FILES_BUCKET)
+    .from(GLOVEBOX_FILES_BUCKET)
     .upload(storagePath, opts.file, {
       cacheControl: "3600",
       contentType: mime,
@@ -213,15 +222,15 @@ export async function uploadBrangusFile(opts: {
     title: opts.title?.trim() || friendlyTitle(opts.file.name),
     kind: opts.kind ?? null,
     tags: tagsWithFileCollection([], opts.category),
-    source: opts.source ?? "files",
+    source: opts.source ?? "glovebox",
     conversation_id: opts.conversationId ?? null,
     extraction_status: "pending",
   };
 
-  const { error: insertError } = await supabase.from("brangus_files").insert(insertPayload);
+  const { error: insertError } = await supabase.from("glovebox_files").insert(insertPayload);
   if (insertError) {
     // Best-effort cleanup of the orphaned object so retries don't pile up.
-    await supabase.storage.from(BRANGUS_FILES_BUCKET).remove([storagePath]);
+    await supabase.storage.from(GLOVEBOX_FILES_BUCKET).remove([storagePath]);
     throw insertError;
   }
 
@@ -232,22 +241,22 @@ export async function uploadBrangusFile(opts: {
   return { fileId, storagePath };
 }
 
-export async function deleteBrangusFile(file: BrangusFileRow): Promise<void> {
+export async function deleteGloveboxFile(file: GloveboxFileRow): Promise<void> {
   const supabase = createClient();
   await supabase
-    .from("brangus_files")
+    .from("glovebox_files")
     .update({ is_deleted: true, deleted_at: new Date().toISOString() })
     .eq("id", file.id);
 
   if (file.storage_path) {
-    await supabase.storage.from(BRANGUS_FILES_BUCKET).remove([file.storage_path]);
+    await supabase.storage.from(GLOVEBOX_FILES_BUCKET).remove([file.storage_path]);
   }
 }
 
 export async function signedUrlFor(storagePath: string): Promise<string | null> {
   const supabase = createClient();
   const { data, error } = await supabase.storage
-    .from(BRANGUS_FILES_BUCKET)
+    .from(GLOVEBOX_FILES_BUCKET)
     .createSignedUrl(storagePath, SIGNED_URL_TTL_SECONDS);
   if (error || !data) return null;
   return data.signedUrl;
@@ -259,7 +268,7 @@ export async function signedDownloadUrlFor(
 ): Promise<string | null> {
   const supabase = createClient();
   const { data, error } = await supabase.storage
-    .from(BRANGUS_FILES_BUCKET)
+    .from(GLOVEBOX_FILES_BUCKET)
     .createSignedUrl(storagePath, SIGNED_URL_TTL_SECONDS, { download: filename });
   if (error || !data) return null;
   return data.signedUrl;
@@ -269,7 +278,7 @@ export async function downloadOriginalAsBase64(
   storagePath: string
 ): Promise<{ base64: string; mime: string } | null> {
   const supabase = createClient();
-  const { data, error } = await supabase.storage.from(BRANGUS_FILES_BUCKET).download(storagePath);
+  const { data, error } = await supabase.storage.from(GLOVEBOX_FILES_BUCKET).download(storagePath);
   if (error || !data) return null;
   const buffer = new Uint8Array(await data.arrayBuffer());
   // Convert to base64 in chunks - large PDFs choke btoa(String.fromCharCode(...))
@@ -289,7 +298,7 @@ export async function downloadExtractedText(
   const supabase = createClient();
   // Naming convention is fixed - extracted.txt always lives next to original.
   const candidate = `${userId}/${fileId}/extracted.txt`;
-  const { data, error } = await supabase.storage.from(BRANGUS_FILES_BUCKET).download(candidate);
+  const { data, error } = await supabase.storage.from(GLOVEBOX_FILES_BUCKET).download(candidate);
   if (error || !data) return null;
   return await data.text();
 }

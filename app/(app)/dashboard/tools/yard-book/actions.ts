@@ -18,6 +18,7 @@ const yardBookItemSchema = z.object({
   recurrence_interval: z.number().int().positive().nullable(),
   reminder_offsets: z.array(z.number().int()).nullable(),
   linked_herd_ids: z.array(z.string().uuid()).nullable(),
+  attachment_file_ids: z.array(z.string().uuid()).nullable(),
   property_id: z.string().uuid().nullable(),
 });
 
@@ -40,6 +41,16 @@ function parseEventTime(time: string | null): string | null {
   return d.toISOString();
 }
 
+function parseUuidArray(raw: string | null): string[] | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function createYardBookItem(formData: FormData) {
   const supabase = await createClient();
   const {
@@ -50,16 +61,15 @@ export async function createYardBookItem(formData: FormData) {
 
   const reminderOffsetsRaw = formData.get("reminder_offsets") as string;
   const linkedHerdIdsRaw = formData.get("linked_herd_ids") as string;
+  const attachmentFileIdsRaw = formData.get("attachment_file_ids") as string;
   const eventTime = formData.get("event_time") as string;
 
   let reminderOffsets: number[] | null = null;
-  let linkedHerdIds: string[] | null = null;
   try {
     if (reminderOffsetsRaw) reminderOffsets = JSON.parse(reminderOffsetsRaw);
   } catch { /* ignore */ }
-  try {
-    if (linkedHerdIdsRaw) linkedHerdIds = JSON.parse(linkedHerdIdsRaw);
-  } catch { /* ignore */ }
+  const linkedHerdIds = parseUuidArray(linkedHerdIdsRaw);
+  const attachmentFileIds = parseUuidArray(attachmentFileIdsRaw);
 
   const parsed = yardBookItemSchema.safeParse({
     title: formData.get("title"),
@@ -75,6 +85,7 @@ export async function createYardBookItem(formData: FormData) {
       : null,
     reminder_offsets: reminderOffsets,
     linked_herd_ids: linkedHerdIds,
+    attachment_file_ids: attachmentFileIds,
     property_id: (formData.get("property_id") as string) || null,
   });
   if (!parsed.success) return { error: "Invalid input" };
@@ -95,6 +106,7 @@ export async function createYardBookItem(formData: FormData) {
     recurrence_interval: v.recurrence_interval,
     reminder_offsets: v.reminder_offsets,
     linked_herd_ids: v.linked_herd_ids,
+    attachment_file_ids: v.attachment_file_ids,
     property_id: v.property_id,
     is_completed: false,
     notifications_scheduled: false,
@@ -120,16 +132,15 @@ export async function updateYardBookItem(id: string, formData: FormData) {
 
   const reminderOffsetsRaw = formData.get("reminder_offsets") as string;
   const linkedHerdIdsRaw = formData.get("linked_herd_ids") as string;
+  const attachmentFileIdsRaw = formData.get("attachment_file_ids") as string;
   const eventTime = formData.get("event_time") as string;
 
   let reminderOffsets: number[] | null = null;
-  let linkedHerdIds: string[] | null = null;
   try {
     if (reminderOffsetsRaw) reminderOffsets = JSON.parse(reminderOffsetsRaw);
   } catch { /* ignore */ }
-  try {
-    if (linkedHerdIdsRaw) linkedHerdIds = JSON.parse(linkedHerdIdsRaw);
-  } catch { /* ignore */ }
+  const linkedHerdIds = parseUuidArray(linkedHerdIdsRaw);
+  const attachmentFileIds = parseUuidArray(attachmentFileIdsRaw);
 
   const parsed = yardBookItemSchema.safeParse({
     title: formData.get("title"),
@@ -145,6 +156,7 @@ export async function updateYardBookItem(id: string, formData: FormData) {
       : null,
     reminder_offsets: reminderOffsets,
     linked_herd_ids: linkedHerdIds,
+    attachment_file_ids: attachmentFileIds,
     property_id: (formData.get("property_id") as string) || null,
   });
   if (!parsed.success) return { error: "Invalid input" };
@@ -165,6 +177,7 @@ export async function updateYardBookItem(id: string, formData: FormData) {
       recurrence_interval: v.recurrence_interval,
       reminder_offsets: v.reminder_offsets,
       linked_herd_ids: v.linked_herd_ids,
+      attachment_file_ids: v.attachment_file_ids,
       property_id: v.property_id,
       updated_at: new Date().toISOString(),
     })

@@ -614,7 +614,7 @@ async function buildFileContentBlock(file: {
   const mime = (file.mime_type ?? "").toLowerCase();
 
   if (mime === "application/pdf") {
-    const { data, error } = await supabase.storage.from("brangus-files").download(file.storage_path);
+    const { data, error } = await supabase.storage.from("glovebox-files").download(file.storage_path);
     if (error || !data) return null;
     const base64 = await blobToBase64(data);
     return {
@@ -623,7 +623,7 @@ async function buildFileContentBlock(file: {
     };
   }
   if (mime.startsWith("image/")) {
-    const { data, error } = await supabase.storage.from("brangus-files").download(file.storage_path);
+    const { data, error } = await supabase.storage.from("glovebox-files").download(file.storage_path);
     if (error || !data) return null;
     const base64 = await blobToBase64(data);
     return {
@@ -637,7 +637,7 @@ async function buildFileContentBlock(file: {
   let bodyText = "";
   if (file.extracted_text_path) {
     const { data, error } = await supabase.storage
-      .from("brangus-files")
+      .from("glovebox-files")
       .download(file.extracted_text_path);
     if (!error && data) bodyText = await data.text();
   }
@@ -869,7 +869,7 @@ export async function sendMessage(
         const supabase = supabaseModule.createClient();
         for (const fileId of queued) {
           const { data: row } = await supabase
-            .from("brangus_files")
+            .from("glovebox_files")
             .select("id, title, original_filename, mime_type, storage_path, extracted_text_path, extraction_status")
             .eq("id", fileId)
             .maybeSingle<AttachedFile>();

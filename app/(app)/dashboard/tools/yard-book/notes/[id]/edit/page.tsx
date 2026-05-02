@@ -23,7 +23,7 @@ export default async function EditYardBookNotePage({
   const [{ data: note }, { data: herds }] = await Promise.all([
     supabase
       .from("yard_book_notes")
-      .select("id, title, body, is_pinned, linked_herd_ids")
+      .select("id, title, body, is_pinned, linked_herd_ids, attachment_file_ids")
       .eq("id", id)
       .eq("user_id", user.id)
       .eq("is_deleted", false)
@@ -57,6 +57,7 @@ export default async function EditYardBookNotePage({
             body: note.body ?? "",
             is_pinned: note.is_pinned ?? false,
             linked_herd_ids: note.linked_herd_ids ?? null,
+            attachment_file_ids: note.attachment_file_ids ?? null,
           }}
           herds={herds ?? []}
           action={update}

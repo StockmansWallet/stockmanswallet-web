@@ -1,16 +1,20 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useState } from "react";
-import { Beef, TrendingUp, MapPin, MessageCircle, FileText, Download, Loader2 } from "lucide-react";
+import {
+  Beef,
+  CalendarDays,
+  Download,
+  FileText,
+  Loader2,
+  MapPin,
+  MessageCircle,
+  Scale,
+  TrendingUp,
+} from "lucide-react";
 import { getCh40SharedFileDownloadUrl } from "@/app/(app)/dashboard/ch40/connections/[id]/actions";
 import type { MessageAttachment } from "@/lib/types/advisory";
-
-const SPECIES_EMOJI: Record<string, string> = {
-  Cattle: "\uD83D\uDC04",
-  Sheep: "\uD83D\uDC0F",
-  Pig: "\uD83D\uDC16",
-  Goat: "\uD83D\uDC10",
-};
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat("en-AU", {
@@ -71,37 +75,58 @@ export function ShareAttachmentCard({
 
   if (attachment.type === "herd") {
     return (
-      <div className="mt-2 flex min-w-0 items-start gap-3 rounded-xl border border-ch40/20 bg-ch40/[0.04] p-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-ch40/15">
-          <Beef className="h-4 w-4 text-ch40-light" aria-hidden="true" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
+      <div className="mt-2 min-w-0 overflow-hidden rounded-xl border border-ch40/20 bg-ch40/[0.045] shadow-sm shadow-black/10">
+        <div className="flex items-start gap-3 border-b border-white/[0.06] px-3 py-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-ch40/15 ring-1 ring-ch40/15">
+            <Beef className="h-4 w-4 text-ch40-light" aria-hidden="true" />
+          </div>
+          <div className="min-w-0 flex-1">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-ch40-light">
               Shared herd
             </span>
-            <span aria-hidden="true" className="text-xs">
-              {SPECIES_EMOJI[attachment.species] ?? ""}
-            </span>
+            <p className="mt-0.5 truncate text-sm font-semibold text-text-primary">
+              {attachment.name}
+            </p>
+            <p className="mt-0.5 text-xs text-text-secondary">
+              {attachment.head_count.toLocaleString("en-AU")} head
+              {" \u00B7 "}
+              {[attachment.breed, attachment.category].filter(Boolean).join(" ")}
+            </p>
           </div>
-          <p className="mt-0.5 truncate text-sm font-semibold text-text-primary">
-            {attachment.name}
-          </p>
-          <p className="mt-0.5 text-xs text-text-secondary">
-            {attachment.head_count.toLocaleString("en-AU")} head
-            {" \u00B7 "}
-            {attachment.breed} {attachment.category}
-          </p>
-          <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-text-muted">
-            {attachment.current_weight != null && attachment.current_weight > 0 && (
-              <span>Avg {Math.round(attachment.current_weight)} kg</span>
-            )}
-            {attachment.estimated_value != null && attachment.estimated_value > 0 && (
-              <span className="font-medium text-success">
-                ~{formatCurrency(attachment.estimated_value)}
-              </span>
-            )}
-          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-px bg-white/[0.06] text-[11px]">
+          <HerdMetric
+            icon={<Scale className="h-3.5 w-3.5" aria-hidden="true" />}
+            label="Average weight"
+            value={
+              attachment.current_weight != null && attachment.current_weight > 0
+                ? `${Math.round(attachment.current_weight)} kg`
+                : "Not recorded"
+            }
+          />
+          <HerdMetric
+            icon={<TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />}
+            label="Estimated value"
+            value={
+              attachment.estimated_value != null && attachment.estimated_value > 0
+                ? formatCurrency(attachment.estimated_value)
+                : "Not recorded"
+            }
+          />
+          <HerdMetric
+            icon={<MapPin className="h-3.5 w-3.5" aria-hidden="true" />}
+            label="Property"
+            value={
+              attachment.property_name
+                ? `${attachment.property_name}${attachment.property_state ? `, ${attachment.property_state}` : ""}`
+                : "Not recorded"
+            }
+          />
+          <HerdMetric
+            icon={<CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />}
+            label="Updated"
+            value={attachment.last_updated ? formatDate(attachment.last_updated) : "Not recorded"}
+          />
         </div>
       </div>
     );
@@ -207,4 +232,24 @@ export function ShareAttachmentCard({
   const _exhaustive: never = attachment;
   void _exhaustive;
   return null;
+}
+
+function HerdMetric({
+  icon,
+  label,
+  value,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="min-w-0 bg-surface/80 px-3 py-2.5">
+      <div className="flex items-center gap-1.5 text-text-muted">
+        {icon}
+        <span className="truncate">{label}</span>
+      </div>
+      <p className="mt-1 truncate text-xs font-semibold text-text-primary">{value}</p>
+    </div>
+  );
 }

@@ -202,7 +202,7 @@ export const producerToolItems: NavItem[] = [
     ...nav("grid-iq"),
   },
   {
-    label: "File Cabinet",
+    label: "Glovebox",
     href: "/dashboard/tools/files",
     icon: <FolderOpen className="h-5 w-5" />,
     ...nav(),

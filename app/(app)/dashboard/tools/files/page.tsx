@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
-import { FilesPageClient } from "@/components/app/files/files-page-client";
-import type { BrangusFileRow } from "@/lib/brangus/files";
+import { GloveboxPageClient } from "@/components/app/files/files-page-client";
+import type { GloveboxFileRow } from "@/lib/glovebox/files";
 
-export const metadata = { title: "File Cabinet" };
+export const metadata = { title: "Glovebox" };
 
 export default async function FilesPage() {
   const supabase = await createClient();
@@ -14,7 +14,7 @@ export default async function FilesPage() {
   if (!user) redirect("/login");
 
   const { data: filesWithCategory, error: filesError } = await supabase
-    .from("brangus_files")
+    .from("glovebox_files")
     .select(
       "id, storage_path, title, original_filename, mime_type, size_bytes, kind, category, tags, page_count, extraction_status, source, conversation_id, created_at, updated_at"
     )
@@ -26,7 +26,7 @@ export default async function FilesPage() {
 
   if (filesError) {
     const fallback = await supabase
-      .from("brangus_files")
+      .from("glovebox_files")
       .select(
         "id, storage_path, title, original_filename, mime_type, size_bytes, kind, tags, page_count, extraction_status, source, conversation_id, created_at, updated_at"
       )
@@ -39,8 +39,8 @@ export default async function FilesPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="File Cabinet" subtitle="Property and livestock documents." />
-      <FilesPageClient userId={user.id} initialFiles={(files ?? []) as BrangusFileRow[]} />
+      <PageHeader title="Glovebox" subtitle="Property and livestock documents." />
+      <GloveboxPageClient userId={user.id} initialFiles={(files ?? []) as GloveboxFileRow[]} />
     </div>
   );
 }

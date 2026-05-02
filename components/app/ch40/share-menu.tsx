@@ -1,21 +1,21 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Beef, TrendingUp, Plus, X, MapPin } from "lucide-react";
+import { useState, useRef } from "react";
+import { Beef, FileText, FolderOpen, Loader2, Paperclip } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Card, CardContent } from "@/components/ui/card";
 import type { MessageAttachment } from "@/lib/types/advisory";
-import {
-  listMyHerdsForShare,
-  listMarketPricesForShare,
-} from "@/app/(app)/dashboard/ch40/connections/[id]/actions";
+import { listMyHerdsForShare } from "@/app/(app)/dashboard/ch40/connections/[id]/actions";
+import { ChatAttachmentMenu } from "@/components/app/chat/chat-attachment-menu";
+import { createClient } from "@/lib/supabase/client";
+import { uploadGloveboxFile } from "@/lib/glovebox/files";
 
 interface ShareMenuProps {
   onAttach: (attachment: MessageAttachment) => void;
   disabled?: boolean;
 }
 
-type MenuMode = "closed" | "root" | "herds" | "prices";
+type MenuMode = "closed" | "root" | "herds" | "files";
 
 interface HerdRow {
   id: string;
@@ -26,35 +26,28 @@ interface HerdRow {
   head_count: number;
   current_weight: number | null;
   initial_weight: number | null;
+  property_name: string | null;
+  property_state: string | null;
+  last_updated: string | null;
 }
 
-interface PriceRow {
-  category: string;
-  saleyard: string;
-  price_per_kg: number;
-  weight_range: string | null;
-  breed: string | null;
-  data_date: string;
+interface FileRow {
+  id: string;
+  title: string;
+  original_filename: string;
+  mime_type: string | null;
+  size_bytes: number | null;
+  kind: string | null;
+  storage_path: string | null;
 }
 
 export function ShareMenu({ onAttach, disabled }: ShareMenuProps) {
   const [mode, setMode] = useState<MenuMode>("closed");
   const [herds, setHerds] = useState<HerdRow[] | null>(null);
-  const [prices, setPrices] = useState<PriceRow[] | null>(null);
+  const [files, setFiles] = useState<FileRow[] | null>(null);
   const [loading, setLoading] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  // Close root menu on outside click.
-  useEffect(() => {
-    if (mode !== "root") return;
-    function onClick(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMode("closed");
-      }
-    }
-    document.addEventListener("mousedown", onClick);
-    return () => document.removeEventListener("mousedown", onClick);
-  }, [mode]);
+  const [uploading, setUploading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const openHerdPicker = async () => {
     setMode("herds");
@@ -66,12 +59,18 @@ export function ShareMenu({ onAttach, disabled }: ShareMenuProps) {
     }
   };
 
-  const openPricePicker = async () => {
-    setMode("prices");
-    if (prices == null) {
+  const openFilePicker = async () => {
+    setMode("files");
+    if (files == null) {
       setLoading(true);
-      const result = await listMarketPricesForShare();
-      setPrices((result.prices as PriceRow[]) ?? []);
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("glovebox_files")
+        .select("id, title, original_filename, mime_type, size_bytes, kind, storage_path")
+        .eq("is_deleted", false)
+        .order("updated_at", { ascending: false })
+        .limit(50);
+      setFiles((data ?? []) as FileRow[]);
       setLoading(false);
     }
   };
@@ -88,79 +87,96 @@ export function ShareMenu({ onAttach, disabled }: ShareMenuProps) {
       current_weight: h.current_weight,
       initial_weight: h.initial_weight,
       estimated_value: null,
+      property_name: h.property_name,
+      property_state: h.property_state,
+      last_updated: h.last_updated,
     });
     setMode("closed");
   };
 
-  const sharePrice = (p: PriceRow) => {
+  const shareFile = (file: FileRow) => {
     onAttach({
-      type: "price",
-      category: p.category,
-      saleyard: p.saleyard,
-      price_per_kg: p.price_per_kg,
-      weight_range: p.weight_range,
-      breed: p.breed,
-      data_date: p.data_date,
+      type: "file",
+      file_id: file.id,
+      title: file.title || file.original_filename,
+      mime_type: file.mime_type,
+      size_bytes: file.size_bytes,
+      kind: file.kind,
     });
     setMode("closed");
+  };
+
+  const uploadFiles = async (fileList: FileList | null) => {
+    const uploadFile = fileList?.[0];
+    if (!uploadFile) return;
+    setUploading(true);
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+      const { fileId } = await uploadGloveboxFile({
+        userId: user.id,
+        file: uploadFile,
+        source: "ch40",
+      });
+      onAttach({
+        type: "file",
+        file_id: fileId,
+        title: uploadFile.name.replace(/\.[^.]+$/, ""),
+        mime_type: uploadFile.type || "application/octet-stream",
+        size_bytes: uploadFile.size,
+        kind: null,
+      });
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
   };
 
   return (
     <>
-      <div className="relative" ref={menuRef}>
-        <button
-          type="button"
-          onClick={() => setMode(mode === "root" ? "closed" : "root")}
-          disabled={disabled}
-          aria-label="Attach a herd or market price"
-          aria-expanded={mode === "root"}
-          title="Attach a herd or market price"
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-all disabled:opacity-40 ${
-            mode === "root"
-              ? "border-ch40/30 bg-ch40/20 text-ch40-light"
-              : "border-ch40/25 bg-ch40/15 text-ch40-light hover:bg-ch40/25 hover:text-ch40-light"
-          }`}
-        >
-          {mode === "root" ? (
-            <X className="h-5 w-5" aria-hidden="true" strokeWidth={2.5} />
-          ) : (
-            <Plus className="h-5 w-5" aria-hidden="true" strokeWidth={2.5} />
-          )}
-        </button>
+      <ChatAttachmentMenu
+        open={mode === "root"}
+        busy={uploading}
+        disabled={disabled}
+        accentClassName="border-ch40/30 text-ch40-light"
+        onOpenChange={(open) => setMode(open ? "root" : "closed")}
+        actions={[
+          {
+            id: "upload",
+            title: "Attach a file",
+            subtitle: "Upload and save it to Glovebox",
+            icon: <Paperclip className="h-4 w-4" aria-hidden="true" />,
+            iconClassName: "bg-ch40/15 text-ch40-light",
+            onSelect: () => inputRef.current?.click(),
+          },
+          {
+            id: "glovebox",
+            title: "From Glovebox",
+            subtitle: "Choose a file you have already saved",
+            icon: <FolderOpen className="h-4 w-4" aria-hidden="true" />,
+            iconClassName: "bg-info/15 text-info",
+            onSelect: openFilePicker,
+          },
+          {
+            id: "herd",
+            title: "Share a herd",
+            subtitle: "Send a snapshot with weight, head count and property context",
+            icon: <Beef className="h-4 w-4" aria-hidden="true" />,
+            iconClassName: "bg-ch40/15 text-ch40-light",
+            onSelect: openHerdPicker,
+          },
+        ]}
+      />
 
-        {mode === "root" && (
-          <div className="bg-bg-alt absolute bottom-full left-0 z-20 mb-2 w-56 overflow-hidden rounded-xl border border-white/10 shadow-xl">
-            <button
-              type="button"
-              onClick={openHerdPicker}
-              className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-white/[0.04]"
-            >
-              <div className="bg-ch40/15 flex h-8 w-8 items-center justify-center rounded-lg">
-                <Beef className="text-ch40-light h-4 w-4" aria-hidden="true" />
-              </div>
-              <div>
-                <p className="text-text-primary text-sm font-medium">Share a herd</p>
-                <p className="text-text-muted text-[11px]">
-                  A frozen snapshot of one of your herds
-                </p>
-              </div>
-            </button>
-            <button
-              type="button"
-              onClick={openPricePicker}
-              className="flex w-full items-center gap-3 border-t border-white/[0.06] px-3 py-2.5 text-left transition-colors hover:bg-white/[0.04]"
-            >
-              <div className="bg-info/15 flex h-8 w-8 items-center justify-center rounded-lg">
-                <TrendingUp className="text-info h-4 w-4" aria-hidden="true" />
-              </div>
-              <div>
-                <p className="text-text-primary text-sm font-medium">Share a market price</p>
-                <p className="text-text-muted text-[11px]">Latest saleyard or national price</p>
-              </div>
-            </button>
-          </div>
-        )}
-      </div>
+      <input
+        ref={inputRef}
+        type="file"
+        className="hidden"
+        onChange={(event) => uploadFiles(event.target.files)}
+      />
 
       <Modal
         open={mode === "herds"}
@@ -193,6 +209,11 @@ export function ShareMenu({ onAttach, disabled }: ShareMenuProps) {
                         {" \u00B7 "}
                         {h.breed} {h.category}
                       </p>
+                      <p className="text-text-muted mt-0.5 truncate text-[11px]">
+                        {h.current_weight ? `${Math.round(h.current_weight)}kg avg` : h.species}
+                        {h.property_name ? ` · ${h.property_name}` : ""}
+                        {h.property_state ? `, ${h.property_state}` : ""}
+                      </p>
                     </div>
                   </button>
                 </CardContent>
@@ -207,47 +228,36 @@ export function ShareMenu({ onAttach, disabled }: ShareMenuProps) {
       </Modal>
 
       <Modal
-        open={mode === "prices"}
+        open={mode === "files"}
         onClose={() => setMode("closed")}
-        title="Share a market price"
+        title="Choose from Glovebox"
         size="md"
       >
         {loading ? (
-          <p className="text-text-muted py-8 text-center text-sm">Loading prices...</p>
-        ) : prices && prices.length > 0 ? (
+          <div className="flex justify-center py-8 text-text-muted">
+            <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+          </div>
+        ) : files && files.length > 0 ? (
           <div className="max-h-[60vh] space-y-2 overflow-y-auto pr-1">
-            {prices.map((p) => (
+            {files.map((file) => (
               <Card
-                key={`${p.category}-${p.saleyard}-${p.breed ?? ""}-${p.weight_range ?? ""}-${p.data_date}`}
+                key={file.id}
                 className="bg-surface hover:bg-surface-low cursor-pointer transition-all"
               >
                 <CardContent className="p-0">
                   <button
                     type="button"
-                    onClick={() => sharePrice(p)}
+                    onClick={() => shareFile(file)}
                     className="flex w-full items-center gap-3 px-4 py-3 text-left"
                   >
-                    <div className="bg-info/15 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
-                      <TrendingUp className="text-info h-4 w-4" aria-hidden="true" />
+                    <div className="bg-ch40/15 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+                      <FileText className="text-ch40-light h-4 w-4" aria-hidden="true" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-text-primary truncate text-sm font-semibold">
-                        {p.category}
-                        {p.breed ? ` (${p.breed})` : ""}
+                      <p className="text-text-primary truncate text-sm font-semibold">{file.title}</p>
+                      <p className="text-text-muted mt-0.5 truncate text-xs">
+                        {file.kind ? file.kind.replaceAll("_", " ") : file.mime_type ?? "File"}
                       </p>
-                      <div className="text-text-muted mt-0.5 flex flex-wrap items-center gap-x-3 text-xs">
-                        <span className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3" aria-hidden="true" />
-                          {p.saleyard}
-                        </span>
-                        {p.weight_range && <span>{p.weight_range}</span>}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-info text-base font-bold">
-                        ${(p.price_per_kg / 100).toFixed(2)}
-                      </p>
-                      <p className="text-text-muted text-[10px]">/kg</p>
                     </div>
                   </button>
                 </CardContent>
@@ -256,7 +266,7 @@ export function ShareMenu({ onAttach, disabled }: ShareMenuProps) {
           </div>
         ) : (
           <p className="text-text-muted py-8 text-center text-sm">
-            No recent market prices available.
+            No files in Glovebox yet.
           </p>
         )}
       </Modal>

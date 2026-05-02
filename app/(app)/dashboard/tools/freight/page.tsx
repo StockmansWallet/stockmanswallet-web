@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { FreightCalculator } from "./freight-calculator";
+import { FreightTabs } from "./freight-tabs";
 
 export const metadata = {
   title: "Freight IQ",
@@ -37,6 +38,7 @@ export default async function FreightPage() {
         title="Freight IQ"
         subtitle="Deck loading and route costing"
         subtitleClassName="text-sm font-medium text-text-secondary"
+        actions={<FreightTabs active="new" />}
       />
       <FreightCalculator herds={herds ?? []} properties={properties ?? []} />
     </div>

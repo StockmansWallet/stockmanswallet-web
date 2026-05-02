@@ -163,6 +163,26 @@ export default async function YardBookItemPage({ params }: { params: Promise<{ i
     propertyName = data?.property_name ?? null;
   }
 
+  let attachmentFiles: {
+    id: string;
+    title: string;
+    original_filename: string;
+    mime_type: string;
+    size_bytes: number;
+    kind: string | null;
+  }[] = [];
+  if (item.attachment_file_ids && item.attachment_file_ids.length > 0) {
+    const { data } = await supabase
+      .from("glovebox_files")
+      .select("id, title, original_filename, mime_type, size_bytes, kind")
+      .in("id", item.attachment_file_ids)
+      .eq("user_id", user.id)
+      .eq("is_deleted", false);
+    attachmentFiles = (data ?? []).sort(
+      (a, b) => item.attachment_file_ids.indexOf(a.id) - item.attachment_file_ids.indexOf(b.id)
+    );
+  }
+
   const catConfig =
     CATEGORY_CONFIG[item.category_raw as YardBookCategory] ?? CATEGORY_CONFIG.Livestock;
   const CatIcon = catConfig.icon;
@@ -335,7 +355,68 @@ export default async function YardBookItemPage({ params }: { params: Promise<{ i
             </CardContent>
           </Card>
         )}
+
+        {attachmentFiles.length > 0 && (
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <div className="flex items-center gap-2.5">
+                <SectionIcon icon={FileText} />
+                <CardTitle>Glovebox Attachments</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {attachmentFiles.map((file) => (
+                  <div
+                    key={file.id}
+                    className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5"
+                  >
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-yard-book/15">
+                      <FileText className="h-4 w-4 text-yard-book-light" aria-hidden="true" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-text-primary">
+                        {file.title}
+                      </p>
+                      <p className="truncate text-xs text-text-muted">
+                        {file.kind ? gloveboxKindLabel(file.kind) : shortMime(file.mime_type)}
+                        {" · "}
+                        {formatBytes(file.size_bytes)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
+}
+
+function gloveboxKindLabel(kind: string): string {
+  return kind
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function shortMime(mime: string): string {
+  const value = (mime || "").toLowerCase();
+  if (value === "application/pdf") return "PDF";
+  if (value.startsWith("image/")) return value.split("/")[1]?.toUpperCase() ?? "IMAGE";
+  if (value.includes("spreadsheet") || value.includes("excel")) return "XLSX";
+  if (value.includes("csv")) return "CSV";
+  if (value.includes("wordprocessingml")) return "DOCX";
+  if (value.startsWith("text/")) return "TEXT";
+  return "FILE";
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  const kb = bytes / 1024;
+  if (kb < 1024) return `${kb.toFixed(0)} KB`;
+  const mb = kb / 1024;
+  return `${mb.toFixed(1)} MB`;
 }

@@ -10,7 +10,7 @@ export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
-  // Files the user attached to this turn via the paperclip. Drives the chip
+  // Glovebox files the user attached to this turn via the paperclip. Drives the chip
   // strip rendered inside the user bubble. Empty / undefined for plain text.
   attachments?: ChatMessageAttachment[];
 }
@@ -129,15 +129,15 @@ export interface ChatDataStore {
   // Supabase (e.g. lookup_file). Populated when the chat starts.
   userId: string | null;
 
-  // File ids that lookup_file get_content asked Brangus to read on the
+  // Glovebox file ids that lookup_file get_content asked Brangus to read on the
   // NEXT turn (PDFs/images that need to arrive as native document/image
   // blocks). The chat-service drains this after each tool round and
   // appends the corresponding content blocks to the next user message.
   pendingFileFollowups: string[];
 }
 
-// MARK: - Brangus Files (chat-side rows)
-export interface BrangusFileChatRow {
+// MARK: - Glovebox Files (chat-side rows)
+export interface GloveboxFileChatRow {
   id: string;
   title: string;
   original_filename: string;

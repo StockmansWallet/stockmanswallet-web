@@ -449,7 +449,7 @@ export function BrangusChat({
         ]);
         if (cancelled) return;
         // lookup_file needs user_id at the store level so it can scope its
-        // brangus_files queries without re-fetching auth on every tool call.
+        // glovebox_files queries without re-fetching auth on every tool call.
         dataStore.userId = userIdRef.current;
         const prompt = buildSystemPrompt(dataStore, serverConfig, userMemories, recentChats);
         setStore(dataStore);

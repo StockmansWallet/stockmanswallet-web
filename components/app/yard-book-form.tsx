@@ -7,6 +7,7 @@ import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Wrench, DollarSign, Home, User } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
+import { YardBookGloveboxAttachments } from "@/components/app/yard-book-glovebox-attachments";
 import type { Database } from "@/lib/types/database";
 import type { YardBookCategory, RecurrenceRule } from "@/lib/types/models";
 
@@ -237,6 +238,8 @@ export function YardBookForm({ item, herds, properties, action, submitLabel }: Y
               className="text-text-primary placeholder:text-text-muted focus:ring-yard-book/60 w-full rounded-xl bg-white/5 px-4 py-3 text-sm transition-all outline-none focus:bg-white/8 focus:ring-1 focus:ring-inset"
             />
           </section>
+
+          <YardBookGloveboxAttachments initialFileIds={item?.attachment_file_ids ?? []} />
         </div>
 
         {/* Right column */}

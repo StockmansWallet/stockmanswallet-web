@@ -74,6 +74,7 @@ const gridSaveSchema = z.object({
   recordName: z.string().min(1).max(200).nullable(),
   sourceFileName: z.string().max(500).nullable(),
   processorId: z.string().uuid().nullable(),
+  gloveboxFileId: z.string().uuid().nullable(),
   gridData: z.object({
     processorName: z.string().nullable(),
     gridCode: z.string().nullable(),
@@ -92,6 +93,7 @@ export interface ProcessorGridSaveInput {
   recordName: string | null;
   sourceFileName: string | null;
   processorId: string | null;
+  gloveboxFileId: string | null;
   gridData: GridParserData;
 }
 
@@ -109,7 +111,7 @@ export async function saveProcessorGrid(
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Not authenticated" };
 
-  const { recordName, sourceFileName, processorId, gridData } = parsed.data;
+  const { recordName, sourceFileName, processorId, gloveboxFileId, gridData } = parsed.data;
   const effectiveProcessor = gridData.processorName || "Unknown Processor";
   const id = crypto.randomUUID();
 
@@ -117,6 +119,7 @@ export async function saveProcessorGrid(
     id,
     user_id: user.id,
     processor_id: processorId,
+    glovebox_file_id: gloveboxFileId,
     processor_name: effectiveProcessor,
     grid_name: recordName || `${effectiveProcessor} - Grid`,
     source_file_name: sourceFileName,
@@ -203,6 +206,7 @@ const killSheetSaveSchema = z.object({
   recordName: z.string().min(1).max(200).nullable(),
   sourceFileName: z.string().max(500).nullable(),
   processorId: z.string().uuid().nullable(),
+  gloveboxFileId: z.string().uuid().nullable(),
   killSheetData: z.object({
     processorName: z.string().nullable(),
     killDate: z.string().nullable(),
@@ -227,6 +231,7 @@ export interface KillSheetSaveInput {
   recordName: string | null;
   sourceFileName: string | null;
   processorId: string | null;
+  gloveboxFileId: string | null;
   killSheetData: KillSheetParserData;
 }
 
@@ -244,7 +249,8 @@ export async function saveKillSheet(
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Not authenticated" };
 
-  const { recordName, sourceFileName, processorId, killSheetData: ks } = parsed.data;
+  const { recordName, sourceFileName, processorId, gloveboxFileId, killSheetData: ks } =
+    parsed.data;
   const effectiveProcessor = ks.processorName || "Unknown Processor";
   const id = crypto.randomUUID();
 
@@ -252,6 +258,7 @@ export async function saveKillSheet(
     id,
     user_id: user.id,
     processor_id: processorId,
+    glovebox_file_id: gloveboxFileId,
     processor_name: effectiveProcessor,
     record_name: recordName || `${effectiveProcessor} - Kill Sheet`,
     source_file_name: sourceFileName,

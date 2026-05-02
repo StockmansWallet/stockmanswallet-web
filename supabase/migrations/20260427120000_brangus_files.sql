@@ -1,20 +1,20 @@
--- Brangus Files
--- Document/photo upload feature for Brangus AI chat.
+-- Glovebox Files
+-- Document/photo storage for Glovebox.
 -- One row per uploaded file, regardless of whether it was uploaded from the
--- Files tool page or directly attached in a chat message.
--- Files store any format - PDFs and images go to Claude natively as document
+-- Glovebox tool or directly attached in a chat message.
+-- Glovebox stores any format - PDFs and images go to Claude natively as document
 -- /image content blocks; everything else is text-extracted into extracted.txt
 -- by the extract-file-text Edge Function on upload.
 
 -- =====================================================================
--- brangus_files: master file table
+-- glovebox_files: master file table
 -- =====================================================================
 
-CREATE TABLE IF NOT EXISTS brangus_files (
+CREATE TABLE IF NOT EXISTS glovebox_files (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
 
-    -- Storage object pointers (paths inside the brangus-files bucket)
+    -- Storage object pointers (paths inside the glovebox-files bucket)
     storage_path TEXT NOT NULL,           -- {uid}/{id}/original.{ext}
     extracted_text_path TEXT,             -- {uid}/{id}/extracted.txt or NULL
     preview_image_path TEXT,              -- {uid}/{id}/preview.jpg or NULL
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS brangus_files (
     property_id UUID REFERENCES properties(id) ON DELETE SET NULL,
 
     -- Where the file was uploaded from
-    source TEXT NOT NULL DEFAULT 'files', -- 'files' | 'chat'
+    source TEXT NOT NULL DEFAULT 'glovebox', -- glovebox | chat | ch40 | grid_iq | reports | yard_book
     conversation_id UUID REFERENCES brangus_conversations(id) ON DELETE SET NULL,
 
     -- Server-side text extraction state (populated by extract-file-text Edge Function)
@@ -50,40 +50,40 @@ CREATE TABLE IF NOT EXISTS brangus_files (
     is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
     deleted_at TIMESTAMPTZ,
 
-    CONSTRAINT brangus_files_kind_valid CHECK (
+    CONSTRAINT glovebox_files_kind_valid CHECK (
         kind IS NULL OR kind IN (
             'vet_report', 'nlis', 'mla_receipt', 'lease',
             'soil_test', 'kill_sheet', 'eu_cert', 'breeding', 'other'
         )
     ),
-    CONSTRAINT brangus_files_source_valid CHECK (source IN ('files', 'chat')),
-    CONSTRAINT brangus_files_extraction_status_valid CHECK (
+    CONSTRAINT glovebox_files_source_valid CHECK (source IN ('glovebox', 'chat', 'ch40', 'grid_iq', 'reports', 'yard_book')),
+    CONSTRAINT glovebox_files_extraction_status_valid CHECK (
         extraction_status IN ('pending', 'complete', 'unsupported', 'failed', 'not_required')
     )
 );
 
-ALTER TABLE brangus_files ENABLE ROW LEVEL SECURITY;
+ALTER TABLE glovebox_files ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY users_own_files_select
-    ON brangus_files FOR SELECT
+CREATE POLICY users_own_glovebox_files_select
+    ON glovebox_files FOR SELECT
     USING (user_id = auth.uid());
 
-CREATE POLICY users_own_files_insert
-    ON brangus_files FOR INSERT
+CREATE POLICY users_own_glovebox_files_insert
+    ON glovebox_files FOR INSERT
     WITH CHECK (user_id = auth.uid());
 
-CREATE POLICY users_own_files_update
-    ON brangus_files FOR UPDATE
+CREATE POLICY users_own_glovebox_files_update
+    ON glovebox_files FOR UPDATE
     USING (user_id = auth.uid());
 
-CREATE POLICY users_own_files_delete
-    ON brangus_files FOR DELETE
+CREATE POLICY users_own_glovebox_files_delete
+    ON glovebox_files FOR DELETE
     USING (user_id = auth.uid());
 
-CREATE INDEX idx_brangus_files_user_id ON brangus_files(user_id);
-CREATE INDEX idx_brangus_files_user_kind ON brangus_files(user_id, kind);
-CREATE INDEX idx_brangus_files_conversation ON brangus_files(conversation_id) WHERE conversation_id IS NOT NULL;
-CREATE INDEX idx_brangus_files_user_active ON brangus_files(user_id, updated_at DESC) WHERE is_deleted = FALSE;
+CREATE INDEX idx_glovebox_files_user_id ON glovebox_files(user_id);
+CREATE INDEX idx_glovebox_files_user_kind ON glovebox_files(user_id, kind);
+CREATE INDEX idx_glovebox_files_conversation ON glovebox_files(conversation_id) WHERE conversation_id IS NOT NULL;
+CREATE INDEX idx_glovebox_files_user_active ON glovebox_files(user_id, updated_at DESC) WHERE is_deleted = FALSE;
 
 -- =====================================================================
 -- brangus_message_attachments: join table linking a message to its files
@@ -94,7 +94,7 @@ CREATE INDEX idx_brangus_files_user_active ON brangus_files(user_id, updated_at 
 CREATE TABLE IF NOT EXISTS brangus_message_attachments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     message_id UUID NOT NULL REFERENCES brangus_messages(id) ON DELETE CASCADE,
-    file_id UUID NOT NULL REFERENCES brangus_files(id) ON DELETE CASCADE,
+    file_id UUID NOT NULL REFERENCES glovebox_files(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 
@@ -119,10 +119,10 @@ CREATE INDEX idx_bma_message ON brangus_message_attachments(message_id);
 CREATE INDEX idx_bma_file ON brangus_message_attachments(file_id);
 
 -- =====================================================================
--- updated_at trigger for brangus_files
+-- updated_at trigger for glovebox_files
 -- =====================================================================
 
-CREATE OR REPLACE FUNCTION brangus_files_touch_updated_at()
+CREATE OR REPLACE FUNCTION glovebox_files_touch_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = now();
@@ -130,44 +130,44 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_brangus_files_touch_updated_at
-    BEFORE UPDATE ON brangus_files
+CREATE TRIGGER trg_glovebox_files_touch_updated_at
+    BEFORE UPDATE ON glovebox_files
     FOR EACH ROW
-    EXECUTE FUNCTION brangus_files_touch_updated_at();
+    EXECUTE FUNCTION glovebox_files_touch_updated_at();
 
 -- =====================================================================
--- brangus-files storage bucket + per-user RLS
+-- glovebox-files storage bucket + per-user RLS
 -- =====================================================================
 
 INSERT INTO storage.buckets (id, name, public)
-VALUES ('brangus-files', 'brangus-files', false)
+VALUES ('glovebox-files', 'glovebox-files', false)
 ON CONFLICT (id) DO NOTHING;
 
 -- Per-user folder policy: object name must begin with "{auth.uid()}/"
-CREATE POLICY "brangus_files_storage_select"
+CREATE POLICY "glovebox_files_storage_select"
     ON storage.objects FOR SELECT
     USING (
-        bucket_id = 'brangus-files'
+        bucket_id = 'glovebox-files'
         AND starts_with(name, (auth.uid())::text || '/')
     );
 
-CREATE POLICY "brangus_files_storage_insert"
+CREATE POLICY "glovebox_files_storage_insert"
     ON storage.objects FOR INSERT
     WITH CHECK (
-        bucket_id = 'brangus-files'
+        bucket_id = 'glovebox-files'
         AND starts_with(name, (auth.uid())::text || '/')
     );
 
-CREATE POLICY "brangus_files_storage_update"
+CREATE POLICY "glovebox_files_storage_update"
     ON storage.objects FOR UPDATE
     USING (
-        bucket_id = 'brangus-files'
+        bucket_id = 'glovebox-files'
         AND starts_with(name, (auth.uid())::text || '/')
     );
 
-CREATE POLICY "brangus_files_storage_delete"
+CREATE POLICY "glovebox_files_storage_delete"
     ON storage.objects FOR DELETE
     USING (
-        bucket_id = 'brangus-files'
+        bucket_id = 'glovebox-files'
         AND starts_with(name, (auth.uid())::text || '/')
     );

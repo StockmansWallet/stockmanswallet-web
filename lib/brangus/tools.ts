@@ -412,7 +412,7 @@ export const toolDefinitions = [
   {
     name: "lookup_file",
     description:
-      "Looks up files the user has uploaded (vet reports, NLIS docs, MLA receipts, lease agreements, soil tests, kill sheets, EU certs, breeding records, photos, anything else). action='list' returns a slim catalogue (id, title, category, kind, size, page count). action='get_metadata' returns one file's metadata. action='get_content' makes the file readable to you - PDFs and images arrive as native document/image blocks on the next turn, other formats arrive as extracted text in the tool_result. Use list first to discover what the user has, then get_content to actually read the relevant one. When the user attaches a file directly via the paperclip in the chat, you do NOT need to call lookup_file - it is already in the user message.",
+      "Looks up files stored in the user's Glovebox (vet reports, NLIS docs, MLA receipts, lease agreements, soil tests, kill sheets, processor grids, reports, photos, anything else). action='list' returns a slim catalogue (id, title, category, kind, size, page count). action='get_metadata' returns one file's metadata. action='get_content' makes the file readable to you. PDFs and images arrive as native document/image blocks on the next turn, other formats arrive as extracted text in the tool_result. Use list first to discover what the user has, then get_content to actually read the relevant one. When the user attaches a file directly via the paperclip in the chat, you do NOT need to call lookup_file. It is already in the user message.",
     input_schema: {
       type: "object",
       properties: {
@@ -509,7 +509,7 @@ async function executeLookupFile(
       const max = Math.max(1, Math.min(50, maxRaw));
 
       let q = supabase
-        .from("brangus_files")
+        .from("glovebox_files")
         .select("id, title, category, kind, size_bytes, page_count, mime_type, created_at")
         .eq("user_id", store.userId)
         .eq("is_deleted", false)
@@ -522,7 +522,7 @@ async function executeLookupFile(
       const { data, error } = await q;
       if (error) {
         let fallbackQ = supabase
-          .from("brangus_files")
+          .from("glovebox_files")
           .select("id, title, kind, size_bytes, page_count, mime_type, created_at")
           .eq("user_id", store.userId)
           .eq("is_deleted", false)
@@ -562,7 +562,7 @@ async function executeLookupFile(
       const fileId = typeof input.file_id === "string" ? input.file_id : null;
       if (!fileId) return "Error: file_id required.";
       let { data, error } = await supabase
-        .from("brangus_files")
+        .from("glovebox_files")
         .select(
           "id, title, category, kind, tags, notes, original_filename, mime_type, size_bytes, page_count, extraction_status, created_at",
         )
@@ -572,7 +572,7 @@ async function executeLookupFile(
         .maybeSingle();
       if (error || !data) {
         const fallback = await supabase
-          .from("brangus_files")
+          .from("glovebox_files")
           .select(
             "id, title, kind, tags, notes, original_filename, mime_type, size_bytes, page_count, extraction_status, created_at",
           )
@@ -603,7 +603,7 @@ async function executeLookupFile(
       const fileId = typeof input.file_id === "string" ? input.file_id : null;
       if (!fileId) return "Error: file_id required.";
       const { data, error } = await supabase
-        .from("brangus_files")
+        .from("glovebox_files")
         .select(
           "id, title, original_filename, mime_type, storage_path, extracted_text_path, extraction_status",
         )
@@ -624,7 +624,7 @@ async function executeLookupFile(
       }
       if (data.extracted_text_path) {
         const { data: blob, error: dlError } = await supabase.storage
-          .from("brangus-files")
+          .from("glovebox-files")
           .download(data.extracted_text_path);
         if (dlError || !blob) return "(File contents not available.)";
         const text = await blob.text();

@@ -1,13 +1,14 @@
 "use client";
 
 // Compact plus-menu attachment control for the Brangus chat composer.
-// Uploads files via the same backend the Files tool page uses; queued files
+// Uploads files via the same backend the Glovebox tool uses; queued files
 // are attached to the next user turn.
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useRef, useState, type ReactNode } from "react";
 import { FolderOpen, Loader2, Paperclip, X } from "lucide-react";
-import { uploadBrangusFile } from "@/lib/brangus/files";
+import { uploadGloveboxFile } from "@/lib/glovebox/files";
 import { createClient } from "@/lib/supabase/client";
+import { ChatAttachmentMenu } from "@/components/app/chat/chat-attachment-menu";
 
 export interface AttachmentChip {
   id: string;
@@ -37,7 +38,6 @@ export function BrangusAttachmentRow({
   children,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
   const dragDepthRef = useRef(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,18 +46,6 @@ export function BrangusAttachmentRow({
   const [filePickerOpen, setFilePickerOpen] = useState(false);
   const [filePickerItems, setFilePickerItems] = useState<AttachmentChip[] | null>(null);
 
-  useEffect(() => {
-    if (!menuOpen) return;
-
-    const onPointerDown = (event: PointerEvent) => {
-      if (menuRef.current?.contains(event.target as Node)) return;
-      setMenuOpen(false);
-    };
-
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [menuOpen]);
-
   const handleFiles = useCallback(
     async (files: File[]) => {
       if (!userId || files.length === 0) return;
@@ -65,7 +53,7 @@ export function BrangusAttachmentRow({
       setError(null);
       try {
         for (const file of files) {
-          const { fileId, storagePath } = await uploadBrangusFile({
+          const { fileId, storagePath } = await uploadGloveboxFile({
             userId,
             file,
             source: "chat",
@@ -96,7 +84,7 @@ export function BrangusAttachmentRow({
     setFilePickerItems(null);
     const supabase = createClient();
     const { data } = await supabase
-      .from("brangus_files")
+      .from("glovebox_files")
       .select(
         "id, title, original_filename, mime_type, storage_path, extracted_text_path, extraction_status",
       )
@@ -168,55 +156,35 @@ export function BrangusAttachmentRow({
       )}
 
       <div className="flex items-center gap-2">
-        <div ref={menuRef} className="relative shrink-0">
-          <button
-            type="button"
-            onClick={() => setMenuOpen((open) => !open)}
-            disabled={busy || !userId}
-            className="flex h-[44px] w-[44px] items-center justify-center rounded-full border border-white/10 bg-white/5 text-text-muted transition hover:bg-white/10 hover:text-text-secondary disabled:opacity-50"
-            aria-label="Add attachment"
-            aria-expanded={menuOpen}
-          >
-            {busy ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Paperclip className="h-4 w-4" />
-            )}
-          </button>
-
-          {menuOpen && (
-            <div className="absolute bottom-full left-0 z-30 mb-2 w-52 overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-3 shadow-2xl shadow-black/35 backdrop-blur-xl backdrop-saturate-150">
-              <p className="px-1 pb-2 text-[10px] font-semibold tracking-[0.16em] text-text-muted uppercase">
-                Attachments
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  inputRef.current?.click();
-                }}
-                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-white/80 transition hover:bg-white/[0.06] hover:text-white"
-              >
-                <Paperclip className="h-3.5 w-3.5" />
-                <span>Attach a file</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  setFilePickerOpen(true);
-                  loadSavedFiles();
-                }}
-                disabled={!userId}
-                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-white/80 transition hover:bg-white/[0.06] hover:text-white disabled:opacity-50"
-              >
-                <FolderOpen className="h-3.5 w-3.5" />
-                <span>From my File Cabinet</span>
-              </button>
-            </div>
-          )}
-        </div>
+        <ChatAttachmentMenu
+          open={menuOpen}
+          busy={busy}
+          disabled={!userId}
+          accentClassName="border-amber-300/30 text-amber-200"
+          onOpenChange={setMenuOpen}
+          actions={[
+            {
+              id: "upload",
+              title: "Attach a file",
+              subtitle: "Upload and save it to Glovebox",
+              icon: <Paperclip className="h-4 w-4" aria-hidden="true" />,
+              iconClassName: "bg-amber-500/15 text-amber-200",
+              onSelect: () => inputRef.current?.click(),
+            },
+            {
+              id: "glovebox",
+              title: "From Glovebox",
+              subtitle: "Choose a file you have already saved",
+              icon: <FolderOpen className="h-4 w-4" aria-hidden="true" />,
+              iconClassName: "bg-info/15 text-info",
+              disabled: !userId,
+              onSelect: () => {
+                setFilePickerOpen(true);
+                loadSavedFiles();
+              },
+            },
+          ]}
+        />
 
         <input
           ref={inputRef}
@@ -272,13 +240,13 @@ function ChooseFilesModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm md:items-center">
-      <div className="m-4 w-full max-w-md rounded-2xl bg-neutral-950 p-4">
+      <div className="m-4 w-full max-w-md rounded-2xl border border-white/[0.08] bg-bg-alt p-4 shadow-2xl">
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-white">Choose files</h3>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-white/60 hover:bg-white/5"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-text-muted transition-colors hover:bg-white/[0.08] hover:text-text-primary"
             aria-label="Close file picker"
           >
             <X className="h-4 w-4" />
@@ -293,7 +261,7 @@ function ChooseFilesModal({
             No files yet. Upload one from the Tools tab.
           </div>
         ) : (
-          <ul className="max-h-72 divide-y divide-white/[0.06] overflow-y-auto">
+          <ul className="max-h-72 space-y-2 overflow-y-auto pr-1">
             {items.map((item) => {
               const already = existingIds.has(item.id);
               return (
@@ -305,12 +273,15 @@ function ChooseFilesModal({
                       onPicked(item);
                       onClose();
                     }}
-                    className="flex w-full items-center gap-2 px-1 py-2 text-left text-sm text-white hover:bg-white/[0.04] disabled:opacity-40"
+                    className="flex w-full items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-left transition-colors hover:bg-white/[0.06] disabled:opacity-50"
                   >
-                    <span className="min-w-0 flex-1 truncate">{item.title}</span>
-                    <span className="shrink-0 text-xs text-white/40">
-                      {shortMime(item.mime_type)}
-                    </span>
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/15">
+                      <Paperclip className="h-4 w-4 text-amber-200" aria-hidden="true" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-white">{item.title}</p>
+                      <p className="truncate text-xs text-white/40">{shortMime(item.mime_type)}</p>
+                    </div>
                   </button>
                 </li>
               );

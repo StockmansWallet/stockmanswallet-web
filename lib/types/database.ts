@@ -436,6 +436,7 @@ export type Database = {
           reminder_offsets: number[] | null;
           notifications_scheduled: boolean;
           linked_herd_ids: string[] | null;
+          attachment_file_ids: string[] | null;
           property_id: string | null;
           pack_id: string | null;
           pack_item_index: number | null;
@@ -464,6 +465,7 @@ export type Database = {
           reminder_offsets?: number[] | null;
           notifications_scheduled?: boolean;
           linked_herd_ids?: string[] | null;
+          attachment_file_ids?: string[] | null;
           property_id?: string | null;
           pack_id?: string | null;
           pack_item_index?: number | null;
@@ -492,6 +494,7 @@ export type Database = {
           reminder_offsets?: number[] | null;
           notifications_scheduled?: boolean;
           linked_herd_ids?: string[] | null;
+          attachment_file_ids?: string[] | null;
           property_id?: string | null;
           pack_id?: string | null;
           pack_item_index?: number | null;
@@ -531,6 +534,7 @@ export type Database = {
           realisation_factor: number | null;
           payment_check_result: unknown | null;
           source_file_path: string | null;
+          glovebox_file_id: string | null;
           notes: string | null;
         };
         Insert: {
@@ -561,6 +565,7 @@ export type Database = {
           realisation_factor?: number | null;
           payment_check_result?: unknown | null;
           source_file_path?: string | null;
+          glovebox_file_id?: string | null;
           notes?: string | null;
         };
         Update: {
@@ -591,6 +596,7 @@ export type Database = {
           realisation_factor?: number | null;
           payment_check_result?: unknown | null;
           source_file_path?: string | null;
+          glovebox_file_id?: string | null;
           notes?: string | null;
         };
       };

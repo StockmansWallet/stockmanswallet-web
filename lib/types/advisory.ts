@@ -221,6 +221,9 @@ export interface HerdAttachment {
   current_weight: number | null;
   initial_weight: number | null;
   estimated_value: number | null;
+  property_name?: string | null;
+  property_state?: string | null;
+  last_updated?: string | null;
 }
 
 /**
@@ -252,7 +255,7 @@ export interface BrangusChatAttachment {
 }
 
 /**
- * Frozen reference to a File Cabinet (brangus_files) entry. Receiver sees
+ * Frozen reference to a Glovebox (glovebox_files) entry. Receiver sees
  * the filename + metadata; access to the actual file is gated by the file's
  * existing RLS (per-user). Acts as a "shared pointer" - useful when both
  * producers have access to the file already.
@@ -343,4 +346,3 @@ export function permissionStatusLabel(connection: ConnectionRequest): string {
   if (!hasActivePermission(connection)) return "Not sharing";
   return "Sharing";
 }
-

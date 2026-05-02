@@ -185,12 +185,26 @@ export async function sendProducerMessage(
   if (attachment && attachment.type === "herd") {
     const { data: herd } = await supabase
       .from("herds")
-      .select("id, name, species, breed, category, head_count, current_weight, initial_weight")
+      .select(
+        "id, name, species, breed, category, head_count, current_weight, initial_weight, property_id, updated_at"
+      )
       .eq("id", attachment.herd_id)
       .eq("user_id", user.id)
       .eq("is_deleted", false)
       .maybeSingle();
     if (!herd) return { error: "Herd not found or not yours to share" };
+    let propertyName: string | null = null;
+    let propertyState: string | null = null;
+    if (herd.property_id) {
+      const { data: property } = await supabase
+        .from("properties")
+        .select("property_name, state")
+        .eq("id", herd.property_id)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      propertyName = (property?.property_name as string | null) ?? null;
+      propertyState = (property?.state as string | null) ?? null;
+    }
     verifiedAttachment = {
       type: "herd",
       herd_id: herd.id as string,
@@ -202,6 +216,9 @@ export async function sendProducerMessage(
       current_weight: (herd.current_weight as number) ?? null,
       initial_weight: (herd.initial_weight as number) ?? null,
       estimated_value: attachment.estimated_value,
+      property_name: propertyName ?? attachment.property_name ?? null,
+      property_state: propertyState ?? attachment.property_state ?? null,
+      last_updated: (herd.updated_at as string | null) ?? attachment.last_updated ?? null,
     };
   } else if (attachment && attachment.type === "price") {
     // Prices are public reference data; no ownership check needed.
@@ -224,7 +241,7 @@ export async function sendProducerMessage(
     };
   } else if (attachment && attachment.type === "file") {
     const { data: file } = await supabase
-      .from("brangus_files")
+      .from("glovebox_files")
       .select("id, title, original_filename, mime_type, size_bytes, kind")
       .eq("id", attachment.file_id)
       .eq("user_id", user.id)
@@ -319,7 +336,7 @@ export async function getCh40SharedFileDownloadUrl(connectionId: string, fileId:
   if (!hasAttachedFile) return { error: "File is not attached to this conversation" };
 
   const { data: file } = await supabase
-    .from("brangus_files")
+    .from("glovebox_files")
     .select("storage_path, original_filename, title, user_id")
     .eq("id", fileId)
     .eq("is_deleted", false)
@@ -338,7 +355,7 @@ export async function getCh40SharedFileDownloadUrl(connectionId: string, fileId:
   const filename =
     (file.original_filename as string | null) || (file.title as string | null) || "shared-file";
   const { data: signed, error } = await supabase.storage
-    .from("brangus-files")
+    .from("glovebox-files")
     .createSignedUrl(file.storage_path as string, 60 * 15, { download: filename });
 
   if (error || !signed?.signedUrl) return { error: "Could not create download link" };
@@ -359,14 +376,45 @@ export async function listMyHerdsForShare() {
 
   const { data } = await supabase
     .from("herds")
-    .select("id, name, species, breed, category, head_count, current_weight, initial_weight")
+    .select(
+      "id, name, species, breed, category, head_count, current_weight, initial_weight, property_id, updated_at"
+    )
     .eq("user_id", user.id)
     .eq("is_deleted", false)
     .eq("is_sold", false)
     .neq("is_demo_data", true)
     .order("name");
 
-  return { herds: data ?? [] };
+  const propertyIds = [
+    ...new Set((data ?? []).map((herd) => herd.property_id as string | null).filter(Boolean)),
+  ] as string[];
+  const propertyMap = new Map<string, { property_name: string | null; state: string | null }>();
+  if (propertyIds.length > 0) {
+    const { data: properties } = await supabase
+      .from("properties")
+      .select("id, property_name, state")
+      .eq("user_id", user.id)
+      .in("id", propertyIds);
+    for (const property of properties ?? []) {
+      propertyMap.set(property.id as string, {
+        property_name: (property.property_name as string | null) ?? null,
+        state: (property.state as string | null) ?? null,
+      });
+    }
+  }
+
+  return {
+    herds: (data ?? []).map((herd) => {
+      const property =
+        herd.property_id != null ? propertyMap.get(herd.property_id as string) : undefined;
+      return {
+      ...herd,
+      property_name: property?.property_name ?? null,
+      property_state: property?.state ?? null,
+      last_updated: herd.updated_at ?? null,
+      };
+    }),
+  };
 }
 
 /**

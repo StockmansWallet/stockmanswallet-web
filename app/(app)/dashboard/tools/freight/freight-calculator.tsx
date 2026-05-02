@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo, useTransition } from "react";
-import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -26,14 +25,17 @@ import {
   ChevronDown,
   Bookmark,
   BookmarkCheck,
+  FileText,
   Share2,
   Check,
-  History,
+  Loader2,
 } from "lucide-react";
 import { getRoadDistanceKm } from "@/lib/services/distance-service";
 import AddressAutocomplete, { type AddressResult } from "@/components/app/address-autocomplete";
 import { buildFreightShareText } from "@/lib/freight/share-formatter";
 import { saveFreightEstimate } from "./actions";
+import { createClient } from "@/lib/supabase/client";
+import { uploadGloveboxFile } from "@/lib/glovebox/files";
 
 // --- Types ---
 
@@ -142,6 +144,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
   const [didSave, setDidSave] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [shareStatus, setShareStatus] = useState<"idle" | "copied">("idle");
+  const [gloveboxStatus, setGloveboxStatus] = useState<"idle" | "saving" | "saved">("idle");
   const [isSaving, startSaving] = useTransition();
 
   const selectedHerd = herds.find((h) => h.id === selectedHerdId);
@@ -360,6 +363,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     setDidSave(false);
     setSaveError(null);
     setShareStatus("idle");
+    setGloveboxStatus("idle");
   }
 
   function handleSave() {
@@ -396,6 +400,42 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
       }
       setDidSave(true);
     });
+  }
+
+  async function handleSavePdfToGlovebox() {
+    if (!result || gloveboxStatus === "saving") return;
+    setSaveError(null);
+    setGloveboxStatus("saving");
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("Please sign in again to save to Glovebox.");
+
+      const pdfBytes = await generateFreightEstimatePdf({
+        originName: selectedProperty?.property_name ?? "Origin",
+        destinationName: destinationLabel,
+        herdName: herdLabel,
+        result,
+        assumptions: buildAssumptionsLine(result),
+      });
+      const filename = freightPdfFilename(selectedProperty?.property_name, destinationLabel);
+      const pdfBlob = new Blob([new Uint8Array(pdfBytes)], { type: "application/pdf" });
+      const file = new File([pdfBlob], filename, { type: "application/pdf" });
+      await uploadGloveboxFile({
+        userId: user.id,
+        file,
+        title: "Freight IQ Estimate",
+        kind: "other",
+        category: "Freight IQ",
+        source: "freight_iq",
+      });
+      setGloveboxStatus("saved");
+    } catch (err) {
+      setGloveboxStatus("idle");
+      setSaveError(err instanceof Error ? err.message : "Could not save PDF to Glovebox.");
+    }
   }
 
   async function handleShare() {
@@ -450,6 +490,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
     setDidSave(false);
     setSaveError(null);
     setShareStatus("idle");
+    setGloveboxStatus("idle");
   }
 
   return (
@@ -874,8 +915,8 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
             )}
 
             {/* Save & Share */}
-            <div className="flex flex-col gap-2">
-              <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-3">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <Button
                   type="button"
                   variant={didSave ? "ghost" : "freight-iq"}
@@ -897,7 +938,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                 <Button
                   type="button"
                   variant="ghost"
-                  className="bg-freight-iq/15 text-freight-iq hover:bg-freight-iq/25 ring-freight-iq/20 ring-1 ring-inset"
+                  className="bg-freight-iq/12 text-freight-iq hover:bg-freight-iq/20 ring-freight-iq/20 ring-1 ring-inset"
                   onClick={handleShare}
                   aria-live="polite"
                 >
@@ -911,18 +952,34 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
                     </>
                   )}
                 </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="bg-white/[0.04] text-freight-iq hover:bg-freight-iq/10 ring-freight-iq/20 ring-1 ring-inset sm:col-span-2"
+                  onClick={handleSavePdfToGlovebox}
+                  disabled={gloveboxStatus === "saving" || gloveboxStatus === "saved"}
+                  aria-live="polite"
+                >
+                  {gloveboxStatus === "saving" ? (
+                    <>
+                      <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> Creating PDF
+                    </>
+                  ) : gloveboxStatus === "saved" ? (
+                    <>
+                      <Check className="mr-1.5 h-4 w-4" /> Saved to Glovebox
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="mr-1.5 h-4 w-4" /> Save PDF to Glovebox
+                    </>
+                  )}
+                </Button>
               </div>
               {saveError && (
-                <p className="text-error text-xs" role="alert">
+                <p className="text-error mt-2 text-xs" role="alert">
                   {saveError}
                 </p>
               )}
-              <Link
-                href="/dashboard/tools/freight/history"
-                className="text-freight-iq mt-3 inline-flex h-9 items-center gap-1.5 self-center rounded-full bg-white/[0.03] px-4 text-[13px] font-semibold ring-1 ring-white/[0.06] transition-colors ring-inset hover:bg-white/[0.06]"
-              >
-                <History className="h-3.5 w-3.5" /> View saved estimates
-              </Link>
             </div>
           </div>
         ) : (
@@ -941,4 +998,134 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
       </div>
     </div>
   );
+}
+
+async function generateFreightEstimatePdf(input: {
+  originName: string;
+  destinationName: string;
+  herdName: string;
+  result: FreightEstimate;
+  assumptions: string;
+}): Promise<Uint8Array> {
+  const { PDFDocument, StandardFonts, rgb } = await import("pdf-lib");
+  const doc = await PDFDocument.create();
+  const page = doc.addPage([595.28, 841.89]);
+  const regular = await doc.embedFont(StandardFonts.Helvetica);
+  const bold = await doc.embedFont(StandardFonts.HelveticaBold);
+  const ink = rgb(0.12, 0.11, 0.09);
+  const muted = rgb(0.42, 0.39, 0.34);
+  const accent = rgb(0.53, 0.74, 0.32);
+  const rule = rgb(0.86, 0.84, 0.78);
+  const margin = 54;
+  let y = 775;
+
+  const drawText = (
+    text: string,
+    x: number,
+    lineY: number,
+    size: number,
+    font = regular,
+    color = ink
+  ) => page.drawText(text, { x, y: lineY, size, font, color });
+
+  drawText("Freight IQ Estimate", margin, y, 22, bold, ink);
+  y -= 24;
+  drawText("Stockman's Wallet", margin, y, 10, regular, muted);
+  y -= 26;
+  page.drawLine({ start: { x: margin, y }, end: { x: 541, y }, thickness: 1, color: rule });
+  y -= 36;
+
+  drawText(`${input.originName} to ${input.destinationName}`, margin, y, 16, bold, ink);
+  y -= 24;
+  if (input.herdName.trim()) {
+    drawText(`Herd: ${input.herdName}`, margin, y, 11, regular, muted);
+    y -= 18;
+  }
+
+  const total = `$${Math.round(input.result.totalCost).toLocaleString("en-AU")} +GST`;
+  drawText("Freight Estimate", margin, y, 10, regular, muted);
+  y -= 36;
+  drawText(total, margin, y, 30, bold, accent);
+  y -= 42;
+
+  const rows: Array<[string, string]> = [
+    ["Head count", `${input.result.headCount.toLocaleString("en-AU")} head`],
+    ["Average weight", `${Math.round(input.result.averageWeightKg)} kg`],
+    ["Distance", `${Math.round(input.result.distanceKm).toLocaleString("en-AU")} km`],
+    ["Required decks", `${input.result.decksRequired}`],
+    ["Cost per head", `$${Math.round(input.result.costPerHead).toLocaleString("en-AU")}`],
+    ["Cost per deck", `$${Math.round(input.result.costPerDeck).toLocaleString("en-AU")}`],
+    ["Rate", `$${input.result.ratePerDeckPerKm.toFixed(2)}/deck/km`],
+    ["Loading", `${input.result.headsPerDeck} head/deck`],
+  ];
+
+  for (const [label, value] of rows) {
+    drawText(label, margin, y, 11, regular, muted);
+    const valueWidth = bold.widthOfTextAtSize(value, 11);
+    drawText(value, 541 - valueWidth, y, 11, bold, ink);
+    y -= 22;
+    page.drawLine({ start: { x: margin, y: y + 9 }, end: { x: 541, y: y + 9 }, thickness: 0.5, color: rule });
+  }
+
+  y -= 12;
+  drawText("Assumptions", margin, y, 13, bold, ink);
+  y -= 18;
+  for (const line of wrapText(input.assumptions, 78)) {
+    drawText(line, margin, y, 10, regular, muted);
+    y -= 14;
+  }
+
+  const notices = [
+    input.result.efficiencyPrompt,
+    input.result.shortCartNotice,
+    input.result.categoryWarning,
+    input.result.breederAutoDetectNotice,
+  ].filter(Boolean) as string[];
+  if (notices.length > 0) {
+    y -= 12;
+    drawText("Notes", margin, y, 13, bold, ink);
+    y -= 18;
+    for (const notice of notices) {
+      for (const line of wrapText(notice, 82)) {
+        drawText(line, margin, y, 10, regular, muted);
+        y -= 14;
+      }
+      y -= 4;
+    }
+  }
+
+  drawText(new Date().toLocaleDateString("en-AU"), margin, 44, 9, regular, muted);
+  return doc.save();
+}
+
+function wrapText(text: string, maxChars: number): string[] {
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+  let current = "";
+  for (const word of words) {
+    const next = current ? `${current} ${word}` : word;
+    if (next.length > maxChars && current) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = next;
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
+}
+
+function freightPdfFilename(origin: string | null | undefined, destination: string): string {
+  const cleanOrigin = slugPart(origin ?? "origin");
+  const cleanDestination = slugPart(destination || "destination");
+  const date = new Date().toISOString().split("T")[0];
+  return `freight-iq-${cleanOrigin}-to-${cleanDestination}-${date}.pdf`;
+}
+
+function slugPart(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 36);
 }

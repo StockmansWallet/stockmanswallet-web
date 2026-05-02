@@ -3,8 +3,8 @@
 -- the current user is a participant in an approved producer-peer connection
 -- containing a message whose attachment JSON points at the file.
 
-CREATE POLICY ch40_shared_files_select
-    ON public.brangus_files FOR SELECT
+CREATE POLICY ch40_shared_glovebox_files_select
+    ON public.glovebox_files FOR SELECT
     USING (
         EXISTS (
             SELECT 1
@@ -14,17 +14,17 @@ CREATE POLICY ch40_shared_files_select
               AND cr.status = 'approved'
               AND (cr.requester_user_id = auth.uid() OR cr.target_user_id = auth.uid())
               AND am.attachment ->> 'type' = 'file'
-              AND am.attachment ->> 'file_id' = brangus_files.id::text
+              AND am.attachment ->> 'file_id' = glovebox_files.id::text
         )
     );
 
-CREATE POLICY ch40_shared_files_storage_select
+CREATE POLICY ch40_shared_glovebox_files_storage_select
     ON storage.objects FOR SELECT
     USING (
-        bucket_id = 'brangus-files'
+        bucket_id = 'glovebox-files'
         AND EXISTS (
             SELECT 1
-            FROM public.brangus_files bf
+            FROM public.glovebox_files bf
             JOIN public.advisory_messages am
               ON am.attachment ->> 'type' = 'file'
              AND am.attachment ->> 'file_id' = bf.id::text

@@ -28,32 +28,32 @@ import {
   X,
 } from "lucide-react";
 import {
-  type BrangusDetectedFileType,
-  type BrangusFileRow,
+  type GloveboxDetectedFileType,
+  type GloveboxFileRow,
   DEFAULT_FILE_CATEGORY_OPTIONS,
   detectFileType,
   fileCategoryLabel,
   FILE_TYPE_LABELS,
   formatFileSize,
   tagsWithFileCollection,
-  uploadBrangusFile,
-  deleteBrangusFile,
+  uploadGloveboxFile,
+  deleteGloveboxFile,
   signedDownloadUrlFor,
   signedUrlFor,
   friendlyTitle,
-} from "@/lib/brangus/files";
+} from "@/lib/glovebox/files";
 import { createClient } from "@/lib/supabase/client";
 import { PageHeaderActionsPortal } from "@/components/ui/page-header-actions-portal";
 
 interface Props {
   userId: string;
-  initialFiles: BrangusFileRow[];
+  initialFiles: GloveboxFileRow[];
 }
 
 type GroupMode = "category" | "type" | "source" | "none";
 type DragPreview = {
-  file: BrangusFileRow;
-  type: BrangusDetectedFileType;
+  file: GloveboxFileRow;
+  type: GloveboxDetectedFileType;
   startX: number;
   startY: number;
   x: number;
@@ -66,11 +66,11 @@ const UNCATEGORISED = "Uncategorised";
 const DROP_UNCATEGORISED = "__uncategorised__";
 const DRAG_ACTIVATION_DISTANCE = 6;
 
-export function FilesPageClient({ userId, initialFiles }: Props) {
-  const [files, setFiles] = useState<BrangusFileRow[]>(initialFiles);
+export function GloveboxPageClient({ userId, initialFiles }: Props) {
+  const [files, setFiles] = useState<GloveboxFileRow[]>(initialFiles);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeFile, setActiveFile] = useState<BrangusFileRow | null>(null);
+  const [activeFile, setActiveFile] = useState<GloveboxFileRow | null>(null);
   const [activeCollection, setActiveCollection] = useState(ALL_COLLECTIONS);
   const [groupMode, setGroupMode] = useState<GroupMode>("category");
   const [query, setQuery] = useState("");
@@ -175,7 +175,7 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
   }, [activeCollection, files, query]);
 
   const groupedFiles = useMemo(() => {
-    const groups = new Map<string, BrangusFileRow[]>();
+    const groups = new Map<string, GloveboxFileRow[]>();
     for (const file of visibleFiles) {
       const key = groupLabel(file, groupMode);
       groups.set(key, [...(groups.get(key) ?? []), file]);
@@ -193,8 +193,8 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
       setError(null);
       try {
         for (const file of picked) {
-          const { fileId, storagePath } = await uploadBrangusFile({ userId, file });
-          const row: BrangusFileRow = {
+          const { fileId, storagePath } = await uploadGloveboxFile({ userId, file });
+          const row: GloveboxFileRow = {
             id: fileId,
             storage_path: storagePath,
             title: friendlyTitle(file.name),
@@ -206,7 +206,7 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
             tags: [],
             page_count: null,
             extraction_status: "pending",
-            source: "files",
+            source: "glovebox",
             conversation_id: null,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -223,21 +223,21 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
     [userId]
   );
 
-  const handleDelete = useCallback(async (file: BrangusFileRow) => {
-    if (!confirm(`Delete ${file.title}? Brangus will no longer be able to read it.`)) return;
-    await deleteBrangusFile(file);
+  const handleDelete = useCallback(async (file: GloveboxFileRow) => {
+    if (!confirm(`Delete ${file.title}? Tools that reference it may show it as removed.`)) return;
+    await deleteGloveboxFile(file);
     setFiles((prev) => prev.filter((f) => f.id !== file.id));
     setActiveFile((current) => (current?.id === file.id ? null : current));
   }, []);
 
-  const handleDownload = useCallback(async (file: BrangusFileRow) => {
+  const handleDownload = useCallback(async (file: GloveboxFileRow) => {
     setError(null);
     try {
       let storagePath = file.storage_path;
       if (!storagePath) {
         const supabase = createClient();
         const { data: row, error: lookupError } = await supabase
-          .from("brangus_files")
+          .from("glovebox_files")
           .select("storage_path")
           .eq("id", file.id)
           .maybeSingle<{ storage_path: string }>();
@@ -254,7 +254,7 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
     }
   }, []);
 
-  const handleFileChange = useCallback((updated: Partial<BrangusFileRow> & { id: string }) => {
+  const handleFileChange = useCallback((updated: Partial<GloveboxFileRow> & { id: string }) => {
     setFiles((prev) => prev.map((f) => (f.id === updated.id ? { ...f, ...updated } : f)));
     setActiveFile((current) => (current?.id === updated.id ? { ...current, ...updated } : current));
   }, []);
@@ -283,7 +283,7 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
 
       const supabase = createClient();
       const { error: updateError } = await supabase
-        .from("brangus_files")
+        .from("glovebox_files")
         .update({ tags: nextTags })
         .eq("id", fileId);
 
@@ -432,7 +432,7 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
         const supabase = createClient();
         for (const file of matchingFiles) {
           const { error: updateError } = await supabase
-            .from("brangus_files")
+            .from("glovebox_files")
             .update({ tags: tagsWithFileCollection(file.tags, nextCollection) })
             .eq("id", file.id);
           if (updateError) {
@@ -498,7 +498,7 @@ export function FilesPageClient({ userId, initialFiles }: Props) {
         const supabase = createClient();
         for (const file of filesInCollection) {
           const { error: updateError } = await supabase
-            .from("brangus_files")
+            .from("glovebox_files")
             .update({ tags: tagsWithFileCollection(file.tags, null) })
             .eq("id", file.id);
           if (updateError) {
@@ -987,7 +987,7 @@ function collectionDropTargetFromPoint(x: number, y: number): string | null | un
   return value === DROP_UNCATEGORISED ? null : value;
 }
 
-function fileTypeShortLabel(type: BrangusDetectedFileType): string {
+function fileTypeShortLabel(type: GloveboxDetectedFileType): string {
   if (type === "pdf") return "PDF";
   if (type === "image") return "IMG";
   if (type === "spreadsheet") return "XLS";
@@ -1035,7 +1035,7 @@ function FileRow({
   onDelete,
   onPointerDragStart,
 }: {
-  file: BrangusFileRow;
+  file: GloveboxFileRow;
   isDragging: boolean;
   onOpen: () => void;
   onDownload: () => void;
@@ -1076,10 +1076,10 @@ function FileRow({
               <span>{file.page_count} pages</span>
             </>
           )}
-          {file.source === "chat" && (
+          {file.source !== "glovebox" && (
             <>
               <span className="text-white/20">/</span>
-              <span>from Brangus chat</span>
+              <span>from {fileSourceLabel(file.source)}</span>
             </>
           )}
         </div>
@@ -1111,7 +1111,7 @@ function FileRow({
   );
 }
 
-function StatusPill({ status }: { status: BrangusFileRow["extraction_status"] }) {
+function StatusPill({ status }: { status: GloveboxFileRow["extraction_status"] }) {
   const label = fileStatusLabel(status);
   const className =
     status === "pending"
@@ -1131,14 +1131,14 @@ function StatusPill({ status }: { status: BrangusFileRow["extraction_status"] })
   );
 }
 
-function fileStatusLabel(status: BrangusFileRow["extraction_status"]): string {
+function fileStatusLabel(status: GloveboxFileRow["extraction_status"]): string {
   if (status === "pending") return "Processing";
   if (status === "failed") return "Failed";
   if (status === "unsupported") return "Stored";
   return "Ready";
 }
 
-function FileTypeIcon({ type }: { type: BrangusDetectedFileType }) {
+function FileTypeIcon({ type }: { type: GloveboxDetectedFileType }) {
   const className = "h-4 w-4";
   switch (type) {
     case "image":
@@ -1155,12 +1155,20 @@ function FileTypeIcon({ type }: { type: BrangusDetectedFileType }) {
   }
 }
 
-function groupLabel(file: BrangusFileRow, groupMode: GroupMode): string {
+function groupLabel(file: GloveboxFileRow, groupMode: GroupMode): string {
   if (groupMode === "type") return FILE_TYPE_LABELS[detectFileType(file)];
-  if (groupMode === "source")
-    return file.source === "chat" ? "From Brangus chat" : "Uploaded in File Cabinet";
-  if (groupMode === "none") return "File Cabinet";
+  if (groupMode === "source") return fileSourceLabel(file.source);
+  if (groupMode === "none") return "Glovebox";
   return fileCategoryLabel(file);
+}
+
+function fileSourceLabel(source: GloveboxFileRow["source"]): string {
+  if (source === "chat") return "Brangus chat";
+  if (source === "ch40") return "Ch 40";
+  if (source === "grid_iq") return "Grid IQ";
+  if (source === "reports") return "Reports";
+  if (source === "yard_book") return "Yard Book";
+  return "Glovebox";
 }
 
 function triggerAnchorDownload(href: string, filename: string): void {
@@ -1180,11 +1188,11 @@ function FileDetailDrawer({
   onDownload,
   onChange,
 }: {
-  file: BrangusFileRow;
+  file: GloveboxFileRow;
   categoryOptions: string[];
   onClose: () => void;
   onDownload: () => void;
-  onChange: (file: Partial<BrangusFileRow> & { id: string }) => void;
+  onChange: (file: Partial<GloveboxFileRow> & { id: string }) => void;
 }) {
   const [title, setTitle] = useState(file.title);
   const initialCategory = fileCategoryLabel(file);
@@ -1199,7 +1207,7 @@ function FileDetailDrawer({
       const nextTags = tagsWithFileCollection(file.tags, cleanCategory);
       const supabase = createClient();
       await supabase
-        .from("brangus_files")
+        .from("glovebox_files")
         .update({
           title: cleanTitle,
           tags: nextTags,
@@ -1232,7 +1240,7 @@ function FileDetailDrawer({
     if (!storagePath) {
       const supabase = createClient();
       const { data: row } = await supabase
-        .from("brangus_files")
+        .from("glovebox_files")
         .select("storage_path")
         .eq("id", file.id)
         .maybeSingle<{ storage_path: string }>();
@@ -1247,7 +1255,7 @@ function FileDetailDrawer({
     <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm">
       <div className="flex h-full w-full max-w-lg flex-col gap-5 overflow-y-auto bg-neutral-950 p-6 shadow-2xl">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">File details</h2>
+          <h2 className="text-lg font-semibold text-white">Glovebox file</h2>
           <button onClick={onClose} className="rounded-lg p-2 text-white/60 hover:bg-white/5">
             <X className="h-4 w-4" />
           </button>
@@ -1308,7 +1316,7 @@ function FileDetailDrawer({
             </>
           )}
           <dt className="text-white/40">Source</dt>
-          <dd>{file.source === "chat" ? "Brangus chat" : "File Cabinet"}</dd>
+          <dd>{fileSourceLabel(file.source)}</dd>
           <dt className="text-white/40">Status</dt>
           <dd>{fileStatusLabel(file.extraction_status)}</dd>
         </dl>

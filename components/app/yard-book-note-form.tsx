@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Pin, PinOff } from "lucide-react";
+import { YardBookGloveboxAttachments } from "@/components/app/yard-book-glovebox-attachments";
 
 interface YardBookNoteFormProps {
   note?: {
@@ -13,6 +14,7 @@ interface YardBookNoteFormProps {
     body: string;
     is_pinned: boolean;
     linked_herd_ids: string[] | null;
+    attachment_file_ids?: string[] | null;
   };
   herds: { id: string; name: string; head_count: number }[];
   action: (formData: FormData) => Promise<{ error: string } | void>;
@@ -127,6 +129,8 @@ export function YardBookNoteForm({ note, herds, action, submitLabel }: YardBookN
           </div>
         </div>
       )}
+
+      <YardBookGloveboxAttachments initialFileIds={note?.attachment_file_ids ?? []} />
 
       {error && (
         <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">

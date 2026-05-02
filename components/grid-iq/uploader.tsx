@@ -12,6 +12,7 @@ import {
   X,
   Grid3x3,
   FileSpreadsheet,
+  FolderOpen,
   Loader2,
   CheckCircle,
   AlertTriangle,
@@ -19,6 +20,14 @@ import {
 import { extractDocument } from "@/lib/grid-iq/extraction-service";
 import type { ExtractionResult } from "@/lib/grid-iq/types";
 import { createClient } from "@/lib/supabase/client";
+import {
+  GLOVEBOX_FILES_BUCKET,
+  formatFileSize as formatGloveboxFileSize,
+  kindLabel,
+  uploadGloveboxFile,
+  type GloveboxFileKind,
+  type GloveboxFileRow,
+} from "@/lib/glovebox/files";
 import {
   saveProcessorGrid,
   saveKillSheet,
@@ -43,6 +52,8 @@ const ACCEPTED_EXTENSIONS = new Set([
 ]);
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const GLOVEBOX_FILE_SELECT =
+  "id,title,original_filename,mime_type,size_bytes,kind,category,tags,page_count,extraction_status,source,conversation_id,created_at,updated_at,storage_path";
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -88,7 +99,11 @@ export function GridIQUploader({
   const [headCountConfirmed, setHeadCountConfirmed] = useState(false);
   const [typeMismatchConfirmed, setTypeMismatchConfirmed] = useState(false);
   const [gridNameOverride, setGridNameOverride] = useState<string | null>(null);
+  const [sourceGloveboxFileId, setSourceGloveboxFileId] = useState<string | null>(null);
+  const [gloveboxPickerOpen, setGloveboxPickerOpen] = useState(false);
+  const [gloveboxFiles, setGloveboxFiles] = useState<GloveboxFileRow[] | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const sourceGloveboxFileIdRef = useRef<string | null>(null);
 
   // Processor picker: load once, auto-match on extraction, manual override.
   interface ProcessorOption {
@@ -128,12 +143,14 @@ export function GridIQUploader({
     if (match) setSelectedProcessorId(match.id);
   }, [result, processors, selectedProcessorId]);
 
-  const handleFile = useCallback((f: File) => {
+  const handleFile = useCallback((f: File, gloveboxFileId: string | null = null) => {
     setError(null);
     setResult(null);
     setHeadCountConfirmed(false);
     setTypeMismatchConfirmed(false);
     setGridNameOverride(null);
+    sourceGloveboxFileIdRef.current = gloveboxFileId;
+    setSourceGloveboxFileId(gloveboxFileId);
 
     const ext = f.name.split(".").pop()?.toLowerCase() || "";
     if (!ACCEPTED_TYPES.includes(f.type) && !ACCEPTED_EXTENSIONS.has(ext)) {
@@ -167,6 +184,73 @@ export function GridIQUploader({
       setPreview(null);
     }
   }, []);
+
+  const loadGloveboxFiles = useCallback(async () => {
+    setGloveboxFiles(null);
+    const supabase = createClient();
+    const kind = uploadType === "grid" ? "processor_grid" : "kill_sheet";
+    const { data } = await supabase
+      .from("glovebox_files")
+      .select(GLOVEBOX_FILE_SELECT)
+      .eq("is_deleted", false)
+      .eq("kind", kind)
+      .order("updated_at", { ascending: false })
+      .limit(80);
+    setGloveboxFiles((data ?? []) as GloveboxFileRow[]);
+  }, [uploadType]);
+
+  const handleGloveboxFile = useCallback(
+    async (row: GloveboxFileRow) => {
+      if (!row.storage_path) {
+        setError("That Glovebox file is missing its stored document.");
+        return;
+      }
+      setIsProcessing(true);
+      setError(null);
+      try {
+        const supabase = createClient();
+        const { data, error: downloadError } = await supabase.storage
+          .from(GLOVEBOX_FILES_BUCKET)
+          .download(row.storage_path);
+        if (downloadError || !data) {
+          throw downloadError ?? new Error("Could not download Glovebox file.");
+        }
+        const selectedFile = new File([data], row.original_filename, {
+          type: row.mime_type || data.type || "application/octet-stream",
+        });
+        handleFile(selectedFile, row.id);
+        setGloveboxPickerOpen(false);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Could not open Glovebox file.");
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    [handleFile]
+  );
+
+  const saveCurrentFileToGlovebox = useCallback(async (): Promise<string | null> => {
+    if (!file) return null;
+    if (sourceGloveboxFileId) return sourceGloveboxFileId;
+
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("Please sign in again to upload.");
+
+    const isGrid = uploadType === "grid";
+    const { fileId } = await uploadGloveboxFile({
+      userId: user.id,
+      file,
+      kind: (isGrid ? "processor_grid" : "kill_sheet") as GloveboxFileKind,
+      category: isGrid ? "Processor Grids" : "Kill sheets",
+      source: "grid_iq",
+    });
+    sourceGloveboxFileIdRef.current = fileId;
+    setSourceGloveboxFileId(fileId);
+    return fileId;
+  }, [file, sourceGloveboxFileId, uploadType]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -203,6 +287,7 @@ export function GridIQUploader({
     setResult(null);
 
     try {
+      await saveCurrentFileToGlovebox();
       const extractionResult = await extractDocument(file, uploadType);
       setResult(extractionResult);
     } catch (err) {
@@ -225,6 +310,7 @@ export function GridIQUploader({
           recordName: gridNameOverride,
           sourceFileName: file?.name ?? null,
           processorId: selectedProcessorId,
+          gloveboxFileId: sourceGloveboxFileIdRef.current ?? sourceGloveboxFileId,
           gridData: result.gridData,
         });
         if (!saveResult.ok) throw new Error(saveResult.error);
@@ -235,6 +321,7 @@ export function GridIQUploader({
           recordName: gridNameOverride,
           sourceFileName: file?.name ?? null,
           processorId: selectedProcessorId,
+          gloveboxFileId: sourceGloveboxFileIdRef.current ?? sourceGloveboxFileId,
           killSheetData: result.killSheetData,
         });
         if (!saveResult.ok) throw new Error(saveResult.error);
@@ -258,6 +345,8 @@ export function GridIQUploader({
     setHeadCountConfirmed(false);
     setTypeMismatchConfirmed(false);
     setGridNameOverride(null);
+    sourceGloveboxFileIdRef.current = null;
+    setSourceGloveboxFileId(null);
     if (inputRef.current) inputRef.current.value = "";
   };
 
@@ -340,6 +429,20 @@ export function GridIQUploader({
                 }}
               >
                 Browse Files
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="mt-2 border border-white/[0.08] bg-white/[0.04] hover:border-grid-iq/30 hover:bg-grid-iq/10 hover:text-grid-iq"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setGloveboxPickerOpen(true);
+                  loadGloveboxFiles();
+                }}
+              >
+                <FolderOpen className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+                Choose from Glovebox
               </Button>
               <input
                 ref={inputRef}
@@ -517,6 +620,14 @@ export function GridIQUploader({
             : "Upload an Excel (.xlsx), PDF, or image of your kill sheet. Grid IQ extracts head counts, grades, weights, and pricing to track your over-the-hooks performance."}
         </p>
       </div>
+
+      <GridIQGloveboxPicker
+        open={gloveboxPickerOpen}
+        files={gloveboxFiles}
+        uploadType={uploadType}
+        onClose={() => setGloveboxPickerOpen(false)}
+        onPick={handleGloveboxFile}
+      />
     </div>
   );
 }
@@ -715,6 +826,84 @@ function ExtractionResultView({
       )}
     </div>
   );
+}
+
+function GridIQGloveboxPicker({
+  open,
+  files,
+  uploadType,
+  onClose,
+  onPick,
+}: {
+  open: boolean;
+  files: GloveboxFileRow[] | null;
+  uploadType: UploadType;
+  onClose: () => void;
+  onPick: (file: GloveboxFileRow) => void;
+}) {
+  if (!open) return null;
+
+  const title = uploadType === "grid" ? "Choose processor grid" : "Choose kill sheet";
+  const empty = uploadType === "grid" ? "No processor grids in Glovebox yet." : "No kill sheets in Glovebox yet.";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm md:items-center">
+      <div className="m-4 w-full max-w-lg rounded-2xl border border-white/[0.08] bg-bg-alt p-4 shadow-2xl">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-text-primary">{title}</h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-text-muted transition-colors hover:bg-white/[0.08] hover:text-text-primary"
+            aria-label="Close Glovebox picker"
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+
+        {files === null ? (
+          <div className="flex justify-center py-8 text-text-muted">
+            <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+          </div>
+        ) : files.length === 0 ? (
+          <p className="py-8 text-center text-sm text-text-muted">{empty}</p>
+        ) : (
+          <div className="max-h-[60vh] space-y-2 overflow-y-auto pr-1">
+            {files.map((file) => (
+              <button
+                key={file.id}
+                type="button"
+                onClick={() => onPick(file)}
+                className="flex w-full items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-left transition-colors hover:bg-white/[0.06]"
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-grid-iq/15">
+                  <FileSpreadsheet className="h-4 w-4 text-grid-iq" aria-hidden="true" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-text-primary">{file.title}</p>
+                  <p className="truncate text-xs text-text-muted">
+                    {kindLabel(file.kind) ?? shortMime(file.mime_type)}
+                    {" · "}
+                    {formatGloveboxFileSize(file.size_bytes)}
+                  </p>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function shortMime(mime: string): string {
+  const value = (mime || "").toLowerCase();
+  if (value === "application/pdf") return "PDF";
+  if (value.startsWith("image/")) return value.split("/")[1]?.toUpperCase() ?? "IMAGE";
+  if (value.includes("spreadsheet") || value.includes("excel")) return "XLSX";
+  if (value.includes("csv")) return "CSV";
+  if (value.startsWith("text/")) return "TEXT";
+  return "FILE";
 }
 
 function DetailRow({ label, value }: { label: string; value: string }) {

@@ -10,12 +10,23 @@ const yardBookNoteSchema = z.object({
   body: z.string().max(20000),
   is_pinned: z.boolean(),
   linked_herd_ids: z.array(z.string().uuid()).nullable(),
+  attachment_file_ids: z.array(z.string().uuid()).nullable(),
   property_id: z.string().uuid().nullable(),
 });
 
 const idSchema = z.object({ id: z.string().uuid() });
 
 function parseHerdIds(raw: string | null): string[] | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function parseUuidArray(raw: string | null): string[] | null {
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw);
@@ -37,6 +48,7 @@ export async function createYardBookNote(formData: FormData) {
     body: ((formData.get("body") as string) || "").trim(),
     is_pinned: formData.get("is_pinned") === "on",
     linked_herd_ids: parseHerdIds(formData.get("linked_herd_ids") as string | null),
+    attachment_file_ids: parseUuidArray(formData.get("attachment_file_ids") as string | null),
     property_id: (formData.get("property_id") as string) || null,
   });
   if (!parsed.success) return { error: "Invalid input" };
@@ -52,6 +64,7 @@ export async function createYardBookNote(formData: FormData) {
     body: v.body,
     is_pinned: v.is_pinned,
     linked_herd_ids: v.linked_herd_ids,
+    attachment_file_ids: v.attachment_file_ids,
     property_id: v.property_id,
     is_demo_data: false,
   });
@@ -77,6 +90,7 @@ export async function updateYardBookNote(id: string, formData: FormData) {
     body: ((formData.get("body") as string) || "").trim(),
     is_pinned: formData.get("is_pinned") === "on",
     linked_herd_ids: parseHerdIds(formData.get("linked_herd_ids") as string | null),
+    attachment_file_ids: parseUuidArray(formData.get("attachment_file_ids") as string | null),
     property_id: (formData.get("property_id") as string) || null,
   });
   if (!parsed.success) return { error: "Invalid input" };
@@ -91,6 +105,7 @@ export async function updateYardBookNote(id: string, formData: FormData) {
       body: v.body,
       is_pinned: v.is_pinned,
       linked_herd_ids: v.linked_herd_ids,
+      attachment_file_ids: v.attachment_file_ids,
       property_id: v.property_id,
       updated_at: new Date().toISOString(),
     })

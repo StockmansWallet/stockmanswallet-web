@@ -1,16 +1,16 @@
--- Brangus Files: flexible user-facing organisation.
--- Keeps the legacy fixed kind column for Brangus/tool compatibility, while
+-- Glovebox Files: flexible user-facing organisation.
+-- Keeps the legacy fixed kind column for Glovebox/tool compatibility, while
 -- adding an editable category users can shape into their own folder list.
 
-ALTER TABLE brangus_files
+ALTER TABLE glovebox_files
 ADD COLUMN IF NOT EXISTS category TEXT;
 
-ALTER TABLE brangus_files
-ADD CONSTRAINT brangus_files_category_length
+ALTER TABLE glovebox_files
+ADD CONSTRAINT glovebox_files_category_length
 CHECK (category IS NULL OR char_length(category) <= 80)
 NOT VALID;
 
-UPDATE brangus_files
+UPDATE glovebox_files
 SET category = CASE kind
     WHEN 'vet_report' THEN 'Health & vet'
     WHEN 'nlis' THEN 'NLIS & compliance'
@@ -26,6 +26,6 @@ END
 WHERE category IS NULL
   AND kind IS NOT NULL;
 
-CREATE INDEX IF NOT EXISTS idx_brangus_files_user_category
-ON brangus_files(user_id, category)
+CREATE INDEX IF NOT EXISTS idx_glovebox_files_user_category
+ON glovebox_files(user_id, category)
 WHERE is_deleted = FALSE;

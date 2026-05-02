@@ -10,6 +10,7 @@ import { createPortal } from "react-dom";
 import { useSearchParams } from "next/navigation";
 import { ChevronDown, Download, FileSpreadsheet, FileText, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { uploadGloveboxFile } from "@/lib/glovebox/files";
 import type { ReportType as PdfReportType } from "@/lib/pdf/generate";
 
 type TableReportType =
@@ -34,6 +35,7 @@ interface ReportDownloadMenuProps {
 }
 
 type Format = "pdf" | "xlsx" | "csv";
+type Action = Format | "glovebox";
 
 interface ReadonlyParams {
   get(name: string): string | null;
@@ -94,7 +96,7 @@ export function ReportDownloadMenu({ groups, label = "Download" }: ReportDownloa
     };
   }, [open]);
 
-  async function handleDownload(group: ReportDownloadGroup, format: Format) {
+  async function handleDownload(group: ReportDownloadGroup, format: Action) {
     const busyKey = `${group.reportType}:${format}`;
     setBusy(busyKey);
     setError(null);
@@ -108,7 +110,9 @@ export function ReportDownloadMenu({ groups, label = "Download" }: ReportDownloa
         return;
       }
 
-      if (format === "pdf") {
+      if (format === "glovebox") {
+        await savePdfToGlovebox(session.access_token, session.user.id, group, searchParams);
+      } else if (format === "pdf") {
         await downloadPdf(session.access_token, group, searchParams);
       } else {
         await downloadTable(session.access_token, group, format, searchParams);
@@ -139,17 +143,32 @@ export function ReportDownloadMenu({ groups, label = "Download" }: ReportDownloa
         <div className="flex flex-col gap-3">
           {visibleGroups.map((group) => (
             <div key={group.reportType} className="flex flex-col">
-              <p className="text-text-muted mb-1.5 px-1 text-[10px] font-semibold tracking-widest uppercase">
-                {group.label}
-              </p>
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="mb-1.5 flex items-center justify-between gap-3 px-1">
+                <p className="text-text-muted text-[10px] font-semibold tracking-widest uppercase">
+                  {group.label}
+                </p>
+                {isCreatingPdf(busy, group) && (
+                  <span className="text-[10px] font-medium text-reports">
+                    Creating PDF
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
                 {(group.pdf ?? true) && (
-                  <FormatRow
-                    icon={<FileText className="h-3.5 w-3.5" aria-hidden="true" />}
-                    formatLabel="PDF"
-                    busy={busy === `${group.reportType}:pdf`}
-                    onClick={() => handleDownload(group, "pdf")}
-                  />
+                  <>
+                    <FormatRow
+                      icon={<FileText className="h-3.5 w-3.5" aria-hidden="true" />}
+                      formatLabel="PDF"
+                      busy={busy === `${group.reportType}:pdf`}
+                      onClick={() => handleDownload(group, "pdf")}
+                    />
+                    <FormatRow
+                      icon={<FileText className="h-3.5 w-3.5" aria-hidden="true" />}
+                      formatLabel="Glovebox"
+                      busy={busy === `${group.reportType}:glovebox`}
+                      onClick={() => handleDownload(group, "glovebox")}
+                    />
+                  </>
                 )}
                 {(group.table ?? true) && (
                   <>
@@ -200,6 +219,10 @@ export function ReportDownloadMenu({ groups, label = "Download" }: ReportDownloa
   );
 }
 
+function isCreatingPdf(busy: string | null, group: ReportDownloadGroup): boolean {
+  return busy === `${group.reportType}:pdf` || busy === `${group.reportType}:glovebox`;
+}
+
 function FormatRow({
   icon,
   formatLabel,
@@ -229,16 +252,7 @@ async function downloadPdf(
   group: ReportDownloadGroup,
   searchParams: ReadonlyParams
 ): Promise<void> {
-  const config: Record<string, string> = {};
-  for (const key of FORWARD_KEYS) {
-    const value = searchParams.get(key);
-    if (value) config[key] = value;
-  }
-  if (group.extraConfig) {
-    for (const [key, value] of Object.entries(group.extraConfig)) {
-      if (value) config[key] = value;
-    }
-  }
+  const config = buildPdfReportConfig(group, searchParams);
 
   const response = await fetch("/api/reports/generate", {
     method: "POST",
@@ -257,6 +271,64 @@ async function downloadPdf(
     filename: string;
   };
   triggerAnchorDownload(signedUrl, filename);
+}
+
+async function savePdfToGlovebox(
+  jwt: string,
+  userId: string,
+  group: ReportDownloadGroup,
+  searchParams: ReadonlyParams
+): Promise<void> {
+  const config = buildPdfReportConfig(group, searchParams);
+  const response = await fetch("/api/reports/generate", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ reportType: group.reportType, config }),
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    throw new Error(payload.error ?? `Request failed: ${response.status}`);
+  }
+
+  const { signedUrl, filename } = (await response.json()) as {
+    signedUrl: string;
+    filename: string;
+  };
+  const pdfResponse = await fetch(signedUrl);
+  if (!pdfResponse.ok) {
+    throw new Error(`Could not fetch generated PDF: ${pdfResponse.status}`);
+  }
+
+  const blob = await pdfResponse.blob();
+  const file = new File([blob], filename, { type: "application/pdf" });
+  await uploadGloveboxFile({
+    userId,
+    file,
+    title: group.label,
+    kind: "other",
+    category: "Reports",
+    source: "reports",
+  });
+}
+
+function buildPdfReportConfig(
+  group: ReportDownloadGroup,
+  searchParams: ReadonlyParams
+): Record<string, string> {
+  const config: Record<string, string> = {};
+  for (const key of FORWARD_KEYS) {
+    const value = searchParams.get(key);
+    if (value) config[key] = value;
+  }
+  if (group.extraConfig) {
+    for (const [key, value] of Object.entries(group.extraConfig)) {
+      if (value) config[key] = value;
+    }
+  }
+  return config;
 }
 
 async function downloadTable(

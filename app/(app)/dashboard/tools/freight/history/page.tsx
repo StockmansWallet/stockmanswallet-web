@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { ChevronLeft, Truck } from "lucide-react";
+import { Truck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SavedEstimatesList, type SavedEstimate } from "./saved-estimates-list";
+import { FreightTabs } from "../freight-tabs";
 
 export const metadata = { title: "Saved Freight Estimates" };
 
@@ -54,19 +54,12 @@ export default async function FreightHistoryPage() {
 
   return (
     <div className="w-full max-w-[1680px]">
-      <Link
-        href="/dashboard/tools/freight"
-        className="bg-surface-lowest text-text-secondary hover:text-text-primary mb-4 inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors"
-      >
-        <ChevronLeft className="h-4 w-4" /> Freight IQ
-      </Link>
-
       <PageHeader
         feature="freight-iq"
-        title="Saved Estimates"
-        titleClassName="text-4xl font-bold text-freight-iq"
+        title="Freight IQ"
         subtitle="Freight calculations you've bookmarked from iOS or web"
         subtitleClassName="text-sm font-medium text-text-secondary"
+        actions={<FreightTabs active="saved" />}
       />
 
       {estimates.length === 0 ? (
