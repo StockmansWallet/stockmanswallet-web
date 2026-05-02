@@ -17,8 +17,8 @@ export function StepChannel40({
         </h2>
         <p className="mt-1.5 text-sm leading-relaxed text-white/60">
           Channel 40 is the producer network inside Stockman&apos;s Wallet.
-          Other producers can find your property, see your basic details, and
-          start a conversation about livestock, freight, or local markets.
+          Other producers can find you by searching Ch 40, see your basic
+          details, and send a connection request.
         </p>
       </div>
 
@@ -32,11 +32,10 @@ export function StepChannel40({
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold text-white">
-            Show me on Channel 40
+            Searchable on Ch 40
           </p>
           <p className="mt-1 text-xs leading-relaxed text-white/60">
-            Other producers can discover and connect with you. Off by default
-            if you skip this.
+            Off by default. Turn on to appear in Ch 40 search results.
           </p>
         </div>
         <div

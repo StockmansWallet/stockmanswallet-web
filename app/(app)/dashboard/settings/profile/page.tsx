@@ -181,7 +181,7 @@ function PublicProfilePreview({
             className={`h-3.5 w-3.5 ${isVisible ? "text-success" : "text-text-muted"}`}
             aria-hidden="true"
           />
-          {isVisible ? "Visible in network" : "Hidden from search"}
+          {isVisible ? "Searchable on Ch 40" : "Hidden from Ch 40 search"}
         </div>
       </div>
 

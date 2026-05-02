@@ -54,7 +54,7 @@ export function ContactDetailsForm({
       <p className="text-text-muted text-xs leading-relaxed">
         {isAdvisor
           ? "These details are visible to producers in the directory when your listing is active."
-          : "These details are visible when someone views your profile in the network or directory."}
+          : "These details are visible on your Ch 40 profile."}
       </p>
 
       <Input

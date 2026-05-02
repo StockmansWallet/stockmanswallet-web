@@ -164,11 +164,11 @@ const FEATURE_TABS: FeatureTab[] = [
     colorLight: "var(--feature-ch40-light)",
     colorDark: "var(--feature-ch40-dark)",
     bullets: [
-      "Browse a directory of producers and send connection requests",
+      "Search Ch 40 for producers and send connection requests",
       "Build a permanent network of trusted peers across your region",
       "Message connections directly with thread-based chat",
       "Share insights on markets, conditions, and service providers",
-      "Control your visibility and opt in or out of the producer directory",
+      "Control whether your profile appears in Ch 40 search results",
     ],
     mockup: "/images/screenshots/feature-ch40-chat.webp",
     icon: <Radio className="h-5 w-5" />,
