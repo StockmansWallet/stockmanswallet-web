@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { PRICING_TIERS } from "@/lib/marketing/constants";
 import { ADVISOR_ENABLED } from "@/lib/feature-flags";
@@ -70,12 +71,12 @@ export default function Pricing() {
                 Introductory Pricing
               </span>
               <h2 className="mt-3 text-3xl font-semibold text-balance text-white sm:text-4xl lg:text-5xl">
-                Simple, transparent pricing
+                Select your cut
               </h2>
               <p className="text-text-secondary mx-auto mt-4 max-w-xl text-base">
-                {ADVISOR_ENABLED
-                  ? "Plans for producers and advisors. Every plan starts with a 7-day free trial when the app launches."
-                  : "Every plan starts with a 7-day free trial when the app launches."}
+                From a single property to a sprawling enterprise, we've carved out a plan that fits.
+                <br />
+                Every plan starts with a 7-day free trial when the app launches.
               </p>
             </motion.div>
 
@@ -161,6 +162,29 @@ export default function Pricing() {
                       </div>
                     )}
 
+                    {tier.image && (
+                      <div className="relative mb-2 flex h-32 items-center justify-center sm:h-40">
+                        <div
+                          aria-hidden="true"
+                          className="absolute inset-0 mx-auto h-full w-3/4 rounded-full opacity-40 blur-2xl"
+                          style={{
+                            background:
+                              "radial-gradient(ellipse at center, rgba(231,136,34,0.45) 0%, transparent 65%)",
+                          }}
+                        />
+                        <Image
+                          src={tier.image}
+                          alt=""
+                          aria-hidden
+                          width={512}
+                          height={512}
+                          quality={92}
+                          sizes="(min-width: 1024px) 280px, (min-width: 640px) 240px, 200px"
+                          className="relative h-full w-auto object-contain drop-shadow-[0_18px_24px_rgba(0,0,0,0.45)]"
+                        />
+                      </div>
+                    )}
+
                     <div className="mb-6">
                       <h3 className={`text-lg font-semibold ${accent.text}`}>{tier.name}</h3>
                       <p className="mt-1 text-sm font-semibold text-white">{tier.subtitle}</p>
@@ -229,22 +253,17 @@ export default function Pricing() {
             </AnimatePresence>
 
             {/* Notes */}
-            <div className="mx-auto mt-12 grid max-w-4xl gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.04] p-5">
-                <h4 className="text-sm font-semibold text-white">7-Day Free Trial</h4>
-                <p className="text-text-muted mt-1 text-xs leading-relaxed">
-                  Every paid plan starts with a 7-day free trial when the app launches. Your
-                  subscription begins automatically at the end of the trial unless cancelled
-                  beforehand.
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.04] p-5">
-                <h4 className="text-brand text-sm font-semibold">Usage Limits</h4>
-                <p className="text-text-muted mt-1 text-xs leading-relaxed">
-                  Plan-based usage limits apply to Brangus and Freight IQ. Additional usage can be
-                  purchased if needed.
-                </p>
-              </div>
+            <div className="text-text-muted mx-auto mt-10 grid max-w-3xl gap-x-10 gap-y-3 text-xs leading-relaxed sm:grid-cols-2">
+              <p>
+                <span className="font-semibold text-white/85">7-day free trial.</span> Every paid
+                plan starts with a 7-day free trial when the app launches. Your subscription begins
+                automatically at the end of the trial unless cancelled beforehand.
+              </p>
+              <p>
+                <span className="font-semibold text-white/85">Usage limits.</span> Plan-based usage
+                limits apply to Brangus and Freight IQ. Additional usage can be purchased if
+                needed.
+              </p>
             </div>
           </div>
         </SectionCard>

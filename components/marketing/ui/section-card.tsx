@@ -6,6 +6,7 @@ interface SectionCardProps {
   className?: string;
   glowPosition?: string;
   glowSize?: string;
+  overflowVisible?: boolean;
 }
 
 export default function SectionCard({
@@ -13,17 +14,19 @@ export default function SectionCard({
   className,
   glowPosition = "50% 18%",
   glowSize = "1120px 700px",
+  overflowVisible = false,
 }: SectionCardProps) {
   return (
     <div
       className={clsx(
-        "relative overflow-hidden rounded-[32px] bg-[#17130f] px-4 py-10 shadow-[0_18px_48px_rgba(0,0,0,0.32)] sm:px-8 sm:py-12 lg:px-10 xl:px-12",
+        "relative rounded-[32px] bg-[#17130f] px-4 py-10 shadow-[0_18px_48px_rgba(0,0,0,0.32)] sm:px-8 sm:py-12 lg:px-10 xl:px-12",
+        overflowVisible ? "overflow-visible" : "overflow-hidden",
         className
       )}
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-0"
+        className="pointer-events-none absolute inset-0 z-0 rounded-[inherit]"
         style={{
           background:
             `radial-gradient(ellipse ${glowSize} at ${glowPosition}, color-mix(in srgb, var(--color-brand) 24%, transparent), color-mix(in srgb, var(--color-brand) 9%, transparent) 42%, transparent 74%), ` +
@@ -32,7 +35,7 @@ export default function SectionCard({
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(ellipse_960px_640px_at_50%_42%,transparent_0%,rgba(8,7,6,0.08)_58%,rgba(8,7,6,0.32)_100%)]"
+        className="pointer-events-none absolute inset-0 z-0 rounded-[inherit] bg-[radial-gradient(ellipse_960px_640px_at_50%_42%,transparent_0%,rgba(8,7,6,0.08)_58%,rgba(8,7,6,0.32)_100%)]"
       />
       <div
         aria-hidden="true"

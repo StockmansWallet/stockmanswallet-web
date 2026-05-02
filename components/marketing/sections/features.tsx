@@ -51,7 +51,7 @@ const FEATURE_TABS: FeatureTab[] = [
       "Understand capital concentration across herd groups and properties",
       "Get a clear financial snapshot of your entire operation at a glance",
     ],
-    mockup: "/images/iphone-dashboard-screen.webp",
+    mockup: "/images/screenshots/feature-dashboard.webp",
     icon: <Wallet className="h-5 w-5" />,
   },
   {
@@ -70,7 +70,7 @@ const FEATURE_TABS: FeatureTab[] = [
       "Track breeding activity, calving rates, and pre-birth accruals across relevant herds",
       "Apply growth and mortality assumptions to project changing herd values over time",
     ],
-    mockup: "/images/iphone-screen-herds-comp.webp",
+    mockup: "/images/screenshots/feature-herd-details-dash.webp",
     icon: <IconCattleTags className="h-5 w-5" />,
   },
   {
@@ -89,7 +89,7 @@ const FEATURE_TABS: FeatureTab[] = [
       "Export branded PDF reports or share directly via email",
       "Track sales performance with gross, freight, and net breakdowns",
     ],
-    mockup: "/images/iphone-screen-reports.webp",
+    mockup: "/images/screenshots/feature-reports-pdf.webp",
     icon: <FileText className="h-5 w-5" />,
   },
   // Advisory Hub feature tab - hidden when advisor feature flag is off
@@ -132,7 +132,7 @@ const FEATURE_TABS: FeatureTab[] = [
       "View tasks grouped by horizon: Overdue, Today, Next 7 Days, Next 30, and beyond",
       "Mark items complete and track progress across your operation",
     ],
-    mockup: "/images/iphone-screen-yardbook.webp",
+    mockup: "/images/screenshots/feature-yardbook.webp",
     icon: <BookOpen className="h-5 w-5" />,
   },
   {
@@ -151,7 +151,7 @@ const FEATURE_TABS: FeatureTab[] = [
       "Save estimates for future reference and side-by-side comparison",
       "Feed results into Grid IQ for net-of-freight market vs processor analysis",
     ],
-    mockup: "/images/iphone-screen-freight.webp",
+    mockup: "/images/screenshots/feature-freightiq-a.webp",
     icon: <Truck className="h-5 w-5" />,
   },
   {
@@ -170,7 +170,7 @@ const FEATURE_TABS: FeatureTab[] = [
       "Share insights on markets, conditions, and service providers",
       "Control your visibility and opt in or out of the producer directory",
     ],
-    mockup: "/images/iphone-screen-producernetwork.webp",
+    mockup: "/images/screenshots/feature-ch40-chat.webp",
     icon: <Radio className="h-5 w-5" />,
   },
   {
@@ -189,7 +189,7 @@ const FEATURE_TABS: FeatureTab[] = [
       "Spot trends early with up, down, and flat market signals",
       "Data feeds directly into your portfolio valuations and insight engine",
     ],
-    mockup: "/images/iphone-screen-markets.webp",
+    mockup: "/images/screenshots/feature-markets.webp",
     icon: <TrendingUp className="h-5 w-5" />,
   },
   {
@@ -208,7 +208,7 @@ const FEATURE_TABS: FeatureTab[] = [
       "Calving forecasts tracking gestation progress and expected calf value",
       "Yard Book alerts surfacing overdue and upcoming tasks",
     ],
-    mockup: "/images/iphone-screen-insights.webp",
+    mockup: "/images/screenshots/feature-insights.webp",
     icon: <Lightbulb className="h-5 w-5" />,
   },
   {
@@ -227,7 +227,7 @@ const FEATURE_TABS: FeatureTab[] = [
       "Post-kill analysis with Grid Capture Ratio, Realisation Factor, and Kill Score",
       "Build a kill sheet library that improves your predictions over time",
     ],
-    mockup: "/images/iphone-screen-gridiq.webp",
+    mockup: "/images/screenshots/feature-gridiq.webp",
     icon: <Grid3x3 className="h-5 w-5" />,
     comingSoon: true,
   },
@@ -247,7 +247,17 @@ function FeatureVideo({ src, isActive }: { src: string; isActive: boolean }) {
     }
   }, [isActive]);
 
-  return <video ref={ref} src={src} autoPlay muted loop playsInline className="w-full" />;
+  return (
+    <video
+      ref={ref}
+      src={src}
+      autoPlay
+      muted
+      loop
+      playsInline
+      className="h-full w-full object-cover"
+    />
+  );
 }
 
 export default function Features() {
@@ -284,10 +294,18 @@ export default function Features() {
                 aria-pressed={active === i}
                 className={`flex shrink-0 cursor-pointer items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none ${
                   active === i
-                    ? "border-white/15 bg-white/10 text-white"
+                    ? "text-white"
                     : "border-white/[0.08] bg-white/[0.04] text-white/60"
                 }`}
-                style={active === i ? { color: tab.colorLight } : undefined}
+                style={
+                  active === i
+                    ? {
+                        backgroundColor: `color-mix(in srgb, ${tab.color} 18%, transparent)`,
+                        borderColor: tab.color,
+                        color: tab.colorLight,
+                      }
+                    : undefined
+                }
               >
                 {tab.icon}
                 <span>{tab.name}</span>
@@ -295,14 +313,14 @@ export default function Features() {
             ))}
           </div>
 
-          <div className="relative z-10 mt-14 grid items-start gap-10 lg:grid-cols-[240px_minmax(0,1fr)_340px] lg:gap-12 xl:grid-cols-[260px_minmax(0,1fr)_380px]">
+          <div className="relative z-10 mt-14 grid items-start gap-10 lg:grid-cols-[240px_312px_minmax(0,1fr)] lg:gap-12 xl:grid-cols-[260px_334px_minmax(0,1fr)]">
             <motion.nav
               initial={{ opacity: 0, x: -18 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.1 }}
               aria-label="Feature selector"
-              className="hidden lg:block"
+              className="relative z-20 hidden lg:block"
             >
               <div className="space-y-1.5">
                 <p className="mb-4 text-xs font-semibold tracking-wider text-white/45 uppercase">
@@ -315,35 +333,20 @@ export default function Features() {
                       key={tab.id}
                       onClick={() => setActive(i)}
                       aria-pressed={selected}
-                      className={`group relative flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-[14px] px-3 py-3 text-left ring-1 transition-colors ring-inset focus-visible:outline-none ${
+                      className={`group relative flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-[14px] border px-3 py-3 text-left transition-colors focus-visible:outline-none ${
                         selected
-                          ? "bg-white/[0.09] text-white ring-transparent"
-                          : "text-white/58 ring-white/[0.08] hover:bg-white/[0.045] hover:text-white/80"
+                          ? "text-white"
+                          : "border-white/[0.08] text-white/58 hover:bg-white/[0.045] hover:text-white/80"
                       }`}
+                      style={
+                        selected
+                          ? {
+                              backgroundColor: `color-mix(in srgb, ${tab.color} 18%, rgba(255,255,255,0.04))`,
+                              borderColor: tab.color,
+                            }
+                          : undefined
+                      }
                     >
-                      {selected && (
-                        <span
-                          aria-hidden="true"
-                          className="pointer-events-none absolute inset-0"
-                          style={{
-                            background: `linear-gradient(to right, color-mix(in srgb, ${tab.color} 22%, transparent), transparent 65%)`,
-                          }}
-                        />
-                      )}
-                      {selected && (
-                        <span
-                          aria-hidden="true"
-                          className="pointer-events-none absolute inset-0 rounded-[14px]"
-                          style={{
-                            padding: "1px",
-                            background: `linear-gradient(to right, ${tab.color}, color-mix(in srgb, ${tab.color} 0%, transparent) 45%)`,
-                            WebkitMask:
-                              "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
-                            WebkitMaskComposite: "xor",
-                            maskComposite: "exclude",
-                          }}
-                        />
-                      )}
                       {selected && (
                         <motion.span
                           layoutId="featureRailIndicator"
@@ -395,7 +398,68 @@ export default function Features() {
               </div>
             </motion.nav>
 
-            <div className="min-w-0">
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.55, delay: 0.15 }}
+              className="relative flex justify-center lg:justify-start lg:self-end"
+            >
+              <div
+                aria-hidden="true"
+                className="absolute top-1/2 left-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-25 blur-3xl"
+                style={{
+                  background: `radial-gradient(circle, ${feature.color} 0%, transparent 62%)`,
+                }}
+              />
+              <div
+                className="relative z-10 w-[256px] drop-shadow-[0_28px_80px_rgba(0,0,0,0.5)] sm:w-[278px] lg:w-[312px] xl:w-[334px]"
+                style={{ aspectRatio: "1470 / 3000" }}
+              >
+                <div
+                  className="absolute overflow-hidden rounded-[5%/2.4%] bg-black"
+                  style={{ top: "2.2%", bottom: "2.2%", left: "5.1%", right: "5.1%" }}
+                >
+                  <AnimatePresence initial={false}>
+                    <motion.div
+                      key={feature.id}
+                      initial={{ opacity: 0, scale: 1.012 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 1.012 }}
+                      transition={{ duration: 0.28, ease: "easeOut" }}
+                      className="absolute inset-0"
+                    >
+                      {feature.video ? (
+                        <FeatureVideo
+                          src={feature.video}
+                          isActive={feature.id === FEATURE_TABS[active].id}
+                        />
+                      ) : (
+                        <Image
+                          src={feature.mockup}
+                          alt={`${feature.name} screenshot`}
+                          fill
+                          quality={95}
+                          sizes="(min-width: 1280px) 320px, (min-width: 1024px) 300px, (min-width: 640px) 270px, 250px"
+                          className="object-cover"
+                        />
+                      )}
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+                <Image
+                  src="/images/iphone-frame.webp"
+                  alt=""
+                  aria-hidden
+                  fill
+                  priority
+                  sizes="(min-width: 1280px) 334px, (min-width: 1024px) 312px, (min-width: 640px) 278px, 256px"
+                  className="pointer-events-none z-10 select-none"
+                />
+              </div>
+            </motion.div>
+
+            <div className="relative z-20 min-w-0">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={feature.id}
@@ -465,53 +529,6 @@ export default function Features() {
                 </motion.div>
               </AnimatePresence>
             </div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 24 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.55, delay: 0.15 }}
-              className="relative flex justify-center lg:justify-end"
-            >
-              <div
-                aria-hidden="true"
-                className="absolute top-1/2 left-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-25 blur-3xl"
-                style={{
-                  background: `radial-gradient(circle, ${feature.color} 0%, transparent 62%)`,
-                }}
-              />
-              <div
-                className="relative z-10 w-[230px] sm:w-[250px] lg:w-[280px] xl:w-[300px]"
-                style={{ aspectRatio: "390 / 844" }}
-              >
-                <AnimatePresence initial={false}>
-                  <motion.div
-                    key={feature.id}
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.98 }}
-                    transition={{ duration: 0.28, ease: "easeOut" }}
-                    className="absolute inset-0"
-                  >
-                    {feature.video ? (
-                      <FeatureVideo
-                        src={feature.video}
-                        isActive={feature.id === FEATURE_TABS[active].id}
-                      />
-                    ) : (
-                      <Image
-                        src={feature.mockup}
-                        alt={`${feature.name} screenshot`}
-                        width={390}
-                        height={844}
-                        sizes="(min-width: 1280px) 300px, (min-width: 1024px) 280px, (min-width: 640px) 250px, 230px"
-                        className="w-full drop-shadow-[0_28px_80px_rgba(0,0,0,0.45)]"
-                      />
-                    )}
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-            </motion.div>
           </div>
         </SectionCard>
       </div>

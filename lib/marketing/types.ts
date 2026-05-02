@@ -20,6 +20,7 @@ export interface PricingTier {
   badge?: string
   category: 'producer' | 'advisor'
   features: PricingFeature[]
+  image?: string
 }
 
 export interface PricingFeature {
