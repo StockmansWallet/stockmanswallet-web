@@ -200,27 +200,6 @@ export async function signInWithApple() {
   redirect(`https://appleid.apple.com/auth/authorize?${params.toString()}`);
 }
 
-export async function signInWithGoogle() {
-  const supabase = await createClient();
-  const origin = process.env.NEXT_PUBLIC_SITE_URL || "https://stockmanswallet.com.au";
-
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: `${origin}/auth/callback`,
-      queryParams: {
-        prompt: "select_account",
-      },
-    },
-  });
-
-  if (error || !data.url) {
-    redirect("/sign-in?error=Could+not+start+Google+sign+in");
-  }
-
-  redirect(data.url);
-}
-
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();

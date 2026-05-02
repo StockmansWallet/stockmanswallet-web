@@ -53,11 +53,15 @@ const nextConfig: NextConfig = {
             value: "max-age=63072000; includeSubDomains; preload",
           },
           {
-            // Isolates this origin from same-origin popups opened by other
-            // origins. Prevents XS-Leaks and tab-napping against Supabase
-            // auth flows.
+            // `same-origin-allow-popups` isolates against same-origin popups
+            // opened by other origins (XS-Leaks, tab-napping) while still
+            // allowing popups WE opened (e.g. Google Identity Services
+            // sign-in popup at accounts.google.com) to post the OAuth
+            // credential back to us via `window.opener.postMessage`. Strict
+            // `same-origin` would silently break the GIS popup flow - the
+            // popup completes auth then can't return the credential.
             key: "Cross-Origin-Opener-Policy",
-            value: "same-origin",
+            value: "same-origin-allow-popups",
           },
           {
             // Blocks other origins from embedding our responses as no-cors
@@ -74,11 +78,16 @@ const nextConfig: NextConfig = {
               // Note: 'unsafe-inline' on scripts is required by Next.js
               // hydration. Migrate to a nonce-based policy via middleware
               // post-launch.
-              "script-src 'self' 'unsafe-inline' https://maps.googleapis.com https://va.vercel-scripts.com",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              // accounts.google.com hosts the Google Identity Services
+              // (gsi/client) script used for the native ID-token sign-in flow.
+              "script-src 'self' 'unsafe-inline' https://accounts.google.com https://maps.googleapis.com https://va.vercel-scripts.com",
+              "style-src 'self' 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com",
               "img-src 'self' data: blob: https://*.supabase.co https://maps.googleapis.com https://maps.gstatic.com https://lh3.googleusercontent.com https://*.googleusercontent.com",
               "font-src 'self' data: https://fonts.gstatic.com",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.supabase.com https://maps.googleapis.com https://api.open-meteo.com https://va.vercel-scripts.com https://vitals.vercel-insights.com",
+              "connect-src 'self' https://accounts.google.com https://*.supabase.co wss://*.supabase.co https://api.supabase.com https://maps.googleapis.com https://api.open-meteo.com https://va.vercel-scripts.com https://vitals.vercel-insights.com",
+              // GIS renders the sign-in button and FedCM dialog as iframes
+              // hosted on accounts.google.com.
+              "frame-src https://accounts.google.com",
               "frame-ancestors 'none'",
               "object-src 'none'",
               "base-uri 'self'",

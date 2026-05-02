@@ -1,247 +1,302 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { StepWelcome } from "./step-welcome";
-import { StepAccountType } from "./step-account-type";
-import type { AccountType } from "./step-account-type";
-import { StepSetup } from "./step-setup";
+import dynamic from "next/dynamic";
+import { ArrowLeft, Check } from "lucide-react";
+import logoAnimData from "@/public/animations/StockmansLogoAnim.json";
+import PageBackground from "@/components/marketing/ui/page-background";
+import SectionCard from "@/components/marketing/ui/section-card";
+import { StepProperty } from "./step-property";
 import { StepSaleyard } from "./step-saleyard";
-import { StepPreferences } from "./step-preferences";
+import { StepChannel40 } from "./step-channel40";
 import { StepComplete } from "./step-complete";
 import {
   completeOnboarding,
-  skipOnboarding,
   type OnboardingData,
   type OnboardingProperty,
 } from "@/app/onboarding/actions";
 
-const TOTAL_STEPS = 6;
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
+
+// MVP: producer-only. Advisor onboarding lives behind ADVISOR_ENABLED. To
+// re-enable: restore the StepAccountType + advisor branches in the step
+// components and the completeOnboarding server action (see
+// project_advisor_on_hold memory entry).
+const ACCOUNT_TYPE = "producer" as const;
+
+type StepDefinition = {
+  key: string;
+  title: string;
+  description: string;
+};
+
+const STEPS: StepDefinition[] = [
+  {
+    key: "property",
+    title: "Your property",
+    description: "Tell us about your land",
+  },
+  {
+    key: "saleyard",
+    title: "Preferred saleyard",
+    description: "Pick your home market",
+  },
+  {
+    key: "channel40",
+    title: "Channel 40",
+    description: "Producer network",
+  },
+  {
+    key: "done",
+    title: "All set",
+    description: "Welcome aboard",
+  },
+];
+
+const TOTAL_STEPS = STEPS.length;
 
 export function OnboardingWizard({ userName }: { userName: string }) {
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
-  // Core state
-  const [accountType, setAccountType] = useState<AccountType | undefined>();
-  const [accountTypeRole, setAccountTypeRole] = useState("");
   const [displayName, setDisplayName] = useState(userName || "");
 
-  // Producer state
-  const [properties, setProperties] = useState<OnboardingProperty[]>([]);
+  // Single property in onboarding. Users add more from Settings later.
+  const [property, setProperty] = useState<OnboardingProperty>({
+    name: "",
+    state: "QLD",
+    isDefault: true,
+  });
+
   const [preferredSaleyard, setPreferredSaleyard] = useState<
     string | undefined
   >();
 
-  // Advisor state
-  const [companyName, setCompanyName] = useState("");
-  const [businessType, setBusinessType] = useState("");
-  const [advisorRole, setAdvisorRole] = useState("");
-  const [businessAddress, setBusinessAddress] = useState("");
-
-  // Preferences - producer
-  const [isDiscoverableToAdvisors, setIsDiscoverableToAdvisors] =
-    useState(false);
   const [isVisibleOnProducerNetwork, setIsVisibleOnProducerNetwork] =
     useState(false);
 
-  // Preferences - advisor
-  const [isListedInDirectory, setIsListedInDirectory] = useState(false);
-
-  // Public profile
-  const [contactEmail, setContactEmail] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [bio, setBio] = useState("");
+  function updateProperty(patch: Partial<OnboardingProperty>) {
+    setProperty((prev) => ({ ...prev, ...patch }));
+  }
 
   function next() {
-    // Skip saleyard step for advisors
-    if (step === 2 && accountType === "advisor") {
-      setStep(4); // Skip to preferences
-    } else {
-      setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1));
-    }
+    setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1));
   }
 
   function back() {
-    if (step === 4 && accountType === "advisor") {
-      setStep(2); // Skip back over saleyard
-    } else {
-      setStep((s) => Math.max(s - 1, 0));
-    }
+    setStep((s) => Math.max(s - 1, 0));
   }
 
   async function handleComplete() {
     setSubmitting(true);
     const data: OnboardingData = {
-      accountType: accountType!,
+      accountType: ACCOUNT_TYPE,
       displayName,
-      properties,
+      properties: property.name.trim() ? [property] : [],
       preferredSaleyard,
-      companyName,
-      businessType,
-      advisorRole,
-      businessAddress,
-      accountTypeRole,
-      isDiscoverableToAdvisors,
+      // Advisor-only fields kept blank for the producer flow.
+      companyName: "",
+      businessType: "",
+      advisorRole: "",
+      businessAddress: "",
+      accountTypeRole: "",
+      // Advisor discoverability hidden from MVP (no advisors live yet).
+      isDiscoverableToAdvisors: false,
       isVisibleOnProducerNetwork,
-      isListedInDirectory,
-      contactEmail,
-      contactPhone,
-      bio,
+      isListedInDirectory: false,
+      contactEmail: "",
+      contactPhone: "",
+      bio: "",
     };
     await completeOnboarding(data);
   }
 
-  async function handleSkip() {
-    setSubmitting(true);
-    await skipOnboarding();
-  }
-
-  // Get primary property state for saleyard proximity
-  const primaryPropertyState =
-    properties.find((p) => p.isDefault)?.state || properties[0]?.state;
-
   const canProceed = (() => {
     switch (step) {
       case 0:
-        return true; // Welcome
-      case 1: {
-        // Account type must be selected
-        if (!accountType) return false;
-        // If advisor, role must be selected
-        if (accountType === "advisor" && !accountTypeRole) return false;
-        return true;
-      }
+        // Property step: need name + at least property name
+        return displayName.trim().length > 0 && property.name.trim().length > 0;
+      case 1:
+        return true; // Saleyard optional
       case 2:
-        // Setup
-        if (accountType === "producer") return properties.length > 0;
-        if (accountType === "advisor")
-          return !!(
-            companyName &&
-            businessType &&
-            advisorRole &&
-            businessAddress
-          );
-        return false;
+        return true; // Channel 40 optional
       case 3:
-        return true; // Saleyard is optional
-      case 4:
-        return true; // Preferences optional
-      case 5:
-        return true; // Complete
+        return true; // Done
       default:
         return false;
     }
   })();
 
   const stepContent = [
-    <StepWelcome key="welcome" />,
-    <StepAccountType
-      key="type"
-      value={accountType}
-      advisorRole={accountTypeRole}
-      onChange={setAccountType}
-      onAdvisorRoleChange={setAccountTypeRole}
-    />,
-    <StepSetup
-      key="setup"
-      accountType={accountType}
+    <StepProperty
+      key="property"
       displayName={displayName}
-      properties={properties}
-      companyName={companyName}
-      businessType={businessType}
-      advisorRole={advisorRole}
-      businessAddress={businessAddress}
+      property={property}
       onDisplayNameChange={setDisplayName}
-      onPropertiesChange={setProperties}
-      onCompanyNameChange={setCompanyName}
-      onBusinessTypeChange={setBusinessType}
-      onAdvisorRoleChange={setAdvisorRole}
-      onBusinessAddressChange={setBusinessAddress}
+      onPropertyChange={updateProperty}
     />,
     <StepSaleyard
       key="saleyard"
       value={preferredSaleyard}
-      propertyState={primaryPropertyState}
+      propertyState={property.state}
       onChange={setPreferredSaleyard}
     />,
-    <StepPreferences
-      key="prefs"
-      accountType={accountType}
-      isDiscoverableToAdvisors={isDiscoverableToAdvisors}
-      isVisibleOnProducerNetwork={isVisibleOnProducerNetwork}
-      isListedInDirectory={isListedInDirectory}
-      contactEmail={contactEmail}
-      contactPhone={contactPhone}
-      bio={bio}
-      onDiscoverableToAdvisorsChange={setIsDiscoverableToAdvisors}
-      onVisibleOnProducerNetworkChange={setIsVisibleOnProducerNetwork}
-      onListedInDirectoryChange={setIsListedInDirectory}
-      onContactEmailChange={setContactEmail}
-      onContactPhoneChange={setContactPhone}
-      onBioChange={setBio}
+    <StepChannel40
+      key="channel40"
+      isVisible={isVisibleOnProducerNetwork}
+      onChange={setIsVisibleOnProducerNetwork}
     />,
-    <StepComplete
-      key="complete"
-      accountType={accountType}
-      userName={displayName || userName}
-    />,
+    <StepComplete key="done" userName={displayName || userName} />,
   ];
 
+  const isLastStep = step === TOTAL_STEPS - 1;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <div className="w-full max-w-lg">
-        {/* Progress bar */}
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex gap-1.5">
-            {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-              <div
-                key={i}
-                className={`h-1.5 w-8 rounded-full transition-colors ${
-                  i <= step ? "bg-brand" : "bg-white/10"
-                }`}
-              />
-            ))}
-          </div>
-          {/* Skip button removed - users must complete onboarding */}
-        </div>
+    <>
+      <PageBackground />
+      <main className="fixed inset-0 z-10 overflow-y-auto">
+        <div className="mx-auto flex min-h-screen w-full max-w-[34rem] items-center justify-center px-5 py-6 sm:px-6 sm:py-10 lg:max-w-[64rem] lg:px-8 lg:py-14">
+          <SectionCard className="w-full">
+            <div className="relative z-[2] flex w-full flex-col gap-y-8 lg:flex-row lg:items-stretch lg:gap-x-12 lg:gap-y-0">
+              {/* Left column: logo + step list */}
+              <div className="flex w-full flex-col items-center gap-y-6 text-center lg:w-[18rem] lg:flex-shrink-0 lg:items-start lg:text-left">
+                <div className="mx-auto w-full max-w-[8rem] drop-shadow-[0_8px_30px_rgba(0,0,0,0.28)] sm:max-w-[9rem] lg:mx-0 lg:max-w-[7.5rem]">
+                  <Lottie
+                    animationData={logoAnimData}
+                    loop={false}
+                    className="h-auto w-full"
+                  />
+                </div>
 
-        <Card>
-          <CardContent className="p-6 sm:p-8">
-            {stepContent[step]}
+                <ol className="w-full space-y-2">
+                  {STEPS.map((s, i) => (
+                    <StepRow
+                      key={s.key}
+                      number={i + 1}
+                      title={s.title}
+                      description={s.description}
+                      state={
+                        i < step ? "done" : i === step ? "current" : "upcoming"
+                      }
+                      // Allow jumping back to any completed step. Forward
+                      // navigation stays gated by Continue (so we can keep
+                      // running canProceed validation).
+                      onClick={
+                        i < step && !submitting ? () => setStep(i) : undefined
+                      }
+                    />
+                  ))}
+                </ol>
+              </div>
 
-            <div className="mt-8 flex items-center justify-between">
-              {step > 0 && step < TOTAL_STEPS - 1 ? (
-                <Button
-                  variant="ghost"
-                  className="border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.06]"
-                  onClick={back}
-                  disabled={submitting}
-                >
-                  Back
-                </Button>
-              ) : (
-                <div />
-              )}
+              {/* Right column: active form + nav */}
+              <div className="flex w-full flex-1 flex-col lg:min-h-[28rem]">
+                <div className="flex-1">{stepContent[step]}</div>
 
-              {step < TOTAL_STEPS - 1 ? (
-                <Button onClick={next} disabled={!canProceed || submitting}>
-                  Continue
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleComplete}
-                  disabled={submitting}
-                  className="w-full"
-                >
-                  {submitting ? "Setting up..." : "Get Started"}
-                </Button>
-              )}
+                <div className="mt-8 flex items-center justify-between gap-3">
+                  {step > 0 && !isLastStep ? (
+                    <button
+                      type="button"
+                      onClick={back}
+                      disabled={submitting}
+                      className="inline-flex items-center gap-1.5 text-sm text-white/55 transition-colors hover:text-white disabled:opacity-60"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                      Back
+                    </button>
+                  ) : (
+                    <div />
+                  )}
+
+                  {!isLastStep ? (
+                    <button
+                      type="button"
+                      onClick={next}
+                      disabled={!canProceed || submitting}
+                      className="bg-brand hover:bg-brand-light flex h-10 items-center justify-center rounded-full px-6 text-sm font-medium text-white transition-colors active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Continue
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleComplete}
+                      disabled={submitting}
+                      className="bg-brand hover:bg-brand-light flex h-10 w-full items-center justify-center rounded-full px-6 text-sm font-medium text-white transition-colors active:scale-[0.99] disabled:opacity-60"
+                    >
+                      {submitting ? "Setting up..." : "Get started"}
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+          </SectionCard>
+        </div>
+      </main>
+    </>
   );
+}
+
+function StepRow({
+  number,
+  title,
+  description,
+  state,
+  onClick,
+}: {
+  number: number;
+  title: string;
+  description: string;
+  state: "done" | "current" | "upcoming";
+  onClick?: () => void;
+}) {
+  const isDone = state === "done";
+  const isCurrent = state === "current";
+  const isClickable = !!onClick;
+
+  const baseClasses = `flex w-full items-start gap-3 rounded-2xl px-3 py-2.5 text-left transition-colors ${
+    isCurrent ? "bg-brand/10 ring-brand/30 ring-1" : ""
+  } ${isClickable ? "hover:bg-white/[0.04] cursor-pointer" : ""}`;
+
+  const inner = (
+    <>
+      <div
+        className={`mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-semibold transition-colors ${
+          isDone
+            ? "bg-brand text-white"
+            : isCurrent
+              ? "bg-brand text-white"
+              : "bg-white/10 text-white/55"
+        }`}
+      >
+        {isDone ? <Check className="h-3.5 w-3.5" /> : number}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p
+          className={`text-sm font-medium ${
+            isCurrent || isDone ? "text-white" : "text-white/55"
+          }`}
+        >
+          {title}
+        </p>
+        <p
+          className={`text-xs ${isCurrent ? "text-white/70" : "text-white/40"}`}
+        >
+          {description}
+        </p>
+      </div>
+    </>
+  );
+
+  if (isClickable) {
+    return (
+      <li>
+        <button type="button" onClick={onClick} className={baseClasses}>
+          {inner}
+        </button>
+      </li>
+    );
+  }
+
+  return <li className={baseClasses}>{inner}</li>;
 }
