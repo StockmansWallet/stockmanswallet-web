@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import landingBg from "@/public/images/landing-bg.webp";
 
 type PageBackgroundVariant = "photo" | "app";
@@ -7,7 +10,13 @@ type PageBackgroundVariant = "photo" | "app";
 // warm vertical gradient (lighter at top, darker at bottom) so the sky stays
 // present and the lower half supports foreground text and cards.
 export default function PageBackground({ variant = "photo" }: { variant?: PageBackgroundVariant }) {
+  const pathname = usePathname();
   const isApp = variant === "app";
+  const isLegalDocument = pathname === "/privacy" || pathname === "/terms";
+
+  if (!isApp && isLegalDocument) {
+    return null;
+  }
 
   if (isApp) {
     return (
