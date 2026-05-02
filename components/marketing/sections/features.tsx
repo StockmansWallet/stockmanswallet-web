@@ -420,32 +420,44 @@ export default function Features() {
                   className="absolute overflow-hidden rounded-[5%/2.4%] bg-black"
                   style={{ top: "2.2%", bottom: "2.2%", left: "5.1%", right: "5.1%" }}
                 >
-                  <AnimatePresence initial={false}>
-                    <motion.div
-                      key={feature.id}
-                      initial={{ opacity: 0, scale: 1.012 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 1.012 }}
-                      transition={{ duration: 0.28, ease: "easeOut" }}
-                      className="absolute inset-0"
-                    >
-                      {feature.video ? (
-                        <FeatureVideo
-                          src={feature.video}
-                          isActive={feature.id === FEATURE_TABS[active].id}
-                        />
-                      ) : (
+                  {FEATURE_TABS.map((tab, i) => {
+                    const isActive = i === active;
+                    if (tab.video) {
+                      if (!isActive) return null;
+                      return (
+                        <motion.div
+                          key={tab.id}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.28, ease: "easeOut" }}
+                          className="absolute inset-0"
+                        >
+                          <FeatureVideo src={tab.video} isActive={isActive} />
+                        </motion.div>
+                      );
+                    }
+                    return (
+                      <motion.div
+                        key={tab.id}
+                        initial={false}
+                        animate={{ opacity: isActive ? 1 : 0 }}
+                        transition={{ duration: 0.28, ease: "easeOut" }}
+                        className="absolute inset-0"
+                        aria-hidden={!isActive}
+                      >
                         <Image
-                          src={feature.mockup}
-                          alt={`${feature.name} screenshot`}
+                          src={tab.mockup}
+                          alt={isActive ? `${tab.name} screenshot` : ""}
                           fill
                           quality={95}
+                          priority={i === 0}
+                          loading={i === 0 ? undefined : "eager"}
                           sizes="(min-width: 1280px) 320px, (min-width: 1024px) 300px, (min-width: 640px) 270px, 250px"
                           className="object-cover"
                         />
-                      )}
-                    </motion.div>
-                  </AnimatePresence>
+                      </motion.div>
+                    );
+                  })}
                 </div>
                 <Image
                   src="/images/iphone-frame.webp"
