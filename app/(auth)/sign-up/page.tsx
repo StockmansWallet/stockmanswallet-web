@@ -95,7 +95,7 @@ function SignUpScreen() {
     return (
       <main className="fixed inset-0 z-10 overflow-y-auto">
         <div className="mx-auto flex min-h-screen w-full max-w-[34rem] items-center justify-center px-5 py-6 sm:px-6 sm:py-10 lg:max-w-[64rem] lg:px-8 lg:py-14">
-          <SectionCard className="w-full">
+          <SectionCard className="w-full" glowPosition="28% 28%">
             <div className="relative z-[2] flex w-full flex-col items-center gap-y-6 text-center sm:gap-y-7 lg:flex-row lg:items-stretch lg:justify-center lg:gap-x-16 lg:gap-y-0 lg:text-left">
             <div className="flex w-full max-w-[34rem] flex-col items-center gap-y-6 sm:gap-y-7 lg:max-w-[28rem] lg:flex-1 lg:items-center lg:justify-center lg:text-center">
               <div className="mx-auto w-full max-w-[14rem] sm:max-w-[16rem]">
@@ -173,7 +173,7 @@ function SignUpScreen() {
   return (
     <main className="fixed inset-0 z-10 overflow-y-auto">
       <div className="mx-auto flex min-h-screen w-full max-w-[34rem] items-center justify-center px-5 py-6 sm:px-6 sm:py-10 lg:max-w-[64rem] lg:px-8 lg:py-14">
-        <SectionCard className="w-full">
+        <SectionCard className="w-full" glowPosition="28% 28%">
           <div className="relative z-[2] flex w-full flex-col items-center gap-y-6 text-center sm:gap-y-7 lg:flex-row lg:items-stretch lg:justify-center lg:gap-x-16 lg:gap-y-0 lg:text-left">
           <div className="flex w-full max-w-[34rem] flex-col items-center gap-y-6 sm:gap-y-7 lg:max-w-[28rem] lg:flex-1 lg:items-center lg:justify-center lg:text-center">
             <div className="mx-auto w-full max-w-[12rem] drop-shadow-[0_8px_30px_rgba(0,0,0,0.28)] sm:max-w-[14rem]">
