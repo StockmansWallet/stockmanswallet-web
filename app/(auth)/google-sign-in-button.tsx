@@ -125,7 +125,10 @@ export default function GoogleSignInButton({ onError, text = "continue_with" }: 
         strategy="afterInteractive"
         onReady={() => setScriptReady(true)}
       />
-      <div ref={buttonRef} className="flex h-10 w-full items-center justify-center" />
+      <div
+        ref={buttonRef}
+        className="flex h-10 w-full max-w-[22rem] items-center justify-center overflow-hidden rounded-full bg-white [&_iframe]:rounded-full"
+      />
     </>
   );
 }
