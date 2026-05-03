@@ -146,9 +146,16 @@ export default function Pricing() {
                     : "mx-auto max-w-3xl sm:grid-cols-2"
                 }`}
               >
-                {tiers.map((tier) => (
-                  <div
+                {tiers.map((tier, index) => (
+                  <motion.div
                     key={tier.id}
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      delay: index * 0.1,
+                      duration: 0.45,
+                      ease: [0.16, 1, 0.3, 1],
+                    }}
                     className={`group relative flex flex-col rounded-2xl p-4 transition-colors duration-300 sm:p-6 ${
                       tier.highlighted
                         ? `border ${accent.border} ${accent.cardBg} ${accent.glow}`
@@ -164,7 +171,16 @@ export default function Pricing() {
                     )}
 
                     {tier.image && (
-                      <div className="pointer-events-none relative -mt-16 mb-2 flex h-36 items-end justify-center sm:-mt-20 sm:h-44">
+                      <motion.div
+                        initial={{ opacity: 0, y: 12, scale: 0.88 }}
+                        animate={{ opacity: 1, y: 0, scale: [0.88, 1.04, 1] }}
+                        transition={{
+                          delay: 0.14 + index * 0.1,
+                          duration: 0.52,
+                          ease: [0.16, 1, 0.3, 1],
+                        }}
+                        className="pointer-events-none relative -mt-16 mb-2 flex h-36 items-end justify-center sm:-mt-20 sm:h-44"
+                      >
                         <div
                           aria-hidden="true"
                           className="absolute inset-0 mx-auto h-full w-3/4 rounded-full opacity-40 blur-2xl"
@@ -187,7 +203,7 @@ export default function Pricing() {
                               : ""
                           }`}
                         />
-                      </div>
+                      </motion.div>
                     )}
 
                     <div className="mb-6">
@@ -259,7 +275,7 @@ export default function Pricing() {
                         </li>
                       ))}
                     </ul>
-                  </div>
+                  </motion.div>
                 ))}
               </motion.div>
             </AnimatePresence>
