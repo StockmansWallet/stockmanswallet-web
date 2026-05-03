@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Eye, EyeOff, Mail } from "lucide-react";
-import logoAnimData from "@/public/animations/StockmansLogoAnim.json";
+import tallyAnimData from "@/public/animations/tally.json";
 import SectionCard from "@/components/marketing/ui/section-card";
 import { signIn, signInAsDemo, signInWithApple } from "../actions";
 import GoogleSignInButton from "../google-sign-in-button";
@@ -66,16 +66,16 @@ function SignInScreen() {
         <SectionCard className="w-full" glowPosition="28% 28%">
           <div className="relative z-[2] flex w-full flex-col items-center gap-y-6 text-center sm:gap-y-7 lg:flex-row lg:items-stretch lg:justify-center lg:gap-x-16 lg:gap-y-0 lg:text-left">
           <div className="flex w-full max-w-[34rem] flex-col items-center gap-y-6 sm:gap-y-7 lg:max-w-[28rem] lg:flex-1 lg:items-center lg:justify-center lg:text-center">
-            <div className="mx-auto w-full max-w-[12rem] drop-shadow-[0_8px_30px_rgba(0,0,0,0.28)] sm:max-w-[14rem]">
-              <Lottie animationData={logoAnimData} loop={false} className="h-auto w-full" />
+            <div className="mx-auto w-full max-w-[6.5rem] drop-shadow-[0_8px_30px_rgba(231,136,34,0.2)] sm:max-w-[7.5rem]">
+              <Lottie animationData={tallyAnimData} loop={false} className="h-auto w-full" />
             </div>
 
             <div className="px-2 lg:max-w-[22rem] lg:px-0">
-              <h1 className="text-[clamp(1.75rem,5.5vw,2.5rem)] font-semibold tracking-tight text-white lg:text-[3rem] lg:leading-[1.1]">
+              <h1 className="text-[clamp(1.65rem,5vw,2.25rem)] font-semibold tracking-tight text-white lg:text-[2.35rem] lg:leading-[1.12]">
                 G&apos;day, Stockman.
               </h1>
-              <p className="mt-3 text-[clamp(1rem,3vw,1.18rem)] leading-relaxed text-white/72 lg:text-[1.15rem]">
-                Sign in to keep tabs on your herds.
+              <p className="mt-3 text-[clamp(0.95rem,2.5vw,1.08rem)] leading-relaxed text-white/72 lg:text-[1.02rem]">
+                Markets move, cattle grow, and the books don&apos;t wait.
               </p>
             </div>
           </div>
