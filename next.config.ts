@@ -80,7 +80,9 @@ const nextConfig: NextConfig = {
               // post-launch.
               // accounts.google.com hosts the Google Identity Services
               // (gsi/client) script used for the native ID-token sign-in flow.
-              "script-src 'self' 'unsafe-inline' https://accounts.google.com https://maps.googleapis.com https://va.vercel-scripts.com",
+              // 'unsafe-eval' is added in dev only because React Fast Refresh
+              // requires it to reconstruct callstacks. Production NEVER allows it.
+              `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""} https://accounts.google.com https://maps.googleapis.com https://va.vercel-scripts.com`,
               "style-src 'self' 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com",
               "img-src 'self' data: blob: https://*.supabase.co https://maps.googleapis.com https://maps.gstatic.com https://lh3.googleusercontent.com https://*.googleusercontent.com",
               "font-src 'self' data: https://fonts.gstatic.com",

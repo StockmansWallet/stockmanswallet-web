@@ -46,7 +46,6 @@ export default function PageBackground({ variant = "photo" }: { variant?: PageBa
         src={landingBg}
         alt=""
         fill
-        priority
         placeholder="blur"
         sizes="100vw"
         className={`object-cover ${isApp ? "scale-[1.035] opacity-70 blur-sm saturate-[0.78]" : ""}`}

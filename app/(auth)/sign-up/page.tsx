@@ -109,10 +109,10 @@ function SignUpScreen() {
 
               <div className="px-2 lg:max-w-[22rem] lg:px-0">
                 <h1 className="text-[clamp(1.65rem,5vw,2.25rem)] font-semibold tracking-tight text-white lg:text-[2.35rem] lg:leading-[1.12]">
-                  You&apos;re almost there, mate.
+                  She&apos;s in the post, mate.
                 </h1>
                 <p className="mt-3 text-[clamp(0.95rem,2.5vw,1.08rem)] leading-relaxed text-white/72 lg:text-[1.02rem]">
-                  Tap the link I&apos;ve sent to
+                  Check ya inbox and tap the link sent to
                   <br />
                   <span className="text-brand font-medium">{confirmationEmail}</span>
                 </p>
@@ -205,7 +205,7 @@ function SignUpScreen() {
                   </button>
                 </form>
 
-                <GoogleSignInButton text="signup_with" onError={(msg) => setError(msg)} />
+                <GoogleSignInButton text="signup_with" onError={setError} />
 
                 <form onSubmit={handleSubmit} noValidate>
                   <AnimatePresence initial={false}>

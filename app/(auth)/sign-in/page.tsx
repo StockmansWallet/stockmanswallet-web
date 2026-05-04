@@ -95,7 +95,7 @@ function SignInScreen() {
                   </button>
                 </form>
 
-                <GoogleSignInButton onError={(msg) => setError(msg)} />
+                <GoogleSignInButton onError={setError} />
 
                 <form onSubmit={handleSubmit} noValidate>
                   <AnimatePresence initial={false}>
