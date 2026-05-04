@@ -1,9 +1,17 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
+
+async function getRequestOrigin() {
+  const headerStore = await headers();
+  const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
+  const proto = headerStore.get("x-forwarded-proto") ?? "https";
+  if (host) return `${proto}://${host}`;
+  return process.env.NEXT_PUBLIC_SITE_URL || "https://stockmanswallet.com.au";
+}
 
 const signInSchema = z.object({
   email: z.string().trim().toLowerCase().email().max(254),
@@ -174,7 +182,7 @@ export async function resendConfirmation(email: string) {
 
 export async function signInWithGoogle() {
   const supabase = await createClient();
-  const origin = process.env.NEXT_PUBLIC_SITE_URL || "https://stockmanswallet.com.au";
+  const origin = await getRequestOrigin();
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",

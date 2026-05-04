@@ -30,7 +30,11 @@ export async function GET(request: NextRequest) {
   const response = NextResponse.redirect(`${origin}${redirectTo}`);
 
   // Create Supabase client that writes cookies directly onto the redirect response
-  // This preserves all cookie options (httpOnly, secure, sameSite, path, maxAge)
+  // This preserves all cookie options (httpOnly, secure, sameSite, path, maxAge).
+  // In production we force Secure + SameSite=Lax so the session cookie survives
+  // the cross-site OAuth round-trip (Supabase -> our callback -> /dashboard).
+  // Without this, browsers can drop the cookie and middleware sees no session,
+  // looping the user back to /sign-in even though the code exchange succeeded.
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -40,9 +44,13 @@ export async function GET(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          );
+          cookiesToSet.forEach(({ name, value, options }) => {
+            const hardened =
+              process.env.NODE_ENV === "production"
+                ? { ...options, secure: true, sameSite: options?.sameSite ?? "lax" }
+                : options;
+            response.cookies.set(name, value, hardened);
+          });
         },
       },
     }
