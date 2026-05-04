@@ -172,6 +172,28 @@ export async function resendConfirmation(email: string) {
   return { success: true };
 }
 
+export async function signInWithGoogle() {
+  const supabase = await createClient();
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || "https://stockmanswallet.com.au";
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${origin}/auth/callback`,
+      queryParams: {
+        access_type: "offline",
+        prompt: "consent",
+      },
+    },
+  });
+
+  if (error || !data?.url) {
+    redirect("/sign-in?error=google-failed");
+  }
+
+  redirect(data.url);
+}
+
 export async function signInWithApple() {
   const origin = process.env.NEXT_PUBLIC_SITE_URL || "https://stockmanswallet.com.au";
 
