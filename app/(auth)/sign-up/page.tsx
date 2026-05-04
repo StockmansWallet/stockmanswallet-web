@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Eye, EyeOff, Mail } from "lucide-react";
 import tallyAnimData from "@/public/animations/tally.json";
 import SectionCard from "@/components/marketing/ui/section-card";
+import { suggestEmailCorrection } from "@/lib/utils/email-typo";
 import { signUp, resendConfirmation, signInWithApple } from "../actions";
 import GoogleSignInButton from "../google-sign-in-button";
 
@@ -33,13 +34,35 @@ function SignUpScreen() {
   const [resending, setResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
   const [capsLockOn, setCapsLockOn] = useState(false);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  // Email-typo confirmation flow. When the user submits with a suggested
+  // correction still showing, we intercept and surface an inline panel so
+  // they have to actively choose between the suggestion and their typed
+  // email. Without this intercept users miss the inline suggestion and we
+  // ship verification emails to non-existent domains (the original bug
+  // that motivated typo detection in the first place).
+  const [pendingTypoEmail, setPendingTypoEmail] = useState<string | null>(null);
+  const [typoBypassed, setTypoBypassed] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const queryError = searchParams.get("error");
   const displayError = error ?? queryError;
   const passwordsMismatch =
     password.length > 0 && confirmPassword.length > 0 && password !== confirmPassword;
+
+  // Show a "did you mean..." suggestion only once the user has typed enough
+  // for the domain to be complete (has a dot and >= 5 chars). Avoids flashing
+  // suggestions while they are still mid-typing.
+  const emailSuggestion = useMemo(() => {
+    const at = email.lastIndexOf("@");
+    if (at <= 0) return null;
+    const domain = email.slice(at + 1);
+    if (!domain.includes(".") || domain.length < 5) return null;
+    return suggestEmailCorrection(email);
+  }, [email]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -65,6 +88,13 @@ function SignUpScreen() {
       return;
     }
 
+    // Soft-block submission when a likely typo is present. The user has to
+    // actively confirm before we send them past this point.
+    if (emailSuggestion && !typoBypassed) {
+      setPendingTypoEmail(email);
+      return;
+    }
+
     setLoading(true);
     const result = await signUp(formData);
 
@@ -78,6 +108,21 @@ function SignUpScreen() {
       setConfirmationEmail(result.email);
     }
     setLoading(false);
+  }
+
+  function acceptTypoSuggestion() {
+    if (!emailSuggestion) return;
+    setEmail(emailSuggestion);
+    setPendingTypoEmail(null);
+    // Don't auto-submit. The user pressed Create account once with a typo;
+    // give them one more chance to read the corrected address before going.
+  }
+
+  function bypassTypoCheck() {
+    setTypoBypassed(true);
+    setPendingTypoEmail(null);
+    // Re-trigger submit on the next tick so the bypass flag is in state.
+    queueMicrotask(() => formRef.current?.requestSubmit());
   }
 
   async function handleResend() {
@@ -115,6 +160,10 @@ function SignUpScreen() {
                   Check ya inbox and tap the link sent to
                   <br />
                   <span className="text-brand font-medium">{confirmationEmail}</span>
+                </p>
+                <p className="mt-4 text-xs leading-relaxed text-white/45">
+                  Not arriving? Check the spelling above, then your spam folder.
+                  Bigpond and Telstra users especially - the email often lands there.
                 </p>
               </div>
             </div>
@@ -207,7 +256,7 @@ function SignUpScreen() {
 
                 <GoogleSignInButton text="signup_with" onError={setError} />
 
-                <form onSubmit={handleSubmit} noValidate>
+                <form ref={formRef} onSubmit={handleSubmit} noValidate>
                   <AnimatePresence initial={false}>
                     {showEmailForm && (
                       <motion.div
@@ -232,8 +281,30 @@ function SignUpScreen() {
                               type="email"
                               autoComplete="email"
                               placeholder="you@example.com"
+                              value={email}
+                              onChange={(e) => {
+                                setEmail(e.target.value);
+                                // Editing the email retracts both the
+                                // confirmation panel and any prior bypass,
+                                // so a fresh typo gets caught again.
+                                if (pendingTypoEmail) setPendingTypoEmail(null);
+                                if (typoBypassed) setTypoBypassed(false);
+                              }}
                               className="focus:border-brand/70 focus:ring-brand/20 h-11 w-full rounded-full border border-white/10 bg-white/10 px-5 text-base text-white transition-colors outline-none placeholder:text-white/35 focus:bg-white/12 focus:ring-2"
                             />
+                            {emailSuggestion && (
+                              <p className="pl-1 text-xs text-amber-300/85">
+                                Did you mean{" "}
+                                <button
+                                  type="button"
+                                  onClick={() => setEmail(emailSuggestion)}
+                                  className="font-medium underline-offset-2 hover:underline"
+                                >
+                                  {emailSuggestion}
+                                </button>
+                                ?
+                              </p>
+                            )}
                           </div>
 
                           <div className="space-y-1.5 text-left">
@@ -350,6 +421,42 @@ function SignUpScreen() {
                         ? "Create account"
                         : "Sign up with email"}
                   </button>
+
+                  <AnimatePresence initial={false}>
+                    {pendingTypoEmail && emailSuggestion && (
+                      <motion.div
+                        key="typo-confirm"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={panelSpring}
+                        style={{ overflow: "hidden" }}
+                      >
+                        <div className="mt-2.5 space-y-2.5 rounded-2xl border border-amber-300/20 bg-amber-900/15 p-4 text-left">
+                          <p className="text-sm text-amber-50/90">
+                            That email looks like a typo. Did you mean{" "}
+                            <span className="font-semibold">{emailSuggestion}</span>?
+                          </p>
+                          <div className="flex flex-col gap-2 sm:flex-row">
+                            <button
+                              type="button"
+                              onClick={acceptTypoSuggestion}
+                              className="flex-1 rounded-full bg-amber-300/90 px-4 py-2 text-sm font-semibold text-[#2a1d16] transition-colors hover:bg-amber-300"
+                            >
+                              Use {emailSuggestion}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={bypassTypoCheck}
+                              className="flex-1 rounded-full border border-white/15 bg-transparent px-4 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/5"
+                            >
+                              No, use {pendingTypoEmail}
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   <AnimatePresence initial={false}>
                     {displayError && (
