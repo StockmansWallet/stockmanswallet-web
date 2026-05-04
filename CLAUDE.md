@@ -1,4 +1,7 @@
-# Stockman's Wallet Web - Claude Code Guide
+# Stockman's Wallet Web - Project Guide
+
+Global rules (writing style, terminology, engineering quality, workflow) live in
+`/Volumes/Gonzales/StockmansWallet/AGENTS.md`. This file covers web-specific facts only.
 
 ## Project
 Next.js (App Router) web companion to the iOS app. Same Supabase project.
@@ -19,11 +22,6 @@ npx prettier --write <file>   # Format (also runs automatically via PostToolUse 
 ## Feature flags
 - `ADVISOR_ENABLED` (in `lib/feature-flags.ts`) is `false` for MVP. Advisor routes, nav items, and marketing sections are gated behind it. Don't add advisor-only features without flipping the flag.
 
-## Writing Style
-- NEVER use em-dashes in any content, copy, or code comments
-- NEVER say "mob/mobs", always "herd/herds"
-- Australian English spelling (colour, organisation, etc.)
-
 ## Architecture
 - Server Components (async page.tsx) fetch Supabase data directly via `@supabase/ssr`
 - Server Actions (`actions.ts`) handle mutations
@@ -39,7 +37,7 @@ npx prettier --write <file>   # Format (also runs automatically via PostToolUse 
 - `breed_premiums.premium_pct` aliased as `premium_percent:premium_pct`
 
 ## Git
-- Git root: `/Volumes/Gonzales/StockmansWallet/StockmansWallet-Web/stockmanswallet-web/`
+- Git root: `/Volumes/Gonzales/StockmansWallet/app-web/stockmanswallet-web/`
 - Separate repo from iOS. Never commit from parent directory.
 - Commit email: `admin@stockmanswallet.com.au`
 - No `Co-Authored-By` lines (blocks Vercel Hobby deploys)

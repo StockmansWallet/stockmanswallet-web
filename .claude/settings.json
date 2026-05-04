@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "f=$(jq -r '.tool_input.file_path // .tool_response.filePath // empty'); if [[ \"$f\" =~ \\.(ts|tsx|js|jsx|cjs|mjs|mdx|json|css)$ ]] && [ -f \"$f\" ]; then /Volumes/Gonzales/StockmansWallet/StockmansWallet-Web/stockmanswallet-web/node_modules/.bin/prettier --write --ignore-unknown \"$f\" >/dev/null 2>&1 || true; fi; exit 0",
+            "command": "f=$(jq -r '.tool_input.file_path // .tool_response.filePath // empty'); if [[ \"$f\" =~ \\.(ts|tsx|js|jsx|cjs|mjs|mdx|json|css)$ ]] && [ -f \"$f\" ]; then /Volumes/Gonzales/StockmansWallet/app-web/stockmanswallet-web/node_modules/.bin/prettier --write --ignore-unknown \"$f\" >/dev/null 2>&1 || true; fi; exit 0",
             "timeout": 15
           }
         ]
