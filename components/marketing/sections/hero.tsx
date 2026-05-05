@@ -24,6 +24,8 @@ const FEATURE_CARDS = [
   },
 ] as const;
 
+const SHOW_FEATURE_CARDS = false;
+
 export default function Hero() {
   const { openWaitlist } = useWaitlist();
   const sectionRef = useRef<HTMLElement>(null);
@@ -41,6 +43,10 @@ export default function Hero() {
   const currentFeatureCard = FEATURE_CARDS[activeFeatureCard];
 
   useEffect(() => {
+    if (!SHOW_FEATURE_CARDS) {
+      return;
+    }
+
     const interval = window.setInterval(() => {
       setActiveFeatureCard((current) => (current + 1) % FEATURE_CARDS.length);
     }, 6500);
@@ -53,10 +59,9 @@ export default function Hero() {
       {/* Content */}
       <div className="relative mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8">
         <SectionCard
-          className="px-6 py-12 sm:px-8 sm:py-14 lg:px-12 lg:py-16"
+          className="px-6 sm:px-8 lg:px-12"
           glowPosition="60% 20%"
           glowSize="1200px 720px"
-          overflowVisible
         >
           <div className="relative z-10 grid items-center gap-16 lg:grid-cols-2 lg:gap-20">
             {/* Text Column */}
@@ -139,75 +144,79 @@ export default function Hero() {
             {/* Phone Column */}
             <motion.div
               style={{ y: phoneY }}
-              className="relative flex min-h-[500px] items-center justify-center lg:min-h-[620px]"
+              className="relative flex h-[360px] items-center justify-center sm:h-[430px] lg:h-[500px]"
             >
-              {/* Layered phone mockup */}
+              {/* Brangus phone mockup */}
               <motion.div
                 initial={{ opacity: 0, y: 40, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                className="relative z-10 h-[480px] max-w-[120vw] translate-x-8 translate-y-8 sm:h-[560px] lg:h-[640px] lg:translate-x-14 xl:h-[690px] xl:translate-x-16"
+                className="absolute top-[-45px] right-[-155px] z-10 h-[500px] max-w-[150vw] sm:top-[-68px] sm:right-[-235px] sm:h-[620px] lg:top-[-96px] lg:right-[-282px] lg:h-[720px] xl:top-[-114px] xl:right-[-318px] xl:h-[780px]"
               >
                 <Image
-                  src="/images/iphone-hero.png"
-                  alt="Stockman's Wallet app dashboard"
-                  width={1018}
-                  height={1243}
+                  src="/images/hero_landing_iPhoneHand.webp"
+                  alt="Brangus holding the Stockman's Wallet app dashboard on an iPhone"
+                  width={2336}
+                  height={1744}
                   className="h-full w-auto max-w-none select-none"
                   priority
                   loading="eager"
-                  sizes="(min-width: 1280px) 565px, (min-width: 1024px) 524px, (min-width: 640px) 459px, 393px"
+                  sizes="(min-width: 1280px) 1045px, (min-width: 1024px) 965px, (min-width: 640px) 831px, 670px"
                 />
               </motion.div>
 
-              {/* Floating feature card */}
-              <div className="absolute top-[45%] left-[8%] z-20 hidden w-[250px] select-none sm:block sm:w-[285px] lg:top-[47%] lg:left-[2%] lg:w-[315px] xl:left-[-2%] xl:w-[350px]">
-                <AnimatePresence mode="popLayout" initial={false}>
-                  <motion.div
-                    key={currentFeatureCard.src}
-                    initial={
-                      prefersReducedMotion
-                        ? { opacity: 0 }
-                        : { opacity: 0, x: 42, y: 18, rotate: 3, scale: 0.94 }
-                    }
-                    animate={
-                      prefersReducedMotion
-                        ? { opacity: 1 }
-                        : { opacity: 1, x: 0, y: [0, -10, 0], rotate: 0, scale: 1 }
-                    }
-                    exit={
-                      prefersReducedMotion
-                        ? { opacity: 0 }
-                        : { opacity: 0, x: -54, y: -20, rotate: -4, scale: 0.96 }
-                    }
-                    transition={
-                      prefersReducedMotion
-                        ? { duration: 0.35 }
-                        : {
-                            opacity: { duration: 0.42 },
-                            x: { duration: 0.72, ease: [0.16, 1, 0.3, 1] },
-                            rotate: { duration: 0.72, ease: [0.16, 1, 0.3, 1] },
-                            scale: { duration: 0.72, ease: [0.16, 1, 0.3, 1] },
-                            y: {
-                              duration: 5.5,
-                              repeat: Infinity,
-                              ease: "easeInOut",
-                            },
-                          }
-                    }
-                    className={`overflow-hidden rounded-[18px] border bg-emerald-950/30 shadow-[0_18px_42px_rgba(0,0,0,0.42)] backdrop-blur-2xl backdrop-saturate-150 ${currentFeatureCard.frameClassName}`}
-                  >
-                    <Image
-                      src={currentFeatureCard.src}
-                      alt={currentFeatureCard.alt}
-                      width={604}
-                      height={314}
-                      className="w-full"
-                      sizes="(min-width: 1280px) 350px, (min-width: 1024px) 315px, (min-width: 640px) 285px, 250px"
-                    />
-                  </motion.div>
-                </AnimatePresence>
-              </div>
+              {SHOW_FEATURE_CARDS ? (
+                <>
+                  {/* Floating feature card */}
+                  <div className="absolute top-[45%] left-[8%] z-20 hidden w-[250px] select-none sm:block sm:w-[285px] lg:top-[47%] lg:left-[2%] lg:w-[315px] xl:left-[-2%] xl:w-[350px]">
+                    <AnimatePresence mode="popLayout" initial={false}>
+                      <motion.div
+                        key={currentFeatureCard.src}
+                        initial={
+                          prefersReducedMotion
+                            ? { opacity: 0 }
+                            : { opacity: 0, x: 42, y: 18, rotate: 3, scale: 0.94 }
+                        }
+                        animate={
+                          prefersReducedMotion
+                            ? { opacity: 1 }
+                            : { opacity: 1, x: 0, y: [0, -10, 0], rotate: 0, scale: 1 }
+                        }
+                        exit={
+                          prefersReducedMotion
+                            ? { opacity: 0 }
+                            : { opacity: 0, x: -54, y: -20, rotate: -4, scale: 0.96 }
+                        }
+                        transition={
+                          prefersReducedMotion
+                            ? { duration: 0.35 }
+                            : {
+                                opacity: { duration: 0.42 },
+                                x: { duration: 0.72, ease: [0.16, 1, 0.3, 1] },
+                                rotate: { duration: 0.72, ease: [0.16, 1, 0.3, 1] },
+                                scale: { duration: 0.72, ease: [0.16, 1, 0.3, 1] },
+                                y: {
+                                  duration: 5.5,
+                                  repeat: Infinity,
+                                  ease: "easeInOut",
+                                },
+                              }
+                        }
+                        className={`overflow-hidden rounded-[18px] border bg-emerald-950/30 shadow-[0_18px_42px_rgba(0,0,0,0.42)] backdrop-blur-2xl backdrop-saturate-150 ${currentFeatureCard.frameClassName}`}
+                      >
+                        <Image
+                          src={currentFeatureCard.src}
+                          alt={currentFeatureCard.alt}
+                          width={604}
+                          height={314}
+                          className="w-full"
+                          sizes="(min-width: 1280px) 350px, (min-width: 1024px) 315px, (min-width: 640px) 285px, 250px"
+                        />
+                      </motion.div>
+                    </AnimatePresence>
+                  </div>
+                </>
+              ) : null}
             </motion.div>
           </div>
         </SectionCard>
