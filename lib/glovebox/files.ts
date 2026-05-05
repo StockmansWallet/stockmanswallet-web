@@ -43,12 +43,20 @@ export interface GloveboxFileRow {
   mime_type: string;
   size_bytes: number;
   kind: GloveboxFileKind | null;
-  category?: string | null;
+  collection?: string | null;
   tags?: string[] | null;
   page_count: number | null;
   extraction_status: GloveboxFileExtractionStatus;
   source: GloveboxFileSource;
   conversation_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GloveboxCollectionRow {
+  id: string;
+  user_id: string;
+  name: string;
   created_at: string;
   updated_at: string;
 }
@@ -66,7 +74,7 @@ export const FILE_KIND_OPTIONS: { value: GloveboxFileKind; label: string }[] = [
   { value: "other", label: "Other" },
 ];
 
-export const DEFAULT_FILE_CATEGORY_OPTIONS = [
+export const DEFAULT_FILE_COLLECTION_OPTIONS = [
   "Health & vet",
   "NLIS & compliance",
   "Sales & receipts",
@@ -81,8 +89,6 @@ export const DEFAULT_FILE_CATEGORY_OPTIONS = [
   "Finance & admin",
   "General",
 ];
-
-export const FILE_COLLECTION_TAG_PREFIX = "collection:";
 
 export type GloveboxDetectedFileType =
   | "pdf"
@@ -110,30 +116,10 @@ export function kindLabel(kind: GloveboxFileKind | null | undefined): string | n
   return FILE_KIND_OPTIONS.find((option) => option.value === kind)?.label ?? null;
 }
 
-export function fileCollectionFromTags(tags: string[] | null | undefined): string | null {
-  const collectionTag = tags?.find((tag) => tag.startsWith(FILE_COLLECTION_TAG_PREFIX));
-  const collection = collectionTag?.slice(FILE_COLLECTION_TAG_PREFIX.length).trim();
-  return collection || null;
-}
-
-export function fileTagsWithoutCollection(tags: string[] | null | undefined): string[] {
-  return (tags ?? []).filter((tag) => !tag.startsWith(FILE_COLLECTION_TAG_PREFIX));
-}
-
-export function tagsWithFileCollection(
-  tags: string[] | null | undefined,
-  category: string | null | undefined
-): string[] {
-  const nextTags = fileTagsWithoutCollection(tags);
-  const cleanCategory = category?.trim();
-  if (cleanCategory) nextTags.push(`${FILE_COLLECTION_TAG_PREFIX}${cleanCategory}`);
-  return nextTags;
-}
-
-export function fileCategoryLabel(
-  file: Pick<GloveboxFileRow, "category" | "kind" | "tags">
+export function fileCollectionLabel(
+  file: Pick<GloveboxFileRow, "collection">
 ): string {
-  return fileCollectionFromTags(file.tags) || file.category?.trim() || "Uncategorised";
+  return file.collection?.trim() || "Uncategorised";
 }
 
 export function detectFileType(
@@ -190,7 +176,7 @@ export async function uploadGloveboxFile(opts: {
   file: File;
   title?: string;
   kind?: GloveboxFileKind | null;
-  category?: string | null;
+  collection?: string | null;
   source?: GloveboxFileSource;
   conversationId?: string | null;
 }): Promise<UploadResult> {
@@ -221,7 +207,8 @@ export async function uploadGloveboxFile(opts: {
     size_bytes: opts.file.size,
     title: opts.title?.trim() || friendlyTitle(opts.file.name),
     kind: opts.kind ?? null,
-    tags: tagsWithFileCollection([], opts.category),
+    collection: opts.collection?.trim() || null,
+    tags: [],
     source: opts.source ?? "glovebox",
     conversation_id: opts.conversationId ?? null,
     extraction_status: "pending",

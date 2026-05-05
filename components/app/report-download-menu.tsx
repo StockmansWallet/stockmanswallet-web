@@ -309,7 +309,7 @@ async function savePdfToGlovebox(
     file,
     title: group.label,
     kind: "other",
-    category: "Reports",
+    collection: "Reports",
     source: "reports",
   });
 }

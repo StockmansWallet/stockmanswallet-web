@@ -428,7 +428,7 @@ export function FreightCalculator({ herds, properties }: FreightCalculatorProps)
         file,
         title: "Freight IQ Estimate",
         kind: "other",
-        category: "Freight IQ",
+        collection: "Freight IQ",
         source: "freight_iq",
       });
       setGloveboxStatus("saved");

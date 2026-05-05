@@ -293,7 +293,7 @@ export const toolDefinitions = [
   {
     name: "record_sale",
     description:
-      "Records a livestock sale against one of the user's herds. Use ONLY when the user explicitly says they have sold animals or want to log/record a sale (e.g. 'I just sold 50 steers at $5/kg', 'log that sale', 'record it'). Do NOT use for hypothetical scenarios — use calculate_price_scenario for 'what if' questions. After recording, the sale appears in the app's sales history and the herd head count is updated automatically.",
+      "Records a livestock sale against one of the user's herds. Use ONLY when the user explicitly says they have sold animals or want to log/record a sale (e.g. 'I just sold 50 steers at $5/kg', 'log that sale', 'record it'). Do NOT use for hypothetical scenarios, use calculate_price_scenario for 'what if' questions. After recording, the sale appears in the app's sales history and the herd head count is updated automatically.",
     input_schema: {
       type: "object",
       properties: {
@@ -412,7 +412,7 @@ export const toolDefinitions = [
   {
     name: "lookup_file",
     description:
-      "Looks up files stored in the user's Glovebox (vet reports, NLIS docs, MLA receipts, lease agreements, soil tests, kill sheets, processor grids, reports, photos, anything else). action='list' returns a slim catalogue (id, title, category, kind, size, page count). action='get_metadata' returns one file's metadata. action='get_content' makes the file readable to you. PDFs and images arrive as native document/image blocks on the next turn, other formats arrive as extracted text in the tool_result. Use list first to discover what the user has, then get_content to actually read the relevant one. When the user attaches a file directly via the paperclip in the chat, you do NOT need to call lookup_file. It is already in the user message.",
+      "Looks up files stored in the user's Glovebox (vet reports, NLIS docs, MLA receipts, lease agreements, soil tests, kill sheets, processor grids, reports, photos, anything else). action='list' returns a slim catalogue (id, title, collection, kind, size, page count). action='get_metadata' returns one file's metadata. action='get_content' makes the file readable to you. PDFs and images arrive as native document/image blocks on the next turn, other formats arrive as extracted text in the tool_result. Use list first to discover what the user has, then get_content to actually read the relevant one. When the user attaches a file directly via the paperclip in the chat, you do NOT need to call lookup_file. It is already in the user message.",
     input_schema: {
       type: "object",
       properties: {
@@ -430,9 +430,9 @@ export const toolDefinitions = [
           description:
             "Optional legacy kind filter for list. One of: vet_report, nlis, mla_receipt, lease, soil_test, kill_sheet, eu_cert, breeding, other.",
         },
-        category: {
+        collection: {
           type: "string",
-          description: "Optional user-created collection/category filter for list, e.g. Health & vet.",
+          description: "Optional user-created collection filter for list, e.g. Health & vet.",
         },
         free_text: {
           type: "string",
@@ -503,20 +503,20 @@ async function executeLookupFile(
   switch (action) {
     case "list": {
       const kind = typeof input.kind === "string" ? input.kind : null;
-      const category = typeof input.category === "string" ? input.category : null;
+      const collection = typeof input.collection === "string" ? input.collection : null;
       const freeText = typeof input.free_text === "string" ? input.free_text : "";
       const maxRaw = typeof input.max_results === "number" ? input.max_results : 25;
       const max = Math.max(1, Math.min(50, maxRaw));
 
       let q = supabase
         .from("glovebox_files")
-        .select("id, title, category, kind, size_bytes, page_count, mime_type, created_at")
+        .select("id, title, collection, kind, size_bytes, page_count, mime_type, created_at")
         .eq("user_id", store.userId)
         .eq("is_deleted", false)
         .order("updated_at", { ascending: false })
         .limit(max);
       if (kind) q = q.eq("kind", kind);
-      if (category) q = q.eq("category", category);
+      if (collection) q = q.eq("collection", collection);
       if (freeText) q = q.ilike("title", `%${freeText}%`);
 
       const { data, error } = await q;
@@ -536,7 +536,7 @@ async function executeLookupFile(
           (fallbackData ?? []).map((row) => ({
             id: row.id,
             title: row.title,
-            category: null,
+            collection: null,
             kind: row.kind,
             size_bytes: row.size_bytes,
             page_count: row.page_count,
@@ -549,7 +549,7 @@ async function executeLookupFile(
         (data ?? []).map((row) => ({
           id: row.id,
           title: row.title,
-          category: row.category,
+          collection: row.collection,
           kind: row.kind,
           size_bytes: row.size_bytes,
           page_count: row.page_count,
@@ -564,7 +564,7 @@ async function executeLookupFile(
       let { data, error } = await supabase
         .from("glovebox_files")
         .select(
-          "id, title, category, kind, tags, notes, original_filename, mime_type, size_bytes, page_count, extraction_status, created_at",
+          "id, title, collection, kind, tags, notes, original_filename, mime_type, size_bytes, page_count, extraction_status, created_at",
         )
         .eq("id", fileId)
         .eq("user_id", store.userId)
@@ -580,14 +580,14 @@ async function executeLookupFile(
           .eq("user_id", store.userId)
           .eq("is_deleted", false)
           .maybeSingle();
-        data = fallback.data ? { ...fallback.data, category: null } : null;
+        data = fallback.data ? { ...fallback.data, collection: null } : null;
         error = fallback.error;
       }
       if (error || !data) return "Error: file not found.";
       return JSON.stringify({
         id: data.id,
         title: data.title,
-        category: data.category,
+        collection: data.collection,
         kind: data.kind,
         tags: data.tags ?? [],
         notes: data.notes,

@@ -114,7 +114,7 @@ export function YardBookGloveboxAttachments({
             userId: user.id,
             file,
             source: "yard_book",
-            category: "Yard Book",
+            collection: "Yard Book",
           });
           addFile({
             id: fileId,
@@ -124,8 +124,8 @@ export function YardBookGloveboxAttachments({
             mime_type: file.type || "application/octet-stream",
             size_bytes: file.size,
             kind: null,
-            category: "Yard Book",
-            tags: ["collection:Yard Book"],
+            collection: "Yard Book",
+            tags: [],
             page_count: null,
             extraction_status: "pending",
             source: "yard_book",

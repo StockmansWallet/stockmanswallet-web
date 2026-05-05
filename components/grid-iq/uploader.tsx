@@ -244,7 +244,7 @@ export function GridIQUploader({
       userId: user.id,
       file,
       kind: (isGrid ? "processor_grid" : "kill_sheet") as GloveboxFileKind,
-      category: isGrid ? "Processor Grids" : "Kill sheets",
+      collection: isGrid ? "Processor Grids" : "Kill sheets",
       source: "grid_iq",
     });
     sourceGloveboxFileIdRef.current = fileId;
