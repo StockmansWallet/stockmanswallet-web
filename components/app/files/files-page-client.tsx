@@ -1,70 +1,39 @@
 "use client";
 
 import {
-  type PointerEvent as ReactPointerEvent,
-  useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
+import { Loader2, Plus } from "lucide-react";
 import {
-  Database,
-  Download,
-  File,
-  FileSpreadsheet,
-  FileText,
-  Folder,
-  FolderOpen,
-  Check,
-  ImageIcon,
-  Layers3,
-  Loader2,
-  MoreHorizontal,
-  Pencil,
-  Plus,
-  Search,
-  Trash2,
-  X,
-} from "lucide-react";
-import {
-  type GloveboxDetectedFileType,
   type GloveboxCollectionRow,
   type GloveboxFileRow,
   detectFileType,
   fileCollectionLabel,
   FILE_TYPE_LABELS,
-  formatFileSize,
-  uploadGloveboxFile,
-  deleteGloveboxFile,
-  signedDownloadUrlFor,
-  signedUrlFor,
-  friendlyTitle,
 } from "@/lib/glovebox/files";
-import { createClient } from "@/lib/supabase/client";
 import { PageHeaderActionsPortal } from "@/components/ui/page-header-actions-portal";
+import { GloveboxCollectionsSidebar } from "./glovebox-collections-sidebar";
+import { CompactFileDragPreview } from "./glovebox-drag-preview";
+import { FileDetailDrawer } from "./glovebox-file-detail-drawer";
+import { GloveboxMainPanel } from "./glovebox-main-panel";
+import {
+  ALL_COLLECTIONS,
+  type DragPreview,
+  type GroupMode,
+  groupLabel,
+} from "./glovebox-shared";
+import { makeDragPreview, useGloveboxDrag } from "./use-glovebox-drag";
+import { useGloveboxCollections } from "./use-glovebox-collections";
+import { useGloveboxFileActions } from "./use-glovebox-file-actions";
 
 interface Props {
   userId: string;
   initialFiles: GloveboxFileRow[];
   initialCollections: GloveboxCollectionRow[];
 }
-
-type GroupMode = "collection" | "type" | "source" | "none";
-type DragPreview = {
-  file: GloveboxFileRow;
-  type: GloveboxDetectedFileType;
-  startX: number;
-  startY: number;
-  x: number;
-  y: number;
-  active: boolean;
-};
-
-const ALL_COLLECTIONS = "__all__";
-const UNCATEGORISED = "Uncategorised";
-const DROP_UNCATEGORISED = "__uncategorised__";
-const DRAG_ACTIVATION_DISTANCE = 6;
 
 export function GloveboxPageClient({ userId, initialFiles, initialCollections }: Props) {
   const [files, setFiles] = useState<GloveboxFileRow[]>(initialFiles);
@@ -87,6 +56,14 @@ export function GloveboxPageClient({ userId, initialFiles, initialCollections }:
   const suppressNextFileOpenRef = useRef(false);
   const activeDragPreview = dragPreview?.active ? dragPreview : null;
   const draggingFileId = activeDragPreview?.file.id ?? null;
+  const { handlePicked, handleDelete, handleDownload, handleFileChange } = useGloveboxFileActions({
+    userId,
+    fileInputRef,
+    setFiles,
+    setActiveFile,
+    setBusy,
+    setError,
+  });
 
   useEffect(() => {
     if (!openCollectionMenu) return;
@@ -110,33 +87,29 @@ export function GloveboxPageClient({ userId, initialFiles, initialCollections }:
     };
   }, [openCollectionMenu]);
 
-  useEffect(() => {
-    dragPreviewRef.current = dragPreview;
-  }, [dragPreview]);
-
-  const isPointerDragStarted = dragPreview !== null;
-
-  const collectionOptions = useMemo(() => {
-    const values = new Set<string>();
-    for (const collection of collections) {
-      const label = collection.name.trim();
-      if (label) values.add(label);
-    }
-    for (const file of files) {
-      const label = fileCollectionLabel(file);
-      if (label !== UNCATEGORISED) values.add(label);
-    }
-    return Array.from(values).sort((a, b) => a.localeCompare(b));
-  }, [collections, files]);
-
-  const collectionCounts = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const file of files) {
-      const label = fileCollectionLabel(file);
-      counts.set(label, (counts.get(label) ?? 0) + 1);
-    }
-    return counts;
-  }, [files]);
+  const {
+    collectionOptions,
+    collectionCounts,
+    moveFileToCollection,
+    handleCreateCollection,
+    renameCollection,
+    deleteCollection,
+  } = useGloveboxCollections({
+    userId,
+    files,
+    collections,
+    collectionDraft,
+    editingCollection,
+    setFiles,
+    setActiveFile,
+    setCollections,
+    setActiveCollection,
+    setCollectionDraft,
+    setIsCreatingCollection,
+    setEditingCollection,
+    setEditingDraft,
+    setError,
+  });
 
   const visibleFiles = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -166,371 +139,14 @@ export function GloveboxPageClient({ userId, initialFiles, initialCollections }:
     return Array.from(groups.entries());
   }, [groupMode, visibleFiles]);
 
-  const handlePicked = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const picked = Array.from(e.target.files ?? []);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      if (picked.length === 0) return;
-
-      setBusy(true);
-      setError(null);
-      try {
-        for (const file of picked) {
-          const { fileId, storagePath } = await uploadGloveboxFile({ userId, file });
-          const row: GloveboxFileRow = {
-            id: fileId,
-            storage_path: storagePath,
-            title: friendlyTitle(file.name),
-            original_filename: file.name,
-            mime_type: file.type || "application/octet-stream",
-            size_bytes: file.size,
-            kind: null,
-            collection: null,
-            tags: [],
-            page_count: null,
-            extraction_status: "pending",
-            source: "glovebox",
-            conversation_id: null,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          };
-          setFiles((prev) => [row, ...prev]);
-        }
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : "Upload failed";
-        setError(msg);
-      } finally {
-        setBusy(false);
-      }
-    },
-    [userId]
-  );
-
-  const handleDelete = useCallback(async (file: GloveboxFileRow) => {
-    if (!confirm(`Delete ${file.title}? Tools that reference it may show it as removed.`)) return;
-    await deleteGloveboxFile(file);
-    setFiles((prev) => prev.filter((f) => f.id !== file.id));
-    setActiveFile((current) => (current?.id === file.id ? null : current));
-  }, []);
-
-  const handleDownload = useCallback(async (file: GloveboxFileRow) => {
-    setError(null);
-    try {
-      let storagePath = file.storage_path;
-      if (!storagePath) {
-        const supabase = createClient();
-        const { data: row, error: lookupError } = await supabase
-          .from("glovebox_files")
-          .select("storage_path")
-          .eq("id", file.id)
-          .maybeSingle<{ storage_path: string }>();
-        if (lookupError) throw lookupError;
-        storagePath = row?.storage_path;
-      }
-      if (!storagePath) throw new Error("Could not find the original file.");
-
-      const url = await signedDownloadUrlFor(storagePath, file.original_filename);
-      if (!url) throw new Error("Could not create a download link.");
-      triggerAnchorDownload(url, file.original_filename);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Download failed.");
-    }
-  }, []);
-
-  const handleFileChange = useCallback((updated: Partial<GloveboxFileRow> & { id: string }) => {
-    setFiles((prev) => prev.map((f) => (f.id === updated.id ? { ...f, ...updated } : f)));
-    setActiveFile((current) => (current?.id === updated.id ? { ...current, ...updated } : current));
-  }, []);
-
-  const moveFileToCollection = useCallback(
-    async (fileId: string, nextCollection: string | null) => {
-      const file = files.find((candidate) => candidate.id === fileId);
-      if (!file) return;
-
-      const currentCollection = fileCollectionLabel(file);
-      const previousCollection = currentCollection === UNCATEGORISED ? null : currentCollection;
-      const cleanNext = nextCollection?.trim() || null;
-      if ((previousCollection ?? null) === cleanNext) return;
-
-      setError(null);
-      setFiles((prev) =>
-        prev.map((candidate) =>
-          candidate.id === fileId ? { ...candidate, collection: cleanNext } : candidate
-        )
-      );
-      setActiveFile((current) =>
-        current?.id === fileId ? { ...current, collection: cleanNext } : current
-      );
-
-      const supabase = createClient();
-      const { error: updateError } = await supabase
-        .from("glovebox_files")
-        .update({ collection: cleanNext })
-        .eq("id", fileId);
-
-      if (updateError) {
-        setFiles((prev) =>
-          prev.map((candidate) =>
-            candidate.id === fileId
-              ? { ...candidate, collection: previousCollection }
-              : candidate
-          )
-        );
-        setActiveFile((current) =>
-          current?.id === fileId
-            ? { ...current, collection: previousCollection }
-            : current
-        );
-        setError(updateError.message);
-      }
-    },
-    [files]
-  );
-
-  useEffect(() => {
-    if (!isPointerDragStarted) return;
-
-    const previousUserSelect = document.body.style.userSelect;
-    document.body.style.userSelect = "none";
-
-    function finishDrag(event?: globalThis.PointerEvent, shouldDrop = false) {
-      const current = dragPreviewRef.current;
-      if (!current) return;
-
-      const active =
-        current.active ||
-        (event
-          ? Math.hypot(event.clientX - current.startX, event.clientY - current.startY) >=
-            DRAG_ACTIVATION_DISTANCE
-          : false);
-      const dropTarget =
-        shouldDrop && active && event
-          ? collectionDropTargetFromPoint(event.clientX, event.clientY)
-          : undefined;
-
-      if (dropTarget !== undefined) {
-        void moveFileToCollection(current.file.id, dropTarget);
-      }
-
-      if (active) {
-        suppressNextFileOpenRef.current = true;
-        window.setTimeout(() => {
-          suppressNextFileOpenRef.current = false;
-        }, 0);
-      }
-
-      dragPreviewRef.current = null;
-      setDragPreview(null);
-      setDropCollection(null);
-    }
-
-    function handlePointerMove(event: globalThis.PointerEvent) {
-      const current = dragPreviewRef.current;
-      if (!current) return;
-
-      const active =
-        current.active ||
-        Math.hypot(event.clientX - current.startX, event.clientY - current.startY) >=
-          DRAG_ACTIVATION_DISTANCE;
-      const next = {
-        ...current,
-        x: event.clientX,
-        y: event.clientY,
-        active,
-      };
-
-      event.preventDefault();
-      dragPreviewRef.current = next;
-      setDragPreview(next);
-
-      if (active) {
-        const dropTarget = collectionDropTargetFromPoint(event.clientX, event.clientY);
-        setDropCollection(
-          dropTarget === undefined ? null : dropTarget === null ? UNCATEGORISED : dropTarget
-        );
-      }
-    }
-
-    function handlePointerUp(event: globalThis.PointerEvent) {
-      finishDrag(event, true);
-    }
-
-    function handlePointerCancel() {
-      finishDrag();
-    }
-
-    document.addEventListener("pointermove", handlePointerMove, { passive: false });
-    document.addEventListener("pointerup", handlePointerUp);
-    document.addEventListener("pointercancel", handlePointerCancel);
-
-    return () => {
-      document.removeEventListener("pointermove", handlePointerMove);
-      document.removeEventListener("pointerup", handlePointerUp);
-      document.removeEventListener("pointercancel", handlePointerCancel);
-      document.body.style.userSelect = previousUserSelect;
-    };
-  }, [isPointerDragStarted, moveFileToCollection]);
-
-  const handleCreateCollection = useCallback(async () => {
-    const nextCollection = collectionDraft.trim();
-    if (!nextCollection) return;
-    if (collectionOptions.some((collection) => collection.toLowerCase() === nextCollection.toLowerCase())) {
-      setError("A collection with that name already exists.");
-      return;
-    }
-    const supabase = createClient();
-    const { data, error: insertError } = await supabase
-      .from("glovebox_collections")
-      .insert({ user_id: userId, name: nextCollection })
-      .select("id, user_id, name, created_at, updated_at")
-      .single<GloveboxCollectionRow>();
-    if (insertError) {
-      setError(insertError.message);
-      return;
-    }
-    setCollections((prev) => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
-    setActiveCollection(nextCollection);
-    setCollectionDraft("");
-    setIsCreatingCollection(false);
-  }, [collectionDraft, collectionOptions, userId]);
-
-  const renameCollection = useCallback(
-    async (currentCollection: string, nextCollectionRaw: string) => {
-      const nextCollection = nextCollectionRaw.trim();
-      if (!nextCollection || nextCollection.toLowerCase() === currentCollection.toLowerCase()) {
-        setEditingCollection(null);
-        setEditingDraft("");
-        return;
-      }
-      if (
-        collectionOptions.some(
-          (collection) =>
-            collection.toLowerCase() === nextCollection.toLowerCase() &&
-            collection.toLowerCase() !== currentCollection.toLowerCase()
-        )
-      ) {
-        setError("A collection with that name already exists.");
-        return;
-      }
-
-      setError(null);
-      const matchingFiles = files.filter((file) => fileCollectionLabel(file) === currentCollection);
-      const supabase = createClient();
-
-      const existingCollection = collections.find(
-        (collection) => collection.name.toLowerCase() === currentCollection.toLowerCase()
-      );
-      if (existingCollection) {
-        const { error: renameError } = await supabase
-          .from("glovebox_collections")
-          .update({ name: nextCollection })
-          .eq("id", existingCollection.id);
-        if (renameError) {
-          setError(renameError.message);
-          return;
-        }
-      }
-
-      if (matchingFiles.length > 0) {
-        const { error: updateError } = await supabase
-          .from("glovebox_files")
-          .update({ collection: nextCollection })
-          .eq("user_id", userId)
-          .eq("collection", currentCollection);
-        if (updateError) {
-          setError(updateError.message);
-          return;
-        }
-      }
-
-      setFiles((prev) =>
-        prev.map((file) =>
-          fileCollectionLabel(file) === currentCollection
-            ? {
-                ...file,
-                collection: nextCollection,
-              }
-            : file
-        )
-      );
-      if (existingCollection) {
-        setCollections((prev) =>
-          prev
-            .map((collection) =>
-              collection.id === existingCollection.id ? { ...collection, name: nextCollection } : collection
-            )
-            .sort((a, b) => a.name.localeCompare(b.name))
-        );
-      }
-      setActiveCollection((current) => (current === currentCollection ? nextCollection : current));
-      setEditingCollection(null);
-      setEditingDraft("");
-    },
-    [collectionOptions, collections, files, userId]
-  );
-
-  const deleteCollection = useCallback(
-    async (collectionToDelete: string) => {
-      const filesInCollection = files.filter(
-        (file) => fileCollectionLabel(file) === collectionToDelete
-      );
-      if (
-        !confirm(
-          filesInCollection.length > 0
-            ? `Delete ${collectionToDelete}? Files in this collection will move to Uncategorised.`
-            : `Delete ${collectionToDelete}?`
-        )
-      ) {
-        return;
-      }
-
-      setError(null);
-      const supabase = createClient();
-      if (filesInCollection.length > 0) {
-        const { error: updateError } = await supabase
-          .from("glovebox_files")
-          .update({ collection: null })
-          .eq("user_id", userId)
-          .eq("collection", collectionToDelete);
-        if (updateError) {
-          setError(updateError.message);
-          return;
-        }
-      }
-      const collectionRow = collections.find(
-        (collection) => collection.name.toLowerCase() === collectionToDelete.toLowerCase()
-      );
-      if (collectionRow) {
-        const { error: deleteError } = await supabase
-          .from("glovebox_collections")
-          .delete()
-          .eq("id", collectionRow.id);
-        if (deleteError) {
-          setError(deleteError.message);
-          return;
-        }
-      }
-
-      setFiles((prev) =>
-        prev.map((file) =>
-          fileCollectionLabel(file) === collectionToDelete
-            ? { ...file, collection: null }
-            : file
-        )
-      );
-      setCollections((prev) =>
-        prev.filter((collection) => collection.name.toLowerCase() !== collectionToDelete.toLowerCase())
-      );
-      setActiveCollection((current) =>
-        current === collectionToDelete ? ALL_COLLECTIONS : current
-      );
-      if (editingCollection === collectionToDelete) {
-        setEditingCollection(null);
-        setEditingDraft("");
-      }
-    },
-    [collections, editingCollection, files, userId]
-  );
+  useGloveboxDrag({
+    dragPreview,
+    dragPreviewRef,
+    suppressNextFileOpenRef,
+    setDragPreview,
+    setDropCollection,
+    moveFileToCollection,
+  });
 
   const activeCollectionLabel =
     activeCollection === ALL_COLLECTIONS ? "All files" : activeCollection;
@@ -558,207 +174,69 @@ export function GloveboxPageClient({ userId, initialFiles, initialCollections }:
       )}
 
       <div className="grid gap-4 lg:grid-cols-[250px_minmax(0,1fr)]">
-        <aside className="rounded-xl border border-white/10 bg-white/[0.02] p-2 lg:sticky lg:top-4 lg:self-start">
-          <div className="flex items-center justify-between gap-2 px-2 py-2">
-            <div className="flex items-center gap-2 text-xs font-semibold tracking-wide text-white/45 uppercase">
-              <Folder className="h-4 w-4" />
-              Categories
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsCreatingCollection((open) => !open)}
-              className="rounded-lg p-1.5 text-white/45 hover:bg-white/[0.05] hover:text-white"
-              aria-label="New collection"
-            >
-              <Plus className="h-4 w-4" />
-            </button>
-          </div>
+        <GloveboxCollectionsSidebar
+          filesCount={files.length}
+          collectionOptions={collectionOptions}
+          collectionCounts={collectionCounts}
+          activeCollection={activeCollection}
+          openCollectionMenu={openCollectionMenu}
+          dropCollection={dropCollection}
+          isCreatingCollection={isCreatingCollection}
+          collectionDraft={collectionDraft}
+          editingCollection={editingCollection}
+          editingDraft={editingDraft}
+          onToggleCreate={() => {
+            setCollectionDraft("");
+            setIsCreatingCollection((open) => !open);
+          }}
+          onCollectionDraftChange={setCollectionDraft}
+          onCreateCollection={() => void handleCreateCollection()}
+          onActiveCollectionChange={(collection) => {
+            setActiveCollection(collection);
+            setOpenCollectionMenu(null);
+          }}
+          onToggleMenu={(collection) =>
+            setOpenCollectionMenu((current) => (current === collection ? null : collection))
+          }
+          onStartRename={(collection) => {
+            setEditingCollection(collection);
+            setEditingDraft(collection);
+            setOpenCollectionMenu(null);
+          }}
+          onDeleteCollection={(collection) => {
+            setOpenCollectionMenu(null);
+            void deleteCollection(collection);
+          }}
+          onEditingDraftChange={setEditingDraft}
+          onSaveRename={(collection) => void renameCollection(collection, editingDraft)}
+          onCancelRename={() => {
+            setEditingCollection(null);
+            setEditingDraft("");
+          }}
+        />
 
-          {isCreatingCollection && (
-            <div className="mb-2 flex gap-1 px-2">
-              <input
-                value={collectionDraft}
-                onChange={(e) => setCollectionDraft(e.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") handleCreateCollection();
-                  if (event.key === "Escape") {
-                    setCollectionDraft("");
-                    setIsCreatingCollection(false);
-                  }
-                }}
-                placeholder="Collection name"
-                className="h-8 min-w-0 flex-1 rounded-lg border border-white/10 bg-black/20 px-2 text-xs text-white outline-none placeholder:text-white/35 focus:border-brand/50"
-                autoFocus
-              />
-              <button
-                type="button"
-                onClick={handleCreateCollection}
-                className="bg-brand/15 text-brand hover:bg-brand/25 rounded-lg px-2 text-xs font-semibold"
-              >
-                Add
-              </button>
-            </div>
-          )}
-
-          <CollectionButton
-            label="All files"
-            count={files.length}
-            active={activeCollection === ALL_COLLECTIONS}
-            onClick={() => setActiveCollection(ALL_COLLECTIONS)}
-          />
-          <CollectionButton
-            label={UNCATEGORISED}
-            count={collectionCounts.get(UNCATEGORISED) ?? 0}
-            active={activeCollection === UNCATEGORISED}
-            onClick={() => setActiveCollection(UNCATEGORISED)}
-            dropTarget={null}
-            dropActive={dropCollection === UNCATEGORISED}
-          />
-
-          <div className="my-2 h-px bg-white/[0.06]" />
-
-          {collectionOptions.map((collection) => (
-            <div key={collection}>
-              {editingCollection === collection ? (
-                <CollectionEditRow
-                  value={editingDraft}
-                  onChange={setEditingDraft}
-                  onSave={() => void renameCollection(collection, editingDraft)}
-                  onCancel={() => {
-                    setEditingCollection(null);
-                    setEditingDraft("");
-                  }}
-                />
-              ) : (
-                <CollectionButton
-                  label={collection}
-                  count={collectionCounts.get(collection) ?? 0}
-                  active={activeCollection === collection}
-                  menuOpen={openCollectionMenu === collection}
-                  onClick={() => {
-                    setActiveCollection(collection);
-                    setOpenCollectionMenu(null);
-                  }}
-                  dropTarget={collection}
-                  dropActive={dropCollection === collection}
-                  onToggleMenu={() =>
-                    setOpenCollectionMenu((current) => (current === collection ? null : collection))
-                  }
-                  onRename={() => {
-                    setEditingCollection(collection);
-                    setEditingDraft(collection);
-                    setOpenCollectionMenu(null);
-                  }}
-                  onDelete={() => {
-                    setOpenCollectionMenu(null);
-                    void deleteCollection(collection);
-                  }}
-                />
-              )}
-            </div>
-          ))}
-        </aside>
-
-        <main className="min-w-0 rounded-xl border border-white/10 bg-white/[0.02]">
-          <div className="border-b border-white/[0.06] p-3">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 text-xs font-semibold tracking-wide text-white/45 uppercase">
-                  <FolderOpen className="h-4 w-4" />
-                  <span className="truncate">{activeCollectionLabel}</span>
-                  <span className="text-white/30">{visibleFiles.length}</span>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center lg:justify-end">
-                <div className="relative min-w-0 sm:w-48 lg:w-56">
-                  <Search className="text-text-muted pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search files"
-                    aria-label="Search files"
-                    className="bg-surface text-text-primary placeholder:text-text-muted focus:ring-brand/20 h-8 w-full rounded-full pr-4 pl-9 text-xs transition-all outline-none focus:ring-2"
-                  />
-                </div>
-
-                <select
-                  value={groupMode}
-                  onChange={(e) => setGroupMode(e.target.value as GroupMode)}
-                  className="h-9 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-sm text-white"
-                  aria-label="Group files"
-                >
-                  <option value="collection">Group by collection</option>
-                  <option value="type">Group by file type</option>
-                  <option value="source">Group by source</option>
-                  <option value="none">No grouping</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-3">
-            {visibleFiles.length === 0 ? (
-              <div className="p-8 text-center text-sm text-white/60">
-                {files.length === 0
-                  ? "No files yet. Upload documents or photos and they will appear here."
-                  : "No files match this view."}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {groupedFiles.map(([group, groupFiles]) => (
-                  <section key={group} className="min-w-0">
-                    {groupMode !== "none" && (
-                      <div className="mb-2 flex items-center justify-between px-1">
-                        <div className="flex min-w-0 items-center gap-2 text-xs font-semibold tracking-wide text-white/55 uppercase">
-                          {groupMode === "type" ? (
-                            <FileTypeIcon type={detectFileType(groupFiles[0])} />
-                          ) : groupMode === "source" ? (
-                            <Layers3 className="h-4 w-4" />
-                          ) : (
-                            <FolderOpen className="h-4 w-4" />
-                          )}
-                          <span className="truncate">{group}</span>
-                        </div>
-                        <span className="text-xs text-white/35">{groupFiles.length}</span>
-                      </div>
-                    )}
-
-                    <ul className="space-y-2">
-                      {groupFiles.map((file) => (
-                        <FileRow
-                          key={file.id}
-                          file={file}
-                          isDragging={draggingFileId === file.id}
-                          onOpen={() => {
-                            if (suppressNextFileOpenRef.current) return;
-                            setActiveFile(file);
-                          }}
-                          onDownload={() => void handleDownload(file)}
-                          onDelete={() => handleDelete(file)}
-                          onPointerDragStart={(event) => {
-                            event.currentTarget.setPointerCapture(event.pointerId);
-                            setDragPreview({
-                              file,
-                              type: detectFileType(file),
-                              startX: event.clientX,
-                              startY: event.clientY,
-                              x: event.clientX,
-                              y: event.clientY,
-                              active: false,
-                            });
-                            setOpenCollectionMenu(null);
-                          }}
-                        />
-                      ))}
-                    </ul>
-                  </section>
-                ))}
-              </div>
-            )}
-          </div>
-        </main>
+        <GloveboxMainPanel
+          activeCollectionLabel={activeCollectionLabel}
+          visibleFilesCount={visibleFiles.length}
+          totalFilesCount={files.length}
+          query={query}
+          groupMode={groupMode}
+          groupedFiles={groupedFiles}
+          draggingFileId={draggingFileId}
+          onQueryChange={setQuery}
+          onGroupModeChange={setGroupMode}
+          onOpenFile={(file) => {
+            if (suppressNextFileOpenRef.current) return;
+            setActiveFile(file);
+          }}
+          onDownloadFile={(file) => void handleDownload(file)}
+          onDeleteFile={(file) => handleDelete(file)}
+          onPointerDragStart={(file, event) => {
+            event.currentTarget.setPointerCapture(event.pointerId);
+            setDragPreview(makeDragPreview(file, detectFileType(file), event));
+            setOpenCollectionMenu(null);
+          }}
+        />
       </div>
 
       {activeFile && (
@@ -772,535 +250,6 @@ export function GloveboxPageClient({ userId, initialFiles, initialCollections }:
       )}
 
       {activeDragPreview && <CompactFileDragPreview preview={activeDragPreview} />}
-    </div>
-  );
-}
-
-function CollectionButton({
-  label,
-  count,
-  active,
-  menuOpen,
-  dropTarget,
-  dropActive,
-  onClick,
-  onToggleMenu,
-  onRename,
-  onDelete,
-}: {
-  label: string;
-  count: number;
-  active: boolean;
-  menuOpen?: boolean;
-  dropTarget?: string | null;
-  dropActive?: boolean;
-  onClick: () => void;
-  onToggleMenu?: () => void;
-  onRename?: () => void;
-  onDelete?: () => void;
-}) {
-  return (
-    <div
-      data-files-collection-drop-target={
-        dropTarget === undefined
-          ? undefined
-          : dropTarget === null
-            ? DROP_UNCATEGORISED
-            : dropTarget
-      }
-      data-files-collection-menu-root={onToggleMenu ? "" : undefined}
-      className={`group relative flex w-full items-center rounded-lg px-2 py-2 pr-9 text-left text-sm transition ${
-        dropActive
-          ? "bg-brand/25 text-brand ring-1 ring-brand/35"
-          : active
-            ? "bg-brand/15 text-brand"
-            : "text-white/70 hover:bg-white/[0.05] hover:text-white"
-      }`}
-    >
-      <button type="button" onClick={onClick} className="flex min-w-0 flex-1 items-center gap-2">
-        {active ? (
-          <FolderOpen className="h-4 w-4 shrink-0" />
-        ) : (
-          <Folder className="h-4 w-4 shrink-0" />
-        )}
-        <span className="min-w-0 flex-1 truncate text-left">{label}</span>
-      </button>
-      {count > 0 && (
-        <span
-          className={`text-brand border-brand/20 absolute right-3 flex h-5 min-w-5 items-center justify-center rounded-full border bg-brand/15 px-1.5 text-[10px] font-bold tabular-nums transition ${
-            onToggleMenu &&
-            (menuOpen ? "opacity-0" : "group-hover:opacity-0 group-focus-within:opacity-0")
-          }`}
-        >
-          {count > 99 ? "99+" : count}
-        </span>
-      )}
-      {onToggleMenu && (
-        <>
-          <button
-            type="button"
-            onClick={onToggleMenu}
-            className={`absolute right-2 rounded-md p-1 text-white/35 transition hover:bg-white/[0.08] hover:text-white focus:bg-white/[0.08] focus:text-white ${
-              menuOpen
-                ? "opacity-100"
-                : "pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100"
-            }`}
-            aria-label={`Manage ${label}`}
-            aria-expanded={menuOpen}
-          >
-            <MoreHorizontal className="h-3.5 w-3.5" />
-          </button>
-          {menuOpen && (
-            <div
-              role="menu"
-              className="absolute top-9 right-1 z-50 w-40 overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding p-1.5 shadow-2xl shadow-black/35 backdrop-blur-xl backdrop-saturate-150"
-            >
-              {onRename && (
-                <button
-                  type="button"
-                  onClick={onRename}
-                  role="menuitem"
-                  className="text-text-muted hover:text-text-primary flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-colors hover:bg-white/[0.06]"
-                >
-                  <Pencil className="h-4 w-4" />
-                  Rename
-                </button>
-              )}
-              {onDelete && (
-                <button
-                  type="button"
-                  onClick={onDelete}
-                  role="menuitem"
-                  className="text-error hover:bg-error/10 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition-colors"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Delete
-                </button>
-              )}
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
-
-function CollectionEditRow({
-  value,
-  onChange,
-  onSave,
-  onCancel,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  onSave: () => void;
-  onCancel: () => void;
-}) {
-  return (
-    <div className="flex items-center gap-1 rounded-lg bg-white/[0.04] px-2 py-2">
-      <input
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") onSave();
-          if (event.key === "Escape") onCancel();
-        }}
-        className="h-7 min-w-0 flex-1 rounded-md border border-white/10 bg-black/20 px-2 text-xs text-white outline-none focus:border-brand/50"
-        autoFocus
-      />
-      <button
-        type="button"
-        onClick={onSave}
-        className="rounded-md p-1.5 text-emerald-300 hover:bg-emerald-400/10"
-        aria-label="Save collection name"
-      >
-        <Check className="h-3.5 w-3.5" />
-      </button>
-      <button
-        type="button"
-        onClick={onCancel}
-        className="rounded-md p-1.5 text-white/45 hover:bg-white/[0.08] hover:text-white"
-        aria-label="Cancel rename"
-      >
-        <X className="h-3.5 w-3.5" />
-      </button>
-    </div>
-  );
-}
-
-function collectionDropTargetFromPoint(x: number, y: number): string | null | undefined {
-  const target = document.elementFromPoint(x, y);
-  const collectionTarget =
-    target instanceof Element
-      ? target.closest<HTMLElement>("[data-files-collection-drop-target]")
-      : null;
-  const value = collectionTarget?.dataset.filesCollectionDropTarget;
-
-  if (!value) return undefined;
-  return value === DROP_UNCATEGORISED ? null : value;
-}
-
-function fileTypeShortLabel(type: GloveboxDetectedFileType): string {
-  if (type === "pdf") return "PDF";
-  if (type === "image") return "IMG";
-  if (type === "spreadsheet") return "XLS";
-  if (type === "document") return "DOC";
-  if (type === "data") return "TXT";
-  return "FILE";
-}
-
-function CompactFileDragPreview({ preview }: { preview: DragPreview }) {
-  return (
-    <div
-      aria-hidden
-      className="pointer-events-none fixed z-[1000]"
-      style={{
-        left: 0,
-        top: 0,
-        transform: `translate3d(${Math.max(8, preview.x - 42)}px, ${Math.max(
-          8,
-          preview.y - 28
-        )}px, 0)`,
-      }}
-    >
-      <div className="file-drag-preview-card flex w-[260px] items-center gap-2.5 rounded-2xl border border-white/[0.10] bg-clip-padding px-3 py-2.5 shadow-2xl shadow-black/40 [backface-visibility:hidden]">
-        <div className="bg-brand/15 text-brand flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[10px] text-[10px] font-extrabold tracking-wide">
-          {fileTypeShortLabel(preview.type)}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="truncate text-xs leading-tight font-bold text-white">
-            {preview.file.title}
-          </div>
-          <div className="mt-1 truncate text-[11px] leading-tight text-white/55">
-            {FILE_TYPE_LABELS[preview.type]} / {formatFileSize(preview.file.size_bytes)}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function FileRow({
-  file,
-  isDragging,
-  onOpen,
-  onDownload,
-  onDelete,
-  onPointerDragStart,
-}: {
-  file: GloveboxFileRow;
-  isDragging: boolean;
-  onOpen: () => void;
-  onDownload: () => void;
-  onDelete: () => void;
-  onPointerDragStart: (event: ReactPointerEvent<HTMLLIElement>) => void;
-}) {
-  const type = detectFileType(file);
-  const collection = fileCollectionLabel(file);
-
-  return (
-    <li
-      onPointerDown={(event) => {
-        if (event.button !== 0) return;
-        const target = event.target;
-        if (target instanceof Element && target.closest("[data-file-row-action]")) return;
-        onPointerDragStart(event);
-      }}
-      className={`flex min-w-0 touch-pan-y cursor-grab select-none items-center gap-3 rounded-lg border px-4 py-3 transition-[transform,opacity,background-color,border-color,box-shadow] duration-200 ease-out active:cursor-grabbing ${
-        isDragging
-          ? "-translate-y-0.5 scale-[0.92] border-brand/20 bg-brand/[0.05] opacity-0 shadow-none"
-          : "border-white/10 bg-white/[0.025] hover:border-white/15 hover:bg-white/[0.04]"
-      }`}
-    >
-      <div className="bg-brand/15 text-brand flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
-        <FileTypeIcon type={type} />
-      </div>
-      <button type="button" onClick={onOpen} className="min-w-0 flex-1 text-left">
-        <div className="truncate text-sm font-semibold text-white">{file.title}</div>
-        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-white/50">
-          <span>{collection}</span>
-          <span className="text-white/20">/</span>
-          <span>{FILE_TYPE_LABELS[type]}</span>
-          <span className="text-white/20">/</span>
-          <span>{formatFileSize(file.size_bytes)}</span>
-          {file.page_count != null && (
-            <>
-              <span className="text-white/20">/</span>
-              <span>{file.page_count} pages</span>
-            </>
-          )}
-          {file.source !== "glovebox" && (
-            <>
-              <span className="text-white/20">/</span>
-              <span>from {fileSourceLabel(file.source)}</span>
-            </>
-          )}
-        </div>
-      </button>
-
-      <StatusPill status={file.extraction_status} />
-
-      <button
-        type="button"
-        data-file-row-action
-        onClick={onDownload}
-        className="rounded-lg p-2 text-white/40 hover:bg-white/[0.08] hover:text-white"
-        aria-label={`Download ${file.title}`}
-        title="Download original"
-      >
-        <Download className="h-4 w-4" />
-      </button>
-
-      <button
-        type="button"
-        data-file-row-action
-        onClick={onDelete}
-        className="rounded-lg p-2 text-white/40 hover:bg-red-500/10 hover:text-red-300"
-        aria-label="Delete file"
-      >
-        <Trash2 className="h-4 w-4" />
-      </button>
-    </li>
-  );
-}
-
-function StatusPill({ status }: { status: GloveboxFileRow["extraction_status"] }) {
-  const label = fileStatusLabel(status);
-  const className =
-    status === "pending"
-      ? "border-amber-400/25 bg-amber-400/10 text-amber-200"
-      : status === "failed"
-        ? "border-red-400/25 bg-red-400/10 text-red-200"
-        : status === "unsupported"
-          ? "border-white/10 bg-white/[0.04] text-white/60"
-          : "border-emerald-400/20 bg-emerald-400/10 text-emerald-200";
-
-  return (
-    <span
-      className={`hidden shrink-0 rounded-full border px-2 py-1 text-xs sm:inline-flex ${className}`}
-    >
-      {label}
-    </span>
-  );
-}
-
-function fileStatusLabel(status: GloveboxFileRow["extraction_status"]): string {
-  if (status === "pending") return "Processing";
-  if (status === "failed") return "Failed";
-  if (status === "unsupported") return "Stored";
-  return "Ready";
-}
-
-function FileTypeIcon({ type }: { type: GloveboxDetectedFileType }) {
-  const className = "h-4 w-4";
-  switch (type) {
-    case "image":
-      return <ImageIcon className={className} />;
-    case "spreadsheet":
-      return <FileSpreadsheet className={className} />;
-    case "data":
-      return <Database className={className} />;
-    case "pdf":
-    case "document":
-      return <FileText className={className} />;
-    default:
-      return <File className={className} />;
-  }
-}
-
-function groupLabel(file: GloveboxFileRow, groupMode: GroupMode): string {
-  if (groupMode === "type") return FILE_TYPE_LABELS[detectFileType(file)];
-  if (groupMode === "source") return fileSourceLabel(file.source);
-  if (groupMode === "none") return "Glovebox";
-  return fileCollectionLabel(file);
-}
-
-function fileSourceLabel(source: GloveboxFileRow["source"]): string {
-  if (source === "chat") return "Brangus chat";
-  if (source === "ch40") return "Ch 40";
-  if (source === "grid_iq") return "Grid IQ";
-  if (source === "reports") return "Reports";
-  if (source === "yard_book") return "Yard Book";
-  return "Glovebox";
-}
-
-function triggerAnchorDownload(href: string, filename: string): void {
-  const a = document.createElement("a");
-  a.href = href;
-  a.download = filename;
-  a.rel = "noopener";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}
-
-function FileDetailDrawer({
-  file,
-  collectionOptions,
-  onClose,
-  onDownload,
-  onChange,
-}: {
-  file: GloveboxFileRow;
-  collectionOptions: string[];
-  onClose: () => void;
-  onDownload: () => void;
-  onChange: (file: Partial<GloveboxFileRow> & { id: string }) => void;
-}) {
-  const [title, setTitle] = useState(file.title);
-  const initialCollection = fileCollectionLabel(file);
-  const [collection, setCollection] = useState(initialCollection === UNCATEGORISED ? "" : initialCollection);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const type = detectFileType(file);
-
-  const saveValues = useCallback(
-    async (nextTitle: string, nextCollection: string) => {
-      const cleanTitle = nextTitle.trim() || file.original_filename;
-      const cleanCollection = nextCollection.trim() || null;
-      const supabase = createClient();
-      await supabase
-        .from("glovebox_files")
-        .update({
-          title: cleanTitle,
-          collection: cleanCollection,
-        })
-        .eq("id", file.id);
-      onChange({
-        id: file.id,
-        title: cleanTitle,
-        collection: cleanCollection,
-      });
-    },
-    [file.id, file.original_filename, onChange]
-  );
-
-  const save = useCallback(() => {
-    void saveValues(title, collection);
-  }, [collection, saveValues, title]);
-
-  const applyCollection = useCallback(
-    (nextCollection: string) => {
-      setCollection(nextCollection);
-      void saveValues(title, nextCollection);
-    },
-    [saveValues, title]
-  );
-
-  const openPreview = useCallback(async () => {
-    let storagePath = file.storage_path;
-    if (!storagePath) {
-      const supabase = createClient();
-      const { data: row } = await supabase
-        .from("glovebox_files")
-        .select("storage_path")
-        .eq("id", file.id)
-        .maybeSingle<{ storage_path: string }>();
-      storagePath = row?.storage_path;
-    }
-    if (!storagePath) return;
-    const url = await signedUrlFor(storagePath);
-    if (url) setPreviewUrl(url);
-  }, [file.id, file.storage_path]);
-
-  return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm">
-      <div className="flex h-full w-full max-w-lg flex-col gap-5 overflow-y-auto bg-neutral-950 p-6 shadow-2xl">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">Glovebox file</h2>
-          <button onClick={onClose} className="rounded-lg p-2 text-white/60 hover:bg-white/5">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        <label className="space-y-1">
-          <span className="text-xs tracking-wide text-white/50 uppercase">Title</span>
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onBlur={save}
-            className="focus:border-brand/50 w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white outline-none"
-          />
-        </label>
-
-        <label className="space-y-2">
-          <span className="text-xs tracking-wide text-white/50 uppercase">Collection</span>
-          <input
-            value={collection}
-            list="file-collection-options"
-            onChange={(e) => setCollection(e.target.value)}
-            onBlur={save}
-            placeholder="Uncategorised"
-            className="focus:border-brand/50 w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white outline-none placeholder:text-white/35"
-          />
-          <datalist id="file-collection-options">
-            {collectionOptions.map((option) => (
-              <option key={option} value={option} />
-            ))}
-          </datalist>
-          <div className="flex flex-wrap gap-2">
-            {collectionOptions.slice(0, 8).map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => applyCollection(option)}
-                className="hover:border-brand/40 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs text-white/65 hover:text-white"
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </label>
-
-        <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm text-white/70">
-          <dt className="text-white/40">Filename</dt>
-          <dd className="truncate">{file.original_filename}</dd>
-          <dt className="text-white/40">Detected type</dt>
-          <dd>{FILE_TYPE_LABELS[type]}</dd>
-          <dt className="text-white/40">MIME</dt>
-          <dd className="truncate">{file.mime_type}</dd>
-          <dt className="text-white/40">Size</dt>
-          <dd>{formatFileSize(file.size_bytes)}</dd>
-          {file.page_count != null && (
-            <>
-              <dt className="text-white/40">Pages</dt>
-              <dd>{file.page_count}</dd>
-            </>
-          )}
-          <dt className="text-white/40">Source</dt>
-          <dd>{fileSourceLabel(file.source)}</dd>
-          <dt className="text-white/40">Status</dt>
-          <dd>{fileStatusLabel(file.extraction_status)}</dd>
-        </dl>
-
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={openPreview}
-            className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white hover:bg-white/[0.08]"
-          >
-            Preview
-          </button>
-          <button
-            type="button"
-            onClick={onDownload}
-            className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white hover:bg-white/[0.08]"
-          >
-            <Download className="h-4 w-4" />
-            Download original
-          </button>
-        </div>
-
-        {previewUrl && (
-          <div className="aspect-[3/4] overflow-hidden rounded-lg border border-white/10">
-            {file.mime_type.startsWith("image/") ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={previewUrl} alt={file.title} className="h-full w-full object-contain" />
-            ) : (
-              <iframe src={previewUrl} title={file.title} className="h-full w-full" />
-            )}
-          </div>
-        )}
-      </div>
     </div>
   );
 }
