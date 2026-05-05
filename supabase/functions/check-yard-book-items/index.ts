@@ -1,10 +1,10 @@
 // ============================================
-// SUPABASE EDGE FUNCTION: Check Yard Book Items
+// SUPABASE EDGE FUNCTION: Check Yardbook Items
 // ============================================
 // File: supabase/functions/check-yard-book-items/index.ts
 // Deploy: supabase functions deploy check-yard-book-items --no-verify-jwt
 //
-// Debug: Scans unfinished Yard Book items whose event_date has passed and
+// Debug: Scans unfinished Yardbook items whose event_date has passed and
 // Debug: inserts a yard_book_overdue notification for each one that has not
 // Debug: been announced yet. Re-announces when the user extends the item
 // Debug: past its previous notification timestamp. Runs on a daily cron at
@@ -78,7 +78,7 @@ serve(async (req: Request) => {
         user_id: item.user_id,
         type: "yard_book_overdue",
         title: `Overdue: ${item.title}`,
-        body: `This Yard Book item was due ${due} and is still open.`,
+        body: `This Yardbook item was due ${due} and is still open.`,
         link: `/dashboard/tools/yard-book/${item.id}`,
       });
       if (notifError) {

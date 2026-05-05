@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
-import { deleteYardBookItem } from "../actions";
+import { deleteYardbookItem } from "../actions";
 
-export function DeleteYardBookItemButton({
+export function DeleteYardbookItemButton({
   id,
   title,
 }: {
@@ -17,7 +17,7 @@ export function DeleteYardBookItemButton({
 
   async function handleDelete() {
     setDeleting(true);
-    const result = await deleteYardBookItem(id);
+    const result = await deleteYardbookItem(id);
     if (result?.error) {
       setDeleting(false);
       setOpen(false);

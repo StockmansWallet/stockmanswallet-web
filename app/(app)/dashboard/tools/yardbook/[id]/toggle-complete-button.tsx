@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, RotateCcw } from "lucide-react";
-import { toggleYardBookItemComplete } from "../actions";
+import { toggleYardbookItemComplete } from "../actions";
 
 export function ToggleCompleteButton({
   id,
@@ -16,7 +16,7 @@ export function ToggleCompleteButton({
 
   async function handleToggle() {
     setToggling(true);
-    await toggleYardBookItemComplete(id, !isCompleted);
+    await toggleYardbookItemComplete(id, !isCompleted);
     setToggling(false);
   }
 

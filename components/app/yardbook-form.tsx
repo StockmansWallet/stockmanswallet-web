@@ -7,15 +7,15 @@ import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Wrench, DollarSign, Home, User } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
-import { YardBookGloveboxAttachments } from "@/components/app/yard-book-glovebox-attachments";
+import { YardbookGloveboxAttachments } from "@/components/app/yardbook-glovebox-attachments";
 import type { Database } from "@/lib/types/database";
-import type { YardBookCategory, RecurrenceRule } from "@/lib/types/models";
+import type { YardbookCategory, RecurrenceRule } from "@/lib/types/models";
 
-type YardBookRow = Database["public"]["Tables"]["yard_book_items"]["Row"];
+type YardbookRow = Database["public"]["Tables"]["yard_book_items"]["Row"];
 type IconComponent = React.ComponentType<{ className?: string }>;
 
 const CATEGORIES: {
-  value: YardBookCategory;
+  value: YardbookCategory;
   label: string;
   icon: IconComponent;
   bg: string;
@@ -25,8 +25,8 @@ const CATEGORIES: {
     value: "Livestock",
     label: "Livestock",
     icon: IconCattleTags,
-    bg: "bg-yard-book/15",
-    text: "text-yard-book-light",
+    bg: "bg-yardbook/15",
+    text: "text-yardbook-light",
   },
   {
     value: "Operations",
@@ -56,20 +56,20 @@ const RECURRENCE_OPTIONS: { value: RecurrenceRule; label: string }[] = [
   { value: "Annual", label: "Annual" },
 ];
 
-interface YardBookFormProps {
-  item?: YardBookRow;
+interface YardbookFormProps {
+  item?: YardbookRow;
   herds: { id: string; name: string; head_count: number }[];
   properties: { id: string; property_name: string }[];
   action: (formData: FormData) => Promise<{ error: string } | void>;
   submitLabel: string;
 }
 
-export function YardBookForm({ item, herds, properties, action, submitLabel }: YardBookFormProps) {
+export function YardbookForm({ item, herds, properties, action, submitLabel }: YardbookFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const [category, setCategory] = useState<YardBookCategory>(item?.category_raw ?? "Livestock");
+  const [category, setCategory] = useState<YardbookCategory>(item?.category_raw ?? "Livestock");
   const [isAllDay, setIsAllDay] = useState(item?.is_all_day ?? true);
   const [isRecurring, setIsRecurring] = useState(item?.is_recurring ?? false);
   const [enableReminders, setEnableReminders] = useState((item?.reminder_offsets?.length ?? 0) > 0);
@@ -179,7 +179,7 @@ export function YardBookForm({ item, herds, properties, action, submitLabel }: Y
                     name="is_all_day"
                     checked={isAllDay}
                     onChange={(e) => setIsAllDay(e.target.checked)}
-                    className="text-yard-book accent-yard-book h-4 w-4 rounded border-black/20"
+                    className="text-yardbook accent-yardbook h-4 w-4 rounded border-black/20"
                   />
                   All day event
                 </label>
@@ -235,11 +235,11 @@ export function YardBookForm({ item, herds, properties, action, submitLabel }: Y
               rows={3}
               defaultValue={item?.notes ?? ""}
               placeholder="Any additional notes..."
-              className="text-text-primary placeholder:text-text-muted focus:ring-yard-book/60 w-full rounded-xl bg-white/5 px-4 py-3 text-sm transition-all outline-none focus:bg-white/8 focus:ring-1 focus:ring-inset"
+              className="text-text-primary placeholder:text-text-muted focus:ring-yardbook/60 w-full rounded-xl bg-white/5 px-4 py-3 text-sm transition-all outline-none focus:bg-white/8 focus:ring-1 focus:ring-inset"
             />
           </section>
 
-          <YardBookGloveboxAttachments initialFileIds={item?.attachment_file_ids ?? []} />
+          <YardbookGloveboxAttachments initialFileIds={item?.attachment_file_ids ?? []} />
         </div>
 
         {/* Right column */}
@@ -254,7 +254,7 @@ export function YardBookForm({ item, herds, properties, action, submitLabel }: Y
                 type="checkbox"
                 checked={enableReminders}
                 onChange={(e) => setEnableReminders(e.target.checked)}
-                className="text-yard-book accent-yard-book h-4 w-4 rounded border-black/20"
+                className="text-yardbook accent-yardbook h-4 w-4 rounded border-black/20"
               />
               Enable reminders
             </label>
@@ -269,7 +269,7 @@ export function YardBookForm({ item, herds, properties, action, submitLabel }: Y
                       onClick={() => toggleOffset(opt.value)}
                       className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                         isActive
-                          ? "bg-yard-book/15 text-yard-book"
+                          ? "bg-yardbook/15 text-yardbook"
                           : "text-text-muted hover:text-text-secondary bg-white/5 hover:bg-white/8"
                       }`}
                     >
@@ -292,7 +292,7 @@ export function YardBookForm({ item, herds, properties, action, submitLabel }: Y
                 name="is_recurring"
                 checked={isRecurring}
                 onChange={(e) => setIsRecurring(e.target.checked)}
-                className="text-yard-book accent-yard-book h-4 w-4 rounded border-black/20"
+                className="text-yardbook accent-yardbook h-4 w-4 rounded border-black/20"
               />
               Recurring event
             </label>
@@ -324,7 +324,7 @@ export function YardBookForm({ item, herds, properties, action, submitLabel }: Y
                       onClick={() => toggleHerd(herd.id)}
                       className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                         isActive
-                          ? "bg-yard-book/15 text-yard-book"
+                          ? "bg-yardbook/15 text-yardbook"
                           : "text-text-muted hover:text-text-secondary bg-white/5 hover:bg-white/8"
                       }`}
                     >
@@ -358,7 +358,7 @@ export function YardBookForm({ item, herds, properties, action, submitLabel }: Y
 
       {/* Actions */}
       <div className="mt-8 flex items-center gap-3">
-        <Button type="submit" variant="yard-book" disabled={submitting}>
+        <Button type="submit" variant="yardbook" disabled={submitting}>
           {submitting ? "Saving..." : submitLabel}
         </Button>
         <Button

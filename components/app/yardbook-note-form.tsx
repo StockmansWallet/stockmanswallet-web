@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Pin, PinOff } from "lucide-react";
-import { YardBookGloveboxAttachments } from "@/components/app/yard-book-glovebox-attachments";
+import { YardbookGloveboxAttachments } from "@/components/app/yardbook-glovebox-attachments";
 
-interface YardBookNoteFormProps {
+interface YardbookNoteFormProps {
   note?: {
     id: string;
     title: string;
@@ -21,7 +21,7 @@ interface YardBookNoteFormProps {
   submitLabel: string;
 }
 
-export function YardBookNoteForm({ note, herds, action, submitLabel }: YardBookNoteFormProps) {
+export function YardbookNoteForm({ note, herds, action, submitLabel }: YardbookNoteFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -80,7 +80,7 @@ export function YardBookNoteForm({ note, herds, action, submitLabel }: YardBookN
           onClick={() => setIsPinned((v) => !v)}
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border transition-colors ${
             isPinned
-              ? "border-yard-book/40 bg-yard-book/15 text-yard-book-light"
+              ? "border-yardbook/40 bg-yardbook/15 text-yardbook-light"
               : "border-white/[0.08] bg-white/[0.04] text-text-muted hover:bg-white/[0.06]"
           }`}
           aria-label={isPinned ? "Unpin note" : "Pin note"}
@@ -98,7 +98,7 @@ export function YardBookNoteForm({ note, herds, action, submitLabel }: YardBookN
         onChange={(e) => setBody(e.target.value)}
         maxLength={20000}
         rows={14}
-        className="w-full resize-y rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-yard-book/40 focus:bg-white/[0.06] focus:outline-none"
+        className="w-full resize-y rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-yardbook/40 focus:bg-white/[0.06] focus:outline-none"
       />
 
       {/* Linked herds */}
@@ -117,7 +117,7 @@ export function YardBookNoteForm({ note, herds, action, submitLabel }: YardBookN
                   onClick={() => toggleHerd(herd.id)}
                   className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                     selected
-                      ? "bg-yard-book/20 text-yard-book-light"
+                      ? "bg-yardbook/20 text-yardbook-light"
                       : "bg-white/[0.06] text-text-secondary hover:bg-white/[0.10]"
                   }`}
                   aria-pressed={selected}
@@ -130,7 +130,7 @@ export function YardBookNoteForm({ note, herds, action, submitLabel }: YardBookN
         </div>
       )}
 
-      <YardBookGloveboxAttachments initialFileIds={note?.attachment_file_ids ?? []} />
+      <YardbookGloveboxAttachments initialFileIds={note?.attachment_file_ids ?? []} />
 
       {error && (
         <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
@@ -147,7 +147,7 @@ export function YardBookNoteForm({ note, herds, action, submitLabel }: YardBookN
         >
           Cancel
         </Button>
-        <Button type="submit" disabled={submitting || !canSubmit} variant="yard-book">
+        <Button type="submit" disabled={submitting || !canSubmit} variant="yardbook">
           {submitting ? "Saving…" : submitLabel}
         </Button>
       </div>

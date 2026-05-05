@@ -10,7 +10,7 @@ import {
 } from "@/lib/glovebox/files";
 import { createClient } from "@/lib/supabase/client";
 
-interface YardBookGloveboxAttachmentsProps {
+interface YardbookGloveboxAttachmentsProps {
   name?: string;
   initialFileIds?: string[] | null;
 }
@@ -33,10 +33,10 @@ const FILE_SELECT = [
   "storage_path",
 ].join(",");
 
-export function YardBookGloveboxAttachments({
+export function YardbookGloveboxAttachments({
   name = "attachment_file_ids",
   initialFileIds,
-}: YardBookGloveboxAttachmentsProps) {
+}: YardbookGloveboxAttachmentsProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>(initialFileIds ?? []);
   const [selectedFiles, setSelectedFiles] = useState<GloveboxFileRow[]>([]);
@@ -114,7 +114,7 @@ export function YardBookGloveboxAttachments({
             userId: user.id,
             file,
             source: "yard_book",
-            collection: "Yard Book",
+            collection: "Yardbook",
           });
           addFile({
             id: fileId,
@@ -124,7 +124,7 @@ export function YardBookGloveboxAttachments({
             mime_type: file.type || "application/octet-stream",
             size_bytes: file.size,
             kind: null,
-            collection: "Yard Book",
+            collection: "Yardbook",
             tags: [],
             page_count: null,
             extraction_status: "pending",
@@ -158,7 +158,7 @@ export function YardBookGloveboxAttachments({
               setPickerOpen(true);
               loadPickerFiles();
             }}
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-text-secondary transition-colors hover:border-yard-book/30 hover:bg-yard-book/10 hover:text-yard-book-light"
+            className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-text-secondary transition-colors hover:border-yardbook/30 hover:bg-yardbook/10 hover:text-yardbook-light"
           >
             <FolderOpen className="h-3.5 w-3.5" aria-hidden="true" />
             Choose
@@ -167,7 +167,7 @@ export function YardBookGloveboxAttachments({
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={busy}
-            className="inline-flex items-center gap-1.5 rounded-full border border-yard-book/20 bg-yard-book/15 px-3 py-1.5 text-xs font-semibold text-yard-book-light transition-colors hover:bg-yard-book/25 disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-full border border-yardbook/20 bg-yardbook/15 px-3 py-1.5 text-xs font-semibold text-yardbook-light transition-colors hover:bg-yardbook/25 disabled:opacity-60"
           >
             {busy ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
@@ -208,7 +208,7 @@ export function YardBookGloveboxAttachments({
         </div>
       ) : (
         <div className="rounded-xl border border-dashed border-white/[0.08] bg-white/[0.02] px-4 py-5 text-sm text-text-muted">
-          Attach files from Glovebox or upload files that should stay with this Yard Book entry.
+          Attach files from Glovebox or upload files that should stay with this Yardbook entry.
         </div>
       )}
 
@@ -276,8 +276,8 @@ function GloveboxPickerModal({
                   }}
                   className="flex w-full items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-left transition-colors hover:bg-white/[0.06] disabled:opacity-55"
                 >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-yard-book/15">
-                    <FileText className="h-4 w-4 text-yard-book-light" aria-hidden="true" />
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-yardbook/15">
+                    <FileText className="h-4 w-4 text-yardbook-light" aria-hidden="true" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-text-primary">{file.title}</p>
@@ -288,7 +288,7 @@ function GloveboxPickerModal({
                     </p>
                   </div>
                   {selected && (
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-yard-book/20 text-yard-book-light">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-yardbook/20 text-yardbook-light">
                       <Check className="h-3.5 w-3.5" aria-hidden="true" />
                     </div>
                   )}
@@ -305,8 +305,8 @@ function GloveboxPickerModal({
 function AttachmentRow({ file, trailing }: { file: GloveboxFileRow; trailing: ReactNode }) {
   return (
     <div className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-yard-book/15">
-        <FileText className="h-4 w-4 text-yard-book-light" aria-hidden="true" />
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-yardbook/15">
+        <FileText className="h-4 w-4 text-yardbook-light" aria-hidden="true" />
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-text-primary">{file.title}</p>

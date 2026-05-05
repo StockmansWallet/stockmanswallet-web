@@ -56,7 +56,7 @@ const FEATURE_OPTIONS: Record<Role, { value: string; label: string }[]> = {
     { value: "herd_valuation", label: "Herd Valuation" },
     { value: "brangus", label: "Brangus AI" },
     { value: "reports", label: "Reports" },
-    { value: "yard_book", label: "Yard Book" },
+    { value: "yard_book", label: "Yardbook" },
     { value: "freight_iq", label: "Freight IQ" },
     { value: "grid_iq", label: "Grid IQ" },
     { value: "insights", label: "Insights" },

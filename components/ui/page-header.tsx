@@ -6,7 +6,7 @@ type FeatureHue =
   | "brangus"
   | "insights"
   | "markets"
-  | "yard-book"
+  | "yardbook"
   | "reports"
   | "freight-iq"
   | "grid-iq"
@@ -32,7 +32,7 @@ const featureTitleClasses: Record<FeatureHue, string> = {
   brangus: "text-brangus",
   insights: "text-insights",
   markets: "text-markets",
-  "yard-book": "text-yard-book",
+  "yardbook": "text-yardbook",
   reports: "text-reports",
   "freight-iq": "text-freight-iq",
   "grid-iq": "text-grid-iq",
@@ -116,7 +116,7 @@ function resolveHeaderAccent(
   if (titleClassName.includes("text-brangus")) return "brangus";
   if (titleClassName.includes("text-insights")) return "insights";
   if (titleClassName.includes("text-markets")) return "markets";
-  if (titleClassName.includes("text-yard-book")) return "yard-book";
+  if (titleClassName.includes("text-yardbook")) return "yardbook";
   if (titleClassName.includes("text-reports")) return "reports";
   if (titleClassName.includes("text-freight-iq")) return "freight-iq";
   if (titleClassName.includes("text-grid-iq")) return "grid-iq";

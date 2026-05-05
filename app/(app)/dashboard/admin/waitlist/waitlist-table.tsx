@@ -47,7 +47,7 @@ const FEATURE_LABELS: Record<string, string> = {
   herd_valuation: "Herd Valuation",
   reports: "Reports",
   advisory_hub: "Advisory Hub",
-  yard_book: "Yard Book",
+  yard_book: "Yardbook",
   freight_iq: "Freight IQ",
   grid_iq: "Grid IQ",
   ch40: "Ch 40",

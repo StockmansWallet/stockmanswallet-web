@@ -2,13 +2,13 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
-import { YardBookNoteForm } from "@/components/app/yard-book-note-form";
-import { DeleteYardBookNoteButton } from "./delete-button";
-import { updateYardBookNote } from "../../actions";
+import { YardbookNoteForm } from "@/components/app/yardbook-note-form";
+import { DeleteYardbookNoteButton } from "./delete-button";
+import { updateYardbookNote } from "../../actions";
 
-export const metadata = { title: "Edit Note - Yard Book" };
+export const metadata = { title: "Edit Note - Yardbook" };
 
-export default async function EditYardBookNotePage({
+export default async function EditYardbookNotePage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -39,18 +39,18 @@ export default async function EditYardBookNotePage({
 
   if (!note) notFound();
 
-  const update = updateYardBookNote.bind(null, id);
+  const update = updateYardbookNote.bind(null, id);
 
   return (
     <div className="max-w-3xl">
       <PageHeader
-        feature="yard-book"
+        feature="yardbook"
         title="Edit Note"
         subtitle="Update your note."
-        actions={<DeleteYardBookNoteButton id={id} />}
+        actions={<DeleteYardbookNoteButton id={id} />}
       />
       <Card className="p-5">
-        <YardBookNoteForm
+        <YardbookNoteForm
           note={{
             id: note.id,
             title: note.title ?? "",

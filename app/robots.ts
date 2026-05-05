@@ -14,7 +14,7 @@ export default function robots(): MetadataRoute.Robots {
           "/dashboard/",
           "/herds/",
           "/properties/",
-          "/yard-book/",
+          "/yardbook/",
           "/reports/",
           "/settings/",
           "/asset-register",

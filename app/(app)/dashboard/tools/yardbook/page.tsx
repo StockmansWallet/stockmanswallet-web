@@ -3,11 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { YardBookTabs } from "@/components/app/yard-book-tabs";
+import { YardbookTabs } from "@/components/app/yardbook-tabs";
 
-export const metadata = { title: "Yard Book" };
+export const metadata = { title: "Yardbook" };
 
-export default async function YardBookPage({
+export default async function YardbookPage({
   searchParams,
 }: {
   searchParams: Promise<{ tab?: string }>;
@@ -54,9 +54,9 @@ export default async function YardBookPage({
   return (
     <div className="w-full max-w-[1680px]">
       <PageHeader
-        feature="yard-book"
-        title="Yard Book"
-        titleClassName="text-4xl font-bold text-yard-book"
+        feature="yardbook"
+        title="Yardbook"
+        titleClassName="text-4xl font-bold text-yardbook"
         subtitle="Top Pocket Stuff"
         subtitleClassName="text-sm font-medium text-text-secondary"
       />
@@ -64,15 +64,15 @@ export default async function YardBookPage({
       {isCompletelyEmpty ? (
         <Card>
           <EmptyState
-            title="Nothing in your Yard Book yet"
+            title="Nothing in your Yardbook yet"
             description="Add reminders for events, or jot quick notes in your pocketbook."
             actionLabel="Add Reminder"
-            actionHref="/dashboard/tools/yard-book/new"
-            variant="yard-book"
+            actionHref="/dashboard/tools/yardbook/new"
+            variant="yardbook"
           />
         </Card>
       ) : (
-        <YardBookTabs
+        <YardbookTabs
           items={allItems}
           herds={herds ?? []}
           notes={allNotes}

@@ -63,7 +63,7 @@ interface HerdRow {
   breeder_sub_type: string | null;
 }
 
-interface YardBookRow {
+interface YardbookRow {
   id: string;
   title: string;
   event_date: string;
@@ -94,7 +94,7 @@ export async function evaluateInsights(): Promise<BrangusInsight[]> {
   if (!user) return [];
 
   // Parallel data fetch
-  const [{ data: herds }, { data: breedPremiumData }, { data: yardBookItems }] = await Promise.all([
+  const [{ data: herds }, { data: breedPremiumData }, { data: yardbookItems }] = await Promise.all([
     supabase
       .from("herds")
       .select(`id, name, species, breed, category, head_count,
@@ -185,7 +185,7 @@ export async function evaluateInsights(): Promise<BrangusInsight[]> {
   insights.push(...evaluateSellVsHold(valuations, nationalPriceMap, premiumMap, saleyardPriceMap, saleyardBreedPriceMap));
   insights.push(...evaluateBestMonth(valuations, seasonalData));
   insights.push(...evaluateBreeding(valuations));
-  insights.push(...evaluateYardBook((yardBookItems ?? []) as YardBookRow[]));
+  insights.push(...evaluateYardbook((yardbookItems ?? []) as YardbookRow[]));
 
   // Sort by priority DESC, take top 6
   insights.sort((a, b) => b.priority - a.priority);
@@ -393,9 +393,9 @@ function evaluateBreeding(
   return insights;
 }
 
-// MARK: - Yard Book Alerts
+// MARK: - Yardbook Alerts
 
-function evaluateYardBook(items: YardBookRow[]): BrangusInsight[] {
+function evaluateYardbook(items: YardbookRow[]): BrangusInsight[] {
   const insights: BrangusInsight[] = [];
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
@@ -408,16 +408,16 @@ function evaluateYardBook(items: YardBookRow[]): BrangusInsight[] {
   if (overdue.length > 0) {
     insights.push({
       id: "yardbook-overdue",
-      templateId: "yardBook",
+      templateId: "yardbook",
       title: "Overdue Tasks",
       keyFigure: `${overdue.length}`,
-      keyFigureSubtitle: `overdue task${overdue.length !== 1 ? "s" : ""} in Yard Book`,
+      keyFigureSubtitle: `overdue task${overdue.length !== 1 ? "s" : ""} in Yardbook`,
       narrative: overdue.length === 1
-        ? `"${overdue[0].title}" is past due. Tap to review your Yard Book.`
+        ? `"${overdue[0].title}" is past due. Tap to review your Yardbook.`
         : `You have ${overdue.length} overdue tasks including "${overdue[0].title}". Time to catch up.`,
       sentiment: "negative",
       icon: "alert-triangle",
-      linkHref: "/dashboard/tools/yard-book",
+      linkHref: "/dashboard/tools/yardbook",
       priority: 80,
     });
   }
@@ -425,7 +425,7 @@ function evaluateYardBook(items: YardBookRow[]): BrangusInsight[] {
   if (upcoming.length > 0) {
     insights.push({
       id: "yardbook-upcoming",
-      templateId: "yardBook",
+      templateId: "yardbook",
       title: "Coming Up",
       keyFigure: `${upcoming.length}`,
       keyFigureSubtitle: `task${upcoming.length !== 1 ? "s" : ""} this week`,
@@ -434,7 +434,7 @@ function evaluateYardBook(items: YardBookRow[]): BrangusInsight[] {
         : `${upcoming.length} tasks this week including "${upcoming[0].title}".`,
       sentiment: "neutral",
       icon: "clipboard-list",
-      linkHref: "/dashboard/tools/yard-book",
+      linkHref: "/dashboard/tools/yardbook",
       priority: 55,
     });
   }

@@ -101,6 +101,20 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: "/dashboard/tools/yard-book",
+        destination: "/dashboard/tools/yardbook",
+        permanent: true,
+      },
+      {
+        source: "/dashboard/tools/yard-book/:path*",
+        destination: "/dashboard/tools/yardbook/:path*",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

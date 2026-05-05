@@ -65,7 +65,7 @@ const featureGuides = [
     icon: <Brain className="h-5 w-5" />,
   },
   {
-    title: "Yard Book",
+    title: "Yardbook",
     description: "Schedule and track tasks like musters, vet visits, weaning, and sales with date-based reminders.",
     icon: <BookOpen className="h-5 w-5" />,
   },

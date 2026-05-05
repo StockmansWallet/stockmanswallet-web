@@ -16,29 +16,29 @@ import {
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
-import { deleteYardBookItem } from "@/app/(app)/dashboard/tools/yard-book/actions";
+import { deleteYardbookItem } from "@/app/(app)/dashboard/tools/yardbook/actions";
 import type { Database } from "@/lib/types/database";
-import type { YardBookCategory } from "@/lib/types/models";
+import type { YardbookCategory } from "@/lib/types/models";
 
-type YardBookItemRow = Database["public"]["Tables"]["yard_book_items"]["Row"];
+type YardbookItemRow = Database["public"]["Tables"]["yard_book_items"]["Row"];
 
-interface YardBookRunSheetProps {
-  items: YardBookItemRow[];
+interface YardbookRunSheetProps {
+  items: YardbookItemRow[];
   herds: { id: string; name: string; head_count: number }[];
 }
 
 type IconComponent = React.ComponentType<{ className?: string }>;
 
 const CATEGORY_CONFIG: Record<
-  YardBookCategory,
+  YardbookCategory,
   { label: string; icon: IconComponent; bg: string; text: string; iconBg: string }
 > = {
   Livestock: {
     label: "Livestock",
     icon: IconCattleTags,
-    bg: "bg-yard-book/15",
-    text: "text-yard-book-light",
-    iconBg: "bg-yard-book/20",
+    bg: "bg-yardbook/15",
+    text: "text-yardbook-light",
+    iconBg: "bg-yardbook/20",
   },
   Operations: {
     label: "Operations",
@@ -135,8 +135,8 @@ function formatTime(timeStr: string): string {
   return `${displayHour}:${minutes} ${ampm}`;
 }
 
-export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
-  const [filterCategory, setFilterCategory] = useState<YardBookCategory | null>(null);
+export function YardbookRunSheet({ items, herds }: YardbookRunSheetProps) {
+  const [filterCategory, setFilterCategory] = useState<YardbookCategory | null>(null);
   const [showCompleted, setShowCompleted] = useState(false);
 
   const herdMap = useMemo(() => {
@@ -158,7 +158,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
   }, [items, filterCategory, showCompleted]);
 
   const horizonGroups = useMemo(() => {
-    const groups: Record<HorizonKey, YardBookItemRow[]> = {
+    const groups: Record<HorizonKey, YardbookItemRow[]> = {
       overdue: [],
       today: [],
       next7: [],
@@ -203,13 +203,13 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
             onClick={() => setFilterCategory(null)}
             className={`inline-flex h-8 shrink-0 items-center rounded-full px-3.5 text-xs font-medium transition-all ${
               filterCategory === null
-                ? "bg-yard-book/15 text-yard-book"
+                ? "bg-yardbook/15 text-yardbook"
                 : "bg-surface text-text-muted hover:bg-surface-raised hover:text-text-secondary"
             }`}
           >
             All
           </button>
-          {(Object.keys(CATEGORY_CONFIG) as YardBookCategory[]).map((cat) => {
+          {(Object.keys(CATEGORY_CONFIG) as YardbookCategory[]).map((cat) => {
             const config = CATEGORY_CONFIG[cat];
             const Icon = config.icon;
             const isActive = filterCategory === cat;
@@ -239,7 +239,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
               aria-pressed={showCompleted}
               className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-xs font-medium transition-all ${
                 showCompleted
-                  ? "bg-yard-book/15 text-yard-book"
+                  ? "bg-yardbook/15 text-yardbook"
                   : "bg-surface text-text-muted hover:bg-surface-raised hover:text-text-secondary"
               }`}
             >
@@ -255,8 +255,8 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
             </button>
           )}
 
-          <Link href="/dashboard/tools/yard-book/new">
-            <Button size="sm" variant="yard-book" className="lg:hidden">
+          <Link href="/dashboard/tools/yardbook/new">
+            <Button size="sm" variant="yardbook" className="lg:hidden">
               Add Item
             </Button>
           </Link>
@@ -285,7 +285,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
                 >
                   {group.title}
                 </h3>
-                <span className="bg-yard-book/15 text-yard-book inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-semibold tabular-nums">
+                <span className="bg-yardbook/15 text-yardbook inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-semibold tabular-nums">
                   {group.items.length}
                 </span>
               </div>
@@ -294,7 +294,7 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
                 {group.items.map((item) => {
                   const days = daysUntilEvent(item.event_date);
                   const catConfig =
-                    CATEGORY_CONFIG[item.category_raw as YardBookCategory] ??
+                    CATEGORY_CONFIG[item.category_raw as YardbookCategory] ??
                     CATEGORY_CONFIG.Livestock;
                   const CatIcon = catConfig.icon;
                   const linkedHerds = (item.linked_herd_ids ?? [])
@@ -304,11 +304,11 @@ export function YardBookRunSheet({ items, herds }: YardBookRunSheetProps) {
                   return (
                     <div
                       key={item.id}
-                      className="group relative flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-3 py-2.5 transition-colors duration-150 hover:border-yard-book/35 hover:bg-yard-book/[0.075]"
+                      className="group relative flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] bg-clip-padding px-3 py-2.5 transition-colors duration-150 hover:border-yardbook/35 hover:bg-yardbook/[0.075]"
                     >
                       {/* Tap target overlay (entire row navigates to detail) */}
                       <Link
-                        href={`/dashboard/tools/yard-book/${item.id}`}
+                        href={`/dashboard/tools/yardbook/${item.id}`}
                         aria-label={`Open ${item.title}`}
                         className="absolute inset-0 rounded-xl"
                       />
@@ -391,7 +391,7 @@ function RowDeleteButton({ id, title }: { id: string; title: string }) {
 
   async function handleDelete() {
     setDeleting(true);
-    const result = await deleteYardBookItem(id);
+    const result = await deleteYardbookItem(id);
     // Server action redirects on success; only reached on error
     if (result?.error) {
       setDeleting(false);

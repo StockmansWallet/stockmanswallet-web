@@ -9,12 +9,12 @@ export const metadata = {
 
 const tools = [
   {
-    name: "Yard Book",
+    name: "Yardbook",
     description: "Your digital run sheet. Track tasks, health, breeding, and more.",
-    href: "/dashboard/tools/yard-book",
+    href: "/dashboard/tools/yardbook",
     icon: <BookOpen className="h-5 w-5" />,
-    iconBg: "bg-yard-book/15",
-    iconText: "text-yard-book",
+    iconBg: "bg-yardbook/15",
+    iconText: "text-yardbook",
   },
   {
     name: "Freight IQ",

@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getEffectiveJoinedDate } from "@/lib/data/breeding";
 
-const yardBookItemSchema = z.object({
+const yardbookItemSchema = z.object({
   title: z.string().min(1).max(200),
   event_date: z.string().min(1).max(30),
   is_all_day: z.boolean(),
@@ -22,7 +22,7 @@ const yardBookItemSchema = z.object({
   property_id: z.string().uuid().nullable(),
 });
 
-const yardBookIdSchema = z.object({
+const yardbookIdSchema = z.object({
   id: z.string().uuid(),
 });
 
@@ -51,7 +51,7 @@ function parseUuidArray(raw: string | null): string[] | null {
   }
 }
 
-export async function createYardBookItem(formData: FormData) {
+export async function createYardbookItem(formData: FormData) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -71,7 +71,7 @@ export async function createYardBookItem(formData: FormData) {
   const linkedHerdIds = parseUuidArray(linkedHerdIdsRaw);
   const attachmentFileIds = parseUuidArray(attachmentFileIdsRaw);
 
-  const parsed = yardBookItemSchema.safeParse({
+  const parsed = yardbookItemSchema.safeParse({
     title: formData.get("title"),
     event_date: formData.get("event_date"),
     is_all_day: formData.get("is_all_day") === "on",
@@ -115,12 +115,12 @@ export async function createYardBookItem(formData: FormData) {
 
   if (error) return { error: error.message };
 
-  revalidatePath("/dashboard/tools/yard-book");
-  redirect("/dashboard/tools/yard-book");
+  revalidatePath("/dashboard/tools/yardbook");
+  redirect("/dashboard/tools/yardbook");
 }
 
-export async function updateYardBookItem(id: string, formData: FormData) {
-  const idParsed = yardBookIdSchema.safeParse({ id });
+export async function updateYardbookItem(id: string, formData: FormData) {
+  const idParsed = yardbookIdSchema.safeParse({ id });
   if (!idParsed.success) return { error: "Invalid input" };
 
   const supabase = await createClient();
@@ -142,7 +142,7 @@ export async function updateYardBookItem(id: string, formData: FormData) {
   const linkedHerdIds = parseUuidArray(linkedHerdIdsRaw);
   const attachmentFileIds = parseUuidArray(attachmentFileIdsRaw);
 
-  const parsed = yardBookItemSchema.safeParse({
+  const parsed = yardbookItemSchema.safeParse({
     title: formData.get("title"),
     event_date: formData.get("event_date"),
     is_all_day: formData.get("is_all_day") === "on",
@@ -186,13 +186,13 @@ export async function updateYardBookItem(id: string, formData: FormData) {
 
   if (error) return { error: error.message };
 
-  revalidatePath("/dashboard/tools/yard-book");
-  revalidatePath(`/dashboard/tools/yard-book/${id}`);
-  redirect(`/dashboard/tools/yard-book/${id}`);
+  revalidatePath("/dashboard/tools/yardbook");
+  revalidatePath(`/dashboard/tools/yardbook/${id}`);
+  redirect(`/dashboard/tools/yardbook/${id}`);
 }
 
-export async function deleteYardBookItem(id: string) {
-  const parsed = yardBookIdSchema.safeParse({ id });
+export async function deleteYardbookItem(id: string) {
+  const parsed = yardbookIdSchema.safeParse({ id });
   if (!parsed.success) return { error: "Invalid input" };
   const supabase = await createClient();
   const {
@@ -213,11 +213,11 @@ export async function deleteYardBookItem(id: string) {
 
   if (error) return { error: error.message };
 
-  revalidatePath("/dashboard/tools/yard-book");
-  redirect("/dashboard/tools/yard-book");
+  revalidatePath("/dashboard/tools/yardbook");
+  redirect("/dashboard/tools/yardbook");
 }
 
-export async function toggleYardBookItemComplete(
+export async function toggleYardbookItemComplete(
   id: string,
   isCompleted: boolean
 ) {
@@ -242,8 +242,8 @@ export async function toggleYardBookItemComplete(
 
   if (error) return { error: error.message };
 
-  revalidatePath("/dashboard/tools/yard-book");
-  revalidatePath(`/dashboard/tools/yard-book/${id}`);
+  revalidatePath("/dashboard/tools/yardbook");
+  revalidatePath(`/dashboard/tools/yardbook/${id}`);
 }
 
 // MARK: - Breeding Milestone Auto-Creation
@@ -258,7 +258,7 @@ function addDays(dateStr: string, days: number): string {
   return d.toISOString().split("T")[0];
 }
 
-// Debug: Auto-create Yard Book breeding milestone items when herd joining dates are set.
+// Debug: Auto-create Yardbook breeding milestone items when herd joining dates are set.
 // Uses packId "breeding-milestones-{herdId}" for grouping and deduplication.
 // Delete-and-recreate strategy: soft-deletes uncompleted items, preserves completed ones.
 export type MilestoneSyncResult = { ok: true } | { ok: false; error: string };
@@ -309,7 +309,7 @@ export async function syncBreedingMilestonesForHerd(
     : null;
 
   if (!herd.is_breeder || !effectiveJoinedDate) {
-    revalidatePath("/dashboard/tools/yard-book");
+    revalidatePath("/dashboard/tools/yardbook");
     return { ok: true };
   }
 
@@ -455,6 +455,6 @@ export async function syncBreedingMilestonesForHerd(
     }
   }
 
-  revalidatePath("/dashboard/tools/yard-book");
+  revalidatePath("/dashboard/tools/yardbook");
   return { ok: true };
 }

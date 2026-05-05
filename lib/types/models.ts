@@ -12,7 +12,7 @@ export type UserRole =
   | "Accountant"
   | "Succession Planner";
 
-export type YardBookCategory =
+export type YardbookCategory =
   | "Livestock"
   | "Operations"
   | "Finance"
@@ -136,7 +136,7 @@ export interface Property {
   freight_cost_per_km: number;
 }
 
-export interface YardBookItem {
+export interface YardbookItem {
   id: string;
   user_id: string;
   created_at: string;
@@ -148,7 +148,7 @@ export interface YardBookItem {
   is_all_day: boolean;
   event_time?: string;
 
-  category: YardBookCategory;
+  category: YardbookCategory;
 
   is_completed: boolean;
   completed_date?: string;

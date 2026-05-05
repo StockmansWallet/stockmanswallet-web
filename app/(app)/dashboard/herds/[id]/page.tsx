@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
-import { YardBookBanner } from "@/components/app/yard-book-banner";
+import { YardbookBanner } from "@/components/app/yardbook-banner";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StatCard } from "@/components/ui/stat-card";
@@ -646,7 +646,7 @@ export default async function HerdDetailPage({ params }: { params: Promise<{ id:
 
         {herd.is_breeder && (
           <Suspense>
-            <YardBookBanner />
+            <YardbookBanner />
           </Suspense>
         )}
 

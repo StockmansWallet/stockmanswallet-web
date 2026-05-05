@@ -18,7 +18,7 @@ export const toolDefinitions = [
   {
     name: "lookup_portfolio_data",
     description:
-      "Retrieves specific portfolio, market, weather, and operational data from the app. This is your PRIMARY tool - call it for ANY question about herds, properties, prices, market indices, freight, sales, weather, or the yard book. You MUST call this tool before citing any specific numbers (prices, weights, head counts, values, dates, temperatures) in your response. Herd valuations returned by this tool come straight from the Stockman's Wallet valuation engine and already include breed premium, projected weight (ADG accrual), pre-birth accrual, calves at foot, and mortality deduction. NEVER recompute these figures yourself - quote them as returned. Do NOT surface the internal acronym 'AMV' to the user; refer to it as 'the valuation engine' or 'Stockman's Wallet' in your reply. BREEDER SUB-TYPES: Breeder-category herds carry a sub-type of either 'Heifer' or 'Cow'. When a user asks about HEIFERS, include Breeder herds with sub-type Heifer in the answer (they are heifers, just flagged for breeding). When a user asks about COWS, include Breeder herds with sub-type Cow plus any Dry Cow herds. Treat the parenthesised sub-type in the per-herd line (e.g. 'Breeder (Heifer)') as authoritative for this grouping. Never silently exclude a Breeder herd from a heifer or cow answer based on its top-level category. If the user asks about market indices (EYCI, WYCI, OTH), current prices, today's market, or what categories are worth, use query_type 'market_prices' - this mirrors what the Markets tab shows. If the user asks how the market has MOVED over TIME ('trend', 'last 3 months', 'how has EYCI been tracking', 'price history', 'past six months', 'is the market up or down lately', 'compared to last year', 'this time last year'), use query_type 'historical_prices' - returns the 12-month MLA indicator trend. CRITICAL FOR DIRECTIONAL / YEAR-ON-YEAR QUESTIONS: market_prices is single-saleyard and category-level only - it cannot tell you which way 'the market' is moving on its own. For 'is the market going up or down?' or 'how does X compare to last year?', ALWAYS call historical_prices for the national EYCI/WYCI trend in addition to market_prices, and disclose any single-yard limitation upfront ('Looking at [yard] data...') if you cite a market_prices figure in that broader context. If the user asks about typical seasonal patterns or the best month to sell, use query_type 'seasonal_pricing'. SALEYARD COMPARISONS: if the user asks 'what would my X be worth at Y instead of Z', 'compare Roma vs Dalby', 'is Gracemere better than Charters Towers for these', or any 'what if I sold at a different yard' question, use query_type 'saleyard_comparison' with herd_name + the list of saleyards. You have LIVE MLA pricing for EVERY saleyard in Australia via the AVAILABLE SALEYARDS list in the portfolio index - the user does NOT need the saleyard 'linked' to their account, it does NOT need to be in their settings, and you should NEVER ask them to add it. Just call the tool. If the user asks about weather, temperature, rain, forecast, or conditions at a property, use query_type 'property_weather'. Always look up data first. Never rely on the portfolio index alone.",
+      "Retrieves specific portfolio, market, weather, and operational data from the app. This is your PRIMARY tool - call it for ANY question about herds, properties, prices, market indices, freight, sales, weather, or the yardbook. You MUST call this tool before citing any specific numbers (prices, weights, head counts, values, dates, temperatures) in your response. Herd valuations returned by this tool come straight from the Stockman's Wallet valuation engine and already include breed premium, projected weight (ADG accrual), pre-birth accrual, calves at foot, and mortality deduction. NEVER recompute these figures yourself - quote them as returned. Do NOT surface the internal acronym 'AMV' to the user; refer to it as 'the valuation engine' or 'Stockman's Wallet' in your reply. BREEDER SUB-TYPES: Breeder-category herds carry a sub-type of either 'Heifer' or 'Cow'. When a user asks about HEIFERS, include Breeder herds with sub-type Heifer in the answer (they are heifers, just flagged for breeding). When a user asks about COWS, include Breeder herds with sub-type Cow plus any Dry Cow herds. Treat the parenthesised sub-type in the per-herd line (e.g. 'Breeder (Heifer)') as authoritative for this grouping. Never silently exclude a Breeder herd from a heifer or cow answer based on its top-level category. If the user asks about market indices (EYCI, WYCI, OTH), current prices, today's market, or what categories are worth, use query_type 'market_prices' - this mirrors what the Markets tab shows. If the user asks how the market has MOVED over TIME ('trend', 'last 3 months', 'how has EYCI been tracking', 'price history', 'past six months', 'is the market up or down lately', 'compared to last year', 'this time last year'), use query_type 'historical_prices' - returns the 12-month MLA indicator trend. CRITICAL FOR DIRECTIONAL / YEAR-ON-YEAR QUESTIONS: market_prices is single-saleyard and category-level only - it cannot tell you which way 'the market' is moving on its own. For 'is the market going up or down?' or 'how does X compare to last year?', ALWAYS call historical_prices for the national EYCI/WYCI trend in addition to market_prices, and disclose any single-yard limitation upfront ('Looking at [yard] data...') if you cite a market_prices figure in that broader context. If the user asks about typical seasonal patterns or the best month to sell, use query_type 'seasonal_pricing'. SALEYARD COMPARISONS: if the user asks 'what would my X be worth at Y instead of Z', 'compare Roma vs Dalby', 'is Gracemere better than Charters Towers for these', or any 'what if I sold at a different yard' question, use query_type 'saleyard_comparison' with herd_name + the list of saleyards. You have LIVE MLA pricing for EVERY saleyard in Australia via the AVAILABLE SALEYARDS list in the portfolio index - the user does NOT need the saleyard 'linked' to their account, it does NOT need to be in their settings, and you should NEVER ask them to add it. Just call the tool. If the user asks about weather, temperature, rain, forecast, or conditions at a property, use query_type 'property_weather'. Always look up data first. Never rely on the portfolio index alone.",
     input_schema: {
       type: "object",
       properties: {
@@ -127,7 +127,7 @@ export const toolDefinitions = [
   {
     name: "create_yard_book_event",
     description:
-      "Creates a new event in the user's Yard Book. ONLY use when the user EXPLICITLY asks to add, create, schedule, or set a reminder.",
+      "Creates a new event in the user's Yardbook. ONLY use when the user EXPLICITLY asks to add, create, schedule, or set a reminder.",
     input_schema: {
       type: "object",
       properties: {
@@ -158,7 +158,7 @@ export const toolDefinitions = [
   {
     name: "manage_yard_book_event",
     description:
-      "Marks a Yard Book event as complete or deletes it. Use when the user says 'mark X as done', 'complete X', 'tick off X', 'delete X', or 'remove X'.",
+      "Marks a Yardbook event as complete or deletes it. Use when the user says 'mark X as done', 'complete X', 'tick off X', 'delete X', or 'remove X'.",
     input_schema: {
       type: "object",
       properties: {
@@ -464,9 +464,9 @@ export async function executeTool(
     case "calculate_freight":
       return executeFreight(input, store);
     case "create_yard_book_event":
-      return executeCreateYardBookEvent(input, store);
+      return executeCreateYardbookEvent(input, store);
     case "manage_yard_book_event":
-      return executeManageYardBookEvent(input, store);
+      return executeManageYardbookEvent(input, store);
     case "lookup_grid_iq_data":
       return executeGridIQLookup(input, store);
     case "calculate_price_scenario":
@@ -692,7 +692,7 @@ async function executeLookup(input: Record<string, unknown>, store: ChatDataStor
     case "freight_estimates":
       return lookupFreightEstimates(input.herd_name as string | undefined, store);
     case "yard_book":
-      return lookupYardBook(store);
+      return lookupYardbook(store);
     case "health_records":
       return lookupHealthRecords(input.herd_name as string, store);
     case "property_weather":
@@ -1659,13 +1659,13 @@ function lookupFreightEstimates(herdName: string | undefined, store: ChatDataSto
   return lines.join("\n");
 }
 
-// MARK: - Yard Book
+// MARK: - Yardbook
 
-// Format a single Yard Book row for the tool_result. Resolves linked herd UUIDs
+// Format a single Yardbook row for the tool_result. Resolves linked herd UUIDs
 // to their real display names from the portfolio so Brangus does not hallucinate
 // placeholder names like "Breeder X" when describing events.
-function formatYardBookItem(
-  item: ChatDataStore["yardBookItems"][number],
+function formatYardbookItem(
+  item: ChatDataStore["yardbookItems"][number],
   store: ChatDataStore,
   showCompleted: boolean
 ): string {
@@ -1696,50 +1696,50 @@ function formatYardBookItem(
   return line;
 }
 
-function lookupYardBook(store: ChatDataStore): string {
-  if (store.yardBookItems.length === 0) return "YARD BOOK:\nNo events in the Yard Book";
+function lookupYardbook(store: ChatDataStore): string {
+  if (store.yardbookItems.length === 0) return "YARDBOOK:\nNo events in the Yardbook";
 
   // Parse YYYY-MM-DD as local midnight (not UTC) to avoid date-shift in AEST
   const todayLocal = new Date();
   todayLocal.setHours(0, 0, 0, 0);
-  const overdue = store.yardBookItems
+  const overdue = store.yardbookItems
     .filter((i) => {
       if (i.is_completed) return false;
       const [y, m, d] = i.event_date.split("T")[0].split("-").map(Number);
       return new Date(y, m - 1, d) < todayLocal;
     })
     .sort((a, b) => a.event_date.localeCompare(b.event_date));
-  const upcoming = store.yardBookItems
+  const upcoming = store.yardbookItems
     .filter((i) => {
       if (i.is_completed) return false;
       const [y, m, d] = i.event_date.split("T")[0].split("-").map(Number);
       return new Date(y, m - 1, d) >= todayLocal;
     })
     .sort((a, b) => a.event_date.localeCompare(b.event_date));
-  const completed = store.yardBookItems
+  const completed = store.yardbookItems
     .filter((i) => i.is_completed)
     .sort((a, b) => (b.completed_date ?? b.event_date).localeCompare(a.completed_date ?? a.event_date));
 
-  const lines = ["YARD BOOK (operational calendar):"];
+  const lines = ["YARDBOOK (operational calendar):"];
 
   if (overdue.length > 0) {
     lines.push(`\nOVERDUE (${overdue.length}):`);
     for (const item of overdue.slice(0, 10)) {
-      lines.push(formatYardBookItem(item, store, false));
+      lines.push(formatYardbookItem(item, store, false));
     }
     if (overdue.length > 10) lines.push(`(${overdue.length - 10} more overdue items not shown)`);
   }
   if (upcoming.length > 0) {
     lines.push(`\nUPCOMING (${upcoming.length}):`);
     for (const item of upcoming.slice(0, 30)) {
-      lines.push(formatYardBookItem(item, store, false));
+      lines.push(formatYardbookItem(item, store, false));
     }
     if (upcoming.length > 30) lines.push(`(${upcoming.length - 30} more upcoming items not shown)`);
   }
   if (completed.length > 0) {
     lines.push(`\nRECENTLY COMPLETED (${completed.length} total):`);
     for (const item of completed.slice(0, 10)) {
-      lines.push(formatYardBookItem(item, store, true));
+      lines.push(formatYardbookItem(item, store, true));
     }
     if (completed.length > 10) lines.push(`(${completed.length - 10} more completed items not shown)`);
   }
@@ -2073,9 +2073,9 @@ async function executeSingleFreight(input: Record<string, unknown>, store: ChatD
   return lines.join("\n");
 }
 
-// MARK: - Yard Book Event Tools
+// MARK: - Yardbook Event Tools
 
-function executeCreateYardBookEvent(input: Record<string, unknown>, store: ChatDataStore): string {
+function executeCreateYardbookEvent(input: Record<string, unknown>, store: ChatDataStore): string {
   const title = input.title as string;
   const date = input.date as string;
   const category = input.category as string;
@@ -2099,7 +2099,7 @@ function executeCreateYardBookEvent(input: Record<string, unknown>, store: ChatD
     }
   }
 
-  store.pendingYardBookEvents.push({
+  store.pendingYardbookEvents.push({
     title,
     date,
     category,
@@ -2110,7 +2110,7 @@ function executeCreateYardBookEvent(input: Record<string, unknown>, store: ChatD
     linked_herd_names: matchedNames.length > 0 ? matchedNames : undefined,
   });
 
-  let result = `Created Yard Book event: "${title}" on ${date} (${category}).`;
+  let result = `Created Yardbook event: "${title}" on ${date} (${category}).`;
   if (matchedNames.length > 0) {
     result += ` Linked to: ${matchedNames.join(", ")}.`;
   }
@@ -2121,22 +2121,22 @@ function executeCreateYardBookEvent(input: Record<string, unknown>, store: ChatD
   return result;
 }
 
-function executeManageYardBookEvent(input: Record<string, unknown>, store: ChatDataStore): string {
+function executeManageYardbookEvent(input: Record<string, unknown>, store: ChatDataStore): string {
   const action = input.action as string;
   const title = input.title as string;
   if (!action || !title) return "Error: action and title are required.";
 
-  const match = store.yardBookItems.find(
+  const match = store.yardbookItems.find(
     (i) => i.title.toLowerCase().includes(title.toLowerCase())
   );
-  if (!match) return `No Yard Book event found matching '${title}'.`;
+  if (!match) return `No Yardbook event found matching '${title}'.`;
 
-  store.pendingYardBookActions.push({ action, itemId: match.id, title: match.title });
+  store.pendingYardbookActions.push({ action, itemId: match.id, title: match.title });
 
   if (action === "complete") {
-    return `Marked "${match.title}" as complete in Yard Book.`;
+    return `Marked "${match.title}" as complete in Yardbook.`;
   } else {
-    return `Deleted "${match.title}" from Yard Book.`;
+    return `Deleted "${match.title}" from Yardbook.`;
   }
 }
 
@@ -2586,10 +2586,10 @@ export function generateAutoCards(
       const overdueMatch = resultText.match(/OVERDUE \((\d+)\)/);
       const upcomingMatch = resultText.match(/UPCOMING \((\d+)\)/);
       if (overdueMatch && parseInt(overdueMatch[1]) > 0) {
-        cards.push({ id: crypto.randomUUID(), label: "Overdue", value: overdueMatch[1], subtitle: "Yard Book items", sentiment: "negative", action: { type: "yardBook" } });
+        cards.push({ id: crypto.randomUUID(), label: "Overdue", value: overdueMatch[1], subtitle: "Yardbook items", sentiment: "negative", action: { type: "yardbook" } });
       }
       if (upcomingMatch) {
-        cards.push({ id: crypto.randomUUID(), label: "Upcoming", value: upcomingMatch[1], subtitle: "Yard Book items", sentiment: "neutral", action: { type: "yardBook" } });
+        cards.push({ id: crypto.randomUUID(), label: "Upcoming", value: upcomingMatch[1], subtitle: "Yardbook items", sentiment: "neutral", action: { type: "yardbook" } });
       }
     }
   }

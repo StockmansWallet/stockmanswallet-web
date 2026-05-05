@@ -6,7 +6,7 @@ type TabAccent =
   | "brangus"
   | "insights"
   | "markets"
-  | "yard-book"
+  | "yardbook"
   | "reports"
   | "freight-iq"
   | "grid-iq"
@@ -31,7 +31,7 @@ const activeTextByAccent: Record<TabAccent, string> = {
   brangus: "text-brangus-light",
   insights: "text-insights-light",
   markets: "text-markets-light",
-  "yard-book": "text-yard-book-light",
+  "yardbook": "text-yardbook-light",
   reports: "text-reports-light",
   "freight-iq": "text-freight-iq-text",
   "grid-iq": "text-grid-iq-light",
@@ -44,7 +44,7 @@ const indicatorByAccent: Record<TabAccent, string> = {
   brangus: "bg-brangus/20",
   insights: "bg-insights/20",
   markets: "bg-markets/20",
-  "yard-book": "bg-yard-book/20",
+  "yardbook": "bg-yardbook/20",
   reports: "bg-reports/20",
   "freight-iq": "bg-freight-iq-dark/30",
   "grid-iq": "bg-grid-iq/20",

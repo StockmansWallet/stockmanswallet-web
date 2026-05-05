@@ -20,14 +20,14 @@ export const metadata = { title: "Notifications" };
 
 const notificationGroups = [
   {
-    title: "Yard Book",
+    title: "Yardbook",
     description: "Operational reminders for jobs and run sheets.",
     icon: ClipboardList,
-    tone: "yard-book",
+    tone: "yardbook",
     items: [
       {
         label: "Task reminders",
-        description: "Get notified before yard book items are due.",
+        description: "Get notified before yardbook items are due.",
         status: "Coming soon",
       },
       {
@@ -293,8 +293,8 @@ function StatusPill({ label, active }: { label: string; active: boolean }) {
 
 function getToneClasses(tone: string) {
   switch (tone) {
-    case "yard-book":
-      return { bg: "bg-yard-book/15", text: "text-yard-book" };
+    case "yardbook":
+      return { bg: "bg-yardbook/15", text: "text-yardbook" };
     case "markets":
       return { bg: "bg-markets/15", text: "text-markets" };
     case "ch40":

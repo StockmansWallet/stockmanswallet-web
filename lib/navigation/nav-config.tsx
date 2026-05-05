@@ -51,7 +51,7 @@ type NavFeature =
   | "brangus"
   | "insights"
   | "markets"
-  | "yard-book"
+  | "yardbook"
   | "reports"
   | "freight-iq"
   | "grid-iq"
@@ -79,9 +79,9 @@ const FEATURE_NAV: Record<NavFeature, { activeClass: string; hoverClass: string 
     activeClass: "bg-markets/15 text-markets",
     hoverClass: "hover:bg-markets-dark hover:text-white",
   },
-  "yard-book": {
-    activeClass: "bg-yard-book/15 text-yard-book",
-    hoverClass: "hover:bg-yard-book-dark hover:text-white",
+  "yardbook": {
+    activeClass: "bg-yardbook/15 text-yardbook",
+    hoverClass: "hover:bg-yardbook-dark hover:text-white",
   },
   reports: {
     activeClass: "bg-reports/15 text-reports",
@@ -182,12 +182,12 @@ export const producerIntelItems: NavItem[] = [
 // Producer mode - tools section
 export const producerToolItems: NavItem[] = [
   {
-    label: "Yard Book",
-    href: "/dashboard/tools/yard-book",
+    label: "Yardbook",
+    href: "/dashboard/tools/yardbook",
     icon: <BookOpen className="h-5 w-5" />,
-    ...nav("yard-book"),
+    ...nav("yardbook"),
     notificationTypes: ["yard_book_overdue"],
-    badgeSuppressPrefix: "/dashboard/tools/yard-book",
+    badgeSuppressPrefix: "/dashboard/tools/yardbook",
   },
   {
     label: "Freight IQ",

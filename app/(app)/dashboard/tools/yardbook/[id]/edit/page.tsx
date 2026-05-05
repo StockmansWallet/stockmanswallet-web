@@ -1,12 +1,12 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
-import { YardBookForm } from "@/components/app/yard-book-form";
-import { updateYardBookItem } from "../../actions";
+import { YardbookForm } from "@/components/app/yardbook-form";
+import { updateYardbookItem } from "../../actions";
 
-export const metadata = { title: "Edit Yard Book Item" };
+export const metadata = { title: "Edit Yardbook Item" };
 
-export default async function EditYardBookItemPage({
+export default async function EditYardbookItemPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -45,16 +45,16 @@ export default async function EditYardBookItemPage({
 
   if (!item) notFound();
 
-  const boundUpdate = updateYardBookItem.bind(null, id);
+  const boundUpdate = updateYardbookItem.bind(null, id);
 
   return (
     <div className="w-full max-w-[1680px]">
-      <PageHeader feature="yard-book"
+      <PageHeader feature="yardbook"
         title={`Edit: ${item.title}`}
-        titleClassName="text-4xl font-bold text-yard-book"
+        titleClassName="text-4xl font-bold text-yardbook"
         subtitle={item.category_raw}
       />
-      <YardBookForm
+      <YardbookForm
         item={item}
         herds={herds ?? []}
         properties={properties ?? []}

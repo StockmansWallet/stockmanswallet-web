@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function YardBookLoading() {
+export default function YardbookLoading() {
   return (
     <div>
       {/* Stat cards */}

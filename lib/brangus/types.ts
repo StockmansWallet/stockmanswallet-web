@@ -24,7 +24,7 @@ export interface ChatMessageAttachment {
 // Navigation actions triggered by tapping a summary card
 // Each type maps to a specific route in the app
 export type CardAction =
-  | { type: "yardBook" }
+  | { type: "yardbook" }
   | { type: "herdDetail"; id: string; name: string }
   | { type: "portfolio" }
   | { type: "market" }
@@ -79,7 +79,7 @@ export interface ChatDataStore {
   herds: HerdRow[];
   properties: PropertyRow[];
   salesRecords: SalesRow[];
-  yardBookItems: YardBookRow[];
+  yardbookItems: YardbookRow[];
   musterRecords: MusterRow[];
   healthRecords: HealthRow[];
   categoryPricesRaw: CategoryPriceRow[];
@@ -119,8 +119,8 @@ export interface ChatDataStore {
   activeSaleyards: Set<string>;
 
   // Pending mutations from tool calls (persisted after response)
-  pendingYardBookEvents: PendingYardBookEvent[];
-  pendingYardBookActions: PendingYardBookAction[];
+  pendingYardbookEvents: PendingYardbookEvent[];
+  pendingYardbookActions: PendingYardbookAction[];
   pendingSaleRecords: PendingSaleRecord[];
   pendingTreatmentRecords: PendingTreatmentRecord[];
   pendingMusterRecords: PendingMusterRecord[];
@@ -216,7 +216,7 @@ export interface SalesRow {
   price_per_unit: number | null;
 }
 
-export interface YardBookRow {
+export interface YardbookRow {
   id: string;
   title: string;
   event_date: string;
@@ -339,7 +339,7 @@ export interface SeasonalCategoryData {
 
 // MARK: - Pending Mutations
 
-export interface PendingYardBookEvent {
+export interface PendingYardbookEvent {
   title: string;
   date: string;
   category: string;
@@ -350,7 +350,7 @@ export interface PendingYardBookEvent {
   linked_herd_names?: string[];
 }
 
-export interface PendingYardBookAction {
+export interface PendingYardbookAction {
   action: string;
   itemId: string;
   title: string;

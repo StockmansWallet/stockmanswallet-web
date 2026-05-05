@@ -29,7 +29,7 @@ type HeaderAccent =
   | "brangus"
   | "insights"
   | "markets"
-  | "yard-book"
+  | "yardbook"
   | "reports"
   | "freight-iq"
   | "grid-iq"
@@ -282,11 +282,11 @@ export function AppHeader({
                   Reports
                 </Link>
                 <Link
-                  href="/dashboard/tools/yard-book"
+                  href="/dashboard/tools/yardbook"
                   className="border border-white/[0.08] bg-white/[0.03] text-text-secondary hover:bg-white/[0.06] hover:text-text-primary inline-flex h-9 items-center gap-2 rounded-full px-4 text-[13px] font-semibold transition-colors"
                 >
                   <BookOpen className="h-4 w-4" />
-                  Yard Book
+                  Yardbook
                 </Link>
               </>
             )}
@@ -344,7 +344,7 @@ const accentTitleClass: Record<HeaderAccent, string> = {
   brangus: "text-brangus",
   insights: "text-insights",
   markets: "text-markets",
-  "yard-book": "text-yard-book",
+  "yardbook": "text-yardbook",
   reports: "text-reports",
   "freight-iq": "text-freight-iq",
   "grid-iq": "text-grid-iq",

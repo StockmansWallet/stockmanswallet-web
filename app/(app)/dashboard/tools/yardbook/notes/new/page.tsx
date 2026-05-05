@@ -2,12 +2,12 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
-import { YardBookNoteForm } from "@/components/app/yard-book-note-form";
-import { createYardBookNote } from "../actions";
+import { YardbookNoteForm } from "@/components/app/yardbook-note-form";
+import { createYardbookNote } from "../actions";
 
-export const metadata = { title: "New Note - Yard Book" };
+export const metadata = { title: "New Note - Yardbook" };
 
-export default async function NewYardBookNotePage() {
+export default async function NewYardbookNotePage() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -25,14 +25,14 @@ export default async function NewYardBookNotePage() {
   return (
     <div className="max-w-3xl">
       <PageHeader
-        feature="yard-book"
+        feature="yardbook"
         title="New Note"
         subtitle="Add a free-form note to your pocketbook."
       />
       <Card className="p-5">
-        <YardBookNoteForm
+        <YardbookNoteForm
           herds={herds ?? []}
-          action={createYardBookNote}
+          action={createYardbookNote}
           submitLabel="Save Note"
         />
       </Card>

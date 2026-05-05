@@ -118,7 +118,7 @@ const FEATURE_TABS: FeatureTab[] = [
     : []),
   {
     id: "yardbook",
-    name: "Yard Book",
+    name: "Yardbook",
     tagline: "Your digital run sheet",
     description:
       "Your digital run sheet. Track every mustering, vet visit, breeding event, maintenance job, and personal reminder in one place, with colour-coded categories, recurring schedules, and horizon-based grouping so nothing falls through the cracks.",
@@ -206,7 +206,7 @@ const FEATURE_TABS: FeatureTab[] = [
       "Sell vs hold analysis with projected gains over 30, 60, and 90 days",
       "Optimal sale month identification based on historical seasonal pricing",
       "Calving forecasts tracking gestation progress and expected calf value",
-      "Yard Book alerts surfacing overdue and upcoming tasks",
+      "Yardbook alerts surfacing overdue and upcoming tasks",
     ],
     mockup: "/images/screenshots/feature-insights.webp",
     icon: <Lightbulb className="h-5 w-5" />,

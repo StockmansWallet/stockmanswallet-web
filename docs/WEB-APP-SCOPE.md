@@ -42,13 +42,13 @@ All need: `user_id` FK, RLS policies (`auth.uid() = user_id`), proper indexes.
 
 ### 3. App Pages (mirroring iOS tabs)
 
-**Dashboard** - Portfolio value, performance chart, herd breakdown, market snapshot, weather, insight cards, yard book preview
+**Dashboard** - Portfolio value, performance chart, herd breakdown, market snapshot, weather, insight cards, yardbook preview
 
 **Portfolio/Herds** - Herd list (sort/filter/search), add herd wizard, herd detail (valuation breakdown, market pulse, saleyard comparison, breeding details, records), edit herd, sell stock flow, CSV import
 
 **Brangus** - Chat interface (reuse existing Edge Functions), tool call display, conversation history, insight cards feed (9 template types)
 
-**Tools** - Yard Book (CRUD, NLP, recurring events), Freight IQ (calculator + saved estimates), Grid IQ (OCR upload, analysis, sell window), Reports (PDF generation), Market View (live MLA data, physical sales)
+**Tools** - Yardbook (CRUD, NLP, recurring events), Freight IQ (calculator + saved estimates), Grid IQ (OCR upload, analysis, sell window), Reports (PDF generation), Market View (live MLA data, physical sales)
 
 **Settings** - Profile, properties, preferences, sale locations, account deletion
 
@@ -62,7 +62,7 @@ Buttons, inputs, modals, cards, tables, tabs, toasts, skeletons, empty states
 - No TTS/voice (or basic Web Speech API fallback)
 - PDF: `@react-pdf/renderer` instead of native iOS rendering
 - OCR: file upload instead of camera scanning
-- No push notifications (web push or email for Yard Book reminders)
+- No push notifications (web push or email for Yardbook reminders)
 
 ---
 
@@ -78,7 +78,7 @@ Claude Code dramatically accelerates certain work. Here's how each area breaks d
 | Business logic ports | 2-3 weeks | **3-5 days** | Biggest Claude Code win. Claude reads the Swift ValuationEngine/FreightEngine/ReferenceData and translates to TypeScript line-by-line. Pure math, well-defined inputs/outputs. |
 | UI component library | 1-2 weeks | **2-3 days** | Shadcn/ui or Radix provides primitives. Claude generates themed wrappers matching existing design tokens in `globals.css`. |
 | Dashboard + Portfolio (core) | 3-4 weeks | **1-1.5 weeks** | Pages are data-fetch + render. Claude scaffolds fast. Chart integration and polish needs iteration. |
-| Tools (Yard Book, Freight, Market, Reports) | 3-4 weeks | **1-1.5 weeks** | CRUD pages are Claude Code's sweet spot. PDF generation needs more iteration. |
+| Tools (Yardbook, Freight, Market, Reports) | 3-4 weeks | **1-1.5 weeks** | CRUD pages are Claude Code's sweet spot. PDF generation needs more iteration. |
 | Brangus (chat + cards) | 2-3 weeks | **4-6 days** | Chat UI is standard. Edge Functions already exist. Template engine port is mechanical (9 templates with defined data shapes). |
 | Grid IQ | 2 weeks | **3-5 days** | File upload + API call + results display. Extraction logic already lives in Edge Functions. |
 | Settings + Profile | 1 week | **2-3 days** | Form-heavy CRUD pages. Fast. |
@@ -139,7 +139,7 @@ Neither "finish iOS first" nor "build both in parallel" is the right answer. Her
 1. Market View (read-only, no user data dependency - could even start before sync)
 2. Brangus chat (Edge Functions already exist)
 3. Freight IQ
-4. Yard Book
+4. Yardbook
 5. Reports
 6. Grid IQ
 7. Advisory features (lowest priority unless advisor users are pushing for it)
@@ -168,7 +168,7 @@ The Supabase data migration is the critical path for BOTH platforms. Do it now. 
 - **Herds page** — premium UI with stat cards (total value, head, herds, avg weight), species pill filters, sortable table, search, property grouping with separate cards per property
 - **Valuation engine** — TypeScript port of iOS `calculateHerdValue` with MLA category prices, breed premiums, weight-range bracket matching, 4-tier saleyard pricing (general+premium → breed-specific → national+premium → fallback), breed premium double-application guard, price source tracking with `calculateHerdValuation`, local breed premium fallback, saleyard name resolution, and iOS-parity price resolution (last-wins for range, max for fallback)
 - **Herd detail page** — shows estimated herd value with per-head breakdown, red price source indicators when using national avg or fallback pricing
-- **Yard Book** — full implementation matching iOS: run sheet with horizon grouping (Overdue/Today/Next 7/30/90/Later), 5 colour-coded categories with filter pills, countdown badges, herd linking (multi-select), reminder offsets, recurrence rules, mark complete/incomplete, show/hide completed, stat cards, soft-delete. Data syncs bidirectionally with iOS via shared Supabase table
+- **Yardbook** — full implementation matching iOS: run sheet with horizon grouping (Overdue/Today/Next 7/30/90/Later), 5 colour-coded categories with filter pills, countdown badges, herd linking (multi-select), reminder offsets, recurrence rules, mark complete/incomplete, show/hide completed, stat cards, soft-delete. Data syncs bidirectionally with iOS via shared Supabase table
 - **Brangus (Brangus chat)** — interactive AI chat component with message display, input handling, suggested prompts, chat service layer, and tool definitions in `lib/brangus/`
 - **Demo data seeder** — Doongara Station with 20 herds, flagged as demo data, safe clear that uses soft-delete
 - **Clear All Data** — settings option to permanently delete all user data via Edge Function (double confirmation, affects both web and iOS)
@@ -176,7 +176,7 @@ The Supabase data migration is the critical path for BOTH platforms. Do it now. 
 - **Admin MLA upload** — admin-only CSV upload page for MLA market data with email whitelist, format auto-detection, chunked upload with progress
 - **Freight IQ** - full 3-step calculator matching iOS: property/herd selection with auto-fill, saleyard destination with haversine distance, 5-field assumptions grid, results with GST/per-head/per-deck breakdown
 - Tool pages scaffolded: Grid IQ, Reports, Market View, Settings
-- **Per-tool accent colors** - Each tool uses its own iOS-matched color: Grid IQ (teal), Freight IQ (sky), Yard Book (lime), Reports (amber), Advisory Hub (purple). Applied to sidebar, buttons, empty states, stat cards, section icons, and links
+- **Per-tool accent colors** - Each tool uses its own iOS-matched color: Grid IQ (teal), Freight IQ (sky), Yardbook (lime), Reports (amber), Advisory Hub (purple). Applied to sidebar, buttons, empty states, stat cards, section icons, and links
 - **Consistent rounded-xl** - All interactive elements standardised to `rounded-xl` (12px) for a cohesive look
 - UI component library: Card, Button (9 variants incl. tool colors), Input, Badge, PageHeader, EmptyState (6 color variants), StatCard (6 accent options), Tabs, etc.
 - Lucide-react icons throughout (matching iOS SF Symbols)

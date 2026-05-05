@@ -66,7 +66,7 @@ export default function AboutTally() {
                 <p>
                   In Australian pastoral life, the tally is everywhere. Scratched into fenceposts
                   during musters. Carved into drafting-gate rails as cattle run through the race.
-                  Pencilled into the yard book that every stockman carries or even Milwaukee penned
+                  Pencilled into the yardbook that every stockman carries or even Milwaukee penned
                   onto a pair of Wrangler jeans.{" "}
                   <span className="text-white/80">&ldquo;What&apos;s the tally?&rdquo;</span> is the
                   most fundamental question in stockwork, and the one that tells you whether the job

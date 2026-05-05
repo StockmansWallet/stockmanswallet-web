@@ -4,7 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { syncBreedingMilestonesForHerd } from "@/app/(app)/dashboard/tools/yard-book/actions";
+import { syncBreedingMilestonesForHerd } from "@/app/(app)/dashboard/tools/yardbook/actions";
 import {
   fullHerdFormSchema as herdFormSchema,
   deriveSexFromCategory,
@@ -89,7 +89,7 @@ export async function createHerd(formData: FormData) {
 
   if (error) return { error: error.message };
 
-  // Debug: Auto-create Yard Book breeding milestones for breeder herds with joining data
+  // Debug: Auto-create Yardbook breeding milestones for breeder herds with joining data
   // Compute the derived joined_date for milestones
   const derivedJoinedDate = (() => {
     const prog = v.breeding_program_type;

@@ -15,7 +15,7 @@ type EmptyStateVariant =
   | "brangus"
   | "insights"
   | "markets"
-  | "yard-book"
+  | "yardbook"
   | "reports"
   | "freight-iq"
   | "grid-iq"
@@ -43,7 +43,7 @@ const variantStyles: Record<EmptyStateVariant, { iconBg: string; iconText: strin
   brangus: { iconBg: "bg-brangus/10", iconText: "text-brangus" },
   insights: { iconBg: "bg-insights/10", iconText: "text-insights" },
   markets: { iconBg: "bg-markets/10", iconText: "text-markets" },
-  "yard-book": { iconBg: "bg-yard-book/10", iconText: "text-yard-book" },
+  "yardbook": { iconBg: "bg-yardbook/10", iconText: "text-yardbook" },
   reports: { iconBg: "bg-reports/10", iconText: "text-reports" },
   "freight-iq": { iconBg: "bg-freight-iq/10", iconText: "text-freight-iq" },
   "grid-iq": { iconBg: "bg-grid-iq/10", iconText: "text-grid-iq" },
@@ -62,7 +62,7 @@ const variantToButton: Record<EmptyStateVariant, ButtonVariant> = {
   brangus: "brangus",
   insights: "insights",
   markets: "markets",
-  "yard-book": "yard-book",
+  "yardbook": "yardbook",
   reports: "reports",
   "freight-iq": "freight-iq",
   "grid-iq": "grid-iq",

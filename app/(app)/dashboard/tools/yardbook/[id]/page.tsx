@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DeleteYardBookItemButton } from "./delete-button";
+import { DeleteYardbookItemButton } from "./delete-button";
 import { ToggleCompleteButton } from "./toggle-complete-button";
 import {
   Pencil,
@@ -21,20 +21,20 @@ import {
   User,
 } from "lucide-react";
 import { IconCattleTags } from "@/components/icons/icon-cattle-tags";
-import type { YardBookCategory } from "@/lib/types/models";
+import type { YardbookCategory } from "@/lib/types/models";
 
-export const metadata = { title: "Yard Book Item" };
+export const metadata = { title: "Yardbook Item" };
 
 type IconComponent = React.ComponentType<{ className?: string }>;
 
 const CATEGORY_CONFIG: Record<
-  YardBookCategory,
+  YardbookCategory,
   { icon: IconComponent; bg: string; text: string; label: string }
 > = {
   Livestock: {
     icon: IconCattleTags,
-    bg: "bg-yard-book/15",
-    text: "text-yard-book-light",
+    bg: "bg-yardbook/15",
+    text: "text-yardbook-light",
     label: "Livestock",
   },
   Operations: { icon: Wrench, bg: "bg-warning/15", text: "text-warning", label: "Operations" },
@@ -74,9 +74,9 @@ function InfoRow({
 function SectionIcon({ icon: Icon, className }: { icon: IconComponent; className?: string }) {
   return (
     <div
-      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${className ?? "bg-yard-book/15"}`}
+      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${className ?? "bg-yardbook/15"}`}
     >
-      <Icon className={`h-3.5 w-3.5 ${className ? "" : "text-yard-book"}`} />
+      <Icon className={`h-3.5 w-3.5 ${className ? "" : "text-yardbook"}`} />
     </div>
   );
 }
@@ -122,7 +122,7 @@ function recurrenceLabel(rule: string, interval?: number | null): string {
   }
 }
 
-export default async function YardBookItemPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function YardbookItemPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
   const {
@@ -184,26 +184,26 @@ export default async function YardBookItemPage({ params }: { params: Promise<{ i
   }
 
   const catConfig =
-    CATEGORY_CONFIG[item.category_raw as YardBookCategory] ?? CATEGORY_CONFIG.Livestock;
+    CATEGORY_CONFIG[item.category_raw as YardbookCategory] ?? CATEGORY_CONFIG.Livestock;
   const CatIcon = catConfig.icon;
   const days = daysUntil(item.event_date);
 
   return (
     <div className="w-full max-w-[1680px]">
       <PageHeader
-        feature="yard-book"
+        feature="yardbook"
         title={item.title}
         subtitle={catConfig.label}
         actions={
           <div className="flex items-center gap-2">
             <ToggleCompleteButton id={id} isCompleted={item.is_completed} />
-            <Link href={`/dashboard/tools/yard-book/${id}/edit`}>
+            <Link href={`/dashboard/tools/yardbook/${id}/edit`}>
               <Button variant="secondary" size="sm">
                 <Pencil className="mr-1.5 h-3.5 w-3.5" />
                 Edit
               </Button>
             </Link>
-            <DeleteYardBookItemButton id={id} title={item.title} />
+            <DeleteYardbookItemButton id={id} title={item.title} />
           </div>
         }
       />
@@ -328,7 +328,7 @@ export default async function YardBookItemPage({ params }: { params: Promise<{ i
                 <div key={herd.id} className="flex items-center justify-between py-3 text-sm">
                   <Link
                     href={`/dashboard/herds/${herd.id}`}
-                    className="text-yard-book font-medium hover:underline"
+                    className="text-yardbook font-medium hover:underline"
                   >
                     {herd.name}
                   </Link>
@@ -371,8 +371,8 @@ export default async function YardBookItemPage({ params }: { params: Promise<{ i
                     key={file.id}
                     className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5"
                   >
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-yard-book/15">
-                      <FileText className="h-4 w-4 text-yard-book-light" aria-hidden="true" />
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-yardbook/15">
+                      <FileText className="h-4 w-4 text-yardbook-light" aria-hidden="true" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-text-primary">

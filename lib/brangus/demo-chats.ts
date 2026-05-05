@@ -38,7 +38,7 @@ export const DEMO_ACTIVE_CONVERSATION: DemoConversation = {
       id: "m2",
       role: "assistant",
       content:
-        "Good question, and the answer depends on a couple of things I can see in your portfolio. Your Droughtmaster Yearlings are sitting at 350 kg off the Bore Paddock, with DWG around 0.9. In six weeks at that gain they'll push roughly 390 kg, which lifts them into a stronger bracket at Gracemere.\n\nCQLX has been firm on yearling steers the last three weeks. Averages at 440 to 490 kg are trading around $4.00 to $4.12 per kg. At your current 350 kg you're closer to $3.70 per kg on recent sales, so holding gets you both more weight and a better unit price.\n\nThe trade-off is feed cost and seasonal risk. If your Bore Paddock is still in good condition through May, holding makes sense. If you're already starting to feed them, the maths tightens up fast.\n\nMy recommendation: hold four to six weeks if pasture holds, and book them onto the first CQLX sale after they clear 380 kg. I can set a Yard Book reminder for the weekly sale in six weeks' time if you like.",
+        "Good question, and the answer depends on a couple of things I can see in your portfolio. Your Droughtmaster Yearlings are sitting at 350 kg off the Bore Paddock, with DWG around 0.9. In six weeks at that gain they'll push roughly 390 kg, which lifts them into a stronger bracket at Gracemere.\n\nCQLX has been firm on yearling steers the last three weeks. Averages at 440 to 490 kg are trading around $4.00 to $4.12 per kg. At your current 350 kg you're closer to $3.70 per kg on recent sales, so holding gets you both more weight and a better unit price.\n\nThe trade-off is feed cost and seasonal risk. If your Bore Paddock is still in good condition through May, holding makes sense. If you're already starting to feed them, the maths tightens up fast.\n\nMy recommendation: hold four to six weeks if pasture holds, and book them onto the first CQLX sale after they clear 380 kg. I can set a Yardbook reminder for the weekly sale in six weeks' time if you like.",
     },
     {
       id: "m3",
@@ -79,10 +79,10 @@ export const DEMO_ACTIVE_CONVERSATION: DemoConversation = {
     {
       id: "i-active-4",
       label: "Schedule sale",
-      value: "Yard Book",
+      value: "Yardbook",
       subtitle: "Set reminder for 6 weeks",
       sentiment: "neutral",
-      action: { type: "yardBook" },
+      action: { type: "yardbook" },
     },
   ],
 };
@@ -154,7 +154,7 @@ export const DEMO_SAVED_CONVERSATIONS: DemoConversation[] = [
         id: "s2-2",
         role: "assistant",
         content:
-          "Your First-Calf Heifers are 26 months old with 34 calves already dropped, which means they're on track for a second joining. To hit a mid-winter calving next year you want them back in calf from roughly the third week of May through late July.\n\nA few things to think about:\n\nBody condition first. Heifers raising their first calf often lose condition in their second joining if they're still on their first. Target a score of 2.5 to 3 before you put bulls in.\n\nSynchronised vs uncontrolled. You ran a controlled joining last year. With the Doongara Dozer AI program running on your Main Breeders, you could piggyback these heifers on the same synch protocol and re-use the same AI sires. That gives you a tight 21-day calving window and better bull utilisation.\n\nCalf weaning. If you wean the current calves at 3 months (late May based on your calf weight recorded date), condition recovers quickly and your re-joining window is exactly right.\n\nRecommendation: wean around 20 May, start CIDR insertions early June, AI last week of June, then drop clean-up bulls in for 30 days. Happy to add milestones to your Yard Book if you'd like.",
+          "Your First-Calf Heifers are 26 months old with 34 calves already dropped, which means they're on track for a second joining. To hit a mid-winter calving next year you want them back in calf from roughly the third week of May through late July.\n\nA few things to think about:\n\nBody condition first. Heifers raising their first calf often lose condition in their second joining if they're still on their first. Target a score of 2.5 to 3 before you put bulls in.\n\nSynchronised vs uncontrolled. You ran a controlled joining last year. With the Doongara Dozer AI program running on your Main Breeders, you could piggyback these heifers on the same synch protocol and re-use the same AI sires. That gives you a tight 21-day calving window and better bull utilisation.\n\nCalf weaning. If you wean the current calves at 3 months (late May based on your calf weight recorded date), condition recovers quickly and your re-joining window is exactly right.\n\nRecommendation: wean around 20 May, start CIDR insertions early June, AI last week of June, then drop clean-up bulls in for 30 days. Happy to add milestones to your Yardbook if you'd like.",
       },
     ],
     insights: [
@@ -164,7 +164,7 @@ export const DEMO_SAVED_CONVERSATIONS: DemoConversation[] = [
         value: "~20 May",
         subtitle: "3 months old, ease condition loss",
         sentiment: "neutral",
-        action: { type: "yardBook" },
+        action: { type: "yardbook" },
       },
       {
         id: "i-s2-2",
@@ -172,7 +172,7 @@ export const DEMO_SAVED_CONVERSATIONS: DemoConversation[] = [
         value: "Early Jun",
         subtitle: "CIDR insertions",
         sentiment: "positive",
-        action: { type: "yardBook" },
+        action: { type: "yardbook" },
       },
       {
         id: "i-s2-3",

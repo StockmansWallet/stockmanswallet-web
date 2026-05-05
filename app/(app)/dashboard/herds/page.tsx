@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HerdsListView, type PriceRowFlat } from "./herds-list-view";
-import { YardBookBanner } from "@/components/app/yard-book-banner";
+import { YardbookBanner } from "@/components/app/yardbook-banner";
 import { Plus } from "lucide-react";
 import {
   calculateHerdValuation,
@@ -186,7 +186,7 @@ export default async function HerdsPage() {
   return (
     <div className="w-full max-w-[1680px]">
       <Suspense>
-        <YardBookBanner />
+        <YardbookBanner />
       </Suspense>
       <PageHeader
         title="Herds"

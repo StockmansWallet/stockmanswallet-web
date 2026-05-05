@@ -34,7 +34,7 @@ const CHAT_EXAMPLES: ChatExample[] = [
   {
     userMessage:
       "Brangus I forgot it's Hilary's birthday on the 10th June, I need to book the mustering chopper for next Thursday for the bulls and Campbells utes in for a Service this Friday.",
-    assistantMessage: `No worries, all sorted. Hilary's birthday is in the Yard Book for 10 June, chopper's booked for the bulls next Thursday, and Campbells utes are down for service this Friday. I'll ping you a reminder for each one so you can keep your head in the paddock and not in your calendar.`,
+    assistantMessage: `No worries, all sorted. Hilary's birthday is in the Yardbook for 10 June, chopper's booked for the bulls next Thursday, and Campbells utes are down for service this Friday. I'll ping you a reminder for each one so you can keep your head in the paddock and not in your calendar.`,
     contextCards: [],
   },
   {
@@ -222,7 +222,7 @@ export default function Brangus() {
                   "Years of historical market data",
                   "Always on across your operation",
                   "Connected to every tool and workflow",
-                  "Manages your Yard Book via conversation",
+                  "Manages your Yardbook via conversation",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
                     <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#4c7fff]/15 backdrop-blur-sm">

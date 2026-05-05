@@ -26,7 +26,7 @@ const CAN_DO = [
   "Explore herd detail, breeding accrual, calves at foot",
   "Chat with Brangus, the livestock AI co-pilot",
   "View Markets, Insights, Reports, Freight IQ, Grid IQ",
-  "Try the Yard Book and Ch 40 layouts",
+  "Try the Yardbook and Ch 40 layouts",
 ] as const;
 
 const READ_ONLY = [
@@ -139,9 +139,9 @@ export default async function DemoGuidePage() {
               body="Estimate what it would cost to send a load from Emerald to Roma."
             />
             <TryLink
-              href="/dashboard/tools/yard-book"
+              href="/dashboard/tools/yardbook"
               icon={<BookOpen className="h-4 w-4" />}
-              title="Open the Yard Book"
+              title="Open the Yardbook"
               body="See upcoming breeding milestones, paddock rotations, and sales."
             />
             <TryLink

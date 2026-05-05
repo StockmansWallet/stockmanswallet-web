@@ -4,19 +4,19 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AlertTriangle, CalendarCheck, X } from "lucide-react";
 
-type YardBookAction = "created" | "updated" | "error";
+type YardbookAction = "created" | "updated" | "error";
 
 /**
  * Shows a confirmation or warning banner after breeding milestones are synced
- * to Yard Book. Reads ?yardbook=created|updated|error from the URL and
+ * to Yardbook. Reads ?yardbook=created|updated|error from the URL and
  * auto-dismisses after 8 seconds (error banner is persistent until dismissed).
  */
-export function YardBookBanner() {
+export function YardbookBanner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const [visible, setVisible] = useState(false);
-  const [action, setAction] = useState<YardBookAction | null>(null);
+  const [action, setAction] = useState<YardbookAction | null>(null);
 
   useEffect(() => {
     const yb = searchParams.get("yardbook");
@@ -45,10 +45,10 @@ export function YardBookBanner() {
       <div className="border-error/40 bg-error/10 text-error mb-4 flex items-start gap-3 rounded-xl border px-4 py-3 text-sm">
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
         <div className="flex-1">
-          <p className="font-medium">Yard Book sync failed</p>
+          <p className="font-medium">Yardbook sync failed</p>
           <p className="text-error/80 mt-0.5">
-            The herd was saved, but breeding milestones could not be scheduled in Yard Book. Open
-            the Yard Book tab and check your reminders, or edit the herd to retry.
+            The herd was saved, but breeding milestones could not be scheduled in Yardbook. Open
+            the Yardbook tab and check your reminders, or edit the herd to retry.
           </p>
         </div>
         <button
@@ -64,15 +64,15 @@ export function YardBookBanner() {
 
   const message =
     action === "created"
-      ? "Breeding milestones (joining period, pregnancy testing, and expected calving) have been added to your Yard Book with reminders."
-      : "Breeding milestones have been updated in your Yard Book to reflect the new joining period dates.";
+      ? "Breeding milestones (joining period, pregnancy testing, and expected calving) have been added to your Yardbook with reminders."
+      : "Breeding milestones have been updated in your Yardbook to reflect the new joining period dates.";
 
   return (
     <div className="text-warning border-warning/40 bg-warning/10 mb-4 flex items-start gap-3 rounded-xl border px-4 py-3 text-sm">
       <CalendarCheck className="mt-0.5 h-4 w-4 shrink-0" />
       <div className="flex-1">
         <p className="font-medium">
-          {action === "created" ? "Added to Yard Book" : "Yard Book Updated"}
+          {action === "created" ? "Added to Yardbook" : "Yardbook Updated"}
         </p>
         <p className="text-warning/80 mt-0.5">{message}</p>
       </div>

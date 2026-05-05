@@ -3,15 +3,15 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
-import { deleteYardBookNote } from "../../actions";
+import { deleteYardbookNote } from "../../actions";
 
-export function DeleteYardBookNoteButton({ id }: { id: string }) {
+export function DeleteYardbookNoteButton({ id }: { id: string }) {
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   async function handleDelete() {
     setDeleting(true);
-    const result = await deleteYardBookNote(id);
+    const result = await deleteYardbookNote(id);
     if (result?.error) {
       setDeleting(false);
       setOpen(false);

@@ -51,7 +51,7 @@ export function fileSourceLabel(source: GloveboxFileRow["source"]): string {
   if (source === "ch40") return "Ch 40";
   if (source === "grid_iq") return "Grid IQ";
   if (source === "reports") return "Reports";
-  if (source === "yard_book") return "Yard Book";
+  if (source === "yard_book") return "Yardbook";
   return "Glovebox";
 }
 

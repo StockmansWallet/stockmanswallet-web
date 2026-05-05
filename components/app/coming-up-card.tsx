@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { BookOpen, ChevronRight } from "lucide-react";
 
-interface YardBookItem {
+interface YardbookItem {
   id: string;
   title: string;
   event_date: string;
@@ -27,7 +27,7 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString("en-AU", { day: "numeric", month: "short" });
 }
 
-export function ComingUpCard({ items, limit = 3 }: { items: YardBookItem[]; limit?: number }) {
+export function ComingUpCard({ items, limit = 3 }: { items: YardbookItem[]; limit?: number }) {
   const visible = items.slice(0, limit);
 
   return (
@@ -35,13 +35,13 @@ export function ComingUpCard({ items, limit = 3 }: { items: YardBookItem[]; limi
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="bg-yard-book/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
-              <BookOpen className="text-yard-book h-3.5 w-3.5" />
+            <div className="bg-yardbook/15 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+              <BookOpen className="text-yardbook h-3.5 w-3.5" />
             </div>
-            <CardTitle>Yard Book – Coming Up</CardTitle>
+            <CardTitle>Yardbook – Coming Up</CardTitle>
           </div>
           <Link
-            href="/dashboard/tools/yard-book"
+            href="/dashboard/tools/yardbook"
             className="bg-surface-raised text-text-secondary hover:bg-surface-high hover:text-text-primary inline-flex items-center gap-0.5 rounded-md px-2 py-1 text-xs font-medium transition-colors"
           >
             View all
@@ -51,18 +51,18 @@ export function ComingUpCard({ items, limit = 3 }: { items: YardBookItem[]; limi
       </CardHeader>
       {items.length === 0 ? (
         <EmptyState
-          icon={<BookOpen className="text-yard-book h-6 w-6" />}
+          icon={<BookOpen className="text-yardbook h-6 w-6" />}
           title="Nothing coming up"
-          description="Add events to your Yard Book to see them here."
-          actionLabel="Open Yard Book"
-          actionHref="/dashboard/tools/yard-book"
+          description="Add events to your Yardbook to see them here."
+          actionLabel="Open Yardbook"
+          actionHref="/dashboard/tools/yardbook"
         />
       ) : (
         <CardContent className="divide-y divide-white/[0.06] px-5 pb-5">
           {visible.map((item) => (
             <Link
               key={item.id}
-              href={`/dashboard/tools/yard-book/${item.id}`}
+              href={`/dashboard/tools/yardbook/${item.id}`}
               className="flex items-center justify-between py-3 transition-colors hover:opacity-80"
             >
               <div className="min-w-0">

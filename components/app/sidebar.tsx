@@ -94,7 +94,7 @@ export function Sidebar({
           {toolItems.length > 0 && (
             <div className={sectionClassName}>
               <p className="text-text-muted/60 mb-1 px-3 pt-1 text-[10px] font-semibold tracking-widest uppercase">
-                Tools
+                Operations
               </p>
               <div className="space-y-0.5">
                 {toolItems.map((item) => (

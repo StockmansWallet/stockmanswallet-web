@@ -163,8 +163,8 @@ export function BrangusDemoHub() {
   const handleCardAction = useCallback(
     (action: CardAction) => {
       switch (action.type) {
-        case "yardBook":
-          router.push("/dashboard/tools/yard-book");
+        case "yardbook":
+          router.push("/dashboard/tools/yardbook");
           break;
         case "herdDetail":
           router.push(`/dashboard/herds/${action.id}`);

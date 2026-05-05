@@ -57,7 +57,7 @@
   --hue-orange-dark: #b35f1d;
   --hue-orange-text: #8a4814;
 
-  /* Notebook Crimson - Yard Book (reminders). Apple Reminders
+  /* Notebook Crimson - Yardbook (reminders). Apple Reminders
      convention, also the ribbon bookmark of a leather journal. */
   --hue-red: #e5484d;
   --hue-red-light: #f0787b;
@@ -144,9 +144,9 @@
   --feature-advisory: var(--hue-indigo);
   --feature-advisory-light: var(--hue-indigo-light);
   --feature-advisory-dark: var(--hue-indigo-dark);
-  --feature-yardbook: var(--color-yard-book);
-  --feature-yardbook-light: var(--color-yard-book-light);
-  --feature-yardbook-dark: var(--color-yard-book-dark);
+  --feature-yardbook: var(--color-yardbook);
+  --feature-yardbook-light: var(--color-yardbook-light);
+  --feature-yardbook-dark: var(--color-yardbook-dark);
   --feature-freight: var(--color-freight-iq);
   --feature-freight-light: var(--color-freight-iq-light);
   --feature-freight-dark: var(--color-freight-iq-dark);
@@ -317,11 +317,11 @@
   --color-markets-dark: var(--color-red-dark);
   --color-markets-text: var(--color-red-text);
 
-  /* Yard Book (reminders) - Paddock Emerald */
-  --color-yard-book: var(--color-emerald);
-  --color-yard-book-light: var(--color-emerald-light);
-  --color-yard-book-dark: var(--color-emerald-dark);
-  --color-yard-book-text: var(--color-emerald-text);
+  /* Yardbook (reminders) - Paddock Emerald */
+  --color-yardbook: var(--color-emerald);
+  --color-yardbook-light: var(--color-emerald-light);
+  --color-yardbook-dark: var(--color-emerald-dark);
+  --color-yardbook-text: var(--color-emerald-text);
 
   /* Reports - Hi-Vis Orange */
   --color-reports: var(--color-orange);

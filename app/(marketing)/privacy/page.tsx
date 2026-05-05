@@ -67,7 +67,7 @@ export default function PrivacyPolicy() {
           <li>Calculate freight cost estimates between locations.</li>
           <li>Power Brangus, our AI assistant, to answer questions about your portfolio.</li>
           <li>Sync your data between devices via your account.</li>
-          <li>Send notifications about yard book events you have scheduled.</li>
+          <li>Send notifications about yardbook events you have scheduled.</li>
         </LegalList>
         <p>
           We do not sell, rent, or share your personal information with third parties for marketing

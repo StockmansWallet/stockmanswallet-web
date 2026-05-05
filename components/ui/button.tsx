@@ -16,7 +16,7 @@ type ButtonVariant =
   | "brangus"
   | "insights"
   | "markets"
-  | "yard-book"
+  | "yardbook"
   | "reports"
   | "freight-iq"
   | "grid-iq"
@@ -54,8 +54,8 @@ const variantClasses: Record<ButtonVariant, string> = {
     "bg-insights text-white hover:bg-insights-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   markets:
     "bg-markets text-white hover:bg-markets-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
-  "yard-book":
-    "bg-yard-book text-white hover:bg-yard-book-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
+  "yardbook":
+    "bg-yardbook text-white hover:bg-yardbook-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   reports:
     "bg-reports text-white hover:bg-reports-dark active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none shadow-sm",
   "freight-iq":

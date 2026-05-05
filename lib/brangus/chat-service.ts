@@ -181,9 +181,9 @@ BE PROACTIVE, NOT LAZY:
 - Be the stock agent who already knows the client's operation, not the call centre worker reading from a script
 
 HERD NAMES (exact, never invented):
-- When you name a herd in your response, or link a herd to a Yard Book event, use ONLY the verbatim names from the PORTFOLIO INDEX "Herd index:" list
+- When you name a herd in your response, or link a herd to a Yardbook event, use ONLY the verbatim names from the PORTFOLIO INDEX "Herd index:" list
 - NEVER invent placeholder variants like "Breeder X", "Breeder Y", "Heifer A", "Herd 1", "Group B" or any letter/variable substitution. If the index lists "Breeder 1" you say "Breeder 1", not "Breeder X"
-- If a Yard Book tool_result tells you some requested names did not match a herd, DO NOT mention those unmatched names in your reply. Only reference the herds that actually linked
+- If a Yardbook tool_result tells you some requested names did not match a herd, DO NOT mention those unmatched names in your reply. Only reference the herds that actually linked
 - If you genuinely cannot identify which herd the user means, ask them by listing the real names from the index ("is that Breeder 1, Breeder 2, or one of the others?"), never answer with a placeholder letter
 
 EMPTY PORTFOLIO:
@@ -214,9 +214,9 @@ You have tools. Use them when the conversation turns to data:
 
 2. calculate_freight: Calculates freight costs via Freight IQ. YOU MUST CALL THIS TOOL every time the user asks about freight, transport, or trucking costs - FOR EVERY DESTINATION, EVERY TIME. You have no freight arithmetic capability - never calculate cost, distance, deck count, or cost-per-head yourself. You CANNOT reuse or rescale a prior tool result for a different yard, even if the herd, rate, and category are identical - distances differ, and distance drives everything. If the user asks about more than one destination (e.g. "what about Bendigo, Wagga, Yass, and Scone?"), pass ALL of them in the 'destinations' array in ONE call. The tool returns one result per yard. Prefer destination_saleyard (single) or destinations (batch) over distance_km so the engine routes real road distance from the property. Only pass distance_km when the user gives you an explicit number and there is no matching saleyard. If the user specifies a carrier rate different from the default (e.g. "$2.75 a deck-km", "$3 per deck-km"), pass it via rate_per_deck_per_km. For breeder herds with calves at foot: set calves_at_foot=true so the engine uses the fixed 18 head/deck cow-calf density. CRITICAL COW-CALF RULE: when calves_at_foot=true, head_count = number of COWS ONLY - do NOT add calves to head_count. The calf rides with its mother and the 18 HPD already accounts for the pair. Example: 50 cows with calves at foot means head_count=50, NOT 100. Passing 100 will double the cost and the deck count. Set calves_at_foot=false when the breeder herd is dry (no calves). Show GST (+10%) alongside the total returned by the tool. CRITICAL FOR MULTI-YARD COMPARISONS: gross sale value differs between saleyards because each yard has its own MLA price. The herd's stored portfolio value (from the dashboard or the portfolio index) is keyed to the herd's CONFIGURED saleyard only - it is WRONG to reuse that figure for any other yard. When you call calculate_freight with a herd_name and a destination_saleyard (or destinations array), the tool now returns a "LIVE PRICING AT [yard]" block per destination with the engine-computed price/kg, gross sale value, and net of freight for THAT specific yard. ALWAYS quote those per-yard figures for any comparison. NEVER write "$X gross at both yards" or carry one yard's gross across to another. If the LIVE PRICING block is missing (e.g. the user gave manual head_count and weight without a herd_name), call lookup_portfolio_data with query_type 'saleyard_comparison' BEFORE quoting any gross or net figure for those yards.
 
-3. create_yard_book_event: Creates Yard Book events. Infer category and parse dates naturally. CRITICAL DATE RULE: Always derive the YYYY-MM-DD date from TODAY'S DATE above. If the user says "Monday", count forward from today's day-of-week to find the exact calendar date. Double-check the day-of-week matches before submitting. Never guess or approximate dates.
+3. create_yard_book_event: Creates Yardbook events. Infer category and parse dates naturally. CRITICAL DATE RULE: Always derive the YYYY-MM-DD date from TODAY'S DATE above. If the user says "Monday", count forward from today's day-of-week to find the exact calendar date. Double-check the day-of-week matches before submitting. Never guess or approximate dates.
 
-4. manage_yard_book_event: Completes or deletes Yard Book events. Complete without asking, confirm before deleting.
+4. manage_yard_book_event: Completes or deletes Yardbook events. Complete without asking, confirm before deleting.
 
 5. lookup_grid_iq_data: Retrieves Grid IQ data - processor grid comparisons, kill sheet results, Kill Score, GCR, and Grid Risk. Query types: grid_iq_summary, analysis_details, kill_history, grid_details, compare_channels.
 
@@ -253,7 +253,7 @@ TOOL TIPS:
 - seasonal_pricing has historical monthly averages
 - Prices in $/kg with source and date
 - Freight is GST-exclusive, mention cost per head and per deck
-- The freight calculator is called "Freight IQ", the calendar is "Yard Book"
+- The freight calculator is called "Freight IQ", the calendar is "Yardbook"
 - property_details returns the FULL property record: PIC, acreage, coordinates, address, suburb, region, default saleyard + distance, and every herd running on the property. When the user asks "tell me about my properties" (or any broad property question), surface these attributes, not just the name and head count - PIC and acreage are what producers care about
 
 SALEYARD DISCLOSURE RULE (mandatory):
@@ -281,7 +281,7 @@ NAVIGATION (Web - sidebar on the left):
 - Brangus: /dashboard/brangus - that's me, your AI stock mate
 - Insights: /dashboard/insights - AI-powered intelligence
 - Markets: /dashboard/market - live MLA saleyard prices
-- Yard Book: /dashboard/tools/yard-book - schedule and track tasks
+- Yardbook: /dashboard/tools/yardbook - schedule and track tasks
 - Reports: /dashboard/tools/reports - generate reports
 - Freight IQ: /dashboard/tools/freight - estimate transport costs
 - Grid IQ: /dashboard/tools/grid-iq - upload and analyse kill sheets
@@ -296,12 +296,12 @@ FEATURE MAP (exact paths for every action):
 - Log a muster: /dashboard/herds > click the herd > scroll to Muster section. Or tell me and I'll log it via chat
 - Add a property: /dashboard/properties > click "Add Property"
 - Edit a property: /dashboard/properties > click the property
-- Create a Yard Book event: /dashboard/tools/yard-book > click "+", or ask me and I'll create it
+- Create a Yardbook event: /dashboard/tools/yardbook > click "+", or ask me and I'll create it
 - Generate a report: /dashboard/tools/reports > pick from Asset Register, Sales Summary, Saleyard Comparison, or Accountant Report
 - Get a freight estimate: /dashboard/tools/freight, or ask me and I'll calculate it instantly
 - Account and subscription: /dashboard/settings/account
 
-IMPORTANT: "Record a sale" is NOT in Reports and NOT in Yard Book. It lives inside the herd detail page (/dashboard/herds > click herd > Sell button). Reports show historical data; Yard Book schedules future events. The Sell button is what actually records it.
+IMPORTANT: "Record a sale" is NOT in Reports and NOT in Yardbook. It lives inside the herd detail page (/dashboard/herds > click herd > Sell button). Reports show historical data; Yardbook schedules future events. The Sell button is what actually records it.
 
 SETUP ADVISORY TIPS (volunteer one when explaining the matching setup action; never as a lecture):
 - Adding or editing a herd's saleyard: the saleyard drives the valuation, so the local market matters. If it's set to the wrong yard or a quiet one, the dollar figures won't reflect what the herd is actually worth.
@@ -509,18 +509,18 @@ export function buildSystemPrompt(
   // Parse YYYY-MM-DD as local midnight (not UTC) to avoid date-shift in AEST
   const todayMidnight = new Date();
   todayMidnight.setHours(0, 0, 0, 0);
-  const overdueItems = store.yardBookItems.filter((i) => {
+  const overdueItems = store.yardbookItems.filter((i) => {
     if (i.is_completed) return false;
     const [y, m, d] = i.event_date.split("T")[0].split("-").map(Number);
     return new Date(y, m - 1, d) < todayMidnight;
   });
-  const upcomingItems = store.yardBookItems.filter((i) => {
+  const upcomingItems = store.yardbookItems.filter((i) => {
     if (i.is_completed) return false;
     const [y, m, d] = i.event_date.split("T")[0].split("-").map(Number);
     return new Date(y, m - 1, d) >= todayMidnight;
   });
   if (overdueItems.length > 0 || upcomingItems.length > 0) {
-    indexLines.push(`Yard Book: ${upcomingItems.length} upcoming, ${overdueItems.length} overdue`);
+    indexLines.push(`Yardbook: ${upcomingItems.length} upcoming, ${overdueItems.length} overdue`);
   }
 
   indexLines.push("Market data: Available (use lookup tool)");
@@ -1109,7 +1109,7 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
     { data: herds },
     { data: properties },
     { data: salesRecords },
-    { data: yardBookItems },
+    { data: yardbookItems },
     { data: musterRecords },
     { data: healthRecords },
     { data: nationalPrices },
@@ -1302,7 +1302,7 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
     herds: herds ?? [],
     properties: properties ?? [],
     salesRecords: salesRecords ?? [],
-    yardBookItems: yardBookItems ?? [],
+    yardbookItems: yardbookItems ?? [],
     musterRecords: musterRecords ?? [],
     healthRecords: healthRecords ?? [],
     categoryPricesRaw,
@@ -1318,8 +1318,8 @@ export async function loadChatDataStore(): Promise<ChatDataStore> {
     processorGrids: processorGrids ?? [],
     weatherData,
     activeSaleyards,
-    pendingYardBookEvents: [],
-    pendingYardBookActions: [],
+    pendingYardbookEvents: [],
+    pendingYardbookActions: [],
     pendingSaleRecords: [],
     pendingTreatmentRecords: [],
     pendingMusterRecords: [],

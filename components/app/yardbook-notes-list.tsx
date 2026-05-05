@@ -12,7 +12,7 @@ type Note = {
   updated_at: string;
 };
 
-interface YardBookNotesListProps {
+interface YardbookNotesListProps {
   notes: Note[];
 }
 
@@ -48,7 +48,7 @@ function preview(note: Pick<Note, "title" | "body">): {
   return { displayTitle: firstLine || "Untitled note", previewText: rest };
 }
 
-export function YardBookNotesList({ notes }: YardBookNotesListProps) {
+export function YardbookNotesList({ notes }: YardbookNotesListProps) {
   if (notes.length === 0) {
     return (
       <Card>
@@ -56,8 +56,8 @@ export function YardBookNotesList({ notes }: YardBookNotesListProps) {
           title="No notes yet"
           description="Jot down prices heard at the saleyard, agent phone numbers, or anything else you want to come back to later."
           actionLabel="New Note"
-          actionHref="/dashboard/tools/yard-book/notes/new"
-          variant="yard-book"
+          actionHref="/dashboard/tools/yardbook/notes/new"
+          variant="yardbook"
         />
       </Card>
     );
@@ -69,8 +69,8 @@ export function YardBookNotesList({ notes }: YardBookNotesListProps) {
   return (
     <div className="space-y-6">
       <div className="flex justify-end lg:hidden">
-        <Link href="/dashboard/tools/yard-book/notes/new">
-          <Button variant="yard-book" size="sm">
+        <Link href="/dashboard/tools/yardbook/notes/new">
+          <Button variant="yardbook" size="sm">
             <Plus className="mr-1.5 h-3.5 w-3.5" />
             New Note
           </Button>
@@ -124,12 +124,12 @@ function NoteCard({ note, pinned = false }: { note: Note; pinned?: boolean }) {
   const { displayTitle, previewText } = preview(note);
   return (
     <Link
-      href={`/dashboard/tools/yard-book/notes/${note.id}/edit`}
+      href={`/dashboard/tools/yardbook/notes/${note.id}/edit`}
       className="block rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 transition-colors hover:border-white/[0.10] hover:bg-white/[0.05]"
     >
       <div className="flex items-baseline gap-2">
         <h3 className="flex-1 truncate text-sm font-semibold text-text-primary">{displayTitle}</h3>
-        {pinned && <Pin className="h-3 w-3 shrink-0 text-yard-book-light" />}
+        {pinned && <Pin className="h-3 w-3 shrink-0 text-yardbook-light" />}
         <span className="shrink-0 text-[11px] text-text-muted">
           {relativeDate(note.updated_at)}
         </span>

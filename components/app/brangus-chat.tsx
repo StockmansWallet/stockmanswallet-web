@@ -58,7 +58,7 @@ const SUGGESTED_PROMPTS = [
   "Compare freight costs to Gracemere vs Roma",
   "When should I market my steers?",
   "How are cattle prices trending?",
-  "What's coming up in my Yard Book?",
+  "What's coming up in my Yardbook?",
   "Give me a breakdown of all my herds",
 ];
 
@@ -406,8 +406,8 @@ export function BrangusChat({
   const handleCardAction = useCallback(
     (action: CardAction) => {
       switch (action.type) {
-        case "yardBook":
-          router.push("/dashboard/tools/yard-book");
+        case "yardbook":
+          router.push("/dashboard/tools/yardbook");
           break;
         case "herdDetail":
           router.push(`/dashboard/herds/${action.id}`);
@@ -524,7 +524,7 @@ export function BrangusChat({
     };
   }, []);
 
-  // Persist yard book mutations after each response
+  // Persist yardbook mutations after each response
   const persistMutations = useCallback(async (dataStore: ChatDataStore) => {
     const supabase = createClient();
     const {
@@ -532,8 +532,8 @@ export function BrangusChat({
     } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Create new yard book events
-    for (const event of dataStore.pendingYardBookEvents) {
+    // Create new yardbook events
+    for (const event of dataStore.pendingYardbookEvents) {
       await supabase.from("yard_book_items").insert({
         id: crypto.randomUUID(),
         user_id: user.id,
@@ -546,10 +546,10 @@ export function BrangusChat({
         recurrence_rule_raw: event.recurrence_rule ?? null,
       });
     }
-    dataStore.pendingYardBookEvents = [];
+    dataStore.pendingYardbookEvents = [];
 
-    // Process yard book actions
-    for (const action of dataStore.pendingYardBookActions) {
+    // Process yardbook actions
+    for (const action of dataStore.pendingYardbookActions) {
       if (action.action === "complete") {
         await supabase
           .from("yard_book_items")
@@ -562,7 +562,7 @@ export function BrangusChat({
           .eq("id", action.itemId);
       }
     }
-    dataStore.pendingYardBookActions = [];
+    dataStore.pendingYardbookActions = [];
 
     // Record sales logged through Brangus chat
     for (const sale of dataStore.pendingSaleRecords) {
@@ -762,7 +762,7 @@ export function BrangusChat({
             .catch((err) => console.error("Auto-title failed:", err));
         }
 
-        // Persist any yard book mutations
+        // Persist any yardbook mutations
         await persistMutations(store);
       } catch (err) {
         console.error("Brangus error:", err);

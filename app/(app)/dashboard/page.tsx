@@ -106,7 +106,7 @@ export default async function DashboardPage() {
       .order("property_name"),
     // Breed premiums (matches iOS BreedPremiumService)
     supabase.from("breed_premiums").select("breed, premium_percent:premium_pct"),
-    // Upcoming yard book items for Coming Up card
+    // Upcoming yardbook items for Coming Up card
     supabase
       .from("yard_book_items")
       .select("id, title, event_date, category_raw")

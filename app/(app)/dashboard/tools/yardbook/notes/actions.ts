@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-const yardBookNoteSchema = z.object({
+const yardbookNoteSchema = z.object({
   title: z.string().max(200),
   body: z.string().max(20000),
   is_pinned: z.boolean(),
@@ -36,14 +36,14 @@ function parseUuidArray(raw: string | null): string[] | null {
   }
 }
 
-export async function createYardBookNote(formData: FormData) {
+export async function createYardbookNote(formData: FormData) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
-  const parsed = yardBookNoteSchema.safeParse({
+  const parsed = yardbookNoteSchema.safeParse({
     title: ((formData.get("title") as string) || "").trim(),
     body: ((formData.get("body") as string) || "").trim(),
     is_pinned: formData.get("is_pinned") === "on",
@@ -71,11 +71,11 @@ export async function createYardBookNote(formData: FormData) {
 
   if (error) return { error: error.message };
 
-  revalidatePath("/dashboard/tools/yard-book");
-  redirect("/dashboard/tools/yard-book?tab=notes");
+  revalidatePath("/dashboard/tools/yardbook");
+  redirect("/dashboard/tools/yardbook?tab=notes");
 }
 
-export async function updateYardBookNote(id: string, formData: FormData) {
+export async function updateYardbookNote(id: string, formData: FormData) {
   const idParsed = idSchema.safeParse({ id });
   if (!idParsed.success) return { error: "Invalid input" };
 
@@ -85,7 +85,7 @@ export async function updateYardBookNote(id: string, formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
-  const parsed = yardBookNoteSchema.safeParse({
+  const parsed = yardbookNoteSchema.safeParse({
     title: ((formData.get("title") as string) || "").trim(),
     body: ((formData.get("body") as string) || "").trim(),
     is_pinned: formData.get("is_pinned") === "on",
@@ -114,12 +114,12 @@ export async function updateYardBookNote(id: string, formData: FormData) {
 
   if (error) return { error: error.message };
 
-  revalidatePath("/dashboard/tools/yard-book");
-  revalidatePath(`/dashboard/tools/yard-book/notes/${id}/edit`);
-  redirect("/dashboard/tools/yard-book?tab=notes");
+  revalidatePath("/dashboard/tools/yardbook");
+  revalidatePath(`/dashboard/tools/yardbook/notes/${id}/edit`);
+  redirect("/dashboard/tools/yardbook?tab=notes");
 }
 
-export async function deleteYardBookNote(id: string) {
+export async function deleteYardbookNote(id: string) {
   const parsed = idSchema.safeParse({ id });
   if (!parsed.success) return { error: "Invalid input" };
 
@@ -141,11 +141,11 @@ export async function deleteYardBookNote(id: string) {
 
   if (error) return { error: error.message };
 
-  revalidatePath("/dashboard/tools/yard-book");
-  redirect("/dashboard/tools/yard-book?tab=notes");
+  revalidatePath("/dashboard/tools/yardbook");
+  redirect("/dashboard/tools/yardbook?tab=notes");
 }
 
-export async function toggleYardBookNotePin(id: string, isPinned: boolean) {
+export async function toggleYardbookNotePin(id: string, isPinned: boolean) {
   const parsed = idSchema.safeParse({ id });
   if (!parsed.success) return { error: "Invalid input" };
 
@@ -166,6 +166,6 @@ export async function toggleYardBookNotePin(id: string, isPinned: boolean) {
 
   if (error) return { error: error.message };
 
-  revalidatePath("/dashboard/tools/yard-book");
+  revalidatePath("/dashboard/tools/yardbook");
   return { success: true };
 }

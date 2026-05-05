@@ -88,7 +88,7 @@ Two-way connection system allowing advisors to request access to producer portfo
 - Values: `"producer"` | `"advisor"`
 - Default: `"producer"`
 
-**Producer sidebar:** Dashboard, Herds, Properties, Brangus, Markets, Yard Book, Reports, Freight IQ, Grid IQ, Advisory Hub, Producer Network
+**Producer sidebar:** Dashboard, Herds, Properties, Brangus, Markets, Yardbook, Reports, Freight IQ, Grid IQ, Advisory Hub, Producer Network
 
 **Advisor sidebar:** Dashboard, Clients, Markets, Brangus, Reports, Freight IQ
 

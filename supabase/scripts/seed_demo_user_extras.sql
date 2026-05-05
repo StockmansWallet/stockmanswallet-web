@@ -1,4 +1,4 @@
--- One-time seed of Tier 2/3 data (sales, yard book, health, muster) for the
+-- One-time seed of Tier 2/3 data (sales, yardbook, health, muster) for the
 -- shared demo user. Run once after creating demo@stockmanswallet.com.au via the
 -- Auth Admin API and calling seed_demo_data_tier1(demo_user_id) to populate
 -- herds and properties.

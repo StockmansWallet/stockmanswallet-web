@@ -35,6 +35,6 @@ export async function clearAllUserData() {
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/herds");
   revalidatePath("/dashboard/properties");
-  revalidatePath("/dashboard/tools/yard-book");
+  revalidatePath("/dashboard/tools/yardbook");
   return { success: true };
 }
