@@ -70,13 +70,9 @@ export default function Hero() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
-                className="mb-6"
+                className="mb-6 h-[100px] w-[120px] sm:h-[150px] sm:w-[179px]"
               >
-                <Lottie
-                  animationData={tallyAnimData}
-                  loop={false}
-                  className="h-[100px] w-[120px] sm:h-[150px] sm:w-[179px]"
-                />
+                <Lottie animationData={tallyAnimData} loop={false} className="h-full w-full" />
               </motion.div>
 
               <motion.h1
@@ -148,9 +144,11 @@ export default function Hero() {
             >
               {/* Brangus phone mockup */}
               <motion.div
-                initial={{ opacity: 0, y: 40, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                initial={
+                  prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: "110vw", y: 24 }
+                }
+                animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, x: 0, y: 0 }}
+                transition={{ duration: 0.95, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
                 className="absolute top-[-45px] right-[-155px] z-10 h-[500px] max-w-[150vw] sm:top-[-68px] sm:right-[-235px] sm:h-[620px] lg:top-[-96px] lg:right-[-282px] lg:h-[720px] xl:top-[-114px] xl:right-[-318px] xl:h-[780px]"
               >
                 <Image
