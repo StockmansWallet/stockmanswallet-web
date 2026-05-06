@@ -78,6 +78,10 @@ export default function Pricing() {
                 fits.
                 <br />
                 Every plan starts with a 7-day free trial when the app launches.
+                <br />
+                <span className="font-semibold text-white/80">
+                  Introductory pricing may change before release.
+                </span>
               </p>
             </motion.div>
 
@@ -198,9 +202,7 @@ export default function Pricing() {
                           quality={95}
                           sizes="(min-width: 1024px) 280px, (min-width: 640px) 240px, 200px"
                           className={`relative h-full w-auto object-contain drop-shadow-[0_18px_24px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-out group-hover:-translate-y-2 group-hover:scale-105 group-hover:drop-shadow-[0_26px_30px_rgba(0,0,0,0.55)] ${
-                            tier.id === "tomahawk"
-                              ? "scale-110 group-hover:scale-[1.16]"
-                              : ""
+                            tier.id === "tomahawk" ? "scale-110 group-hover:scale-[1.16]" : ""
                           }`}
                         />
                       </motion.div>
@@ -220,9 +222,7 @@ export default function Pricing() {
                                 /month
                               </span>
                             </div>
-                            <p className="text-text-muted text-xs font-semibold">
-                              AUD ex GST
-                            </p>
+                            <p className="text-text-muted text-xs font-semibold">AUD ex GST</p>
                           </div>
                         ) : tier.priceLabel ? (
                           <div className="flex items-baseline gap-1">
@@ -288,13 +288,13 @@ export default function Pricing() {
                 automatically at the end of the trial unless cancelled beforehand.
               </p>
               <p>
-                <span className="font-semibold text-white/85">Pricing.</span> Prices are shown in
-                AUD excluding GST. GST is applied at checkout where applicable.
+                <span className="font-semibold text-white/85">Pricing.</span> Prices are
+                introductory, shown in AUD excluding GST, and may change before the app is released.
+                GST is applied at checkout where applicable.
               </p>
               <p>
                 <span className="font-semibold text-white/85">Usage limits.</span> Plan-based usage
-                limits apply to Brangus and Freight IQ. Additional usage can be purchased if
-                needed.
+                limits apply to Brangus and Freight IQ. Additional usage can be purchased if needed.
               </p>
             </div>
           </div>

@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  ChevronLeft,
+  ChevronRight,
   Wallet,
   TrendingUp,
   BookOpen,
@@ -32,6 +34,7 @@ interface FeatureTab {
   icon: React.ReactNode;
   comingSoon?: boolean;
   badge?: string;
+  availabilityNote?: string;
 }
 
 const FEATURE_TABS: FeatureTab[] = [
@@ -59,7 +62,7 @@ const FEATURE_TABS: FeatureTab[] = [
     name: "Herd Valuation",
     tagline: "Live financial assets",
     description:
-      "Turn each herd into a live financial asset. Market-linked valuations reflect breed premiums, daily weight gain, breeding activity, and projected biological change, so your balance sheet keeps pace with the paddock.",
+      "Turn each herd into a live financial asset. Market valuations stay linked to the biological changes inside the herd, including headcount, breed premiums, calving accruals, average daily weight gain, and mortality, so your balance sheet keeps pace with the paddock.",
     color: "var(--feature-herds)",
     colorLight: "var(--feature-herds-light)",
     colorDark: "var(--feature-herds-dark)",
@@ -230,6 +233,7 @@ const FEATURE_TABS: FeatureTab[] = [
     mockup: "/images/screenshots/feature-gridiq.webp",
     icon: <Grid3x3 className="h-5 w-5" />,
     comingSoon: true,
+    availabilityNote: "(Not included in current subscription plans)",
   },
 ];
 
@@ -263,7 +267,15 @@ function FeatureVideo({ src, isActive }: { src: string; isActive: boolean }) {
 export default function Features() {
   const [active, setActive] = useState(0);
   const feature = FEATURE_TABS[active];
+  const previousFeature = FEATURE_TABS[(active - 1 + FEATURE_TABS.length) % FEATURE_TABS.length];
+  const nextFeature = FEATURE_TABS[(active + 1) % FEATURE_TABS.length];
   const proofPoints = feature.bullets.slice(0, 3);
+  const goToPreviousFeature = () => {
+    setActive((current) => (current - 1 + FEATURE_TABS.length) % FEATURE_TABS.length);
+  };
+  const goToNextFeature = () => {
+    setActive((current) => (current + 1) % FEATURE_TABS.length);
+  };
 
   return (
     <section id="features" className="relative scroll-mt-[6.75rem] overflow-x-clip">
@@ -293,9 +305,7 @@ export default function Features() {
                 onClick={() => setActive(i)}
                 aria-pressed={active === i}
                 className={`flex shrink-0 cursor-pointer items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none ${
-                  active === i
-                    ? "text-white"
-                    : "border-white/[0.08] bg-white/[0.04] text-white/60"
+                  active === i ? "text-white" : "border-white/[0.08] bg-white/[0.04] text-white/60"
                 }`}
                 style={
                   active === i
@@ -500,6 +510,11 @@ export default function Features() {
                         {feature.badge ?? "Coming Soon"}
                       </span>
                     )}
+                    {feature.availabilityNote && (
+                      <span className="text-xs font-medium text-white/55">
+                        {feature.availabilityNote}
+                      </span>
+                    )}
                   </div>
 
                   <h3
@@ -537,6 +552,46 @@ export default function Features() {
                         <span className="text-sm leading-relaxed text-white/74">{bullet}</span>
                       </div>
                     ))}
+                  </div>
+
+                  <div className="mt-9 flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-2" aria-label="Feature navigation">
+                      <button
+                        type="button"
+                        onClick={goToPreviousFeature}
+                        aria-label={`Previous feature: ${previousFeature.name}`}
+                        className="group flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/[0.12] bg-white/[0.055] text-white/75 transition-colors hover:border-white/[0.22] hover:bg-white/[0.09] hover:text-white focus-visible:ring-2 focus-visible:outline-none"
+                      >
+                        <ChevronLeft className="h-5 w-5 transition-transform group-hover:-translate-x-0.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={goToNextFeature}
+                        aria-label={`Next feature: ${nextFeature.name}`}
+                        className="group flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border text-white transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                        style={{
+                          backgroundColor: `color-mix(in srgb, ${feature.color} 18%, rgba(255,255,255,0.055))`,
+                          borderColor: `color-mix(in srgb, ${feature.color} 55%, rgba(255,255,255,0.12))`,
+                          color: feature.colorLight,
+                        }}
+                      >
+                        <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
+                      </button>
+                    </div>
+
+                    <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                      <span className="font-semibold text-white/62 tabular-nums">
+                        {active + 1} / {FEATURE_TABS.length}
+                      </span>
+                      <span className="hidden h-1 w-1 rounded-full bg-white/24 sm:inline-block" />
+                      <button
+                        type="button"
+                        onClick={goToNextFeature}
+                        className="max-w-full cursor-pointer truncate text-left font-semibold text-white/72 transition-colors hover:text-white focus-visible:ring-2 focus-visible:outline-none"
+                      >
+                        Next: <span style={{ color: feature.colorLight }}>{nextFeature.name}</span>
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
               </AnimatePresence>
