@@ -130,6 +130,7 @@ const FEATURE_TABS: FeatureTab[] = [
     colorDark: "var(--feature-yardbook-dark)",
     bullets: [
       "Create events across five categories: Health, Mustering, Maintenance, Breeding, and Admin",
+      "Add events manually, by voice or conversation, or with help from Brangus",
       "Set recurring schedules and reminder offsets so you are always ahead",
       "Link events to one or more herds for full operational context",
       "View tasks grouped by horizon: Overdue, Today, Next 7 Days, Next 30, and beyond",
@@ -181,7 +182,7 @@ const FEATURE_TABS: FeatureTab[] = [
     name: "Markets",
     tagline: "Live market intelligence",
     description:
-      "Live market data at your fingertips. National indicators, saleyard category prices, and trend signals, updated daily so you can time your decisions with confidence.",
+      "Keep current market movement in view. Daily national indicators, saleyard category prices, and trend signals show where prices are shifting by species, category, and region, helping you read the market before you act.",
     color: "var(--feature-markets)",
     colorLight: "var(--feature-markets-light)",
     colorDark: "var(--feature-markets-dark)",
