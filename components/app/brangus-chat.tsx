@@ -99,7 +99,8 @@ Try asking me:
 
   // First-time user - introduce Brangus
   if (pastConversations === 0) {
-    const opener = tod === "morning" ? "Good morning" : tod === "afternoon" ? "Good arvo" : "G'evening";
+    const opener =
+      tod === "morning" ? "Good morning" : tod === "afternoon" ? "Good arvo" : "G'evening";
     return `${opener}, ${name}. I'm Brangus, your stock advisor. I've got your whole portfolio at my fingertips, so fire away. Ask me about your herds, freight, sale timing, or anything else and I'll do the heavy lifting.`;
   }
 
@@ -228,7 +229,10 @@ export function BrangusChat({
         ]
       : [];
 
-  const [messages, setMessages] = useState<ChatMessage[]>([...initialStaticWelcome, ...hydratedMessages]);
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    ...initialStaticWelcome,
+    ...hydratedMessages,
+  ]);
   // Drives the typing-indicator-in-place-of-welcome render path. True only while
   // we're waiting for Haiku's dynamic opener to come back (or fail).
   const [isWelcomeLoading, setIsWelcomeLoading] = useState<boolean>(willFireDynamicOpener);
@@ -498,8 +502,7 @@ export function BrangusChat({
             .then((opener) => {
               if (cancelled) return;
               const content =
-                opener ??
-                buildWelcomeGreeting(pastConversationCount, { isAdvisor, userFirstName });
+                opener ?? buildWelcomeGreeting(pastConversationCount, { isAdvisor, userFirstName });
               finaliseWelcome(content);
             })
             .catch((err) => {
@@ -693,19 +696,24 @@ export function BrangusChat({
       setMessages((prev) => [...prev, userMessage]);
       setIsLoading(true);
 
-      // Persist user message (non-blocking)
-      const convId = conversationIdRef.current;
-      if (convId && userId) {
-        saveMessage(convId, userId, "user", text).catch((err) =>
-          console.error("Failed to persist user message:", err)
-        );
-      }
-
       // Drain attachments queued via the paperclip for THIS turn so the
       // multi-modal user message is built once and the chips clear before
       // the response arrives.
       const turnAttachments = attachedFiles;
       setAttachedFiles([]);
+
+      // Persist user message (non-blocking)
+      const convId = conversationIdRef.current;
+      if (convId && userId) {
+        saveMessage(
+          convId,
+          userId,
+          "user",
+          text,
+          null,
+          turnAttachments.map((file) => file.id)
+        ).catch((err) => console.error("Failed to persist user message:", err));
+      }
 
       try {
         const { assistantText, updatedHistory, quickInsights } = await sendMessage(

@@ -10,9 +10,7 @@ export type BrangusMessageRow = Tables<"brangus_messages">;
 
 // MARK: - Client-side CRUD (browser components)
 
-export async function createConversation(
-  userId: string
-): Promise<BrangusConversationRow> {
+export async function createConversation(userId: string): Promise<BrangusConversationRow> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("brangus_conversations")
@@ -31,22 +29,45 @@ export async function saveMessage(
   userId: string,
   role: "user" | "assistant",
   content: string,
-  cardsJson?: unknown[] | null
-): Promise<void> {
+  cardsJson?: unknown[] | null,
+  attachmentIds: string[] = []
+): Promise<string | null> {
   const supabase = createClient();
 
   // Insert message (include cards_json for assistant messages with summary cards)
-  const row: Record<string, unknown> = { conversation_id: conversationId, user_id: userId, role, content };
+  const row: Record<string, unknown> = {
+    conversation_id: conversationId,
+    user_id: userId,
+    role,
+    content,
+  };
   if (cardsJson && cardsJson.length > 0) {
     row.cards_json = cardsJson;
   }
-  const { error: msgError } = await supabase
+  const { data: message, error: msgError } = await supabase
     .from("brangus_messages")
-    .insert(row);
+    .insert(row)
+    .select("id")
+    .single();
 
   if (msgError) {
     console.error("Failed to save message:", msgError.message);
-    return;
+    return null;
+  }
+
+  if (message?.id && attachmentIds.length > 0) {
+    const rows = attachmentIds.map((fileId) => ({
+      message_id: message.id,
+      file_id: fileId,
+      user_id: userId,
+    }));
+    const { error: attachmentError } = await supabase
+      .from("brangus_message_attachments")
+      .upsert(rows, { onConflict: "message_id,file_id" });
+
+    if (attachmentError) {
+      console.error("Failed to save message attachments:", attachmentError.message);
+    }
   }
 
   // Update conversation timestamp + preview (assistant messages only)
@@ -63,6 +84,8 @@ export async function saveMessage(
   if (convError) {
     console.error("Failed to update conversation:", convError.message);
   }
+
+  return message?.id ?? null;
 }
 
 export async function autoTitleConversation(
@@ -73,9 +96,13 @@ export async function autoTitleConversation(
   const supabase = createClient();
 
   // Debug: getUser() forces token refresh; getSession() alone can return stale tokens
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return null;
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
   if (!session?.access_token) return null;
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -85,7 +112,8 @@ export async function autoTitleConversation(
   const body = {
     model: "claude-sonnet-4-6",
     max_tokens: 20,
-    system: "Generate a 3-5 word title for this Australian livestock conversation. No quotes, no punctuation, no full stop. Title only.",
+    system:
+      "Generate a 3-5 word title for this Australian livestock conversation. No quotes, no punctuation, no full stop. Title only.",
     messages: [
       { role: "user", content: userText },
       { role: "assistant", content: assistantText },
@@ -112,10 +140,7 @@ export async function autoTitleConversation(
 
     const title = sanitiseResponse(text.trim());
 
-    await supabase
-      .from("brangus_conversations")
-      .update({ title })
-      .eq("id", conversationId);
+    await supabase.from("brangus_conversations").update({ title }).eq("id", conversationId);
 
     return title;
   } catch (err) {
@@ -124,9 +149,7 @@ export async function autoTitleConversation(
   }
 }
 
-export async function softDeleteConversation(
-  conversationId: string
-): Promise<void> {
+export async function softDeleteConversation(conversationId: string): Promise<void> {
   const supabase = createClient();
   const { error } = await supabase
     .from("brangus_conversations")
@@ -138,9 +161,7 @@ export async function softDeleteConversation(
   }
 }
 
-export async function bulkSoftDeleteConversations(
-  conversationIds: string[]
-): Promise<void> {
+export async function bulkSoftDeleteConversations(conversationIds: string[]): Promise<void> {
   if (conversationIds.length === 0) return;
   const supabase = createClient();
   const { error } = await supabase
@@ -155,9 +176,7 @@ export async function bulkSoftDeleteConversations(
 
 // MARK: - Client-side message fetching (for embedded chat panel)
 
-export async function fetchMessages(
-  conversationId: string
-): Promise<BrangusMessageRow[]> {
+export async function fetchMessages(conversationId: string): Promise<BrangusMessageRow[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("brangus_messages")
@@ -185,11 +204,7 @@ export function formatConversationForExport(
     year: "numeric",
   });
 
-  const lines: string[] = [
-    `Brangus - ${title ?? "Conversation"}`,
-    date,
-    "",
-  ];
+  const lines: string[] = [`Brangus - ${title ?? "Conversation"}`, date, ""];
 
   for (const msg of messages) {
     const label = msg.role === "user" ? "You:" : "Brangus:";
