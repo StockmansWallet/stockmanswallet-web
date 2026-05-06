@@ -434,6 +434,20 @@ export function BrangusChat({
   useEffect(() => {
     let cancelled = false;
 
+    // Wraps a labelled async step so the catch below can attribute failure to
+    // the specific sub-call (portfolio store, server config, memories, recent
+    // chats) instead of the generic "Failed to load your portfolio data".
+    async function step<T>(label: string, fn: () => Promise<T>): Promise<T> {
+      try {
+        return await fn();
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        const wrapped = new Error(`[${label}] ${message}`);
+        if (err instanceof Error && err.stack) wrapped.stack = err.stack;
+        throw wrapped;
+      }
+    }
+
     async function init() {
       try {
         const supabase = createClient();
@@ -446,10 +460,10 @@ export function BrangusChat({
         // recentChats excludes the active conversation so a resumed chat doesn't
         // appear in its own "recent chats" list.
         const [dataStore, serverConfig, userMemories, recentChats] = await Promise.all([
-          loadChatDataStore(),
-          fetchServerConfig(),
-          fetchUserMemories(),
-          fetchRecentChats(existingConvId ?? null),
+          step("loadChatDataStore", () => loadChatDataStore()),
+          step("fetchServerConfig", () => fetchServerConfig()),
+          step("fetchUserMemories", () => fetchUserMemories()),
+          step("fetchRecentChats", () => fetchRecentChats(existingConvId ?? null)),
         ]);
         if (cancelled) return;
         // lookup_file needs user_id at the store level so it can scope its
@@ -515,7 +529,10 @@ export function BrangusChat({
       } catch (err) {
         if (cancelled) return;
         console.error("Failed to load chat data:", err);
-        setError("Failed to load your portfolio data. Please refresh and try again.");
+        const detail = err instanceof Error ? err.message : String(err);
+        setError(
+          `Failed to load your portfolio data. Please refresh and try again. (${detail})`
+        );
       } finally {
         if (!cancelled) setIsInitialising(false);
       }
