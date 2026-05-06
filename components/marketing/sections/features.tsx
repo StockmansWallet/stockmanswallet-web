@@ -220,12 +220,12 @@ const FEATURE_TABS: FeatureTab[] = [
     name: "Grid IQ",
     tagline: "Market vs processor",
     description:
-      "Compare the saleyard against the processor before you sell. Upload grids via photo or PDF, let AI extract the data, build a test consignment from your portfolio, and see which channel nets the best return. Then track kill sheets to sharpen future decisions.",
+      "Compare the saleyard against the processor before you sell. Upload CSV files or spreadsheets, build a test consignment from your portfolio, and see which channel nets the best return. Then track kill sheets to sharpen future decisions.",
     color: "var(--feature-gridiq)",
     colorLight: "var(--feature-gridiq-light)",
     colorDark: "var(--feature-gridiq-dark)",
     bullets: [
-      "AI-powered grid extraction from photos, PDFs, and spreadsheets",
+      "Grid analysis from CSV files and spreadsheets",
       "Net market vs net processor comparison including freight",
       "Processor fit scoring and sell window indicator per category",
       "Post-kill analysis with Grid Capture Ratio, Realisation Factor, and Kill Score",
