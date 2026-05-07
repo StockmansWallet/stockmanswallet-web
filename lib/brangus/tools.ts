@@ -1462,6 +1462,8 @@ function formatProperty(
       saleyardLine += ` (${Math.round(prop.default_saleyard_distance)}km)`;
     }
     lines.push(saleyardLine);
+    const directionContext = buildSaleyardDirectionContext(prop, prop.default_saleyard);
+    if (directionContext) lines.push(directionContext);
   }
   if (prop.is_default) lines.push("Default property: Yes");
 
@@ -2032,8 +2034,13 @@ function lookupFreightEstimates(herdName: string | undefined, store: ChatDataSto
     });
 
     const gst = estimate.totalCost * 0.1;
-    const saleyardName = herd.selected_saleyard ?? "default saleyard";
+    const originProperty = findOriginPropertyForHerd(herd, store.properties);
+    const saleyardName = herd.selected_saleyard ?? originProperty?.default_saleyard ?? "default saleyard";
     const lines = [`FREIGHT ESTIMATE - ${herd.name} to ${saleyardName}:`];
+    if (originProperty && saleyardName !== "default saleyard") {
+      const directionContext = buildSaleyardDirectionContext(originProperty, saleyardName);
+      if (directionContext) lines.push(directionContext);
+    }
     lines.push(`Head: ${estimate.headCount}`);
     lines.push(`Weight: ${Math.round(estimate.averageWeightKg)}kg avg`);
     lines.push(`Category: ${estimate.freightCategory.displayName}`);
@@ -2075,6 +2082,12 @@ function lookupFreightEstimates(herdName: string | undefined, store: ChatDataSto
     lines.push(
       `- ${herd.name}: $${Math.round(est.totalCost).toLocaleString()} (+ $${Math.round(gst)} GST), ${est.decksRequired} deck(s), ${Math.round(dist)}km`
     );
+    const originProperty = findOriginPropertyForHerd(herd, store.properties);
+    const saleyardName = herd.selected_saleyard ?? originProperty?.default_saleyard;
+    if (originProperty && saleyardName) {
+      const directionContext = buildSaleyardDirectionContext(originProperty, saleyardName);
+      if (directionContext) lines.push(`  ${directionContext}`);
+    }
   }
   return lines.join("\n");
 }
@@ -2386,6 +2399,8 @@ async function executeSingleFreight(
   let sex: string;
   let distanceKm: number;
   let calvesAtFoot: boolean | undefined;
+  let originProperty: ChatDataStore["properties"][0] | undefined;
+  let destinationSaleyard: string | undefined;
 
   // Optional user-specified overrides validated against sane commercial bounds.
   const rawRate = input.rate_per_deck_per_km;
@@ -2424,6 +2439,8 @@ async function executeSingleFreight(
 
     // Resolve distance - prefer saleyard routing, fall back to manual distance only when no saleyard.
     const destSaleyard = input.destination_saleyard as string | undefined;
+    destinationSaleyard = destSaleyard;
+    originProperty = findOriginPropertyForHerd(herd, store.properties);
     const manualDist = input.distance_km as number | undefined;
     if (destSaleyard) {
       distanceKm = await resolveDistanceToSaleyard(herd, store.properties, destSaleyard);
@@ -2453,6 +2470,8 @@ async function executeSingleFreight(
     sex = (input.sex as string) ?? "Male";
     const manualDist = input.distance_km as number | undefined;
     const destSaleyard = input.destination_saleyard as string | undefined;
+    destinationSaleyard = destSaleyard;
+    originProperty = findDefaultProperty(store.properties);
     if (destSaleyard) {
       distanceKm = await resolveDistanceToSaleyardFromProps(store.properties, destSaleyard);
       if ((!distanceKm || distanceKm <= 0) && manualDist && manualDist > 0) {
@@ -2484,6 +2503,11 @@ async function executeSingleFreight(
 
   const gst = estimate.totalCost * 0.1;
   const lines = ["FREIGHT CALCULATION RESULT:"];
+  if (originProperty && destinationSaleyard) {
+    lines.push(`Route: ${originProperty.property_name} → ${destinationSaleyard}`);
+    const directionContext = buildSaleyardDirectionContext(originProperty, destinationSaleyard);
+    if (directionContext) lines.push(directionContext);
+  }
   lines.push(`Head: ${estimate.headCount}`);
   lines.push(`Weight: ${Math.round(estimate.averageWeightKg)}kg avg`);
   lines.push(`Category: ${estimate.freightCategory.displayName}`);
@@ -3376,6 +3400,62 @@ function resolveDistance(
     return defaultProp.default_saleyard_distance;
   }
   return null;
+}
+
+function findDefaultProperty(
+  properties: ChatDataStore["properties"]
+): ChatDataStore["properties"][0] | undefined {
+  return properties.find((p) => p.is_default) ?? properties[0];
+}
+
+function findOriginPropertyForHerd(
+  herd: ChatDataStore["herds"][0],
+  properties: ChatDataStore["properties"]
+): ChatDataStore["properties"][0] | undefined {
+  if (herd.property_id) {
+    const prop = properties.find((p) => p.id === herd.property_id);
+    if (prop) return prop;
+  }
+  return findDefaultProperty(properties);
+}
+
+function buildSaleyardDirectionContext(
+  property: ChatDataStore["properties"][0],
+  saleyardName: string
+): string | null {
+  if (property.latitude == null || property.longitude == null) return null;
+  const saleyardCoords = findSaleyardCoords(saleyardName);
+  if (!saleyardCoords) return null;
+
+  const direction = describeRelativeDirection(
+    property.latitude,
+    property.longitude,
+    saleyardCoords.lat,
+    saleyardCoords.lon
+  );
+  const destinationPhrase = `${direction.toPhrase} ${saleyardName}`;
+  return `DIRECTION CONTEXT: ${saleyardName} is ${direction.compass} of ${property.property_name}. Local phrasing: say "${destinationPhrase}" or "${direction.therePhrase}", not a guessed up/down/out/over direction.`;
+}
+
+function describeRelativeDirection(
+  fromLat: number,
+  fromLon: number,
+  toLat: number,
+  toLon: number
+): { compass: string; toPhrase: string; therePhrase: string } {
+  const deltaLat = toLat - fromLat;
+  const deltaLon = toLon - fromLon;
+  const absLat = Math.abs(deltaLat);
+  const absLon = Math.abs(deltaLon);
+
+  if (absLat >= absLon) {
+    return deltaLat < 0
+      ? { compass: "south", toPhrase: "down to", therePhrase: "down there" }
+      : { compass: "north", toPhrase: "up to", therePhrase: "up there" };
+  }
+  return deltaLon < 0
+    ? { compass: "west", toPhrase: "out to", therePhrase: "out there" }
+    : { compass: "east", toPhrase: "over to", therePhrase: "over there" };
 }
 
 // Fuzzy saleyard coordinate lookup matching iOS three-level resolution:

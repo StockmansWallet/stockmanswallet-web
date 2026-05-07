@@ -1,8 +1,9 @@
 "use client";
 
 // Share a Brangus conversation with another producer on the network.
-// Opens as a modal dialog, loads discoverable producers, lets the user pick
-// one + add an optional note, and sends via the shared-chats-service.
+// Opens as a modal dialog, loads connected producers, lets the user pick
+// one or more recipients + add an optional note, and sends via the
+// shared-chats-service.
 
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
@@ -51,10 +52,10 @@ export function ShareToProducerDialog({
   const [loading, setLoading] = useState(true);
   const [producers, setProducers] = useState<SharePickerProducer[]>([]);
   const [search, setSearch] = useState("");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [note, setNote] = useState("");
   const [sending, setSending] = useState(false);
-  const [sentName, setSentName] = useState<string | null>(null);
+  const [sentCount, setSentCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   // Portal mount guard: createPortal requires document.body which is only
@@ -67,11 +68,11 @@ export function ShareToProducerDialog({
   // Reset state whenever the dialog opens so stale selections don't persist.
   useEffect(() => {
     if (!open) return;
-    setSelectedId(null);
+    setSelectedIds(new Set());
     setNote("");
     setSearch("");
     setError(null);
-    setSentName(null);
+    setSentCount(0);
     setLoading(true);
     fetchShareablePicks()
       .then((rows) => setProducers(rows))
@@ -100,8 +101,20 @@ export function ShareToProducerDialog({
     );
   });
 
+  const toggleProducer = useCallback((producerId: string) => {
+    setSelectedIds((current) => {
+      const next = new Set(current);
+      if (next.has(producerId)) {
+        next.delete(producerId);
+      } else {
+        next.add(producerId);
+      }
+      return next;
+    });
+  }, []);
+
   const handleSend = useCallback(async () => {
-    if (!selectedId) return;
+    if (selectedIds.size === 0) return;
     setSending(true);
     setError(null);
     try {
@@ -111,17 +124,19 @@ export function ShareToProducerDialog({
         content: m.content,
         created_at: m.timestamp instanceof Date ? m.timestamp.toISOString() : m.timestamp,
       }));
-      await shareConversation({
-        recipientUserId: selectedId,
-        originalConversationId: conversationId,
-        title: conversationTitle,
-        senderDisplayName,
-        messages: normalised,
-        cards,
-        note,
-      });
-      const recipient = producers.find((p) => p.user_id === selectedId);
-      setSentName(recipient?.display_name ?? null);
+      const recipientIds = Array.from(selectedIds);
+      for (const recipientUserId of recipientIds) {
+        await shareConversation({
+          recipientUserId,
+          originalConversationId: conversationId,
+          title: conversationTitle,
+          senderDisplayName,
+          messages: normalised,
+          cards,
+          note,
+        });
+      }
+      setSentCount(recipientIds.length);
       // Close automatically after a brief confirmation so the user lands back
       // in the chat without manual dismissal.
       setTimeout(onClose, 1400);
@@ -131,14 +146,13 @@ export function ShareToProducerDialog({
       setSending(false);
     }
   }, [
-    selectedId,
+    selectedIds,
     conversationId,
     conversationTitle,
     senderDisplayName,
     messages,
     cards,
     note,
-    producers,
     onClose,
   ]);
 
@@ -152,7 +166,7 @@ export function ShareToProducerDialog({
       className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-md"
       role="dialog"
       aria-modal="true"
-      aria-label="Share with a producer"
+      aria-label="Share as chat"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -160,7 +174,7 @@ export function ShareToProducerDialog({
       <div className="bg-surface/95 relative mx-4 flex w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-white/[0.10] shadow-2xl backdrop-blur-xl">
         <header className="flex items-center justify-between border-b border-white/[0.06] px-5 py-4">
           <div>
-            <h2 className="text-text-primary text-base font-semibold">Share with a producer</h2>
+            <h2 className="text-text-primary text-base font-semibold">Share as chat</h2>
             <p className="text-text-muted mt-0.5 text-xs">
               They&apos;ll see this chat in their Brangus Shared tab.
             </p>
@@ -174,16 +188,16 @@ export function ShareToProducerDialog({
           </button>
         </header>
 
-        {sentName !== null ? (
+        {sentCount > 0 ? (
           <div className="flex flex-col items-center gap-3 px-6 py-10 text-center">
             <div className="bg-brangus/15 flex h-14 w-14 items-center justify-center rounded-full">
               <Check className="text-brangus h-7 w-7" />
             </div>
             <p className="text-text-primary text-base font-semibold">Shared</p>
             <p className="text-text-muted text-sm">
-              {sentName
-                ? `${sentName} will see it in their Brangus Shared tab.`
-                : "They'll see it in their Brangus Shared tab."}
+              {sentCount === 1
+                ? "They'll see it in their Brangus Shared tab."
+                : `Shared with ${sentCount} producers. They'll see it in their Brangus Shared tab.`}
             </p>
           </div>
         ) : (
@@ -232,7 +246,7 @@ export function ShareToProducerDialog({
               ) : (
                 <ul className="divide-y divide-white/[0.04]">
                   {filtered.map((p) => {
-                    const isSelected = selectedId === p.user_id;
+                    const isSelected = selectedIds.has(p.user_id);
                     const subline = [
                       p.property_name,
                       [p.region, p.state].filter(Boolean).join(", "),
@@ -242,7 +256,7 @@ export function ShareToProducerDialog({
                     return (
                       <li key={p.user_id}>
                         <button
-                          onClick={() => setSelectedId(p.user_id)}
+                          onClick={() => toggleProducer(p.user_id)}
                           className={`flex w-full items-center gap-3 px-5 py-3 text-left transition-colors ${
                             isSelected ? "bg-brangus/10" : "hover:bg-white/[0.03]"
                           }`}
@@ -280,12 +294,14 @@ export function ShareToProducerDialog({
                 <p className="text-destructive text-xs">{error}</p>
               ) : (
                 <p className="text-text-muted text-xs">
-                  {messages.length} message{messages.length === 1 ? "" : "s"} will be shared
+                  {selectedIds.size > 0
+                    ? `${messages.length} message${messages.length === 1 ? "" : "s"} will be shared with ${selectedIds.size} producer${selectedIds.size === 1 ? "" : "s"}`
+                    : `${messages.length} message${messages.length === 1 ? "" : "s"} will be shared`}
                 </p>
               )}
               <button
                 onClick={handleSend}
-                disabled={!selectedId || sending}
+                disabled={selectedIds.size === 0 || sending}
                 className="bg-brangus hover:bg-brangus-text inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {sending ? (
@@ -293,7 +309,13 @@ export function ShareToProducerDialog({
                 ) : (
                   <Send className="h-3.5 w-3.5" />
                 )}
-                <span>{sending ? "Sending..." : "Send"}</span>
+                <span>
+                  {sending
+                    ? "Sending..."
+                    : selectedIds.size > 1
+                      ? `Send to ${selectedIds.size}`
+                      : "Send"}
+                </span>
               </button>
             </footer>
           </>

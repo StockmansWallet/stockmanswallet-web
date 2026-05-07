@@ -351,7 +351,7 @@ export function BrangusHub({
           >
             <span>{tab.label}</span>
             {tab.badge && tab.badge > 0 ? (
-              <span className="bg-brangus inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white">
+              <span className="inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-error px-1 text-[10px] font-bold text-white">
                 {tab.badge > 9 ? "9+" : tab.badge}
               </span>
             ) : null}
@@ -377,7 +377,7 @@ export function BrangusHub({
                 >
                   <span>{tab.label}</span>
                   {tab.badge && tab.badge > 0 ? (
-                    <span className="bg-brangus inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white">
+                    <span className="inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-error px-1 text-[10px] font-bold text-white">
                       {tab.badge > 9 ? "9+" : tab.badge}
                     </span>
                   ) : null}

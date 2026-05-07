@@ -40,6 +40,15 @@ const MAX_TOKENS = 2048;
 const MAX_TOOL_ROUNDS = 5;
 const EMPTY_RESPONSE_FALLBACK =
   "I had trouble putting that answer together. Could you ask that one again?";
+const LOCATION_LANGUAGE_RULES = `LOCATION LANGUAGE RULES:
+- When talking about a saleyard or place relative to a user's property, do not guess "up", "down", "out", or "over" from the place name.
+- If a tool result contains DIRECTION CONTEXT, use that local phrasing exactly.
+- If there is no DIRECTION CONTEXT, use neutral wording like "to Gracemere" or "at Gracemere".
+- As a guide only: south is "down", north is "up", west is "out", east is "over".`;
+const REPORT_RECOMMENDATION_RULES = `REPORT RECOMMENDATION RULES:
+- If the user asks what to print or send to a bank, lender, finance broker, valuer, or insurer, recommend the Asset Register.
+- Use the Accountant Report only for accountant, tax, financial year, or bookkeeping contexts.
+- If the user asks for proof of livestock assets, portfolio value, security position, or bank-ready valuation support, recommend the Asset Register.`;
 
 // MARK: - Server Config
 
@@ -263,7 +272,7 @@ Every herd dollar value, per-head dollar value, and portfolio total in your resp
 - If lookup_portfolio_data returns "valuation loading..." for a herd, say so and offer to retry. Do NOT substitute your own arithmetic.
 
 FORMAL DOCUMENTATION REFERRAL:
-When a user wants numbers for a third party - bank, accountant, lender, buyer, vendor, anyone outside the chat - point them to the Reports section as the authoritative source rather than relying on chat figures alone. Especially relevant for asset registers, bank meetings, accountant submissions, or any context where the document needs to "carry weight". Phrase it as a practical pivot, not a refusal: e.g. "the Accountant Report in Reports gives them something proper to work with, that's the kind of document that actually carries weight". NEVER fabricate or inflate numbers even if the user asks; redirect to the formal report and use the real number for context only.
+When a user wants numbers for a third party - bank, accountant, lender, buyer, vendor, anyone outside the chat - point them to the Reports section as the authoritative source rather than relying on chat figures alone. Especially relevant for asset registers, bank meetings, accountant submissions, or any context where the document needs to "carry weight". For banks, lenders, finance brokers, valuers, insurers, or livestock asset/security evidence, recommend the Asset Register. Use the Accountant Report only for accountant, tax, financial year, or bookkeeping contexts. Phrase it as a practical pivot, not a refusal: e.g. "the Asset Register in Reports gives them something proper to work with, that's the kind of document that actually carries weight". NEVER fabricate or inflate numbers even if the user asks; redirect to the formal report and use the real number for context only.
 
 TOOL TIPS:
 - market_prices also has national indices (EYCI, WYCI, OTH)
@@ -456,6 +465,8 @@ export function buildSystemPrompt(
   // 2. Conversation rules (server or fallback) + dynamic date
   const rules = getConfig(config, "conversation_rules", FALLBACK_CONVERSATION_RULES);
   sections.push(rules + `\n\nTODAY'S DATE: ${today} (QLD, Australia).`);
+  sections.push(LOCATION_LANGUAGE_RULES);
+  sections.push(REPORT_RECOMMENDATION_RULES);
 
   // 3. Tool instructions (server or fallback)
   sections.push(getConfig(config, "tool_instructions", FALLBACK_TOOL_INSTRUCTIONS));

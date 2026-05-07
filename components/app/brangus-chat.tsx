@@ -11,13 +11,10 @@ import {
   ChevronDown,
   AlertCircle,
   ClipboardCopy,
-  Download,
   Check,
   FileText,
   Image as ImageIcon,
   Share2,
-  Mail,
-  MessageCircle,
   Users,
 } from "lucide-react";
 import { ShareToProducerDialog } from "@/components/app/brangus/share-to-producer-dialog";
@@ -284,7 +281,7 @@ export function BrangusChat({
     }
   }, [sessionCards.length]);
 
-  // "Share with a producer" dialog state. Opens from the share menu and posts
+  // "Share as chat" dialog state. Opens from the share menu and posts
   // a frozen snapshot of the current conversation into brangus_shared_chats.
   const [showShareToProducer, setShowShareToProducer] = useState(false);
   const [senderDisplayName, setSenderDisplayName] = useState<string | null>(null);
@@ -847,26 +844,6 @@ export function BrangusChat({
     setTimeout(() => setCopied(false), 2000);
   }, [messages]);
 
-  const handleDownload = useCallback(() => {
-    const exportMessages = messages.map((m) => ({
-      role: m.role,
-      content: m.content,
-      created_at: m.timestamp.toISOString(),
-    }));
-    const text = formatConversationForExport(null, new Date().toISOString(), exportMessages);
-    const blob = new Blob([text], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `brangus-chat-${new Date().toISOString().slice(0, 10)}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [messages]);
-
-  const handlePrint = useCallback(() => {
-    window.print();
-  }, []);
-
   const getShareText = useCallback(() => {
     const exportMessages = messages.map((m) => ({
       role: m.role,
@@ -930,21 +907,6 @@ export function BrangusChat({
     };
   }, [showShareMenu]);
 
-  const handleShareEmail = useCallback(() => {
-    const text = getShareText();
-    const subject = encodeURIComponent("Brangus Chat");
-    const body = encodeURIComponent(text);
-    window.open(`mailto:?subject=${subject}&body=${body}`, "_self");
-    setShowShareMenu(false);
-  }, [getShareText]);
-
-  const handleShareWhatsApp = useCallback(() => {
-    const text = getShareText();
-    const encoded = encodeURIComponent(text);
-    window.open(`https://wa.me/?text=${encoded}`, "_blank");
-    setShowShareMenu(false);
-  }, [getShareText]);
-
   const isFirstLiveSummaryReveal =
     sessionCards.length > 0 &&
     !hadHydratedSessionCardsRef.current &&
@@ -958,8 +920,7 @@ export function BrangusChat({
       />
 
       {/* Share menu - one unified button. Disabled until there are 2+ messages
-          so there's something worth sharing. Matches the styling of the
-          "Download Reports" button on the reports pages. The dropdown is
+          so there's something worth sharing. The dropdown is
           portalled to document.body + fixed-positioned so it escapes any
           overflow-clipping parent (eg. the hub's toolbar container). */}
       {(() => {
@@ -1027,46 +988,14 @@ export function BrangusChat({
                 className={menuItemClass}
               >
                 <Users className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Share with a producer</span>
+                <span>Share as chat</span>
               </button>
-              <div className="my-1 border-t border-white/[0.06]" />
-              <button
-                role="menuitem"
-                onClick={() => {
-                  handleDownload();
-                  setShowShareMenu(false);
-                }}
-                className={menuItemClass}
-              >
-                <Download className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Save as .txt</span>
-              </button>
-              <button
-                role="menuitem"
-                onClick={() => {
-                  handlePrint();
-                  setShowShareMenu(false);
-                }}
-                className={menuItemClass}
-              >
-                <FileText className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Save as PDF</span>
-              </button>
-              <div className="my-1 border-t border-white/[0.06]" />
               {canNativeShare && (
                 <button role="menuitem" onClick={handleShareNative} className={menuItemClass}>
                   <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
-                  <span>Share via device</span>
+                  <span>Share as text</span>
                 </button>
               )}
-              <button role="menuitem" onClick={handleShareEmail} className={menuItemClass}>
-                <Mail className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Email</span>
-              </button>
-              <button role="menuitem" onClick={handleShareWhatsApp} className={menuItemClass}>
-                <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>WhatsApp</span>
-              </button>
             </div>
           ) : null;
         return (
@@ -1081,7 +1010,7 @@ export function BrangusChat({
         );
       })()}
 
-      {/* Share with a producer - frozen snapshot posted into brangus_shared_chats.
+      {/* Share as chat - frozen snapshot posted into brangus_shared_chats.
           Recipient sees it in their Brangus Shared tab rendered as chat bubbles. */}
       <ShareToProducerDialog
         open={showShareToProducer}
