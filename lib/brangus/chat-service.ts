@@ -38,6 +38,8 @@ import type {
 const MODEL = "claude-sonnet-4-6";
 const MAX_TOKENS = 2048;
 const MAX_TOOL_ROUNDS = 5;
+const EMPTY_RESPONSE_FALLBACK =
+  "I had trouble putting that answer together. Could you ask that one again?";
 
 // MARK: - Server Config
 
@@ -805,6 +807,30 @@ export async function sendMessage(
         pendingInsights ?? (autoCards.length > 0 ? autoCards.slice(0, 4) : undefined);
       // Debug: Fallback if Claude returned empty text but has summary cards
       const finalText = text || (finalCards && finalCards.length > 0 ? "Here's what I found." : "");
+      if (!finalText.trim()) {
+        if (rounds < MAX_TOOL_ROUNDS) {
+          currentHistory = [
+            ...currentHistory,
+            {
+              role: "user",
+              content:
+                "Your last response had no visible text for the user. Reply again with a concise plain text answer. Do not return only tool calls or empty content.",
+            },
+          ];
+          continue;
+        }
+        return {
+          assistantText: EMPTY_RESPONSE_FALLBACK,
+          updatedHistory: [
+            ...currentHistory.slice(0, -1),
+            {
+              role: "assistant",
+              content: [{ type: "text", text: EMPTY_RESPONSE_FALLBACK }],
+            },
+          ],
+          quickInsights: finalCards,
+        };
+      }
       // BRG-013 drift detector: scan the response for dollar figures and compare each
       // one against the cached AMV engine values. Logs a warning when Brangus quotes a
       // number that diverges materially from any cached herd total or per-head value.

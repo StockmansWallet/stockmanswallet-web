@@ -740,12 +740,16 @@ export function BrangusChat({
           systemPrompt,
           turnAttachments
         );
+        const visibleAssistantText = assistantText.trim();
+        if (!visibleAssistantText) {
+          throw new Error("Brangus returned an empty response. Please try again.");
+        }
 
         // Add assistant message to UI (fade in, not bounce, since it replaces typing indicator)
         const assistantMessage: ChatMessage = {
           id: crypto.randomUUID(),
           role: "assistant",
-          content: assistantText,
+          content: visibleAssistantText,
           timestamp: new Date(),
         };
         postTypingIdRef.current = assistantMessage.id;
@@ -763,10 +767,12 @@ export function BrangusChat({
         // Persist assistant message (non-blocking) - include summary cards if present
         const cardsToSave = quickInsights && quickInsights.length > 0 ? quickInsights : null;
         if (convId && userId) {
-          saveMessage(convId, userId, "assistant", assistantText, cardsToSave)
+          saveMessage(convId, userId, "assistant", visibleAssistantText, cardsToSave)
             .then(() => {
               const preview =
-                assistantText.length > 100 ? assistantText.slice(0, 97) + "..." : assistantText;
+                visibleAssistantText.length > 100
+                  ? visibleAssistantText.slice(0, 97) + "..."
+                  : visibleAssistantText;
               onConversationUpdated?.(convId, {
                 preview_text: preview,
                 updated_at: new Date().toISOString(),

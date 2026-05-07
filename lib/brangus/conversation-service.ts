@@ -32,6 +32,13 @@ export async function saveMessage(
   cardsJson?: unknown[] | null,
   attachmentIds: string[] = []
 ): Promise<string | null> {
+  const trimmedContent = content.trim();
+  if (role === "assistant" && !trimmedContent) {
+    console.warn("Skipped saving empty Brangus assistant message.");
+    return null;
+  }
+  const messageContent = role === "assistant" ? trimmedContent : content;
+
   const supabase = createClient();
 
   // Insert message (include cards_json for assistant messages with summary cards)
@@ -39,7 +46,7 @@ export async function saveMessage(
     conversation_id: conversationId,
     user_id: userId,
     role,
-    content,
+    content: messageContent,
   };
   if (cardsJson && cardsJson.length > 0) {
     row.cards_json = cardsJson;
@@ -73,7 +80,8 @@ export async function saveMessage(
   // Update conversation timestamp + preview (assistant messages only)
   const update: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (role === "assistant") {
-    update.preview_text = content.length > 100 ? content.slice(0, 97) + "..." : content;
+    update.preview_text =
+      messageContent.length > 100 ? messageContent.slice(0, 97) + "..." : messageContent;
   }
 
   const { error: convError } = await supabase
