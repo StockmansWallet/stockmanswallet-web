@@ -1,5 +1,5 @@
 import type { PointerEvent as ReactPointerEvent } from "react";
-import { Download, Share2, Trash2 } from "lucide-react";
+import { Download, Radio, Trash2 } from "lucide-react";
 import {
   detectFileType,
   fileCollectionLabel,
@@ -93,7 +93,7 @@ export function FileRow({
         aria-label={`Share ${file.title} to Ch 40`}
         title="Share to Ch 40"
       >
-        <Share2 className="h-4 w-4" />
+        <Radio className="h-4 w-4" />
       </button>
 
       <button

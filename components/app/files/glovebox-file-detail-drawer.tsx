@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { Download, Share2, X } from "lucide-react";
+import { Download, Radio, X } from "lucide-react";
 import {
   detectFileType,
   fileCollectionLabel,
@@ -181,7 +181,7 @@ export function FileDetailDrawer({
             onClick={() => setShowCh40Share(true)}
             className="border-ch40/20 bg-ch40/12 text-ch40-light hover:bg-ch40/18 inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm"
           >
-            <Share2 className="h-4 w-4" />
+            <Radio className="h-4 w-4" />
             Share to Ch 40
           </button>
         </div>

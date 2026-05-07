@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { CheckCircle2, Circle, Loader2, Send, Share2 } from "lucide-react";
+import { CheckCircle2, Circle, Loader2, Radio, Send } from "lucide-react";
 import {
   listGloveboxCh40Recipients,
   shareGloveboxFileToCh40,
@@ -86,7 +86,7 @@ export function GloveboxCh40ShareDialog({
       <div className="space-y-4">
         <div className="border-brand/15 bg-brand/8 flex items-center gap-3 rounded-lg border p-3">
           <div className="bg-brand/15 text-brand flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
-            <Share2 className="h-4 w-4" aria-hidden="true" />
+            <Radio className="h-4 w-4" aria-hidden="true" />
           </div>
           <div className="min-w-0">
             <p className="text-text-primary truncate text-sm font-semibold">{file.title}</p>
