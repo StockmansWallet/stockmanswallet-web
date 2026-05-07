@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { PRICING_TIERS } from "@/lib/marketing/constants";
 import { ADVISOR_ENABLED } from "@/lib/feature-flags";
@@ -71,11 +70,11 @@ export default function Pricing() {
                 Introductory Pricing
               </span>
               <h2 className="mt-3 text-3xl font-semibold text-balance text-white sm:text-4xl lg:text-5xl">
-                Select your cut
+                Saddle Up With the Right Plan
               </h2>
               <p className="text-text-secondary mx-auto mt-4 max-w-xl text-base">
-                From a single property to a sprawling enterprise, we&apos;ve carved out a plan that
-                fits.
+                From a single property to a larger operation, choose the plan that fits how you
+                manage your livestock portfolio.
                 <br />
                 Every plan starts with a 7-day free trial when the app launches.
                 <br />
@@ -172,40 +171,6 @@ export default function Pricing() {
                       >
                         {tier.badge}
                       </div>
-                    )}
-
-                    {tier.image && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 12, scale: 0.88 }}
-                        animate={{ opacity: 1, y: 0, scale: [0.88, 1.04, 1] }}
-                        transition={{
-                          delay: 0.14 + index * 0.1,
-                          duration: 0.52,
-                          ease: [0.16, 1, 0.3, 1],
-                        }}
-                        className="pointer-events-none relative -mt-16 mb-2 flex h-36 items-end justify-center sm:-mt-20 sm:h-44"
-                      >
-                        <div
-                          aria-hidden="true"
-                          className="absolute inset-0 mx-auto h-full w-3/4 rounded-full opacity-40 blur-2xl"
-                          style={{
-                            background:
-                              "radial-gradient(ellipse at center, rgba(231,136,34,0.45) 0%, transparent 65%)",
-                          }}
-                        />
-                        <Image
-                          src={tier.image}
-                          alt=""
-                          aria-hidden
-                          width={512}
-                          height={512}
-                          quality={95}
-                          sizes="(min-width: 1024px) 280px, (min-width: 640px) 240px, 200px"
-                          className={`relative h-full w-auto object-contain drop-shadow-[0_18px_24px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-out group-hover:-translate-y-2 group-hover:scale-105 group-hover:drop-shadow-[0_26px_30px_rgba(0,0,0,0.55)] ${
-                            tier.id === "tomahawk" ? "scale-110 group-hover:scale-[1.16]" : ""
-                          }`}
-                        />
-                      </motion.div>
                     )}
 
                     <div className="mb-6">

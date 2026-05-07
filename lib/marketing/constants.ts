@@ -195,14 +195,13 @@ export const PRICING_TIERS: PricingTier[] = [
   // Producer Plans
   {
     id: "ringer",
-    name: "The Sirloin",
+    name: "Ringer",
     subtitle: "1 Property",
     price: 89,
     priceAnnual: null,
-    description: "Lean, honest, and cut for one property.",
+    description: "For one property getting started with live herd valuation.",
     highlighted: false,
     category: "producer",
-    image: "/images/cuts/cut-sirloin.png",
     features: [
       { name: "1 property", included: true },
       { name: "Unlimited herds", included: true },
@@ -217,14 +216,13 @@ export const PRICING_TIERS: PricingTier[] = [
   },
   {
     id: "stockman",
-    name: "The Ribeye",
+    name: "Stockman",
     subtitle: "Up to 3 Properties",
     price: 159,
     priceAnnual: null,
-    description: "More marbling. More room to grow.",
+    description: "For growing operations managing up to three properties.",
     highlighted: false,
     category: "producer",
-    image: "/images/cuts/cut-ribeye.png",
     features: [
       { name: "Up to 3 properties", included: true },
       { name: "Unlimited herds", included: true },
@@ -239,14 +237,13 @@ export const PRICING_TIERS: PricingTier[] = [
   },
   {
     id: "head-stockman",
-    name: "The Tomahawk",
+    name: "Head Stockman",
     subtitle: "4+ Properties",
     price: 249,
     priceAnnual: null,
-    description: "The showpiece cut for bigger yards.",
+    description: "For larger operations managing four or more properties.",
     highlighted: false,
     category: "producer",
-    image: "/images/cuts/cut-tomahawk.png",
     features: [
       { name: "4+ properties", included: true },
       { name: "Unlimited herds", included: true },
