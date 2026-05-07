@@ -15,6 +15,7 @@ export function GloveboxMainPanel({
   onQueryChange,
   onGroupModeChange,
   onOpenFile,
+  onShareFile,
   onDownloadFile,
   onDeleteFile,
   onPointerDragStart,
@@ -29,6 +30,7 @@ export function GloveboxMainPanel({
   onQueryChange: (query: string) => void;
   onGroupModeChange: (mode: GroupMode) => void;
   onOpenFile: (file: GloveboxFileRow) => void;
+  onShareFile: (file: GloveboxFileRow) => void;
   onDownloadFile: (file: GloveboxFileRow) => void;
   onDeleteFile: (file: GloveboxFileRow) => void;
   onPointerDragStart: (file: GloveboxFileRow, event: React.PointerEvent<HTMLLIElement>) => void;
@@ -107,6 +109,7 @@ export function GloveboxMainPanel({
                       file={file}
                       isDragging={draggingFileId === file.id}
                       onOpen={() => onOpenFile(file)}
+                      onShare={() => onShareFile(file)}
                       onDownload={() => onDownloadFile(file)}
                       onDelete={() => onDeleteFile(file)}
                       onPointerDragStart={(event) => onPointerDragStart(file, event)}

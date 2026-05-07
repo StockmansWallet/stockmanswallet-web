@@ -1,13 +1,9 @@
 "use client";
 
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Loader2, Plus } from "lucide-react";
 import {
+  type GloveboxCollectionGroupRow,
   type GloveboxCollectionRow,
   type GloveboxFileRow,
   detectFileType,
@@ -16,15 +12,18 @@ import {
 } from "@/lib/glovebox/files";
 import { PageHeaderActionsPortal } from "@/components/ui/page-header-actions-portal";
 import { GloveboxCollectionsSidebar } from "./glovebox-collections-sidebar";
+import { GloveboxCh40ShareDialog } from "./glovebox-ch40-share-dialog";
 import { CompactFileDragPreview } from "./glovebox-drag-preview";
 import { FileDetailDrawer } from "./glovebox-file-detail-drawer";
 import { GloveboxMainPanel } from "./glovebox-main-panel";
 import {
   ALL_COLLECTIONS,
+  UNCATEGORISED,
   type DragPreview,
   type GroupMode,
   groupLabel,
 } from "./glovebox-shared";
+import { useCollapsedGloveboxGroups } from "./use-collapsed-glovebox-groups";
 import { makeDragPreview, useGloveboxDrag } from "./use-glovebox-drag";
 import { useGloveboxCollections } from "./use-glovebox-collections";
 import { useGloveboxFileActions } from "./use-glovebox-file-actions";
@@ -32,24 +31,38 @@ import { useGloveboxFileActions } from "./use-glovebox-file-actions";
 interface Props {
   userId: string;
   initialFiles: GloveboxFileRow[];
+  initialGroups: GloveboxCollectionGroupRow[];
   initialCollections: GloveboxCollectionRow[];
 }
 
-export function GloveboxPageClient({ userId, initialFiles, initialCollections }: Props) {
+export function GloveboxPageClient({
+  userId,
+  initialFiles,
+  initialGroups,
+  initialCollections,
+}: Props) {
   const [files, setFiles] = useState<GloveboxFileRow[]>(initialFiles);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeFile, setActiveFile] = useState<GloveboxFileRow | null>(null);
+  const [sharingFile, setSharingFile] = useState<GloveboxFileRow | null>(null);
   const [activeCollection, setActiveCollection] = useState(ALL_COLLECTIONS);
   const [groupMode, setGroupMode] = useState<GroupMode>("collection");
   const [query, setQuery] = useState("");
+  const [groups, setGroups] = useState<GloveboxCollectionGroupRow[]>(initialGroups);
   const [collections, setCollections] = useState<GloveboxCollectionRow[]>(initialCollections);
-  const [isCreatingCollection, setIsCreatingCollection] = useState(false);
+  const [isCreatingCollection, setIsCreatingCollection] = useState<string | null>(null);
+  const [isCreatingGroup, setIsCreatingGroup] = useState(false);
   const [collectionDraft, setCollectionDraft] = useState("");
+  const [groupDraft, setGroupDraft] = useState("");
   const [editingCollection, setEditingCollection] = useState<string | null>(null);
+  const [editingGroup, setEditingGroup] = useState<string | null>(null);
   const [editingDraft, setEditingDraft] = useState("");
   const [openCollectionMenu, setOpenCollectionMenu] = useState<string | null>(null);
+  const [openGroupMenu, setOpenGroupMenu] = useState<string | null>(null);
   const [dropCollection, setDropCollection] = useState<string | null>(null);
+  const [draggedCollection, setDraggedCollection] = useState<string | null>(null);
+  const { collapsedGroupIds, expandGroup, toggleGroup } = useCollapsedGloveboxGroups();
   const [dragPreview, setDragPreview] = useState<DragPreview | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dragPreviewRef = useRef<DragPreview | null>(null);
@@ -88,25 +101,38 @@ export function GloveboxPageClient({ userId, initialFiles, initialCollections }:
   }, [openCollectionMenu]);
 
   const {
-    collectionOptions,
+    sortedGroups,
+    collectionById,
+    collectionsByGroupId,
     collectionCounts,
     moveFileToCollection,
+    handleCreateGroup,
     handleCreateCollection,
+    renameGroup,
     renameCollection,
+    moveCollectionToGroup,
+    deleteGroup,
     deleteCollection,
   } = useGloveboxCollections({
     userId,
     files,
+    groups,
     collections,
     collectionDraft,
+    groupDraft,
     editingCollection,
+    editingGroup,
     setFiles,
     setActiveFile,
+    setGroups,
     setCollections,
     setActiveCollection,
     setCollectionDraft,
+    setGroupDraft,
     setIsCreatingCollection,
+    setIsCreatingGroup,
     setEditingCollection,
+    setEditingGroup,
     setEditingDraft,
     setError,
   });
@@ -114,8 +140,11 @@ export function GloveboxPageClient({ userId, initialFiles, initialCollections }:
   const visibleFiles = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return files.filter((file) => {
-      const collection = fileCollectionLabel(file);
-      if (activeCollection !== ALL_COLLECTIONS && collection !== activeCollection) return false;
+      const collection = file.collection_id
+        ? (collectionById.get(file.collection_id)?.name ?? fileCollectionLabel(file))
+        : fileCollectionLabel(file);
+      const collectionKey = file.collection_id ?? collection;
+      if (activeCollection !== ALL_COLLECTIONS && collectionKey !== activeCollection) return false;
       if (!needle) return true;
       return [
         file.title,
@@ -128,7 +157,7 @@ export function GloveboxPageClient({ userId, initialFiles, initialCollections }:
         .toLowerCase()
         .includes(needle);
     });
-  }, [activeCollection, files, query]);
+  }, [activeCollection, collectionById, files, query]);
 
   const groupedFiles = useMemo(() => {
     const groups = new Map<string, GloveboxFileRow[]>();
@@ -149,7 +178,11 @@ export function GloveboxPageClient({ userId, initialFiles, initialCollections }:
   });
 
   const activeCollectionLabel =
-    activeCollection === ALL_COLLECTIONS ? "All files" : activeCollection;
+    activeCollection === ALL_COLLECTIONS
+      ? "All files"
+      : activeCollection === UNCATEGORISED
+        ? "Uncategorised"
+        : (collectionById.get(activeCollection)?.name ?? "Glovebox");
 
   return (
     <div className="space-y-4">
@@ -176,42 +209,83 @@ export function GloveboxPageClient({ userId, initialFiles, initialCollections }:
       <div className="grid gap-4 lg:grid-cols-[250px_minmax(0,1fr)]">
         <GloveboxCollectionsSidebar
           filesCount={files.length}
-          collectionOptions={collectionOptions}
+          groups={sortedGroups}
+          collectionsByGroupId={collectionsByGroupId}
           collectionCounts={collectionCounts}
           activeCollection={activeCollection}
           openCollectionMenu={openCollectionMenu}
+          openGroupMenu={openGroupMenu}
           dropCollection={dropCollection}
           isCreatingCollection={isCreatingCollection}
+          isCreatingGroup={isCreatingGroup}
           collectionDraft={collectionDraft}
+          groupDraft={groupDraft}
           editingCollection={editingCollection}
+          editingGroup={editingGroup}
           editingDraft={editingDraft}
-          onToggleCreate={() => {
-            setCollectionDraft("");
-            setIsCreatingCollection((open) => !open);
+          draggedCollection={draggedCollection}
+          collapsedGroupIds={collapsedGroupIds}
+          onToggleCreateGroup={() => {
+            setGroupDraft("");
+            setIsCreatingGroup((open) => !open);
           }}
+          onToggleCreateCollection={(groupId) => {
+            setCollectionDraft("");
+            expandGroup(groupId);
+            setIsCreatingCollection((current) => (current === groupId ? null : groupId));
+          }}
+          onToggleGroupCollapse={toggleGroup}
           onCollectionDraftChange={setCollectionDraft}
-          onCreateCollection={() => void handleCreateCollection()}
+          onGroupDraftChange={setGroupDraft}
+          onCreateCollection={(groupId) => void handleCreateCollection(groupId)}
+          onCreateGroup={() => void handleCreateGroup()}
           onActiveCollectionChange={(collection) => {
             setActiveCollection(collection);
             setOpenCollectionMenu(null);
+            setOpenGroupMenu(null);
           }}
-          onToggleMenu={(collection) =>
-            setOpenCollectionMenu((current) => (current === collection ? null : collection))
-          }
-          onStartRename={(collection) => {
-            setEditingCollection(collection);
-            setEditingDraft(collection);
+          onToggleCollectionMenu={(collection) => {
+            setOpenCollectionMenu((current) => (current === collection ? null : collection));
+            setOpenGroupMenu(null);
+          }}
+          onToggleGroupMenu={(group) => {
+            setOpenGroupMenu((current) => (current === group ? null : group));
             setOpenCollectionMenu(null);
+          }}
+          onStartRenameCollection={(collection) => {
+            setEditingCollection(collection.id);
+            setEditingDraft(collection.name);
+            setOpenCollectionMenu(null);
+          }}
+          onStartRenameGroup={(group) => {
+            setEditingGroup(group.id);
+            setEditingDraft(group.name);
+            setOpenGroupMenu(null);
           }}
           onDeleteCollection={(collection) => {
             setOpenCollectionMenu(null);
-            void deleteCollection(collection);
+            void deleteCollection(collection.id);
+          }}
+          onDeleteGroup={(group) => {
+            setOpenGroupMenu(null);
+            void deleteGroup(group.id);
           }}
           onEditingDraftChange={setEditingDraft}
-          onSaveRename={(collection) => void renameCollection(collection, editingDraft)}
+          onSaveCollectionRename={(collection) =>
+            void renameCollection(collection.id, editingDraft)
+          }
+          onSaveGroupRename={(group) => void renameGroup(group.id, editingDraft)}
           onCancelRename={() => {
             setEditingCollection(null);
+            setEditingGroup(null);
             setEditingDraft("");
+          }}
+          onCollectionDragStart={setDraggedCollection}
+          onCollectionDragEnd={() => setDraggedCollection(null)}
+          onCollectionDropOnGroup={(groupId) => {
+            if (!draggedCollection) return;
+            void moveCollectionToGroup(draggedCollection, groupId);
+            setDraggedCollection(null);
           }}
         />
 
@@ -229,6 +303,7 @@ export function GloveboxPageClient({ userId, initialFiles, initialCollections }:
             if (suppressNextFileOpenRef.current) return;
             setActiveFile(file);
           }}
+          onShareFile={setSharingFile}
           onDownloadFile={(file) => void handleDownload(file)}
           onDeleteFile={(file) => handleDelete(file)}
           onPointerDragStart={(file, event) => {
@@ -242,11 +317,15 @@ export function GloveboxPageClient({ userId, initialFiles, initialCollections }:
       {activeFile && (
         <FileDetailDrawer
           file={activeFile}
-          collectionOptions={collectionOptions}
+          collections={collections}
           onClose={() => setActiveFile(null)}
           onDownload={() => void handleDownload(activeFile)}
           onChange={handleFileChange}
         />
+      )}
+
+      {sharingFile && (
+        <GloveboxCh40ShareDialog file={sharingFile} open onClose={() => setSharingFile(null)} />
       )}
 
       {activeDragPreview && <CompactFileDragPreview preview={activeDragPreview} />}

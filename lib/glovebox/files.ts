@@ -43,6 +43,7 @@ export interface GloveboxFileRow {
   mime_type: string;
   size_bytes: number;
   kind: GloveboxFileKind | null;
+  collection_id?: string | null;
   collection?: string | null;
   tags?: string[] | null;
   page_count: number | null;
@@ -53,10 +54,23 @@ export interface GloveboxFileRow {
   updated_at: string;
 }
 
-export interface GloveboxCollectionRow {
+export interface GloveboxCollectionGroupRow {
   id: string;
   user_id: string;
   name: string;
+  sort_order: number;
+  is_system_default: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GloveboxCollectionRow {
+  id: string;
+  user_id: string;
+  group_id: string | null;
+  name: string;
+  sort_order: number;
+  is_system_default: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -176,6 +190,7 @@ export async function uploadGloveboxFile(opts: {
   file: File;
   title?: string;
   kind?: GloveboxFileKind | null;
+  collectionId?: string | null;
   collection?: string | null;
   source?: GloveboxFileSource;
   conversationId?: string | null;
@@ -207,6 +222,7 @@ export async function uploadGloveboxFile(opts: {
     size_bytes: opts.file.size,
     title: opts.title?.trim() || friendlyTitle(opts.file.name),
     kind: opts.kind ?? null,
+    collection_id: opts.collectionId ?? null,
     collection: opts.collection?.trim() || null,
     tags: [],
     source: opts.source ?? "glovebox",

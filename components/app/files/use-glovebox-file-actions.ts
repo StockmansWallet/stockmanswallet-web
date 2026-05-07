@@ -43,6 +43,7 @@ export function useGloveboxFileActions({
             mime_type: file.type || "application/octet-stream",
             size_bytes: file.size,
             kind: null,
+            collection_id: null,
             collection: null,
             tags: [],
             page_count: null,

@@ -1,54 +1,65 @@
 import { useCallback, useState } from "react";
-import { Download, X } from "lucide-react";
+import { Download, Share2, X } from "lucide-react";
 import {
   detectFileType,
   fileCollectionLabel,
   FILE_TYPE_LABELS,
   formatFileSize,
   signedUrlFor,
+  type GloveboxCollectionRow,
   type GloveboxFileRow,
 } from "@/lib/glovebox/files";
 import { createClient } from "@/lib/supabase/client";
+import { GloveboxCh40ShareDialog } from "./glovebox-ch40-share-dialog";
 import { fileSourceLabel, fileStatusLabel, UNCATEGORISED } from "./glovebox-shared";
 
 export function FileDetailDrawer({
   file,
-  collectionOptions,
+  collections,
   onClose,
   onDownload,
   onChange,
 }: {
   file: GloveboxFileRow;
-  collectionOptions: string[];
+  collections: GloveboxCollectionRow[];
   onClose: () => void;
   onDownload: () => void;
   onChange: (file: Partial<GloveboxFileRow> & { id: string }) => void;
 }) {
   const [title, setTitle] = useState(file.title);
   const initialCollection = fileCollectionLabel(file);
-  const [collection, setCollection] = useState(initialCollection === UNCATEGORISED ? "" : initialCollection);
+  const [collection, setCollection] = useState(
+    initialCollection === UNCATEGORISED ? "" : initialCollection
+  );
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [showCh40Share, setShowCh40Share] = useState(false);
   const type = detectFileType(file);
+  const collectionOptions = collections.map((option) => option.name);
 
   const saveValues = useCallback(
     async (nextTitle: string, nextCollection: string) => {
       const cleanTitle = nextTitle.trim() || file.original_filename;
       const cleanCollection = nextCollection.trim() || null;
+      const collectionRow = cleanCollection
+        ? collections.find((option) => option.name.toLowerCase() === cleanCollection.toLowerCase())
+        : null;
       const supabase = createClient();
       await supabase
         .from("glovebox_files")
         .update({
           title: cleanTitle,
+          collection_id: collectionRow?.id ?? null,
           collection: cleanCollection,
         })
         .eq("id", file.id);
       onChange({
         id: file.id,
         title: cleanTitle,
+        collection_id: collectionRow?.id ?? null,
         collection: cleanCollection,
       });
     },
-    [file.id, file.original_filename, onChange]
+    [collections, file.id, file.original_filename, onChange]
   );
 
   const save = useCallback(() => {
@@ -115,14 +126,14 @@ export function FileDetailDrawer({
             ))}
           </datalist>
           <div className="flex flex-wrap gap-2">
-            {collectionOptions.slice(0, 8).map((option) => (
+            {collections.slice(0, 8).map((option) => (
               <button
-                key={option}
+                key={option.id}
                 type="button"
-                onClick={() => applyCollection(option)}
+                onClick={() => applyCollection(option.name)}
                 className="hover:border-brand/40 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs text-white/65 hover:text-white"
               >
-                {option}
+                {option.name}
               </button>
             ))}
           </div>
@@ -165,6 +176,14 @@ export function FileDetailDrawer({
             <Download className="h-4 w-4" />
             Download original
           </button>
+          <button
+            type="button"
+            onClick={() => setShowCh40Share(true)}
+            className="border-ch40/20 bg-ch40/12 text-ch40-light hover:bg-ch40/18 inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm"
+          >
+            <Share2 className="h-4 w-4" />
+            Share to Ch 40
+          </button>
         </div>
 
         {previewUrl && (
@@ -177,6 +196,12 @@ export function FileDetailDrawer({
             )}
           </div>
         )}
+
+        <GloveboxCh40ShareDialog
+          file={file}
+          open={showCh40Share}
+          onClose={() => setShowCh40Share(false)}
+        />
       </div>
     </div>
   );
